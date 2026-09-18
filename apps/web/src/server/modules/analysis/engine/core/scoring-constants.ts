@@ -71,7 +71,7 @@ export const TECH_DEBT_SCORING = {
 
   highDuplicationThreshold: 15,
 
-  minDuplicationThreshold: 8, // Процент, ниже которого не создаем Finding
+  minDuplicationThreshold: 8, // Percentage below which we don't create a Finding
 
   /** Maximum penalty from orphaned modules */
   orphanPenaltyMax: 18,
@@ -330,8 +330,8 @@ export const LLM_TEMPERATURE_STRATEGY = {
    */
   classification: {
     description: "Strict extraction for repo analysis (File parsing, Imports)",
-    temperature: 0.2, // Снижено до 0.2 для обеспечения максимальной строгости структуры
-    topK: 20, // Оптимизировано для Gemini API под задачи классификации
+    temperature: 0.2, // Lowered to 0.2 to ensure maximum structural strictness
+    topK: 20, // Optimized for Gemini API for classification tasks
     topP: 0.9,
   },
 
@@ -365,17 +365,17 @@ export const LLM_TEMPERATURE_STRATEGY = {
    */
   reasoning: {
     description: "Complex synthesis for Architecture Maps, S&R blocks, and logic planning",
-    temperature: 1.0, // ИСПРАВЛЕН БАГ: установлено в 1.0 согласно требованиям к моделям Reasoning
-    topK: 64, // Увеличено до 64 (значение по умолчанию для моделей Gemini Pro/Flash)
+    temperature: 1.0, // BUG FIXED: set to 1.0 per requirements for Reasoning models
+    topK: 64, // Increased to 64 (default value for Gemini Pro/Flash models)
     topP: 0.95,
   },
 } as const;
 
 export const AI_POLICY_CONSTANTS = {
-  /** Коэффициент оценки: сколько символов в среднем приходится на 1 токен */
+  /** Estimation ratio: average number of characters per token */
   CHARS_PER_TOKEN_RATIO: 3.5,
 
-  /** Максимальное кол-во токенов на один файл (чтобы один файл не съел весь бюджет) */
+  /** Maximum tokens per file (so a single file can't consume the whole budget) */
   FILE_TOKEN_LIMITS: {
     architect: 4000,
     writer_api: 6000,
@@ -383,11 +383,11 @@ export const AI_POLICY_CONSTANTS = {
     writer_readme: 3500,
   },
 
-  /** Пороги для анализа PR */
+  /** Thresholds for PR analysis */
   PR_ANALYSIS: {
     COMPLEXITY_RATIO_THRESHOLD: 2.0,
-    DENSE_CHANGE_THRESHOLD: 300, // Строк
-    MAX_CHANGES_PER_FILE: 1000, // Строк изменений
+    DENSE_CHANGE_THRESHOLD: 300, // Lines
+    MAX_CHANGES_PER_FILE: 1000, // Lines of changes
     SEVERITY_THRESHOLDS: {
       CRITICAL: 9,
       HIGH: 7,
@@ -395,10 +395,10 @@ export const AI_POLICY_CONSTANTS = {
     },
   },
 
-  /** Лимиты токенов на разные стадии анализа */
+  /** Token limits for various analysis stages */
   TOKEN_BUDGETS: {
     architect: 210_000,
-    pr_differential: 40_000, // Добавили для PR
+    pr_differential: 40_000, // Added for PR
     writer_api: 180_000,
     writer_architecture: 180_000,
     writer_readme: 150_000,
@@ -412,9 +412,9 @@ export type LLMTaskType = keyof typeof LLM_TEMPERATURE_STRATEGY;
 // ============================================================================
 
 export const ADAPTER_PRIORITIES = {
-  regex: 100, // Базовый уровень (наименее точный)
-  treeSitter: 200, // Средний уровень (AST без типов)
-  typescript: 300, // Максимальный уровень (полный компилятор с типами)
+  regex: 100, // Base level (least accurate)
+  treeSitter: 200, // Mid level (AST without types)
+  typescript: 300, // Maximum level (full compiler with types)
 };
 
 // ============================================================================
@@ -441,30 +441,30 @@ export const SCHEMA_LIMITS = {
 // ============================================================================
 
 /**
- * Уровни уверенности для различных методов извлечения фактов.
- * Чем глубже анализ, тем выше число.
+ * Confidence levels for various fact-extraction methods.
+ * The deeper the analysis, the higher the number.
  */
 export const CONFIDENCE_LEVELS = {
   astRoute: 74,
-  // Tree-sitter (Хорошая точность по структуре)
+  // Tree-sitter (Good structural accuracy)
   astStructure: 80,
   astSymbol: 78,
 
-  // Базовые категории
+  // Base categories
   configDiscovery: 90,
   frameworkDiscovery: 72,
   inferredLibrary: 68,
 
   lowSignalDiscovery: 58,
 
-  // Regex / Manifests (Средняя точность)
+  // Regex / Manifests (Medium accuracy)
   manifestMatch: 88,
   // OpenAPI / Swagger
   openapiSpec: 92,
   regexExported: 75,
 
   regexInternal: 60,
-  // TypeScript Compiler (Самый надежный)
+  // TypeScript Compiler (Most reliable)
   tsCompiler: 95,
   tsHeuristic: 75,
   tsInferred: 88,
@@ -475,10 +475,10 @@ export const CONFIDENCE_LEVELS = {
 // ============================================================================
 
 export const ENTRYPOINT_CONFIDENCE = {
-  heuristic: 58, // Предположение по названию файла
-  libraryExport: 72, // Публичный экспорт библиотеки
-  runtimeApi: 86, // Явный API endpoint
-  runtimeLogic: 74, // Логика запуска
+  heuristic: 58, // Guess based on file name
+  libraryExport: 72, // Public library export
+  runtimeApi: 86, // Explicit API endpoint
+  runtimeLogic: 74, // Startup logic
 };
 
 // ============================================================================
@@ -486,17 +486,17 @@ export const ENTRYPOINT_CONFIDENCE = {
 // ============================================================================
 
 /**
- * Веса для определения "важности" модулей в архитектуре.
- * Используются для сортировки и выбора файлов в отчет.
+ * Weights for determining module "importance" in the architecture.
+ * Used for sorting and selecting files for the report.
  */
 export const ARCHITECTURE_WEIGHTS = {
   apiSurfaceMultiplier: 4,
   complexityOffset: 1.15,
   exportMultiplier: 1,
-  inboundMultiplier: 3, // Входящие связи важнее исходящих
+  inboundMultiplier: 3, // Inbound connections matter more than outbound ones
   outboundMultiplier: 1,
 
-  // Модификаторы для риск-модели
+  // Risk-model modifiers
   riskInboundMultiplier: 14,
   riskOutboundMultiplier: 3,
 };
@@ -524,7 +524,7 @@ export const DOC_PIPELINE_THRESHOLDS = {
   maxPublicInterfacePaths: 24,
   maxRiskPaths: 8,
   minConfidenceForFact: 70,
-  // Порог уверенности, ниже которого ставится плашка "Unknown" или "Low Confidence"
+  // Confidence threshold below which the "Unknown" or "Low Confidence" badge is shown
   minConfidenceForStrength: 75,
 } as const;
 

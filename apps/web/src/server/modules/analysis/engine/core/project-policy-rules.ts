@@ -205,7 +205,7 @@ export const PROJECT_POLICY_RULES = {
     "require\\s*\\(.*\\)",
     "const\\s+.*\\s*=\\s*require\\(.*\\)",
 
-    // 2. Python (включая многострочные импорты и алиасы)
+    // 2. Python (including multi-line imports and aliases)
     "^\\s*import\\s+[\\w\\s,]+",
     "^\\s*from\\s+\\S+\\s+import\\s+.*",
 
@@ -232,7 +232,7 @@ export const PROJECT_POLICY_RULES = {
     "^\\s*include\\s+.*",
     "^\\s*include_once\\s+.*",
 
-    // 7. 1С:Предприятие / BSL (Подключение внешних компонент и модулей)
+    // 7. 1C:Enterprise / BSL (Connecting external components and modules)
     "(?i)^\\s*подключитьвнешнююкомпоненту\\s*\\(.*\\)",
     "(?i)^\\s*#вставка.*",
   ],
@@ -391,7 +391,7 @@ export const PROJECT_POLICY_RULES = {
       },
     ],
 
-    // SQL Injection паттерны
+    // SQL Injection patterns
     SQL_INJECTION: [
       { id: "raw_sql", pattern: /\.raw\(|db\.execute\(|db\.run\(/i, title: "Raw SQL Execution" },
       {
@@ -778,13 +778,13 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   { aliases: [".github/workflows", "github actions"], category: "tooling", name: "GitHub Actions" },
 
   // ==========================================
-  // 17. MODERN HIGH-SPEED RUST-BASED TOOLING (Ультра-актуально!)
+  // 17. MODERN HIGH-SPEED RUST-BASED TOOLING (Ultra-current!)
   // ==========================================
-  { aliases: ["@rspack/core", "rspack"], category: "tooling", name: "Rspack" }, // Сверхбыстрый сборщик от ByteDance
+  { aliases: ["@rspack/core", "rspack"], category: "tooling", name: "Rspack" }, // ByteDance's ultra-fast bundler
   { aliases: ["turbopack"], category: "tooling", name: "Turbopack" },
-  { aliases: ["oxc", "oxlint"], category: "tooling", name: "Oxc/Oxlint" }, // Замена ESLint на Rust
-  { aliases: ["rolldown"], category: "tooling", name: "Rolldown" }, // Будущее ядро Vite
-  { aliases: ["biome", "@biomejs/biome"], category: "tooling", name: "Biome" }, // Замена Prettier/ESLint на Rust
+  { aliases: ["oxc", "oxlint"], category: "tooling", name: "Oxc/Oxlint" }, // ESLint replacement in Rust
+  { aliases: ["rolldown"], category: "tooling", name: "Rolldown" }, // Vite's future core
+  { aliases: ["biome", "@biomejs/biome"], category: "tooling", name: "Biome" }, // Prettier/ESLint replacement in Rust
 
   // ==========================================
   // 18. TESTING SUITES

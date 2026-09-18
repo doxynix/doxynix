@@ -5,8 +5,8 @@ type TriggerTaskOptions = Parameters<typeof task>[0];
 export type TaskInfraConfig = Omit<TriggerTaskOptions, "id" | "run">;
 
 /**
- * Единая разделяемая очередь для всех AI-райтеров документации (Readme, API, и т.д.).
- * Устанавливает конкурентность на уровне максимум 2 задач на один ключ (пользователя).
+ * Shared queue for all AI documentation writers (README, API, etc.).
+ * Sets concurrency to at most 2 tasks per key (user).
  */
 export const writersQueue = queue({
   concurrencyLimit: 2,
@@ -16,16 +16,16 @@ export const writersQueue = queue({
 export const TASK_CONFIGS = {
   agentGithubReply: {
     machine: { preset: "small-2x" },
-    maxDuration: 60 * 10, // TIME: 10 минут
+    maxDuration: 60 * 10, // TIME: 10 minutes
     retry: {
       maxAttempts: 1,
     },
   },
 
-  // Анализ изменений (диффа) в рамках Pull Request
+  // Analysis of changes (diff) in a Pull Request
   analyzePr: {
     machine: { preset: "small-2x" },
-    maxDuration: 60 * 5, // TIME: 5 минут
+    maxDuration: 60 * 5, // TIME: 5 minutes
     retry: {
       factor: 2,
       maxAttempts: 2,
@@ -37,10 +37,10 @@ export const TASK_CONFIGS = {
     },
   },
 
-  // Полный статический анализ и построение графа зависимостей
+  // Full static analysis and dependency graph construction
   analyzeRepo: {
     machine: { preset: "medium-1x" },
-    maxDuration: 60 * 60, // TIME: 60 минут
+    maxDuration: 60 * 60, // TIME: 60 minutes
     retry: {
       factor: 2,
       maxAttempts: 2,
@@ -53,19 +53,19 @@ export const TASK_CONFIGS = {
     },
   },
 
-  // Экспресс-аудит безопасности и качества одного файла
+  // Express security and quality audit of a single file
   analyzeSingleFile: {
     machine: { preset: "small-2x" },
-    maxDuration: 60 * 5, // TIME: 5 минут
+    maxDuration: 60 * 5, // TIME: 5 minutes
     retry: {
       maxAttempts: 1,
     },
   },
 
-  // Ежедневный регламент обслуживания СУБД (очистка сессий, токенов)
+  // Daily database maintenance routine (session, token cleanup)
   dailyDatabaseMaintenance: {
     machine: { preset: "micro" },
-    maxDuration: 60 * 5, // TIME: 5 минут
+    maxDuration: 60 * 5, // TIME: 5 minutes
     retry: {
       factor: 2,
       maxAttempts: 3,
@@ -76,28 +76,28 @@ export const TASK_CONFIGS = {
     },
   },
 
-  // Документирование исходного кода одного файла
+  // Documentation of a single file's source code
   documentSingleFile: {
     machine: { preset: "small-2x" },
-    maxDuration: 60 * 5, // TIME: 5 минут
+    maxDuration: 60 * 5, // TIME: 5 minutes
     retry: {
       maxAttempts: 1,
     },
   },
 
-  // Генерация автоматических исправлений кода (AI Fix)
+  // Generation of automatic code fixes (AI Fix)
   generateFix: {
     machine: { preset: "small-2x" },
-    maxDuration: 60 * 15, // TIME: 15 минут
+    maxDuration: 60 * 15, // TIME: 15 minutes
     retry: {
       maxAttempts: 1,
     },
   },
 
-  // AI-райтеры для комплексной документации репозитория
+  // AI writers for comprehensive repository documentation
   writers: {
     machine: { preset: "small-2x" },
-    maxDuration: 60 * 15, // TIME: 15 минут
+    maxDuration: 60 * 15, // TIME: 15 minutes
     queue: writersQueue,
     retry: {
       maxAttempts: 1,

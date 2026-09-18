@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { PromptFactory, UserPromptBuilder } from "./prompt-builder";
 
 describe("PromptFactory.forRole", () => {
-  it("устанавливает role-секцию с описанием роли", () => {
+  it("sets the role section with a role description", () => {
     const builder = PromptFactory.forRole("readme-writer");
 
     expect(builder.getSections().get("role")).toBe(
@@ -11,7 +11,7 @@ describe("PromptFactory.forRole", () => {
     );
   });
 
-  it("каждая роль получает своё описание", () => {
+  it("each role gets its own description", () => {
     expect(PromptFactory.forRole("generic").getSections().get("role")).toContain(
       "Expert Technical Writer",
     );
@@ -20,19 +20,19 @@ describe("PromptFactory.forRole", () => {
     );
   });
 
-  it("buildSystem() по умолчанию начинается с <|think|> и содержит секцию роли", () => {
+  it("buildSystem() by default starts with <|think|> and contains the role section", () => {
     const system = PromptFactory.forRole("architect").buildSystem();
 
     expect(system.startsWith("<|think|>\n# ROLE\n")).toBe(true);
   });
 
-  it("язык по умолчанию English не создаёт language-секцию", () => {
+  it("default English language does not create a language section", () => {
     const system = PromptFactory.forRole("generic").withLanguageNotice().buildSystem();
 
     expect(system).not.toContain("# LANGUAGE CONFIGURATION");
   });
 
-  it("withLanguageNotice с не-English языком добавляет секцию", () => {
+  it("withLanguageNotice with a non-English language adds the section", () => {
     const system = PromptFactory.forRole("generic", "Deutsch").withLanguageNotice().buildSystem();
 
     expect(system).toContain("# LANGUAGE CONFIGURATION");
@@ -40,8 +40,8 @@ describe("PromptFactory.forRole", () => {
   });
 });
 
-describe("PromptBuilder (через PromptFactory)", () => {
-  it("buildSystem() собирает секции в порядке role→task→constraints→grounding→strategy→anti_fluff→output", () => {
+describe("PromptBuilder (via PromptFactory)", () => {
+  it("buildSystem() assembles sections in order role→task→constraints→grounding→strategy→anti_fluff→output", () => {
     const system = PromptFactory.forRole("generic")
       .withRole("R")
       .withTask("T")
@@ -66,7 +66,7 @@ describe("PromptBuilder (через PromptFactory)", () => {
     expect(headings.every((h) => h >= 0)).toBe(true);
   });
 
-  it("нестандартные секции добавляются после стандартных", () => {
+  it("custom sections are added after standard ones", () => {
     const system = PromptFactory.forRole("generic")
       .withRole("R")
       .addSection("custom", "extra content")
@@ -76,7 +76,7 @@ describe("PromptBuilder (через PromptFactory)", () => {
     expect(system).toContain("extra content");
   });
 
-  it("addSection нормализует ключ в нижний регистр (task из TASK)", () => {
+  it("addSection normalizes the key to lowercase (task from TASK)", () => {
     const system = PromptFactory.forRole("generic")
       .withRole("R")
       .addSection("TASK", "T body")
@@ -85,7 +85,7 @@ describe("PromptBuilder (через PromptFactory)", () => {
     expect(system.indexOf("# TASK")).toBeGreaterThan(system.indexOf("# ROLE"));
   });
 
-  it("withThinking(false) добавляет операционное ограничение и убирает <|think|>", () => {
+  it("withThinking(false) adds an operational constraint and removes <|think|>", () => {
     const system = PromptFactory.forRole("generic").withRole("R").withThinking(false).buildSystem();
 
     expect(system).toContain("# OPERATIONAL CONSTRAINT");
@@ -93,7 +93,7 @@ describe("PromptBuilder (через PromptFactory)", () => {
     expect(system).not.toContain("<|think|>");
   });
 
-  it("withConstraints нумерует правила и пропускает falsy-значения", () => {
+  it("withConstraints numbers rules and skips falsy values", () => {
     const system = PromptFactory.forRole("generic")
       .withConstraints("A", undefined, "", "B")
       .buildSystem();
@@ -101,13 +101,13 @@ describe("PromptBuilder (через PromptFactory)", () => {
     expect(system).toContain("# CONSTRAINTS\n1. A\n2. B");
   });
 
-  it("withConstraints без правил не создаёт секцию", () => {
+  it("withConstraints without rules does not create the section", () => {
     const system = PromptFactory.forRole("generic").withConstraints().buildSystem();
 
     expect(system).not.toContain("# CONSTRAINTS");
   });
 
-  it("withGrounding формирует буллеты и фильтрует falsy", () => {
+  it("withGrounding builds bullets and filters falsy values", () => {
     const system = PromptFactory.forRole("generic")
       .withGrounding("G1", undefined, "G2")
       .buildSystem();
@@ -115,13 +115,13 @@ describe("PromptBuilder (через PromptFactory)", () => {
     expect(system).toContain("# GROUNDING\n- G1\n- G2");
   });
 
-  it("withStrategy нумерует шаги", () => {
+  it("withStrategy numbers the steps", () => {
     const system = PromptFactory.forRole("generic").withStrategy("S1", "S2").buildSystem();
 
     expect(system).toContain("# STRATEGY\n1. S1\n2. S2");
   });
 
-  it("withJsonSchema формирует OUTPUT_SCHEMA с pretty-printed JSON", () => {
+  it("withJsonSchema builds OUTPUT_SCHEMA with pretty-printed JSON", () => {
     const schema = { name: "x", score: 0 };
     const system = PromptFactory.forRole("generic").withJsonSchema(schema).buildSystem();
 
@@ -130,7 +130,7 @@ describe("PromptBuilder (через PromptFactory)", () => {
     expect(system).toContain(JSON.stringify(schema, null, 2));
   });
 
-  it("withOutputFormat принимает строку и объект", () => {
+  it("withOutputFormat accepts a string and an object", () => {
     const asString = PromptFactory.forRole("generic").withOutputFormat("plain").buildSystem();
     const asObject = PromptFactory.forRole("generic")
       .withOutputFormat({ content: "body", title: "MY FORMAT" })
@@ -140,7 +140,7 @@ describe("PromptBuilder (через PromptFactory)", () => {
     expect(asObject).toContain("# MY FORMAT\nbody");
   });
 
-  it("reset() очищает секции и возвращает thinking в исходное состояние", () => {
+  it("reset() clears sections and restores thinking to its initial state", () => {
     const builder = PromptFactory.forRole("generic").withRole("R").withThinking(false);
 
     builder.reset();
@@ -148,7 +148,7 @@ describe("PromptBuilder (через PromptFactory)", () => {
     expect(builder.buildSystem()).toBe("<|think|>\n");
   });
 
-  it("getSections() возвращает копию, не влияя на билдер", () => {
+  it("getSections() returns a copy without affecting the builder", () => {
     const builder = PromptFactory.forRole("generic");
     const copy = builder.getSections();
 
@@ -159,33 +159,33 @@ describe("PromptBuilder (через PromptFactory)", () => {
 });
 
 describe("UserPromptBuilder", () => {
-  it("build() пустого билдера — пустая строка", () => {
+  it("build() of an empty builder — empty string", () => {
     expect(new UserPromptBuilder().build()).toBe("");
   });
 
-  it("addRaw соединяет части переносами строк", () => {
+  it("addRaw joins parts with line breaks", () => {
     const built = new UserPromptBuilder().addRaw("a").addRaw("b").build();
 
     expect(built).toBe("a\nb");
   });
 
-  it("addHeading добавляет markdown-заголовок уровня 1-4", () => {
+  it("addHeading adds a markdown heading of level 1-4", () => {
     expect(new UserPromptBuilder().addHeading(1, "Title").build()).toBe("\n# Title\n");
     expect(new UserPromptBuilder().addHeading(4, "Deep").build()).toBe("\n#### Deep\n");
   });
 
-  it("addList поддерживает маркированные и нумерованные списки", () => {
+  it("addList supports bulleted and numbered lists", () => {
     expect(new UserPromptBuilder().addList(["a", "b"]).build()).toBe("- a\n- b");
     expect(new UserPromptBuilder().addList(["a", "b"], true).build()).toBe("1. a\n2. b");
   });
 
-  it("addJsonBlock оборачивает JSON в CDATA-XML", () => {
+  it("addJsonBlock wraps JSON in CDATA-XML", () => {
     const built = new UserPromptBuilder().addJsonBlock({ a: 1 }, "data").build();
 
     expect(built).toBe('<data>\n<![CDATA[\n{\n  "a": 1\n}\n]]>\n</data>');
   });
 
-  it("addXmlSection экранирует атрибуты (HTML-escape)", () => {
+  it("addXmlSection escapes attributes (HTML-escape)", () => {
     const built = new UserPromptBuilder()
       .addXmlSection("file", "content", { path: 'a"b&c' })
       .build();
@@ -193,14 +193,14 @@ describe("UserPromptBuilder", () => {
     expect(built).toContain('path="a&quot;b&amp;c"');
   });
 
-  it("addXmlSection заменяет закрывающую CDATA-последовательность", () => {
+  it("addXmlSection replaces the closing CDATA sequence", () => {
     const built = new UserPromptBuilder().addXmlSection("t", "a ]]> b").build();
 
     expect(built).toContain("a ]]&gt; b");
     expect(built).not.toContain("a ]]> b");
   });
 
-  it("reset() очищает части", () => {
+  it("reset() clears parts", () => {
     const builder = new UserPromptBuilder().addRaw("x");
 
     builder.reset();

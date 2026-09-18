@@ -18,7 +18,7 @@ import { AppSearch } from "@/shared/ui/kit/app-search";
 import {
   type NotificationsParsersState,
   notificationsParsers,
-} from "@/entities/notifications/model/notifications-parsers";
+} from "@/entities/notification/model/notifications-parsers";
 
 import { NotificationsBulkActions } from "./notifications-bulk-actions";
 import { NotificationsRepoFilter } from "./notifications-repo-filter";

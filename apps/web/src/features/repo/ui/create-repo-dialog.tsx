@@ -41,7 +41,7 @@ import {
 import { useRepoActions } from "@/entities/repo/model/use-repo-actions";
 import { RepoItem } from "@/entities/repo/ui/repo-item";
 
-const STALE_TIME = 1000 * 60 * 5; // TIME: 5 минут
+const STALE_TIME = 1000 * 60 * 5; // TIME: 5 minutes
 
 export function CreateRepoDialog() {
   const tCommon = useTranslations("Common");

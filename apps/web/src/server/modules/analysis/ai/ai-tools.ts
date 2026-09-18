@@ -61,7 +61,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
       inputSchema: z.object({}),
     }),
 
-    // TODO: вынести в общий
+    // TODO: extract to a shared utility
     getLatestAnalysis: tool({
       description:
         "Check the status (PENDING, COMPLETED, FAILED) and metadata of the latest static code analysis run for a repository.",
@@ -304,7 +304,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
       }),
     }),
 
-    // TODO: вынести в общий
+    // TODO: extract to a shared utility
     triggerRepositoryAnalysis: tool({
       description: "Queue and start a complete static code analysis run for a repository.",
       execute: async ({ branch, repoId: inputRepoId }) => {

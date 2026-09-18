@@ -49,7 +49,7 @@ type GeneratedDocsInput = {
 };
 
 /**
- * Расчет скоринга полноты документации.
+ * Calculates the documentation completeness scoring.
  */
 export function calculateDocumentationOutputScore(docs: GeneratedDocsInput) {
   let score = 0;

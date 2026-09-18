@@ -6,7 +6,7 @@ import { AUTH_PROVIDERS } from "@/shared/config/env.server";
 import { appLogger } from "../app-logger";
 import { prisma } from "../db";
 
-const REFRESH_THRESHOLD_MS = 5 * 60 * 1000; // TIME: 5 минут
+const REFRESH_THRESHOLD_MS = 5 * 60 * 1000; // TIME: 5 minutes
 
 export const githubTokenService = {
   async getValidToken(userId: number): Promise<null | string> {

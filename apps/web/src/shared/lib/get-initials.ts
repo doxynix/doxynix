@@ -1,16 +1,36 @@
-export function getInitials(name?: null | string, email?: null | string): string {
-  const [first, second] = name?.trim().split(/\s+/) ?? [];
+import { DEFAULT_LOCALE } from "../config/locales";
 
-  if (first != null && second != null) {
-    return (first.charAt(0) + second.charAt(0)).toUpperCase();
+function firstGrapheme(value: string, locale: string): string {
+  for (const { segment } of new Intl.Segmenter(locale, { granularity: "grapheme" }).segment(
+    value,
+  )) {
+    return segment;
+  }
+  return "";
+}
+
+export function getInitials(
+  name?: null | string,
+  email?: null | string,
+  locale: string = DEFAULT_LOCALE,
+): string {
+  const trimmedName = name?.trim();
+
+  if (trimmedName) {
+    const [first, second] = trimmedName.split(/\s+/);
+    if (first && second) {
+      return (firstGrapheme(first, locale) + firstGrapheme(second, locale)).toLocaleUpperCase(
+        locale,
+      );
+    }
+    if (first) {
+      return firstGrapheme(first, locale).toLocaleUpperCase(locale);
+    }
   }
 
-  if (first != null) {
-    return first.charAt(0).toUpperCase();
-  }
-
-  if (email?.trim() != null && email.trim() !== "") {
-    return email.trim().charAt(0).toUpperCase();
+  const trimmedEmail = email?.trim();
+  if (trimmedEmail) {
+    return firstGrapheme(trimmedEmail, locale).toLocaleUpperCase(locale);
   }
 
   return "U";

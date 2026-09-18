@@ -4,8 +4,8 @@ import { useTranslations } from "next-intl";
 
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
-import type { UiApiKey } from "@/entities/api-keys/model/api-keys.types";
-import { ApiKeyCard } from "@/entities/api-keys/ui/api-key-card";
+import type { UiApiKey } from "@/entities/api-key/model/api-keys.types";
+import { ApiKeyCard } from "@/entities/api-key/ui/api-key-card";
 
 import { ApiKeyArchivedTable } from "./api-key-archived-table";
 import { RevokeApiKeyDialog } from "./revoke-api-key-dialog";

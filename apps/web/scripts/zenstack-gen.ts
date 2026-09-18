@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 
-console.log("🚀 Запуск ZenStack через умный триггер...");
+console.log("🚀 Launching ZenStack via smart trigger...");
 
 const child = spawn(
   "bunx",
@@ -15,7 +15,7 @@ child.stdout.on("data", (data) => {
   process.stdout.write(output);
 
   if (output.includes("All plugins completed successfully!")) {
-    console.log("\n✅ ZenStack отрапортовал об успехе. Принудительный выход.");
+    console.log("\n✅ ZenStack reported success. Forcing exit.");
     child.kill("SIGKILL");
     process.exit(0);
   }
@@ -27,7 +27,7 @@ child.stderr.on("data", (data) => {
 
 child.on("exit", (code) => {
   if (code !== 0 && code !== null) {
-    console.error(`\n❌ ZenStack завершился с ошибкой (код ${code})`);
+    console.error(`\n❌ ZenStack finished with an error (code ${code})`);
     process.exit(code || 1);
   }
 });

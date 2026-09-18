@@ -43,7 +43,7 @@ type CallWithFallbackProps<T> = {
   topP?: number;
 };
 
-const LLM_API_TIMEOUT_MS = 300_000; // TIME: 5 минут
+const LLM_API_TIMEOUT_MS = 300_000; // TIME: 5 minutes
 
 export async function callWithFallback<T>({
   attemptMetadata = {},

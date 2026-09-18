@@ -1,4 +1,4 @@
-/** Смещения TODO-маркера в документе и класс подсветки CodeMirror. */
+/** Offsets of a TODO marker in the document and the CodeMirror highlight class. */
 export type TodoMarker = {
   className: string;
   end: number;
@@ -8,8 +8,8 @@ export type TodoMarker = {
 const TAG_REGEX = /\b(todo|fixme|bug|hack|note|xxx)\b/gi;
 
 /**
- * Находит TODO/FIXME/BUG/HACK/NOTE/XXX в текстовом отрезке.
- * Смещения возвращаются абсолютными: offset + индекс совпадения в text.
+ * Finds TODO/FIXME/BUG/HACK/NOTE/XXX in a text segment.
+ * Offsets are returned as absolute: offset + index of the match in text.
  */
 export const findTodoMarkers = (text: string, offset: number): TodoMarker[] => {
   const markers: TodoMarker[] = [];

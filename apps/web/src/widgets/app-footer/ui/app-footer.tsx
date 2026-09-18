@@ -12,7 +12,7 @@ import { SystemStatus } from "./system-status";
 const INTERNAL_LINKS = [
   { href: "/terms", label: "Terms of Service" },
   { href: "/privacy", label: "Privacy Policy" },
-  { href: "/thanks", label: "Thanks!" },
+  { href: "/high-five", label: "High five" },
 ] as const;
 
 const SOCIAL_LINKS = [

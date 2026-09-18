@@ -41,9 +41,9 @@ const aiModelsSchema = z.record(
 );
 
 /**
- * Функция динамического получения актуальной карты моделей.
- * Пытается прочитать Edge Config, в случае неудачи или неверного формата
- * безопасно возвращает дефолтный жестко зашитый конфиг.
+ * Dynamically fetches the current model map.
+ * Tries to read Edge Config; on failure or invalid format,
+ * safely falls back to the static hardcoded config.
  */
 export async function getActiveModels(): Promise<Record<AIModelRole, AllAvailableModels[]>> {
   try {

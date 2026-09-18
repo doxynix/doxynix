@@ -1,5 +1,3 @@
-// @vitest-environment jsdom
-
 import { describe, expect, it } from "vitest";
 
 import type { RepoSearchResult } from "./repo.types";
@@ -56,7 +54,6 @@ describe("buildRepoDetailHref", () => {
 describe("buildRepoCodeHref", () => {
   it("builds the code url with encoded owner and name", () => {
     const href = buildRepoCodeHref({ name: "c%20d", owner: "a b" });
-
     expect(href).toBe("/dashboard/repo/a%20b/c%2520d/code");
   });
 
@@ -97,7 +94,6 @@ describe("buildRepoDocsHref", () => {
 describe("buildRepoMapHref", () => {
   it("sets the view param for group node ids", () => {
     const href = buildRepoMapHref({ name: "n", nodeId: "group:src", owner: "o" });
-
     expect(query(href).get("view")).toBe("group:src");
   });
 

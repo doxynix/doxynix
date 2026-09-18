@@ -114,7 +114,13 @@ export async function getAnalysisContext(
     throw new Error("Unable to resolve GitHub token for private repository.");
   }
 
-  if (forceRefresh === false && lastSuccessfulAnalysis?.commitSha === currentSha) {
+  if (
+    shouldUseCache({
+      currentSha,
+      forceRefresh,
+      lastSuccessfulSha: lastSuccessfulAnalysis?.commitSha ?? undefined,
+    })
+  ) {
     taskLogger.info("GitHub: No new commits detected, using cached results");
     return { currentSha, repo: null, token };
   }
@@ -160,4 +166,15 @@ export async function cloneRepository(
     taskLogger.error(`Git: Clone failed. ${safe}`);
     throw new Error(`Failed to clone repository: ${safe}`, { cause: error });
   }
+}
+
+export function shouldUseCache(options: {
+  forceRefresh?: boolean;
+  lastSuccessfulSha?: string;
+  currentSha: string;
+}): boolean {
+  if (options.forceRefresh === true) {
+    return false;
+  }
+  return options.lastSuccessfulSha === options.currentSha;
 }

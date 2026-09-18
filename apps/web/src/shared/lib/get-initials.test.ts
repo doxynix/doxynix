@@ -1,56 +1,62 @@
 import { describe, expect, it } from "vitest";
 
-import { getInitials } from "@/shared/lib/get-initials";
+import { getInitials } from "./get-initials";
 
-describe("shared/lib/utils:getInitials", () => {
-  it("should return initials for names with two or more words", () => {
-    const fullName = "Ada Lovelace Byron";
+// Matches unpaired UTF-16 surrogates: a high surrogate not followed by a low one,
+// or a low surrogate not preceded by a high one.
+const NO_LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
 
-    const result = getInitials(fullName);
-
-    expect(result).toBe("AL");
+describe("getInitials", () => {
+  it("returns initials for names with two or more words", () => {
+    expect(getInitials("Ada Lovelace Byron")).toBe("AL");
   });
 
-  it("should return one letter for a single-word name", () => {
-    const name = "Cher";
-
-    const result = getInitials(name);
-
-    expect(result).toBe("C");
+  it("returns one letter for a single-word name", () => {
+    expect(getInitials("Cher")).toBe("C");
   });
 
-  it("should trim extra spaces in name before extracting initials", () => {
-    const name = "   Alan    Turing   ";
-
-    const result = getInitials(name);
-
-    expect(result).toBe("AT");
+  it("trims extra spaces before extracting initials", () => {
+    expect(getInitials("   Alan    Turing   ")).toBe("AT");
   });
 
-  it("should support non-latin names", () => {
-    const name = "Иван Петров";
-
-    const result = getInitials(name);
-
-    expect(result).toBe("ИП");
+  it("supports Cyrillic names", () => {
+    expect(getInitials("Иван Петров")).toBe("ИП");
   });
 
-  it("should fallback to email initial when name is null or undefined", () => {
-    const email = "user@example.com";
-
-    const fromNull = getInitials(null, email);
-    const fromUndefined = getInitials(undefined, email);
-
-    expect(fromNull).toBe("U");
-    expect(fromUndefined).toBe("U");
+  it("takes the first character for CJK names (no uppercase concept)", () => {
+    expect(getInitials("张三")).toBe("张");
   });
 
-  it("should return U when both name and email are missing", () => {
-    const name = null;
-    const email = undefined;
+  it("handles RTL scripts without case", () => {
+    expect(getInitials("محمد علي")).toBe("مع");
+  });
 
-    const result = getInitials(name, email);
+  it("does not split Devanagari conjunct clusters", () => {
+    expect(getInitials("राम प्रसाद")).toBe("राप्र");
+  });
 
-    expect(result).toBe("U");
+  it("keeps emoji intact instead of emitting a lone surrogate", () => {
+    expect(getInitials("😀 User")).toBe("😀U");
+  });
+
+  it("never emits lone surrogates for ZWJ emoji sequences", () => {
+    const result = getInitials("👨👩👧👦 Dev");
+    expect(result.endsWith("D")).toBe(true);
+    expect(NO_LONE_SURROGATE.test(result)).toBe(false);
+  });
+
+  it("uppercases per locale (Turkish dotted capital I)", () => {
+    expect(getInitials("ilker yılmaz", undefined, "tr")).toBe("İY");
+    expect(getInitials("ilker yılmaz")).toBe("IY");
+  });
+
+  it("falls back to email initial when name is missing", () => {
+    expect(getInitials(null, "bob@example.com")).toBe("B");
+    expect(getInitials(undefined, "alice@example.com")).toBe("A");
+  });
+
+  it("returns U when both name and email are missing", () => {
+    expect(getInitials(null, null)).toBe("U");
+    expect(getInitials(undefined, undefined)).toBe("U");
   });
 });

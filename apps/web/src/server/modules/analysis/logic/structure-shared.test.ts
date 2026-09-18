@@ -9,7 +9,7 @@ import {
 } from "./structure-shared";
 
 describe("createEmptyGroupEntry", () => {
-  it("возвращает пустую запись с нулевыми счётчиками", () => {
+  it("returns an empty entry with zeroed counters", () => {
     const entry = createEmptyGroupEntry();
 
     expect(entry.paths).toEqual([]);
@@ -32,12 +32,12 @@ describe("createEmptyGroupEntry", () => {
 });
 
 describe("makeStructureNodeId / parseStructureNodeId", () => {
-  it("формирует id nodeType:path", () => {
+  it("builds an id of nodeType:path", () => {
     expect(makeStructureNodeId("file", "src/app.ts")).toBe("file:src/app.ts");
     expect(makeStructureNodeId("group", "src/features")).toBe("group:src/features");
   });
 
-  it("парсит файловые и групповые id", () => {
+  it("parses file and group ids", () => {
     expect(parseStructureNodeId("file:src/app.ts")).toEqual({
       nodeType: "file",
       path: "src/app.ts",
@@ -54,12 +54,12 @@ describe("makeStructureNodeId / parseStructureNodeId", () => {
 });
 
 describe("isPathInsideScope", () => {
-  it("включает сам scope и вложенные пути", () => {
+  it("includes the scope itself and nested paths", () => {
     expect(isPathInsideScope("src/features/user.ts", "src")).toBe(true);
     expect(isPathInsideScope("src", "src")).toBe(true);
   });
 
-  it("исключает соседние и родительские пути", () => {
+  it("excludes sibling and parent paths", () => {
     expect(isPathInsideScope("src/features/user.ts", "src/app")).toBe(false);
     expect(isPathInsideScope("src", "src/features")).toBe(false);
     expect(isPathInsideScope("srm/features/user.ts", "src")).toBe(false);
@@ -67,21 +67,21 @@ describe("isPathInsideScope", () => {
 });
 
 describe("resolveImmediateChildScope", () => {
-  it("возвращает file для односегментного потомка", () => {
+  it("returns file for a single-segment child", () => {
     expect(resolveImmediateChildScope("src", "src/app.ts")).toEqual({
       nodeType: "file",
       path: "src/app.ts",
     });
   });
 
-  it("возвращает group для многосегментного потомка", () => {
+  it("returns group for a multi-segment child", () => {
     expect(resolveImmediateChildScope("src", "src/features/user.ts")).toEqual({
       nodeType: "group",
       path: "src/features",
     });
   });
 
-  it("возвращает null для путей вне scope", () => {
+  it("returns null for paths outside scope", () => {
     expect(resolveImmediateChildScope("src", "lib/app.ts")).toBeNull();
     expect(resolveImmediateChildScope("src", "src2/app.ts")).toBeNull();
     expect(resolveImmediateChildScope("src", "src")).toBeNull();

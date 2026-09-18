@@ -47,7 +47,7 @@ const makeMetrics = (overrides: Partial<RepoMetrics> = {}): RepoMetrics =>
   }) as unknown as RepoMetrics;
 
 describe("createStructuralContextEdges", () => {
-  it("пустые входы дают пустой список рёбер", () => {
+  it("empty inputs yield an empty edge list", () => {
     const result = createStructuralContextEdges({
       aiResult: {} as unknown as AIResult,
       apiPaths: new Set(),
@@ -58,7 +58,7 @@ describe("createStructuralContextEdges", () => {
     expect(result).toEqual([]);
   });
 
-  it("строит топологические рёбра между семантическими группами", () => {
+  it("builds topological edges between semantic groups", () => {
     const groupMap = new Map<string, StructureGroupEntry>([
       ["src", emptyGroupEntry({ backend: 1 })],
       ["api", emptyGroupEntry({ api: 1 })],
@@ -99,7 +99,7 @@ describe("createStructuralContextEdges", () => {
     );
   });
 
-  it("рёбра сортируются по убыванию веса", () => {
+  it("sorts edges by descending weight", () => {
     const groupMap = new Map<string, StructureGroupEntry>([
       ["src", emptyGroupEntry({ backend: 1 })],
       ["api", emptyGroupEntry({ api: 1 })],
@@ -116,7 +116,7 @@ describe("createStructuralContextEdges", () => {
     expect(weights).toEqual([...weights].sort((a, b) => b - a));
   });
 
-  it("graphPreviewEdges: api-отношение по apiPaths, скип same-group и чувствительных путей", () => {
+  it("graphPreviewEdges: api relation from apiPaths, skips same-group and sensitive paths", () => {
     const result = createStructuralContextEdges({
       aiResult: {} as unknown as AIResult,
       apiPaths: new Set(["src/app/a.ts"]),
@@ -141,7 +141,7 @@ describe("createStructuralContextEdges", () => {
     ]);
   });
 
-  it("капает результат до 24 рёбер и сохраняет сортировку", () => {
+  it("caps the result to 24 edges and keeps the ordering", () => {
     const graphPreviewEdges = Array.from({ length: 30 }, (_, i) => ({
       fromPath: `g${i}/a.ts`,
       toPath: `g${i + 10}/a.ts`,
@@ -161,7 +161,7 @@ describe("createStructuralContextEdges", () => {
     expect(weights).toEqual([...weights].sort((a, b) => b - a));
   });
 
-  it("добавляет cycle-рёбра из dependencyCycles и entrypoint-рёбра к primaryModules", () => {
+  it("adds cycle edges from dependencyCycles and entrypoint edges to primaryModules", () => {
     const metrics = makeMetrics({
       documentationInput: {
         api: { publicSurfacePaths: [] },
@@ -213,7 +213,7 @@ describe("createStructuralContextEdges", () => {
     );
   });
 
-  it("учитывает evidence из findings (risk) и repository_facts (focus)", () => {
+  it("accounts for evidence from findings (risk) and repository_facts (focus)", () => {
     const aiResult = {
       findings: [{ evidence: [{ path: "hot/a.ts" }, { path: "deploy/util.ts" }], title: "F1" }],
       repository_facts: [
@@ -283,7 +283,7 @@ describe("buildDrilldownEdges", () => {
       ...overrides,
     }) as unknown as StructureContext;
 
-  it("строит двунаправленное ребро по graphPreviewEdges с relation api", () => {
+  it("builds a bidirectional edge from graphPreviewEdges with relation api", () => {
     const context = makeContext({
       apiPaths: new Set(["src/routes.ts"]),
       metrics: makeMetrics({
@@ -310,7 +310,7 @@ describe("buildDrilldownEdges", () => {
     ]);
   });
 
-  it("игнорирует пути вне parentPath и одиночные child-узлы (рёбер нет)", () => {
+  it("ignores paths outside parentPath and lone child nodes (no edges)", () => {
     const context = makeContext({
       meaningfulEntrypoints: ["other/file.ts", "src/app.ts"],
       metrics: makeMetrics({

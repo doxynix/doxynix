@@ -17,7 +17,7 @@ import {
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
-import { notificationTypeConfig } from "@/entities/notifications/model/notification-type-config";
+import { notificationTypeConfig } from "@/entities/notification/model/notification-type-config";
 
 import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";
 

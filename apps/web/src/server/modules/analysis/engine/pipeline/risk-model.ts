@@ -49,7 +49,7 @@ function buildRiskRawMetrics(
   changeCoupling: ChangeCouplingRef[],
   graphReliability: DependencyGraphEvidence,
 ): RiskRawMetrics {
-  // ЭТАЛОН: Линейный поиск экстремумов для защиты от Maximum call stack size exceeded на больших данных
+  // Reference: Linear extremum search to avoid Maximum call stack size exceeded on large datasets
   let strongestChangeCouplingCommits = 0;
   for (const pair of changeCoupling) {
     if (pair.commits > strongestChangeCouplingCommits) {
@@ -151,7 +151,7 @@ function buildDependencyCycleFinding(
     return null;
   }
 
-  // ЭТАЛОН: Извлекаем уникальные файлы из первых трех циклов Тарьяна для расширения контекста улик ИИ
+  // Reference: Extract unique files from the first three Tarjan cycles to broaden the evidence context for the AI
   const topCyclesFiles = uniq(evidence.dependencyCycles.slice(0, 3).flat());
 
   return createRiskFinding({
@@ -301,7 +301,7 @@ function buildRiskFindings(
     buildGraphReliabilityFinding(graphReliability, derivedScores),
   ].filter((finding): finding is RiskFindingRef => finding != null);
 
-  // ЭТАЛОН: Безопасная иммутабельная сортировка находок
+  // Reference: Safe immutable sort of findings
   return allFindings.toSorted((left, right) => right.score - left.score);
 }
 

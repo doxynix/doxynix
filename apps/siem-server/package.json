@@ -15,7 +15,7 @@
   "types": "./dist/src/index.d.ts",
   "scripts": {
     "arch:baseline": "depcruise src --config .dependency-cruiser.ts --baseline",
-    "arch:check": "depcruise src --config .dependency-cruiser.ts --output-type err --cache --ignore-known",
+    "arch:check": "depcruise src --config .dependency-cruiser.ts --output-type err --ignore-known",
     "build": "tsc",
     "db:drop-migration": "bun with-doppler bun drizzle-kit drop",
     "db:generate": "bun with-doppler drizzle-kit generate",
@@ -31,7 +31,7 @@
     "seed:admin": "bun with-doppler bun scripts/seed-admin.ts",
     "type-check": "tsc -b",
     "validate": "biome check . && oxlint && bun run arch:check",
-    "with-doppler": "bun scripts/doppler.ts"
+    "with-doppler": "bun ../../scripts/doppler.ts"
   },
   "dependencies": {
     "@axiomhq/js": "1.8.0",

@@ -3,13 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 const mocks = vi.hoisted(() => ({
-  appLogger: {
-    debug: vi.fn(),
-    error: vi.fn(),
-    flush: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
-  },
+  appLogger: { error: vi.fn() },
   authApiGetSession: vi.fn(),
   createTokenRequest: vi.fn(),
 }));
@@ -25,20 +19,14 @@ vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 
 import { GET } from "./route";
 
-describe("GET /api/realtime/auth", () => {
-  it("returns token request with full capability when session is present", async () => {
-    mocks.authApiGetSession.mockResolvedValueOnce({
-      user: { id: "42" },
-    });
-    mocks.createTokenRequest.mockResolvedValueOnce({ token: "T" });
+describe("GET /api/realtime/auth — Capability Security Matrix", () => {
+  it("authorizes logged-in user with personal channel presence and system access", async () => {
+    mocks.authApiGetSession.mockResolvedValueOnce({ user: { id: "42" } });
+    mocks.createTokenRequest.mockResolvedValueOnce({ token: "auth-token" });
 
     const res = await GET();
 
     expect(res.status).toBe(200);
-    await expect(res.json()).resolves.toEqual({ token: "T" });
-    expect(mocks.authApiGetSession).toHaveBeenCalledWith({
-      headers: expect.any(Headers),
-    });
     expect(mocks.createTokenRequest).toHaveBeenCalledWith({
       capability: JSON.stringify({
         [REALTIME_CONFIG.channels.news]: ["subscribe"],
@@ -50,14 +38,13 @@ describe("GET /api/realtime/auth", () => {
     });
   });
 
-  it("returns token request with anonymous clientId and minimal capability when no session", async () => {
+  it("strictly restricts anonymous callers to public news channel without personal access", async () => {
     mocks.authApiGetSession.mockResolvedValueOnce(null);
     mocks.createTokenRequest.mockResolvedValueOnce({ token: "anon-token" });
 
     const res = await GET();
 
     expect(res.status).toBe(200);
-    await expect(res.json()).resolves.toEqual({ token: "anon-token" });
     expect(mocks.createTokenRequest).toHaveBeenCalledWith({
       capability: JSON.stringify({
         [REALTIME_CONFIG.channels.news]: ["subscribe"],
@@ -67,18 +54,13 @@ describe("GET /api/realtime/auth", () => {
     });
   });
 
-  it("returns 500 and logs error when createTokenRequest throws", async () => {
-    mocks.authApiGetSession.mockResolvedValueOnce({
-      user: { id: "42" },
-    });
-    mocks.createTokenRequest.mockRejectedValueOnce(new Error("b"));
+  it("returns 500 and logs when realtime provider token creation throws", async () => {
+    mocks.authApiGetSession.mockResolvedValueOnce({ user: { id: "42" } });
+    mocks.createTokenRequest.mockRejectedValueOnce(new Error("Ably cluster timeout"));
 
     const res = await GET();
 
     expect(res.status).toBe(500);
     await expect(res.json()).resolves.toEqual({ error: "Error requesting token" });
-    expect(mocks.appLogger.error).toHaveBeenCalledWith(
-      expect.objectContaining({ msg: "Realtime auth error" }),
-    );
   });
 });

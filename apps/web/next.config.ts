@@ -270,7 +270,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   productionBrowserSourceMaps: false, // Ensures clients cannot fetch raw sourcemaps from browser
   reactCompiler: true,
-  // cacheComponents: true, // если будут баги выключить (// NOTE: обнаружен баг №418 с гидратацией выяснено что приходится оборачивать каждый чих в suspense так еще и юзать везде 'use cache' директиву ибо теперь кеширование руками надо делать слишком много переписывать пока PPR отложен на неопределенный срок)
+  // cacheComponents: true, // disable if bugs appear (// NOTE: bug #418 with hydration discovered — turns out everything must be wrapped in Suspense and the 'use cache' directive used everywhere, since caching is now manual; too much rewriting while PPR is deferred indefinitely)
   reactStrictMode: true,
   async redirects() {
     const shortcuts = [

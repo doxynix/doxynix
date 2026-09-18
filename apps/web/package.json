@@ -12,7 +12,7 @@
     "analyze": "bun with-doppler \"cross-env ANALYZE=true next build --webpack\"",
     "analyze:exp": "bun with-doppler \"next experimental-analyze\"",
     "arch:baseline": "depcruise src --config .dependency-cruiser.ts --baseline",
-    "arch:check": "depcruise src --config .dependency-cruiser.ts --output-type err --cache --ignore-known",
+    "arch:check": "depcruise src --config .dependency-cruiser.ts --output-type err --ignore-known",
     "arch:graph": "depcruise src --collapse 2 --config .dependency-cruiser.ts --cache --output-type dot | dot -T svg > arch/architecture.svg",
     "build": "bun ../../scripts/clean-symlinks.ts && bun with-doppler \"cross-env NODE_OPTIONS=\\\"--max-old-space-size=6144\\\" next build --webpack\"",
     "build:turbopack": "bun ../../scripts/clean-symlinks.ts && bun with-doppler \"cross-env NODE_OPTIONS=\\\"--max-old-space-size=4096\\\" next build\"",
@@ -31,7 +31,7 @@
     "format": "biome check --write .",
     "format:check": "biome check .",
     "gen:client": "bun with-doppler \"openapi --input http://localhost:3000/api/openapi --output ./src/shared/api-contracts/client --client axios\"",
-    "gen:credits": "bun scripts/thanks.ts",
+    "gen:credits": "bun scripts/high-five.ts",
     "lhci": "lhci autorun",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
@@ -46,7 +46,7 @@
     "type-check": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" tsc -b",
     "type-check:coverage": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" type-coverage --detail",
     "validate": "biome check . && oxlint && bun run lint:fsd && bun run arch:check",
-    "with-doppler": "bun scripts/doppler.ts"
+    "with-doppler": "bun ../../scripts/doppler.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "3.0.121",
@@ -118,7 +118,6 @@
     "@trpc/client": "catalog:",
     "@trpc/react-query": "11.18.0",
     "@trpc/server": "catalog:",
-    "@types/picomatch": "4.0.3",
     "@uiw/codemirror-extensions-color": "4.25.11",
     "@uiw/codemirror-extensions-hyper-link": "4.25.11",
     "@uiw/codemirror-theme-github": "4.25.11",
@@ -252,6 +251,7 @@
     "@trpc/openapi": "11.17.0-alpha",
     "@types/hast": "3.0.5",
     "@types/pg": "8.23.1",
+    "@types/picomatch": "4.0.3",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@types/react-scroll": "1.8.10",

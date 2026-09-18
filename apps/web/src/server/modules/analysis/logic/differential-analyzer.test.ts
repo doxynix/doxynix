@@ -78,7 +78,7 @@ describe("DifferentialAnalyzer.analyzePRDiff", () => {
     vi.mocked(callWithFallback).mockResolvedValue({ findings: [], summary: "" });
   });
 
-  it("возвращает пустой результат при отсутствии релевантных файлов", async () => {
+  it("returns an empty result when no relevant files are present", async () => {
     const analyzer = new DifferentialAnalyzer(makeConfig());
 
     const result = await analyzer.analyzePRDiff(
@@ -100,7 +100,7 @@ describe("DifferentialAnalyzer.analyzePRDiff", () => {
     );
   });
 
-  it("отфильтровывает файлы по excludePatterns и лимиту >1000 строк", async () => {
+  it("filters files by excludePatterns and a >1000-line limit", async () => {
     const analyzer = new DifferentialAnalyzer(
       makeConfig({ excludePatterns: ["**/node_modules/**"] }),
     );
@@ -120,7 +120,7 @@ describe("DifferentialAnalyzer.analyzePRDiff", () => {
     expect(result.findings).toEqual([]);
   });
 
-  it("sentinel-фаза находит секреты, уязвимости, SQL и TODO с правильными строками", async () => {
+  it("sentinel phase finds secrets, vulnerabilities, SQL and TODOs with correct line numbers", async () => {
     const analyzer = new DifferentialAnalyzer(makeConfig());
 
     const result = await analyzer.analyzePRDiff(
@@ -171,7 +171,7 @@ describe("DifferentialAnalyzer.analyzePRDiff", () => {
     expect(result.analyzedLines).toBe(4);
   });
 
-  it("mapper-фаза находит высокую плотность изменений (ratio > 2)", async () => {
+  it("mapper phase detects high change density (ratio > 2)", async () => {
     const analyzer = new DifferentialAnalyzer(makeConfig());
 
     const result = await analyzer.analyzePRDiff(
@@ -186,18 +186,18 @@ describe("DifferentialAnalyzer.analyzePRDiff", () => {
       expect.objectContaining({
         file: "src/refactor.ts",
         line: 1,
-        message: "Файл содержит 4 новых строк. Высокая плотность изменений затрудняет ревью.",
+        message: "File contains 4 new lines. High density of changes makes review difficult.",
         score: 5,
         severity: "MEDIUM",
-        suggestion: "Разбейте изменения на несколько логических модулей или PR.",
-        title: "Высокая сложность изменений",
+        suggestion: "Split the changes into several smaller logical modules or PRs.",
+        title: "High change complexity",
         type: "PERFORMANCE",
       }),
     ]);
     expect(result.riskScore).toBe(5);
   });
 
-  it("mapper-фаза срабатывает при более чем 300 добавленных строк", async () => {
+  it("mapper phase triggers at more than 300 added lines", async () => {
     const bigPatch = `--- a/src/huge.ts
 +++ b/src/huge.ts
 @@ -0,0 +1,301 @@
@@ -219,7 +219,7 @@ ${"+a\n".repeat(301)}`;
     });
   });
 
-  it("applyFocusFilters оставляет только указанные focusAreas", async () => {
+  it("applyFocusFilters keeps only the specified focusAreas", async () => {
     vi.mocked(callWithFallback).mockResolvedValue({
       findings: [
         { file: "src/api.ts", line: 1, message: "AI bug", score: 6, title: "AI bug", type: "BUG" },
@@ -234,11 +234,11 @@ ${"+a\n".repeat(301)}`;
       PR_METADATA,
     );
 
-    expect(result.findings).toHaveLength(4); // TODO(STYLE) и AI BUG отброшены
+    expect(result.findings).toHaveLength(4); // TODO(STYLE) and AI BUG dropped
     expect(result.findings.every((f) => f.type === "SECURITY")).toBe(true);
   });
 
-  it("дедуплицирует совпадающие file:line:type:message findings", async () => {
+  it("deduplicates matching file:line:type:message findings", async () => {
     vi.mocked(callWithFallback).mockResolvedValue({
       findings: [
         {
@@ -263,12 +263,12 @@ ${"+a\n".repeat(301)}`;
       PR_METADATA,
     );
 
-    // AI-дубликат Stripe выброшен; остаются 5 sentinel-находок.
+    // AI duplicate of Stripe dropped; 5 sentinel findings remain.
     expect(result.findings).toHaveLength(5);
     expect(result.summary).toBe("mocked summary");
   });
 
-  it("AI-фаза мапит severity по порогам CRITICAL/HIGH/MEDIUM/LOW", async () => {
+  it("AI phase maps severity by CRITICAL/HIGH/MEDIUM/LOW thresholds", async () => {
     vi.mocked(callWithFallback).mockResolvedValue({
       findings: [
         { file: "src/a.ts", line: 1, message: "c", score: 10, title: "A", type: "SECURITY" },
@@ -296,7 +296,7 @@ ${"+a\n".repeat(301)}`;
     );
   });
 
-  it("полный конвейер: sentinel + mapper + AI объединяются и скорируются", async () => {
+  it("full pipeline: sentinel + mapper + AI findings are merged and scored", async () => {
     vi.mocked(callWithFallback).mockResolvedValue({
       findings: [
         {
@@ -332,7 +332,7 @@ ${"+a\n".repeat(301)}`;
     expect(result.riskScore).toBe(7); // ceil(mean(10, 8, 8, 9, 2, 5, 7) = 7)
   });
 
-  it("падение AI-фазы → warn и fallback на локальный анализ", async () => {
+  it("AI phase failure → warn and fallback to local analysis", async () => {
     vi.mocked(callWithFallback).mockRejectedValue(new Error("model exploded"));
     const analyzer = new DifferentialAnalyzer(makeConfig());
 
@@ -352,7 +352,7 @@ ${"+a\n".repeat(301)}`;
     );
   });
 
-  it("не вызывает AI при отсутствии patch-данных", async () => {
+  it("does not call AI when no patch data is present", async () => {
     const analyzer = new DifferentialAnalyzer(makeConfig());
 
     const result = await analyzer.analyzePRDiff(
@@ -368,7 +368,7 @@ ${"+a\n".repeat(301)}`;
     expect(result.changedFiles).toBe(1);
   });
 
-  it("логирует старт анализа", async () => {
+  it("logs the start of analysis", async () => {
     const analyzer = new DifferentialAnalyzer(makeConfig({ tokenBudget: 40_000 }));
 
     const result = await analyzer.analyzePRDiff(

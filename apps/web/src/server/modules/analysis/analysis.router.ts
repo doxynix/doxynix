@@ -190,7 +190,7 @@ export const analysisRouter = createTRPCRouter({
     }),
 
   /**
-   * Очищает корзину после создания PR.
+   * Clears the staging area after creating a PR.
    */
   clearStaging: protectedProcedure
     .input(z.object({ repoId: z.uuid() }))
@@ -618,7 +618,7 @@ export const analysisRouter = createTRPCRouter({
     }),
 
   /**
-   * Получает все текущие изменения для создания PR.
+   * Gets all currently staged changes for creating a PR.
    */
   getStagedFiles: protectedProcedure
     .input(z.object({ repoId: z.uuid() }))
@@ -987,8 +987,8 @@ export const analysisRouter = createTRPCRouter({
     }),
 
   /**
-   * Добавляет файл в "корзину" изменений репозитория в Redis.
-   * Ключ: pr-stage:{userId}:{repoId}
+   * Adds a file to the repository's staged changes in Redis.
+   * Key: pr-stage:{userId}:{repoId}
    */
   stageFile: protectedProcedure
     .input(

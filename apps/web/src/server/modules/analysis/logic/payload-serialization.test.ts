@@ -108,7 +108,7 @@ const documentationInput = {
 } as unknown as DocumentationInputSnapshot;
 
 describe("toPromptJson", () => {
-  it("сериализует необъектные значения как есть", () => {
+  it("serializes non-object values as-is", () => {
     expect(toPromptJson(undefined)).toBe("{}");
     expect(toPromptJson(null)).toBe("{}");
     expect(toPromptJson(42)).toBe("42");
@@ -116,7 +116,7 @@ describe("toPromptJson", () => {
     expect(toPromptJson(true)).toBe("true");
   });
 
-  it("выбрасывает пустые массивы и объекты на любом уровне", () => {
+  it("drops empty arrays and objects at any level", () => {
     expect(toPromptJson({})).toBe("{}");
     expect(toPromptJson({ a: [] })).toBe("{}");
     expect(toPromptJson({ a: {} })).toBe("{}");
@@ -124,19 +124,19 @@ describe("toPromptJson", () => {
     expect(toPromptJson({ outer: { inner: 1 } })).toBe('{"outer":{"inner":1}}');
   });
 
-  it("сохраняет примитивы и непустые массивы", () => {
+  it("keeps primitives and non-empty arrays", () => {
     const parsed = JSON.parse(toPromptJson({ name: "web", score: 42, tags: ["a", "b"] }));
 
     expect(parsed).toEqual({ name: "web", score: 42, tags: ["a", "b"] });
   });
 
-  it("удаляет пустые объекты из массивов", () => {
+  it("removes empty objects from arrays", () => {
     const parsed = JSON.parse(toPromptJson({ list: [{ a: 1 }, {}] }));
 
     expect(parsed.list).toEqual([{ a: 1 }]);
   });
 
-  it("для graphReliability-подобного объекта удаляет edges и обрезает unresolvedSamples до 8", () => {
+  it("for a graphReliability-like object drops edges and trims unresolvedSamples to 8", () => {
     const payload = {
       graphReliability: {
         edges: [{ fromPath: "a", kind: "internal", resolved: true, specifier: "./b" }],
@@ -158,7 +158,7 @@ describe("toPromptJson", () => {
     expect(parsed.graphReliability.extra).toEqual({ keep: true });
   });
 
-  it("для не-graphReliability объекта edges и unresolvedSamples сохраняются целиком", () => {
+  it("for a non-graphReliability object keeps edges and unresolvedSamples intact", () => {
     const parsed = JSON.parse(
       toPromptJson({ edges: [{ id: 1 }], unresolvedSamples: [{ x: 1 }, { x: 2 }] }),
     );
@@ -169,7 +169,7 @@ describe("toPromptJson", () => {
 });
 
 describe("serializeAllowedPaths", () => {
-  it("сортирует пути по localeCompare", () => {
+  it("sorts paths by localeCompare", () => {
     expect(JSON.parse(serializeAllowedPaths(["z.ts", "a.ts", "m.ts"]))).toEqual([
       "a.ts",
       "m.ts",
@@ -177,7 +177,7 @@ describe("serializeAllowedPaths", () => {
     ]);
   });
 
-  it("не мутирует входной массив", () => {
+  it("does not mutate the input array", () => {
     const input = ["z.ts", "a.ts"];
 
     serializeAllowedPaths(input);
@@ -185,7 +185,7 @@ describe("serializeAllowedPaths", () => {
     expect(input).toEqual(["z.ts", "a.ts"]);
   });
 
-  it("возвращает валидный JSON для пустого массива", () => {
+  it("returns valid JSON for an empty array", () => {
     expect(JSON.parse(serializeAllowedPaths([]))).toEqual([]);
   });
 });
@@ -193,7 +193,7 @@ describe("serializeAllowedPaths", () => {
 describe("buildWriterSectionPayloads", () => {
   const payloads = buildWriterSectionPayloads(documentationInput);
 
-  it("возвращает 5 записей с sections по DOC_SECTION_DEPENDENCIES", () => {
+  it("returns 5 entries with sections per DOC_SECTION_DEPENDENCIES", () => {
     expect(Object.keys(payloads)).toEqual([
       "api",
       "architecture",
@@ -208,11 +208,11 @@ describe("buildWriterSectionPayloads", () => {
     expect(payloads.readme.sections).toEqual(["overview", "architecture"]);
   });
 
-  it("changelog всегда имеет пустую payload", () => {
+  it("changelog always has an empty payload", () => {
     expect(payloads.changelog.payload).toBe("");
   });
 
-  it("api.payload сериализует секцию api_reference", () => {
+  it("api.payload serializes the api_reference section", () => {
     const parsed = JSON.parse(payloads.api.payload);
 
     expect(parsed.body.publicSurfacePaths).toEqual(["/api/items"]);
@@ -220,7 +220,7 @@ describe("buildWriterSectionPayloads", () => {
     expect(parsed.section).toBe("api_reference");
   });
 
-  it("readme.payload урезает modules до 8 и evidencePaths до 12/16, сохраняет primaryEntrypoints", () => {
+  it("readme.payload trims modules to 8 and evidencePaths to 12/16, keeps primaryEntrypoints", () => {
     const parsed = JSON.parse(payloads.readme.payload);
 
     expect(parsed.architecture.body.modules).toHaveLength(8);
@@ -229,14 +229,14 @@ describe("buildWriterSectionPayloads", () => {
     expect(parsed.onboarding.evidencePaths).toHaveLength(16);
   });
 
-  it("readme.payload выбрасывает рёбра графа через compactPromptPayload", () => {
+  it("readme.payload drops graph edges via compactPromptPayload", () => {
     const parsed = JSON.parse(payloads.readme.payload);
 
     expect(parsed.architecture.body.graphReliability.edges).toBeUndefined();
     expect(parsed.architecture.body.graphReliability.resolvedEdges).toBe(1);
   });
 
-  it("contributing.payload объединяет onboarding и overview", () => {
+  it("contributing.payload merges onboarding and overview", () => {
     const parsed = JSON.parse(payloads.contributing.payload);
 
     expect(parsed.onboarding.body.apiPaths).toEqual(["/api/items"]);

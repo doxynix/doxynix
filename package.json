@@ -7,13 +7,13 @@
     "packages/*"
   ],
   "scripts": {
+    "arch:check": "turbo arch:check",
     "build": "turbo build",
     "clean:symlinks": "bun scripts/clean-symlinks.ts",
     "db:generate": "turbo db:generate",
     "db:migrate": "turbo db:migrate",
     "db:push": "turbo db:push",
     "db:studio": "turbo db:studio",
-    "arch:check": "turbo arch:check",
     "dev": "turbo dev --filter=!@doxynix/cli",
     "dump:packages": "find . \\( -name \"node_modules\" -o -name \".next\" -o -name \".turbo\" \\) -prune -o -name \"package.json\" -print -exec bunx cli-highlight {} \\;",
     "dup": "jscpd",

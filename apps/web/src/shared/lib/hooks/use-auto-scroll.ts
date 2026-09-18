@@ -124,7 +124,7 @@ export function useAutoScroll<T extends HTMLElement>(
 }
 
 /**
- * Находится ли контейнер в пределах 15px от нижней границы прокрутки.
+ * Whether the container is within 15px of the bottom scroll boundary.
  */
 export function isNearBottom(
   scrollHeight: number,

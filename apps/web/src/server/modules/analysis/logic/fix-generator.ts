@@ -10,6 +10,7 @@ import { callWithFallback } from "@/server/utils/call";
 import { getActiveModels, SAFETY_SETTINGS } from "../ai/ai-constants";
 import { buildCodeFixerSystemPrompt, buildCodeFixerUserPrompt } from "../ai/prompts-refactored";
 import type { FindingForFix, GeneratedDiff } from "./pr.types";
+import { applySurgicalEditBlock } from "./surgical-edit";
 
 type FixedFileContent = {
   filePath: string;
@@ -33,62 +34,6 @@ type FindingInput = {
 };
 
 const FILE_TAG_REGEX = /<file\s+path\s*=\s*["']([^"']+)["']\s*>([\S\s]*?)<\/file>/gi;
-
-function getIndent(line: string): string {
-  const match = /^\s*/.exec(line);
-  return match ? match[0] : "";
-}
-
-function adjustIndentation(
-  replaceLines: string[],
-  searchIndent: string,
-  targetIndent: string,
-): string[] {
-  if (searchIndent === targetIndent) {
-    return replaceLines;
-  }
-
-  return replaceLines.map((line) => {
-    if (line.trim() === "") {
-      return "";
-    }
-
-    if (line.startsWith(searchIndent)) {
-      return targetIndent + line.slice(searchIndent.length);
-    }
-    return targetIndent + line.trimStart();
-  });
-}
-
-function getTokens(line: string): string[] {
-  return line
-    .trim()
-    .toLowerCase()
-    .split(/[\s()[\]{}.,;+\-*/=<>!]+/gu)
-    .filter(Boolean);
-}
-
-function lineSimilarity(line1: string, line2: string): number {
-  const t1 = getTokens(line1);
-  const t2 = getTokens(line2);
-  if (t1.length === 0 && t2.length === 0) {
-    return 1.0;
-  }
-  if (t1.length === 0 || t2.length === 0) {
-    return 0.0;
-  }
-
-  const set1 = new Set(t1);
-  const set2 = new Set(t2);
-  let intersection = 0;
-  for (const token of set1) {
-    if (set2.has(token)) {
-      intersection++;
-    }
-  }
-  const union = set1.size + set2.size - intersection;
-  return intersection / union;
-}
 
 class FixGenerator {
   static async generateDiffsFromContentPublic(
@@ -229,7 +174,6 @@ export class FixService {
 
     let fileContent = original.replaceAll("\r\n", "\n");
     let match: RegExpExecArray | null = null;
-    let appliedCount = 0;
 
     blockRegex.lastIndex = 0;
     while ((match = blockRegex.exec(response)) !== null) {
@@ -243,124 +187,26 @@ export class FixService {
       const normalizedSearch = searchBlock.replaceAll("\r\n", "\n");
       const normalizedReplace = replaceBlock.replaceAll("\r\n", "\n");
 
-      if (fileContent.includes(normalizedSearch)) {
-        fileContent = fileContent.replace(normalizedSearch, normalizedReplace);
-        appliedCount++;
-        continue;
-      }
+      const { content, kind, similarity } = applySurgicalEditBlock({
+        fileContent,
+        replaceBlock: normalizedReplace,
+        searchBlock: normalizedSearch,
+      });
 
-      const searchLines = normalizedSearch.split("\n");
-      const fileLines = fileContent.split("\n");
-
-      let matchedIndex = -1;
-      let matchedIndent = "";
-      let originalSearchIndent = "";
-
-      const firstNonEmptySearchLine = searchLines.find((l) => l.trim() !== "") ?? "";
-      originalSearchIndent = getIndent(firstNonEmptySearchLine);
-
-      for (let i = 0; i <= fileLines.length - searchLines.length; i++) {
-        let isMatch = true;
-        let detectedIndent = "";
-
-        for (let j = 0; j < searchLines.length; j++) {
-          const sLine = searchLines[j]!;
-          const fLine = fileLines[i + j]!;
-
-          if (sLine.trim() === "" && fLine.trim() === "") {
-            continue;
-          }
-
-          if (sLine.trim() === "" || fLine.trim() === "") {
-            isMatch = false;
-            break;
-          }
-
-          if (sLine.trim() !== fLine.trim()) {
-            isMatch = false;
-            break;
-          }
-
-          if (detectedIndent === "" && fLine.trim() !== "") {
-            detectedIndent = getIndent(fLine);
-          }
-        }
-
-        if (isMatch) {
-          matchedIndex = i;
-          matchedIndent = detectedIndent;
-          break;
-        }
-      }
-
-      if (matchedIndex !== -1) {
-        const adjustedReplaceLines = adjustIndentation(
-          normalizedReplace.split("\n"),
-          originalSearchIndent,
-          matchedIndent,
-        );
-
-        fileLines.splice(matchedIndex, searchLines.length, ...adjustedReplaceLines);
-        fileContent = fileLines.join("\n");
-        appliedCount++;
-        continue;
-      }
-
-      let bestIndex = -1;
-      let bestScore = 0;
-      let bestWindowIndent = "";
-
-      for (let i = 0; i <= fileLines.length - searchLines.length; i++) {
-        let totalScore = 0;
-        let detectedIndent = "";
-
-        for (let j = 0; j < searchLines.length; j++) {
-          const sLine = searchLines[j]!;
-          const fLine = fileLines[i + j]!;
-
-          if (sLine.trim() === "" && fLine.trim() === "") {
-            totalScore += 1.0;
-            continue;
-          }
-
-          totalScore += lineSimilarity(sLine, fLine);
-
-          if (detectedIndent === "" && fLine.trim() !== "") {
-            detectedIndent = getIndent(fLine);
-          }
-        }
-
-        const avgScore = totalScore / searchLines.length;
-        if (avgScore > bestScore && avgScore > 0.75) {
-          bestScore = avgScore;
-          bestIndex = i;
-          bestWindowIndent = detectedIndent;
-        }
-      }
-
-      if (bestIndex !== -1) {
+      if (kind === "fuzzy") {
         appLogger.info({
           filePath,
-          msg: `Fuzzy search-replace applied successfully (similarity score: ${Math.round(bestScore * 100)}%)`,
+          msg: `Fuzzy search-replace applied successfully (similarity score: ${Math.round(similarity * 100)}%)`,
         });
-
-        const adjustedReplaceLines = adjustIndentation(
-          normalizedReplace.split("\n"),
-          originalSearchIndent,
-          bestWindowIndent,
-        );
-
-        fileLines.splice(bestIndex, searchLines.length, ...adjustedReplaceLines);
-        fileContent = fileLines.join("\n");
-        appliedCount++;
-        continue;
+      } else if (kind === "none") {
+        appLogger.error({
+          failedSearchBlock: searchBlock.slice(0, 250),
+          filePath,
+          msg: "Surgical block match failed. Search content did not match any section.",
+        });
       }
 
-      appLogger.error({
-        failedSearchBlock: searchBlock.slice(0, 250),
-        filePath,
-        msg: "Surgical block match failed. Search content did not match any section.",
-      });
+      fileContent = content;
     }
 
     return fileContent;

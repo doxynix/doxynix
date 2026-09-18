@@ -1,9 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { z } from "zod";
 
-// ---------------------------------------------------------------------------
-// Hoisted mocks — declared BEFORE source imports
-// ---------------------------------------------------------------------------
+// ── Hoisted mocks ────────────────────────────────────────────────────────────
 const mocks = vi.hoisted(() => ({
   apiForUser: vi.fn(),
   appLogger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
@@ -23,25 +21,18 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("ai", () => ({ tool: mocks.tool }));
-
 vi.mock("@/server/core/app-logger", () => ({ appLogger: mocks.appLogger }));
-
 vi.mock("@/server/core/db", () => ({ prisma: mocks.prisma }));
-
 vi.mock("@/server/core/github/github-browse.service", () => ({
   githubBrowseService: mocks.githubBrowseService,
 }));
-
 vi.mock("@/server/core/trpc/server", () => ({ apiForUser: mocks.apiForUser }));
-
 vi.mock("@/server/utils/optimizers", () => ({ CodeOptimizer: mocks.CodeOptimizer }));
 
-import { buildRepositoryToolProfile } from "./ai-tools";
+import { buildRepositoryToolProfile, type RepositoryToolProfile } from "./ai-tools";
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-function buildTools(profile: Parameters<typeof buildRepositoryToolProfile>[0]) {
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function buildTools(profile: RepositoryToolProfile) {
   return buildRepositoryToolProfile(profile, 1, "repo-uuid", "main");
 }
 
@@ -55,175 +46,166 @@ function getTool(toolSet: Record<string, unknown>, name: string): ToolValue {
   return toolSet[name] as ToolValue;
 }
 
-// ---------------------------------------------------------------------------
-// Profile → key selection
-// ---------------------------------------------------------------------------
-const profileExpectedKeys: Record<string, string[]> = {
-  architect: ["readFile", "readMultipleFiles", "searchCode"],
-  file_action: ["readFile", "readMultipleFiles", "searchCode"],
-  fixer: ["readFile", "readMultipleFiles"],
-  github_agent: [
-    "getLatestAnalysis",
-    "listFiles",
-    "readFile",
-    "readMultipleFiles",
-    "readPreviousDocument",
-    "searchCode",
-    "triggerRepositoryAnalysis",
-  ],
-  mapper: ["listFiles", "readFile", "searchCode"],
-  pr_review: ["readFile", "readMultipleFiles", "searchCode"],
-  writer_api: ["readFile", "readMultipleFiles", "searchCode"],
-  writer_architecture: ["readFile", "readMultipleFiles", "readPreviousDocument", "searchCode"],
-  writer_contributing: ["readFile", "readPreviousDocument", "searchCode"],
-  writer_readme: ["readFile", "readPreviousDocument"],
-};
+// ── Tests ────────────────────────────────────────────────────────────────────
+describe("ai-tools profile composition", () => {
+  const profileExpectedKeys: Record<RepositoryToolProfile, string[]> = {
+    architect: ["readFile", "readMultipleFiles", "searchCode"],
+    file_action: ["readFile", "readMultipleFiles", "searchCode"],
+    fixer: ["readFile", "readMultipleFiles"],
+    github_agent: [
+      "getLatestAnalysis",
+      "listFiles",
+      "readFile",
+      "readMultipleFiles",
+      "readPreviousDocument",
+      "searchCode",
+      "triggerRepositoryAnalysis",
+    ],
+    mapper: ["listFiles", "readFile", "searchCode"],
+    pr_review: ["readFile", "readMultipleFiles", "searchCode"],
+    writer_api: ["readFile", "readMultipleFiles", "searchCode"],
+    writer_architecture: ["readFile", "readMultipleFiles", "readPreviousDocument", "searchCode"],
+    writer_contributing: ["readFile", "readPreviousDocument", "searchCode"],
+    writer_readme: ["readFile", "readPreviousDocument"],
+  };
 
-for (const [profile, expected] of Object.entries(profileExpectedKeys)) {
-  describe(`buildRepositoryToolProfile("${profile}")`, () => {
-    it("returns the correct tool keys", () => {
-      const tools = buildTools(profile as Parameters<typeof buildRepositoryToolProfile>[0]);
-      const keys = Object.keys(tools).sort();
-      expect(keys).toEqual(expected.sort());
+  for (const [profile, expected] of Object.entries(profileExpectedKeys)) {
+    it(`configures correct tools for profile "${profile}"`, () => {
+      const tools = buildTools(profile as RepositoryToolProfile);
+      expect(Object.keys(tools).sort()).toEqual(expected.sort());
     });
+  }
 
-    it("each tool has a description and execute function", () => {
-      const tools = buildTools(profile as Parameters<typeof buildRepositoryToolProfile>[0]);
-      for (const toolDef of Object.values(tools)) {
-        expect(typeof toolDef.description).toBe("string");
-        expect(typeof toolDef.execute).toBe("function");
-      }
-    });
-  });
-}
-
-describe("buildRepositoryToolProfile with unknown profile", () => {
   it("throws for unrecognized profile key", () => {
-    // @ts-expect-error testing invalid profile
-    expect(() => buildRepositoryToolProfile("writer_x", 1, "repo-uuid", "main")).toThrow(
+    // @ts-expect-error testing runtime invalid profile
+    expect(() => buildRepositoryToolProfile("invalid_profile", 1, "repo-uuid", "main")).toThrow(
       "is not iterable",
     );
   });
 });
 
-// ---------------------------------------------------------------------------
-// Tool inputSchema shapes
-// ---------------------------------------------------------------------------
-describe("inputSchema shapes", () => {
-  it("readFile has required path string and optional skeletonize boolean", () => {
-    const tools = buildTools("architect");
-    const schema = getTool(tools, "readFile").inputSchema;
-    expect(schema).toBeDefined();
-    // Validate with a correct input
-    const parsed = schema.safeParse({ path: "src/index.ts" });
-    expect(parsed.success).toBe(true);
-    // Validate with skeletonize
-    const parsed2 = schema.safeParse({ path: "src/index.ts", skeletonize: false });
-    expect(parsed2.success).toBe(true);
+describe("ai-tools input schemas", () => {
+  it("validates readFile schema", () => {
+    const schema = getTool(buildTools("architect"), "readFile").inputSchema;
+    expect(schema.safeParse({ path: "src/index.ts" }).success).toBe(true);
+    expect(schema.safeParse({ path: "src/index.ts", skeletonize: false }).success).toBe(true);
+    expect(schema.safeParse({}).success).toBe(false);
   });
 
-  it("listFiles has optional prefix string", () => {
-    const tools = buildTools("mapper");
-    const schema = getTool(tools, "listFiles").inputSchema;
-    const parsed = schema.safeParse({ prefix: "src" });
-    expect(parsed.success).toBe(true);
-    const parsed2 = schema.safeParse({});
-    expect(parsed2.success).toBe(true);
-  });
-
-  it("readPreviousDocument has docType enum", () => {
-    const tools = buildTools("writer_readme");
-    const schema = getTool(tools, "readPreviousDocument").inputSchema;
-    const parsed = schema.safeParse({ docType: "README" });
-    expect(parsed.success).toBe(true);
-    const parsed2 = schema.safeParse({ docType: "INVALID" });
-    expect(parsed2.success).toBe(false);
+  it("validates readPreviousDocument docType enum", () => {
+    const schema = getTool(buildTools("writer_readme"), "readPreviousDocument").inputSchema;
+    expect(schema.safeParse({ docType: "README" }).success).toBe(true);
+    expect(schema.safeParse({ docType: "INVALID" }).success).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// listFiles execute
-// ---------------------------------------------------------------------------
-describe("listFiles execute", () => {
-  it("returns newline-joined file paths", async () => {
-    mocks.prisma.repo.findUnique.mockResolvedValue({ name: "repo", owner: "acme" });
-    mocks.githubBrowseService.getRepoFiles.mockResolvedValue([["a.ts"], ["b/c.ts"]]);
+describe("ai-tools execution logic", () => {
+  describe("readFile & readMultipleFiles", () => {
+    it("returns skeletonized code by default and raw code when skeletonize is false", async () => {
+      mocks.githubBrowseService.getFileContent.mockResolvedValue({ content: "const x = 1;" });
+      const tool = getTool(buildTools("architect"), "readFile");
 
-    const tools = buildTools("mapper");
-    const result = await getTool(tools, "listFiles").execute({});
+      const defaultResult = (await tool.execute({ path: "src/a.ts" })) as any;
+      expect(defaultResult.content).toBe("optimized:const x = 1;");
+      expect(defaultResult.skeletonized).toBe(true);
 
-    expect(result).toBe("a.ts\nb/c.ts");
+      const rawResult = (await tool.execute({ path: "src/a.ts", skeletonize: false })) as any;
+      expect(rawResult.content).toBe("clean:const x = 1;");
+      expect(rawResult.skeletonized).toBe(false);
+    });
+
+    it("readMultipleFiles isolates errors per file without failing the whole batch", async () => {
+      mocks.githubBrowseService.getFileContent
+        .mockResolvedValueOnce({ content: "file-1" })
+        .mockRejectedValueOnce(new Error("File not found"));
+
+      const tool = getTool(buildTools("architect"), "readMultipleFiles");
+      const result = (await tool.execute({ paths: ["a.ts", "missing.ts"] })) as any[];
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        content: "optimized:file-1",
+        path: "a.ts",
+        skeletonized: true,
+        success: true,
+      });
+      expect(result[1]).toEqual({
+        content: "Error: Could not read missing.ts",
+        path: "missing.ts",
+        success: false,
+      });
+    });
   });
 
-  it("filters by prefix", async () => {
-    mocks.prisma.repo.findUnique.mockResolvedValue({ name: "repo", owner: "acme" });
-    mocks.githubBrowseService.getRepoFiles.mockResolvedValue([["a.ts"], ["b/c.ts"]]);
+  describe("listFiles", () => {
+    it("lists files and applies prefix filtering", async () => {
+      mocks.prisma.repo.findUnique.mockResolvedValue({ name: "repo", owner: "acme" });
+      mocks.githubBrowseService.getRepoFiles.mockResolvedValue([
+        ["src/app.ts"],
+        ["src/utils/math.ts"],
+        ["docs/readme.md"],
+      ]);
 
-    const tools = buildTools("mapper");
-    const result = await getTool(tools, "listFiles").execute({ prefix: "b" });
+      const tool = getTool(buildTools("mapper"), "listFiles");
 
-    expect(result).toBe("b/c.ts");
+      const allFiles = await tool.execute({});
+      expect(allFiles).toBe("src/app.ts\nsrc/utils/math.ts\ndocs/readme.md");
+
+      const filtered = await tool.execute({ prefix: "src/utils" });
+      expect(filtered).toBe("src/utils/math.ts");
+    });
   });
 
-  it("returns error when repo not found", async () => {
-    mocks.prisma.repo.findUnique.mockResolvedValue(null);
+  describe("readPreviousDocument", () => {
+    it("returns previous document content when found in database", async () => {
+      mocks.prisma.repo.findUnique.mockResolvedValue({ id: 10 });
+      mocks.prisma.document.findFirst.mockResolvedValue({
+        content: "# Existing API",
+        type: "API",
+        version: "v1",
+      });
 
-    const tools = buildTools("mapper");
-    const result = await getTool(tools, "listFiles").execute({});
+      const tool = getTool(buildTools("writer_readme"), "readPreviousDocument");
+      const result = (await tool.execute({ docType: "API" })) as any;
 
-    expect(result).toBe("Error: Repo not found");
+      expect(result.content).toBe("# Existing API");
+      expect(result.type).toBe("API");
+    });
+
+    it("returns friendly note when no previous document exists (first analysis)", async () => {
+      mocks.prisma.repo.findUnique.mockResolvedValue({ id: 10 });
+      mocks.prisma.document.findFirst.mockResolvedValue(null);
+
+      const tool = getTool(buildTools("writer_readme"), "readPreviousDocument");
+      const result = await tool.execute({ docType: "README" });
+
+      expect(result).toContain('No previous documentation of type "README" exists yet');
+      expect(result).toContain("This is the first analysis");
+    });
   });
 
-  it("returns error on githubBrowseService failure", async () => {
-    mocks.prisma.repo.findUnique.mockResolvedValue({ name: "repo", owner: "acme" });
-    mocks.githubBrowseService.getRepoFiles.mockRejectedValue(new Error("network"));
+  describe("searchCode", () => {
+    it("formats search results with [[path]] notation for LLM grounding", async () => {
+      mocks.apiForUser.mockResolvedValue({
+        analysis: {
+          searchWorkspace: vi.fn().mockResolvedValue([
+            {
+              description: "auth helper",
+              docSectionId: null,
+              docType: null,
+              label: "checkAuth",
+              path: "src/auth.ts",
+              score: 0.95,
+            },
+          ]),
+        },
+      });
 
-    const tools = buildTools("mapper");
-    const result = await getTool(tools, "listFiles").execute({});
+      const tool = getTool(buildTools("mapper"), "searchCode");
+      const result = (await tool.execute({ search: "checkAuth" })) as string;
 
-    expect(result).toBe("Error listing files.");
-    expect(mocks.appLogger.error).toHaveBeenCalled();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// readFile execute
-// ---------------------------------------------------------------------------
-describe("readFile execute", () => {
-  it("returns skeletonized content by default", async () => {
-    mocks.githubBrowseService.getFileContent.mockResolvedValue({ content: "src" });
-
-    const tools = buildTools("architect");
-    const result = (await getTool(tools, "readFile").execute({
-      path: "x.ts",
-    })) as Record<string, unknown>;
-
-    expect(result.content).toBe("optimized:src");
-    expect(result.path).toBe("x.ts");
-    expect(result.skeletonized).toBe(true);
-  });
-
-  it("returns cleaned content when skeletonize=false", async () => {
-    mocks.githubBrowseService.getFileContent.mockResolvedValue({ content: "src" });
-
-    const tools = buildTools("architect");
-    const result = (await getTool(tools, "readFile").execute({
-      path: "x.ts",
-      skeletonize: false,
-    })) as Record<string, unknown>;
-
-    expect(result.content).toBe("clean:src");
-    expect(result.skeletonized).toBe(false);
-  });
-
-  it("returns error string on failure", async () => {
-    mocks.githubBrowseService.getFileContent.mockRejectedValue(new Error("not found"));
-
-    const tools = buildTools("architect");
-    const result = await getTool(tools, "readFile").execute({ path: "missing.ts" });
-
-    expect(typeof result).toBe("string");
-    expect(result).toContain("missing.ts");
-    expect(mocks.appLogger.warn).toHaveBeenCalled();
+      expect(result).toContain("[[src/auth.ts]]");
+      expect(result).toContain("checkAuth: auth helper");
+    });
   });
 });

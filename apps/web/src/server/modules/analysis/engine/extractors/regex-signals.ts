@@ -8,11 +8,11 @@ import {
   type RegexSymbolPattern,
 } from "./regex-signal-specs";
 
-// ЭТАЛОН: Быстрый подсчет совпадений без создания тяжелых JS-массивов в оперативной памяти
+// Reference: Counts matches quickly without allocating heavy JS arrays in memory
 function countRegexMatches(content: string, patterns: RegExp[]): number {
   let total = 0;
   for (const pattern of patterns) {
-    // Сбрасываем индекс регулярного выражения перед поиском
+    // Reset the regex lastIndex before each search pass
     pattern.lastIndex = 0;
     while (pattern.exec(content) !== null) {
       total++;
@@ -159,7 +159,7 @@ function buildSignals(
     analysisMode: "heuristic",
     apiSurface: params.apiSurface,
     complexityMetrics: {
-      complexity: 0, // TODO: посчитать
+      complexity: 0, // TODO: compute
       maxNesting: 0,
     },
     confidence: 60,

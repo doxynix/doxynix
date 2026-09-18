@@ -98,10 +98,10 @@ export class OpenApiDiscoveryEngine {
   private static isLikelySpec(path: string, content: string): boolean {
     const ext = getFileExtension(path).toLowerCase();
 
-    if (IGNORED_EXTENSIONS.has(`.${ext}`)) {
+    if (IGNORED_EXTENSIONS.has(ext)) {
       return false;
     }
-    if (!["json", "yaml", "yml"].includes(ext)) {
+    if (![".json", ".yaml", ".yml"].includes(ext)) {
       return false;
     }
 

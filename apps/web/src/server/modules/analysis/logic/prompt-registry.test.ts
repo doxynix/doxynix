@@ -38,7 +38,7 @@ describe("PromptRegistry", () => {
     expect(registry.getMetadata("nope")).toBeNull();
   });
 
-  it("регистрация дубликата бросает ошибку", () => {
+  it("registering a duplicate throws an error", () => {
     const { registry, metadata, builderFn } = makeRegistry();
 
     registry.register(metadata("readme-writer"), builderFn);
@@ -48,7 +48,7 @@ describe("PromptRegistry", () => {
     );
   });
 
-  it("build возвращает результат builderFn с параметрами", () => {
+  it("build returns the builderFn result with params", () => {
     const { registry, metadata, builderFn } = makeRegistry();
 
     registry.register(metadata("readme-writer"), builderFn);
@@ -57,7 +57,7 @@ describe("PromptRegistry", () => {
     expect(registry.build(asBuildId("readme-writer"))).toBe("payload:none");
   });
 
-  it("build несуществующего промпта бросает ошибку", () => {
+  it("build of a missing prompt throws an error", () => {
     const { registry } = makeRegistry();
 
     expect(() => registry.build(asBuildId("missing"))).toThrow(
@@ -65,7 +65,7 @@ describe("PromptRegistry", () => {
     );
   });
 
-  it("alias резолвится к target-промпту", () => {
+  it("alias resolves to the target prompt", () => {
     const { registry, metadata, builderFn } = makeRegistry();
 
     registry.register(metadata("readme-writer"), builderFn);
@@ -76,7 +76,7 @@ describe("PromptRegistry", () => {
     expect(registry.has("legacy-readme")).toBe(true);
   });
 
-  it("alias с неизвестным target бросает ошибку", () => {
+  it("alias with unknown target throws an error", () => {
     const { registry } = makeRegistry();
 
     expect(() => registry.alias("old", "missing-target")).toThrow(
@@ -84,7 +84,7 @@ describe("PromptRegistry", () => {
     );
   });
 
-  it("getByRole фильтрует по роли", () => {
+  it("getByRole filters by role", () => {
     const { registry, metadata, builderFn } = makeRegistry();
 
     registry.register(metadata("architect", { role: "arch" }), builderFn);
@@ -94,7 +94,7 @@ describe("PromptRegistry", () => {
     expect(registry.getByRole("nobody")).toEqual([]);
   });
 
-  it("getByTaskType фильтрует по типу задачи", () => {
+  it("getByTaskType filters by task type", () => {
     const { registry, metadata, builderFn } = makeRegistry();
 
     registry.register(metadata("architect", { taskType: "default" }), builderFn);
@@ -104,7 +104,7 @@ describe("PromptRegistry", () => {
     expect(registry.getByTaskType("classification")).toEqual([]);
   });
 
-  it("getAllMetadata возвращает все метаданные", () => {
+  it("getAllMetadata returns all metadata", () => {
     const { registry, metadata, builderFn } = makeRegistry();
 
     registry.register(metadata("architect"), builderFn);
@@ -118,7 +118,7 @@ describe("PromptRegistry", () => {
     ).toEqual(["architect", "readme-writer"]);
   });
 
-  it("exportAsJson возвращает метаданные с ISO-датами", () => {
+  it("exportAsJson returns metadata with ISO dates", () => {
     const { registry, metadata, builderFn } = makeRegistry();
 
     registry.register(metadata("readme-writer"), builderFn);
@@ -129,7 +129,7 @@ describe("PromptRegistry", () => {
     expect(exported["readme-writer"]?.metadata.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T.*Z$/);
   });
 
-  it("getStats считает totalPrompts, byOutputFormat, byRole, byTaskType", () => {
+  it("getStats counts totalPrompts, byOutputFormat, byRole, byTaskType", () => {
     const { registry, metadata, builderFn } = makeRegistry();
 
     registry.register(
@@ -157,7 +157,7 @@ describe("PromptRegistry", () => {
     expect(stats.byTaskType).toEqual({ creative: 2, default: 1 });
   });
 
-  it("clear очищает промпты и алиасы", () => {
+  it("clear clears prompts and aliases", () => {
     const { registry, metadata, builderFn } = makeRegistry();
 
     registry.register(metadata("readme-writer"), builderFn).alias("old", "readme-writer");
@@ -169,12 +169,12 @@ describe("PromptRegistry", () => {
   });
 });
 
-describe("глобальный реестр", () => {
-  it("getGlobalPromptRegistry возвращает один экземпляр до reset", () => {
+describe("global registry", () => {
+  it("getGlobalPromptRegistry returns a single instance until reset", () => {
     expect(getGlobalPromptRegistry()).toBe(getGlobalPromptRegistry());
   });
 
-  it("resetGlobalPromptRegistry создаёт новый экземпляр", () => {
+  it("resetGlobalPromptRegistry creates a new instance", () => {
     const first = getGlobalPromptRegistry();
 
     resetGlobalPromptRegistry();
@@ -184,7 +184,7 @@ describe("глобальный реестр", () => {
 });
 
 describe("createPromptMetadata / PROMPT_IDS", () => {
-  it("возвращает дефолтные значения", () => {
+  it("returns default values", () => {
     const meta = createPromptMetadata({});
 
     expect(meta).toMatchObject({
@@ -202,7 +202,7 @@ describe("createPromptMetadata / PROMPT_IDS", () => {
     expect(meta.createdAt).toBe(meta.modifiedAt);
   });
 
-  it("применяет overrides поверх дефолтов", () => {
+  it("applies overrides on top of defaults", () => {
     const createdAt = new Date("2024-01-01T00:00:00.000Z");
 
     const meta = createPromptMetadata({ createdAt, id: "p1", name: "N" });
@@ -213,7 +213,7 @@ describe("createPromptMetadata / PROMPT_IDS", () => {
     expect(meta.role).toBe("generic");
   });
 
-  it("PROMPT_IDS фиксирует идентификаторы", () => {
+  it("PROMPT_IDS pins the identifiers", () => {
     expect(PROMPT_IDS).toEqual({
       API_DOC: "api-documentarian",
       ARCHITECT: "architect",

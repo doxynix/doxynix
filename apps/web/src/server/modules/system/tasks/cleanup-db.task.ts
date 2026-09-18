@@ -5,7 +5,7 @@ import { prisma } from "@/server/core/db";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
 
 /**
- * Единая комплексная задача ежедневного обслуживания и очистки СУБД
+ * Single comprehensive daily database maintenance and cleanup task
  */
 export const dailyDatabaseMaintenance = schedules.task({
   cron: "0 3 * * *",

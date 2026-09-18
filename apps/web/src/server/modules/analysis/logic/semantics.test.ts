@@ -63,7 +63,7 @@ const emptyMetrics = (): RepoMetrics =>
   }) as unknown as RepoMetrics;
 
 describe("collectSemanticKinds", () => {
-  it("прокидывает семантические виды путей через ProjectPolicy", () => {
+  it("passes semantic path kinds through ProjectPolicy", () => {
     const kinds = collectSemanticKinds("src/server/api/routes.ts", new Set());
 
     expect(kinds).toEqual(expect.arrayContaining(["api", "backend"]));
@@ -74,7 +74,7 @@ describe("collectSemanticKinds", () => {
 });
 
 describe("describeGroup", () => {
-  it("склеивает label группы и описание семантического вида", () => {
+  it("joins group label with semantic kind description", () => {
     expect(describeGroup("src/features", "frontend")).toBe(
       "src / features: UI, app shell or client-facing flow composition.",
     );
@@ -82,11 +82,11 @@ describe("describeGroup", () => {
 });
 
 describe("getGenericGroupPenalty", () => {
-  it("для файлов штраф отсутствует", () => {
+  it("applies no penalty for files", () => {
     expect(getGenericGroupPenalty(makeNode({ nodeType: "file", path: "src/app.ts" }))).toBe(0);
   });
 
-  it("для generic-группы с неизвестным kind и слабыми сигналами штраф растёт", () => {
+  it("raises penalty for a generic group with unknown kind and weak signals", () => {
     const penalty = getGenericGroupPenalty(
       makeNode({
         kind: "unknown",
@@ -119,7 +119,7 @@ describe("getGenericGroupPenalty", () => {
     expect(penalty).toBeGreaterThan(0);
   });
 
-  it("сильные сигналы и backend-kind снижают штраф (10 − 6 − 2 = 2)", () => {
+  it("strong signals and backend-kind lower the penalty (10 − 6 − 2 = 2)", () => {
     const penalty = getGenericGroupPenalty(
       makeNode({
         kind: "backend",
@@ -140,20 +140,20 @@ describe("getGenericGroupPenalty", () => {
 });
 
 describe("isLikelyBarrelPath", () => {
-  it("распознаёт index-файлы и корневые index-файлы", () => {
+  it("recognizes index files and root index files", () => {
     expect(isLikelyBarrelPath("src/index.ts")).toBe(true);
     expect(isLikelyBarrelPath("lib/features/index.jsx")).toBe(true);
     expect(isLikelyBarrelPath("index.js")).toBe(true);
   });
 
-  it("не считает barrels обычные файлы", () => {
+  it("does not treat regular files as barrels", () => {
     expect(isLikelyBarrelPath("src/app.ts")).toBe(false);
     expect(isLikelyBarrelPath("src/my-index.ts")).toBe(false);
   });
 });
 
 describe("buildGroupKeySet", () => {
-  it("дедуплицирует и группирует пути через deriveGroupId", () => {
+  it("deduplicates and groups paths via deriveGroupId", () => {
     expect(buildGroupKeySet(["src/app.ts", "src/app.ts", "lib/x.ts"], new Set())).toEqual([
       "src/app.ts",
       "lib/x.ts",
@@ -162,11 +162,11 @@ describe("buildGroupKeySet", () => {
 });
 
 describe("filterMeaningfulEntrypoints", () => {
-  it("отбрасывает barrel-файлы, когда есть альтернативы", () => {
+  it("discards barrel files when alternatives exist", () => {
     expect(filterMeaningfulEntrypoints(["src/index.ts", "lib/main.ts"])).toEqual(["lib/main.ts"]);
   });
 
-  it("возвращает исходные пути, если все — barrels", () => {
+  it("returns original paths when all are barrels", () => {
     expect(filterMeaningfulEntrypoints(["src/index.ts", "lib/index.ts"])).toEqual([
       "src/index.ts",
       "lib/index.ts",
@@ -175,7 +175,7 @@ describe("filterMeaningfulEntrypoints", () => {
 });
 
 describe("summarizeGroupImportance", () => {
-  it("перечисляет причины по счётчикам", () => {
+  it("lists reasons by counters", () => {
     const summary = summarizeGroupImportance({
       apiCount: 1,
       changeCouplingCount: 0,
@@ -198,7 +198,7 @@ describe("summarizeGroupImportance", () => {
     expect(summary).toContain("shows recent git activity concentration");
   });
 
-  it("без причин возвращает только describeGroup", () => {
+  it("returns only describeGroup when there are no reasons", () => {
     const summary = summarizeGroupImportance({
       apiCount: 0,
       changeCouplingCount: 0,
@@ -226,7 +226,7 @@ describe("shouldKeepStructurePath", () => {
     Set<"api" | "config" | "entrypoint" | "fact" | "finding" | "hotspot" | "onboarding">
   >();
 
-  it("отбрасывает чувствительные и игнорируемые пути", () => {
+  it("discards sensitive and ignored paths", () => {
     expect(shouldKeepStructurePath(".env", signalMap, emptyMetrics(), new Set(), new Set())).toBe(
       false,
     );
@@ -235,7 +235,7 @@ describe("shouldKeepStructurePath", () => {
     ).toBe(false);
   });
 
-  it("сохраняет путь с сильным сигналом", () => {
+  it("keeps a path with a strong signal", () => {
     signalMap.set("src/app.ts", new Set(["entrypoint"]));
 
     expect(
@@ -243,14 +243,14 @@ describe("shouldKeepStructurePath", () => {
     ).toBe(true);
   });
 
-  it("односегментный путь без сигналов не проходит порог", () => {
+  it("single-segment path without signals fails the threshold", () => {
     signalMap.clear();
     expect(
       shouldKeepStructurePath("other.ts", signalMap, emptyMetrics(), new Set(), new Set()),
     ).toBe(false);
   });
 
-  it("учитывает routeInventory и publicSurfacePaths в скоринге", () => {
+  it("accounts for routeInventory and publicSurfacePaths in scoring", () => {
     const metrics = {
       ...emptyMetrics(),
       routeInventory: { sourceFiles: ["src/api/routes.ts"] },
@@ -263,7 +263,7 @@ describe("shouldKeepStructurePath", () => {
 });
 
 describe("rankStructureNode", () => {
-  it("награждает группы и значимые маркеры", () => {
+  it("rewards groups and meaningful markers", () => {
     const base = rankStructureNode(makeNode());
     const marked = rankStructureNode(
       makeNode({
@@ -286,7 +286,7 @@ describe("rankStructureNode", () => {
 });
 
 describe("isMeaningfulTopLevelNode", () => {
-  it("generic-группа с одним путём без маркеров — не значимая", () => {
+  it("generic group with a single path and no markers is not meaningful", () => {
     const generic = makeInspectNode({
       markers: {
         api: false,
@@ -315,7 +315,7 @@ describe("isMeaningfulTopLevelNode", () => {
     expect(isMeaningfulTopLevelNode(generic)).toBe(false);
   });
 
-  it("entrypoint-маркер делает узел значимым", () => {
+  it("entrypoint marker makes the node meaningful", () => {
     const node = makeInspectNode({
       markers: {
         api: false,
@@ -331,7 +331,7 @@ describe("isMeaningfulTopLevelNode", () => {
 });
 
 describe("isMeaningfulChildNode", () => {
-  it("file-barrel не значим, api-файл значим", () => {
+  it("file-barrel is not meaningful, api file is meaningful", () => {
     expect(
       isMeaningfulChildNode(makeNode({ nodeType: "file", path: "src/features/ui/index.ts" })),
     ).toBe(false);
@@ -355,7 +355,7 @@ describe("isMeaningfulChildNode", () => {
 });
 
 describe("collectGroupsByKind", () => {
-  it("группирует id групп по primary-виду", () => {
+  it("groups group ids by primary kind", () => {
     const base = createEmptyGroupEntry();
     const groupMap = new Map<string, StructureGroupEntry>([
       ["src", { ...base, semanticCounts: { ...base.semanticCounts, backend: 1 } }],
@@ -370,7 +370,7 @@ describe("collectGroupsByKind", () => {
 });
 
 describe("getStrongGroups", () => {
-  it("сортирует по скорингу и обрезает по лимиту", () => {
+  it("sorts by scoring and truncates by limit", () => {
     const base = createEmptyGroupEntry();
     const groupMap = new Map<string, StructureGroupEntry>([
       ["weak", base],
@@ -384,7 +384,7 @@ describe("getStrongGroups", () => {
 });
 
 describe("ProjectPolicy integration", () => {
-  it("deriveGroupId очевидные случаи", () => {
+  it("deriveGroupId handles obvious cases", () => {
     expect(ProjectPolicy.deriveGroupId("api/routes.ts")).toBe("api");
     expect(ProjectPolicy.deriveGroupId("g0/a.ts")).toBe("g0");
     expect(ProjectPolicy.deriveGroupId(".env")).toBe(".env");

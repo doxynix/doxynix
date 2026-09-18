@@ -52,7 +52,7 @@ const file = (path: string, lines: number): RepositoryModuleFile => ({
 const parse = (skeleton: string) => JSON.parse(skeleton) as Record<string, unknown>;
 
 describe("buildMapperSkeleton", () => {
-  it("отбирает файлы с loc > 5 и сортирует по скорингу", () => {
+  it("selects files with loc > 5 and sorts by score", () => {
     const skeleton = buildMapperSkeleton(
       [file("src/small.ts", 3), file("src/main.ts", 8), file("src/other.ts", 8)],
       makeMetrics(),
@@ -69,7 +69,7 @@ describe("buildMapperSkeleton", () => {
     expect(files[1]).toEqual({ loc: 8, p: "src/other.ts", role: "source" });
   });
 
-  it("присваивает роли config/api и маркирует server/ui по пути", () => {
+  it("assigns config/api roles and marks server/ui by path", () => {
     const skeleton = buildMapperSkeleton(
       [
         file("tsconfig.json", 20),
@@ -97,7 +97,7 @@ describe("buildMapperSkeleton", () => {
     expect(byPath.get("plain/util.ts")).toBe("source");
   });
 
-  it("если все файлы малы, files пуст, но каркас сохраняется", () => {
+  it("when all files are small, files is empty but the skeleton is kept", () => {
     const skeleton = buildMapperSkeleton([file("a.ts", 3)], makeMetrics(), makeEvidence());
 
     const payload = parse(skeleton);
@@ -125,7 +125,7 @@ describe("buildMapperSkeleton", () => {
     expect(Array.isArray(payload.reportFocus)).toBe(true);
   });
 
-  it("фильтрует и сортирует модули по архитектурной релевантности", () => {
+  it("filters and sorts modules by architectural relevance", () => {
     const modules = [
       {
         apiSurface: 1,
@@ -168,7 +168,7 @@ describe("buildMapperSkeleton", () => {
     );
   });
 
-  it("учитывает openapiInventory из метрик как api-источник", () => {
+  it("accounts for openapiInventory from metrics as an api source", () => {
     const skeleton = buildMapperSkeleton(
       [file("openapi.yaml", 30)],
       makeMetrics({

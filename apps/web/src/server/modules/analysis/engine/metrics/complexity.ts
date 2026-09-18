@@ -4,7 +4,7 @@ import type { HealthScoreParams } from "../core/metrics.types";
 import { MODERN_HEALTH_SCORE } from "../core/scoring-constants";
 
 /**
- * Расчет современного, глубокого показателя здоровья репозитория (Health Score).
+ * Calculates the modern, deep repository health score (Health Score).
  */
 export function calculateHealthScore(params: HealthScoreParams): number {
   const {

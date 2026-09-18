@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { SearchParams } from "nuqs/server";
 
 /**
- * Параметры для страниц репозитория
+ * Params for repository pages
  */
 export type RepoPageParams = {
   name: string;
@@ -10,7 +10,7 @@ export type RepoPageParams = {
 };
 
 /**
- * Пропсы для Page
+ * Props for Page
  */
 export type PageProps<TParams = Record<string, string>> = {
   params: Promise<TParams>;
@@ -18,7 +18,7 @@ export type PageProps<TParams = Record<string, string>> = {
 };
 
 /**
- * Пропсы для Layout
+ * Props for Layout
  */
 export type LayoutProps<TParams = Record<string, string>> = {
   children: ReactNode;

@@ -10,10 +10,11 @@ export interface LogEntry {
 
 export type LogCounts = Record<TerminalFilter, number>;
 
-/**
- * Разбирает строки логов вида "LEVEL:::TIMESTAMP:::MESSAGE" в структурированные
- * записи. Строки без разделителя ":::" остаются как есть (level=info).
- */
+export type HighlightToken = {
+  isHighlighted: boolean;
+  text: string;
+};
+
 export const parseLogs = (logs: string[]): LogEntry[] =>
   Array.isArray(logs)
     ? logs.map((log, index) => {
@@ -34,9 +35,11 @@ export const parseLogs = (logs: string[]): LogEntry[] =>
               level = "success";
             }
           }
+
           if (rawTimestamp != null && rawTimestamp !== "") {
             timestamp = rawTimestamp;
           }
+
           if (messageParts.length > 0) {
             message = messageParts.join(":::");
           }
@@ -48,10 +51,12 @@ export const parseLogs = (logs: string[]): LogEntry[] =>
 
 export const countLogs = (logs: LogEntry[]): LogCounts => {
   const counts: LogCounts = { all: 0, error: 0, info: 0, success: 0, warn: 0 };
+
   logs.forEach((log) => {
     counts.all += 1;
     counts[log.level] += 1;
   });
+
   return counts;
 };
 
@@ -59,5 +64,22 @@ export const filterLogs = (logs: LogEntry[], filter: TerminalFilter, search: str
   logs.filter((log) => {
     const matchesFilter = filter === "all" || log.level === filter;
     const matchesSearch = search === "" || log.message.toLowerCase().includes(search.toLowerCase());
+
     return matchesFilter && matchesSearch;
   });
+
+export function computeTextHighlight(text: string, highlight: string): HighlightToken[] {
+  if (!highlight || highlight.trim() === "") {
+    return [{ isHighlighted: false, text }];
+  }
+
+  const escaped = highlight.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = text.split(new RegExp(`(${escaped})`, "gi"));
+
+  return parts
+    .filter((part) => part !== "")
+    .map((part) => ({
+      isHighlighted: part.toLowerCase() === highlight.toLowerCase(),
+      text: part,
+    }));
+}

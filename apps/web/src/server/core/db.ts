@@ -40,11 +40,11 @@ type DmmfDatamodel = {
 };
 
 /**
- * Иммутабельно и точечно патчит DMMF для интеграции шифрования, полностью игнорируя
- * гигантские автогенерируемые структуры типов в `schema` во избежание просадок по CPU на Cold Start.
+ * Immutably and surgically patches DMMF for encryption integration, completely ignoring
+ * the giant auto-generated type structures in `schema` to avoid CPU regressions on cold starts.
  *
- * @param dmmf Исходная DMMF-модель Prisma
- * @returns Пропатченная DMMF-модель без мутации глобального контекста
+ * @param dmmf The original Prisma DMMF model
+ * @returns A patched DMMF model without mutating the global context
  */
 function patchDmmfForEncryption(dmmf: DmmfDatamodel): DmmfDatamodel {
   if (dmmf.datamodel?.models == null) {
@@ -109,11 +109,11 @@ async function getNextAfterApi() {
 }
 
 /**
- * Запускает фоновую задачу логирования аудита.
- * Использует Next.js after() для неблокирующего выполнения в рамках HTTP-запросов.
- * Динамически определяет отсутствие контекста Next.js для совместимости с Trigger.dev и билдами.
+ * Runs the audit logging task in the background.
+ * Uses Next.js after() for non-blocking execution within HTTP requests.
+ * Dynamically detects the absence of the Next.js context for compatibility with Trigger.dev and builds.
  *
- * @param task Асинхронная функция фоновой задачи
+ * @param task The async background task function
  */
 async function runAsBackgroundTask(task: () => Promise<void>): Promise<void> {
   const afterFn = await getNextAfterApi();
@@ -146,8 +146,8 @@ async function runAsBackgroundTask(task: () => Promise<void>): Promise<void> {
 }
 
 /**
- * Фабрика для ленивой инициализации синглтона базы данных Prisma.
- * Выбирает TCP-драйвер PrismaPg для Node.js рантаймов и WebSocket-драйвер PrismaNeon для Edge.
+ * Factory for lazy initialization of the Prisma database singleton.
+ * Picks the PrismaPg TCP driver for Node.js runtimes and the PrismaNeon WebSocket driver for Edge.
  */
 function createPrismaInstance() {
   let baseClient: PrismaClient;

@@ -1,5 +1,22 @@
-function easeInOutCubic(t: number): number {
+export function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+}
+
+export function calculateScrollStep(
+  startTime: number,
+  currentTime: number,
+  duration: number,
+  startPosition: number,
+  distance: number,
+): { position: number; isFinished: boolean } {
+  const timeElapsed = currentTime - startTime;
+  const progress = Math.min(timeElapsed / duration, 1);
+  const easeProgress = easeInOutCubic(progress);
+
+  return {
+    isFinished: timeElapsed >= duration,
+    position: startPosition + distance * easeProgress,
+  };
 }
 
 export function smoothScrollTo(targetId: string, offset: number = 80, duration: number = 800) {
@@ -7,7 +24,6 @@ export function smoothScrollTo(targetId: string, offset: number = 80, duration: 
     return;
   }
 
-  /* eslint-disable-next-line unicorn/prefer-query-selector */
   const targetElement = document.getElementById(targetId);
 
   if (!targetElement) {
@@ -34,13 +50,18 @@ export function smoothScrollTo(targetId: string, offset: number = 80, duration: 
 
   const animation = (currentTime: number) => {
     startTime ??= currentTime;
-    const timeElapsed = currentTime - startTime;
-    const progress = Math.min(timeElapsed / duration, 1);
-    const easeProgress = easeInOutCubic(progress);
 
-    window.scrollTo(0, startPosition + distance * easeProgress);
+    const { position, isFinished } = calculateScrollStep(
+      startTime,
+      currentTime,
+      duration,
+      startPosition,
+      distance,
+    );
 
-    if (timeElapsed < duration) {
+    window.scrollTo(0, position);
+
+    if (!isFinished) {
       requestAnimationFrame(animation);
     } else {
       window.history.replaceState(null, "", `#${targetId}`);

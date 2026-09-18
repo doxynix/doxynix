@@ -1,0 +1,62 @@
+"use client";
+
+import type { ReactNode } from "react";
+import { useLocale, useTranslations } from "next-intl";
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { Input } from "@/shared/ui/core/input";
+import { TimeAgo } from "@/shared/ui/kit/time-ago";
+
+import type { UiApiKey } from "../model/api-keys.types";
+import { maskApiKey } from "../model/api-keys.utils";
+
+export function ApiKeyCard({
+  actions,
+  active,
+}: Readonly<{ actions?: ReactNode; active: UiApiKey }>) {
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
+  const locale = useLocale();
+
+  const maskValue = maskApiKey(active.prefix);
+
+  return (
+    <Card className="group justify-between hover:border-border-strong">
+      <CardHeader className="flex flex-row items-start justify-between pb-2">
+        <div className="flex flex-col gap-1 overflow-hidden">
+          <CardTitle className="truncate font-semibold text-base">{active.name}</CardTitle>
+          <CardDescription className="flex flex-col gap-2 text-xs">
+            <p>
+              {tCommon("created")}:{" "}
+              <TimeAgo
+                date={active.createdAt}
+                locale={locale}
+              />
+            </p>
+            <p>
+              {t("settings_api_keys_last_used")}:{" "}
+              <TimeAgo
+                date={active.lastUsed ?? ""}
+                locale={locale}
+              />
+            </p>
+            {active.description != null && (
+              <p className="line-clamp-4 text-muted-foreground leading-relaxed">
+                {active.description}
+              </p>
+            )}
+          </CardDescription>
+        </div>
+        <div className="flex shrink-0 flex-col items-center gap-1">{actions}</div>
+      </CardHeader>
+      <CardContent>
+        <Input
+          aria-label="Key prefix"
+          className="truncate rounded-xl border border-border bg-surface-hover p-2 font-mono text-muted-foreground text-xs"
+          readOnly
+          value={maskValue}
+        />
+      </CardContent>
+    </Card>
+  );
+}

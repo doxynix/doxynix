@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { DocumentFormatter } from "./section-graph-linker";
 
 describe("DocumentFormatter.withGraphLinks", () => {
-  it("разбивает документ на секции по заголовкам", () => {
+  it("splits a document into sections by headings", () => {
     const document = [
       "# Overview",
       "Intro text.",
@@ -32,7 +32,7 @@ describe("DocumentFormatter.withGraphLinks", () => {
     ]);
   });
 
-  it("текст до первого заголовка попадает в секцию Preamble", () => {
+  it("text before the first heading lands in the Preamble section", () => {
     const result = DocumentFormatter.withGraphLinks(
       "Lead text.\n\n# Title\nBody",
       null,
@@ -51,7 +51,7 @@ describe("DocumentFormatter.withGraphLinks", () => {
     ]);
   });
 
-  it("без заголовков создаётся единственная секция Document", () => {
+  it("without headings, a single Document section is created", () => {
     const result = DocumentFormatter.withGraphLinks("just text", null, "README", "v1");
 
     expect(result.sections).toEqual([
@@ -64,17 +64,17 @@ describe("DocumentFormatter.withGraphLinks", () => {
     ]);
   });
 
-  it("пустой документ даёт пустой список секций", () => {
+  it("an empty document yields an empty section list", () => {
     expect(DocumentFormatter.withGraphLinks("", null, "README", "1").sections).toEqual([]);
   });
 
-  it("id секции нормализует доктип и заголовок", () => {
+  it("section id normalizes doc type and heading", () => {
     const result = DocumentFormatter.withGraphLinks("## My Great Section\n", null, "README", "1");
 
     expect(result.sections[0]?.id).toBe("section-readme-my-great-section");
   });
 
-  it("связывает graphNodeIds по упоминаниям component и file", () => {
+  it("links graphNodeIds by component and file mentions", () => {
     const graph = {
       nodes: [
         { id: "node-1", label: "UserService" },
@@ -93,7 +93,7 @@ describe("DocumentFormatter.withGraphLinks", () => {
     expect(result.sections[0]?.graphNodeIds).toEqual(["node-1", "node-2"]);
   });
 
-  it("связывает graphNodeIds по схожести заголовка секции", () => {
+  it("links graphNodeIds by section heading similarity", () => {
     const graph = { nodes: [{ id: "api-node", label: "API Routes" }] };
 
     const result = DocumentFormatter.withGraphLinks(
@@ -106,7 +106,7 @@ describe("DocumentFormatter.withGraphLinks", () => {
     expect(result.sections[0]?.graphNodeIds).toEqual(["api-node"]);
   });
 
-  it("без графа graphNodeIds пустые", () => {
+  it("graphNodeIds are empty when no graph is provided", () => {
     const result = DocumentFormatter.withGraphLinks("# Section\nBody", undefined, "README", "1");
 
     expect(result.sections[0]?.graphNodeIds).toEqual([]);

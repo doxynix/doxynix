@@ -58,10 +58,10 @@ Applies to: `apps/siem-server/src/modules`, `apps/web/src/server/modules`, and `
 
 | Place | FSD/VSA methodology lint (warn) | Dependency gate (error + baseline) |
 |---|---|---|
-| `apps/web` | steiger (`lint:fsd`) | dep-cruiser: VSA server + FSD boundaries + cycles + orphans |
-| `apps/siem-client` | steiger (`lint:fsd`) | dep-cruiser: FSD layer order + cross-feature + cycles + orphans |
-| `apps/siem-server` | — (no FSD) | dep-cruiser: VSA slices + cycles + orphans |
-| `packages/cli` | — (no FSD) | dep-cruiser: VSA command slices + layering + cycles + orphans |
+| `apps/web` | steiger (`lint:fsd`) | dep-cruiser: VSA server + FSD boundaries + shared-reuse + cycles + orphans |
+| `apps/siem-client` | steiger (`lint:fsd`) | dep-cruiser: FSD layer order + cross-feature + shared-reuse + cycles + orphans |
+| `apps/siem-server` | — (no FSD) | dep-cruiser: VSA slices + entry-reachability + cycles + orphans |
+| `packages/cli` | — (no FSD) | dep-cruiser: VSA command slices + layering + entry-reachability + cycles + orphans |
 | `packages/shared`, `packages/config` | — | — (leaf packages: pure types / configs, no meaningful graph) |
 
 - **steiger** = FSD *methodology* (segment structure, public api, naming) — warns, never blocks.

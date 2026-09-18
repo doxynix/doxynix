@@ -13,7 +13,7 @@ const TOTAL_KEY_LENGTH = BRAND_PREFIX.length + PAYLOAD_LENGTH + CHECKSUM_LENGTH;
 const HEX_REGEX = /^[\da-f]{8}$/;
 
 /**
- * Генерирует криптографическую контрольную сумму (первые 8 символов HMAC-SHA256) для нагрузки ключа.
+ * Generates a cryptographic checksum (first 8 characters of HMAC-SHA256) for the key payload.
  */
 // codeql[js/insufficient-password-hash]
 function calculateChecksum(payload: string): string {
@@ -25,9 +25,9 @@ function calculateChecksum(payload: string): string {
 }
 
 /**
- * Генерирует новый безопасный API-ключ со встроенной чексуммой в сплошном формате (Continuous PAT).
- * Формат: dxnx_[32_символа_нагрузки][8_символов_чексуммы] (Итого: ровно 45 символов)
- * Пример: dxnx_Y29uc29saWRhdGVkX2V4Y2VwdGlvbg2b6c7d8
+ * Generates a new secure API key with an embedded checksum in continuous format (Continuous PAT).
+ * Format: dxnx_[32_char_payload][8_char_checksum] (Total: exactly 45 characters)
+ * Example: dxnx_Y29uc29saWRhdGVkX2V4Y2VwdGlvbg2b6c7d8
  */
 export function generateApiKey(): string {
   const payload = crypto.randomBytes(24).toString("base64url");
@@ -36,7 +36,7 @@ export function generateApiKey(): string {
 }
 
 /**
- * Валидирует контрольную сумму API-ключа локально на CPU без обращений к базе данных.
+ * Validates the API key checksum locally on CPU without database lookups.
  */
 export function validateApiKeyChecksum(apiKey: string): boolean {
   if (
@@ -65,7 +65,7 @@ export function validateApiKeyChecksum(apiKey: string): boolean {
 }
 
 /**
- * Вспомогательный метод для безопасного извлечения payload из ключа (для хэширования в БД)
+ * Helper method to safely extract the payload from the key (for hashing in the database).
  */
 export function extractPayloadFromKey(apiKey: string): null | string {
   if (!validateApiKeyChecksum(apiKey)) {
@@ -75,9 +75,9 @@ export function extractPayloadFromKey(apiKey: string): null | string {
 }
 
 /**
- * Генерирует стандартный хэш SHA-256 для переданного значения.
- * ИСПОЛЬЗУЕТСЯ СТРОГО ДЛЯ PRISMA: для обеспечения 100% совместимости с нативной
- * генерацией хэшей в библиотеке "prisma-field-encryption".
+ * Generates a standard SHA-256 hash for the given value.
+ * USED STRICTLY FOR PRISMA: to ensure 100% compatibility with native
+ * hash generation in the "prisma-field-encryption" library.
  */
 export function getRawHash(value: string): string {
   const input = PRISMA_FIELD_ENCRYPTION_HASH_SALT
@@ -87,10 +87,10 @@ export function getRawHash(value: string): string {
 }
 
 /**
- * Генерирует быстрый хэш-подпись HMAC-SHA256 для хранения API-ключей в БД.
- * Метод абсолютно безопасен, так как исходный payload имеет высокую энтропию (192 бита).
- * Использование HMAC гарантирует защиту от перебора при утечке БД (благодаря секретному API_KEY_PEPPER).
- * ИСПОЛЬЗОВАТЬ СТРОГО ДЛЯ СТРОК С ВЫСОКОЙ ЭНТРОПИЕЙ!
+ * Generates a fast HMAC-SHA256 hash signature for storing API keys in the database.
+ * The method is completely safe, as the original payload has high entropy (192 bits).
+ * Using HMAC guarantees protection against brute force in case of a database leak (thanks to the secret API_KEY_PEPPER).
+ * USE STRICTLY FOR HIGH-ENTROPY STRINGS!
  */
 // codeql[js/insufficient-password-hash]
 export function getApiKeyHash(payload: string): string {
@@ -98,8 +98,8 @@ export function getApiKeyHash(payload: string): string {
 }
 
 /**
- * Генерирует хэш SHA-256 для нормализованного значения с поддержкой Unicode NFC-нормализации.
- * ИСПОЛЬЗУЕТСЯ СТРОГО ДЛЯ PRISMA.
+ * Generates a SHA-256 hash for a normalized value with Unicode NFC normalization support.
+ * USED STRICTLY FOR PRISMA.
  */
 export function getNormalizedHash(value: string): string {
   const normalized = value.trim().normalize("NFC").toLowerCase();

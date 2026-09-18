@@ -3,8 +3,6 @@ import { parseAsStringLiteral, useQueryState } from "nuqs";
 import type { TerminalFilter } from "./terminal-logs";
 import { countLogs, filterLogs, logLevels, parseLogs } from "./terminal-logs";
 
-export type { LogEntry } from "./terminal-logs";
-
 export function useTerminalLogs(logs: string[]) {
   const [filter, setFilter] = useQueryState<TerminalFilter>(
     "logFilter",

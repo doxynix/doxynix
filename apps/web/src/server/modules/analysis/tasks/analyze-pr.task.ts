@@ -15,6 +15,7 @@ import { CommentFormatter, gitHubCommentPoster } from "../logic/comment-poster";
 import { DifferentialAnalyzer } from "../logic/differential-analyzer";
 import type { PRFinding } from "../logic/pr.types";
 import { PRConfigService } from "../logic/pr-config";
+import { lineSimilarity } from "../logic/surgical-edit";
 import { taskLogger } from "../logic/task-logger";
 
 function mergePrBody(existingBody: null | string, aiSummary: string): string {
@@ -122,36 +123,6 @@ function buildLineMappingFromPatch(patch: string): Map<string, number> {
   return lineMap;
 }
 
-function getTokens(line: string): string[] {
-  return line
-    .trim()
-    .toLowerCase()
-    .split(/[\s()[\]{}.,;+\-*/=<>!]+/gu)
-    .filter(Boolean);
-}
-
-function calculateLineSimilarity(line1: string, line2: string): number {
-  const t1 = getTokens(line1);
-  const t2 = getTokens(line2);
-  if (t1.length === 0 && t2.length === 0) {
-    return 1.0;
-  }
-  if (t1.length === 0 || t2.length === 0) {
-    return 0.0;
-  }
-
-  const set1 = new Set(t1);
-  const set2 = new Set(t2);
-  let intersection = 0;
-  for (const token of set1) {
-    if (set2.has(token)) {
-      intersection++;
-    }
-  }
-  const union = set1.size + set2.size - intersection;
-  return intersection / union;
-}
-
 function healFindingLine(
   lineMap: Map<string, number>,
   codeSnippet: string,
@@ -177,7 +148,7 @@ function healFindingLine(
     let bestScore = 0;
     let bestLine = hallucinatedLine;
     for (const [mapText, mapLine] of lineMap.entries()) {
-      const score = calculateLineSimilarity(snippetLine, mapText);
+      const score = lineSimilarity(snippetLine, mapText);
       if (score > bestScore && score > 0.75) {
         bestScore = score;
         bestLine = mapLine;
@@ -405,10 +376,10 @@ export const analyzePrTask = task({
           file: changedFiles[0]?.filename ?? "README.md",
           line: 1,
           message:
-            "✅ **Doxynix Analysis Summary**:\n\nПроверка завершена. В предоставленном диффе критических уязвимостей, нарушений архитектуры или проблем с производительностью не обнаружено. Код соответствует установленным политикам проекта.",
+            "✅ **Doxynix Analysis Summary**:\n\nReview complete. No critical vulnerabilities, architecture violations, or performance issues were found in the provided diff. The code complies with the project's established policies.",
           score: 0,
           severity: "LOW",
-          suggestion: "Изменения выглядят безопасно. Можно продолжать ревью.",
+          suggestion: "The changes look safe. You can proceed with the review.",
           title: "Analysis Completed",
           type: "STYLE",
         });

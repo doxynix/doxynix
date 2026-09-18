@@ -123,9 +123,7 @@ export function RepoDocs({
 
         let text = el.textContent;
 
-        if (text.endsWith("#")) {
-          text = text.slice(0, -1).trim();
-        }
+        text = text ? text.replace(/#$/, "").trim() : "";
 
         return { id, level, text };
       });

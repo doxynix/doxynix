@@ -92,7 +92,7 @@ const makeContext = (overrides: Partial<StructureContext> = {}): StructureContex
 const mockedBuildStructureContext = vi.mocked(buildStructureContext);
 
 describe("buildStructureMapPayloadFromContext", () => {
-  it("строит карту: overview, фильтры, группы, inspect и defaultNodeId", () => {
+  it("builds the map: overview, filters, groups, inspect and defaultNodeId", () => {
     const context = makeContext({
       rawTopLevelEdges: [{ id: "e1", relation: "api", source: "api", target: "src", weight: 3 }],
     });
@@ -126,7 +126,7 @@ describe("buildStructureMapPayloadFromContext", () => {
     expect(payload.selection.defaultNodeId).not.toBeNull();
   });
 
-  it("выбирает defaultNode по firstLookPaths", () => {
+  it("selects the defaultNode from firstLookPaths", () => {
     const context = makeContext({
       docInput: {
         api: { publicSurfacePaths: [] },
@@ -144,7 +144,7 @@ describe("buildStructureMapPayloadFromContext", () => {
     expect(payload.inspect.defaultNodeId).toBe("group:api");
   });
 
-  it("пустой groupMap даёт пустые граф и null-default", () => {
+  it("empty groupMap yields an empty graph and null default", () => {
     const payload = buildStructureMapPayloadFromContext(makeContext({ groupMap: new Map() }), null);
 
     expect(payload.graph.groups).toEqual([]);
@@ -156,7 +156,7 @@ describe("buildStructureMapPayloadFromContext", () => {
 });
 
 describe("buildTopLevelNodes", () => {
-  it("капает список до 14 узлов и сортирует по рангу/лейблу", () => {
+  it("caps the list to 14 nodes and sorts by rank/label", () => {
     const groupMap = new Map<string, StructureGroupEntry>();
     for (let index = 0; index < 16; index++) {
       groupMap.set(`g${index}`, makeGroupEntry([`g${index}/a.ts`]));
@@ -177,7 +177,7 @@ describe("buildTopLevelNodes", () => {
     expect(nodes.map((node) => node.id)).toEqual(expected.map((node) => node.id));
   });
 
-  it("приоритизирует значимые узлы над fallback", () => {
+  it("prioritizes meaningful nodes over fallback", () => {
     const groupMap = new Map<string, StructureGroupEntry>([
       ["other", makeGroupEntry(["x/a.ts"])],
       [
@@ -196,13 +196,13 @@ describe("buildTopLevelNodes", () => {
     expect(nodes.map((node) => node.id)).toEqual(["group:aaa", "group:other"]);
   });
 
-  it("пустой groupMap даёт пустой список", () => {
+  it("empty groupMap yields an empty list", () => {
     expect(buildTopLevelNodes(makeContext({ groupMap: new Map() }))).toEqual([]);
   });
 });
 
 describe("buildStructureNodePayloadFromContext (file)", () => {
-  it("возвращает payload файла с breadcrumbs и пустыми деталями", () => {
+  it("returns a file payload with breadcrumbs and empty details", () => {
     const payload = buildStructureNodePayloadFromContext(makeContext(), null, "file:src/app.ts");
 
     expect(payload).not.toBeNull();
@@ -224,7 +224,7 @@ describe("buildStructureNodePayloadFromContext (file)", () => {
     ]);
   });
 
-  it("возвращает null для файла вне allInterestingPaths", () => {
+  it("returns null for a file outside allInterestingPaths", () => {
     const payload = buildStructureNodePayloadFromContext(
       makeContext(),
       null,
@@ -236,7 +236,7 @@ describe("buildStructureNodePayloadFromContext (file)", () => {
 });
 
 describe("buildStructureNodePayloadFromContext (group)", () => {
-  it("строит children (группы впереди файлов) и canDrillDeeper", () => {
+  it("builds children (groups before files) and canDrillDeeper", () => {
     const payload = buildStructureNodePayloadFromContext(makeContext(), null, "group:src");
 
     expect(payload).not.toBeNull();
@@ -252,17 +252,17 @@ describe("buildStructureNodePayloadFromContext (group)", () => {
     expect(payload?.inspect.contains).toEqual(payload?.children.map((child) => child.label));
   });
 
-  it("возвращает null для группы без scoped путей", () => {
+  it("returns null for a group without scoped paths", () => {
     const payload = buildStructureNodePayloadFromContext(makeContext(), null, "group:void");
 
     expect(payload).toBeNull();
   });
 });
 
-describe("repo-обёртки (buildStructureMapPayload / buildStructureNodePayload)", () => {
+describe("repo wrappers (buildStructureMapPayload / buildStructureNodePayload)", () => {
   const repo = { analyses: [] } as unknown as RepoWithLatestAnalysisAndDocs;
 
-  it("строит payload через замоченный buildStructureContext", () => {
+  it("builds payload via the mocked buildStructureContext", () => {
     mockedBuildStructureContext.mockReturnValue(makeContext());
 
     const payload = buildStructureMapPayload(repo);
@@ -272,14 +272,14 @@ describe("repo-обёртки (buildStructureMapPayload / buildStructureNodePayl
     expect(mockedBuildStructureContext).toHaveBeenCalledWith(repo);
   });
 
-  it("возвращает null, когда context отсутствует", () => {
+  it("returns null when context is missing", () => {
     mockedBuildStructureContext.mockReturnValue(null);
 
     expect(buildStructureMapPayload(repo)).toBeNull();
     expect(buildStructureNodePayload(repo, "file:src/app.ts")).toBeNull();
   });
 
-  it("строит node payload через buildStructureNodePayload", () => {
+  it("builds node payload via buildStructureNodePayload", () => {
     mockedBuildStructureContext.mockReturnValue(makeContext());
 
     const payload = buildStructureNodePayload(repo, "file:src/app.ts");

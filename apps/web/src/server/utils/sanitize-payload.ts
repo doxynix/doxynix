@@ -72,10 +72,10 @@ function redactValue(key: string, value: unknown): unknown {
 }
 
 /**
- * Очищает переданный объект от секретов и технических полей перед логированием.
- * Безопасно обрабатывает циклические ссылки и BigInt.
+ * Cleans the given object of secrets and technical fields before logging.
+ * Safely handles circular references and BigInt.
  *
- * @param obj Данные для очистки
+ * @param obj Data to clean
  */
 export function sanitizePayload(obj: unknown): unknown {
   if (typeof obj === "string") {
@@ -103,8 +103,8 @@ export function sanitizePayload(obj: unknown): unknown {
 const mask = (val: unknown) => (typeof val === "string" ? "[ENCRYPTED_MASKED]" : val);
 
 /**
- * Рекурсивно маскирует PII-данные на основе карты ENCRYPTED_METADATA_MAP,
- * чтобы предотвратить утечку шифруемых полей в сырой payload логов аудита.
+ * Recursively masks PII data based on the ENCRYPTED_METADATA_MAP
+ * to prevent encrypted fields from leaking into the raw payload of audit logs.
  */
 export function maskSensitiveFields(modelName: string, data: unknown): unknown {
   if (data == null || typeof data !== "object") {

@@ -53,7 +53,7 @@ describe("collectTypeScriptSignals", () => {
     vi.clearAllMocks();
   });
 
-  it("при недоступном tree-sitter делает fallback на regex-сигналы", async () => {
+  it("falls back to regex signals when tree-sitter is unavailable", async () => {
     vi.mocked(collectTreeSitterSignals).mockResolvedValue(null);
     vi.mocked(collectRegexSignals).mockReturnValue(heuristicFallback);
 
@@ -64,7 +64,7 @@ describe("collectTypeScriptSignals", () => {
     expect(result.confidence).toBe(60);
   });
 
-  it("сохраняет tree-sitter сигналы и дополняет confidence/analysisMode", async () => {
+  it("keeps tree-sitter signals and fills in confidence/analysisMode", async () => {
     vi.mocked(collectTreeSitterSignals).mockResolvedValue(baseTreeSitterSignals());
 
     const result = await collectTypeScriptSignals(file("src/app.ts", ""));
@@ -75,7 +75,7 @@ describe("collectTypeScriptSignals", () => {
     expect(result.apiSurface).toBe(0);
   });
 
-  it("распознаёт runtime-bootstrap паттерны (new Hono) и добавляет entrypointRef + факт Hono", async () => {
+  it("recognizes runtime-bootstrap patterns (new Hono) and adds an entrypointRef + Hono fact", async () => {
     vi.mocked(collectTreeSitterSignals).mockResolvedValue(
       baseTreeSitterSignals({ imports: ["hono"] }),
     );
@@ -94,7 +94,7 @@ describe("collectTypeScriptSignals", () => {
     );
   });
 
-  it("добавляет library-entrypointRef для index-файла с экспортами", async () => {
+  it("adds a library-entrypointRef for an index file with exports", async () => {
     vi.mocked(collectTreeSitterSignals).mockResolvedValue(
       baseTreeSitterSignals({ exports: 2, path: "src/index.ts" }),
     );
@@ -110,7 +110,7 @@ describe("collectTypeScriptSignals", () => {
     });
   });
 
-  it("не добавляет library-ref для не-index файла", async () => {
+  it("does not add a library-ref for non-index files", async () => {
     vi.mocked(collectTreeSitterSignals).mockResolvedValue(baseTreeSitterSignals({ exports: 2 }));
 
     const result = await collectTypeScriptSignals(file("src/utils.ts", ""));
@@ -118,7 +118,7 @@ describe("collectTypeScriptSignals", () => {
     expect(result.entrypointRefs).toEqual([]);
   });
 
-  it("учитывает publicProcedure/adminProcedure в extraApiSurface", async () => {
+  it("accounts for publicProcedure/adminProcedure in extraApiSurface", async () => {
     vi.mocked(collectTreeSitterSignals).mockResolvedValue(baseTreeSitterSignals());
 
     const result = await collectTypeScriptSignals(
@@ -131,7 +131,7 @@ describe("collectTypeScriptSignals", () => {
     expect(result.apiSurface).toBe(2);
   });
 
-  it("учитывает GET/POST-токен с присваиванием/вызовом в extraApiSurface", async () => {
+  it("accounts for GET/POST tokens with assignment/call in extraApiSurface", async () => {
     vi.mocked(collectTreeSitterSignals).mockResolvedValue(baseTreeSitterSignals());
 
     const result = await collectTypeScriptSignals(
@@ -141,7 +141,7 @@ describe("collectTypeScriptSignals", () => {
     expect(result.apiSurface).toBe(2);
   });
 
-  it("наследует entrypointHint от tree-sitter сигналов, если тот уже true", async () => {
+  it("inherits entrypointHint from tree-sitter signals when it is already true", async () => {
     vi.mocked(collectTreeSitterSignals).mockResolvedValue(
       baseTreeSitterSignals({ entrypointHint: true }),
     );

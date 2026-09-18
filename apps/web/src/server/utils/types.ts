@@ -1,4 +1,4 @@
-// TODO: тоже разгрести типы по возможности
+// TODO: also clean up types where possible
 
 export type TeamRole = {
   login: string;

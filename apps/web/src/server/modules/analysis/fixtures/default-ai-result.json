@@ -1,0 +1,44 @@
+{
+  "analysisRuntime": {
+    "writers": {
+      "api": "llm",
+      "architecture": "missing",
+      "changelog": "failed",
+      "contributing": "llm",
+      "readme": "missing"
+    }
+  },
+  "complexityScore": 50,
+  "domain_analysis": {
+    "business_rules": ["rule"],
+    "core_entities": [{ "logic_complexity": "LOW", "name": "Entity", "responsibility": "resp" }]
+  },
+  "executive_summary": {
+    "architecture_style": "Layered",
+    "purpose": "purpose",
+    "stack_details": ["TypeScript"]
+  },
+  "findings": [],
+  "mainBottlenecks": ["db"],
+  "mostComplexFiles": ["src/a.ts"],
+  "onboarding_guide": { "prerequisites": [], "setup_steps": [] },
+  "onboardingScore": 20,
+  "refactoring_targets": [],
+  "repository_facts": [],
+  "sections": {
+    "api_structure": "REST",
+    "data_flow": "flow",
+    "infrastructure_and_scaling": {
+      "bottlenecks": [],
+      "concurrency_risks": [],
+      "statelessness_check": "ok"
+    },
+    "performance_audit": [],
+    "security_audit": { "risks": ["risk"], "score": 5 },
+    "tech_debt_inventory": []
+  },
+  "securityScore": 60,
+  "swaggerYaml": "openapi: 3.0.0",
+  "techDebtScore": 30,
+  "vulnerabilities": []
+}

@@ -6,8 +6,8 @@ import {
   Code2,
   FileText,
   GitPullRequest,
+  HandHeartIcon,
   Headset,
-  HeartHandshakeIcon,
   Home,
   KeyRound,
   LayoutGrid,
@@ -171,10 +171,10 @@ export const publicHeaderMenu: MenuItems = [
     label: "Help",
   },
   {
-    href: "/thanks",
-    icon: HeartHandshakeIcon,
-    id: "Thanks",
-    label: "Thanks",
+    href: "/high-five",
+    icon: HandHeartIcon,
+    id: "HighFive",
+    label: "High five",
   },
 ];
 

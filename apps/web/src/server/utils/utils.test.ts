@@ -2,13 +2,7 @@ import { access, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 
 import { join } from "pathe";
-import { describe, expect, it, vi } from "vitest";
-
-vi.mock("@/server/core/realtime", () => ({
-  realtimeService: { user: vi.fn(() => ({ publish: vi.fn() })) },
-}));
-
-vi.mock("@/server/core/db", () => ({ prisma: {} }));
+import { describe, expect, it } from "vitest";
 
 import { cleanup, isBinaryBuffer, readAndFilterFiles } from "./utils";
 

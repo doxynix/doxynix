@@ -28,16 +28,16 @@ function safeCurrentMetadata() {
 }
 
 /**
- * Утилита для управления прогрессом и логами таска.
- * Разделяет real-time поток (metadata) и вечное хранение (DB).
+ * Utility for managing task progress and logs.
+ * Separates the real-time stream (metadata) from permanent storage (DB).
  */
 export const taskLogger = {
   error(msg: string) {
     this.log(msg, "error");
   },
   /**
-   * Финальный синк. Вызывается один раз в конце.
-   * Собирает ВСЕ логи из метаданных и кладет в БД на вечное хранение.
+   * Final sync. Called once at the end.
+   * Collects ALL logs from metadata and stores them in the DB permanently.
    */
   async finalize(analysisId: string, status: Status = Status.DONE, message?: string) {
     const finalMsg =
@@ -73,14 +73,14 @@ export const taskLogger = {
     });
   },
   /**
-   * Хелперы для разных уровней логов
+   * Helpers for different log levels
    */
   info(msg: string) {
     this.log(msg, "info");
   },
   /**
-   * Гранулярный лог. Только для real-time отображения.
-   * Формат строки: "level:::timestamp:::message"
+   * Granular log. Only for real-time display.
+   * Line format: "level:::timestamp:::message"
    */
   log(msg: string, level: LogLevel = "info") {
     const timestamp = new Date().toLocaleTimeString();
@@ -92,7 +92,7 @@ export const taskLogger = {
   },
 
   /**
-   * Обновление статуса этапа.
+   * Updates the current stage status.
    */
   async milestone(params: { analysisId: string; msg: string; percent: number; userId: number }) {
     const { analysisId, msg, percent, userId } = params;

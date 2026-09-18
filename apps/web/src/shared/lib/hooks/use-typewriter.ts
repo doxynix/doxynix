@@ -32,9 +32,9 @@ export function useTypewriter(targetText: string, speed = 30): string {
 }
 
 /**
- * Считает, сколько символов исходного текста можно показать на следующем тике.
- * Теги («<b>») и HTML-сущности («&amp;») проскакиваются целиком за один тик,
- * чтобы в выводе не появлялись оборванные конструкции.
+ * Counts how many characters of the source text can be shown on the next tick.
+ * Tags («<b>») and HTML entities («&amp;») are skipped entirely in one tick
+ * so truncated constructs never appear in the output.
  */
 export function nextTypingLength(targetText: string, currentLength: number): number {
   let nextIndex = currentLength;

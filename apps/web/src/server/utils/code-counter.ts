@@ -45,9 +45,9 @@ const LUA_COMMENT: CommentSyntax = {
 };
 
 const SYNTAX_MAP: Record<string, CommentSyntax> = {
-  // Хэш-комментарии
+  // Hash-style comments
   bash: HASH_COMMENT,
-  // C-Like языки
+  // C-like languages
   c: C_LIKE_COMMENT,
   cc: C_LIKE_COMMENT,
   conf: HASH_COMMENT,
@@ -63,7 +63,7 @@ const SYNTAX_MAP: Record<string, CommentSyntax> = {
   h: C_LIKE_COMMENT,
   hpp: C_LIKE_COMMENT,
 
-  // Разметка
+  // Markup
   htm: HTML_COMMENT,
   html: HTML_COMMENT,
   java: C_LIKE_COMMENT,
@@ -102,7 +102,7 @@ const SYNTAX_MAP: Record<string, CommentSyntax> = {
 };
 
 /**
- * Подсчитывает строки кода и комментариев без сторонних библиотек.
+ * Counts lines of code and comments without third-party libraries.
  */
 export function countSourceStats(content: string, rawExtension: string): CodeStats {
   if (typeof content !== "string" || content.length === 0) {
@@ -180,7 +180,7 @@ export function countSourceStats(content: string, rawExtension: string): CodeSta
     }
 
     if (syntax.single && line.includes(syntax.single)) {
-      // Смешанная строка: код + однострочный комментарий в конце
+      // Mixed line: code + trailing single-line comment
       source++;
       comments++;
       continue;

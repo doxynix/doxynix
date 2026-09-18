@@ -34,7 +34,7 @@ const makeNode = (overrides: Partial<StructureInspectNodeLike> = {}): StructureI
 });
 
 describe("buildSuggestedPathsForEntry", () => {
-  it("приоритизирует relatedChildPaths и исключает currentPath", () => {
+  it("prioritizes relatedChildPaths and excludes currentPath", () => {
     const entry = {
       ...emptyEntry(),
       graphNeighborPaths: ["neighbor.ts"],
@@ -53,7 +53,7 @@ describe("buildSuggestedPathsForEntry", () => {
     expect(result).toEqual(expect.arrayContaining(["src/app.ts", "neighbor.ts"]));
   });
 
-  it("включает firstLookPaths, лежащие внутри scope, и ограничивает 6 путями", () => {
+  it("includes firstLookPaths inside scope and caps at 6 paths", () => {
     const entry = { ...emptyEntry(), paths: ["src"] };
 
     const result = buildSuggestedPathsForEntry({
@@ -76,7 +76,7 @@ describe("buildSuggestedPathsForEntry", () => {
 });
 
 describe("buildNeighborPathsForEntry", () => {
-  it("инвертирует coupled пару относительно currentPath", () => {
+  it("inverts the coupled pair relative to currentPath", () => {
     const entry = {
       ...emptyEntry(),
       changeCoupling: [
@@ -97,7 +97,7 @@ describe("buildNeighborPathsForEntry", () => {
 });
 
 describe("buildNeighborBucketsForEntry", () => {
-  it("распределяет соседей по бакетам без currentPath", () => {
+  it("distributes neighbors into buckets without currentPath", () => {
     const entry = {
       ...emptyEntry(),
       apiPaths: ["api/routes.ts"],
@@ -124,7 +124,7 @@ describe("buildNeighborBucketsForEntry", () => {
 });
 
 describe("buildReviewPriority", () => {
-  it("высокий приоритет при score >= 10", () => {
+  it("high priority when score >= 10", () => {
     const entry = {
       ...emptyEntry(),
       hotspotSignals: [
@@ -142,7 +142,7 @@ describe("buildReviewPriority", () => {
     });
   });
 
-  it("средний приоритет при score >= 5", () => {
+  it("medium priority when score >= 5", () => {
     const entry = { ...emptyEntry(), riskTitles: ["a", "b", "c"] };
 
     expect(buildReviewPriority({ entry, node: makeNode() })).toEqual({
@@ -151,7 +151,7 @@ describe("buildReviewPriority", () => {
     });
   });
 
-  it("низкий приоритет в остальных случаях", () => {
+  it("low priority otherwise", () => {
     const priority = buildReviewPriority({ entry: emptyEntry(), node: makeNode() });
 
     expect(priority.level).toBe("low");
@@ -160,7 +160,7 @@ describe("buildReviewPriority", () => {
 });
 
 describe("buildRecommendedActions", () => {
-  it("собирает действия по маркерам и ограничивает 5", () => {
+  it("collects actions from markers and caps at 5", () => {
     const entry = {
       ...emptyEntry(),
       changeCoupling: [{ fromPath: "a.ts", toPath: "b.ts" }],
@@ -185,7 +185,7 @@ describe("buildRecommendedActions", () => {
     ]);
   });
 
-  it("для разрезаемой группы предлагает drill deeper", () => {
+  it("suggests drill deeper for a splittable group", () => {
     const actions = buildRecommendedActions({
       entry: emptyEntry(),
       node: makeNode({ canDrillDeeper: true, nodeType: "group" }),

@@ -194,7 +194,7 @@ export class DifferentialAnalyzer {
   }
 
   /**
-   * Вызов ИИ-модели для глубокого ревью с возвращением находок и общего описания PR
+   * Calls the AI model for a deep review, returning findings and an overall PR summary
    */
   private async runAiReviewPhase(
     relevantFiles: PRDiffInfo["changedFiles"],
@@ -274,11 +274,11 @@ export class DifferentialAnalyzer {
           return {
             file: file.filename,
             line: 1,
-            message: `Файл содержит ${addedLines} новых строк. Высокая плотность изменений затрудняет ревью.`,
+            message: `File contains ${addedLines} new lines. High density of changes makes review difficult.`,
             score: 5,
             severity: this.mapScoreToSeverity(5),
-            suggestion: "Разбейте изменения на несколько логических модулей или PR.",
-            title: "Высокая сложность изменений",
+            suggestion: "Split the changes into several smaller logical modules or PRs.",
+            title: "High change complexity",
             type: "PERFORMANCE",
           } satisfies PRFinding;
         }
@@ -313,7 +313,7 @@ export class DifferentialAnalyzer {
                 title,
                 10,
                 "CRITICAL",
-                "Немедленно удалите секрет из кода и отозовите его. Используйте Environment Variables или Secret Manager.",
+                "Remove the secret from the code immediately and revoke it. Use Environment Variables or a Secret Manager.",
               ),
             );
           }
@@ -329,7 +329,7 @@ export class DifferentialAnalyzer {
                 title,
                 8,
                 "HIGH",
-                "Использование небезопасных функций может привести к RCE или XSS. Используйте безопасные альтернативы (например, параметризацию).",
+                "Using unsafe functions can lead to RCE or XSS. Use safe alternatives (e.g., parameterized queries).",
               ),
             );
           }
@@ -345,7 +345,7 @@ export class DifferentialAnalyzer {
                 title,
                 9,
                 "HIGH",
-                "Обнаружена потенциальная SQL-инъекция. Используйте ORM (Prisma/Drizzle) или Parameterized Queries.",
+                "Potential SQL injection detected. Use an ORM (Prisma/Drizzle) or Parameterized Queries.",
               ),
             );
           }
@@ -361,7 +361,7 @@ export class DifferentialAnalyzer {
                 "TODO/FIXME marker found",
                 2,
                 "LOW",
-                "Завершите реализацию или удалите маркер перед мерджем.",
+                "Finish the implementation or remove the marker before merging.",
                 "STYLE",
               ),
             );

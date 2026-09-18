@@ -43,7 +43,7 @@ export async function runAiPipeline(
 ): Promise<AIResult> {
   taskLogger.log("Initializing AI Multi-Agent Pipeline...");
 
-  // Stage 1: Prompt injection detection (Цензор)
+  // Stage 1: Prompt injection detection (Censor)
   const sentinelStatus = await llmLimiter.schedule(
     { id: `${analysisId}-sentinel`, weight: 5000 },
     () => executeSentinelPhase(instructions, analysisId),

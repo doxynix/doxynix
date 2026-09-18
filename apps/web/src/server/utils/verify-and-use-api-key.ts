@@ -3,8 +3,8 @@ import { prisma } from "../core/db";
 import { extractPayloadFromKey, getApiKeyHash, validateApiKeyChecksum } from "./hash";
 
 /**
- * Верифицирует сырой API-ключ по его HMAC-SHA256 хэшу в базе данных.
- * Сначала проверяет контрольную сумму на CPU, а хэширует и ищет в БД только payload.
+ * Verifies a raw API key against its HMAC-SHA256 hash in the database.
+ * First validates the checksum on the CPU, then hashes and looks up only the payload in the DB.
  */
 export async function verifyAndUseApiKey(token: string) {
   if (!validateApiKeyChecksum(token)) {

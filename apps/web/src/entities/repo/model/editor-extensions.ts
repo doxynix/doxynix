@@ -120,7 +120,7 @@ const universalSyntaxLinter = linter((view) => {
 });
 
 export const BASE_EXTENSIONS: Extension[] = [
-  // zebraStripes({ step: 2 }), // пустые строки подсвечивает выглядит странно
+  // zebraStripes({ step: 2 }), // highlights empty rows, looks odd
   color,
   hyperLink,
 
@@ -129,7 +129,7 @@ export const BASE_EXTENSIONS: Extension[] = [
   dropCursor(),
   rectangularSelection(),
   crosshairCursor(),
-  // highlightWhitespace(), // штука для точек при отступах выглядит не очень
+  // highlightWhitespace(), // the dots for indentation don't look great
   // highlightTrailingWhitespace(),
   // scrollPastEnd(),
   EditorView.lineWrapping,

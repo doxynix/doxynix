@@ -78,7 +78,7 @@ const summarizeImportance = (
   });
 
 describe("buildInspectPayload", () => {
-  it("собирает подсказки из сигналов записи", () => {
+  it("collects hints from the entry signals", () => {
     const entry = {
       ...emptyEntry(),
       apiPaths: ["src/api/route1.ts"],
@@ -150,7 +150,7 @@ describe("buildInspectPayload", () => {
     expect(payload.whyImportant).toContain("This area");
   });
 
-  it("без context nextSuggestedPaths пуст", () => {
+  it("nextSuggestedPaths is empty without context", () => {
     const payload = buildInspectPayload({
       entry: emptyEntry(),
       incoming: [],
@@ -165,7 +165,7 @@ describe("buildInspectPayload", () => {
     expect(payload.relatedPaths).toEqual([]);
   });
 
-  it("с context учитывает firstLookPaths из docInput", () => {
+  it("with context, accounts for firstLookPaths from docInput", () => {
     const entry = { ...emptyEntry(), paths: ["src"] };
 
     const payload = buildInspectPayload({
@@ -188,7 +188,7 @@ describe("buildInspectPayload", () => {
     expect(payload.nextSuggestedPaths).toEqual(["src/onboard.ts"]);
   });
 
-  it("apiHints пусты при нуле счётчика api", () => {
+  it("apiHints are empty when the api counter is zero", () => {
     const payload = buildInspectPayload({
       entry: { ...emptyEntry(), apiPaths: ["src/api/route.ts"] },
       incoming: [],

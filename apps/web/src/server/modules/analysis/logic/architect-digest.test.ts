@@ -160,7 +160,7 @@ const makeProjectMap = (): ProjectMap =>
   }) as unknown as ProjectMap;
 
 describe("buildArchitectDigest", () => {
-  it("мапит факты/финдинги, метрики и секции документации", () => {
+  it("maps facts/findings, metrics and documentation sections", () => {
     const digest = buildArchitectDigest(
       makeDocInput(),
       makeMetrics(),
@@ -250,7 +250,7 @@ describe("buildArchitectDigest", () => {
     expect(digest.projectMap.overview).toBe("A test platform");
   });
 
-  it("ограничивает факты и финдинги до 30", () => {
+  it("caps facts and findings at 30", () => {
     const facts = Array.from(
       { length: 35 },
       (_, index): RepositoryFact => ({
@@ -304,13 +304,13 @@ describe("collectArchitectPreferredPaths", () => {
       ...overrides,
     }) as ArchitectDigest;
 
-  it("упорядочивает и дедуплицирует предпочтительные пути", () => {
+  it("orders and deduplicates preferred paths", () => {
     const paths = collectArchitectPreferredPaths(makeDigest());
 
     expect(paths).toEqual(["e.ts", "mod.ts", "orphan.ts", "dup-a", "pub.ts", "hot.ts", "first.ts"]);
   });
 
-  it("ограничивает результат 200 путями", () => {
+  it("caps the result at 200 paths", () => {
     const many = Array.from({ length: 220 }, (_, index) => `file-${index}.ts`);
     const paths = collectArchitectPreferredPaths(
       makeDigest({

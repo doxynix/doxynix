@@ -431,7 +431,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                       locale={locale}
                     />
                   ) : (
-                    <span className={cn("font-medium text-xs")}>N/A</span> // FIXME: пока не допер но вроде тут надо {item.value
+                    <span className={cn("font-medium text-xs")}>N/A</span> // FIXME: haven't figured it out yet, but I think {item.value should go here
                   )}
                 </div>
               </div>

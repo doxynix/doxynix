@@ -2,7 +2,7 @@
 
 import { trpc } from "@/shared/api/trpc";
 
-import { ApiKeyCardSkeleton } from "@/entities/api-keys/ui/api-key-card-skeleton";
+import { ApiKeyCardSkeleton } from "@/entities/api-key/ui/api-key-card-skeleton";
 
 import { ApiKeysList } from "./api-keys-list";
 

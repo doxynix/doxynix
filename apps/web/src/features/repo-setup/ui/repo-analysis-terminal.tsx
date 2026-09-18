@@ -12,7 +12,9 @@ import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
-import { type LogEntry, useTerminalLogs } from "../model/use-terminal-logs";
+import type { LogEntry } from "../model/terminal-logs";
+import { computeTextHighlight } from "../model/terminal-logs";
+import { useTerminalLogs } from "../model/use-terminal-logs";
 
 type Props = {
   logs: string[];
@@ -167,6 +169,8 @@ function LogLine({ log, searchQuery }: Readonly<{ log: LogEntry; searchQuery: st
     warn: "text-warning",
   };
 
+  const tokens = computeTextHighlight(log.message, searchQuery);
+
   return (
     <div className="flex items-start gap-3 rounded-xl p-2 font-mono transition-colors hover:bg-accent">
       {log.timestamp !== "" && <span className="select-none text-xs">[{log.timestamp}]</span>}
@@ -177,34 +181,19 @@ function LogLine({ log, searchQuery }: Readonly<{ log: LogEntry; searchQuery: st
           levelColors[log.level] || levelColors.info,
         )}
       >
-        {highlightText(log.message, searchQuery)}
+        {tokens.map((token, i) =>
+          token.isHighlighted ? (
+            <span
+              className="rounded-[1px] bg-warning/10 font-bold text-warning"
+              key={i}
+            >
+              {token.text}
+            </span>
+          ) : (
+            token.text
+          ),
+        )}
       </div>
     </div>
-  );
-}
-
-function highlightText(text: string, highlight: string) {
-  if (highlight.trim() === "") {
-    return text;
-  }
-
-  const escaped = highlight.replaceAll(/[$()*+.?[\\\]^{|}]/g, "\\$&");
-  const parts = text.split(new RegExp(`(${escaped})`, "gi"));
-
-  return (
-    <span>
-      {parts.map((part, i) =>
-        part.toLowerCase() === highlight.toLowerCase() ? (
-          <span
-            className="rounded-[1px] bg-warning/10 font-bold text-warning"
-            key={i}
-          >
-            {part}
-          </span>
-        ) : (
-          part
-        ),
-      )}
-    </span>
   );
 }

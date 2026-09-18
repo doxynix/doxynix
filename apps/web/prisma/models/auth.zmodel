@@ -134,10 +134,10 @@ model Passkey {
 model TwoFactor {
   /// @zod.custom.omit(["model"])
   id          String   @id @default(uuid(7)) @db.Uuid
-  // NOTE: Better-auth сам шифрует (AES-256-GCM) так что повторно нету смысла
+  // NOTE: Better-auth encrypts on its own (AES-256-GCM), so encrypting again makes no sense
   /// @zod.custom.omit(["model"])
   secret      String   @omit
-  // NOTE: Better-auth сам шифрует (AES-256-GCM) так что повторно нету смысла
+  // NOTE: Better-auth encrypts on its own (AES-256-GCM), so encrypting again makes no sense
   /// @zod.custom.omit(["model"])
   backupCodes String   @map("backup_codes") @omit
   verified    Boolean  @default(false)

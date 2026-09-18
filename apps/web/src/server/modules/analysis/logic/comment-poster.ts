@@ -9,7 +9,7 @@ import { appLogger } from "@/server/core/app-logger";
 import type { PRFinding } from "./pr.types";
 
 /**
- * Генерирует уникальную сигнатуру для замечания, чтобы избежать дублирования комментариев.
+ * Generates a unique signature for each finding to avoid duplicate comments.
  */
 function generateFindingSignature(finding: PRFinding): string {
   const normFile = finding.file.replaceAll("\\", "/");
@@ -86,7 +86,7 @@ export const CommentFormatter = {
   },
 
   /**
-   * Очищает сгенерированное ИИ-предложение от возможных лишних маркдаун-тегов.
+   * Strips stray markdown tags from the generated AI suggestion.
    */
   sanitizeSuggestion(suggestion: string): string {
     let clean = suggestion.trim();
@@ -97,12 +97,12 @@ export const CommentFormatter = {
 };
 
 /**
- * Потокобезопасный Stateless-класс для работы с комментариями на GitHub.
+ * Thread-safe stateless class for working with GitHub comments.
  */
 export class GitHubCommentPoster {
   /**
    * Post PR comments in batch (single review with all findings)
-   * Фильтрует дубликаты на основе хэш-сигнатур, зашитых в существующие комментарии GitHub.
+   * Deduplicates using hash signatures embedded in existing GitHub comments.
    */
   async postComments(
     octokit: Octokit,
@@ -191,8 +191,8 @@ export class GitHubCommentPoster {
   }
 
   /**
-   * Публикует или обновляет существующий интерактивный дашборд Doxynix в PR.
-   * Предотвращает дублирование и спам в обсуждениях PR.
+   * Publishes or updates the existing interactive Doxynix dashboard in the PR.
+   * Prevents duplicates and spam in PR discussions.
    */
   async postMainDashboardComment(
     octokit: Octokit,

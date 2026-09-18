@@ -86,7 +86,7 @@ export const CodeOptimizer = {
   },
 
   /**
-   * Полиглот-скелетонизация через Tree-Sitter (TypeScript, JavaScript, Go, Python, Rust, C#, и др.)
+   * Polyglot skeletonization via Tree-Sitter (TypeScript, JavaScript, Go, Python, Rust, C#, etc.)
    */
   async skeletonizePolyglot(code: string, fileName: string): Promise<string> {
     const ext = getFileExtension(fileName);

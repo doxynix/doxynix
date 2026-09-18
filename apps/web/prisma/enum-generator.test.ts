@@ -46,7 +46,6 @@ const makeOptions = (enums: DmmfEnum[], output?: string) =>
     generator: { output: output == null ? undefined : { value: output } },
   }) as never;
 
-/** Извлекает ключи const-объекта `export const X = { ... } as const;` из контента. */
 const extractConstKeys = (content: string, enumName: string): string[] =>
   content
     .split(`export const ${enumName} = {`)[1]!

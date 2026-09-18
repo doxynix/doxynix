@@ -25,9 +25,9 @@ type RequestStore = {
 export const requestContext = new AsyncLocalStorage<RequestStore>();
 
 /**
- * Анонимизирует IP-адрес для соответствия GDPR и записи в тип INET PostgreSQL.
- * IPv4: зануляет последний октет (1.2.3.4 -> 1.2.3.0)
- * IPv6: зануляет последние 64 бита (2001:db8:85a3:0:0:8a2e:370:7334 -> 2001:db8:85a3:0::)
+ * Anonymizes an IP address for GDPR compliance and storage in the PostgreSQL INET type.
+ * IPv4: zeroes the last octet (1.2.3.4 -> 1.2.3.0)
+ * IPv6: zeroes the last 64 bits (2001:db8:85a3:0:0:8a2e:370:7334 -> 2001:db8:85a3:0::)
  */
 export function anonymizeIp(ip: null | string | undefined): null | string {
   if (ip == null || ip === "unknown" || ip.trim() === "") {

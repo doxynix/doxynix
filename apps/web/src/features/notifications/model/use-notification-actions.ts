@@ -1,20 +1,7 @@
 import { trpc } from "@/shared/api/trpc";
 
-import type { MarkAllInput } from "@/entities/notifications/model/notifications.types";
-import type { NotificationsParsersState } from "@/entities/notifications/model/notifications-parsers";
-
-export const mapFiltersToInput = (filters?: NotificationsParsersState): MarkAllInput => {
-  if (filters == null) {
-    return {};
-  }
-
-  return {
-    repoName: filters.repo ?? undefined,
-    repoOwner: filters.owner ?? undefined,
-    search: filters.search || undefined,
-    type: filters.type ?? undefined,
-  };
-};
+import { mapFiltersToInput } from "@/entities/notification/model/notification-filters.utils";
+import type { NotificationsParsersState } from "@/entities/notification/model/notifications-parsers";
 
 export function useNotificationActions() {
   const utils = trpc.useUtils();

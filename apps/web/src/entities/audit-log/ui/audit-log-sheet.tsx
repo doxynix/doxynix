@@ -135,7 +135,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
                       "[&_code]:break-all! [&_code]:whitespace-pre-wrap!",
                       "[&_.line]:inline! [&_.line]:break-all! [&_.line]:whitespace-pre-wrap!",
                     )}
-                    dangerouslySetInnerHTML={{ __html: html ?? "" }} // NOTE: санитизации нету здесь так что если в будущем будет вставлять юзерский ввод то иметь ввиду
+                    dangerouslySetInnerHTML={{ __html: html ?? "" }} // NOTE: no sanitization here, so keep this in mind if user input is ever rendered in the future
                   />
                 )}
               </div>

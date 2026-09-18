@@ -34,9 +34,9 @@ import { prisma } from "./db";
 import { emailSignInLimiter } from "./ratelimit";
 import { redisService } from "./redis";
 
-const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // TIME: 30 дней
-const SESSION_UPDATE_AGE = 24 * 60 * 60; // TIME: сутки
-const MAGIC_LINK_MAX_AGE = 10 * 60; // TIME: 10 минут
+const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // TIME: 30 days
+const SESSION_UPDATE_AGE = 24 * 60 * 60; // TIME: 24 hours
+const MAGIC_LINK_MAX_AGE = 10 * 60; // TIME: 10 minutes
 
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 

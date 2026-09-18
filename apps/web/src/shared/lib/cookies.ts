@@ -11,12 +11,6 @@ export function getClientCookie(name: string): null | string {
   return matches ? decodeURIComponent(matches[1] ?? "") : null;
 }
 
-/**
- * Устанавливает куку на стороне клиента
- * @param name - Название куки
- * @param value - Значение
- * @param maxAge - Время жизни в СЕКУНДАХ
- */
 export function setClientCookie(name: string, value: boolean | string, maxAge: number) {
   if (typeof window === "undefined") {
     return;
@@ -28,6 +22,6 @@ export function setClientCookie(name: string, value: boolean | string, maxAge: n
   document.cookie = `${name}=${encodeURIComponent(String(value))}; max-age=${maxAge}; path=/; SameSite=Lax; ${secure}`;
 }
 
-export function getCookieName() {
-  return IS_PROD ? "__Secure-doxynix.session_token" : "doxynix.session_token";
+export function getCookieName(isProdEnv: boolean = IS_PROD): string {
+  return isProdEnv ? "__Secure-doxynix.session_token" : "doxynix.session_token";
 }

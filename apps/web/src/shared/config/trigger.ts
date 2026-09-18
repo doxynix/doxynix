@@ -1,5 +1,5 @@
 /**
- * Централизованный конфиг для Trigger.dev.
+ * Centralized config for Trigger.dev.
  */
 export const TRIGGER_CONFIG = {
   metadataKeys: {

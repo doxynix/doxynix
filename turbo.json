@@ -9,6 +9,7 @@
     "knip.json",
     "lefthook.yml",
     "turbo.json",
+    "packages/config/depcruise-base.json",
     "**/.env.*local"
   ],
   "globalEnv": [
@@ -24,7 +25,13 @@
     "TZ"
   ],
   "tasks": {
-    "arch:check": {},
+    "arch:check": {
+      "inputs": [
+        "src/**",
+        ".dependency-cruiser.ts",
+        ".dependency-cruiser-known-violations.json"
+      ]
+    },
     "build": {
       "dependsOn": ["^build", "db:generate"],
       "env": ["APP_VERSION", "PORT", "NEXT_PUBLIC_*", "VITE_*"],

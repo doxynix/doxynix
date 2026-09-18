@@ -75,7 +75,7 @@ The application strictly enforces **Feature-Sliced Design (FSD)** across client 
 ```
 src/
 ├── app/                  # Next.js App Router ([locale] internationalized routes, API routes)
-├── entities/             # Business models & display cards (repo, pr, api-keys, audit-log, connection, notifications, thanks, user)
+├── entities/             # Business models & display cards (api-key, audit-log, connection, high-five, notification, pr, repo, user)
 ├── features/             # Interactive user workflows:
 │   ├── repo-map/         # Interactive XYFlow canvas, layout hotkeys & node inspector
 │   ├── repo-code-viewer/ # CodeMirror 6 editor, AST symbol search & diffs

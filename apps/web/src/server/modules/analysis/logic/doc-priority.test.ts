@@ -8,7 +8,7 @@ import {
 } from "./doc-priority";
 
 describe("ALL_DOC_TYPES / DOC_SECTION_DEPENDENCIES", () => {
-  it("перечисляет документируемые типы в порядке приоритета", () => {
+  it("lists documentable types in priority order", () => {
     expect(ALL_DOC_TYPES).toEqual([
       DocType.README,
       DocType.API,
@@ -18,7 +18,7 @@ describe("ALL_DOC_TYPES / DOC_SECTION_DEPENDENCIES", () => {
     ]);
   });
 
-  it("описывает зависимости секций для каждого типа документа", () => {
+  it("describes section dependencies for each document type", () => {
     expect(DOC_SECTION_DEPENDENCIES[DocType.API]).toEqual(["api_reference"]);
     expect(DOC_SECTION_DEPENDENCIES[DocType.ARCHITECTURE]).toEqual([
       "architecture",
@@ -31,7 +31,7 @@ describe("ALL_DOC_TYPES / DOC_SECTION_DEPENDENCIES", () => {
 });
 
 describe("calculateDocumentationOutputScore", () => {
-  it("пустой ввод даёт нулевой скор и пустой снапшот", () => {
+  it("empty input yields zero score and an empty snapshot", () => {
     const result = calculateDocumentationOutputScore({});
 
     expect(result.score).toBe(0);
@@ -46,7 +46,7 @@ describe("calculateDocumentationOutputScore", () => {
     });
   });
 
-  it("полный набор документации даёт 100 баллов", () => {
+  it("a full documentation set scores 100 points", () => {
     const result = calculateDocumentationOutputScore({
       generatedApiMarkdown: "# API",
       generatedArchitecture: "# Architecture",
@@ -66,7 +66,7 @@ describe("calculateDocumentationOutputScore", () => {
     });
   });
 
-  it("взвешивает readme (30) и api (25) выше остальных", () => {
+  it("weights readme (30) and api (25) above the rest", () => {
     const result = calculateDocumentationOutputScore({
       generatedApiMarkdown: "# API",
       generatedReadme: "# Readme",
@@ -79,7 +79,7 @@ describe("calculateDocumentationOutputScore", () => {
     expect(result.snapshot.architecture).toBe(false);
   });
 
-  it("игнорирует пустые строки и пробелы (hasText)", () => {
+  it("ignores empty strings and whitespace (hasText)", () => {
     const result = calculateDocumentationOutputScore({
       generatedContributing: "   ",
       generatedReadme: "",
@@ -90,7 +90,7 @@ describe("calculateDocumentationOutputScore", () => {
     expect(result.snapshot.readme).toBe(false);
   });
 
-  it("swaggerYaml не входит в оценку полноты документации", () => {
+  it("swaggerYaml does not count toward the documentation completeness score", () => {
     const result = calculateDocumentationOutputScore({ swaggerYaml: "openapi: 3.0.0" });
 
     expect(result.score).toBe(0);

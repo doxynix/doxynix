@@ -1,51 +1,16 @@
 import fs from "node:fs/promises";
 
-import { Status } from "@doxynix/shared";
 import { compact } from "es-toolkit";
 import fg from "fast-glob";
 import { join, normalize } from "pathe";
 
-import { REALTIME_CONFIG } from "@/shared/config/realtime";
-
 import { appLogger } from "@/server/core/app-logger";
-import { prisma } from "@/server/core/db";
-import { realtimeService } from "@/server/core/realtime";
 import { ProjectPolicy } from "@/server/modules/analysis/engine/core/project-policy";
 
 import { taskLogger } from "../modules/analysis/logic/task-logger";
 
 const MAX_TEXT_FILE_SIZE = 10 * 1024 * 1024;
-
-export async function handleError(
-  error: unknown,
-  analysisId: string,
-  channelName: string,
-  tempPath: string,
-) {
-  const message = error instanceof Error ? error.message : "Unknown error";
-  appLogger.error({
-    analysisId,
-    error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error),
-    msg: "TASK_ERROR",
-  });
-
-  await cleanup(tempPath);
-
-  await prisma.analysis.update({
-    data: {
-      error: message,
-      message: "Analysis failed",
-      status: Status.FAILED,
-    },
-    where: { publicId: analysisId },
-  });
-
-  await realtimeService.channel(channelName).publish(REALTIME_CONFIG.events.user.analysisProgress, {
-    analysisId,
-    message,
-    status: Status.FAILED,
-  });
-}
+const CHUNK_SIZE = 1024;
 
 export async function cleanup(dirPath: string) {
   const path = normalize(dirPath);
@@ -135,8 +100,6 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
   }
   return validFiles;
 }
-
-const CHUNK_SIZE = 1024;
 
 export function isBinaryBuffer(buffer: Uint8Array): boolean {
   const len = Math.min(buffer.length, CHUNK_SIZE);

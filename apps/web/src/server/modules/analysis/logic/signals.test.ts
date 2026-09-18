@@ -19,7 +19,7 @@ const makeAiResult = (overrides: Partial<AIResult> = {}): AIResult =>
 describe("collectScopedEntrySignals", () => {
   const paths = ["src/a.ts", "src/b.ts"];
 
-  it("собирает сигналы, попадающие в выбранные пути", () => {
+  it("collects signals matching the selected paths", () => {
     const metrics = makeMetrics({
       changeCoupling: [
         { commits: 9, fromPath: "src/a.ts", toPath: "src/b.ts" },
@@ -96,7 +96,7 @@ describe("collectScopedEntrySignals", () => {
     expect(result.factTitles).toEqual(["Fact A"]);
   });
 
-  it("сортирует hotsposts по score и ограничивает срезы", () => {
+  it("sorts hotspots by score and caps the slices", () => {
     const metrics = makeMetrics({
       hotspotSignals: Array.from({ length: 6 }, (_, index) => ({
         categories: [],
@@ -125,7 +125,7 @@ describe("collectScopedEntrySignals", () => {
 });
 
 describe("collectScopedSignals", () => {
-  it("возвращает факты и финдинги с evidence в путях", () => {
+  it("returns facts and findings with evidence in paths", () => {
     const aiResult = makeAiResult({
       findings: [
         {

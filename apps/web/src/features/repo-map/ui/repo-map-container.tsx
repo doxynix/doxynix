@@ -90,7 +90,7 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
 
   useEffect(() => {
     if (currentData != null) {
-      // FIXME: пока так ибо если менять то с типами приколы
+      // FIXME: keeping it this way for now, changing it gets tricky with the types
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setDisplayData(currentData);
     } else if (!isFetching) {

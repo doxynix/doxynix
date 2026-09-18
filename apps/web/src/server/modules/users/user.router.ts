@@ -189,7 +189,7 @@ export const userRouter = createTRPCRouter({
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx }) => {
       const userId = Number(ctx.session.user.id);
-      // NOTE: используется чистая призма
+      // NOTE: uses plain Prisma
       const user = await prisma.user.findUnique({
         select: { imageKey: true },
         where: { id: userId },

@@ -32,11 +32,11 @@ export async function handlePushEvent(payload: PushEvent): Promise<void> {
       return undefined;
     }
 
-    // TODO: Здесь триггеришь задачу на анализ всего репозитория или
-    // частичных изменений для векторной БД/документации
+    // TODO: Trigger the analysis task for the entire repository here, or
+    // for partial changes for the vector DB/docs
     // await generateDocsTask.trigger({
     //   repoId: repo.id,
-    //   sha: payload.after // SHA последнего коммита в пуше
+    //   sha: payload.after // SHA of the last commit in the push
     // });
   } catch (error) {
     appLogger.error({ error, msg: "push_webhook_error" });

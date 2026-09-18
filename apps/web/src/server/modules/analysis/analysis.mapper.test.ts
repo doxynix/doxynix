@@ -27,6 +27,8 @@ import type { LatestCompletedAnalysis, RepoWithLatestAnalysisAndDocs } from "./a
 import type { ImpactAnalysis, ParsedFinding } from "./analysis.schemas";
 import type { AIResult } from "./engine/core/analysis-result.schemas";
 import type { RepoMetrics } from "./engine/core/metrics.types";
+import defaultAiResult from "./fixtures/default-ai-result.json";
+import defaultMetrics from "./fixtures/default-metrics.json";
 import type { StructureNodePayload } from "./logic/graph-navigator";
 import type { NodeExplainPayload } from "./logic/node-explainer";
 import type { StoredDocument } from "./logic/structure-shared";
@@ -42,92 +44,12 @@ type AnalyzeContextLike = Parameters<typeof analysisMapper.buildAffectedNodes>[2
 type DetailCache = Parameters<typeof analysisMapper.buildAffectedNodes>[4];
 
 const makeAiResult = (overrides: Partial<AIResult> = {}): AIResult => ({
-  analysisRuntime: {
-    writers: {
-      api: "llm",
-      architecture: "missing",
-      changelog: "failed",
-      contributing: "llm",
-      readme: "missing",
-    },
-  },
-  complexityScore: 50,
-  domain_analysis: {
-    business_rules: ["rule"],
-    core_entities: [{ logic_complexity: "LOW", name: "Entity", responsibility: "resp" }],
-  },
-  executive_summary: {
-    architecture_style: "Layered",
-    purpose: "purpose",
-    stack_details: ["TypeScript"],
-  },
-  findings: [],
-  mainBottlenecks: ["db"],
-  mostComplexFiles: ["src/a.ts"],
-  onboarding_guide: { prerequisites: [], setup_steps: [] },
-  onboardingScore: 20,
-  refactoring_targets: [],
-  repository_facts: [],
-  sections: {
-    api_structure: "REST",
-    data_flow: "flow",
-    infrastructure_and_scaling: {
-      bottlenecks: [],
-      concurrency_risks: [],
-      statelessness_check: "ok",
-    },
-    performance_audit: [],
-    security_audit: { risks: ["risk"], score: 5 },
-    tech_debt_inventory: [],
-  },
-  securityScore: 60,
-  swaggerYaml: "openapi: 3.0.0",
-  techDebtScore: 30,
-  vulnerabilities: [],
+  ...(defaultAiResult as unknown as AIResult),
   ...overrides,
 });
 
 const makeMetrics = (overrides: Partial<RepoMetrics> = {}): RepoMetrics => ({
-  analysisCoverage: {
-    heuristicFiles: 0,
-    languagesByMode: { heuristic: [], treeSitter: [], typeScriptAst: [] },
-    parserCoveragePercent: 0,
-    totalFiles: 0,
-    treeSitterFiles: 0,
-    typeScriptAstFiles: 0,
-  },
-  apiSurface: 0,
-  busFactor: 0,
-  complexityScore: 0,
-  configFiles: 0,
-  configInventory: [],
-  dependencyCycles: [],
-  dependencyHotspots: [],
-  docDensity: 0,
-  duplicationReport: { clones: [], duplicationPercentage: 0, totalDuplicatedLines: 0 },
-  entrypoints: [],
-  factCount: 0,
-  fileCount: 0,
-  findingCount: 0,
-  graphReliability: { resolvedEdges: 0, unresolvedImportSpecifiers: 0, unresolvedSamples: [] },
-  healthScore: 0,
-  hotspotFiles: [],
-  hotspotSignals: [],
-  languages: [],
-  maintenanceStatus: "active",
-  modularityIndex: 0,
-  mostComplexFiles: [],
-  onboardingScore: 0,
-  orphanModules: [],
-  publicExports: 0,
-  securityFindings: [],
-  securityScanStatus: "ok",
-  securityScore: 0,
-  teamRoles: [],
-  techDebtScore: 0,
-  techStack: [],
-  totalLoc: 0,
-  totalSizeKb: 0,
+  ...(defaultMetrics as unknown as RepoMetrics),
   ...overrides,
 });
 
@@ -300,14 +222,14 @@ beforeEach(() => {
 });
 
 describe("coerceAnalysisPayload", () => {
-  it("null/undefined и пустые JSON → null", () => {
+  it("null/undefined and empty JSON → null", () => {
     expect(analysisMapper.coerceAnalysisPayload(null)).toBeNull();
     expect(analysisMapper.coerceAnalysisPayload(undefined)).toBeNull();
     expect(analysisMapper.coerceAnalysisPayload(makeAnalysis(null))).toBeNull();
     expect(analysisMapper.coerceAnalysisPayload(makeAnalysis({}, null))).toBeNull();
   });
 
-  it("валидный resultJson парсится без warn", () => {
+  it("parses a valid resultJson without warn", () => {
     const aiResult = makeAiResult();
     const analysis = makeAnalysis(aiResult);
 
@@ -318,7 +240,7 @@ describe("coerceAnalysisPayload", () => {
     expect(mocks.appLogger.warn).not.toHaveBeenCalled();
   });
 
-  it("невалидный resultJson → warn + raw passthrough", () => {
+  it("invalid resultJson → warn + raw passthrough", () => {
     const invalid = { ...makeAiResult(), refactoring_targets: "oops" } as unknown as AIResult;
     const analysis = makeAnalysis(invalid);
 
@@ -332,13 +254,13 @@ describe("coerceAnalysisPayload", () => {
 });
 
 describe("computeImpactScore", () => {
-  it("базовый сценарий: 0 файлов/файндингов/маркеров → 0", () => {
+  it("base case: 0 files/findings/markers → 0", () => {
     expect(
       analysisMapper.computeImpactScore([], 0, { api: false, entrypoint: false, risk: false }),
     ).toBe(0);
   });
 
-  it("интенсивность = ceil(add+del/20) на файл с капом 18", () => {
+  it("intensity = ceil(add+del/20) per file with cap 18", () => {
     const files = [
       { additions: 20, deletions: 0 },
       { additions: 5000, deletions: 0 },
@@ -348,7 +270,7 @@ describe("computeImpactScore", () => {
     ).toBe(19);
   });
 
-  it("буст от файндингов и маркеров, кап 100", () => {
+  it("adds a boost from findings and markers, cap 100", () => {
     const files = [
       { additions: 5000, deletions: 0 },
       { additions: 5000, deletions: 0 },
@@ -360,7 +282,7 @@ describe("computeImpactScore", () => {
 });
 
 describe("countFindingsByFile", () => {
-  it("считает файндинги по файлам", () => {
+  it("counts findings by file", () => {
     const findings = [
       makeFinding(),
       makeFinding({ file: "src/a.ts" }),
@@ -372,7 +294,7 @@ describe("countFindingsByFile", () => {
     ]);
   });
 
-  it("пустой вход → пустая карта", () => {
+  it("empty input → empty map", () => {
     expect(analysisMapper.countFindingsByFile([]).size).toBe(0);
   });
 });
@@ -383,13 +305,13 @@ describe("matchTopLevelZone", () => {
     topLevelNode({ id: "group:src/api", kind: "api", label: "api", path: "src/api" }),
   ];
 
-  it("выбирает самый длинный подходящий scope", () => {
+  it("selects the longest matching scope", () => {
     expect(analysisMapper.matchTopLevelZone(nodes, "src/api/routes/a.ts", null)?.id).toBe(
       "group:src/api",
     );
   });
 
-  it("fallback на previousFilePath, иначе null", () => {
+  it("falls back to previousFilePath, otherwise null", () => {
     expect(analysisMapper.matchTopLevelZone(nodes, "lib/x.ts", null)).toBeNull();
     expect(analysisMapper.matchTopLevelZone(nodes, "lib/x.ts", "src/api/b.ts")?.id).toBe(
       "group:src/api",
@@ -398,7 +320,7 @@ describe("matchTopLevelZone", () => {
 });
 
 describe("parseChangedFilesSnapshot", () => {
-  it("валидный snapshot → normalize путей и passthrough полей", () => {
+  it("valid snapshot → normalizes paths and passes through fields", () => {
     const analysis = makeImpactAnalysis({
       changedFilesJson: [
         { additions: 3, deletions: 1, filePath: "src/./a.ts", status: "modified" },
@@ -430,7 +352,7 @@ describe("parseChangedFilesSnapshot", () => {
     ]);
   });
 
-  it("невалидный snapshot → legacy-пути из comments и findings (modified, нули)", () => {
+  it("invalid snapshot → legacy paths from comments and findings (modified, zeros)", () => {
     const analysis = makeImpactAnalysis({
       changedFilesJson: [{ additions: -1, deletions: 0, filePath: "", status: "bogus" }],
       comments: [
@@ -468,7 +390,7 @@ describe("parseChangedFilesSnapshot", () => {
 });
 
 describe("parsePersistedFindings", () => {
-  it("валидный findingsJson → normalize file", () => {
+  it("valid findingsJson → normalizes file", () => {
     const analysis = makeImpactAnalysis({
       findingsJson: [{ file: "src/./a.ts", line: 1, message: "m", title: "t", type: "security" }],
     });
@@ -478,7 +400,7 @@ describe("parsePersistedFindings", () => {
     ]);
   });
 
-  it("невалидный findingsJson → fallback на comments", () => {
+  it("invalid findingsJson → falls back to comments", () => {
     const analysis = makeImpactAnalysis({
       comments: [
         {
@@ -500,7 +422,7 @@ describe("parsePersistedFindings", () => {
 });
 
 describe("resolveMatchedNode", () => {
-  it("group-nodeId → запись из topLevelNodeById с markers null", () => {
+  it("group-nodeId → record from topLevelNodeById with markers null", () => {
     const zones = new Map<string, unknown>([["group:src", topLevelNode()]]) as Map<
       string,
       TopLevelNode
@@ -511,7 +433,7 @@ describe("resolveMatchedNode", () => {
     expect(node?.markers).toBeNull();
   });
 
-  it("file-nodeId: берёт из кэша или контекста, скрывая null", () => {
+  it("file-nodeId: takes from cache or context, hiding null", () => {
     const structure = makeStructureNode();
     const detailCache = new Map<string, StructureNodePayload | null>([
       ["file:src/a.ts", structure],
@@ -535,11 +457,11 @@ describe("resolveMatchedNode", () => {
 });
 
 describe("selectPrimaryFile", () => {
-  it("пустой список → null", () => {
+  it("empty list → null", () => {
     expect(analysisMapper.selectPrimaryFile([])).toBeNull();
   });
 
-  it("выбирает файл с максимальным score = findingCount*20 + add + del", () => {
+  it("selects the file with the highest score = findingCount*20 + add + del", () => {
     const files = [
       makeChangedFile({ additions: 100, deletions: 0, filePath: "src/a.ts", findingCount: 0 }),
       makeChangedFile({ additions: 0, deletions: 0, filePath: "src/b.ts", findingCount: 6 }),
@@ -547,7 +469,7 @@ describe("selectPrimaryFile", () => {
     expect(analysisMapper.selectPrimaryFile(files)?.filePath).toBe("src/b.ts");
   });
 
-  it("при равенстве score — лексикографически меньший путь", () => {
+  it("ties in score — picks the lexicographically smaller path", () => {
     const files = [
       makeChangedFile({ additions: 10, deletions: 0, filePath: "z.ts", findingCount: 0 }),
       makeChangedFile({ additions: 10, deletions: 0, filePath: "a.ts", findingCount: 0 }),
@@ -562,7 +484,7 @@ describe("toAnalysisRef", () => {
     expect(analysisMapper.toAnalysisRef(undefined)).toBeNull();
   });
 
-  it("маппит publicId/commitSha/createdAt", () => {
+  it("maps publicId/commitSha/createdAt", () => {
     const analysis = makeAnalysis(makeAiResult());
     expect(analysisMapper.toAnalysisRef(analysis)).toEqual({
       analysisId: "an-1",
@@ -573,7 +495,7 @@ describe("toAnalysisRef", () => {
 });
 
 describe("buildAffectedNodes", () => {
-  it("группирует по nodeId, считает impact и сортирует", () => {
+  it("groups by nodeId, computes impact, and sorts", () => {
     const files = [
       makeChangedFile({ filePath: "src/a.ts", nodeId: "file:src/a.ts", zoneId: "group:src" }),
       makeChangedFile({
@@ -613,7 +535,7 @@ describe("buildAffectedNodes", () => {
     });
   });
 
-  it("пропускает файлы без nodeId и неразрешённые nodeId", () => {
+  it("skips files without nodeId and unresolved nodeIds", () => {
     const result = analysisMapper.buildAffectedNodes(
       [
         makeChangedFile({ nodeId: null }),
@@ -627,7 +549,7 @@ describe("buildAffectedNodes", () => {
     expect(result).toEqual([]);
   });
 
-  it("сортирует по impactScore desc, затем label asc; group-маркеры по умолчанию", () => {
+  it("sorts by impactScore desc, then label asc; default group markers", () => {
     const files = [
       makeChangedFile({
         additions: 400,
@@ -654,7 +576,7 @@ describe("buildAffectedNodes", () => {
 });
 
 describe("buildAffectedZones", () => {
-  it("группирует по zoneId и суммирует impact", () => {
+  it("groups by zoneId and sums impact", () => {
     const files = [
       makeChangedFile({ filePath: "src/a.ts", findingCount: 2, zoneId: "group:src" }),
       makeChangedFile({
@@ -685,7 +607,7 @@ describe("buildAffectedZones", () => {
     });
   });
 
-  it("пропускает файлы без zoneId и unknown zones", () => {
+  it("skips files without zoneId and unknown zones", () => {
     const result = analysisMapper.buildAffectedZones(
       [makeChangedFile({ zoneId: null }), makeChangedFile({ zoneId: "group:ghost" })],
       [],
@@ -696,7 +618,7 @@ describe("buildAffectedZones", () => {
 });
 
 describe("buildTopFindings", () => {
-  it("сортирует по riskLevel desc и рендерит messageHtml через unstable_cache", async () => {
+  it("sorts by riskLevel desc and renders messageHtml through unstable_cache", async () => {
     const findings = [
       makeFinding({
         file: "src/a.ts",
@@ -762,7 +684,7 @@ describe("buildTopFindings", () => {
     );
   });
 
-  it("score отсутствует → riskLevel 0; zoneLabel fallback на file.zoneLabel", async () => {
+  it("missing score → riskLevel 0; zoneLabel falls back to file.zoneLabel", async () => {
     const findings = [makeFinding({ file: "src/a.ts", score: undefined })];
     const files = [
       makeChangedFile({ filePath: "src/a.ts", zoneId: "group:src", zoneLabel: "src" }),
@@ -775,7 +697,7 @@ describe("buildTopFindings", () => {
 });
 
 describe("toAvailableDocs", () => {
-  it("дедуплицирует документы и собирает summary с writer-статусами", () => {
+  it("deduplicates documents and builds summary with writer statuses", () => {
     const aiResult = makeAiResult();
     const repo = makeRepoFact({
       analyses: [makeAnalysis(aiResult)],
@@ -794,7 +716,7 @@ describe("toAvailableDocs", () => {
 });
 
 describe("toBriefPanelInput / toInteractiveBriefNodePayloadInput / toExplainBase / toStructureNodeBase", () => {
-  it("паспортят explain/structureNode через базовые мапперы", () => {
+  it("passes explain/structureNode through the base mappers", () => {
     const explain = makeExplain();
     const structureNode = makeStructureNode();
 
@@ -804,7 +726,7 @@ describe("toBriefPanelInput / toInteractiveBriefNodePayloadInput / toExplainBase
     expect(brief.structureNode.breadcrumbs).toEqual([{ id: "b1", label: "src", path: "src" }]);
   });
 
-  it("интерактивный вариант подставляет analysisRef null, если его нет", () => {
+  it("interactive variant injects null analysisRef when absent", () => {
     const input = analysisMapper.toInteractiveBriefNodePayloadInput({
       explain: makeExplain(),
       structureNode: makeStructureNode(),
@@ -816,7 +738,7 @@ describe("toBriefPanelInput / toInteractiveBriefNodePayloadInput / toExplainBase
 });
 
 describe("toDetailedMetrics", () => {
-  it("маппит весь payload с nullable-дефолтами", () => {
+  it("maps the whole payload with nullable defaults", () => {
     const aiResult = makeAiResult();
     const metrics = makeMetrics({ dependencyCycles: [["a", "b"]] });
     const analysis = makeAnalysis(aiResult, metrics);
@@ -842,7 +764,7 @@ describe("toDetailedMetrics", () => {
     expect(result?.risks.topRisks).toEqual([]);
   });
 
-  it("отсутствующие optional-поля → null/[] по коду, пустой analysis → null", () => {
+  it("missing optional fields → null/[] per code, empty analysis → null", () => {
     const metrics = makeMetrics();
     delete (metrics as { graphReliability?: unknown }).graphReliability;
     delete (metrics as { hotspotSignals?: unknown }).hotspotSignals;
@@ -865,7 +787,7 @@ describe("toDetailedMetrics", () => {
 });
 
 describe("toOverview", () => {
-  it("маппит repo, docs, scores и summary с паддингом key_innovations", () => {
+  it("maps repo, docs, scores, and summary with key_innovations padding", () => {
     const aiResult = makeAiResult();
     const metrics = makeMetrics({ totalSizeKb: 512 });
     const repo = makeRepoFact({
@@ -909,7 +831,7 @@ describe("toOverview", () => {
     });
   });
 
-  it("key_innovations из LLM сохраняется; без анализа → null", () => {
+  it("keeps key_innovations from LLM; no analysis → null", () => {
     const repo = makeRepoFact({
       analyses: [
         makeAnalysis(

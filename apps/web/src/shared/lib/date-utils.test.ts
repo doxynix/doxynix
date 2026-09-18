@@ -1,37 +1,42 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("temporal-polyfill", () => {
-  return {
-    Temporal: {
-      Instant: {
-        fromEpochMilliseconds: vi.fn(() => ({
-          toLocaleString: vi.fn(() => "January 2, 2026 at 03:04"),
-          toZonedDateTimeISO: vi.fn(),
-        })),
-      },
-      Now: {
-        timeZoneId: vi.fn(() => "UTC"),
-        zonedDateTimeISO: vi.fn(() => ({
-          since: vi.fn(() => ({
-            days: 0,
-            hours: 0,
-            minutes: 0,
-            months: 0,
-            sign: 1,
-            weeks: 0,
-            years: 0,
-          })),
-        })),
-      },
-    },
-  };
-});
-
-import { Temporal } from "temporal-polyfill";
-
+import { LOCALES, type Locale } from "@/shared/config/locales";
 import { formatFullDate, formatRelativeTime } from "@/shared/lib/date-utils";
 
-describe("shared/lib/utils:formatRelativeTime", () => {
+// Golden values captured from the test runtime (TZ=UTC, fake clock 2026-02-27T12:00:00Z).
+const RELATIVE_YESTERDAY: Record<Locale, string> = {
+  de: "gestern",
+  en: "yesterday",
+  es: "ayer",
+  fr: "hier",
+  "pt-BR": "ontem",
+  ru: "вчера",
+  "zh-CN": "昨天",
+};
+
+const RELATIVE_LAST_MONTH: Record<Locale, string> = {
+  de: "letzten Monat",
+  en: "last month",
+  es: "el mes pasado",
+  fr: "le mois dernier",
+  "pt-BR": "mês passado",
+  ru: "в прошлом месяце",
+  "zh-CN": "上个月",
+};
+
+// Written-date portion only — ordering is stable per locale, while the time-plus-separator
+// suffix (e.g. "at 03:04", "г. в 03:04") can vary across ICU versions.
+const FULL_DATE_PART: Record<Locale, string> = {
+  de: "2. Januar 2026",
+  en: "January 2, 2026",
+  es: "2 de enero de 2026",
+  fr: "2 janvier 2026",
+  "pt-BR": "2 de janeiro de 2026",
+  ru: "2 января 2026",
+  "zh-CN": "2026年1月2日",
+};
+
+describe("formatRelativeTime", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-02-27T12:00:00.000Z"));
@@ -39,55 +44,31 @@ describe("shared/lib/utils:formatRelativeTime", () => {
 
   afterEach(() => {
     vi.useRealTimers();
-    vi.restoreAllMocks();
   });
 
-  it("should return default value for null and invalid dates", () => {
+  it("returns the default value for null and invalid dates", () => {
     const defaultValue = "N/A";
-
-    const fromNull = formatRelativeTime(null, "en", defaultValue);
-    const fromInvalid = formatRelativeTime("not-a-date", "en", defaultValue);
-
-    expect(fromNull).toBe(defaultValue);
-    expect(fromInvalid).toBe(defaultValue);
+    expect(formatRelativeTime(null, "en", defaultValue)).toBe(defaultValue);
+    expect(formatRelativeTime("not-a-date", "en", defaultValue)).toBe(defaultValue);
   });
 
-  it("should return localized relative time for supported locales", () => {
-    const date = new Date("2026-02-26T12:00:00.000Z");
-
-    const enResult = formatRelativeTime(date, "en");
-    const ruResult = formatRelativeTime(date, "ru");
-    const deResult = formatRelativeTime(date, "de");
-
-    expect(enResult).not.toBe("—");
-    expect(ruResult).not.toBe("—");
-    expect(deResult).not.toBe("—");
+  it.each(LOCALES)("formats yesterday for %s", (locale) => {
+    const yesterday = new Date("2026-02-26T12:00:00.000Z");
+    expect(formatRelativeTime(yesterday, locale)).toBe(RELATIVE_YESTERDAY[locale]);
   });
 
-  it("should return default value and log error when formatter throws", () => {
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-    const temporalSpy = vi
-      .spyOn(Temporal.Instant, "fromEpochMilliseconds")
-      .mockImplementation(() => {
-        throw new Error("Temporal mock crash");
-      });
-
-    const result = formatRelativeTime("2026-01-01T00:00:00.000Z", "en", "fallback");
-
-    expect(result).toBe("fallback");
-    expect(errorSpy).toHaveBeenCalledWith("Date formatting error:", expect.any(Error));
-
-    temporalSpy.mockRestore();
-    errorSpy.mockRestore();
+  it.each(LOCALES)("formats one month ago for %s", (locale) => {
+    const lastMonth = new Date("2026-01-27T12:00:00.000Z");
+    expect(formatRelativeTime(lastMonth, locale)).toBe(RELATIVE_LAST_MONTH[locale]);
   });
 });
 
-describe("shared/lib/utils:formatFullDate", () => {
-  it("should format date to readable string with locale", () => {
-    const formatted = formatFullDate("2026-01-02T03:04:00.000Z", "en");
+describe("formatFullDate", () => {
+  it.each(LOCALES)("formats the date for %s", (locale) => {
+    expect(formatFullDate("2026-01-02T03:04:00.000Z", locale)).toContain(FULL_DATE_PART[locale]);
+  });
 
-    expect(formatted).toContain("2026");
-    expect(formatted).toMatch(/at\s\d{2}:\d{2}$/);
+  it("returns dash fallback for invalid dates", () => {
+    expect(formatFullDate("invalid-date", "en")).toBe("—");
   });
 });

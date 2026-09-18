@@ -5,8 +5,8 @@ import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 
 /**
- * Оппортунистическое обновление данных репозитория из любого GitHub payload.
- * Вызывается без `await` в основных хендлерах, чтобы не блокировать ответ гитхабу.
+ * Opportunistically updates repository data from any GitHub payload.
+ * Called without `await` in the main handlers so the GitHub response is not blocked.
  */
 export async function syncRepoMetadata(repository: Repository): Promise<void> {
   try {

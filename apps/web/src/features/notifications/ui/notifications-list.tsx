@@ -7,8 +7,8 @@ import { EmptyState } from "@/shared/ui/kit/empty-state";
 import type {
   NotificationMeta,
   UiNotification,
-} from "@/entities/notifications/model/notifications.types";
-import { NotificationCard } from "@/entities/notifications/ui/notification-card";
+} from "@/entities/notification/model/notifications.types";
+import { NotificationCard } from "@/entities/notification/ui/notification-card";
 
 import { useNotificationActions } from "../model/use-notification-actions";
 import { NotificationActionButton } from "./notification-action-button";

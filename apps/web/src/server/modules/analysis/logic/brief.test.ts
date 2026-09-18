@@ -37,7 +37,7 @@ const makeStructureNode = (overrides: Record<string, unknown> = {}): BriefStruct
   }) as unknown as BriefStructureNodeInput;
 
 describe("buildInteractiveBriefPanel", () => {
-  it("собирает панель с действиями для файла", () => {
+  it("builds a panel with available actions for a file", () => {
     const panel = buildInteractiveBriefPanel({
       explain: makeExplain(),
       structureNode: makeStructureNode(),
@@ -65,7 +65,7 @@ describe("buildInteractiveBriefPanel", () => {
     });
   });
 
-  it("для группы с drilldown включает canDrillDeeper и отключает file-действия", () => {
+  it("for a group with drilldown, enables canDrillDeeper and disables file actions", () => {
     const panel = buildInteractiveBriefPanel({
       explain: makeExplain(),
       structureNode: makeStructureNode({
@@ -82,7 +82,7 @@ describe("buildInteractiveBriefPanel", () => {
     });
   });
 
-  it("обрезает childLabels до 8", () => {
+  it("truncates childLabels to 8", () => {
     const children = Array.from({ length: 10 }, (_, index) => ({
       id: `file:c${index}.ts`,
       label: `c${index}.ts`,
@@ -99,7 +99,7 @@ describe("buildInteractiveBriefPanel", () => {
 });
 
 describe("buildInteractiveBriefPayload", () => {
-  it("оборачивает панель в panel.defaultNode и отдаёт структуру", () => {
+  it("wraps the panel into panel.defaultNode and returns the structure", () => {
     const payload = buildInteractiveBriefPayload({
       analysisRef: { analysisId: "a1", commitSha: "c1", createdAt: new Date() },
       capabilities: { canDocumentFile: true } as never,
@@ -120,7 +120,7 @@ describe("buildInteractiveBriefPayload", () => {
 });
 
 describe("buildInteractiveBriefNodePayload", () => {
-  it("предпочитает analysisRef из structureNode", () => {
+  it("prefers analysisRef from structureNode", () => {
     const payload = buildInteractiveBriefNodePayload({
       explain: makeExplain({ analysisRef: "explain-ref" }),
       structureNode: makeStructureNode({ analysisRef: "structure-ref" }),
@@ -132,7 +132,7 @@ describe("buildInteractiveBriefNodePayload", () => {
     expect(payload.explain.summary).toEqual(["Line 1", "Line 2"]);
   });
 
-  it("фолбэчит на analysisRef из explain", () => {
+  it("falls back to analysisRef from explain", () => {
     const payload = buildInteractiveBriefNodePayload({
       explain: makeExplain({ analysisRef: "explain-ref" }),
       structureNode: makeStructureNode(),

@@ -31,7 +31,7 @@ const meta: NodeContextMeta = {
 };
 
 describe("buildSyncFileActionMeta", () => {
-  it("прогоняет через поле контекста без изменений", () => {
+  it("passes context fields through unchanged", () => {
     const metaResult = buildSyncFileActionMeta({
       analysisRef,
       contentRef: { analysisId: "analysis-1" },
@@ -45,7 +45,7 @@ describe("buildSyncFileActionMeta", () => {
     expect(metaResult.contentRef).toEqual({ analysisId: "analysis-1" });
   });
 
-  it("без analysisRef помечает консистентность как unknown", () => {
+  it("without analysisRef marks consistency as unknown", () => {
     const metaResult = buildSyncFileActionMeta({
       analysisRef: null,
       contentRef: {},
@@ -59,7 +59,7 @@ describe("buildSyncFileActionMeta", () => {
     );
   });
 
-  it("без явной ссылки консистентность unknown", () => {
+  it("without an explicit reference consistency is unknown", () => {
     const metaResult = buildSyncFileActionMeta({
       analysisRef,
       contentRef: {},
@@ -71,7 +71,7 @@ describe("buildSyncFileActionMeta", () => {
     expect(metaResult.consistencyNote).toContain("without an explicit analysis reference");
   });
 
-  it("совпадающие analysisId/commitSha дают matched", () => {
+  it("matching analysisId/commitSha give matched", () => {
     const metaResult = buildSyncFileActionMeta({
       analysisRef,
       contentRef: { analysisId: "analysis-1", commitSha: "abc123" },
@@ -82,7 +82,7 @@ describe("buildSyncFileActionMeta", () => {
     expect(metaResult.consistency).toBe("matched");
   });
 
-  it("несовпадающий commitSha даёт mismatch", () => {
+  it("mismatching commitSha gives mismatch", () => {
     const metaResult = buildSyncFileActionMeta({
       analysisRef,
       contentRef: { analysisId: "analysis-1", commitSha: "deadbeef" },
@@ -96,7 +96,7 @@ describe("buildSyncFileActionMeta", () => {
     );
   });
 
-  it("несовпадающий analysisId даёт mismatch", () => {
+  it("mismatching analysisId gives mismatch", () => {
     const metaResult = buildSyncFileActionMeta({
       analysisRef,
       contentRef: { analysisId: "other-analysis" },

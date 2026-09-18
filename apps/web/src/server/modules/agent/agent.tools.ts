@@ -219,7 +219,7 @@ export const getAgentTools = (currentRepoId?: string) => ({
         .describe("The unique public UUID of the generated fix to retrieve details for"),
     }),
   }),
-  // TODO: вынести в общий
+  // TODO: extract to shared
 
   getLatestAnalysis: tool({
     description:
@@ -552,7 +552,7 @@ export const getAgentTools = (currentRepoId?: string) => ({
       repoId: z.uuid().describe("The public UUID of the repository").optional(),
     }),
   }),
-  // TODO: вынести в общий
+  // TODO: extract to shared
   triggerRepositoryAnalysis: tool({
     description: "Queue and start a complete static code analysis run for a repository.",
     execute: async ({ branch, docTypes, files, language, repoId }) => {

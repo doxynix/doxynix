@@ -41,7 +41,7 @@ const makeContext = (overrides: Partial<StructureContext> = {}): StructureContex
   }) as unknown as StructureContext;
 
 describe("buildBreadcrumbs", () => {
-  it("для файла строит цепочку до файлового узла", () => {
+  it("builds a chain down to the file node for a file", () => {
     expect(buildBreadcrumbs("file", "src/features/ui/button.tsx")).toEqual([
       expect.objectContaining({ id: "group:src", nodeType: "group", path: "src" }),
       expect.objectContaining({
@@ -62,7 +62,7 @@ describe("buildBreadcrumbs", () => {
     ]);
   });
 
-  it("для группы добавляет финальный групповой узел", () => {
+  it("appends a final group node for a group", () => {
     const crumbs = buildBreadcrumbs("group", "src/features");
 
     expect(crumbs.at(-1)).toEqual(
@@ -71,7 +71,7 @@ describe("buildBreadcrumbs", () => {
     expect(crumbs).toHaveLength(2);
   });
 
-  it("корневой путь даёт один узел", () => {
+  it("root path yields a single node", () => {
     const crumbs = buildBreadcrumbs("file", "app.ts");
 
     expect(crumbs).toEqual([
@@ -83,12 +83,12 @@ describe("buildBreadcrumbs", () => {
 describe("collectNodeScopePaths", () => {
   const context = makeContext();
 
-  it("для файла возвращает путь только если он интересен", () => {
+  it("returns the path for a file only when it is interesting", () => {
     expect(collectNodeScopePaths(context, "file", "src/app.ts")).toEqual(["src/app.ts"]);
     expect(collectNodeScopePaths(context, "file", "src/other.ts")).toEqual([]);
   });
 
-  it("для группы фильтрует интересные пути внутри scope", () => {
+  it("filters interesting paths within scope for a group", () => {
     expect(collectNodeScopePaths(context, "group", "src")).toEqual([
       "src/app.ts",
       "src/routes.ts",
@@ -99,7 +99,7 @@ describe("collectNodeScopePaths", () => {
 });
 
 describe("aggregateEntryForPaths", () => {
-  it("агрегирует пути, сигналы, метрики и факты в запись группы", () => {
+  it("aggregates paths, signals, metrics and facts into a group entry", () => {
     const entry = aggregateEntryForPaths(
       ["src/app.ts", "src/routes.ts", "src/app.ts"],
       makeContext(),
@@ -122,7 +122,7 @@ describe("aggregateEntryForPaths", () => {
     ).toBeGreaterThan(0);
   });
 
-  it("не добавляет сигналы для путей вне scope", () => {
+  it("does not add signals for paths outside scope", () => {
     const entry = aggregateEntryForPaths(["zzz/unrelated.ts"], makeContext());
 
     expect(entry.paths).toEqual(["zzz/unrelated.ts"]);

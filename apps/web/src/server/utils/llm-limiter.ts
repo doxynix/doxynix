@@ -14,14 +14,14 @@ const llmTpmLimiter = new Ratelimit({
 });
 
 /**
- * Парсит сообщение об ошибке от Google Gemini API для извлечения точного времени задержки
+ * Parses an error message from the Google Gemini API to extract the exact retry delay.
  */
 function parseGoogleRetryAfter(error: unknown): null | number {
   if (error == null) {
     return null;
   }
 
-  // Безопасно извлекаем строку сообщения об ошибке
+  // Safely extract the error message string
   let errorMessage = "";
   if (typeof error === "string") {
     errorMessage = error;
@@ -47,7 +47,7 @@ function parseGoogleRetryAfter(error: unknown): null | number {
     }
   }
 
-  // Проверка заголовков retry-after, если ошибка является объектом
+  // Check retry-after headers if the error is an object
   if (
     typeof error === "object" &&
     "status" in error &&
@@ -78,7 +78,7 @@ function parseGoogleRetryAfter(error: unknown): null | number {
 }
 
 /**
- * Единый интерфейс лимитера
+ * Unified limiter interface
  */
 export const llmLimiter = {
   schedule: async <T>(

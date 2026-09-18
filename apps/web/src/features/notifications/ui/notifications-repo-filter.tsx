@@ -18,7 +18,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/core/popover";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 
-import { notificationsParsers } from "@/entities/notifications/model/notifications-parsers";
+import { notificationsParsers } from "@/entities/notification/model/notifications-parsers";
 import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dialog.store";
 
 export function NotificationsRepoFilter() {

@@ -12,8 +12,8 @@ generatorHandler({
     const enums = options.dmmf.datamodel.enums;
 
     const output = enums.map((e) => {
-      // Сортируем значения по алфавиту: DMMF отдаёт их в порядке объявления
-      // в schema.prisma, а репо-политика biome (useSortedKeys) требует сортировки.
+      // Sort values alphabetically: DMMF returns them in declaration order
+      // in schema.prisma, while the repo's biome policy (useSortedKeys) requires sorting.
       const values = [...e.values].sort((a, b) => a.name.localeCompare(b.name));
       const valuesArray = values.map(({ name: value }) => `"${value}"`).join(", ");
 
@@ -38,15 +38,15 @@ generatorHandler({
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
     await fs.writeFile(outputPath, header + output.join("\n"), "utf-8");
 
-    // Сразу приводим сгенерированный файл к репо-формату (переносы длинных
-    // z.enum-массивов и прочее), чтобы не прогонять biome руками после
-    // каждого `db:generate`. Ошибка форматирования не должна валить генерацию.
+    // Immediately bring the generated file into repo format (wrapping of long
+    // z.enum arrays, etc.) so biome doesn't need to be run manually after
+    // every `db:generate`. A formatting error must not fail generation.
     try {
       execFileSync("bun", ["x", "biome", "format", "--write", outputPath], {
         stdio: "ignore",
       });
     } catch {
-      // biome может отсутствовать в окружении генерации — файл всё равно валиден.
+      // biome may be missing in the generation environment — the file is still valid.
     }
   },
   onManifest() {

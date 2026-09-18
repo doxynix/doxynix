@@ -1,4 +1,3 @@
-/** Оставляет из имени файла аватара только безопасные для blob-пути символы. */
 export const sanitizeAvatarBaseName = (name: string): string =>
   name
     .toLowerCase()
@@ -15,7 +14,6 @@ const ERROR_PATTERNS = [
   ["unauthorized", "settings_profile_not_logged_in"],
 ] as const;
 
-/** Сопоставляет сообщение об ошибке загрузки аватара с ключом перевода. */
 export const resolveAvatarUploadErrorKey = (error: unknown): string => {
   const errorMessage = (error instanceof Error ? error.message : String(error)).toLowerCase();
 

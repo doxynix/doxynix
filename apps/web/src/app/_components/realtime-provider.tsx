@@ -46,7 +46,7 @@ export const RealtimeProvider = ({ children }: Props) => {
         console.info("Realtime connection:", state.current);
       });
     }
-    // FIXME: дизейблить пока что потом придумаю чет
+    // FIXME: disable for now, will figure it out later
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setClient(realtime);
 
@@ -66,7 +66,7 @@ export const RealtimeProvider = ({ children }: Props) => {
 
     const handleSystemMsg = (msg: Ably.InboundMessage) => {
       if (msg.name === REALTIME_CONFIG.events.system.maintenance) {
-        toast.warning("Внимание! Технические работы через 5 минут.");
+        toast.warning("Attention! Scheduled maintenance in 5 minutes.");
       }
     };
 
@@ -86,11 +86,11 @@ export const RealtimeProvider = ({ children }: Props) => {
 
         if (payload.type === "FIX_GENERATED" && payload.fixId != null) {
           void utils.analysis.getById.invalidate({ fixId: payload.fixId });
-          toast.success("AI код-фикс готов!");
+          toast.success("AI code fix is ready!");
         } else if (payload.path != null) {
           const action = payload.type === "AUDIT" ? "quick-file-audit" : "document-file-preview";
           void utils.analysis.getFileActionResult.invalidate({ action, path: payload.path });
-          toast.success(`AI завершил ${payload.type === "AUDIT" ? "audit" : "document"} file!`);
+          toast.success(`AI finished ${payload.type === "AUDIT" ? "audit" : "document"} file!`);
         }
       }
 

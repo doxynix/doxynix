@@ -29,7 +29,7 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/core/tooltip";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
-const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // TIME: 1 год
+const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // TIME: 1 year
 const SIDEBAR_WIDTH = "16rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";

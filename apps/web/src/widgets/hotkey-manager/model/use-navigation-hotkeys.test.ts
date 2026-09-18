@@ -1,28 +1,13 @@
-// @vitest-environment jsdom
+import { describe, expect, it, vi } from "vitest";
 
-import { act, renderHook } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-const mockPush = vi.fn();
 vi.mock("@/shared/i18n/navigation", () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: vi.fn(),
 }));
 
-const hotkeyMap = new Map<string, (e: any, handler?: any) => void>();
-vi.mock("react-hotkeys-hook", () => ({
-  useHotkeys: vi.fn((keys: string, callback: any, options?: any) => {
-    if (options?.enabled !== false) {
-      hotkeyMap.set(keys, callback);
-    } else {
-      hotkeyMap.delete(keys);
-    }
-  }),
-}));
-
-import { resolveNavigationRoute, useNavigationHotkeys } from "./use-navigation-hotkeys";
+import { processNavigationSequence, resolveNavigationRoute } from "./use-navigation-hotkeys";
 
 describe("resolveNavigationRoute", () => {
-  it("maps every g-prefix second key to its route", () => {
+  it("should map every valid g-prefix second key to its correct route string", () => {
     expect(resolveNavigationRoute("g", "KeyC")).toBe("/dashboard/settings/connections");
     expect(resolveNavigationRoute("g", "KeyD")).toBe("/dashboard/settings/danger-zone");
     expect(resolveNavigationRoute("g", "KeyH")).toBe("/support");
@@ -35,71 +20,35 @@ describe("resolveNavigationRoute", () => {
     expect(resolveNavigationRoute("g", "KeyS")).toBe("/dashboard/settings/profile");
   });
 
-  it("returns null for unknown keys or invalid prefix", () => {
+  it("should return null for unknown keys or invalid prefix structures", () => {
     expect(resolveNavigationRoute("g", "KeyX")).toBeNull();
     expect(resolveNavigationRoute("x", "KeyC")).toBeNull();
     expect(resolveNavigationRoute("g", "Digit1")).toBeNull();
   });
 });
 
-describe("useNavigationHotkeys hook", () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    vi.clearAllMocks();
-    hotkeyMap.clear();
+describe("processNavigationSequence", () => {
+  it("should return ignore action when prefix is absent", () => {
+    const result = processNavigationSequence(null, "KeyR");
+
+    expect(result).toEqual({ action: "ignore" });
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
+  it("should return execute action with target path for valid sequence", () => {
+    const result = processNavigationSequence("g", "KeyR");
+
+    expect(result).toEqual({ action: "execute", path: "/dashboard/repos" });
   });
 
-  it("navigates to route when valid hotkey sequence is pressed", () => {
-    const onAction = vi.fn();
-    renderHook(() => useNavigationHotkeys(onAction));
+  it("should return reset action when second key is invalid or unrecognized", () => {
+    const result = processNavigationSequence("g", "KeyZ");
 
-    act(() => {
-      hotkeyMap.get("g")?.({}, { hotkey: "g" });
-    });
-
-    act(() => {
-      hotkeyMap.get("*")?.({ code: "KeyR" });
-    });
-
-    expect(onAction).toHaveBeenCalledTimes(1);
-    expect(mockPush).toHaveBeenCalledWith("/dashboard/repos");
+    expect(result).toEqual({ action: "reset" });
   });
 
-  it("resets prefix state if second key is not pressed within 1500ms", () => {
-    renderHook(() => useNavigationHotkeys());
+  it("should return reset action if second input is non-alphabetic", () => {
+    const result = processNavigationSequence("g", "Digit2");
 
-    act(() => {
-      hotkeyMap.get("g")?.({}, { hotkey: "g" });
-    });
-
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-
-    act(() => {
-      hotkeyMap.get("*")?.({ code: "KeyR" });
-    });
-
-    expect(mockPush).not.toHaveBeenCalled();
-  });
-
-  it("ignores unknown second key and resets prefix", () => {
-    const onAction = vi.fn();
-    renderHook(() => useNavigationHotkeys(onAction));
-
-    act(() => {
-      hotkeyMap.get("g")?.({}, { hotkey: "g" });
-    });
-
-    act(() => {
-      hotkeyMap.get("*")?.({ code: "KeyZ" });
-    });
-
-    expect(onAction).not.toHaveBeenCalled();
-    expect(mockPush).not.toHaveBeenCalled();
+    expect(result).toEqual({ action: "reset" });
   });
 });

@@ -23,6 +23,20 @@ describe("sanitizeAvatarBaseName", () => {
     expect(sanitizeAvatarBaseName("фото.png")).toBe("");
   });
 
+  it("removes non-ASCII characters across scripts", () => {
+    for (const filename of ["фото.png", "图片.png", "صورة.png"]) {
+      expect(sanitizeAvatarBaseName(filename)).toBe("");
+    }
+  });
+
+  it("strips accents from Latin names", () => {
+    expect(sanitizeAvatarBaseName("avÁtar.jpg")).toBe("avtar");
+  });
+
+  it("strips emoji from filenames", () => {
+    expect(sanitizeAvatarBaseName("avatar😀.jpg")).toBe("avatar");
+  });
+
   it("leaves only a dash when non-ASCII surrounds it", () => {
     expect(sanitizeAvatarBaseName("Фото (осень).png")).toBe("-");
   });

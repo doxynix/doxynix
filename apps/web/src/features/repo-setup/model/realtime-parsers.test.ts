@@ -2,46 +2,49 @@ import { describe, expect, it } from "vitest";
 
 import { parseProgress, parseStatusMessage, parseTaskLogs } from "./realtime-parsers";
 
-describe("parseProgress", () => {
-  it("parses a valid percent", () => {
-    expect(parseProgress(42)).toBe(42);
+describe("analysisParsers", () => {
+  describe("parseProgress", () => {
+    it("should successfully parse valid numbers within the 0 to 100 range", () => {
+      expect(parseProgress(0)).toBe(0);
+      expect(parseProgress(50)).toBe(50);
+      expect(parseProgress(100)).toBe(100);
+    });
+
+    it("should fallback to 0 when number exceeds the maximum or minimum bounds", () => {
+      expect(parseProgress(-1)).toBe(0);
+      expect(parseProgress(101)).toBe(0);
+    });
+
+    it("should fallback to 0 when input value is malformed or invalid type", () => {
+      expect(parseProgress("50")).toBe(0);
+      expect(parseProgress(null)).toBe(0);
+      expect(parseProgress(undefined)).toBe(0);
+      expect(parseProgress({})).toBe(0);
+    });
   });
 
-  it("accepts the 0 and 100 boundaries", () => {
-    expect(parseProgress(0)).toBe(0);
-    expect(parseProgress(100)).toBe(100);
+  describe("parseStatusMessage", () => {
+    it("should extract valid string logs successfully", () => {
+      expect(parseStatusMessage("Cloning repository...")).toBe("Cloning repository...");
+    });
+
+    it("should fallback to default analyzing text placeholder on invalid types", () => {
+      expect(parseStatusMessage(null)).toBe("Analyzing repository…");
+      expect(parseStatusMessage(123)).toBe("Analyzing repository…");
+      expect(parseStatusMessage({})).toBe("Analyzing repository…");
+    });
   });
 
-  it("falls back to 0 for out-of-range values", () => {
-    expect(parseProgress(-5)).toBe(0);
-    expect(parseProgress(150)).toBe(0);
-  });
+  describe("parseTaskLogs", () => {
+    it("should return the exact same array when input is a valid string array", () => {
+      const logs = ["step 1", "step 2"];
+      expect(parseTaskLogs(logs)).toEqual(logs);
+    });
 
-  it("falls back to 0 for non-numbers", () => {
-    expect(parseProgress("42")).toBe(0);
-    expect(parseProgress(null)).toBe(0);
-    expect(parseProgress(undefined)).toBe(0);
-  });
-});
-
-describe("parseStatusMessage", () => {
-  it("parses a string", () => {
-    expect(parseStatusMessage("Cloning…")).toBe("Cloning…");
-  });
-
-  it("falls back to the default message", () => {
-    expect(parseStatusMessage(42)).toBe("Analyzing repository…");
-    expect(parseStatusMessage(null)).toBe("Analyzing repository…");
-  });
-});
-
-describe("parseTaskLogs", () => {
-  it("parses a string array", () => {
-    expect(parseTaskLogs(["clone", "compile"])).toEqual(["clone", "compile"]);
-  });
-
-  it("falls back to an empty array", () => {
-    expect(parseTaskLogs("nope")).toEqual([]);
-    expect(parseTaskLogs(null)).toEqual([]);
+    it("should fallback to an empty array when input data type is malformed", () => {
+      expect(parseTaskLogs(null)).toEqual([]);
+      expect(parseTaskLogs("not-an-array")).toEqual([]);
+      expect(parseTaskLogs({})).toEqual([]);
+    });
   });
 });

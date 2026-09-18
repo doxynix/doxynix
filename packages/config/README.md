@@ -25,6 +25,7 @@
 | `hono.json` | `apps/siem-server` | TSConfig preset for Hono Bun / Node backend services |
 | `siem-client.json` | `apps/siem-client` | TSConfig preset for Vite + React 19 SPA bundling |
 | `node.json` | `packages/cli` | TSConfig preset for standalone Node.js and CLI tools |
+| `depcruise-base.json` | Global / Base | Shared dependency-cruiser "health" rules + options (extended by each workspace) |
 
 > [!NOTE]  
 >
@@ -46,6 +47,23 @@ In your workspace `tsconfig.json`:
     "baseUrl": "."
   }
 }
+```
+
+### Extending Dependency Cruiser Configs
+
+In your workspace `.dependency-cruiser.ts`:
+
+```ts
+import type { IConfiguration } from "dependency-cruiser";
+
+const config: IConfiguration = {
+  extends: "@doxynix/config/depcruise-base.json",
+  // Only add app-specific rules here (no-orphans exceptions, VSA/FSD);
+  // all "health" rules live in the base.
+  forbidden: [],
+};
+
+module.exports = config;
 ```
 
 ---

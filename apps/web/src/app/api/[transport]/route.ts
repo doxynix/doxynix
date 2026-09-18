@@ -1,6 +1,5 @@
 import type { ToolExecutionOptions } from "ai";
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
-import * as z from "zod";
 
 import { APP_VERSION } from "@/shared/config/env.server";
 
@@ -9,6 +8,8 @@ import { AGENT_SYSTEM_PROMPT } from "@/server/modules/agent/agent.prompts";
 import { getAgentTools } from "@/server/modules/agent/agent.tools";
 import { verifyAndUseApiKey } from "@/server/utils/verify-and-use-api-key";
 
+import { filterAndPrepareTools } from "./mcp-utils";
+
 type GenericExecuteFn = (
   args: Record<string, unknown>,
   context: ToolExecutionOptions,
@@ -16,44 +17,23 @@ type GenericExecuteFn = (
 
 const handler = createMcpHandler(
   (server) => {
-    const agentTools = getAgentTools();
+    const preparedTools = filterAndPrepareTools(getAgentTools() as any);
 
-    for (const [name, toolObj] of Object.entries(agentTools)) {
-      const executeFn = toolObj.execute;
-
-      if (typeof executeFn !== "function") {
-        continue;
-      }
-
-      if (toolObj.needsApproval === true) {
-        appLogger.debug({ msg: "Skipping approval-required tool in MCP registration", tool: name });
-        continue;
-      }
-
-      const inputSchema = toolObj.inputSchema;
-
-      if (!(inputSchema instanceof z.ZodObject)) {
-        continue;
-      }
-
+    for (const tool of preparedTools) {
       server.registerTool(
-        name,
-        {
-          description: toolObj.description ?? "",
-          inputSchema: inputSchema,
-          title: name,
-        },
+        tool.name,
+        { description: tool.description, inputSchema: tool.inputSchema, title: tool.name },
         async (args) => {
           try {
-            const parsedArgs = inputSchema.parse(args);
-
+            const parsedArgs = tool.inputSchema.parse(args);
             const dummyContext: ToolExecutionOptions = {
               messages: [],
-              toolCallId: `mcp-${name}-${Date.now()}`,
+              toolCallId: `mcp-${tool.name}-${Date.now()}`,
             };
-
-            const safeExecute = executeFn as unknown as GenericExecuteFn;
-            const result = await safeExecute(parsedArgs, dummyContext);
+            const result = await (tool.execute as unknown as GenericExecuteFn)(
+              parsedArgs,
+              dummyContext,
+            );
 
             return {
               content: [
@@ -65,13 +45,11 @@ const handler = createMcpHandler(
             };
           } catch (error) {
             const err = error instanceof Error ? error : new Error(String(error));
-
             appLogger.error({
               error: { message: err.message, stack: err.stack },
               msg: "MCP Tool execution failed",
-              tool: name,
+              tool: tool.name,
             });
-
             return {
               content: [
                 {
@@ -86,18 +64,8 @@ const handler = createMcpHandler(
       );
     }
   },
-  {
-    instructions: AGENT_SYSTEM_PROMPT,
-    serverInfo: {
-      name: "Doxynix",
-      version: APP_VERSION,
-    },
-  },
-  {
-    basePath: "/api",
-    maxDuration: 60,
-    verboseLogs: true,
-  },
+  { instructions: AGENT_SYSTEM_PROMPT, serverInfo: { name: "Doxynix", version: APP_VERSION } },
+  { basePath: "/api", maxDuration: 60, verboseLogs: true },
 );
 
 const withMcpAuthHandler = withMcpAuth(
@@ -106,21 +74,13 @@ const withMcpAuthHandler = withMcpAuth(
     if (bearer == null) {
       throw new Error("Unauthorized: Missing API Key.");
     }
-
     const keyRecord = await verifyAndUseApiKey(bearer);
     if (keyRecord == null) {
       throw new Error("Unauthorized: Invalid or revoked Doxynix API Key.");
     }
-
-    return {
-      clientId: String(keyRecord.userId),
-      scopes: [] as string[],
-      token: bearer,
-    };
+    return { clientId: String(keyRecord.userId), scopes: [], token: bearer };
   },
-  {
-    required: true,
-  },
+  { required: true },
 );
 
 export { withMcpAuthHandler as GET, withMcpAuthHandler as POST };

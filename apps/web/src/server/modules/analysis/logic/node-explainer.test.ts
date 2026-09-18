@@ -77,7 +77,7 @@ const makeDrilldown = (overrides: Record<string, unknown> = {}): StructureNodePa
 const analysisRef = { analysisId: "a1", commitSha: "c1", createdAt: new Date("2024-01-01") };
 
 describe("buildNodeExplainPayloadFromContext", () => {
-  it("собирает payload объяснения для узла со scoped путями", () => {
+  it("builds an explanation payload for a node with scoped paths", () => {
     const payload = buildNodeExplainPayloadFromContext(
       makeContext(),
       analysisRef,
@@ -107,7 +107,7 @@ describe("buildNodeExplainPayloadFromContext", () => {
     );
   });
 
-  it("ограничивает sourcePaths 8 уникальными путями и дедуплицирует", () => {
+  it("limits sourcePaths to 8 unique paths and deduplicates", () => {
     const payload = buildNodeExplainPayloadFromContext(
       makeContext(),
       null,
@@ -118,7 +118,7 @@ describe("buildNodeExplainPayloadFromContext", () => {
     expect(payload?.sourcePaths).toEqual(["src/app.ts"]);
   });
 
-  it("возвращает null для узла вне интересных путей", () => {
+  it("returns null for a node outside interesting paths", () => {
     const payload = buildNodeExplainPayloadFromContext(
       makeContext(),
       null,
@@ -129,7 +129,7 @@ describe("buildNodeExplainPayloadFromContext", () => {
     expect(payload).toBeNull();
   });
 
-  it("для группы строит payload с маркерами группы", () => {
+  it("for a group, builds a payload with group markers", () => {
     const payload = buildNodeExplainPayloadFromContext(
       makeContext(),
       null,

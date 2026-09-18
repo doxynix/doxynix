@@ -10,7 +10,7 @@ export type PRFinding = {
   line: number;
   message: string;
   score: number;
-  severity: "CRITICAL" | "HIGH" | "LOW" | "MEDIUM"; // Слова для UI
+  severity: "CRITICAL" | "HIGH" | "LOW" | "MEDIUM"; // Labels used in the UI
   suggestion?: string;
   title: string;
   type: "ARCHITECTURE" | "BUG" | "COMPLEXITY" | "PERFORMANCE" | "SECURITY" | "STYLE";

@@ -43,6 +43,7 @@
     "**/.turbo": true,
     "**/coverage": true,
     "**/dist": true,
+    "**/node_modules/**": true,
     "**/playwright-report": true,
     "**/prisma/generated": true,
     "**/test-results": true

@@ -1,64 +1,37 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { smoothScrollTo } from "@/shared/lib/scroll";
+import { calculateScrollStep, easeInOutCubic } from "./scroll";
 
-describe("shared/lib/utils:smoothScrollTo", () => {
-  const scrollToMock = vi.fn();
-  const matchMediaMock = vi.fn().mockReturnValue({ matches: false });
-
-  beforeEach(() => {
-    vi.stubGlobal("window", {
-      history: {
-        replaceState: vi.fn(),
-      },
-      matchMedia: matchMediaMock,
-      pageYOffset: 0,
-      scrollTo: scrollToMock,
-    });
+describe("easeInOutCubic", () => {
+  it("should return 0 at the start of progress", () => {
+    expect(easeInOutCubic(0)).toBe(0);
   });
 
-  afterEach(() => {
-    vi.unstubAllGlobals();
+  it("should return 0.5 at exact midpoint", () => {
+    expect(easeInOutCubic(0.5)).toBe(0.5);
   });
 
-  it("should warn and stop when element is not found", () => {
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+  it("should return 1 at the end of progress", () => {
+    expect(easeInOutCubic(1)).toBe(1);
+  });
+});
 
-    vi.stubGlobal("document", {
-      getElementById: vi.fn(() => null),
-    });
-
-    smoothScrollTo("missing-element");
-
-    expect(warnSpy).toHaveBeenCalledWith("Element with id #missing-element not found");
-    warnSpy.mockRestore();
+describe("calculateScrollStep", () => {
+  it("should compute correct intermediate position at half duration", () => {
+    const result = calculateScrollStep(1000, 1400, 800, 100, 400);
+    expect(result.position).toBe(300);
+    expect(result.isFinished).toBe(false);
   });
 
-  it("should call scrollTo when target element exists", () => {
-    const element = {
-      getBoundingClientRect: vi.fn(() => ({ top: 300 })),
-    };
-    let currentTime = 0;
+  it("should mark operation as finished when duration bound is met", () => {
+    const result = calculateScrollStep(1000, 1800, 800, 100, 400);
+    expect(result.position).toBe(500);
+    expect(result.isFinished).toBe(true);
+  });
 
-    vi.stubGlobal("document", {
-      getElementById: vi.fn(() => element),
-    });
-    vi.stubGlobal("window", {
-      history: {
-        replaceState: vi.fn(),
-      },
-      matchMedia: matchMediaMock,
-      pageYOffset: 100,
-      scrollTo: scrollToMock,
-    });
-    vi.stubGlobal("requestAnimationFrame", (callback: (time: number) => void) => {
-      currentTime += 400;
-      callback(currentTime);
-      return 1;
-    });
-
-    smoothScrollTo("target", 80, 800);
-
-    expect(scrollToMock).toHaveBeenCalled();
+  it("should clip position to distance max cap when duration overflows", () => {
+    const result = calculateScrollStep(1000, 2500, 800, 100, 400);
+    expect(result.position).toBe(500);
+    expect(result.isFinished).toBe(true);
   });
 });

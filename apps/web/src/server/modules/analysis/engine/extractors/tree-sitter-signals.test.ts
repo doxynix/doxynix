@@ -16,8 +16,8 @@ import {
   TREE_SITTER_SUPPORTED_EXTENSIONS,
 } from "./tree-sitter-signals";
 
-describe("tree-sitter-signals: контракт спецификаций (без wasm)", () => {
-  it("экспортирует ожидаемый список поддерживаемых расширений", () => {
+describe("tree-sitter-signals: spec contract (without wasm)", () => {
+  it("exports the expected list of supported extensions", () => {
     for (const ext of [
       ".ts",
       ".tsx",
@@ -37,7 +37,7 @@ describe("tree-sitter-signals: контракт спецификаций (без
     }
   });
 
-  it(".ts → declarations всех пяти SymbolKind + 3 route-паттерна + typescript-wasm", () => {
+  it(".ts → declarations of all five SymbolKinds + 3 route patterns + typescript-wasm", () => {
     const spec = getSpecByExt(".ts");
 
     expect(spec?.declarations.map((declaration) => declaration.kind)).toEqual([
@@ -56,7 +56,7 @@ describe("tree-sitter-signals: контракт спецификаций (без
     expect(spec?.entrypoints.length).toBeGreaterThan(0);
   });
 
-  it(".py → FastAPI/Flask + Django route-паттерны и python-wasm", () => {
+  it(".py → FastAPI/Flask + Django route patterns and python-wasm", () => {
     const spec = getSpecByExt(".py");
 
     expect(spec?.routePatterns?.map((route) => route.framework)).toEqual([
@@ -67,14 +67,14 @@ describe("tree-sitter-signals: контракт спецификаций (без
     expect(spec?.wasmPackage).toBe("tree-sitter-python");
   });
 
-  it(".go → Gin/Echo route-паттерны и go-wasm", () => {
+  it(".go → Gin/Echo route patterns and go-wasm", () => {
     const spec = getSpecByExt(".go");
 
     expect(spec?.routePatterns?.map((route) => route.framework)).toEqual(["Gin", "Echo", "Echo"]);
     expect(spec?.wasm).toBe("tree-sitter-go.wasm");
   });
 
-  it(".rs → Axum/Actix route-паттерн и declaration-типы Rust", () => {
+  it(".rs → Axum/Actix route pattern and Rust declaration types", () => {
     const spec = getSpecByExt(".rs");
 
     expect(spec?.routePatterns?.[0]?.framework).toBe("Axum/Actix");
@@ -86,12 +86,12 @@ describe("tree-sitter-signals: контракт спецификаций (без
     ]);
   });
 
-  it("неизвестное/пустое расширение → undefined", () => {
+  it("unknown/empty extension → undefined", () => {
     expect(getSpecByExt(".unknown")).toBeUndefined();
     expect(getSpecByExt("")).toBeUndefined();
   });
 
-  it("collectTreeSitterSignals парсит AST в юнит-окружении (wasm доступен)", async () => {
+  it("collectTreeSitterSignals parses AST in unit environment (wasm available)", async () => {
     const result = await collectTreeSitterSignals({
       content: 'package main\n\nfunc main() {\n\tprintln("hi")\n}\n',
       path: "src/main.go",

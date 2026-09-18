@@ -705,7 +705,7 @@ type FindingInputForPrompt = {
 };
 
 /**
- * Системный промпт для профессионального ИИ-рефакторинга кода (SEARCH/REPLACE).
+ * System prompt for professional AI code refactoring (SEARCH/REPLACE).
  */
 export function buildCodeFixerSystemPrompt(targetLanguage: string = "English"): string {
   return PromptFactory.forRole("generic", targetLanguage)
@@ -801,7 +801,7 @@ export function buildCodeFixerSystemPrompt(targetLanguage: string = "English"): 
 }
 
 /**
- * Пользовательский промпт, упаковывающий файлы и уязвимости в XML.
+ * User prompt that wraps files and vulnerabilities into XML.
  */
 export function buildCodeFixerUserPrompt(
   findings: FindingInputForPrompt[],

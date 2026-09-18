@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { LogEntry } from "./terminal-logs";
-import { countLogs, filterLogs, parseLogs } from "./terminal-logs";
+import { computeTextHighlight, countLogs, filterLogs, parseLogs } from "./terminal-logs";
 
 describe("parseLogs", () => {
   it("keeps plain lines as info with a default timestamp", () => {
@@ -49,10 +48,10 @@ describe("parseLogs", () => {
 });
 
 describe("countLogs", () => {
-  const sample: LogEntry[] = [
-    { id: "1", level: "error", message: "a", timestamp: "t" },
-    { id: "2", level: "info", message: "b", timestamp: "t" },
-    { id: "3", level: "error", message: "c", timestamp: "t" },
+  const sample = [
+    { id: "1", level: "error" as const, message: "a", timestamp: "t" },
+    { id: "2", level: "info" as const, message: "b", timestamp: "t" },
+    { id: "3", level: "error" as const, message: "c", timestamp: "t" },
   ];
 
   it("counts all and per-level entries", () => {
@@ -65,10 +64,10 @@ describe("countLogs", () => {
 });
 
 describe("filterLogs", () => {
-  const sample: LogEntry[] = [
-    { id: "1", level: "error", message: "BOOM failed", timestamp: "t" },
-    { id: "2", level: "info", message: "started", timestamp: "t" },
-    { id: "3", level: "info", message: "boom retry", timestamp: "t" },
+  const sample = [
+    { id: "1", level: "error" as const, message: "BOOM failed", timestamp: "t" },
+    { id: "2", level: "info" as const, message: "started", timestamp: "t" },
+    { id: "3", level: "info" as const, message: "boom retry", timestamp: "t" },
   ];
 
   it("keeps everything for filter=all and empty search", () => {
@@ -86,8 +85,36 @@ describe("filterLogs", () => {
   it("combines filter and search with AND", () => {
     expect(filterLogs(sample, "info", "boom").map((l) => l.id)).toEqual(["3"]);
   });
+});
 
-  it("returns nothing when nothing matches", () => {
-    expect(filterLogs(sample, "warn", "")).toEqual([]);
+describe("computeTextHighlight", () => {
+  it("should return a single unhighlighted token when query is empty string", () => {
+    const result = computeTextHighlight("hello world", "");
+    expect(result).toEqual([{ isHighlighted: false, text: "hello world" }]);
+  });
+
+  it("should successfully split and highlight matching sub-tokens", () => {
+    const result = computeTextHighlight("hello world", "world");
+    expect(result).toEqual([
+      { isHighlighted: false, text: "hello " },
+      { isHighlighted: true, text: "world" },
+    ]);
+  });
+
+  it("should match tokens case-insensitively while preserving original text case", () => {
+    const result = computeTextHighlight("Hello WORLD", "world");
+    expect(result).toEqual([
+      { isHighlighted: false, text: "Hello " },
+      { isHighlighted: true, text: "WORLD" },
+    ]);
+  });
+
+  it("should safely escape regex special tokens to prevent runtime compilation errors", () => {
+    const result = computeTextHighlight("core [v1.0] fix", "[v1.0]");
+    expect(result).toEqual([
+      { isHighlighted: false, text: "core " },
+      { isHighlighted: true, text: "[v1.0]" },
+      { isHighlighted: false, text: " fix" },
+    ]);
   });
 });

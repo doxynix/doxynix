@@ -5,8 +5,8 @@ import { getRegexSignalSpec } from "./regex-signal-specs";
 const file = (path: string, content = "") => ({ content, path });
 
 describe("getRegexSignalSpec", () => {
-  describe("выбор спеки по расширению", () => {
-    it("возвращает .cs-спеку с ASP.NET Core роутами и Map*-apiSurface", () => {
+  describe("spec selection by extension", () => {
+    it("returns the .cs spec with ASP.NET Core routes and Map*-apiSurface", () => {
       const spec = getRegexSignalSpec(file("src/Program.cs"));
 
       expect(spec.apiSurfacePatterns).toHaveLength(2);
@@ -15,7 +15,7 @@ describe("getRegexSignalSpec", () => {
       expect(spec.symbolPatterns.map((symbol) => symbol.kind)).toEqual(["class", "interface"]);
     });
 
-    it("возвращает .dart-спеку без routePatterns", () => {
+    it("returns the .dart spec without routePatterns", () => {
       const spec = getRegexSignalSpec(file("lib/main.dart"));
 
       expect(spec.routePatterns).toBeUndefined();
@@ -23,7 +23,7 @@ describe("getRegexSignalSpec", () => {
       expect(spec.symbolPatterns.map((symbol) => symbol.kind)).toEqual(["class", "function"]);
     });
 
-    it("возвращает .go-спеку с Gin-роутами", () => {
+    it("returns the .go spec with Gin routes", () => {
       const spec = getRegexSignalSpec(file("cmd/server/main.go"));
 
       expect(spec.routePatterns?.[0]?.framework).toBe("Gin");
@@ -31,7 +31,7 @@ describe("getRegexSignalSpec", () => {
       expect(spec.symbolPatterns.map((symbol) => symbol.kind)).toEqual(["function", "struct"]);
     });
 
-    it("возвращает .java-спеку со Spring Boot роутами", () => {
+    it("returns the .java spec with Spring Boot routes", () => {
       const spec = getRegexSignalSpec(file("src/main/java/App.java"));
 
       expect(spec.routePatterns?.[0]?.framework).toBe("Spring Boot");
@@ -40,14 +40,14 @@ describe("getRegexSignalSpec", () => {
       );
     });
 
-    it("возвращает .php-спеку с Laravel-роутами", () => {
+    it("returns the .php spec with Laravel routes", () => {
       const spec = getRegexSignalSpec(file("routes/web.php"));
 
       expect(spec.routePatterns?.[0]?.framework).toBe("Laravel");
       expect(spec.symbolPatterns.map((symbol) => symbol.kind)).toEqual(["class", "function"]);
     });
 
-    it("возвращает .py-спеку с двумя FastAPI-роут-паттернами и extraFrameworkTokens", () => {
+    it("returns the .py spec with two FastAPI route patterns and extraFrameworkTokens", () => {
       const spec = getRegexSignalSpec(file("src/app.py"));
 
       expect(spec.routePatterns).toHaveLength(2);
@@ -58,7 +58,7 @@ describe("getRegexSignalSpec", () => {
       expect(spec.apiSurfacePatterns).toHaveLength(3);
     });
 
-    it("возвращает .rb-спеку с Ruby Router роутами", () => {
+    it("returns the .rb spec with Ruby Router routes", () => {
       const spec = getRegexSignalSpec(file("app/controllers/x.rb"));
 
       expect(spec.routePatterns?.[0]?.framework).toBe("Ruby Router");
@@ -69,7 +69,7 @@ describe("getRegexSignalSpec", () => {
       ]);
     });
 
-    it("возвращает .rs-спеку с Axum-роутами и trait/struct символами", () => {
+    it("returns the .rs spec with Axum routes and trait/struct symbols", () => {
       const spec = getRegexSignalSpec(file("src/main.rs"));
 
       expect(spec.routePatterns?.[0]?.framework).toBe("Axum");
@@ -80,14 +80,14 @@ describe("getRegexSignalSpec", () => {
       ]);
     });
 
-    it("возвращает .scala- и .swift-спеки без routePatterns", () => {
+    it("returns the .scala and .swift specs without routePatterns", () => {
       expect(getRegexSignalSpec(file("Main.scala")).routePatterns).toBeUndefined();
       expect(getRegexSignalSpec(file("Main.swift")).routePatterns).toBeUndefined();
     });
   });
 
-  describe("алиасы расширений", () => {
-    it("маппит C-семейство на c-family-спеку", () => {
+  describe("extension aliases", () => {
+    it("maps C-family extensions to the c-family spec", () => {
       for (const ext of [".cc", ".cpp", ".h", ".hpp"]) {
         const spec = getRegexSignalSpec(file(`src/main${ext}`));
         expect(spec.importPatterns[0]!.source).toBe(/^\s*#include\s+"([^"]+)"/u.source);
@@ -95,20 +95,20 @@ describe("getRegexSignalSpec", () => {
       }
     });
 
-    it(".c не в алиасах → DEFAULT-спека (факт)", () => {
+    it(".c not in aliases → DEFAULT spec (fact)", () => {
       const spec = getRegexSignalSpec(file("src/main.c"));
       expect(spec.routePatterns).toBeUndefined();
       expect(spec.apiSurfacePatterns).toEqual([]);
     });
 
-    it("маппит .kt/.kts на .java-спеку", () => {
+    it("maps .kt/.kts to the .java spec", () => {
       for (const ext of [".kt", ".kts"]) {
         const spec = getRegexSignalSpec(file(`src/App${ext}`));
         expect(spec.routePatterns?.[0]?.framework).toBe("Spring Boot");
       }
     });
 
-    it("маппит .bsl/.os на 1c-спеку, а .ex/.exs на elixir-спеку", () => {
+    it("maps .bsl/.os to the 1c spec and .ex/.exs to the elixir spec", () => {
       const oneCSpec = getRegexSignalSpec(file("src/module.bsl"));
       expect(oneCSpec.extraFrameworkTokens?.({ content: "", path: "src/module.os" })).toEqual([
         "1C:Enterprise",
@@ -119,8 +119,8 @@ describe("getRegexSignalSpec", () => {
     });
   });
 
-  describe("неизвестное расширение → DEFAULT-спека", () => {
-    it("для .xyz-расширения возвращает дефолтный набор", () => {
+  describe("unknown extension → DEFAULT spec", () => {
+    it("returns the default set for .xyz extensions", () => {
       const spec = getRegexSignalSpec(file("src/unknown.xyz"));
 
       expect(spec.apiSurfacePatterns).toEqual([]);
@@ -131,14 +131,14 @@ describe("getRegexSignalSpec", () => {
       expect(spec.entrypointHint(file("src/unknown.xyz"))).toBe(false);
     });
 
-    it("для пути без расширения тоже возвращает DEFAULT", () => {
+    it("also returns DEFAULT for extensionless paths", () => {
       const spec = getRegexSignalSpec(file("Makefile"));
 
       expect(spec.apiSurfacePatterns).toEqual([]);
       expect(spec.routePatterns).toBeUndefined();
     });
 
-    it("для uppercase-расширения возвращает DEFAULT (регистрочувствительный lookup)", () => {
+    it("returns DEFAULT for uppercase extensions (case-sensitive lookup)", () => {
       const spec = getRegexSignalSpec(file("src/App.TS"));
 
       expect(spec.apiSurfacePatterns).toEqual([]);
@@ -146,8 +146,8 @@ describe("getRegexSignalSpec", () => {
     });
   });
 
-  describe("regex-паттерны из спек против реальных строк", () => {
-    it(".go Router-роут: группа method и path", () => {
+  describe("spec regex patterns against real strings", () => {
+    it(".go Router route: method and path capture groups", () => {
       const spec = getRegexSignalSpec(file("main.go"));
       const pattern = spec.routePatterns?.[0]?.pattern;
       expect(pattern).toBeDefined();
@@ -158,7 +158,7 @@ describe("getRegexSignalSpec", () => {
       expect(match?.[2]).toBe("/healthz");
     });
 
-    it(".py FastAPI роуты: @app.get и @router.post", () => {
+    it(".py FastAPI routes: @app.get and @router.post", () => {
       const spec = getRegexSignalSpec(file("app.py"));
       const patterns = (spec.routePatterns ?? []).map((route) => {
         return new RegExp(route.pattern.source, route.pattern.flags);
@@ -173,7 +173,7 @@ describe("getRegexSignalSpec", () => {
       expect(appGet?.[2]).toBe("/items");
     });
 
-    it(".cs MapGet: группа method и path", () => {
+    it(".cs MapGet: method and path capture groups", () => {
       const spec = getRegexSignalSpec(file("Program.cs"));
       const pattern = spec.routePatterns?.[0]?.pattern;
       const fresh = new RegExp(pattern!.source, pattern!.flags);
@@ -183,7 +183,7 @@ describe("getRegexSignalSpec", () => {
       expect(match?.[2]).toBe("/api/items");
     });
 
-    it('.rs Axum-роут: #[get("/x")]', () => {
+    it('.rs Axum route: #[get("/x")]', () => {
       const spec = getRegexSignalSpec(file("main.rs"));
       const pattern = spec.routePatterns?.[0]?.pattern;
       const fresh = new RegExp(pattern!.source, pattern!.flags);
@@ -193,7 +193,7 @@ describe("getRegexSignalSpec", () => {
       expect(match?.[2]).toBe("/widgets");
     });
 
-    it('.php Laravel-роут: Route::get(" /users")', () => {
+    it('.php Laravel route: Route::get(" /users")', () => {
       const spec = getRegexSignalSpec(file("web.php"));
       const pattern = spec.routePatterns?.[0]?.pattern;
       const fresh = new RegExp(pattern!.source, pattern!.flags);
@@ -203,7 +203,7 @@ describe("getRegexSignalSpec", () => {
       expect(match?.[2]).toBe("/users");
     });
 
-    it("DEFAULT: export-строки и необворачивающие import", () => {
+    it("DEFAULT: export lines and non-wrapping imports", () => {
       const spec = getRegexSignalSpec(file("src/a.ts"));
 
       const exportPattern = new RegExp(
@@ -217,13 +217,13 @@ describe("getRegexSignalSpec", () => {
         spec.importPatterns[0]!.flags,
       );
       expect(importPattern.exec('import lodash from "lodash"')?.[1]).toBe("lodash");
-      // кавычковые side-effect импорты дефолтной спекой не собираются — `"` не в [\w./-]
+      // quoted side-effect imports are not collected by the default spec — `"` is not in [\w./-]
       expect(importPattern.exec('import "./styles.css";')).toBeNull();
     });
   });
 
   describe("entrypointHint", () => {
-    it(".cs: static void Main и WebApplication.CreateBuilder", () => {
+    it(".cs: static void Main and WebApplication.CreateBuilder", () => {
       const spec = getRegexSignalSpec(file("Program.cs"));
 
       expect(spec.entrypointHint(file("Program.cs", "static void Main(string[] args) {}"))).toBe(
@@ -246,7 +246,7 @@ describe("getRegexSignalSpec", () => {
       expect(spec.entrypointHint(file("run.py", "def main(): pass"))).toBe(false);
     });
 
-    it(".go: пакет main + func main", () => {
+    it(".go: package main + func main", () => {
       const spec = getRegexSignalSpec(file("main.go"));
 
       expect(spec.entrypointHint(file("main.go", "package main\n\nfunc main() {}"))).toBe(true);
@@ -262,7 +262,7 @@ describe("getRegexSignalSpec", () => {
       expect(spec.entrypointHint(file("App.java", "class App {}"))).toBe(false);
     });
 
-    it(".swift: @main; .rb: run/start в basename или config.ru", () => {
+    it(".swift: @main; .rb: run/start in basename or config.ru", () => {
       const swiftSpec = getRegexSignalSpec(file("main.swift"));
       expect(swiftSpec.entrypointHint(file("main.swift", "@main struct App {}"))).toBe(true);
       expect(swiftSpec.entrypointHint(file("main.swift", "import UIKit"))).toBe(false);
@@ -273,14 +273,14 @@ describe("getRegexSignalSpec", () => {
       expect(rubyspec.entrypointHint(file("app.rb", "require 'app'"))).toBe(false);
     });
 
-    it(".php: index.php по имени файла", () => {
+    it(".php: index.php by file name", () => {
       const spec = getRegexSignalSpec(file("public/index.php"));
 
       expect(spec.entrypointHint(file("public/index.php", "<?php echo 1;"))).toBe(true);
       expect(spec.entrypointHint(file("public/router.php", "<?php echo 1;"))).toBe(false);
     });
 
-    it("1c: модули приложения в пути", () => {
+    it("1c: application modules in path", () => {
       const spec = getRegexSignalSpec(file("ManagedApplicationModule.bsl"));
 
       expect(
@@ -300,7 +300,7 @@ describe("getRegexSignalSpec", () => {
   });
 
   describe("extraFrameworkTokens", () => {
-    it(".py: собирает имена фреймворков из содержимого", () => {
+    it(".py: collects framework names from content", () => {
       const spec = getRegexSignalSpec(file("app.py"));
 
       const tokens = spec.extraFrameworkTokens?.(
@@ -310,13 +310,13 @@ describe("getRegexSignalSpec", () => {
       expect(tokens).toEqual(["FastAPI", "APIRouter", "Flask"]);
     });
 
-    it(".py: без фреймворк-токенов возвращает пустой список", () => {
+    it(".py: returns an empty list without framework tokens", () => {
       const spec = getRegexSignalSpec(file("app.py"));
 
       expect(spec.extraFrameworkTokens?.(file("app.py", "import os"))).toEqual([]);
     });
 
-    it("1c: всегда возвращает токен 1C:Enterprise", () => {
+    it("1c: always returns the 1C:Enterprise token", () => {
       const spec = getRegexSignalSpec(file("src/module.bsl"));
 
       expect(spec.extraFrameworkTokens?.(file("src/module.bsl", ""))).toEqual(["1C:Enterprise"]);

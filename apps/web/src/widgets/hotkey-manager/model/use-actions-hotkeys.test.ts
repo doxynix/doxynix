@@ -1,91 +1,30 @@
-// @vitest-environment jsdom
+import { describe, expect, it } from "vitest";
 
-import { act, renderHook } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { processGlobalHotkeySequence } from "./use-actions-hotkeys";
 
-const mockSetOpen = vi.fn();
-vi.mock("@/entities/repo/model/use-create-repo-dialog.store", () => ({
-  useCreateRepoActions: () => ({ setOpen: mockSetOpen }),
-}));
-
-const hotkeyMap = new Map<string, (e: any, handler?: any) => void>();
-vi.mock("react-hotkeys-hook", () => ({
-  useHotkeys: vi.fn((keys: string, callback: any, options?: any) => {
-    if (options?.enabled !== false) {
-      hotkeyMap.set(keys, callback);
-    } else {
-      hotkeyMap.delete(keys);
-    }
-  }),
-}));
-
-import { resolveGlobalHotkeyCommand, useGlobalActionsHotkeys } from "./use-actions-hotkeys";
-
-describe("resolveGlobalHotkeyCommand", () => {
-  it("maps the c+r sequence to createRepo", () => {
-    expect(resolveGlobalHotkeyCommand("c", "KeyR")).toBe("createRepo");
+describe("processGlobalHotkeySequence", () => {
+  it("should return ignore action when prefix is missing", () => {
+    const result = processGlobalHotkeySequence(null, "KeyR");
+    expect(result).toEqual({ action: "ignore" });
   });
 
-  it("returns null for unknown keys or invalid prefix", () => {
-    expect(resolveGlobalHotkeyCommand("c", "KeyX")).toBeNull();
-    expect(resolveGlobalHotkeyCommand("x", "KeyR")).toBeNull();
-    expect(resolveGlobalHotkeyCommand("c", "Digit1")).toBeNull();
-  });
-});
-
-describe("useGlobalActionsHotkeys hook", () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    vi.clearAllMocks();
-    hotkeyMap.clear();
+  it("should successfully execute command on valid c + r sequence", () => {
+    const result = processGlobalHotkeySequence("c", "KeyR");
+    expect(result).toEqual({ action: "execute", command: "createRepo" });
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
+  it("should reset state when the second key is not an alphabetic letter", () => {
+    const result = processGlobalHotkeySequence("c", "Digit1");
+    expect(result).toEqual({ action: "reset" });
   });
 
-  it("opens create repo dialog when c + r sequence is pressed", () => {
-    const onAction = vi.fn();
-    const stopPropagation = vi.fn();
-    renderHook(() => useGlobalActionsHotkeys(onAction));
-
-    act(() => {
-      hotkeyMap.get("c")?.({}, { hotkey: "c" });
-    });
-
-    act(() => {
-      hotkeyMap.get("*")?.({ code: "KeyR", stopPropagation });
-    });
-
-    expect(stopPropagation).toHaveBeenCalled();
-    expect(onAction).toHaveBeenCalledTimes(1);
-
-    act(() => {
-      vi.advanceTimersByTime(10);
-    });
-
-    expect(mockSetOpen).toHaveBeenCalledWith(true);
+  it("should reset state when prefix is valid but second letter is wrong", () => {
+    const result = processGlobalHotkeySequence("c", "KeyX");
+    expect(result).toEqual({ action: "reset" });
   });
 
-  it("clears prefix on timeout without opening dialog", () => {
-    renderHook(() => useGlobalActionsHotkeys());
-
-    act(() => {
-      hotkeyMap.get("c")?.({}, { hotkey: "c" });
-    });
-
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-
-    act(() => {
-      hotkeyMap.get("*")?.({ code: "KeyR", stopPropagation: vi.fn() });
-    });
-
-    act(() => {
-      vi.advanceTimersByTime(10);
-    });
-
-    expect(mockSetOpen).not.toHaveBeenCalled();
+  it("should reset state when an unrecognized prefix is provided", () => {
+    const result = processGlobalHotkeySequence("x", "KeyR");
+    expect(result).toEqual({ action: "reset" });
   });
 });

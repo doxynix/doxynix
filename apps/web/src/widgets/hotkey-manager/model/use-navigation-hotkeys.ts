@@ -20,6 +20,11 @@ const SEQUENTIAL_ROUTES: Record<string, Record<string, string>> = {
 
 const PREFIX_KEYS = Object.keys(SEQUENTIAL_ROUTES);
 
+export type SequenceResult =
+  | { action: "execute"; path: string }
+  | { action: "reset" }
+  | { action: "ignore" };
+
 export function resolveNavigationRoute(prefix: string, code: string): string | null {
   const secondKey = code.startsWith("Key") ? code.slice(3).toLowerCase() : null;
 
@@ -28,6 +33,19 @@ export function resolveNavigationRoute(prefix: string, code: string): string | n
   }
 
   return SEQUENTIAL_ROUTES[prefix]?.[secondKey] ?? null;
+}
+
+export function processNavigationSequence(prefix: string | null, code: string): SequenceResult {
+  if (prefix == null) {
+    return { action: "ignore" };
+  }
+
+  const path = resolveNavigationRoute(prefix, code);
+  if (path == null) {
+    return { action: "reset" };
+  }
+
+  return { action: "execute", path };
 }
 
 export function useNavigationHotkeys(onAction?: () => void) {
@@ -59,18 +77,18 @@ export function useNavigationHotkeys(onAction?: () => void) {
   useHotkeys(
     "*",
     (e) => {
-      if (prefix == null) {
+      const result = processNavigationSequence(prefix, e.code);
+
+      if (result.action === "reset") {
+        setPrefix(null);
         return;
       }
 
-      const path = resolveNavigationRoute(prefix, e.code);
-
-      if (path != null) {
+      if (result.action === "execute") {
         onAction?.();
-        router.push(path);
+        router.push(result.path);
+        setPrefix(null);
       }
-
-      setPrefix(null);
     },
     { enabled: prefix != null, enableOnFormTags: false, preventDefault: true },
     [prefix],

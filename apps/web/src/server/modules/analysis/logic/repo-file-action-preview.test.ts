@@ -75,7 +75,7 @@ const makeDocResult = (
 });
 
 describe("toQuickFileAuditPreview", () => {
-  it("корректирует contextNote при отсутствии контекста", () => {
+  it("corrects contextNote when context is absent", () => {
     const result = toQuickFileAuditPreview(
       makeAuditResult({ contextDiagnostics: makeContext({ hasContext: false }) }),
     );
@@ -90,7 +90,7 @@ describe("toQuickFileAuditPreview", () => {
     );
   });
 
-  it("graph-backed с сильным контекстом даёт статус (graph-backed)", () => {
+  it("graph-backed with strong context yields (graph-backed) status", () => {
     const result = toQuickFileAuditPreview(
       makeAuditResult({
         contextDiagnostics: makeContext({ contextStrength: "strong" }),
@@ -104,7 +104,7 @@ describe("toQuickFileAuditPreview", () => {
     );
   });
 
-  it("graph-backed с умеренным контекстом", () => {
+  it("graph-backed with moderate context", () => {
     const result = toQuickFileAuditPreview(
       makeAuditResult({
         contextDiagnostics: makeContext({ contextStrength: "moderate" }),
@@ -117,7 +117,7 @@ describe("toQuickFileAuditPreview", () => {
     );
   });
 
-  it("graph-backed со слабым контекстом предупреждает о верификации", () => {
+  it("graph-backed with light context warns about verification", () => {
     const result = toQuickFileAuditPreview(
       makeAuditResult({
         contextDiagnostics: makeContext({ contextStrength: "light" }),
@@ -134,7 +134,7 @@ describe("toQuickFileAuditPreview", () => {
     );
   });
 
-  it("контекст уровня узла без graph-neighbor поддержки", () => {
+  it("node-level context without graph-neighbor support", () => {
     const result = toQuickFileAuditPreview(
       makeAuditResult({ contextDiagnostics: makeContext({ contextStrength: "strong" }) }),
     );
@@ -145,7 +145,7 @@ describe("toQuickFileAuditPreview", () => {
     expect(result.title).toBe("Quick file audit (context-aware)");
   });
 
-  it("слабый контекст без graph-backing остаётся context-aware", () => {
+  it("light context without graph-backing stays context-aware", () => {
     const result = toQuickFileAuditPreview(
       makeAuditResult({ contextDiagnostics: makeContext({ contextStrength: "light" }) }),
     );
@@ -156,7 +156,7 @@ describe("toQuickFileAuditPreview", () => {
     );
   });
 
-  it("прокидывает результирующие поля без изменений и зовёт formatQuickFileAuditMarkdown", () => {
+  it("passes result fields through unchanged and calls formatQuickFileAuditMarkdown", () => {
     mockFormat.mockClear();
     const input = makeAuditResult({ consistency: "mismatch", consistencyNote: "stale diff" });
     const result = toQuickFileAuditPreview(input);
@@ -174,7 +174,7 @@ describe("toQuickFileAuditPreview", () => {
 });
 
 describe("toDocumentFilePreview", () => {
-  it("использует documentation как content без префикса контекста", () => {
+  it("uses documentation as content without context prefix", () => {
     const input = makeDocResult({
       contextDiagnostics: makeContext({ hasContext: false }),
     });
@@ -188,7 +188,7 @@ describe("toDocumentFilePreview", () => {
     );
   });
 
-  it("прокидывает values и использует graph-backed заголовок", () => {
+  it("passes values through and uses graph-backed title", () => {
     const result = toDocumentFilePreview(
       makeDocResult({
         contextDiagnostics: makeContext({ contextStrength: "strong" }),

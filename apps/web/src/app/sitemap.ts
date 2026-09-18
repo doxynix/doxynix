@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { APP_URL } from "@/shared/config/env.client";
 import { DEFAULT_LOCALE, LOCALES } from "@/shared/config/locales";
+import { getSitemapUrl } from "@/shared/lib/sitemap.utils";
 
 type RouteConfig = {
   changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
@@ -10,48 +11,13 @@ type RouteConfig = {
 };
 
 const PUBLIC_ROUTES: RouteConfig[] = [
-  {
-    changeFrequency: "daily",
-    path: "",
-    priority: 1.0,
-  },
-  {
-    changeFrequency: "weekly",
-    path: "about",
-    priority: 0.8,
-  },
-  {
-    changeFrequency: "weekly",
-    path: "support",
-    priority: 0.8,
-  },
-  {
-    changeFrequency: "weekly",
-    path: "thanks",
-    priority: 0.7,
-  },
-  {
-    changeFrequency: "monthly",
-    path: "privacy",
-    priority: 0.3,
-  },
-  {
-    changeFrequency: "monthly",
-    path: "terms",
-    priority: 0.3,
-  },
+  { changeFrequency: "daily", path: "", priority: 1.0 },
+  { changeFrequency: "weekly", path: "about", priority: 0.8 },
+  { changeFrequency: "weekly", path: "support", priority: 0.8 },
+  { changeFrequency: "weekly", path: "high-five", priority: 0.7 },
+  { changeFrequency: "monthly", path: "privacy", priority: 0.3 },
+  { changeFrequency: "monthly", path: "terms", priority: 0.3 },
 ];
-
-function getUrl(path: string, locale: string): string {
-  const baseUrl = APP_URL.replace(/\/$/, "");
-  const cleanPath = path ? (path.startsWith("/") ? path.slice(1) : path) : "";
-
-  if (locale === DEFAULT_LOCALE) {
-    return cleanPath ? `${baseUrl}/${cleanPath}` : baseUrl;
-  }
-
-  return cleanPath ? `${baseUrl}/${locale}/${cleanPath}` : `${baseUrl}/${locale}`;
-}
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const sitemapEntries: MetadataRoute.Sitemap = [];
@@ -60,10 +26,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const languages: Record<string, string> = {};
 
     LOCALES.forEach((locale) => {
-      languages[locale] = getUrl(path, locale);
+      languages[locale] = getSitemapUrl(APP_URL, path, locale, DEFAULT_LOCALE);
     });
 
-    languages["x-default"] = getUrl(path, DEFAULT_LOCALE);
+    languages["x-default"] = getSitemapUrl(APP_URL, path, DEFAULT_LOCALE, DEFAULT_LOCALE);
 
     LOCALES.forEach((locale) => {
       sitemapEntries.push({
@@ -73,7 +39,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency,
         lastModified: new Date(),
         priority,
-        url: getUrl(path, locale),
+        url: getSitemapUrl(APP_URL, path, locale, DEFAULT_LOCALE),
       });
     });
   });

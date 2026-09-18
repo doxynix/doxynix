@@ -2,8 +2,8 @@ import type { RepositoryFile } from "./discovery.types";
 import { ProjectPolicy } from "./project-policy";
 
 /**
- * Вычисляет вероятные точки входа (entrypoints) в анализируемую кодовую базу.
- * Опирается на маски файлов, семантику папок и граф связей (отсутствие входящих импортов).
+ * Computes likely entrypoints in the analyzed codebase.
+ * Relies on file name patterns, folder semantics, and the dependency graph (files with no inbound imports).
  */
 export function getLikelyEntrypoints(
   files: RepositoryFile[],

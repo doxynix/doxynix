@@ -28,19 +28,19 @@ const TS_FIXTURE = [
 ].join("\n");
 
 describe("collectRegexSignals", () => {
-  describe("TypeScript-файл (DEFAULT-спека)", () => {
+  describe("TypeScript file (DEFAULT spec)", () => {
     const signals = collectRegexSignals(file("src/app.ts", TS_FIXTURE));
 
-    it("собирает bare-импорты (кавычковые side-effect не матчатся дефолтной спекой)", () => {
+    it("collects bare imports (quoted side-effect imports don't match the default spec)", () => {
       expect(signals.imports).toEqual(["lodash"]);
     });
 
-    it("считает экспорты по строкам export/function/class/interface и не считает комментарии", () => {
+    it("counts exports by export/function/class/interface lines and ignores comments", () => {
       // export function, export const, interface User, class Service, function helper
       expect(signals.exports).toBe(5);
     });
 
-    it("находит символы function/class/interface с экспортной достоверностью", () => {
+    it("finds function/class/interface symbols with export confidence", () => {
       const names = signals.symbols ?? [];
       expect(names.map((symbol) => symbol.name)).toEqual(["helper", "Service", "User"]);
       for (const symbol of names) {
@@ -53,12 +53,12 @@ describe("collectRegexSignals", () => {
       expect(names[2]?.kind).toBe("interface");
     });
 
-    it("не даёт apiSurface и роутов для дефолтной спеки", () => {
+    it("gives no apiSurface or routes for the default spec", () => {
       expect(signals.apiSurface).toBe(0);
       expect(signals.routes).toEqual([]);
     });
 
-    it("не считает import.meta.env кодом (entrypointHint=false) и сохраняет базовые поля", () => {
+    it("does not treat import.meta.env as code (entrypointHint=false) and keeps base fields", () => {
       expect(signals.entrypointHint).toBe(false);
       expect(signals.analysisMode).toBe("heuristic");
       expect(signals.confidence).toBe(60);
@@ -68,14 +68,14 @@ describe("collectRegexSignals", () => {
       expect(signals.frameworkHints).toBeDefined();
     });
 
-    it("подсвечивает строки символов (смещение на 1 из-за ^ + \\s*)", () => {
+    it("reports symbol lines (offset by 1 due to ^ + \\s*)", () => {
       const helper = (signals.symbols ?? []).find((symbol) => symbol.name === "helper");
 
       expect(helper?.line).toBe(17);
     });
   });
 
-  describe("Python FastAPI-файл", () => {
+  describe("Python FastAPI file", () => {
     const PY_FIXTURE = [
       "from fastapi import FastAPI",
       "import os",
@@ -95,19 +95,19 @@ describe("collectRegexSignals", () => {
 
     const signals = collectRegexSignals(file("src/app.py", PY_FIXTURE));
 
-    it("собирает импорты в порядке паттернов: import-строки до from-строк", () => {
+    it("collects imports in pattern order: import lines before from lines", () => {
       expect(signals.imports).toEqual(["os", "fastapi"]);
     });
 
-    it("считает exports: def и class", () => {
+    it("counts exports: def and class", () => {
       expect(signals.exports).toBe(2);
     });
 
-    it("считает apiSurface только от @app/декоратор-роутов", () => {
+    it("counts apiSurface only from @app/decorator routes", () => {
       expect(signals.apiSurface).toBe(1);
     });
 
-    it("извлекает FastAPI-роут с методом, путём и строкой", () => {
+    it("extracts the FastAPI route with method, path, and line", () => {
       expect(signals.routes).toHaveLength(1);
       const route = signals.routes?.[0];
       expect(route).toMatchObject({
@@ -121,25 +121,25 @@ describe("collectRegexSignals", () => {
       });
     });
 
-    it("извлекает символы function/class", () => {
+    it("extracts function/class symbols", () => {
       const names = (signals.symbols ?? []).map((symbol) => symbol.name);
       expect(names).toEqual(["list_items", "Item"]);
       expect((signals.symbols ?? [])[0]?.kind).toBe("function");
       expect((signals.symbols ?? [])[1]?.kind).toBe("class");
     });
 
-    it("распознаёт входную точку __main__", () => {
+    it("recognizes the __main__ entry point", () => {
       expect(signals.entrypointHint).toBe(true);
     });
 
-    it("собирает фреймворк-факт FastAPI из токенов импорта", () => {
+    it("collects the FastAPI framework fact from import tokens", () => {
       expect(signals.frameworkHints).toContainEqual(
         expect.objectContaining({ category: "framework", confidence: 88, name: "FastAPI" }),
       );
     });
   });
 
-  describe("Go-файл", () => {
+  describe("Go file", () => {
     const GO_FIXTURE = [
       "package main",
       "",
@@ -155,25 +155,25 @@ describe("collectRegexSignals", () => {
 
     const signals = collectRegexSignals(file("cmd/server/main.go", GO_FIXTURE));
 
-    it("собирает импорт из блочного require-формата (standalone-строка)", () => {
+    it("collects the import from block require format (standalone line)", () => {
       expect(signals.imports).toEqual(["log"]);
     });
 
-    it("считает apiSurface с учётом двойного матчинга router.GET (фактическое поведение)", () => {
-      // GET(...) и router.GET(...) оба матчатся на каждый роут: 2 роута * 2 паттерна = 4
+    it("counts apiSurface with double matching of router.GET (actual behavior)", () => {
+      // both GET(...) and router.GET(...) match each route: 2 routes * 2 patterns = 4
       expect(signals.apiSurface).toBe(4);
     });
 
-    it("считает exports только для экспортируемых (uppercase) функций — main не экспорт", () => {
-      // `main` начинается со строчной буквы → не матчит [A-Z]\w* (Go-правило экспорта)
+    it("counts exports only for exported (uppercase) functions — main is not an export", () => {
+      // `main` starts with a lowercase letter → doesn't match [A-Z]\w* (Go export rule)
       expect(signals.exports).toBe(0);
     });
 
-    it("не находит main как символ (строчная буква — не экспорт)", () => {
+    it("does not find main as a symbol (lowercase letter is not an export)", () => {
       expect(signals.symbols ?? []).toEqual([]);
     });
 
-    it("извлекает 2 Gin-роута", () => {
+    it("extracts 2 Gin routes", () => {
       expect(signals.routes).toHaveLength(2);
       expect(signals.routes?.[0]).toMatchObject({
         framework: "Gin",
@@ -187,12 +187,12 @@ describe("collectRegexSignals", () => {
       });
     });
 
-    it("распознаёт пакет main + func main как входную точку", () => {
+    it("recognizes package main + func main as the entry point", () => {
       expect(signals.entrypointHint).toBe(true);
     });
   });
 
-  describe("Ruby-файл", () => {
+  describe("Ruby file", () => {
     const RB_FIXTURE = [
       'require "json"',
       "",
@@ -208,15 +208,15 @@ describe("collectRegexSignals", () => {
 
     const signals = collectRegexSignals(file("app/routes.rb", RB_FIXTURE));
 
-    it("собирает require-импорты", () => {
+    it("collects require imports", () => {
       expect(signals.imports).toEqual(["json"]);
     });
 
-    it("считает exports: class и def", () => {
+    it("counts exports: class and def", () => {
       expect(signals.exports).toBe(2);
     });
 
-    it("считает apiSurface и извлекает Ruby Router роут", () => {
+    it("counts apiSurface and extracts the Ruby Router route", () => {
       expect(signals.apiSurface).toBe(1);
       expect(signals.routes).toHaveLength(1);
       expect(signals.routes?.[0]).toMatchObject({
@@ -227,7 +227,7 @@ describe("collectRegexSignals", () => {
       });
     });
 
-    it("находит class и method-функции", () => {
+    it("finds class and method functions", () => {
       expect((signals.symbols ?? []).map((symbol) => symbol.name)).toEqual([
         "UsersController",
         "index",
@@ -235,8 +235,8 @@ describe("collectRegexSignals", () => {
     });
   });
 
-  describe("крайние случаи", () => {
-    it("пустой файл → нулевые счётчики без throw", () => {
+  describe("edge cases", () => {
+    it("empty file → zero counters without throw", () => {
       const signals = collectRegexSignals(file("src/empty.ts", ""));
 
       expect(signals).toMatchObject({
@@ -251,13 +251,13 @@ describe("collectRegexSignals", () => {
       });
     });
 
-    it("не падает на разных расширениях и путях без расширения", () => {
+    it("does not crash on various extensions and extensionless paths", () => {
       for (const path of ["README.md", "src/index.tsx", "index.html", "data.txt", "Makefile"]) {
         expect(() => collectRegexSignals(file(path, "anything here"))).not.toThrow();
       }
     });
 
-    it("не считает закомментированный код", () => {
+    it("does not count commented-out code", () => {
       const signals = collectRegexSignals(
         file(
           "src/commented.ts",

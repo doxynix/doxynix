@@ -81,12 +81,12 @@ describe("coerceAnalysisPayload", () => {
     expect(coerceAnalysisPayload(undefined)).toBeNull();
   });
 
-  it("отсутствующие metricsJson/resultJson → null", () => {
+  it("missing metricsJson/resultJson → null", () => {
     expect(coerceAnalysisPayload(makeAnalysis(null))).toBeNull();
     expect(coerceAnalysisPayload(makeAnalysis({}, null))).toBeNull();
   });
 
-  it("валидный resultJson парсится через aiSchema без warn", () => {
+  it("valid resultJson parses through aiSchema without warn", () => {
     const analysis = makeAnalysis(aiResult);
 
     const result = coerceAnalysisPayload(analysis);
@@ -97,7 +97,7 @@ describe("coerceAnalysisPayload", () => {
     expect(appLogger.warn).not.toHaveBeenCalled();
   });
 
-  it("невалидный resultJson логирует warn и возвращает raw-данные как есть", () => {
+  it("invalid resultJson logs warn and returns raw data as-is", () => {
     const invalid = { ...aiResult, refactoring_targets: "oops" };
     const analysis = makeAnalysis(invalid);
 
@@ -112,11 +112,11 @@ describe("coerceAnalysisPayload", () => {
 });
 
 describe("dedupeLatestDocsByType", () => {
-  it("пустой вход → пустой результат", () => {
+  it("empty input → empty result", () => {
     expect(dedupeLatestDocsByType([])).toEqual([]);
   });
 
-  it("сортирует по DOC_TYPE_ORDER: README, ARCHITECTURE, API, CODE_DOC", () => {
+  it("sorts by DOC_TYPE_ORDER: README, ARCHITECTURE, API, CODE_DOC", () => {
     const result = dedupeLatestDocsByType([
       makeDoc({ publicId: "api-1", type: "API" }),
       makeDoc({ publicId: "arch-1", type: "ARCHITECTURE" }),
@@ -127,7 +127,7 @@ describe("dedupeLatestDocsByType", () => {
     expect(result.map((doc) => doc.publicId)).toEqual(["readme-1", "arch-1", "api-1", "cd-1"]);
   });
 
-  it("внутри типа оставляет документ с новейшим updatedAt", () => {
+  it("keeps the doc with the newest updatedAt within a type", () => {
     const result = dedupeLatestDocsByType([
       makeDoc({
         publicId: "arch-old",
@@ -144,7 +144,7 @@ describe("dedupeLatestDocsByType", () => {
     expect(result.map((doc) => doc.publicId)).toEqual(["arch-new"]);
   });
 
-  it("CODE_DOC дедуплицируется по path, а не по типу", () => {
+  it("dedupes CODE_DOC by path, not by type", () => {
     const result = dedupeLatestDocsByType([
       makeDoc({
         path: "src/a.ts",
@@ -164,7 +164,7 @@ describe("dedupeLatestDocsByType", () => {
     expect(result.map((doc) => doc.publicId)).toEqual(["cd-new", "cd-b"]);
   });
 
-  it("полный сценарий: дубликаты и типы в произвольном порядке", () => {
+  it("full scenario: duplicates and types in arbitrary order", () => {
     const result = dedupeLatestDocsByType([
       makeDoc({
         publicId: "arch-old",
@@ -199,7 +199,7 @@ describe("dedupeLatestDocsByType", () => {
 });
 
 describe("normalizeWriterStatuses", () => {
-  it("null → все статусы null", () => {
+  it("null → all statuses null", () => {
     expect(normalizeWriterStatuses(null)).toEqual({
       api: null,
       architecture: null,
@@ -209,7 +209,7 @@ describe("normalizeWriterStatuses", () => {
     });
   });
 
-  it("без analysisRuntime.writers → все статусы null", () => {
+  it("without analysisRuntime.writers → all statuses null", () => {
     const { analysisRuntime: _analysisRuntime, ...withoutRuntime } = aiResult;
 
     expect(normalizeWriterStatuses(withoutRuntime)).toEqual({
@@ -221,7 +221,7 @@ describe("normalizeWriterStatuses", () => {
     });
   });
 
-  it("маппит writers-статусы по ключам", () => {
+  it("maps writer statuses by key", () => {
     expect(normalizeWriterStatuses(aiResult)).toEqual({
       api: "llm",
       architecture: "missing",
@@ -233,7 +233,7 @@ describe("normalizeWriterStatuses", () => {
 });
 
 describe("toDocSummary", () => {
-  it('llm-статус даёт source "llm"', () => {
+  it('llm status yields source "llm"', () => {
     const withLlm = { ...aiResult, analysisRuntime: { writers: { readme: "llm" as const } } };
 
     const summary = toDocSummary(
@@ -252,14 +252,14 @@ describe("toDocSummary", () => {
     });
   });
 
-  it("не-llm статус даёт source null", () => {
+  it("non-llm status yields null source", () => {
     const summary = toDocSummary(makeDoc({ publicId: "readme-1", type: "README" }), aiResult);
 
     expect(summary.source).toBeNull();
     expect(summary.status).toBe("missing");
   });
 
-  it("CODE_DOC не имеет writer-ключа → status null, source null", () => {
+  it("CODE_DOC has no writer key → status null, source null", () => {
     const summary = toDocSummary(
       makeDoc({ path: "src/a.ts", publicId: "cd-1", type: "CODE_DOC" }),
       aiResult,
