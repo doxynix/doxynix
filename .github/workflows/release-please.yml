@@ -42,21 +42,17 @@ jobs:
         with:
           bun-version-file: "package.json"
 
-      - name: Setup Node for npm publishing
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
-        with:
-          node-version: 24.21.0
-          registry-url: 'https://registry.npmjs.org'
-
       - name: Install dependencies
         run: bun install
 
       - name: Build CLI bundle
-        run: bun run build --filter @doxynix/cli
+        run: |
+          cd packages/cli
+          bun run build
 
       - name: Publish @doxynix/cli to npm
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cd packages/cli
-          npm publish --access public --provenance
+          bun publish --access public --provenance
