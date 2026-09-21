@@ -15,6 +15,7 @@ import rehypeStringify from "rehype-stringify";
 import remarkBreaks from "remark-breaks";
 import remarkEmoji from "remark-emoji";
 import remarkGfm from "remark-gfm";
+import { remarkAlert } from "remark-github-blockquote-alert";
 import remarkMath from "remark-math";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
@@ -90,6 +91,7 @@ export async function markdownToHtml({
   const result = await unified()
     .use(remarkParse)
     .use(remarkGfm)
+    .use(remarkAlert)
     .use(remarkWikiLink, {
       aliasDivider: "|",
       hrefTemplate: (permalink: string) => {
@@ -117,9 +119,8 @@ export async function markdownToHtml({
       ...defaultSchema,
       attributes: {
         ...defaultSchema.attributes,
-        "*": ["className", "style", "id", "ariaHidden", "data-raw"],
+        "*": ["className", "id", "ariaHidden", "data-raw"],
       },
-      clobberPrefix: "",
       tagNames: [
         ...(defaultSchema.tagNames ?? []),
         "span",
@@ -153,6 +154,7 @@ export async function markdownToHtml({
       target: "_blank",
     })
     .use(rehypeShiki, {
+      defaultLanguage: "plaintext",
       themes: { dark: "github-dark-dimmed", light: "github-light" },
       transformers: [
         transformerNotationHighlight(),

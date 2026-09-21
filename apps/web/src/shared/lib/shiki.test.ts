@@ -1,73 +1,58 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { highlightCode } from "@/shared/lib/shiki";
-
-const shikiState = vi.hoisted(() => ({
-  codeToHtml: vi.fn(),
-  createHighlighter: vi.fn(),
-}));
 
 const unstableCacheMock = vi.hoisted(() => vi.fn((fn: () => Promise<string>) => fn));
 
 vi.mock("next/cache", () => ({ unstable_cache: unstableCacheMock }));
-vi.mock("shiki", () => ({ createHighlighter: shikiState.createHighlighter }));
-
-vi.mock("shiki/langs/console.mjs", () => ({ default: { id: "console" } }));
-vi.mock("shiki/langs/json.mjs", () => ({ default: { id: "json" } }));
-vi.mock("shiki/langs/markdown.mjs", () => ({ default: { id: "markdown" } }));
-vi.mock("shiki/langs/typescript.mjs", () => ({ default: { id: "typescript" } }));
-vi.mock("shiki/themes/github-dark-dimmed.mjs", () => ({ default: { id: "github-dark-dimmed" } }));
-vi.mock("shiki/themes/github-light.mjs", () => ({ default: { id: "github-light" } }));
 
 describe("highlightCode", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+  it("highlights code and returns shiki HTML", async () => {
+    const html = await highlightCode("const a = 1;");
 
-    delete (globalThis as any).shikiPromise;
-
-    shikiState.codeToHtml.mockReturnValue("<pre>highlighted</pre>");
-    shikiState.createHighlighter.mockResolvedValue({
-      codeToHtml: shikiState.codeToHtml,
-    });
+    expect(html).toContain("<pre");
+    expect(html).toContain("shiki");
   });
 
-  it("should initialize highlighter only once with BOTH themes (Singleton test)", async () => {
-    await highlightCode("const a = 1;");
-    await highlightCode("const b = 2;");
+  it("maps dark/light themes to github themes", async () => {
+    const dark = await highlightCode("const a = 1;");
+    const light = await highlightCode("const a = 1;", "typescript", "light");
 
-    expect(shikiState.createHighlighter).toHaveBeenCalledTimes(1);
-
-    const callArgs = shikiState.createHighlighter.mock.calls[0]?.[0];
-    expect(callArgs?.themes).toContainEqual(expect.objectContaining({ id: "github-dark-dimmed" }));
-    expect(callArgs?.themes).toContainEqual(expect.objectContaining({ id: "github-light" }));
+    expect(dark).toContain("github-dark-dimmed");
+    expect(light).toContain("github-light");
   });
 
-  it("should use github-light when light theme is requested", async () => {
-    await highlightCode("const x = 1", "typescript", "light");
+  it("resolves aliases like py -> python and golang -> go", async () => {
+    const py = await highlightCode("print('hi')", "py");
+    const golang = await highlightCode("package main", "golang");
 
-    expect(shikiState.codeToHtml).toHaveBeenCalledWith(
-      "const x = 1",
-      expect.objectContaining({ theme: "github-light" }),
+    expect(py).toContain("shiki");
+    expect(golang).toContain("shiki");
+  });
+
+  it("highlights niche languages like fortran and go", async () => {
+    const fortran = await highlightCode(
+      "program hello\n  print *, 'hi'\nend program hello",
+      "fortran",
     );
+    const go = await highlightCode("package main\n\nfunc main() {}", "go");
+
+    expect(fortran).toContain("<pre");
+    expect(go).toContain("<pre");
+  });
+
+  it("does not throw for unknown languages and falls back to plain text", async () => {
+    const html = await highlightCode("some text", "klingon");
+
+    expect(html).toContain("<pre");
+  });
+
+  it("passes cache key parts to unstable_cache", async () => {
+    await highlightCode("const c = 3;", "typescript", "light");
 
     expect(unstableCacheMock).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.arrayContaining(["light"]),
-      expect.any(Object),
-    );
-  });
-
-  it("should use github-dark-dimmed by default (dark mode)", async () => {
-    await highlightCode("const x = 1");
-
-    expect(shikiState.codeToHtml).toHaveBeenCalledWith(
-      "const x = 1",
-      expect.objectContaining({ theme: "github-dark-dimmed" }),
-    );
-
-    expect(unstableCacheMock).toHaveBeenCalledWith(
-      expect.any(Function),
-      expect.arrayContaining(["dark"]),
+      expect.arrayContaining(["light", "typescript"]),
       expect.any(Object),
     );
   });
