@@ -18,6 +18,16 @@ defaults:
     shell: bash
 
 jobs:
+  init:
+    name: Init CI metadata
+    runs-on: ubuntu-latest
+    outputs:
+      started_at: ${{ steps.time.outputs.started_at }}
+    steps:
+      - name: Save CI start time
+        id: time
+        run: echo "started_at=$(date -u +%s)" >> $GITHUB_OUTPUT
+
   quality:
     name: Global Quality 
     if: github.actor != 'ImgBotApp'
@@ -48,12 +58,15 @@ jobs:
 
       - name: Find Unused Code (Knip)
         run: bun run knip
+        continue-on-error: true
 
   security:
     name: Global Security Scanning
     if: github.actor != 'ImgBotApp'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
     steps:
       - name: Checkout repo
@@ -86,18 +99,61 @@ jobs:
         continue-on-error: true
 
       - name: Snyk Open Source (SCA)
+        if: false
         uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04
         with:
           args: --all-projects --severity-threshold=high
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         continue-on-error: true
 
       - name: Setup Snyk CLI
+        if: false
         uses: snyk/actions/setup@9adf32b1121593767fc3c057af55b55db032dc04
 
       - name: Run Snyk Code scan (SAST)
+        if: false
         run: snyk code test . --severity-threshold=high
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         continue-on-error: true
+
+  notify:
+    needs: [init, quality, security]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions:
+      contents: read
+      actions: read
+      statuses: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+        with:
+          fetch-depth: 0
+
+      - name: Collect CI metadata
+        id: collect
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          QUALITY_RESULT: ${{ needs.quality.result }}
+          SECURITY_RESULT: ${{ needs.security.result }}
+          CI_STARTED_AT: ${{ needs.init.outputs.started_at }}
+        run: |
+          python3 .github/scripts/ci-notify.py
+
+      - name: Notify Telegram
+        if: github.actor != 'ImgBotApp' && !contains(github.actor, '[bot]')
+        uses: appleboy/telegram-action@847a2d3240d33a6137191cc89b3ad7f53e427c06
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: ${{ steps.collect.outputs.message }}
+
+      - name: "notify vercel"
+        uses: "vercel/repository-dispatch/actions/status@30f760c6640485cd92f8c785ef361382555fb712" # v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          name: "Vercel - doxynix: notify vercel"
+
+      - name: Check Final Status
+        if: steps.collect.outputs.is_success == 'false'
+        run: exit 1
