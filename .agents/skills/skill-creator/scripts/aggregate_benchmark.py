@@ -144,6 +144,7 @@ def load_run_results(benchmark_dir: Path) -> dict:
                         result["time_seconds"] = timing_data.get("total_duration_seconds", 0.0)
                         result["tokens"] = timing_data.get("total_tokens", 0)
                     except json.JSONDecodeError:
+                        # Malformed timing.json — keep the default time/token values
                         pass
 
                 # Extract metrics if available

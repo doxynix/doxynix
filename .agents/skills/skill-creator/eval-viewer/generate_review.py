@@ -95,6 +95,7 @@ def build_run(root: Path, run_dir: Path) -> dict | None:
                 prompt = metadata.get("prompt", "")
                 eval_id = metadata.get("eval_id")
             except (json.JSONDecodeError, OSError):
+                # Corrupt or unreadable metadata — fall through to transcript.md
                 pass
             if prompt:
                 break
@@ -109,6 +110,7 @@ def build_run(root: Path, run_dir: Path) -> dict | None:
                     if match:
                         prompt = match.group(1).strip()
                 except OSError:
+                    # Unreadable transcript — try the next candidate
                     pass
                 if prompt:
                     break
@@ -133,6 +135,7 @@ def build_run(root: Path, run_dir: Path) -> dict | None:
             try:
                 grading = json.loads(candidate.read_text())
             except (json.JSONDecodeError, OSError):
+                # Corrupt or unreadable grading file — leave as None
                 pass
             if grading:
                 break
@@ -229,6 +232,7 @@ def load_previous_iteration(workspace: Path) -> dict[str, dict]:
                 if r.get("feedback", "").strip()
             }
         except (json.JSONDecodeError, OSError, KeyError):
+            # Corrupt or unexpected feedback.json shape — ignore and continue
             pass
 
     # Load runs (to get outputs)
@@ -297,10 +301,12 @@ def _kill_port(port: int) -> None:
                 try:
                     os.kill(int(pid_str.strip()), signal.SIGTERM)
                 except (ProcessLookupError, ValueError):
+                    # Process already exited or PID is not numeric — nothing to kill
                     pass
         if result.stdout.strip():
             time.sleep(0.5)
     except subprocess.TimeoutExpired:
+        # lsof hung — skip port cleanup
         pass
     except FileNotFoundError:
         print("Note: lsof not found, cannot check if port is in use", file=sys.stderr)
@@ -338,6 +344,7 @@ class ReviewHandler(BaseHTTPRequestHandler):
                 try:
                     benchmark = json.loads(self.benchmark_path.read_text())
                 except (json.JSONDecodeError, OSError):
+                    # Unreadable benchmark file — serve viewer without it
                     pass
             html = generate_html(runs, self.skill_name, self.previous, benchmark)
             content = html.encode("utf-8")
@@ -426,6 +433,7 @@ def main() -> None:
         try:
             benchmark = json.loads(benchmark_path.read_text())
         except (json.JSONDecodeError, OSError):
+            # Unreadable benchmark file — generate viewer without it
             pass
 
     if args.static:
