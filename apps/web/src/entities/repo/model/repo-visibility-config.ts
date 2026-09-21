@@ -1,14 +1,16 @@
 import type { Visibility } from "@doxynix/shared";
 import { Lock, type LucideIcon, Unlock } from "lucide-react";
 
+export type RepoVisibilityLabelKey = "repo_visibility_private" | "repo_visibility_public";
+
 export const repoVisibilityConfig: Record<
   Visibility,
   {
     color: string;
     icon: LucideIcon;
-    label: string;
+    labelKey: RepoVisibilityLabelKey;
   }
 > = {
-  PRIVATE: { color: "text-error", icon: Lock, label: "Private" },
-  PUBLIC: { color: "text-success", icon: Unlock, label: "Public" },
+  PRIVATE: { color: "text-error", icon: Lock, labelKey: "repo_visibility_private" },
+  PUBLIC: { color: "text-success", icon: Unlock, labelKey: "repo_visibility_public" },
 };

@@ -31,7 +31,7 @@ export function AppTooltip({
   const canHover = useCanHover();
 
   if (!canHover || !content) {
-    return <>children</>;
+    return <>{children}</>;
   }
 
   return (

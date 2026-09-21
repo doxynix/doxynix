@@ -9,12 +9,6 @@ import { ExternalLink } from "@/shared/ui/kit/external-link";
 
 import { SystemStatus } from "./system-status";
 
-const INTERNAL_LINKS = [
-  { href: "/terms", label: "Terms of Service" },
-  { href: "/privacy", label: "Privacy Policy" },
-  { href: "/high-five", label: "High five" },
-] as const;
-
 const SOCIAL_LINKS = [
   {
     href: "https://github.com/doxynix/doxynix",
@@ -35,26 +29,37 @@ const SOCIAL_LINKS = [
 
 export async function AppFooter() {
   const tFooter = await getTranslations("Footer");
+  const tCommon = await getTranslations("Common");
 
   return (
     <footer className="flex items-center justify-center bg-background p-2">
       <div className="container grid grid-cols-1 flex-col items-center justify-between justify-items-center gap-4 lg:flex lg:flex-row">
         <div className="order-1 flex flex-wrap items-center justify-center gap-4 lg:order-0">
           <p className="order-1 text-center text-muted-foreground text-xs lg:order-0">
-            &copy; <DateComp isYear /> Doxynix™. {tFooter("all_rights_reserved")}
+            {`© `}
+            <DateComp isYear /> {`Doxynix™. ${tFooter("all_rights_reserved")}`}
           </p>
           <SystemStatus />
         </div>
         <div className="flex xs:flex-row flex-col flex-wrap items-center justify-center not-md:justify-center gap-2 text-muted-foreground text-sm md:gap-6">
-          {INTERNAL_LINKS.map((link) => (
-            <Link
-              className="text-center text-xs transition-colors hover:text-foreground"
-              href={link.href}
-              key={link.href}
-            >
-              {link.label}
-            </Link>
-          ))}
+          <Link
+            className="text-center text-xs transition-colors hover:text-foreground"
+            href="/terms"
+          >
+            {tCommon("terms_of_service")}
+          </Link>
+          <Link
+            className="text-center text-xs transition-colors hover:text-foreground"
+            href="/privacy"
+          >
+            {tCommon("privacy_policy")}
+          </Link>
+          <Link
+            className="text-center text-xs transition-colors hover:text-foreground"
+            href="/high-five"
+          >
+            {tCommon("open_source_credits")}
+          </Link>
 
           <div className="flex items-center gap-4 border-border md:pl-6 xl:border-l">
             {SOCIAL_LINKS.map((social) => (

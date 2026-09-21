@@ -56,7 +56,7 @@ export function AuditLogRow({ log }: Readonly<Props>) {
       <TableCell className="py-4">
         <div className="flex items-center gap-3">
           <div className={cn("flex size-8 items-center justify-center rounded-lg border")}>
-            {Icon != null && <Icon className="size-4" />}
+            {Icon != null && <Icon />}
           </div>
           <span>{log.actionTitle}</span>
         </div>

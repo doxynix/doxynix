@@ -4,6 +4,7 @@ import type { Route } from "next";
 import { useSearchParams } from "next/navigation";
 
 import { getRepoDetailsMenu } from "@/shared/config/navigation";
+import { useNavLabels } from "@/shared/config/navigation-labels";
 import { Link, usePathname } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { isRouteActive } from "@/shared/lib/navigation-utils";
@@ -16,6 +17,7 @@ type Props = { name: string; owner: string };
 export function RepoDetailsTabs({ name, owner }: Readonly<Props>) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const navLabels = useNavLabels();
   const nav = getRepoDetailsMenu(owner, name);
 
   return (
@@ -45,7 +47,7 @@ export function RepoDetailsTabs({ name, owner }: Readonly<Props>) {
               href={href}
             >
               {n.icon != null && <n.icon />}
-              <span>{n.label}</span>
+              <span>{navLabels[n.labelKey]}</span>
             </Link>
           </AppButton>
         );

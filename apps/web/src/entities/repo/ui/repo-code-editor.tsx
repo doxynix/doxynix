@@ -7,10 +7,11 @@ import { EditorState, type Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import CodeMirror from "@uiw/react-codemirror";
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import CodeMirrorMerge from "react-codemirror-merge";
 
-import { BASE_EXTENSIONS, IDE_ONLY_EXTENSIONS, THEME_EXTENSION } from "../model/editor-extensions";
+import { BASE_EXTENSIONS, getIdeOnlyExtensions, THEME_EXTENSION } from "../model/editor-extensions";
 import type { EditorStats } from "../model/editor-stats.types";
 
 type Props = {
@@ -38,9 +39,15 @@ export function RepoCodeEditor({
   showDiff = false,
   value,
 }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
+
   const startingExtensions = minimal
     ? [...BASE_EXTENSIONS, THEME_EXTENSION]
-    : [...BASE_EXTENSIONS, ...IDE_ONLY_EXTENSIONS, THEME_EXTENSION];
+    : [
+        ...BASE_EXTENSIONS,
+        ...getIdeOnlyExtensions({ syntaxError: t("editor_syntax_error") }),
+        THEME_EXTENSION,
+      ];
 
   const [ext, setExt] = useState<Extension[]>(startingExtensions);
   const { resolvedTheme } = useTheme();
@@ -51,7 +58,11 @@ export function RepoCodeEditor({
       const extName = (path.split(".").pop() ?? "").toLowerCase();
       const baseExtensions = minimal
         ? [...BASE_EXTENSIONS, THEME_EXTENSION]
-        : [...BASE_EXTENSIONS, ...IDE_ONLY_EXTENSIONS, THEME_EXTENSION];
+        : [
+            ...BASE_EXTENSIONS,
+            ...getIdeOnlyExtensions({ syntaxError: t("editor_syntax_error") }),
+            THEME_EXTENSION,
+          ];
 
       const dynamicExt: Extension[] = [...baseExtensions];
 
@@ -82,7 +93,7 @@ export function RepoCodeEditor({
     return () => {
       cancelled = true;
     };
-  }, [path, minimal]);
+  }, [path, minimal, t]);
 
   const isDiffMode = showDiff && compareValue != null;
   const mergeExtensionsReadOnly = [

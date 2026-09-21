@@ -1,6 +1,7 @@
 "use client";
 
 import { Maximize2, Minimize2, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function AgentHeader({ expanded, setExpanded }: Readonly<Props>) {
+  const t = useTranslations("Agent");
   const closeAgent = useAgentClose();
 
   return (
@@ -20,12 +22,12 @@ export function AgentHeader({ expanded, setExpanded }: Readonly<Props>) {
       <div className="flex items-center gap-3">
         <div>
           <div className="flex items-center gap-1.5">
-            <p className="font-medium text-sm">Dxnx_ Agent</p>
+            <p className="font-medium text-sm">{t("agent_title")}</p>
             <AppBadge
               className="text-warning"
               variant="outline"
             >
-              BETA
+              {t("beta_badge")}
             </AppBadge>
           </div>
         </div>

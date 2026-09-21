@@ -2,6 +2,7 @@
 
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
 import { TRIGGER_CONFIG } from "@/shared/config/trigger";
@@ -32,6 +33,8 @@ export function RepoAnalysisLive({
   owner,
   repoId,
 }: Readonly<Props>) {
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
   const router = useRouter();
   const utils = trpc.useUtils();
   const { run } = useRealtimeRun(jobId, { accessToken });
@@ -43,7 +46,10 @@ export function RepoAnalysisLive({
   const metadata = run?.metadata ?? {};
 
   const triggerProgress = parseProgress(metadata[TRIGGER_CONFIG.metadataKeys.progress]);
-  const triggerStatusText = parseStatusMessage(metadata[TRIGGER_CONFIG.metadataKeys.statusMessage]);
+  const triggerStatusText = parseStatusMessage(
+    metadata[TRIGGER_CONFIG.metadataKeys.statusMessage],
+    t("repo_analysis_status_analyzing"),
+  );
   const logs = parseTaskLogs(metadata[TRIGGER_CONFIG.metadataKeys.taskLogs]);
 
   const { displayStatus, isFailed, isFinished, isPending, progress } = resolveAnalysisDisplay({
@@ -53,7 +59,7 @@ export function RepoAnalysisLive({
     triggerProgress,
   });
 
-  const handleCancel = (repoId: string, analysisId: string) => {
+  const handleCancel = () => {
     cancelMutation.mutate(
       { analysisId },
       {
@@ -86,16 +92,15 @@ export function RepoAnalysisLive({
         <div className="flex flex-col gap-1">
           <h2 className="font-bold text-2xl tracking-tight">
             {isFinished
-              ? "Analysis Complete"
+              ? t("repo_analysis_complete")
               : isFailed
-                ? "Analysis Failed"
-                : "Analyzing Repository"}
+                ? t("repo_analysis_failed")
+                : t("repo_analysis_running")}
           </h2>
           <p className="text-muted-foreground text-sm">{triggerStatusText}</p>
           {!isFinished && !isFailed && progress >= 85 && (
             <p className="text-muted-foreground text-xs">
-              Generating documentation (README, API, Architecture…). This step can take several
-              minutes after the AI analysis finishes.
+              {t("repo_analysis_generating_docs_hint")}
             </p>
           )}
         </div>
@@ -104,9 +109,9 @@ export function RepoAnalysisLive({
       <div className="flex flex-col gap-3">
         <div className="flex justify-between font-medium text-sm">
           <span className="flex items-center gap-2">
-            Status: <AppBadge variant="outline">{displayStatus}</AppBadge>
+            {tCommon("status")} <AppBadge variant="outline">{displayStatus}</AppBadge>
           </span>
-          <span>{progress}%</span>
+          <span>{progress} %</span>
         </div>
         <Progress
           indicatorClassName="bg-foreground"
@@ -119,23 +124,23 @@ export function RepoAnalysisLive({
       <div className="flex justify-center gap-4">
         {isFinished && (
           <AppButton onClick={() => router.push(`/dashboard/repo/${owner}/${name}`)}>
-            View Results
+            {t("repo_analysis_view_results")}
           </AppButton>
         )}
         {(isFinished || isFailed) && (
           <AppButton
-            onClick={() => handleCancel(repoId, analysisId)}
+            onClick={handleCancel}
             variant="outline"
           >
-            Start New Audit
+            {t("repo_analysis_start_new")}
           </AppButton>
         )}
         {isPending && (
           <AppButton
-            onClick={() => handleCancel(repoId, analysisId)}
+            onClick={handleCancel}
             variant="destructive"
           >
-            Cancel
+            {tCommon("cancel")}
           </AppButton>
         )}
       </div>

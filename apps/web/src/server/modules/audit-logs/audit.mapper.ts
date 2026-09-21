@@ -94,8 +94,8 @@ export function mapAuditLogToDTO(log: AuditLog): AuditLogType {
     deviceType = "tablet";
   }
 
-  const config = MODEL_CONFIG[log.model] || { icon: "database", name: log.model };
-  const op = OP_MAP[log.operation] || { severity: "info", title: log.operation };
+  const config = MODEL_CONFIG[log.model] ?? { icon: "database", name: log.model };
+  const op = OP_MAP[log.operation] ?? { severity: "info", title: log.operation };
 
   let targetName;
   switch (log.model) {

@@ -189,7 +189,7 @@ export function useMapLayout(data: RepoMapDisplayData) {
 
         const layoutedNodes = layoutNodes.map((node) => ({
           ...node,
-          position: nodePositions.get(node.id) || { x: 0, y: 0 },
+          position: nodePositions.get(node.id) ?? { x: 0, y: 0 },
         }));
 
         setNodes(layoutedNodes);

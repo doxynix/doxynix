@@ -1,4 +1,5 @@
 import { AlertCircle, FileEdit } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
 import { formatSize } from "@/shared/lib/size-format";
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function RepoStatusBar({ meta, readOnly, stats }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   return (
     <div className="flex items-center justify-between bg-card px-3 py-1.5 font-mono text-[11px]">
       <div className="flex items-center gap-3 font-semibold">
@@ -24,13 +26,13 @@ export function RepoStatusBar({ meta, readOnly, stats }: Readonly<Props>) {
               : "border-success/50 bg-success/10 text-success",
           )}
         >
-          {readOnly ? "View" : "Edit"}
+          {readOnly ? t("repo_status_view") : t("repo_status_edit")}
         </span>
         <span>{meta.name}</span>
         {stats.isDirty && (
           <span className="flex animate-pulse items-center gap-1 text-warning">
             <FileEdit className="size-3" />
-            Modified
+            {t("repo_status_modified")}
           </span>
         )}
         {stats.errors > 0 && (
@@ -42,10 +44,8 @@ export function RepoStatusBar({ meta, readOnly, stats }: Readonly<Props>) {
       </div>
 
       <div className="flex items-center gap-3 text-muted-foreground">
-        <span>
-          Ln {stats.line}, Col {stats.col}
-        </span>
-        <span>Lines: {stats.totalLines}</span>
+        <span>{t("repo_status_line_col", { col: stats.col, line: stats.line })}</span>
+        <span>{t("repo_status_lines", { count: stats.totalLines })}</span>
         <span>{formatSize(meta.size)}</span>
       </div>
     </div>

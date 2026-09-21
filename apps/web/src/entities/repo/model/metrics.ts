@@ -1,8 +1,15 @@
 import type { UiRepoListItem } from "./repo.types";
 
+export type RepoMetricLabelKey =
+  | "quality_complexity"
+  | "quality_health"
+  | "quality_onboarding"
+  | "quality_security"
+  | "quality_tech_debt";
+
 type Props = {
   id: string;
-  label: string;
+  labelKey: RepoMetricLabelKey;
   score: null | number | undefined;
 };
 
@@ -10,27 +17,27 @@ export function getMetrics(repo: UiRepoListItem): Props[] {
   return [
     {
       id: "health",
-      label: "Health",
+      labelKey: "quality_health",
       score: repo.healthScore,
     },
     {
       id: "security",
-      label: "Security",
+      labelKey: "quality_security",
       score: repo.securityScore,
     },
     {
       id: "techDebt",
-      label: "Tech Debt",
+      labelKey: "quality_tech_debt",
       score: repo.techDebtScore,
     },
     {
       id: "complexity",
-      label: "Complexity",
+      labelKey: "quality_complexity",
       score: repo.complexityScore,
     },
     {
       id: "onboarding",
-      label: "Onboarding",
+      labelKey: "quality_onboarding",
       score: repo.onboardingScore,
     },
   ];

@@ -22,7 +22,7 @@ import {
   Users2,
 } from "lucide-react";
 
-import type { MenuItem, MenuItems } from "./navigation.types";
+import type { MenuItem, MenuItems, PublicMenuItem } from "./navigation.types";
 
 const DASHBOARD_BASE: MenuItems = [
   {
@@ -30,7 +30,7 @@ const DASHBOARD_BASE: MenuItems = [
     href: "/dashboard",
     icon: LayoutGrid,
     id: "dashboard",
-    label: "Dashboard",
+    labelKey: "dashboard",
     shortcut: "G then O",
     url: "/o",
   },
@@ -38,7 +38,7 @@ const DASHBOARD_BASE: MenuItems = [
     href: "/dashboard/repos",
     icon: Book,
     id: "repositories",
-    label: "Repositories",
+    labelKey: "repositories",
     shortcut: "G then R",
     url: "/r",
   },
@@ -46,7 +46,7 @@ const DASHBOARD_BASE: MenuItems = [
     href: "/dashboard/settings",
     icon: Settings,
     id: "settings",
-    label: "Settings",
+    labelKey: "settings",
     shortcut: "G then S",
     url: "/s",
   },
@@ -54,7 +54,7 @@ const DASHBOARD_BASE: MenuItems = [
     href: "/dashboard/notifications",
     icon: Bell,
     id: "notifications",
-    label: "Notifications",
+    labelKey: "notifications",
     shortcut: "G then N",
     url: "/n",
   },
@@ -65,7 +65,7 @@ const SETTINGS_PAGES: MenuItems = [
     href: "/dashboard/settings/profile",
     icon: User,
     id: "profile",
-    label: "Profile",
+    labelKey: "profile",
     shortcut: "G then P",
     url: "/me",
   },
@@ -73,7 +73,7 @@ const SETTINGS_PAGES: MenuItems = [
     href: "/dashboard/settings/connections",
     icon: Link,
     id: "connections",
-    label: "Connections",
+    labelKey: "connections",
     shortcut: "G then C",
     url: "/c",
   },
@@ -81,7 +81,7 @@ const SETTINGS_PAGES: MenuItems = [
     href: "/dashboard/settings/sessions",
     icon: TabletSmartphone,
     id: "sessions",
-    label: "Sessions",
+    labelKey: "sessions",
     shortcut: "G then M",
     url: "/ms",
   },
@@ -89,7 +89,7 @@ const SETTINGS_PAGES: MenuItems = [
     href: "/dashboard/settings/api-keys",
     icon: KeyRound,
     id: "api keys",
-    label: "API Keys",
+    labelKey: "api_keys",
     shortcut: "G then K",
     url: "/k",
   },
@@ -97,7 +97,7 @@ const SETTINGS_PAGES: MenuItems = [
     href: "/dashboard/settings/audit-log",
     icon: Logs,
     id: "audit log",
-    label: "Audit log",
+    labelKey: "audit_log",
     shortcut: "G then L",
     url: "/l",
   },
@@ -105,7 +105,7 @@ const SETTINGS_PAGES: MenuItems = [
     href: "/dashboard/settings/danger-zone",
     icon: AlertTriangle,
     id: "danger zone",
-    label: "Danger Zone",
+    labelKey: "danger_zone",
     shortcut: "G then D",
     url: "/d",
     variant: "destructive",
@@ -117,7 +117,7 @@ const GLOBAL_FEATURES: MenuItems = [
     href: "/support",
     icon: Headset,
     id: "support",
-    label: "Support",
+    labelKey: "support",
     shortcut: "G then H",
     url: "/h",
   },
@@ -129,7 +129,7 @@ const actionsMenu: MenuItems = [
     commandType: "dialog",
     icon: SquareTerminal,
     id: "createRepo",
-    label: "Create Repository",
+    labelKey: "create_repository",
     shortcut: "C then R",
   },
 ];
@@ -151,30 +151,30 @@ export const commandMenuItems: MenuItems = [
   ...actionsMenu,
 ];
 
-export const publicHeaderMenu: MenuItems = [
+export const publicHeaderMenu: PublicMenuItem[] = [
   {
     href: "/",
     icon: Home,
     id: "Home",
-    label: "Home",
+    labelKey: "home",
   },
   {
     href: "/about",
     icon: Users2,
     id: "About",
-    label: "About",
+    labelKey: "about",
   },
   {
     href: "/support",
     icon: Headset,
     id: "Help",
-    label: "Help",
+    labelKey: "help",
   },
   {
     href: "/high-five",
     icon: HandHeartIcon,
     id: "HighFive",
-    label: "High five",
+    labelKey: "high_five",
   },
 ];
 
@@ -187,43 +187,43 @@ export const getRepoDetailsMenu = (owner: string, name: string): MenuItems => {
       href: base,
       icon: BookOpen,
       id: "overview",
-      label: "Overview",
+      labelKey: "overview",
     },
     {
       href: `${base}/analyze`,
       icon: ScanSearch,
       id: "analyze",
-      label: "Analyze",
+      labelKey: "analyze",
     },
     {
       href: `${base}/map`,
       icon: Map,
       id: "map",
-      label: "Map",
+      labelKey: "map",
     },
     {
       href: `${base}/pulls`,
       icon: GitPullRequest,
       id: "pulls",
-      label: "Pulls",
+      labelKey: "pulls",
     },
     {
       href: `${base}/code`,
       icon: Code2,
       id: "code",
-      label: "Code",
+      labelKey: "code",
     },
     {
       href: `${base}/docs`,
       icon: FileText,
       id: "documentation",
-      label: "Documentation",
+      labelKey: "documentation",
     },
     {
       href: `${base}/settings`,
       icon: Settings,
       id: "settings",
-      label: "Settings",
+      labelKey: "settings",
     },
   ];
 };

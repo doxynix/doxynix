@@ -23,7 +23,6 @@ export default defineConfig({
         onBuildStart: async () => {
           console.log("ZenStack generating...");
           try {
-            // eslint-disable-next-line sonarjs/no-os-command-from-path
             execSync("bun zenstack generate --schema prisma/schema.zmodel", {
               env: { ...process.env },
               stdio: "inherit",

@@ -6,6 +6,7 @@ import { Background, MiniMap, type Node, Panel, ReactFlow, useReactFlow } from "
 import "@xyflow/react/dist/style.css";
 
 import { FilterIcon, SlashIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 
 import { cn } from "@/shared/lib/cn";
@@ -54,6 +55,7 @@ export function RepoMap({
   repoId,
   selectedNodeId,
 }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const { resolvedTheme } = useTheme();
   const { fitView } = useReactFlow();
   const {
@@ -148,7 +150,7 @@ export function RepoMap({
             size="sm"
             variant="ghost"
           >
-            Root
+            {t("root")}
           </AppButton>
 
           {breadcrumbItems.length > 0 && (
@@ -202,7 +204,7 @@ export function RepoMap({
                   position="top-left"
                 >
                   <p className="flex items-center gap-1 text-muted-foreground text-xs">
-                    Quick Filters <FilterIcon className="size-3" />
+                    {t("quick_filters")} <FilterIcon className="size-3" />
                   </p>
                   <div className="flex items-center gap-2">
                     {(Object.keys(FILTER_CONFIG) as Array<keyof typeof FILTER_CONFIG>).map(
@@ -218,7 +220,7 @@ export function RepoMap({
                           variant="outline"
                         >
                           <div className={cn("size-2 rounded-full", FILTER_CONFIG[key].color)} />
-                          {FILTER_CONFIG[key].label}
+                          {t(FILTER_CONFIG[key].labelKey)}
                         </AppButton>
                       ),
                     )}

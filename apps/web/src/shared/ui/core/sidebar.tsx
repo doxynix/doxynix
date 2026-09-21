@@ -11,6 +11,7 @@ import {
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Menu, PanelLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
 import { setClientCookie } from "@/shared/lib/cookies";
@@ -158,6 +159,7 @@ function Sidebar({
   side?: "left" | "right";
   variant?: "floating" | "inset" | "sidebar";
 }) {
+  const tCommon = useTranslations("Common");
   const { isMobile, openMobile, setOpenMobile, state } = useSidebar();
 
   if (collapsible === "none") {
@@ -195,8 +197,8 @@ function Sidebar({
           }
         >
           <SheetHeader className="sr-only">
-            <SheetTitle>Sidebar</SheetTitle>
-            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
+            <SheetTitle>{tCommon("menu")}</SheetTitle>
+            <SheetDescription>{tCommon("sidebar_description")}</SheetDescription>
           </SheetHeader>
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
@@ -226,7 +228,7 @@ function Sidebar({
         data-slot="sidebar-gap"
       />
       <aside
-        aria-label="Sidebar"
+        aria-label={tCommon("sidebar")}
         className={cn(
           "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
           side === "left"
@@ -254,6 +256,7 @@ function Sidebar({
 }
 
 function SidebarTrigger({ className, onClick, ...props }: ComponentProps<typeof AppButton>) {
+  const tCommon = useTranslations("Common");
   const { toggleSidebar } = useSidebar();
   const isMobile = useIsMobile();
 
@@ -271,17 +274,18 @@ function SidebarTrigger({ className, onClick, ...props }: ComponentProps<typeof 
       {...props}
     >
       {isMobile ? <Menu /> : <PanelLeft />}
-      <span className="sr-only">Toggle Sidebar</span>
+      <span className="sr-only">{tCommon("toggle_sidebar")}</span>
     </AppButton>
   );
 }
 
 function SidebarRail({ className, ...props }: ComponentProps<"button">) {
+  const tCommon = useTranslations("Common");
   const { toggleSidebar } = useSidebar();
 
   return (
     <button
-      aria-label="Toggle Sidebar"
+      aria-label={tCommon("toggle_sidebar")}
       className={cn(
         "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-standard ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-0.5 hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex",
         "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",

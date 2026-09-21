@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/table-header */
 "use client";
 
 import type { ComponentProps } from "react";

@@ -3,12 +3,14 @@
 import type { Route } from "next";
 
 import { settingsMenu } from "@/shared/config/navigation";
+import { useNavLabels } from "@/shared/config/navigation-labels";
 import { Link, usePathname } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
 
 export function SettingsMenu() {
   const pathname = usePathname();
+  const navLabels = useNavLabels();
 
   return (
     <div className="sticky top-2 flex flex-col gap-1">
@@ -45,7 +47,7 @@ export function SettingsMenu() {
               href={item.href as Route}
             >
               {item.icon != null && <item.icon />}
-              {item.label}
+              {navLabels[item.labelKey]}
             </Link>
           </AppButton>
         );

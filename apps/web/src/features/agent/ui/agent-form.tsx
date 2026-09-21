@@ -2,6 +2,7 @@
 
 import { type ChangeEvent, type JSX, type SyntheticEvent, useRef } from "react";
 import { Paperclip, Send, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
@@ -26,6 +27,7 @@ export function AgentForm({
   setAttachments,
   setInput,
 }: Readonly<InputProps>): JSX.Element {
+  const t = useTranslations("Agent");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -43,7 +45,7 @@ export function AgentForm({
             >
               <span className="max-w-30 truncate">{file.name}</span>
               <AppButton
-                aria-label={`Delete attachment ${file.name}`}
+                aria-label={t("delete_attachment", { name: file.name })}
                 className="size-4 p-0 text-muted-foreground hover:text-destructive"
                 onClick={() => setAttachments((prev: any[]) => prev.filter((_, idx) => idx !== i))}
                 size="icon"
@@ -78,14 +80,14 @@ export function AgentForm({
               onSubmit();
             }
           }}
-          placeholder="Ask Dxnx_..."
+          placeholder={t("input_placeholder")}
           value={input}
         />
 
         <div className="flex items-center justify-end px-1 pt-2">
           <div className="flex items-center gap-1.5">
             <AppButton
-              aria-label="Upload files"
+              aria-label={t("upload_files")}
               onClick={() => fileInputRef.current?.click()}
               size="icon"
               type="button"
@@ -95,7 +97,7 @@ export function AgentForm({
             </AppButton>
 
             <AppButton
-              aria-label="Send message"
+              aria-label={t("send_message")}
               disabled={isLoading || !input.trim()}
               size="icon"
               type="submit"

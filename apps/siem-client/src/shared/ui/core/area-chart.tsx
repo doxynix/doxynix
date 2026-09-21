@@ -102,25 +102,26 @@ type ScrollButtonProps = {
 const ScrollButton = ({ icon, onClick, disabled }: ScrollButtonProps) => {
   const Icon = icon;
   const [isPressed, setIsPressed] = useState(false);
-  const intervalRef = useRef<any>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const [prevDisabled, setPrevDisabled] = useState(disabled);
+  if (prevDisabled !== disabled) {
+    setPrevDisabled(disabled);
+    if (disabled) {
+      setIsPressed(false);
+    }
+  }
 
   useEffect(() => {
-    if (isPressed) {
+    if (isPressed && !disabled) {
       intervalRef.current = setInterval(() => {
         onClick?.();
       }, 300);
     } else {
-      clearInterval(intervalRef.current);
+      clearInterval(intervalRef.current ?? undefined);
     }
-    return () => clearInterval(intervalRef.current);
-  }, [isPressed, onClick]);
-
-  useEffect(() => {
-    if (disabled) {
-      clearInterval(intervalRef.current);
-      setIsPressed(false);
-    }
-  }, [disabled]);
+    return () => clearInterval(intervalRef.current ?? undefined);
+  }, [isPressed, onClick, disabled]);
 
   return (
     <button

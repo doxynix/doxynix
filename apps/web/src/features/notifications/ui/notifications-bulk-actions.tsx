@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AlertTriangle, CheckCheck, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
@@ -30,6 +31,8 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
   const [filters] = useQueryStates(notificationsParsers);
   const { deleteRead, markAllAsRead } = useNotificationActions();
   const [open, setOpen] = useState(false);
+  const t = useTranslations("Notifications");
+  const tCommon = useTranslations("Common");
 
   const debouncedSearch = useDebounce(filters.search, 500);
 
@@ -51,11 +54,11 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
         className="flex cursor-pointer"
         disabled={isMarkAllDisabled}
         isLoading={markAllAsRead.isPending}
-        loadingText="Processing..."
+        loadingText={tCommon("processing")}
         onClick={() => markAllAsRead.mutate({ ...filters, search: debouncedSearch })}
         variant="outline"
       >
-        <CheckCheck /> Mark all as read
+        <CheckCheck /> {t("mark_all_as_read")}
       </LoadingButton>
       <Dialog
         onOpenChange={setOpen}
@@ -67,7 +70,7 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
             disabled={isDeleteReadDisabled}
             variant="destructive"
           >
-            <Trash2 /> Delete all read
+            <Trash2 /> {t("delete_all_read")}
           </AppButton>
         </DialogTrigger>
         <DialogContent>
@@ -77,9 +80,9 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
                 <AlertTriangle className="size-5 text-destructive" />
               </div>
               <div className="flex flex-col gap-1 overflow-hidden">
-                <DialogTitle>Delete all read notifications?</DialogTitle>
+                <DialogTitle>{t("delete_all_read_confirm")}</DialogTitle>
                 <DialogDescription>
-                  This action will delete {stats?.read} notifications matching current filters.
+                  {t("delete_all_read_description", { count: stats?.read ?? 0 })}
                 </DialogDescription>
               </div>
             </div>
@@ -90,17 +93,17 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
                 className="cursor-pointer"
                 variant="outline"
               >
-                Cancel
+                {tCommon("cancel")}
               </AppButton>
             </DialogClose>
             <LoadingButton
               className="cursor-pointer"
               isLoading={deleteRead.isPending}
-              loadingText="Deleting..."
+              loadingText={t("deleting")}
               onClick={handleDelete}
               variant="destructive"
             >
-              Yes, delete
+              {t("yes_delete")}
             </LoadingButton>
           </DialogFooter>
         </DialogContent>

@@ -15,7 +15,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { Link, useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
@@ -42,6 +42,7 @@ type Props = { data: NonNullable<RepoWorkspace> };
 type Signals = Props["data"]["secondary"]["signals"];
 
 export function RepoOverview({ data }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const locale = useLocale();
   const router = useRouter();
   const { aid, name, owner } = useRepoParams();
@@ -109,68 +110,71 @@ export function RepoOverview({ data }: Readonly<Props>) {
   const REPO_STATS_CARDS = [
     {
       className: "bg-success/10",
-      description: health > 75 ? "Codebase is stable" : "Maintenance required",
+      description: health > 75 ? t("health_desc_stable") : t("health_desc_maintenance"),
       icon: Activity,
       iconClass: "text-success",
       id: "health",
-      label: "Health Score",
+      label: t("health_score"),
       value: `${health}/100`,
     },
     {
       className: "bg-emerald-500/10",
-      description: security > 80 ? "No critical leaks" : "Check vulnerabilities",
+      description: security > 80 ? t("security_desc_safe") : t("security_desc_check"),
       icon: ShieldCheck,
       iconClass: "text-emerald-500",
       id: "security",
-      label: "Security Score",
+      label: t("security_score"),
       value: `${security}/100`,
     },
     {
       className: complexity > 60 ? "bg-destructive/10" : "bg-warning/10",
-      description: complexity > 60 ? "High cognitive load" : "Logic is manageable",
+      description: complexity > 60 ? t("complexity_desc_high") : t("complexity_desc_manageable"),
       icon: Layers,
       iconClass: complexity > 60 ? "text-destructive" : "text-warning",
       id: "complexity",
-      label: "Complexity",
+      label: t("complexity_label"),
       value: `${complexity}/100`,
     },
     {
       className: techDebt > 50 ? "bg-destructive/10" : "bg-success/10",
-      description: techDebt > 50 ? "Refactoring urgent" : "Technical debt low",
+      description: techDebt > 50 ? t("tech_debt_desc_urgent") : t("tech_debt_desc_low"),
       icon: AlertTriangle,
       iconClass: techDebt > 50 ? "text-destructive" : "text-success",
       id: "tech-debt",
-      label: "Tech Debt",
+      label: t("tech_debt_label"),
       value: `${techDebt}/100`,
     },
     {
       className: "bg-blue/10",
-      description: onboarding > 70 ? "Easy" : "Hard",
+      description: onboarding > 70 ? t("onboarding_desc_easy") : t("onboarding_desc_hard"),
       icon: Book,
       iconClass: "text-blue",
       id: "onboarding",
-      label: "Onboarding",
+      label: t("onboarding_label"),
       value: `${onboarding}/100`,
     },
   ];
 
   const REPO_SIGNALS = [
-    { label: "Coverage", value: (s: Signals) => `${s.analysisCoverage.parserCoveragePercent}%` },
-    { label: "Bus Factor", value: (s: Signals) => s.busFactor },
-    { label: "API", value: (s: Signals) => s.apiSurface },
-    { label: "Cycles", value: (s: Signals) => s.dependencyCycles },
-    { label: "Docs", value: (s: Signals) => `${s.docDensity}%` },
-    { label: "Duplication", value: (s: Signals) => `${s.duplicationPercentage}%` },
+    {
+      label: t("signal_coverage"),
+      value: (s: Signals) => `${s.analysisCoverage.parserCoveragePercent}%`,
+    },
+    { label: t("signal_bus_factor"), value: (s: Signals) => s.busFactor },
+    { label: t("signal_api"), value: (s: Signals) => s.apiSurface },
+    { label: t("signal_cycles"), value: (s: Signals) => s.dependencyCycles },
+    { label: t("signal_docs"), value: (s: Signals) => `${s.docDensity}%` },
+    { label: t("signal_duplication"), value: (s: Signals) => `${s.duplicationPercentage}%` },
   ] as const;
 
   const REPO_BASE_STATS = [
     {
-      label: "Lines",
+      label: t("stat_lines"),
       value: (s: typeof secondary.stats) => `${(s.linesOfCode / 1000).toFixed(1)}k`,
     },
-    { label: "Files", value: (s: typeof secondary.stats) => s.fileCount },
-    { label: "Size", value: (s: typeof secondary.stats) => s.totalSizeLabel },
-    { label: "Config Files", value: (s: typeof secondary.stats) => s.configFiles },
+    { label: t("stat_files"), value: (s: typeof secondary.stats) => s.fileCount },
+    { label: t("stat_size"), value: (s: typeof secondary.stats) => s.totalSizeLabel },
+    { label: t("stat_config_files"), value: (s: typeof secondary.stats) => s.configFiles },
   ] as const;
 
   const totalLines = secondary.stats.linesOfCode;
@@ -182,7 +186,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <CardTitle className="font-bold text-lg">Executive Summary</CardTitle>
+              <CardTitle className="font-bold text-lg">{t("executive_summary")}</CardTitle>
               <AppBadge
                 className={cn("capitalize", status)}
                 variant="outline"
@@ -212,7 +216,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Card>
           <CardHeader>
-            <CardTitle className="font-medium text-sm">Workspace Search</CardTitle>
+            <CardTitle className="font-medium text-sm">{t("workspace_search")}</CardTitle>
           </CardHeader>
           <CardContent>
             <RepoWorkspaceSearch repoId={repo.id} />
@@ -221,11 +225,11 @@ export function RepoOverview({ data }: Readonly<Props>) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-medium text-sm">Start From Here</CardTitle>
+            <CardTitle className="font-medium text-sm">{t("start_from_here")}</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <p className="font-bold text-muted-foreground text-xs">Key Zones</p>
+              <p className="font-bold text-muted-foreground text-xs">{t("key_zones")}</p>
               <div className="flex flex-wrap gap-2">
                 {navigation.keyZones.map((zone) => (
                   <AppButton
@@ -242,7 +246,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
             </div>
 
             <div className="flex flex-col gap-2">
-              <p className="font-bold text-muted-foreground text-xs">Entrypoints</p>
+              <p className="font-bold text-muted-foreground text-xs">{t("entrypoints")}</p>
               <div className="flex flex-wrap gap-2">
                 {navigation.primaryEntrypoints.map((path) => (
                   <AppButton
@@ -272,7 +276,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-medium text-sm">
-              <Code2 /> Repository Stats
+              <Code2 /> {t("repository_stats")}
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-3 gap-4">
@@ -287,7 +291,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <GitHubIcon className="size-4" /> Github Stats
+              <GitHubIcon className="size-4" /> {t("github_stats")}
             </CardTitle>
           </CardHeader>
 
@@ -302,7 +306,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
                 icon={m.icon}
                 key={m.id}
                 label={m.label}
-                tooltip={m.tooltip}
+                tooltip={t(m.tooltipKey)}
               />
             ))}
             <RepoTopics repoTopics={data.repo.topics} />
@@ -312,7 +316,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-medium text-sm">
-              <Sparkles /> Analysis Signals
+              <Sparkles /> {t("analysis_signals")}
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
@@ -332,18 +336,22 @@ export function RepoOverview({ data }: Readonly<Props>) {
           <CardHeader>
             <CardTitle className="flex items-center justify-between gap-2 font-medium text-sm">
               <div className="flex items-center gap-2">
-                <FileText /> Documentation
+                <FileText /> {t("documentation")}
               </div>
               <AppButton
                 asChild
                 variant="ghost"
               >
-                <Link href={`/dashboard/repo/${data.repo.owner}/${data.repo.name}/docs`}>View</Link>
+                <Link href={`/dashboard/repo/${data.repo.owner}/${data.repo.name}/docs`}>
+                  {t("view")}
+                </Link>
               </AppButton>
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
-            <p className="text-muted-foreground text-xs">{docs.availableCount} docs available</p>
+            <p className="text-muted-foreground text-xs">
+              {t("docs_available", { count: docs.availableCount })}
+            </p>
             <div className="flex flex-wrap gap-2">
               {docs.items.map((item) => (
                 <AppBadge
@@ -353,14 +361,14 @@ export function RepoOverview({ data }: Readonly<Props>) {
                   {item.type.toLowerCase().replace("_", " ")} {item.status}
                 </AppBadge>
               ))}
-              {docs.hasSwagger && <AppBadge variant="secondary">swagger</AppBadge>}
+              {docs.hasSwagger && <AppBadge variant="secondary">{t("swagger")}</AppBadge>}
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-medium text-sm">Languages</CardTitle>
+            <CardTitle className="font-medium text-sm">{t("languages")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="mb-4 flex h-2 w-full overflow-hidden rounded-full">
@@ -401,7 +409,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
             <CardTitle className="flex items-center justify-between text-base">
               <span className="flex items-center gap-2 text-sm">
                 <BookOpenCheck />
-                Quality Radar
+                {t("quality_radar")}
               </span>
             </CardTitle>
           </CardHeader>
@@ -413,7 +421,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-medium text-sm text-warning">
-              <AlertTriangle /> Complex Files
+              <AlertTriangle /> {t("complex_files")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -429,28 +437,28 @@ export function RepoOverview({ data }: Readonly<Props>) {
                     <span className="truncate">{file}</span>
                   </div>
                   <div>
-                    <AppTooltip content="View code">
+                    <AppTooltip content={t("view_code")}>
                       <AppButton
                         asChild
                         size="icon"
                         variant="ghost"
                       >
                         <Link
-                          aria-label={`View code for ${file}`}
+                          aria-label={t("view_code_for", { file })}
                           href={`/dashboard/repo/${owner}/${name}/code?node=file:${encodeURIComponent(file)}&path=${encodeURIComponent(file)}`}
                         >
                           <Code2 />
                         </Link>
                       </AppButton>
                     </AppTooltip>
-                    <AppTooltip content="View on map">
+                    <AppTooltip content={t("view_on_map")}>
                       <AppButton
                         asChild
                         size="icon"
                         variant="ghost"
                       >
                         <Link
-                          aria-label={`View ${file} on map`}
+                          aria-label={t("view_on_map_for", { file })}
                           href={`/dashboard/repo/${owner}/${name}/map?node=file:${encodeURIComponent(file)}&path=${encodeURIComponent(file)}`}
                         >
                           <Map />
@@ -466,7 +474,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
 
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="font-medium text-sm">Top Risks</CardTitle>
+            <CardTitle className="font-medium text-sm">{t("top_risks")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-3">
@@ -484,7 +492,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
                   </div>
                 ))
               ) : (
-                <p className="text-muted-foreground text-sm">No significant risks detected.</p>
+                <p className="text-muted-foreground text-sm">{t("no_significant_risks")}</p>
               )}
             </div>
           </CardContent>

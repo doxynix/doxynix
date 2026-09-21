@@ -1,18 +1,11 @@
-import type { Metadata } from "next";
-
+import { createRepoMetadata } from "@/shared/lib/metadata";
 import type { RepoPageProps } from "@/shared/lib/next.types";
 
 import { RepoMapContainer } from "@/features/repo-map/ui/repo-map-container";
 
 import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 
-export async function generateMetadata({ params }: RepoPageProps): Promise<Metadata> {
-  const { name, owner } = await params;
-
-  return {
-    title: `${owner}/${name}`,
-  };
-}
+export const generateMetadata = createRepoMetadata("map");
 
 export default async function RepoMapPage({ params }: Readonly<RepoPageProps>) {
   const { name, owner } = await params;

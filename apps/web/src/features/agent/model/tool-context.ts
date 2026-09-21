@@ -1,5 +1,12 @@
-export function getToolBaseLabel(toolName: string, toolLabels: Record<string, string>): string {
-  return toolLabels[toolName] ?? `Executing ${toolName.replaceAll(/([A-Z])/g, " $1").trim()}`;
+export function prettifyToolName(toolName: string): string {
+  return toolName.replaceAll(/([A-Z])/g, " $1").trim();
+}
+
+export function getToolBaseLabel(
+  toolName: string,
+  toolLabels: Record<string, string>,
+): null | string {
+  return toolLabels[toolName] ?? null;
 }
 
 export function getDynamicToolContext(toolName: string, args: unknown): null | string {

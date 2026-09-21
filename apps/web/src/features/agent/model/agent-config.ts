@@ -1,40 +1,76 @@
 import { authClient } from "@/shared/lib/auth-client";
 
-export const toolLabels: Record<string, string> = {
-  applyFix: "Applying code corrections on GitHub",
-  clearReadNotifications: "Clearing read notifications",
-  clearStaging: "Clearing staged changes",
-  createApiKey: "Generating secure API key",
-  createFix: "Generating code refactoring suggestions",
-  deleteRepository: "Deleting repository from system",
-  documentFile: "Generating file documentation",
-  getAnalysisComments: "Retrieving code analysis findings",
-  getBranches: "Fetching repository branches",
-  getFileContent: "Reading file content",
-  getLatestAnalysis: "Checking latest analysis status",
-  getNotificationStats: "Loading notification statistics",
-  getRepoAnalytics: "Loading repository quality metrics",
-  getRepoFiles: "Reading repository structure",
-  getStagedFiles: "Listing files in staging area",
-  listApiKeys: "Listing active API keys",
-  listNotifications: "Retrieving notification list",
-  listRepositories: "Listing registered repositories",
-  listUnimportedGithubRepos: "Scanning GitHub for available repositories",
-  markAllNotificationsAsRead: "Marking all notifications as read",
-  markNotificationAsRead: "Updating notification status",
-  openPullRequest: "Opening GitHub Pull Request",
-  pinAuditToDocuments: "Pinning audit report to documents",
-  quickFileAudit: "Running quick file audit",
-  readRepositoryDoc: "Reading workspace documentation",
-  registerRepository: "Registering new repository",
-  revokeApiKey: "Revoking API key",
-  searchWorkspace: "Searching repository workspace",
-  stageFile: "Staging modified file content",
-  stageGeneratedFix: "Importing generated fixes to staging",
-  triggerRepositoryAnalysis: "Starting complete repository analysis",
-  unstageFile: "Removing file from staging",
-  updateApiKey: "Updating API key details",
-  updateUserProfile: "Updating user profile information",
+export type AgentToolLabelKey =
+  | "tool_apply_fix"
+  | "tool_clear_read_notifications"
+  | "tool_clear_staging"
+  | "tool_create_api_key"
+  | "tool_create_fix"
+  | "tool_delete_repository"
+  | "tool_document_file"
+  | "tool_get_analysis_comments"
+  | "tool_get_branches"
+  | "tool_get_file_content"
+  | "tool_get_latest_analysis"
+  | "tool_get_notification_stats"
+  | "tool_get_repo_analytics"
+  | "tool_get_repo_files"
+  | "tool_get_staged_files"
+  | "tool_list_api_keys"
+  | "tool_list_notifications"
+  | "tool_list_repositories"
+  | "tool_list_unimported_github_repos"
+  | "tool_mark_all_notifications_as_read"
+  | "tool_mark_notification_as_read"
+  | "tool_open_pull_request"
+  | "tool_pin_audit_to_documents"
+  | "tool_quick_file_audit"
+  | "tool_read_repository_doc"
+  | "tool_register_repository"
+  | "tool_revoke_api_key"
+  | "tool_search_workspace"
+  | "tool_stage_file"
+  | "tool_stage_generated_fix"
+  | "tool_trigger_repository_analysis"
+  | "tool_unstage_file"
+  | "tool_update_api_key"
+  | "tool_update_user_profile";
+
+export const toolLabelKeys: Record<string, AgentToolLabelKey> = {
+  applyFix: "tool_apply_fix",
+  clearReadNotifications: "tool_clear_read_notifications",
+  clearStaging: "tool_clear_staging",
+  createApiKey: "tool_create_api_key",
+  createFix: "tool_create_fix",
+  deleteRepository: "tool_delete_repository",
+  documentFile: "tool_document_file",
+  getAnalysisComments: "tool_get_analysis_comments",
+  getBranches: "tool_get_branches",
+  getFileContent: "tool_get_file_content",
+  getLatestAnalysis: "tool_get_latest_analysis",
+  getNotificationStats: "tool_get_notification_stats",
+  getRepoAnalytics: "tool_get_repo_analytics",
+  getRepoFiles: "tool_get_repo_files",
+  getStagedFiles: "tool_get_staged_files",
+  listApiKeys: "tool_list_api_keys",
+  listNotifications: "tool_list_notifications",
+  listRepositories: "tool_list_repositories",
+  listUnimportedGithubRepos: "tool_list_unimported_github_repos",
+  markAllNotificationsAsRead: "tool_mark_all_notifications_as_read",
+  markNotificationAsRead: "tool_mark_notification_as_read",
+  openPullRequest: "tool_open_pull_request",
+  pinAuditToDocuments: "tool_pin_audit_to_documents",
+  quickFileAudit: "tool_quick_file_audit",
+  readRepositoryDoc: "tool_read_repository_doc",
+  registerRepository: "tool_register_repository",
+  revokeApiKey: "tool_revoke_api_key",
+  searchWorkspace: "tool_search_workspace",
+  stageFile: "tool_stage_file",
+  stageGeneratedFix: "tool_stage_generated_fix",
+  triggerRepositoryAnalysis: "tool_trigger_repository_analysis",
+  unstageFile: "tool_unstage_file",
+  updateApiKey: "tool_update_api_key",
+  updateUserProfile: "tool_update_user_profile",
 };
 
 export const TOOL_INVALIDATIONS: Record<string, (utils: any) => void> = {

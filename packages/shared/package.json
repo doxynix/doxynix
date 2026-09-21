@@ -10,7 +10,7 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "type-check": "tsc -b",
-    "validate": "biome check . && oxlint"
+    "validate": "biome check . && oxlint && bun type-check"
   },
   "dependencies": {
     "zod": "catalog:"

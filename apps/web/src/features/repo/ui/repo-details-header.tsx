@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Link } from "@/shared/i18n/navigation";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
@@ -17,6 +19,7 @@ import { RepoVersionSelector } from "./repo-version-selector";
 type Props = { repo: UiRepoDetailed };
 
 export function RepoDetailsHeader({ repo }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const visibility = repoVisibilityConfig[repo.visibility];
   const status = repoStatusConfig[repo.status];
   const ownerSlug = encodeURIComponent(repo.owner);
@@ -51,13 +54,13 @@ export function RepoDetailsHeader({ repo }: Readonly<Props>) {
             className={visibility.color}
             variant="outline"
           >
-            {visibility.label}
+            {t(visibility.labelKey)}
           </AppBadge>
           <AppBadge
             className={status.color}
             variant="outline"
           >
-            {status.label}
+            {t(status.labelKey)}
           </AppBadge>
           <AppButton
             asChild
@@ -67,7 +70,7 @@ export function RepoDetailsHeader({ repo }: Readonly<Props>) {
               className="hover:text-foreground"
               href={repo.url}
             >
-              <GitHubIcon className="size-4" /> Github
+              <GitHubIcon className="size-4" /> {t("repo_open_github")}
             </ExternalLink>
           </AppButton>
         </div>

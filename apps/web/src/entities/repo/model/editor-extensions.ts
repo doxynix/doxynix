@@ -100,24 +100,26 @@ const todoHighlighter = ViewPlugin.fromClass(
   },
 );
 
-const universalSyntaxLinter = linter((view) => {
-  const diagnostics: Diagnostic[] = [];
+function createUniversalSyntaxLinter(syntaxErrorMessage: string) {
+  return linter((view) => {
+    const diagnostics: Diagnostic[] = [];
 
-  syntaxTree(view.state)
-    .cursor()
-    .iterate((node) => {
-      if (node.type.isError) {
-        diagnostics.push({
-          from: node.from,
-          message: "Syntax Error: Unexpected token or parsing failed",
-          severity: "error",
-          to: node.to,
-        });
-      }
-    });
+    syntaxTree(view.state)
+      .cursor()
+      .iterate((node) => {
+        if (node.type.isError) {
+          diagnostics.push({
+            from: node.from,
+            message: syntaxErrorMessage,
+            severity: "error",
+            to: node.to,
+          });
+        }
+      });
 
-  return diagnostics;
-});
+    return diagnostics;
+  });
+}
 
 export const BASE_EXTENSIONS: Extension[] = [
   // zebraStripes({ step: 2 }), // highlights empty rows, looks odd
@@ -159,31 +161,33 @@ export const BASE_EXTENSIONS: Extension[] = [
   ]),
 ];
 
-export const IDE_ONLY_EXTENSIONS: Extension[] = [
-  search({ top: true }),
-  lineNumbers(),
-  highlightActiveLineGutter(),
-  highlightActiveLine(),
-  foldGutter(),
-  codeFolding(),
+export function getIdeOnlyExtensions(labels: { syntaxError: string }): Extension[] {
+  return [
+    search({ top: true }),
+    lineNumbers(),
+    highlightActiveLineGutter(),
+    highlightActiveLine(),
+    foldGutter(),
+    codeFolding(),
 
-  todoHighlighter,
+    todoHighlighter,
 
-  showMinimap.compute(["doc"], () => {
-    return {
-      create: () => {
-        const dom = document.createElement("div");
-        return { dom };
-      },
-      displayText: "characters",
-      showOverlay: "mouse-over",
-    };
-  }),
+    showMinimap.compute(["doc"], () => {
+      return {
+        create: () => {
+          const dom = document.createElement("div");
+          return { dom };
+        },
+        displayText: "characters",
+        showOverlay: "mouse-over",
+      };
+    }),
 
-  lintGutter(),
-  universalSyntaxLinter,
-  tooltips({ position: "absolute" }),
-];
+    lintGutter(),
+    createUniversalSyntaxLinter(labels.syntaxError),
+    tooltips({ position: "absolute" }),
+  ];
+}
 
 export const THEME_EXTENSION = EditorView.theme({
   ".close-btn": {

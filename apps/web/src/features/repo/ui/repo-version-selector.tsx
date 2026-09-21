@@ -1,7 +1,7 @@
 "use client";
 
 import { GitCommit } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
@@ -20,6 +20,8 @@ type Props = { repoId: string };
 
 export function RepoVersionSelector({ repoId }: Readonly<Props>) {
   const locale = useLocale();
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
   const [selectedAid, setAid] = useQueryState("aid", parseAsString.withDefault(""));
 
   const { data: history, isLoading } = trpc.analysis.getHistory.useQuery({ repoId });
@@ -35,7 +37,7 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
     >
       <SelectTrigger className="w-60">
         <GitCommit />
-        <SelectValue placeholder="Select version" />
+        <SelectValue placeholder={t("repo_version_placeholder")} />
       </SelectTrigger>
       <SelectContent>
         {history.map((item) => (
@@ -47,7 +49,7 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
             <div className="flex items-center justify-between gap-4 text-xs">
               <div className="flex items-center gap-2 font-medium">
                 <span className="max-w-30 truncate">
-                  {item.commitSha?.slice(0, 7) ?? "Unknown"}
+                  {item.commitSha?.slice(0, 7) ?? t("repo_version_unknown")}
                 </span>
               </div>
               <TimeAgo
@@ -60,7 +62,7 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
                   className="text-destructive text-xs"
                   variant="outline"
                 >
-                  Failed
+                  {tCommon("failed")}
                 </AppBadge>
               )}
             </div>

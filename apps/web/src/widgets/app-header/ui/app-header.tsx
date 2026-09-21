@@ -1,6 +1,7 @@
 "use client";
 
 import { Book, SlashIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { LOCALES, type Locale } from "@/shared/config/locales";
 import { Link, usePathname } from "@/shared/i18n/navigation";
@@ -30,6 +31,7 @@ function stripLocalePrefix(pathname: string) {
 }
 
 export function AppHeader() {
+  const tCommon = useTranslations("Common");
   const { name, owner } = useRepoParams();
   const rawPathname = usePathname();
   const pathname = stripLocalePrefix(rawPathname);
@@ -55,7 +57,7 @@ export function AppHeader() {
     <header className="flex h-full flex-col justify-between bg-background px-4">
       <div className="flex w-full justify-between py-4">
         <div className="flex items-center gap-2.5">
-          <AppTooltip content="Toggle Sidebar (ctrl+b)">
+          <AppTooltip content={tCommon("toggle_sidebar_shortcut")}>
             <SidebarTrigger
               className="text-muted-foreground hover:cursor-pointer"
               variant="ghost"
@@ -74,21 +76,21 @@ export function AppHeader() {
 
         <div className="flex items-center gap-2 md:gap-4">
           <AgentButton />
-          <AppTooltip content="Work in Progress">
+          <AppTooltip content={tCommon("work_in_progress")}>
             <span className="cursor-default rounded bg-warning/20 p-1 py-0.5 text-warning text-xs">
-              BETA
+              {tCommon("beta")}
             </span>
           </AppTooltip>
           <AppCommandMenu />
           <ThemeToggle />
-          <AppTooltip content="Repositories">
+          <AppTooltip content={tCommon("nav_repositories")}>
             <AppButton
               asChild
               size="icon"
               variant="ghost"
             >
               <Link
-                aria-label="Repositories"
+                aria-label={tCommon("nav_repositories")}
                 href="/dashboard/repos"
               >
                 <Book />

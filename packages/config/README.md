@@ -63,7 +63,7 @@ const config: IConfiguration = {
   forbidden: [],
 };
 
-module.exports = config;
+export default config;
 ```
 
 ---

@@ -1,6 +1,7 @@
 "use client";
 
 import { GitPullRequest } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
 import { Link } from "@/shared/i18n/navigation";
@@ -14,12 +15,14 @@ import { RepoPullsList } from "./repo-pulls-list";
 type Props = { name: string; owner: string; repoId: string };
 
 export function RepoPullsListContainer({ name, owner, repoId }: Readonly<Props>) {
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
   const { data: pulls, isLoading } = trpc.analysis.listByRepository.useQuery({
     repoId,
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>{tCommon("loading")}</div>;
   }
 
   if (pulls == null || pulls.length === 0) {
@@ -33,20 +36,22 @@ export function RepoPullsListContainer({ name, owner, repoId }: Readonly<Props>)
                 variant="outline"
               >
                 <ExternalLink href={`https://github.com/${owner}/${name}/pulls`}>
-                  Open pull on GitHub <GitHubIcon />
+                  {t("repo_pull_open_on_github")} <GitHubIcon />
                 </ExternalLink>
               </AppButton>
               <AppButton
                 asChild
                 variant="outline"
               >
-                <Link href={`/dashboard/repo/${owner}/${name}/settings`}>Enable PR analysis</Link>
+                <Link href={`/dashboard/repo/${owner}/${name}/settings`}>
+                  {t("repo_pull_enable_analysis")}
+                </Link>
               </AppButton>
             </div>
           }
-          description="Open a PR on GitHub to view its analysis"
+          description={t("repo_pull_empty_desc")}
           icon={GitPullRequest}
-          title="No PRs found"
+          title={t("repo_pull_empty_title")}
         />
       </div>
     );

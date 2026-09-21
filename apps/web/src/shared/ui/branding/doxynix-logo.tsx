@@ -1,4 +1,5 @@
 import type { ReactNode, SVGProps } from "react";
+import { useTranslations } from "next-intl";
 
 import { Link } from "@/shared/i18n/navigation";
 
@@ -98,13 +99,15 @@ function ExpandedLogo({ isInteractive, ...props }: InnerLogoProps) {
 type Props = { children: ReactNode; isInteractive?: boolean };
 
 function LogoLink({ children, isInteractive }: Readonly<Props>) {
+  const tCommon = useTranslations("Common");
+
   if (!isInteractive) {
     return <>{children}</>;
   }
 
   return (
     <Link
-      aria-label="Doxynix Home"
+      aria-label={tCommon("doxynix_home")}
       className="cursor-pointer hover:text-muted-foreground"
       href="/"
     >

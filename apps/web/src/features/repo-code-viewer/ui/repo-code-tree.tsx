@@ -2,6 +2,7 @@
 
 import { startTransition, useEffect } from "react";
 import { Folder, FolderOpen, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Tree, type TreeApi } from "react-arborist";
 
 import { useResizeObserver } from "@/shared/lib/hooks/use-resize-observer";
@@ -30,6 +31,7 @@ export function RepoCodeTree({
   repo,
   treeApi,
 }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const { actions, state } = useRepoSetup(repo);
 
   const [measureRef, size] = useResizeObserver<HTMLDivElement>();
@@ -62,8 +64,8 @@ export function RepoCodeTree({
   };
 
   const treeActions = [
-    { icon: FolderOpen, label: "Expand All", onClick: handleExpandAll },
-    { icon: Folder, label: "Collapse All", onClick: handleCollapseAll },
+    { icon: FolderOpen, label: t("repo_code_tree_expand_all"), onClick: handleExpandAll },
+    { icon: Folder, label: t("repo_code_tree_collapse_all"), onClick: handleCollapseAll },
   ] satisfies ActionItem[];
 
   return (
@@ -77,7 +79,7 @@ export function RepoCodeTree({
               onChange={(e) => {
                 void actions.setSearchTerm(e.target.value);
               }}
-              placeholder="Search..."
+              placeholder={t("repo_code_tree_search_placeholder")}
               type="search"
               value={state.searchTerm}
             />
@@ -117,7 +119,7 @@ export function RepoCodeTree({
           <RepoTreeSkeleton variant="tree" />
         ) : state.treeData.length === 0 ? (
           <p className="flex h-full items-center justify-center text-muted-foreground text-sm">
-            No files found
+            {t("repo_code_tree_no_files")}
           </p>
         ) : (
           size.height > 0 && (

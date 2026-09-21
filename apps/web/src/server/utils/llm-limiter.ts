@@ -32,7 +32,7 @@ function parseGoogleRetryAfter(error: unknown): null | number {
   }
 
   const match =
-    /retry(?:ing)? in ([\d.]+)s/i.exec(errorMessage) ||
+    /retry(?:ing)? in ([\d.]+)s/i.exec(errorMessage) ??
     /retry(?:ing)? after ([\d.]+)s/i.exec(errorMessage);
 
   if (match != null) {

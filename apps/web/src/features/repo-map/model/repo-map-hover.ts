@@ -3,11 +3,11 @@ import type { Edge, Node } from "@xyflow/react";
 import type { RepoMapDisplayData, RepoMapNodeData } from "./repo-map.types";
 
 export const FILTER_CONFIG = {
-  api: { color: "bg-info", label: "api" },
-  client: { color: "bg-warning", label: "client" },
-  entrypoints: { color: "bg-destructive", label: "entry" },
-  server: { color: "bg-success", label: "server" },
-  shared: { color: "bg-foreground", label: "shared" },
+  api: { color: "bg-info", labelKey: "repo_map_filter_api" },
+  client: { color: "bg-warning", labelKey: "repo_map_filter_client" },
+  entrypoints: { color: "bg-destructive", labelKey: "repo_map_filter_entry" },
+  server: { color: "bg-success", labelKey: "repo_map_filter_server" },
+  shared: { color: "bg-foreground", labelKey: "repo_map_filter_shared" },
 } as const;
 
 export type FilterKey = keyof typeof FILTER_CONFIG;

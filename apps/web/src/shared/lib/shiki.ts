@@ -3,38 +3,36 @@ import "server-only";
 import { createHash } from "node:crypto";
 
 import { unstable_cache } from "next/cache";
-import { createHighlighter } from "shiki";
-import langConsole from "shiki/langs/console.mjs";
-import langJSON from "shiki/langs/json.mjs";
-import langMarkdown from "shiki/langs/markdown.mjs";
-import langTs from "shiki/langs/typescript.mjs";
-import themeDark from "shiki/themes/github-dark-dimmed.mjs";
-import themeLight from "shiki/themes/github-light.mjs";
+import { bundledLanguages, bundledLanguagesAlias, codeToHtml } from "shiki";
 
-type HighlighterType = Awaited<ReturnType<typeof createHighlighter>>;
-
-const globalForShiki = globalThis as unknown as {
-  shikiPromise?: Promise<HighlighterType>;
+/**
+ * Shorthand names that shiki itself does not resolve.
+ * Everything else (js/ts/py/sh/shell/…, ~450 ids incl. 346 languages)
+ * is already a direct key or alias in the `shiki/langs` bundle.
+ */
+const ALIASES: Record<string, string> = {
+  // shiki v4 splits Fortran into fixed/free form grammars.
+  fortran: "fortran-free-form",
+  golang: "go",
 };
 
-export function getHighlighter(): Promise<HighlighterType> {
-  if (!globalForShiki.shikiPromise) {
-    globalForShiki.shikiPromise = createHighlighter({
-      langs: [langTs, langJSON, langMarkdown, langConsole],
-      themes: [themeDark, themeLight],
-    });
-  }
+function normalizeLang(lang: string): string {
+  return ALIASES[lang] ?? lang;
+}
 
-  return globalForShiki.shikiPromise;
+function isKnownLang(lang: string): boolean {
+  return lang in bundledLanguages || lang in bundledLanguagesAlias;
 }
 
 async function highlight(code: string, lang: string, theme: "dark" | "light") {
-  const hl = await getHighlighter();
-
   const shikiTheme = theme === "dark" ? "github-dark-dimmed" : "github-light";
+  const requested = normalizeLang(lang);
+  // The codeToHtml shorthand throws for languages that are not part of the
+  // bundle, so unknown file extensions resolve to plain text instead.
+  const resolved = isKnownLang(requested) ? requested : "text";
 
-  return hl.codeToHtml(code, {
-    lang,
+  return codeToHtml(code, {
+    lang: resolved,
     theme: shikiTheme,
     transformers: [],
   });
@@ -50,7 +48,7 @@ export const highlightCode = async (
 
   return unstable_cache(
     async () => highlight(code, lang, theme),
-    ["shiki-highlight", key, lang, theme],
+    ["shiki-highlight", key, normalizeLang(lang), theme],
     {
       revalidate: false,
       tags: ["shiki"],

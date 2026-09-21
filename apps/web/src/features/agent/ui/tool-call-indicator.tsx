@@ -1,22 +1,38 @@
 "use client";
 
 import { AlertTriangle, Check, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { Spinner } from "@/shared/ui/core/spinner";
 
-import { getDynamicToolContext, getToolBaseLabel } from "../model/tool-context";
+import type { AgentToolLabelKey } from "../model/agent-config";
+import { getDynamicToolContext, getToolBaseLabel, prettifyToolName } from "../model/tool-context";
 
 type Props = {
   addToolApprovalResponse: (options: { approved: boolean; id: string; reason?: string }) => void;
   part: any;
-  toolLabels: Record<string, string>;
+  toolLabelKeys: Record<string, AgentToolLabelKey>;
 };
 
-export function ToolCallIndicator({ addToolApprovalResponse, part, toolLabels }: Readonly<Props>) {
+export function ToolCallIndicator({
+  addToolApprovalResponse,
+  part,
+  toolLabelKeys,
+}: Readonly<Props>) {
+  const t = useTranslations("Agent");
+  const tCommon = useTranslations("Common");
   const toolName = part.type.slice(5);
-  const baseLabel = getToolBaseLabel(toolName, toolLabels);
+
+  const resolvedToolLabels: Record<string, string> = {};
+  for (const [tool, key] of Object.entries(toolLabelKeys)) {
+    resolvedToolLabels[tool] = t(key);
+  }
+
+  const baseLabel =
+    getToolBaseLabel(toolName, resolvedToolLabels) ??
+    t("tool_executing", { tool: prettifyToolName(toolName) });
 
   const dynamicContext = getDynamicToolContext(toolName, part.args);
   const fullLabel = dynamicContext != null ? `${baseLabel}: ${dynamicContext}` : baseLabel;
@@ -31,11 +47,11 @@ export function ToolCallIndicator({ addToolApprovalResponse, part, toolLabels }:
         <div className="flex max-w-[95%] flex-col gap-2 rounded-xl border border-warning/30 bg-warning/5 p-3">
           <div className="flex items-center gap-1.5 font-semibold text-warning text-xs">
             <AlertTriangle className="size-3.5" />
-            <span>Action Requires Confirmation</span>
+            <span>{t("action_requires_confirmation")}</span>
           </div>
           <p className="text-muted-foreground text-xs leading-normal">
-            The agent is requesting approval to:{" "}
-            <strong className="text-foreground">{baseLabel}</strong>.
+            {t("agent_requesting_approval_to")}{" "}
+            <strong className="text-foreground">{`${baseLabel}.`}</strong>
           </p>
           {part.args != null && (
             <pre className="no-scrollbar max-h-24 overflow-x-auto rounded-lg border bg-background p-2 font-mono text-[10px] text-muted-foreground">
@@ -48,7 +64,7 @@ export function ToolCallIndicator({ addToolApprovalResponse, part, toolLabels }:
               onClick={() => addToolApprovalResponse({ approved: true, id: part.approval.id })}
               size="sm"
             >
-              Approve
+              {t("approve")}
             </AppButton>
             <AppButton
               className="text-xs"
@@ -56,13 +72,13 @@ export function ToolCallIndicator({ addToolApprovalResponse, part, toolLabels }:
                 addToolApprovalResponse({
                   approved: false,
                   id: part.approval.id,
-                  reason: "Denied by user",
+                  reason: t("denied_by_user"),
                 })
               }
               size="sm"
               variant="ghost"
             >
-              Deny
+              {t("deny")}
             </AppButton>
           </div>
         </div>
@@ -80,13 +96,21 @@ export function ToolCallIndicator({ addToolApprovalResponse, part, toolLabels }:
         >
           {wasApproved === true ? (
             <>
-              <span className="font-bold text-success text-xs">✓</span>
-              <span className="max-w-[320px] truncate text-foreground">{fullLabel} (Approved)</span>
+              <span className="font-bold text-success text-xs">
+                <Check className="text-success" />
+              </span>
+              <span className="max-w-[320px] truncate text-foreground">
+                {`${fullLabel} (${t("approved")})`}
+              </span>
             </>
           ) : (
             <>
-              <span className="font-bold text-destructive text-xs">✗</span>
-              <span className="max-w-[320px] truncate text-foreground">{fullLabel} (Denied)</span>
+              <span className="font-bold text-destructive text-xs">
+                <X className="text-destructive" />
+              </span>
+              <span className="max-w-[320px] truncate text-foreground">
+                {`${fullLabel} (${t("denied")})`}
+              </span>
             </>
           )}
         </AppBadge>
@@ -104,7 +128,7 @@ export function ToolCallIndicator({ addToolApprovalResponse, part, toolLabels }:
         >
           {isError ? <X className="text-destructive" /> : <Check className="text-success" />}
           <span className="max-w-[320px] truncate text-foreground">
-            {fullLabel} {isError ? "(Failed)" : "(Completed)"}
+            {`${fullLabel} ${isError ? `(${tCommon("failed")})` : `(${t("completed")})`}`}
           </span>
         </AppBadge>
       </div>

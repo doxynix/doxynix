@@ -9,6 +9,8 @@ import { isRouteActive } from "@/shared/lib/navigation-utils";
 import { SidebarMenuBadge, SidebarMenuButton, SidebarMenuShortcut } from "@/shared/ui/core/sidebar";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 
+type Props = Omit<MenuItem, "labelKey"> & { label: string };
+
 export function SidebarLink({
   avatar,
   exact,
@@ -18,7 +20,7 @@ export function SidebarLink({
   label: title,
   notificationsCount,
   shortcut,
-}: Readonly<MenuItem>) {
+}: Readonly<Props>) {
   const pathname = usePathname();
   const blank = isBlank === true;
   if (href == null) {

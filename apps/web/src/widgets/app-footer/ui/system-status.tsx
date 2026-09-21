@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
@@ -11,33 +12,6 @@ type StatusType = "down" | "maintenance" | "unknown" | "up";
 
 type StatusResponse = {
   status: StatusType;
-};
-
-const config = {
-  down: {
-    dotColor: "bg-error",
-    hasPing: true,
-    label: "System Outage",
-    textColor: "text-error",
-  },
-  maintenance: {
-    dotColor: "bg-warning",
-    hasPing: false,
-    label: "Maintenance",
-    textColor: "text-warning",
-  },
-  unknown: {
-    dotColor: "bg-muted-foreground",
-    hasPing: false,
-    label: "Status Unknown",
-    textColor: "text-muted-foreground",
-  },
-  up: {
-    dotColor: "bg-success",
-    hasPing: true,
-    label: "All Systems Operational",
-    textColor: "text-muted-foreground",
-  },
 };
 
 const fetchSystemStatus = async (): Promise<StatusType> => {
@@ -53,6 +27,7 @@ const STALE_TIME = 4 * 60 * 1000; // TIME: 4 minutes
 const REFETCH_INTERVAL = 5 * 60 * 1000; // TIME: 5 minutes
 
 export function SystemStatus({ className }: Readonly<{ className?: string }>) {
+  const t = useTranslations("Dashboard");
   const { data: status = "unknown", isLoading } = useQuery({
     queryFn: fetchSystemStatus,
     queryKey: ["system-status"],
@@ -62,6 +37,33 @@ export function SystemStatus({ className }: Readonly<{ className?: string }>) {
     retry: false,
     staleTime: STALE_TIME,
   });
+
+  const config = {
+    down: {
+      dotColor: "bg-error",
+      hasPing: true,
+      label: t("system_status_down"),
+      textColor: "text-error",
+    },
+    maintenance: {
+      dotColor: "bg-warning",
+      hasPing: false,
+      label: t("system_status_maintenance"),
+      textColor: "text-warning",
+    },
+    unknown: {
+      dotColor: "bg-muted-foreground",
+      hasPing: false,
+      label: t("system_status_unknown"),
+      textColor: "text-muted-foreground",
+    },
+    up: {
+      dotColor: "bg-success",
+      hasPing: true,
+      label: t("system_status_up"),
+      textColor: "text-muted-foreground",
+    },
+  };
 
   const current = config[status];
 

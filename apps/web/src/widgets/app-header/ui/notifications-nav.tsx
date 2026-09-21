@@ -65,7 +65,9 @@ export function NotificationsNav() {
         <DropdownMenuSeparator />
         <div className="flex flex-col gap-1 py-1">
           {notifications.length === 0 && !isLoading ? (
-            <p className="p-4 text-center text-muted-foreground text-sm">No notifications</p>
+            <p className="p-4 text-center text-muted-foreground text-sm">
+              {t("notifications_empty")}
+            </p>
           ) : (
             notifications.map((note) => {
               const href =

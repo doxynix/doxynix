@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 
 import { ImageResponse } from "next/og";
+import { getTranslations } from "next-intl/server";
 import { join } from "pathe";
 
 export const alt = "Doxynix - Code Analysis Platform";
@@ -10,6 +11,7 @@ export const contentType = "image/png";
 export default async function Image() {
   const fontPath = join(process.cwd(), "src/app/fonts/Inter-Regular.ttf");
   const fontData = readFileSync(fontPath);
+  const t = await getTranslations("OG");
 
   return new ImageResponse(
     <div
@@ -104,7 +106,7 @@ export default async function Image() {
               textShadow: "0 10px 30px rgba(0,0,0,0.5)",
             }}
           >
-            Code Analysis Platform
+            {t("og_platform")}
           </div>
         </div>
 
@@ -121,8 +123,8 @@ export default async function Image() {
             textAlign: "center",
           }}
         >
-          <span>Automated documentation, quality metrics &</span>
-          <span>security insights for your repositories.</span>
+          <span>{t("og_docs_metrics")}</span>
+          <span>{t("og_security_insights")}</span>
         </div>
         <div
           style={{

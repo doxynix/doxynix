@@ -6,7 +6,6 @@ describe("shared/lib/utils:isGitHubUrl", () => {
   it("should return true for valid github URLs and short owner/repo paths", () => {
     const validInputs = [
       "https://github.com/facebook/react",
-      // eslint-disable-next-line sonarjs/no-clear-text-protocols
       "http://github.com/vercel/next.js",
       "owner/repo",
       "/owner/repo",
@@ -24,7 +23,6 @@ describe("shared/lib/utils:isGitHubUrl", () => {
       "just-string",
       "https://google.com/repo",
       "https://githubx.com/owner/repo",
-      // eslint-disable-next-line sonarjs/no-clear-text-protocols
       "ftp://github.com/owner/repo",
     ];
 

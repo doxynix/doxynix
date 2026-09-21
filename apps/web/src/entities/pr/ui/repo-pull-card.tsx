@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
-import { CheckCircle2, Clock, ShieldAlert } from "lucide-react";
-import { useLocale } from "next-intl";
+import { CheckCircle2, Clock, Hash, ShieldAlert } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
@@ -42,6 +42,7 @@ function getRiskBadgeClass(score: number): string {
 
 export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
   const locale = useLocale();
+  const t = useTranslations("Dashboard");
   const { className: iconClass, icon: StatusIcon } = getStatusConfig(pull.status);
 
   return (
@@ -56,15 +57,16 @@ export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
 
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2 font-medium">
-            <span>#{pull.prNumber}</span>
+            <Hash className="size-3 text-muted-foreground" />
+            <span>{pull.prNumber}</span>
             <span className="font-mono text-muted-foreground text-sm">
               ({pull.headSha.slice(0, 7)})
             </span>
           </div>
 
           <div className="flex items-center gap-3 text-muted-foreground text-xs">
-            <span>Issues: {pull.findingCount}</span>
-            <span>•</span>
+            <span>{t("repo_pull_card_issues", { count: pull.findingCount })}</span>
+            <span className="size-1 shrink-0 rounded-full bg-muted-foreground" />
             <TimeAgo
               date={pull.createdAt}
               locale={locale}
@@ -75,7 +77,9 @@ export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
 
       {pull.riskScore !== null && (
         <div className="flex flex-col items-end">
-          <span className="mb-1 text-muted-foreground text-xs">Risk Level</span>
+          <span className="mb-1 text-muted-foreground text-xs">
+            {t("repo_pull_card_risk_level")}
+          </span>
           <AppBadge
             className={cn(getRiskBadgeClass(pull.riskScore))}
             variant="outline"

@@ -24,8 +24,7 @@ import { createCallerFactory, createTRPCRouter, protectedProcedure, publicProced
 function formatError(code: TRPCError["code"], message: string) {
   const router = createTRPCRouter({ test: publicProcedure.query(() => "ok") });
   return getErrorShape({
-    // oxlint-disable-next-line no-underscore-dangle
-    config: router._def._config,
+    config: router._def["_config"],
     ctx: undefined,
     error: new TRPCError({ code, message }),
     input: undefined,

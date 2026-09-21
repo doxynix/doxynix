@@ -33,11 +33,12 @@ export function DeleteRepoDialog({ id }: Readonly<Props>) {
   return (
     <DangerActionDialog
       confirmLabel={t("settings_danger_delete_confirmation")}
-      description="You are about to delete repository!"
+      description={t("settings_repo_delete_desc")}
       destructiveAlertContent={
         <span>
-          This action is <strong>irreversible</strong>. Deleting repository entails the complete
-          removal of all generated documentation and calculated metrics.
+          {t("settings_repo_delete_irreversible_pre")}{" "}
+          <strong>{t("settings_repo_delete_irreversible_strong")}</strong>{" "}
+          {t("settings_repo_delete_irreversible_post")}
         </span>
       }
       isLoading={deleteRepo.isPending}
@@ -46,18 +47,19 @@ export function DeleteRepoDialog({ id }: Readonly<Props>) {
       open={open}
       successAlertContent={
         <span>
-          This action <strong>will not delete</strong> your GitHub/GitLab repositories. They will
-          simply stop appearing in this service.
+          {t("settings_repo_delete_safe_pre")}{" "}
+          <strong>{t("settings_repo_delete_safe_strong")}</strong>{" "}
+          {t("settings_repo_delete_safe_post")}
         </span>
       }
       successAlertTitle={t("settings_danger_alert_title")}
-      title="Delete repository?"
+      title={t("settings_repo_delete_title")}
       trigger={
         <AppButton
           className="w-fit cursor-pointer"
           variant="destructive"
         >
-          Delete repository <Trash2 />
+          {t("settings_repo_delete_button")} <Trash2 />
         </AppButton>
       }
     />

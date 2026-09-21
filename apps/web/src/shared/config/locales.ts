@@ -1,4 +1,17 @@
-export const LOCALES = ["en", "ru", "de", "es", "zh-CN", "pt-BR", "fr"] as const;
+export const LOCALES = [
+  "en",
+  "ru",
+  "de",
+  "es",
+  "zh-CN",
+  "pt-BR",
+  "fr",
+  "it",
+  "ja",
+  "ko",
+  "pl",
+  "tr",
+] as const;
 
 export const DEFAULT_LOCALE = "en";
 

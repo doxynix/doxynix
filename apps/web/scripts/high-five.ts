@@ -1,6 +1,3 @@
-/* eslint-disable sonarjs/no-os-command-from-path */
-/* eslint-disable sonarjs/slow-regex */
-/* eslint-disable sonarjs/cognitive-complexity */
 import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";

@@ -237,7 +237,10 @@ export async function callWithFallback<T>({
           } else if (part.type === "error") {
             const timestamp = new Date().toLocaleTimeString();
             try {
-              metadata.append(taskLogs, `error:::${timestamp}:::AI Stream Error: ${part.error}`);
+              metadata.append(
+                taskLogs,
+                `error:::${timestamp}:::AI Stream Error: ${String(part.error)}`,
+              );
             } catch (error) {
               appLogger.debug({ error: error, msg: "Metadata append failed for error log" });
             }

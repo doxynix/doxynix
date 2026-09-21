@@ -184,10 +184,7 @@ export class SafetyContext {
             msg: "Potentially dangerous input pattern detected",
             pattern: pattern.toString(),
           });
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          if (this.level === "strict") {
-            throw new Error("Input contains potentially dangerous patterns");
-          }
+          throw new Error("Input contains potentially dangerous patterns");
         }
       }
     }
@@ -249,9 +246,7 @@ let globalSafetyContext: null | SafetyContext = null;
  * Get or create global safety context
  */
 export function getGlobalSafetyContext(level: SafetyLevel = "strict"): SafetyContext {
-  if (!globalSafetyContext) {
-    globalSafetyContext = new SafetyContext(level);
-  }
+  globalSafetyContext ??= new SafetyContext(level);
   return globalSafetyContext;
 }
 

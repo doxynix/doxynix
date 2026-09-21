@@ -23,8 +23,13 @@ export const FLAGS: Record<Locale, string> = {
   en: "/icons/flags/us.svg",
   es: "/icons/flags/es.svg",
   fr: "/icons/flags/fr.svg",
+  it: "/icons/flags/it.svg",
+  ja: "/icons/flags/jp.svg",
+  ko: "/icons/flags/kr.svg",
+  pl: "/icons/flags/pl.svg",
   "pt-BR": "/icons/flags/br.svg",
   ru: "/icons/flags/ru.svg",
+  tr: "/icons/flags/tr.svg",
   "zh-CN": "/icons/flags/cn.svg",
 };
 
@@ -56,6 +61,7 @@ export function Flag({ alt, src }: Readonly<{ alt: string; src: string }>) {
 
 export function LanguageSwitcher() {
   const t = useTranslations("Dashboard");
+  const tCommon = useTranslations("Common");
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -84,7 +90,7 @@ export function LanguageSwitcher() {
             value={locale}
           >
             <SelectTrigger
-              aria-label="Change Language"
+              aria-label={tCommon("change_language")}
               className="w-40"
             >
               <SelectValue placeholder={t("settings_language_select_placeholder")} />

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 
 import { AppSearch } from "@/shared/ui/kit/app-search";
@@ -15,13 +16,15 @@ type Props = {
 
 export function HighFiveList({ initialGroups }: Readonly<Props>) {
   const [search] = useQueryState("search", parseAsString.withDefault(""));
+  const t = useTranslations("Dashboard");
+  const tCommon = useTranslations("Common");
 
   const filtered = filterAuthorGroups(initialGroups, search);
 
   return (
     <>
       <div className="mb-8 ml-auto w-fit">
-        <AppSearch placeholder="Search libraries..." />
+        <AppSearch placeholder={t("search_libraries")} />
       </div>
 
       {filtered.length > 0 ? (
@@ -35,7 +38,9 @@ export function HighFiveList({ initialGroups }: Readonly<Props>) {
         </div>
       ) : (
         <div className="py-20 text-center text-muted-foreground">
-          Nothing found for &quot;<span className="max-w-60 truncate">{search}</span>&quot;
+          {`${tCommon("nothing_found_for")} "`}
+          <span className="max-w-60 truncate">{search}</span>
+          {`"`}
         </div>
       )}
     </>

@@ -89,7 +89,7 @@ export default async function TermsPage() {
               className="hover:no-underline"
               href="mailto:legal@doxynix.space?subject=Terms of Service Inquiry"
             >
-              legal@doxynix.space
+              {t("contact_email")}
             </a>
           </div>
         </section>

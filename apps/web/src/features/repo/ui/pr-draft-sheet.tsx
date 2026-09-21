@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CreatePrSchema, type CreatePrValues } from "@doxynix/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileIcon, GitPullRequest, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -39,6 +40,8 @@ type Props = {
 };
 
 export function PrDraftSheet({ repoId }: Readonly<Props>) {
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
   const [open, setOpen] = useState(false);
   const [removingFiles, setRemovingFiles] = useState<Set<string>>(new Set());
   const utils = trpc.useUtils();
@@ -48,12 +51,12 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
   });
 
   const openPrMutation = trpc.analysis.openPullRequest.useMutation({
-    onError: (err) => toast.error(`Failed to create PR: ${err.message}`),
+    onError: (err) => toast.error(t("repo_pr_draft_create_error", { message: err.message })),
     onSuccess: (data) => {
       if (data.success) {
-        toast.success("Pull Request created successfully!", {
+        toast.success(t("repo_pr_draft_created"), {
           action: {
-            label: "View",
+            label: t("repo_pr_draft_view"),
             onClick: () => {
               window.open(data.prUrl, "_blank", "noopener,noreferrer");
             },
@@ -68,7 +71,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
   });
 
   const unstageMutation = trpc.analysis.unstageFile.useMutation({
-    onError: (err) => toast.error(`Failed to remove file from draft: ${err.message}`),
+    onError: (err) => toast.error(t("repo_pr_draft_unstage_error", { message: err.message })),
     onSuccess: () => {
       void utils.analysis.getStagedFiles.invalidate();
     },
@@ -77,14 +80,14 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
   const form = useForm<CreatePrValues>({
     defaultValues: {
       branchName: generateBranchName(),
-      prTitle: "Doxynix Suggested code improvements",
+      prTitle: t("repo_pr_draft_default_title"),
     },
     resolver: zodResolver(CreatePrSchema),
   });
 
   const onSubmit = (values: CreatePrValues) => {
     if (stagedFiles == null || stagedFiles.length === 0) {
-      toast.error("No files in stage");
+      toast.error(t("repo_pr_draft_no_files"));
       return;
     }
 
@@ -99,8 +102,8 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
 
   return (
     <Sheet
-      onOpenChange={(open) => {
-        setOpen(open);
+      onOpenChange={(openDialog) => {
+        setOpen(openDialog);
         form.reset();
       }}
       open={open}
@@ -111,7 +114,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
           variant="outline"
         >
           <GitPullRequest />
-          <span>PR Draft</span>
+          <span>{t("repo_pr_draft_trigger_label")}</span>
           {filesCount > 0 && <AppBadge className="absolute -top-2 -right-2">{filesCount}</AppBadge>}
         </AppButton>
       </SheetTrigger>
@@ -120,16 +123,16 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <GitPullRequest />
-            Pull Request Draft
+            {t("repo_pr_draft_title")}
           </SheetTitle>
-          <SheetDescription>
-            Review staged changes and create a new pull request to your repository.
-          </SheetDescription>
+          <SheetDescription>{t("repo_pr_draft_desc")}</SheetDescription>
         </SheetHeader>
 
         <div className="flex min-h-0 flex-1 flex-col gap-6">
           <div className="flex flex-col gap-4">
-            <Label className="text-muted-foreground">Staged Files ({filesCount})</Label>
+            <Label className="text-muted-foreground">
+              {t("repo_pr_draft_staged_label", { count: filesCount })}
+            </Label>
             <ScrollArea className="h-75 rounded-xl border p-2">
               {isFilesLoading ? (
                 <div className="flex flex-col gap-2 p-2">
@@ -142,7 +145,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
                 </div>
               ) : filesCount === 0 ? (
                 <div className="flex h-20 items-center justify-center text-muted-foreground text-xs italic">
-                  No files staged for PR yet.
+                  {t("repo_pr_draft_empty_staged")}
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
@@ -159,7 +162,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
                           <span className="truncate text-xs">{file.filePath}</span>
                         </div>
                         <LoadingButton
-                          aria-label="Unstage file"
+                          aria-label={t("repo_pr_draft_unstage_aria")}
                           className="hover:bg-destructive/10 hover:text-destructive"
                           disabled={isRemoving}
                           isLoading={isRemoving}
@@ -211,7 +214,9 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
                 name="branchName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-muted-foreground">Branch Name</FormLabel>
+                    <FormLabel className="text-muted-foreground">
+                      {t("repo_pr_draft_branch_label")}
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -228,7 +233,9 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
                 name="prTitle"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-muted-foreground">PR Title</FormLabel>
+                    <FormLabel className="text-muted-foreground">
+                      {t("repo_pr_draft_title_label")}
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -248,10 +255,10 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
             disabled={filesCount === 0 || openPrMutation.isPending}
             form="pr-form"
             isLoading={openPrMutation.isPending}
-            loadingText="Processing..."
+            loadingText={tCommon("processing")}
             type="submit"
           >
-            <GitPullRequest /> Open Pull Request
+            <GitPullRequest /> {t("repo_pr_draft_open_pr_button")}
           </LoadingButton>
         </SheetFooter>
       </SheetContent>

@@ -1,7 +1,13 @@
-/* eslint-disable sonarjs/code-eval */
 "use client";
 
-import { type JSX, type SyntheticEvent, useEffect, useState } from "react";
+import {
+  type JSX,
+  type SyntheticEvent,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import parse, {
   type DOMNode,
   domToReact,
@@ -9,6 +15,7 @@ import parse, {
   type HTMLReactParserOptions,
 } from "html-react-parser";
 import { AlertTriangle, Info, Lightbulb, ShieldAlert, Terminal } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Link, useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
@@ -38,6 +45,8 @@ const isTextNode = (node: DOMNode): node is DOMNode & { data: string } => {
   return "data" in node && typeof (node as any).data === "string";
 };
 
+const EMPTY_SUBSCRIBE = () => () => {};
+
 const cleanTextNodes = (nodes: DOMNode[]): DOMNode[] => {
   return nodes.map((node) => {
     if (isTextNode(node)) {
@@ -52,18 +61,21 @@ const cleanTextNodes = (nodes: DOMNode[]): DOMNode[] => {
 };
 
 export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    EMPTY_SUBSCRIBE,
+    () => true,
+    () => false,
+  );
   const router = useRouter();
 
   const { name, owner } = useRepoParams();
+  const t = useTranslations("Dashboard");
+  const tCommon = useTranslations("Common");
 
   const [hoveredFile, setHoveredFile] = useState<null | string>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
+  const contentRef = useRef<HTMLElement>(null);
 
   const handleHoverOrFocus = (e: SyntheticEvent) => {
     const target = e.target as HTMLElement;
@@ -104,6 +116,28 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
     setAnchorEl(null);
   };
 
+  useEffect(() => {
+    const content = contentRef.current;
+    if (content == null) {
+      return;
+    }
+    const trackHover = (e: Event) => handleHoverOrFocus(e as unknown as SyntheticEvent);
+    const trackHoverEnd = (e: Event) => handleHoverOrBlur(e as unknown as SyntheticEvent);
+    content.addEventListener("mouseover", trackHover);
+    content.addEventListener("mouseout", trackHoverEnd);
+    content.addEventListener("focusin", trackHover);
+    content.addEventListener("focusout", trackHoverEnd);
+    return () => {
+      content.removeEventListener("mouseover", trackHover);
+      content.removeEventListener("mouseout", trackHoverEnd);
+      content.removeEventListener("focusin", trackHover);
+      content.removeEventListener("focusout", trackHoverEnd);
+    };
+    // React Compiler memoizes these plain functions, so they are referentially stable at
+    // runtime; the compiler-blind exhaustive-deps rule flags them as recreated each render.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [handleHoverOrFocus, handleHoverOrBlur, data, isLoading]);
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-4">
@@ -116,8 +150,8 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
   if (data == null) {
     return (
       <Alert variant="destructive">
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>Failed to load documentation content.</AlertDescription>
+        <AlertTitle>{t("error")}</AlertTitle>
+        <AlertDescription>{t("docs_failed_load")}</AlertDescription>
       </Alert>
     );
   }
@@ -163,31 +197,31 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
               CAUTION: {
                 className: "border-red-500/30 bg-red-500/5 text-red-500",
                 icon: ShieldAlert,
-                title: "Caution",
+                title: t("alert_caution"),
                 variant: "destructive" as const,
               },
               IMPORTANT: {
                 className: "border-purple-500/30 bg-purple-500/5 text-purple-500",
                 icon: Terminal,
-                title: "Important",
+                title: t("alert_important"),
                 variant: "default" as const,
               },
               NOTE: {
                 className: "border-blue-500/30 bg-blue-500/5 text-blue-500",
                 icon: Info,
-                title: "Note",
+                title: t("alert_note"),
                 variant: "default" as const,
               },
               TIP: {
                 className: "border-emerald-500/30 bg-emerald-500/5 text-emerald-500",
                 icon: Lightbulb,
-                title: "Tip",
+                title: t("alert_tip"),
                 variant: "default" as const,
               },
               WARNING: {
                 className: "border-amber-500/30 bg-amber-500/5 text-amber-500",
                 icon: AlertTriangle,
-                title: "Warning",
+                title: t("alert_warning"),
                 variant: "default" as const,
               },
             } as const;
@@ -301,7 +335,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
             } else {
               result = (
                 <span className="select-none rounded border border-destructive/20 bg-destructive/5 px-1.5 py-0.5 font-mono text-[10px] text-destructive">
-                  [Blocked Unsafe Link]
+                  {t("blocked_unsafe_link")}
                 </span>
               );
             }
@@ -346,7 +380,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
                 <div className="absolute top-3 right-3 z-10 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                   <CopyButton
                     className="bg-background/80 shadow-md hover:bg-background"
-                    tooltipText="Copy code"
+                    tooltipText={tCommon("copy_code")}
                     value={rawCode}
                   />
                 </div>
@@ -363,13 +397,11 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
 
   return (
     <div className="fade-in slide-in-from-bottom-2 animate-in duration-500">
+      {/* Container tracks pointer/focus of child wiki-links (the interactive targets); keyboard parity via onFocus/onBlur. */}
       <article
-        aria-label="Documentation content"
+        aria-label={t("repo_docs_content_aria")}
         className="prose dark:prose-invert wrap-break-word min-w-0 max-w-none prose-pre:bg-transparent prose-pre:p-0"
-        onBlur={handleHoverOrBlur}
-        onFocus={handleHoverOrFocus}
-        onMouseOut={handleHoverOrBlur}
-        onMouseOver={handleHoverOrFocus}
+        ref={contentRef}
       >
         {mounted ? (
           parse(data.html, parseOptions)

@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { trpc } from "@/shared/api/trpc";
 import { commandMenuItems } from "@/shared/config/navigation";
 import type { MenuItem } from "@/shared/config/navigation.types";
+import { useNavLabels } from "@/shared/config/navigation-labels";
 import { useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
@@ -34,6 +35,7 @@ import {
 
 export function AppCommandMenu() {
   const t = useTranslations("Dashboard");
+  const navLabels = useNavLabels();
   const open = useCommandMenuIsOpen();
   const { setOpen } = useCommandMenuActions();
   const [search, setSearch] = useState("");
@@ -145,17 +147,19 @@ export function AppCommandMenu() {
     ? commandMenuItems
     : commandMenuItems.filter(
         (item) =>
-          (item.label.toLowerCase().includes(s) || item.url?.toLowerCase().includes(s)) ?? false,
+          (navLabels[item.labelKey].toLowerCase().includes(s) ||
+            item.url?.toLowerCase().includes(s)) ??
+          false,
       );
 
   return (
     <>
       <AppTooltip
         className="lg:hidden"
-        content="Search site"
+        content={t("command_search")}
       >
         <AppButton
-          aria-label="Search site"
+          aria-label={t("command_search")}
           className={cn(
             "relative size-9 justify-start rounded-xl not-lg:border-0 not-lg:p-0 font-normal text-muted-foreground text-sm lg:w-64 lg:border-border lg:bg-surface-hover lg:pr-12",
           )}
@@ -166,7 +170,7 @@ export function AppCommandMenu() {
 
           <span className="hidden lg:inline-flex lg:pl-4">{t("command_search")}</span>
           <CommandShortcut className="absolute top-1.5 right-3 hidden text-xs lg:flex">
-            Ctrl+K
+            {"Ctrl+K"}
           </CommandShortcut>
         </AppButton>
       </AppTooltip>
@@ -198,13 +202,13 @@ export function AppCommandMenu() {
                         "text-destructive data-[selected=true]:bg-destructive/10 data-[selected=true]:text-destructive",
                       "flex items-center justify-between",
                     )}
-                    key={item.label}
+                    key={navLabels[item.labelKey]}
                     onSelect={() => runCommand(item)}
-                    value={item.label}
+                    value={navLabels[item.labelKey]}
                   >
                     <div className="flex items-center gap-2">
                       {item.icon != null && <item.icon />}
-                      <span>{item.label}</span>
+                      <span>{navLabels[item.labelKey]}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       {item.url != null && (

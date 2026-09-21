@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import fs from "node:fs";
 import { createRequire } from "node:module";
 
@@ -377,7 +376,9 @@ async function initRuntime() {
     }
 
     if (!Parser || typeof Parser.init !== "function") {
-      throw new Error(`[TreeSitter] Could not find Parser.init. Module keys: ${Object.keys(mod)}`);
+      throw new Error(
+        `[TreeSitter] Could not find Parser.init. Module keys: ${Object.keys(mod).join(", ")}`,
+      );
     }
 
     const runtimeWasmName = "tree-sitter.wasm";
@@ -453,7 +454,7 @@ function resolveGrammarWasmPath(spec: LanguageSpec): string {
     pkgOutDir ? resolve(pkgOutDir, spec.wasm) : "",
     resolve(process.cwd(), spec.wasm),
     resolve(process.cwd(), "node_modules/tree-sitter-wasms/out", spec.wasm),
-    resolve(import.meta.dirname ?? "", "../../../vendor/wasms", spec.wasm),
+    resolve((import.meta.dirname as string | undefined) ?? "", "../../../vendor/wasms", spec.wasm),
   ].filter(Boolean);
 
   for (const path of candidates) {

@@ -5,7 +5,6 @@ import {
   forwardRef,
   useEffect,
   useImperativeHandle,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -282,6 +281,14 @@ const isDate = (val: unknown): val is Date => {
   return val instanceof Date;
 };
 
+// Compare dates/ranges by value (timestamps) instead of reference: parents often
+// pass fresh inline objects (`value={{ from, to }}`), which would break the
+// adjust-state-during-render guard and cause "Too many re-renders".
+const isSameDate = (a?: Date, b?: Date): boolean => a?.getTime() === b?.getTime();
+
+const isSameRange = (a?: DateRange, b?: DateRange): boolean =>
+  isSameDate(a?.from, b?.from) && isSameDate(a?.to, b?.to);
+
 const PresetContainer = <TPreset extends Preset>({
   // Available preset configurations
   presets,
@@ -495,21 +502,37 @@ const SingleDatePicker = ({
     }
   }, [open, date]);
 
-  useEffect(() => {
+  const [prevExternal, setPrevExternal] = useState({ defaultValue, value });
+  if (
+    !isSameDate(prevExternal.value, value) ||
+    !isSameDate(prevExternal.defaultValue, defaultValue)
+  ) {
+    setPrevExternal({ defaultValue, value });
     setDate(value ?? defaultValue ?? undefined);
-  }, [value, defaultValue]);
+    setTime(
+      value
+        ? new Time(value.getHours(), value.getMinutes())
+        : defaultValue
+          ? new Time(defaultValue.getHours(), defaultValue.getMinutes())
+          : new Time(0, 0),
+    );
+  }
 
-  useEffect(() => {
+  const [prevDate, setPrevDate] = useState(date);
+  if (prevDate !== date) {
+    setPrevDate(date);
     if (date) {
       setMonth(date);
     }
-  }, [date]);
+  }
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (prevOpen !== open) {
+    setPrevOpen(open);
     if (!open) {
       setMonth(date);
     }
-  }, [open, date]);
+  }
 
   const onCancel = () => {
     const currentInitialDate = initialDateRef.current;
@@ -564,29 +587,12 @@ const SingleDatePicker = ({
     setDate(newDate);
   };
 
-  const formattedDate = useMemo(() => {
-    if (!date) {
-      return null;
-    }
-
-    return formatDate(date, locale, showTimePicker);
-  }, [date, locale, showTimePicker]);
+  const formattedDate = date == null ? null : formatDate(date, locale, showTimePicker);
 
   const onApply = () => {
     setOpen(false);
     onChange?.(date);
   };
-
-  useEffect(() => {
-    setDate(value ?? defaultValue ?? undefined);
-    setTime(
-      value
-        ? new Time(value.getHours(), value.getMinutes())
-        : defaultValue
-          ? new Time(defaultValue.getHours(), defaultValue.getMinutes())
-          : new Time(0, 0),
-    );
-  }, [value, defaultValue]);
 
   return (
     <PopoverPrimitives.Root
@@ -732,21 +738,44 @@ const RangeDatePicker = ({
     }
   }, [open, range]);
 
-  useEffect(() => {
+  const [prevExternal, setPrevExternal] = useState({ defaultValue, value });
+  if (
+    !isSameRange(prevExternal.value, value) ||
+    !isSameRange(prevExternal.defaultValue, defaultValue)
+  ) {
+    setPrevExternal({ defaultValue, value });
     setRange(value ?? defaultValue ?? undefined);
-  }, [value, defaultValue]);
+    setStartTime(
+      value?.from
+        ? new Time(value.from.getHours(), value.from.getMinutes())
+        : defaultValue?.from
+          ? new Time(defaultValue.from.getHours(), defaultValue.from.getMinutes())
+          : new Time(0, 0),
+    );
+    setEndTime(
+      value?.to
+        ? new Time(value.to.getHours(), value.to.getMinutes())
+        : defaultValue?.to
+          ? new Time(defaultValue.to.getHours(), defaultValue.to.getMinutes())
+          : new Time(0, 0),
+    );
+  }
 
-  useEffect(() => {
+  const [prevRange, setPrevRange] = useState(range);
+  if (prevRange !== range) {
+    setPrevRange(range);
     if (range) {
       setMonth(range.from);
     }
-  }, [range]);
+  }
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (prevOpen !== open) {
+    setPrevOpen(open);
     if (!open) {
       setMonth(range?.from);
     }
-  }, [open, range]);
+  }
 
   const onRangeChange = (selectedRange: DateRange | undefined) => {
     const newRange = selectedRange;
@@ -856,34 +885,11 @@ const RangeDatePicker = ({
     }
   };
 
-  useEffect(() => {
-    setRange(value ?? defaultValue ?? undefined);
-
-    setStartTime(
-      value?.from
-        ? new Time(value.from.getHours(), value.from.getMinutes())
-        : defaultValue?.from
-          ? new Time(defaultValue.from.getHours(), defaultValue.from.getMinutes())
-          : new Time(0, 0),
-    );
-    setEndTime(
-      value?.to
-        ? new Time(value.to.getHours(), value.to.getMinutes())
-        : defaultValue?.to
-          ? new Time(defaultValue.to.getHours(), defaultValue.to.getMinutes())
-          : new Time(0, 0),
-    );
-  }, [value, defaultValue]);
-
-  const displayRange = useMemo(() => {
-    if (!range) {
-      return null;
-    }
-
-    return `${range.from ? formatDate(range.from, locale, showTimePicker) : ""} - ${
-      range.to ? formatDate(range.to, locale, showTimePicker) : ""
-    }`;
-  }, [range, locale, showTimePicker]);
+  const displayRange = range
+    ? `${range.from ? formatDate(range.from, locale, showTimePicker) : ""} - ${
+        range.to ? formatDate(range.to, locale, showTimePicker) : ""
+      }`
+    : null;
 
   const onApply = () => {
     setOpen(false);

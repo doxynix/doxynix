@@ -6,6 +6,7 @@ import {
 } from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { ChevronRight, MoreHorizontal } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -14,13 +15,16 @@ const Breadcrumb = forwardRef<
   ComponentPropsWithoutRef<"nav"> & {
     separator?: ReactNode;
   }
->(({ ...props }, ref) => (
-  <nav
-    aria-label="breadcrumb"
-    ref={ref}
-    {...props}
-  />
-));
+>(({ ...props }, ref) => {
+  const tCommon = useTranslations("Common");
+  return (
+    <nav
+      aria-label={tCommon("breadcrumb")}
+      ref={ref}
+      {...props}
+    />
+  );
+});
 Breadcrumb.displayName = "Breadcrumb";
 
 const BreadcrumbList = forwardRef<HTMLOListElement, ComponentPropsWithoutRef<"ol">>(
@@ -94,16 +98,19 @@ const BreadcrumbSeparator = ({ children, className, ...props }: ComponentProps<"
 );
 BreadcrumbSeparator.displayName = "BreadcrumbSeparator";
 
-const BreadcrumbEllipsis = ({ className, ...props }: ComponentProps<"span">) => (
-  <span
-    aria-hidden="true"
-    className={cn("flex size-9 items-center justify-center", className)}
-    {...props}
-  >
-    <MoreHorizontal />
-    <span className="sr-only">More</span>
-  </span>
-);
+const BreadcrumbEllipsis = ({ className, ...props }: ComponentProps<"span">) => {
+  const tCommon = useTranslations("Common");
+  return (
+    <span
+      aria-hidden="true"
+      className={cn("flex size-9 items-center justify-center", className)}
+      {...props}
+    >
+      <MoreHorizontal />
+      <span className="sr-only">{tCommon("more")}</span>
+    </span>
+  );
+};
 BreadcrumbEllipsis.displayName = "BreadcrumbElipssis";
 
 export {

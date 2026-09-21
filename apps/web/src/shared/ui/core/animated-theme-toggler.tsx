@@ -3,6 +3,7 @@
 import { type ComponentPropsWithoutRef, useRef } from "react";
 import { flushSync } from "react-dom";
 import { Moon, Sun } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 
 import { cn } from "@/shared/lib/cn";
@@ -25,6 +26,7 @@ export const AnimatedThemeToggler = ({
   ...props
 }: AnimatedThemeTogglerProps) => {
   const { resolvedTheme, setTheme } = useTheme();
+  const tCommon = useTranslations("Common");
   const isDark = resolvedTheme === "dark";
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -107,7 +109,7 @@ export const AnimatedThemeToggler = ({
 
   return (
     <AppButton
-      aria-label="Switch theme"
+      aria-label={tCommon("switch_theme")}
       className={cn(className, "overflow-hidden")}
       onClick={toggleTheme}
       ref={buttonRef}

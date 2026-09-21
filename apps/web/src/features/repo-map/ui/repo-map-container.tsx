@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import dynamic from "next/dynamic";
 import { ReactFlowProvider } from "@xyflow/react";
 import { FileText } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
@@ -24,6 +25,7 @@ const RepoMap = dynamic(() => import("./repo-map").then((m) => m.RepoMap), {
 });
 
 export function RepoMapContainer({ id }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const { aid, name, owner } = useRepoParams();
 
   const [viewId, setViewId] = useQueryState("view", parseAsString);
@@ -87,16 +89,17 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
 
   const currentData = viewId == null ? mapData : nodeData;
   const isFetching = viewId == null ? isMapFetching : isNodeFetching;
+  const latestData = currentData ?? null;
 
-  useEffect(() => {
-    if (currentData != null) {
-      // FIXME: keeping it this way for now, changing it gets tricky with the types
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setDisplayData(currentData);
-    } else if (!isFetching) {
-      setDisplayData(null);
+  // React-canonical "adjust state during render": keep showing the previous snapshot while a
+  // new query is fetching, and clear it once a query finishes without data.
+  const [lastQuery, setLastQuery] = useState({ isFetching, latestData });
+  if (latestData !== lastQuery.latestData || isFetching !== lastQuery.isFetching) {
+    setLastQuery({ isFetching, latestData });
+    if (latestData != null || !isFetching) {
+      setDisplayData(latestData);
     }
-  }, [currentData, isFetching]);
+  }
 
   if (displayData == null && isFetching) {
     return <Skeleton className="h-180 w-full" />;
@@ -113,14 +116,14 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
                 owner={owner}
               />
             }
-            description="Run AI analysis to automatically generate map."
+            description={t("repo_map_empty_desc")}
             icon={FileText}
-            title="No map generated"
+            title={t("repo_map_empty_title")}
           />
         </div>
       );
     }
-    return <p>Failed to load map data for this folder</p>;
+    return <p>{t("repo_map_load_failed")}</p>;
   }
 
   if (displayData == null) {

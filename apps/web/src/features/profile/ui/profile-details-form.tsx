@@ -106,7 +106,9 @@ export function ProfileDetailsForm({
           name="email"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel className="text-muted-foreground">Email</FormLabel>
+              <FormLabel className="text-muted-foreground">
+                {t("settings_profile_email_label")}
+              </FormLabel>
               <FormControl>
                 <div className="relative">
                   <Mail className="absolute top-2.5 left-3 text-muted-foreground" />
@@ -114,7 +116,7 @@ export function ProfileDetailsForm({
                     {...field}
                     className="pl-9 text-sm sm:text-base"
                     disabled
-                    placeholder="Your email"
+                    placeholder={t("settings_profile_email_placeholder")}
                   />
                   <Lock className="absolute top-2.5 right-3 text-muted-foreground" />
                 </div>
@@ -127,7 +129,7 @@ export function ProfileDetailsForm({
             className="cursor-pointer"
             disabled={(!isWelcome && !isDirty) || !isValid || updateProfile.isPending}
             isLoading={updateProfile.isPending}
-            loadingText={loadingText ?? "Saving..."}
+            loadingText={loadingText ?? t("settings_profile_saving")}
           >
             {buttonText ?? tCommon("save")}
           </LoadingButton>

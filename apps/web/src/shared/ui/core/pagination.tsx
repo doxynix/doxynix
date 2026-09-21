@@ -1,17 +1,23 @@
+"use client";
+
 import { type ComponentProps, forwardRef, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { AppButton, type ButtonProps, buttonVariants } from "@/shared/ui/core/button";
 
-const Pagination = ({ className, ...props }: ComponentProps<"nav">) => (
-  <nav
-    aria-label="pagination"
-    className={cn("mx-auto flex w-full justify-center", className)}
-    {...props}
-  />
-);
+const Pagination = ({ className, ...props }: ComponentProps<"nav">) => {
+  const tCommon = useTranslations("Common");
+  return (
+    <nav
+      aria-label={tCommon("pagination")}
+      className={cn("mx-auto flex w-full justify-center", className)}
+      {...props}
+    />
+  );
+};
 Pagination.displayName = "Pagination";
 
 const PaginationContent = forwardRef<HTMLUListElement, ComponentProps<"ul">>(
@@ -103,42 +109,51 @@ const PaginationLink = ({
 };
 PaginationLink.displayName = "PaginationLink";
 
-const PaginationPrevious = ({ className, ...props }: ComponentProps<typeof PaginationLink>) => (
-  <PaginationLink
-    aria-label="Go to previous page"
-    className={cn("gap-1 pl-2.5", className)}
-    size="default"
-    {...props}
-  >
-    <ChevronLeft />
-    <span>Back</span>
-  </PaginationLink>
-);
+const PaginationPrevious = ({ className, ...props }: ComponentProps<typeof PaginationLink>) => {
+  const tCommon = useTranslations("Common");
+  return (
+    <PaginationLink
+      aria-label={tCommon("go_to_previous_page")}
+      className={cn("gap-1 pl-2.5", className)}
+      size="default"
+      {...props}
+    >
+      <ChevronLeft />
+      <span>{tCommon("back")}</span>
+    </PaginationLink>
+  );
+};
 PaginationPrevious.displayName = "PaginationPrevious";
 
-const PaginationNext = ({ className, ...props }: ComponentProps<typeof PaginationLink>) => (
-  <PaginationLink
-    aria-label="Go to next page"
-    className={cn("gap-1 pr-2.5", className)}
-    size="default"
-    {...props}
-  >
-    <span>Next</span>
-    <ChevronRight />
-  </PaginationLink>
-);
+const PaginationNext = ({ className, ...props }: ComponentProps<typeof PaginationLink>) => {
+  const tCommon = useTranslations("Common");
+  return (
+    <PaginationLink
+      aria-label={tCommon("go_to_next_page")}
+      className={cn("gap-1 pr-2.5", className)}
+      size="default"
+      {...props}
+    >
+      <span>{tCommon("next")}</span>
+      <ChevronRight />
+    </PaginationLink>
+  );
+};
 PaginationNext.displayName = "PaginationNext";
 
-const PaginationEllipsis = ({ className, ...props }: ComponentProps<"span">) => (
-  <span
-    aria-hidden
-    className={cn("flex size-9 items-center justify-center", className)}
-    {...props}
-  >
-    <MoreHorizontal />
-    <span className="sr-only">More pages</span>
-  </span>
-);
+const PaginationEllipsis = ({ className, ...props }: ComponentProps<"span">) => {
+  const tCommon = useTranslations("Common");
+  return (
+    <span
+      aria-hidden
+      className={cn("flex size-9 items-center justify-center", className)}
+      {...props}
+    >
+      <MoreHorizontal />
+      <span className="sr-only">{tCommon("more_pages")}</span>
+    </span>
+  );
+};
 PaginationEllipsis.displayName = "PaginationEllipsis";
 
 export {

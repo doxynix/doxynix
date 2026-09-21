@@ -15,7 +15,7 @@
     "lint:fsd": "steiger ./src",
     "preview": "vite preview",
     "type-check": "tsc -b",
-    "validate": "biome check . && oxlint && bun run lint:fsd && bun run arch:check"
+    "validate": "biome check . && oxlint && bun run lint:fsd && bun run arch:check && bun type-check"
   },
   "dependencies": {
     "@doxynix/shared": "workspace:*",

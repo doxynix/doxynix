@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import Image from "next/image";
 import * as Ably from "ably";
 import { AblyProvider } from "ably/react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
@@ -23,6 +24,8 @@ export const RealtimeProvider = ({ children }: Props) => {
   const { data: session } = authClient.useSession();
   const router = useRouter();
   const userId = session?.user.id;
+
+  const t = useTranslations("Dashboard");
 
   const { invalidateAll } = useNotificationActions();
   const { invalidate } = useRepoActions();
@@ -46,11 +49,16 @@ export const RealtimeProvider = ({ children }: Props) => {
         console.info("Realtime connection:", state.current);
       });
     }
-    // FIXME: disable for now, will figure it out later
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setClient(realtime);
+
+    let disposed = false;
+    queueMicrotask(() => {
+      if (!disposed) {
+        setClient(realtime);
+      }
+    });
 
     return () => {
+      disposed = true;
       realtime.close();
       setClient(null);
     };
@@ -66,7 +74,7 @@ export const RealtimeProvider = ({ children }: Props) => {
 
     const handleSystemMsg = (msg: Ably.InboundMessage) => {
       if (msg.name === REALTIME_CONFIG.events.system.maintenance) {
-        toast.warning("Attention! Scheduled maintenance in 5 minutes.");
+        toast.warning(t("realtime_maintenance_warning"));
       }
     };
 
@@ -86,11 +94,15 @@ export const RealtimeProvider = ({ children }: Props) => {
 
         if (payload.type === "FIX_GENERATED" && payload.fixId != null) {
           void utils.analysis.getById.invalidate({ fixId: payload.fixId });
-          toast.success("AI code fix is ready!");
+          toast.success(t("realtime_fix_ready"));
         } else if (payload.path != null) {
           const action = payload.type === "AUDIT" ? "quick-file-audit" : "document-file-preview";
           void utils.analysis.getFileActionResult.invalidate({ action, path: payload.path });
-          toast.success(`AI finished ${payload.type === "AUDIT" ? "audit" : "document"} file!`);
+          toast.success(
+            payload.type === "AUDIT"
+              ? t("realtime_file_audit_done")
+              : t("realtime_file_document_done"),
+          );
         }
       }
 
@@ -107,16 +119,19 @@ export const RealtimeProvider = ({ children }: Props) => {
 
         void utils.analysis.getComments.invalidate();
 
-        toast.info(`New comment in PR #${payload.prNumber}`, {
+        toast.info(t("realtime_pr_comment_title", { number: payload.prNumber }), {
           action: {
-            label: "View",
+            label: t("view"),
             onClick: () => {
               router.push(
                 `/dashboard/repo/${payload.repoOwner}/${payload.repoName}/pull/${payload.prNumber}`,
               );
             },
           },
-          description: `@${payload.author} commented on "${payload.prTitle}"`,
+          description: t("realtime_pr_comment_desc", {
+            author: payload.author,
+            title: payload.prTitle,
+          }),
           icon: (
             <Image
               alt={payload.author}
@@ -189,6 +204,7 @@ export const RealtimeProvider = ({ children }: Props) => {
     utils.analysis.getLatest,
     utils.analysis.getHistory,
     router,
+    t,
   ]);
 
   if (!client) {

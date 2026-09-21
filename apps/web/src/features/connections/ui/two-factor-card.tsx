@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
 import QRCode from "react-qr-code";
 import { toast } from "sonner";
 
@@ -27,6 +28,8 @@ import { LoadingButton } from "@/shared/ui/kit/loading-button";
 import { ConnectionCard } from "@/entities/connection/ui/connection-card";
 
 export function TwoFactorCard() {
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
   const { data: sessionContext, refetch: refetchSession } = authClient.useSession();
   const user = sessionContext?.user;
   const queryClient = useQueryClient();
@@ -56,7 +59,7 @@ export function TwoFactorCard() {
         setTotpUri(totpRes.data.totpURI);
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to setup 2FA");
+      toast.error(error instanceof Error ? error.message : t("settings_2fa_setup_failed"));
       setIsSetupOpen(false);
     } finally {
       setIsGenerating(false);
@@ -75,7 +78,7 @@ export function TwoFactorCard() {
       toast.error(err.message);
     },
     onSuccess: () => {
-      toast.success("Two-Factor Authentication activated successfully!");
+      toast.success(t("settings_2fa_activated_success"));
       void refetchSession();
       void queryClient.invalidateQueries({ queryKey: ["active-sessions"] });
     },
@@ -90,7 +93,7 @@ export function TwoFactorCard() {
     },
     onError: (err) => toast.error(err.message),
     onSuccess: () => {
-      toast.success("Two-Factor Authentication disabled");
+      toast.success(t("settings_2fa_disabled_success"));
       void refetchSession();
     },
   });
@@ -114,7 +117,7 @@ export function TwoFactorCard() {
       return;
     }
     void navigator.clipboard.writeText(backupCodes.join("\n"));
-    toast.success("Backup codes copied to clipboard");
+    toast.success(t("settings_2fa_backup_codes_copied"));
   };
 
   const isEnabled = user?.twoFactorEnabled === true;
@@ -130,22 +133,18 @@ export function TwoFactorCard() {
               size="sm"
               variant="destructive"
             >
-              Disconnect
+              {tCommon("disconnect")}
             </LoadingButton>
           ) : (
             <AppButton
               onClick={() => void handleOpenSetup()}
               size="sm"
             >
-              Setup
+              {tCommon("setup")}
             </AppButton>
           )
         }
-        description={
-          isEnabled
-            ? "Connected to Authenticator App (Google Authenticator / Authy)"
-            : "Protect your account by requiring an OTP code during login."
-        }
+        description={isEnabled ? t("settings_2fa_enabled_desc") : t("settings_2fa_disabled_desc")}
         icon={
           isEnabled ? (
             <ShieldCheck className="size-5 text-success" />
@@ -153,8 +152,8 @@ export function TwoFactorCard() {
             <ShieldAlert className="size-5 text-muted-foreground" />
           )
         }
-        status={isEnabled ? "Connected" : undefined}
-        title="Two-Factor Authentication (2FA)"
+        status={isEnabled ? t("settings_auth_status_connected") : undefined}
+        title={t("settings_2fa_title")}
       />
 
       <Dialog
@@ -174,20 +173,15 @@ export function TwoFactorCard() {
           onPointerDownOutside={(e) => backupCodes != null && e.preventDefault()}
         >
           <DialogHeader>
-            <DialogTitle>Setup Two-Factor Authentication</DialogTitle>
-            <DialogDescription>
-              Scan the QR code with your authenticator app and enter the verification code.
-            </DialogDescription>
+            <DialogTitle>{t("settings_2fa_setup_dialog_title")}</DialogTitle>
+            <DialogDescription>{t("settings_2fa_setup_dialog_desc")}</DialogDescription>
           </DialogHeader>
 
           {backupCodes && enable2FA.isSuccess ? (
             <div className="flex flex-col gap-4 py-4">
               <div className="flex items-center gap-2 rounded-xl bg-destructive/10 p-3 text-destructive text-xs">
                 <ShieldAlert size={16} />
-                <span>
-                  Save these backup codes in a secure place. If you lose your device, this is the
-                  only way to recover access.
-                </span>
+                <span>{t("settings_2fa_backup_codes_warning")}</span>
               </div>
               <div className="grid grid-cols-2 gap-2 rounded-xl bg-muted p-4 text-center font-mono text-sm">
                 {backupCodes.map((code) => (
@@ -200,14 +194,14 @@ export function TwoFactorCard() {
                   onClick={handleCopyBackupCodes}
                   variant="outline"
                 >
-                  Copy
+                  {tCommon("copy")}
                 </AppButton>
                 <AppButton
                   className="w-full gap-2"
                   onClick={handleDownloadBackupCodes}
                   variant="outline"
                 >
-                  Download
+                  {tCommon("download")}
                 </AppButton>
               </div>
             </div>
@@ -230,12 +224,11 @@ export function TwoFactorCard() {
 
               <div className="flex w-full flex-col gap-2">
                 <p className="text-center text-muted-foreground text-xs">
-                  Enter the 6-digit verification code from your app:
+                  {t("settings_2fa_enter_code_hint")}
                 </p>
                 <InputOTP
                   containerClassName="flex justify-center"
                   maxLength={6}
-                  // disabled={isTwoFactorVerifying}
                   onChange={(value) => setVerificationCode(value.replaceAll(/\D/g, ""))}
                   value={verificationCode}
                 >
@@ -281,17 +274,17 @@ export function TwoFactorCard() {
                 className="w-full"
                 onClick={() => setIsSetupOpen(false)}
               >
-                Done
+                {tCommon("done")}
               </AppButton>
             ) : (
               <LoadingButton
                 className="w-full"
                 disabled={verificationCode.length !== 6 || enable2FA.isPending || isGenerating}
                 isLoading={enable2FA.isPending}
-                loadingText="Activating..."
+                loadingText={t("settings_2fa_activating")}
                 onClick={() => enable2FA.mutate(verificationCode)}
               >
-                Verify & Enable
+                {t("settings_2fa_verify_and_enable")}
               </LoadingButton>
             )}
           </DialogFooter>

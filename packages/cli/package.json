@@ -21,7 +21,7 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "type-check": "tsc --noEmit",
-    "validate": "biome check . && oxlint && bun run arch:check"
+    "validate": "biome check . && oxlint && bun run arch:check && bun type-check"
   },
   "dependencies": {
     "@clack/prompts": "1.8.0",

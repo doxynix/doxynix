@@ -1,6 +1,7 @@
 "use client";
 
 import { FileIcon, FileText, GitCommit, Layers } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
@@ -14,9 +15,11 @@ type Props = {
 };
 
 export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
+  const tCommon = useTranslations("Common");
   return (
     <div className="flex flex-col gap-4 overflow-y-auto p-6">
-      <h3 className="text-2xl">Project Brain</h3>
+      <h3 className="text-2xl">{t("repo_map_overview_project_brain")}</h3>
       <div className="flex items-center gap-2">
         {workspace.analysisRef?.commitSha != null && (
           <AppBadge
@@ -28,7 +31,7 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
             <CopyButton
               className="opacity-100"
               tooltipSide="bottom"
-              tooltipText="Copy SHA"
+              tooltipText={tCommon("copy_sha")}
               value={workspace.analysisRef.commitSha}
             />
           </AppBadge>
@@ -38,16 +41,18 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2 rounded-xl border p-4">
           <div className="flex items-center gap-1 text-xs">
-            <Layers /> Architecture Style
+            <Layers /> {t("repo_map_overview_arch_style")}
           </div>
           {workspace.summary.architectureStyle != null && (
-            <p className="text-sm">{workspace.summary.architectureStyle || "Standard / Layered"}</p>
+            <p className="text-sm">
+              {workspace.summary.architectureStyle || t("repo_map_overview_arch_default")}
+            </p>
           )}
         </div>
 
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2 text-xs">
-            <FileText /> Stack
+            <FileText /> {t("repo_map_overview_stack")}
           </div>
           <div className="flex flex-wrap gap-2">
             {workspace.summary.stack.map((path) => (
@@ -63,7 +68,7 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-xs">
-            <FileText /> Primary modules
+            <FileText /> {t("repo_map_overview_primary_modules")}
           </div>
           <div className="gap-2">
             {workspace.navigation.primaryModules.map((path) => (
@@ -81,15 +86,15 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
         </div>
 
         <div className="flex flex-col gap-3">
-          <div className="text-xs">Purpose</div>
-          <div className="rounded-xl border p-4 text-muted-foreground text-xs italic">
-            &quot;{workspace.summary.purpose}&quot;
+          <div className="text-xs">{t("repo_map_overview_purpose")}</div>
+          <div className="italic rounded-xl border p-4 text-muted-foreground text-xs">
+            {`"${workspace.summary.purpose}"`}
           </div>
         </div>
 
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2 text-xs">
-            <FileText /> Resources
+            <FileText /> {t("repo_map_overview_resources")}
           </div>
           <div className="flex flex-wrap gap-2">
             {workspace.navigation.primaryEntrypoints.map((path) => (

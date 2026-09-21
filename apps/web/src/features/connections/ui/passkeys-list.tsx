@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Fingerprint, KeyRound, Plus, ShieldAlert, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { authClient } from "@/shared/lib/auth-client";
@@ -23,6 +24,8 @@ import { LoadingButton } from "@/shared/ui/kit/loading-button";
 import { ConnectionCard } from "@/entities/connection/ui/connection-card";
 
 export function PasskeysList() {
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
   const [isSupported] = useState(
     () =>
       typeof window.PublicKeyCredential !== "undefined" &&
@@ -60,7 +63,7 @@ export function PasskeysList() {
       toast.error(err.message);
     },
     onSuccess: () => {
-      toast.success("Biometric key linked successfully");
+      toast.success(t("settings_passkey_link_success"));
       setIsAddOpen(false);
       setDeviceName("");
       void refetch();
@@ -78,7 +81,7 @@ export function PasskeysList() {
       toast.error(err.message);
     },
     onSuccess: () => {
-      toast.success("Biometric key removed");
+      toast.success(t("settings_passkey_remove_success"));
       setDeletingKeyId(null);
       void refetch();
     },
@@ -92,12 +95,12 @@ export function PasskeysList() {
             disabled
             size="sm"
           >
-            Not Supported
+            {t("settings_passkey_not_supported")}
           </AppButton>
         }
-        description="Your current browser or hardware does not support biometric authentication."
+        description={t("settings_passkey_not_supported_desc")}
         icon={<ShieldAlert className="text-muted-foreground" />}
-        title="WebAuthn / Passkey"
+        title={t("settings_passkey_webauthn_title")}
       />
     );
   }
@@ -115,22 +118,19 @@ export function PasskeysList() {
               size="sm"
               variant="outline"
             >
-              <Plus size={16} /> Link New Device
+              <Plus size={16} /> {t("settings_passkey_link_new_device")}
             </AppButton>
           </DialogTrigger>
           <DialogContent className="sm:max-w-105">
             <DialogHeader>
-              <DialogTitle>Link Biometric Device</DialogTitle>
-              <DialogDescription>
-                Enter a friendly name for this device (e.g. &quot;My Work MacBook TouchID&quot;) to
-                easily identify it later.
-              </DialogDescription>
+              <DialogTitle>{t("settings_passkey_link_dialog_title")}</DialogTitle>
+              <DialogDescription>{t("settings_passkey_link_dialog_desc")}</DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-4 py-2">
               <Input
                 disabled={createPasskey.isPending}
                 onChange={(e) => setDeviceName(e.target.value)}
-                placeholder="Device Name"
+                placeholder={t("settings_passkey_device_name_placeholder")}
                 value={deviceName}
               />
             </div>
@@ -139,10 +139,10 @@ export function PasskeysList() {
                 className="cursor-pointer"
                 disabled={deviceName.trim().length === 0 || createPasskey.isPending}
                 isLoading={createPasskey.isPending}
-                loadingText="Verifying..."
+                loadingText={t("settings_passkey_verifying")}
                 onClick={() => createPasskey.mutate(deviceName)}
               >
-                Register
+                {t("settings_passkey_register")}
               </LoadingButton>
             </DialogFooter>
           </DialogContent>
@@ -151,7 +151,7 @@ export function PasskeysList() {
 
       {isPending ? (
         <div className="py-4 text-center text-muted-foreground text-xs">
-          Loading active biometric devices...
+          {t("settings_passkey_loading")}
         </div>
       ) : passkeys.length === 0 ? (
         <ConnectionCard
@@ -160,12 +160,12 @@ export function PasskeysList() {
               onClick={() => setIsAddOpen(true)}
               size="sm"
             >
-              Setup
+              {tCommon("setup")}
             </AppButton>
           }
-          description="Register your first TouchID, FaceID or physical security key for password-free login."
+          description={t("settings_passkey_empty_desc")}
           icon={<KeyRound className="size-5 text-muted-foreground" />}
-          title="No Devices Linked"
+          title={t("settings_passkey_empty_title")}
         />
       ) : (
         <div className="grid gap-3">
@@ -173,25 +173,21 @@ export function PasskeysList() {
             <ConnectionCard
               action={
                 <DangerActionDialog
-                  confirmLabel="Remove"
-                  description={`Are you sure you want to delete biometric key &quot;${key.name}&quot;?`}
-                  destructiveAlertContent={
-                    <p>
-                      You will no longer be able to use this specific hardware device to log in.
-                    </p>
-                  }
+                  confirmLabel={tCommon("remove")}
+                  description={t("settings_passkey_delete_confirmation", { name: key.name ?? "" })}
+                  destructiveAlertContent={<p>{t("settings_passkey_delete_alert")}</p>}
                   isLoading={deletePasskey.isPending}
                   onConfirm={() => deletePasskey.mutate(key.id)}
                   onOpenChange={(open) => setDeletingKeyId(open ? key.id : null)}
                   open={deletingKeyId === key.id}
-                  title="Remove Biometric Key"
+                  title={t("settings_passkey_delete_title")}
                   trigger={
                     <AppButton
-                      aria-label="Remove Biometric Key"
+                      aria-label={t("settings_passkey_delete_aria")}
                       size="sm"
                       variant="destructive"
                     >
-                      <Trash2 className="size-4" />
+                      <Trash2 />
                     </AppButton>
                   }
                 />
@@ -199,8 +195,8 @@ export function PasskeysList() {
               description={""}
               icon={<Fingerprint className="size-5 text-primary" />}
               key={key.id}
-              status="Active"
-              title={key.name ?? "Unnamed Device"}
+              status={tCommon("status_active")}
+              title={key.name ?? t("settings_passkey_unnamed_device")}
             />
           ))}
         </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useReactFlow } from "@xyflow/react";
 import { Download } from "lucide-react";
 import type { Options } from "modern-screenshot";
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 
 import { cn } from "@/shared/lib/cn";
@@ -18,6 +19,7 @@ type Props = {
 type ImageType = "png" | "webp";
 
 export function ExportPanel({ className, filename = "repo-map" }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const { getNodes, getNodesBounds } = useReactFlow();
   const { resolvedTheme } = useTheme();
   const hasNodes = getNodes().length > 0;
@@ -99,7 +101,7 @@ export function ExportPanel({ className, filename = "repo-map" }: Readonly<Props
   return (
     <div className={cn("flex flex-col gap-1", className)}>
       <div className="flex items-center justify-center gap-1 text-muted-foreground text-xs">
-        Export <Download className="size-3" />
+        {t("export")} <Download className="size-3" />
       </div>
       <div className="rounded-xl border">
         <LoadingButton

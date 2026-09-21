@@ -217,7 +217,6 @@ export const analyzePrTask = task({
       }
 
       const { octokit } = await getClientContext(prisma, repo.userId, payload.owner);
-      // eslint-disable-next-line sonarjs/no-dead-store
       octokitInstance = octokit;
 
       await updateCommitStatus(

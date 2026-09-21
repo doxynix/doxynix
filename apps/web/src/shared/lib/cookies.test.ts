@@ -18,6 +18,7 @@ describe("shared/lib/cookies", () => {
     });
 
     it("should extract and decode cookie value correctly", () => {
+      // codeql[js/clear-text-cookie] jsdom cookie-parse test only; production setClientCookie sets Secure on HTTPS
       document.cookie = `session_id=${encodeURIComponent("hello world & special=true")}`;
       expect(getClientCookie("session_id")).toBe("hello world & special=true");
     });

@@ -72,7 +72,7 @@ export function RepoCard({ repo }: Readonly<Props>) {
                   className={cn(visibility.color)}
                   variant="outline"
                 >
-                  {visibility.label}
+                  {t(visibility.labelKey)}
                 </AppBadge>
                 <div className={cn("flex shrink-0 items-center gap-1 transition-standard")}>
                   <AppTooltip content={t("repo_open_on_github_tooltip")}>
@@ -84,9 +84,9 @@ export function RepoCard({ repo }: Readonly<Props>) {
                       <GitHubIcon className="size-4" />
                     </ExternalLink>
                   </AppTooltip>
-                  <AppTooltip content="Open settings">
+                  <AppTooltip content={t("repo_open_settings")}>
                     <Link
-                      aria-label={`Settings for ${repo.name}`}
+                      aria-label={t("repo_settings_for", { name: repo.name })}
                       className="flex size-6 items-center justify-center text-muted-foreground not-md:opacity-100 opacity-0 transition-standard hover:text-foreground group-hover:opacity-100"
                       href={`/dashboard/repo/${repo.owner}/${repo.name}/settings`}
                     >
@@ -114,7 +114,7 @@ export function RepoCard({ repo }: Readonly<Props>) {
                   icon={m.icon}
                   key={m.id}
                   label={m.label}
-                  tooltip={m.tooltip}
+                  tooltip={t(m.tooltipKey)}
                 />
               ))}
             </div>
@@ -136,14 +136,16 @@ export function RepoCard({ repo }: Readonly<Props>) {
               ))}
             </div>
           ) : (
-            <span className="my-2 text-right text-muted-foreground text-xs">Not analyzed yet</span>
+            <span className="my-2 text-right text-muted-foreground text-xs">
+              {t("repo_not_analyzed_yet")}
+            </span>
           )}
           <div className="flex flex-col items-end gap-1">
             <AppBadge
               className={cn(status.color)}
               variant="outline"
             >
-              {status.label}
+              {t(status.labelKey)}
             </AppBadge>
             {repo.lastAnalysisDate != null && (
               <AppTooltip

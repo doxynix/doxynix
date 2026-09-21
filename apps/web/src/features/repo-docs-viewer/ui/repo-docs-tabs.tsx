@@ -12,6 +12,7 @@ import {
   HistoryIcon,
   Users,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 
 import { cn } from "@/shared/lib/cn";
@@ -36,11 +37,11 @@ type Props = {
 };
 
 const DOCS = [
-  { icon: BookOpen, id: "README", label: "Overview" },
-  { icon: Code2, id: "API", label: "API Reference" },
-  { icon: GitGraph, id: "ARCHITECTURE", label: "Architecture" },
-  { icon: Users, id: "CONTRIBUTING", label: "How to guides" },
-  { icon: HistoryIcon, id: "CHANGELOG", label: "History" },
+  { icon: BookOpen, id: "README", labelKey: "repo_docs_overview" },
+  { icon: Code2, id: "API", labelKey: "repo_docs_api_reference" },
+  { icon: GitGraph, id: "ARCHITECTURE", labelKey: "repo_docs_architecture" },
+  { icon: Users, id: "CONTRIBUTING", labelKey: "repo_docs_how_to_guides" },
+  { icon: HistoryIcon, id: "CHANGELOG", labelKey: "repo_docs_history" },
 ] as const;
 
 export function RepoDocsTabs({
@@ -50,6 +51,7 @@ export function RepoDocsTabs({
   headings,
   items,
 }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const [activePath, setActivePath] = useQueryState("path", parseAsString);
 
   const uniqueTabs = uniqBy(items, (item) => item.value).map((item) =>
@@ -60,7 +62,7 @@ export function RepoDocsTabs({
 
   return (
     <div className="flex w-72 shrink-0 flex-col gap-4">
-      <h2 className="px-2 py-1 font-bold">Documentation</h2>
+      <h2 className="px-2 py-1 font-bold">{t("repo_docs_title")}</h2>
 
       <TabsList className="flex h-auto w-full flex-col items-stretch justify-start gap-1 bg-transparent p-0">
         {uniqueTabs.map((item) => {
@@ -80,8 +82,10 @@ export function RepoDocsTabs({
                 <item.icon className={cn(isActive ? "text-foreground" : "text-muted-foreground")} />
                 <span className="grow text-left font-medium text-sm">
                   {isCodeDocRoot
-                    ? "File Audits"
-                    : (docMeta?.label ?? item.value.toLowerCase().replace("_", " "))}
+                    ? t("repo_docs_file_audits")
+                    : docMeta
+                      ? t(docMeta.labelKey)
+                      : item.value.toLowerCase().replace("_", " ")}
                 </span>
                 {isActive && <ChevronRight className="text-muted-foreground" />}
               </TabsTrigger>

@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 
+import { createRepoMetadata } from "@/shared/lib/metadata";
+
 import { RepoPullDetailContainer } from "@/features/repo-pulls/ui/repo-pull-details-container";
 
 import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
@@ -7,6 +9,8 @@ import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 type Props = {
   params: Promise<{ name: string; number: string; owner: string }>;
 };
+
+export const generateMetadata = createRepoMetadata("pull_detail");
 
 export default async function PullRequestDetailPage({ params }: Readonly<Props>) {
   const { name, number, owner } = await params;

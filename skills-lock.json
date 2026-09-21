@@ -1,4 +1,5 @@
 {
+  "version": 1,
   "skills": {
     "ai-sdk": {
       "computedHash": "0883204d11b055e968dee697c5858e68064c27dfd4deb6310212895daa65c5ad",
@@ -156,6 +157,12 @@
       "source": "shadcn-ui/ui",
       "sourceType": "github"
     },
+    "skill-creator": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/skill-creator/SKILL.md",
+      "computedHash": "5ea13a6d9f0d4bb694405d79acd00cadec0d21bb138c4dd10fcf3c500cb835c2"
+    },
     "systematic-debugging": {
       "computedHash": "a2750dfbaed1690da73b120254892c4f926b4576cb82eb16fc877783941fe39b",
       "skillPath": "skills/systematic-debugging/SKILL.md",
@@ -240,6 +247,5 @@
       "source": "pproenca/dot-skills",
       "sourceType": "github"
     }
-  },
-  "version": 1
+  }
 }

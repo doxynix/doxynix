@@ -1,4 +1,3 @@
-/** Offsets of a TODO marker in the document and the CodeMirror highlight class. */
 export type TodoMarker = {
   className: string;
   end: number;

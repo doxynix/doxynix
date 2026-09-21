@@ -2,6 +2,7 @@
 
 import { groupBy } from "es-toolkit";
 import { ChevronDown, Folder, MessageSquare, Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
@@ -17,6 +18,8 @@ type Props = {
 };
 
 export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: Readonly<Props>) {
+  const t = useTranslations("Agent");
+
   if (!sessions) {
     return (
       <>
@@ -41,7 +44,7 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
   return (
     <div className="fade-in flex h-full animate-in flex-col">
       <div className="flex h-12 items-center justify-between border-b bg-card px-4 py-6">
-        <h3 className="font-bold text-muted-foreground text-xs">History</h3>
+        <h3 className="font-bold text-muted-foreground text-xs">{t("history_title")}</h3>
         <AppButton
           className="size-6"
           onClick={onNewChat}
@@ -98,7 +101,7 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
 
           {globalSessions.length > 0 && (
             <div className="mt-4 flex flex-col gap-1">
-              <h4 className="mb-1 px-2 text-xs">Global Chats</h4>
+              <h4 className="mb-1 px-2 text-xs">{t("global_chats")}</h4>
               {globalSessions.map((session: any) => (
                 <AppButton
                   className={cn(
@@ -117,7 +120,7 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
           )}
 
           {sessions.length === 0 && (
-            <p className="mt-8 text-center text-muted-foreground text-xs">No past chats yet</p>
+            <p className="mt-8 text-center text-muted-foreground text-xs">{t("no_past_chats")}</p>
           )}
         </div>
       </ScrollArea>

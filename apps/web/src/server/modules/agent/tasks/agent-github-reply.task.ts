@@ -161,9 +161,11 @@ export const agentGithubReplyTask = task({
         ),
       });
 
+      const replyBody = typeof result === "string" ? result : JSON.stringify(result, null, 2);
+
       if (payload.commentType === "review") {
         await botOctokit.rest.pulls.createReplyForReviewComment({
-          body: `> **@Doxynix**\n\n${result}`,
+          body: `> **@Doxynix**\n\n${replyBody}`,
           comment_id: payload.commentId,
           owner: payload.owner,
           pull_number: payload.prNumber,
@@ -171,7 +173,7 @@ export const agentGithubReplyTask = task({
         });
       } else {
         await botOctokit.rest.issues.createComment({
-          body: `> **@Doxynix**\n\n${result}`,
+          body: `> **@Doxynix**\n\n${replyBody}`,
           issue_number: payload.prNumber,
           owner: payload.owner,
           repo: payload.repoName,

@@ -21,7 +21,7 @@ export function useRepoActions() {
     onSuccess: (data) => {
       toast.success(t("repo_added_toast_success"), {
         action: {
-          label: "View",
+          label: t("view"),
           onClick: () => router.push(`/dashboard/repo/${data.repo.owner}/${data.repo.name}`),
         },
       });

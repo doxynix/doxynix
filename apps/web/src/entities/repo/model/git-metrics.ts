@@ -14,13 +14,23 @@ import { formatRelativeTime } from "@/shared/lib/date-utils";
 
 import type { UiRepoListItem } from "./repo.types";
 
+export type GitMetricTooltipKey =
+  | "git_metric_branch"
+  | "git_metric_forks"
+  | "git_metric_last_push"
+  | "git_metric_license"
+  | "git_metric_open_issues"
+  | "git_metric_primary_language"
+  | "git_metric_size"
+  | "git_metric_stars";
+
 type Props = {
   className?: string;
   color?: string;
   icon?: ComponentType<{ className?: string }>;
   id: string;
   label: null | number | string;
-  tooltip?: string;
+  tooltipKey: GitMetricTooltipKey;
 };
 
 type GitMetrics = Pick<
@@ -38,56 +48,62 @@ type GitMetrics = Pick<
 >;
 
 export function getGitMetrics(repo: GitMetrics, locale: string): Props[] {
-  const items = [
+  const items: Props[] = [
     {
       color: repo.languageColor,
       icon: Circle,
       id: "Language",
       label: repo.language,
-      tooltip: "Primary Language",
+      tooltipKey: "git_metric_primary_language",
     },
     {
       color: "text-warning fill-current",
       icon: Star,
       id: "Stars",
       label: repo.stars,
-      tooltip: "Stars",
+      tooltipKey: "git_metric_stars",
     },
-    { color: "text-green-700", icon: GitFork, id: "Forks", label: repo.forks, tooltip: "Forks" },
+    {
+      color: "text-green-700",
+      icon: GitFork,
+      id: "Forks",
+      label: repo.forks,
+      tooltipKey: "git_metric_forks",
+    },
     {
       color: "text-foreground",
       icon: GitBranch,
       id: "Branch",
       label: repo.defaultBranch,
-      tooltip: "Branch",
+      tooltipKey: "git_metric_branch",
     },
     {
       color: "text-destructive",
       icon: CircleDot,
       id: "Open Issues",
       label: repo.openIssues,
-      tooltip: "Open Issues",
+      tooltipKey: "git_metric_open_issues",
     },
     {
       color: "text-muted-foreground",
       icon: Scale,
       id: "License",
       label: repo.license,
-      tooltip: "License",
+      tooltipKey: "git_metric_license",
     },
     {
       color: "text-muted-foreground",
       icon: HardDrive,
       id: "Size",
       label: repo.size > 1024 ? `${(repo.size / 1024).toFixed(1)} MB` : `${repo.size} KB`,
-      tooltip: "Size",
+      tooltipKey: "git_metric_size",
     },
     {
       color: "text-muted-foreground",
       icon: History,
       id: "Last push",
       label: formatRelativeTime(repo.pushedAt, locale),
-      tooltip: "Last push",
+      tooltipKey: "git_metric_last_push",
     },
   ];
 

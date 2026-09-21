@@ -3,12 +3,14 @@
 import React, { type ReactNode, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 type Props = {
   children: ReactNode;
 };
 
 export function A11yProvider({ children }: Readonly<Props>) {
+  const t = useTranslations("Common");
   const pathname = usePathname();
   const [announcement, setAnnouncement] = useState("");
   const isFirstRender = useRef(true);
@@ -34,16 +36,16 @@ export function A11yProvider({ children }: Readonly<Props>) {
       return;
     }
 
-    const title = document.title || "Page changed";
+    const title = document.title || t("page_changed");
 
     const announceId = window.setTimeout(() => {
-      setAnnouncement(`Navigated to ${title}`);
+      setAnnouncement(t("navigated_to", { title }));
     }, 50);
 
     return () => {
       window.clearTimeout(announceId);
     };
-  }, []);
+  }, [pathname, t]);
 
   return (
     <>

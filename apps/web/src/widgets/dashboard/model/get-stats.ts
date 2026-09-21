@@ -22,7 +22,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
     {
       className: getHealthClasses(overview.avgScores.health),
       delta: overview.healthDelta,
-      description: "Code quality average",
+      description: t("stat_health_desc"),
       icon: HeartPulse,
       id: "health",
       label: t("stat_health_score"),
@@ -31,7 +31,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
     {
       className: "bg-surface-selected text-foreground",
       delta: overview.securityDelta,
-      description: "Security audit score",
+      description: t("stat_security_desc"),
       icon: ShieldCheck,
       id: "security",
       label: t("stat_security"),
@@ -40,7 +40,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
     {
       className: "bg-brand-ai/10 text-brand-ai",
       delta: overview.complexityDelta,
-      description: "Cognitive complexity",
+      description: t("stat_complexity_desc"),
       icon: Brain,
       id: "complexity",
       label: t("stat_complexity"),
@@ -50,7 +50,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
     {
       className: "bg-brand-docs/10 text-brand-docs",
       delta: overview.onboardingDelta,
-      description: "Documentation quality",
+      description: t("stat_onboarding_desc"),
       icon: BookOpenCheck,
       id: "onboarding",
       label: t("stat_onboarding"),
@@ -58,7 +58,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
     },
     {
       className: "bg-foreground/10 text-foreground font-mono",
-      description: "Across all repositories",
+      description: t("stat_loc_desc"),
       icon: Code2,
       id: "loc",
       label: t("stat_total_loc"),
@@ -67,7 +67,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
     {
       className: "bg-brand-tech/10 text-brand-tech",
       delta: overview.techDebtDelta,
-      description: "Refactoring needed",
+      description: t("stat_tech_debt_desc"),
       icon: Wrench,
       id: "techdebt",
       label: t("stat_tech_debt"),
@@ -76,7 +76,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
     },
     {
       className: "bg-warning/10 text-warning",
-      description: "Analyses in queue",
+      description: t("stat_pending_desc"),
       icon: Loader2,
       iconClass: analysisStats.pending > 0 ? "animate-spin" : undefined,
       id: "queue",
@@ -85,7 +85,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
     },
     {
       className: "bg-destructive/10 text-destructive",
-      description: "Needs Attention",
+      description: t("stat_critical_repo_count_desc"),
       icon: TriangleAlert,
       id: "criticalRepoCount",
       label: t("stat_critical_repo_count"),

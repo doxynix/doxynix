@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { Check } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { useInView } from "motion/react";
 import { useTranslations } from "next-intl";
 
@@ -91,8 +91,10 @@ export function SimulationTerminal() {
     >
       <TerminalWindow>
         <div className="flex items-center text-muted-foreground">
-          <span className="mr-2 text-success">➜</span>
-          <span className="font-medium text-foreground">~/project</span>
+          <span className="mr-2 text-success">
+            <ArrowRight />
+          </span>
+          <span className="font-medium text-foreground">{t("project_path")}</span>
           <span className="ml-2 text-foreground">{typedCommand}</span>
           {step <= 1 && (
             <span className="ml-1 inline-block h-4 w-2 animate-blink-cursor bg-muted-foreground align-middle" />
@@ -131,7 +133,7 @@ export function SimulationTerminal() {
         {step >= 7 && (
           <div className="fade-in slide-in-from-left-2 mt-4 animate-in rounded-xl border border-success/20 bg-success/10 p-2.5 text-success duration-300">
             {t("section_terminal_step_success_prefix")}{" "}
-            <span className="underline underline-offset-4">/docs/README.md</span>
+            <span className="underline underline-offset-4">{t("readme_path")}</span>
           </div>
         )}
 

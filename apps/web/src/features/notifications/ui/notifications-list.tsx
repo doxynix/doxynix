@@ -1,6 +1,7 @@
 "use client";
 
 import { BellOff, Eye, EyeOff, SearchX, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
@@ -18,13 +19,15 @@ type Props = { meta?: NotificationMeta; notifications: UiNotification[] };
 export function NotificationsList({ meta, notifications }: Readonly<Props>) {
   const { deleteOne, markAs } = useNotificationActions();
   const isPending = markAs.isPending || deleteOne.isPending;
+  const t = useTranslations("Notifications");
+  const tCommon = useTranslations("Common");
 
   if (meta == null || meta.totalCount === 0) {
     return (
       <EmptyState
         description={undefined}
         icon={BellOff}
-        title="No notifications found"
+        title={t("no_notifications")}
       />
     );
   }
@@ -35,14 +38,15 @@ export function NotificationsList({ meta, notifications }: Readonly<Props>) {
         description={
           meta.searchQuery !== "" && meta.searchQuery != null ? (
             <span>
-              Nothing found for <span className="italic">{`"${meta.searchQuery}"`}</span>
+              {tCommon("nothing_found_for")}{" "}
+              <span className="italic">{`"${meta.searchQuery}"`}</span>
             </span>
           ) : (
-            "Try changing filter parameters"
+            t("try_changing_filters")
           )
         }
         icon={SearchX}
-        title="Nothing found"
+        title={t("nothing_found")}
       />
     );
   }
@@ -58,7 +62,7 @@ export function NotificationsList({ meta, notifications }: Readonly<Props>) {
                 icon={n.isRead ? EyeOff : Eye}
                 isPending={markAs.isPending}
                 onClick={() => markAs.mutate(n.id, !n.isRead)}
-                tooltip={n.isRead ? "Mark as unread" : "Mark as read"}
+                tooltip={n.isRead ? t("mark_as_unread") : t("mark_as_read")}
               />
               <NotificationActionButton
                 className="hover:text-destructive"
@@ -66,7 +70,7 @@ export function NotificationsList({ meta, notifications }: Readonly<Props>) {
                 icon={Trash2}
                 isPending={deleteOne.isPending}
                 onClick={() => deleteOne.mutate(n.id)}
-                tooltip="Delete notification"
+                tooltip={t("delete_notification")}
               />
             </>
           }

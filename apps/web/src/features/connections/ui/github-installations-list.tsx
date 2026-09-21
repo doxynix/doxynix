@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { AppButton } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
@@ -19,6 +21,8 @@ type Props = {
 };
 
 export function GitHubInstallationsList({ installations }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
+  const tCommon = useTranslations("Common");
   return (
     <div className="grid gap-3">
       {installations.map((inst) => (
@@ -30,11 +34,11 @@ export function GitHubInstallationsList({ installations }: Readonly<Props>) {
               variant="outline"
             >
               <ExternalLink href={inst.manageUrl ?? ""}>
-                <GitHubIcon /> Configure
+                <GitHubIcon /> {t("settings_connections_github_configure")}
               </ExternalLink>
             </AppButton>
           }
-          description="GitHub App Installation"
+          description={t("settings_connections_github_app_desc")}
           icon={
             <AppAvatar
               alt={inst.login}
@@ -43,7 +47,7 @@ export function GitHubInstallationsList({ installations }: Readonly<Props>) {
             />
           }
           key={inst.id}
-          status="Active"
+          status={tCommon("status_active")}
           title={inst.login}
         />
       ))}

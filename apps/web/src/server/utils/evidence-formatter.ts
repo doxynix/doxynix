@@ -294,9 +294,7 @@ let globalFormatter: EvidenceFormatter | null = null;
  * Get or create global evidence formatter
  */
 export function getGlobalEvidenceFormatter(): EvidenceFormatter {
-  if (!globalFormatter) {
-    globalFormatter = new EvidenceFormatter();
-  }
+  globalFormatter ??= new EvidenceFormatter();
   return globalFormatter;
 }
 

@@ -38,12 +38,14 @@ export function LanguagesSkeleton() {
 }
 
 export function HealthExtremesSkeleton() {
+  const t = useTranslations("Dashboard");
+
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm">
           <HeartPulse className="text-muted-foreground" />
-          Health Extremes
+          {t("health_extremes")}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
@@ -65,13 +67,15 @@ export function HealthExtremesSkeleton() {
 }
 
 export function EcosystemStatusSkeleton() {
+  const t = useTranslations("Dashboard");
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="border-b pb-4">
         <CardTitle className="flex items-center justify-between text-base">
           <span className="flex items-center gap-2">
             <BookOpenCheck className="text-muted-foreground" />
-            Ecosystem Status
+            {t("ecosystem_status")}
           </span>
           <Skeleton className="h-6 w-24 rounded-full" />
         </CardTitle>
@@ -89,12 +93,14 @@ export function EcosystemStatusSkeleton() {
 }
 
 export function RefactoringTargetsSkeleton() {
+  const t = useTranslations("Dashboard");
+
   return (
     <Card>
       <CardHeader className="border-b pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
           <Flame className="text-destructive" />
-          High-Impact Action Items
+          {t("high_impact_action_items")}
         </CardTitle>
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-6 pt-4 md:grid-cols-2">
@@ -195,12 +201,14 @@ export function TrendsWidgetsSkeleton() {
 }
 
 export function SystemRisksSkeleton() {
+  const t = useTranslations("Dashboard");
+
   return (
     <Card className="border-destructive/20">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-destructive/50 text-sm">
           <AlertTriangle />
-          Global Risks
+          {t("global_risks")}
         </CardTitle>
       </CardHeader>
       <CardContent>

@@ -8,13 +8,19 @@
   "[typescriptreact]": { "editor.defaultFormatter": "biomejs.biome" },
 
   "conventionalCommits.scopes": [
-    "web",
-    "siem-server",
-    "siem-client",
+    "ci",
     "cli",
-    "shared",
     "config",
-    "root"
+    "db",
+    "deps",
+    "root",
+    "security",
+    "shared",
+    "siem-client",
+    "siem-server",
+    "skills",
+    "tooling",
+    "web"
   ],
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "explicit",

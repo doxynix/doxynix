@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { userNavMenu } from "@/shared/config/navigation";
+import { useNavLabels } from "@/shared/config/navigation-labels";
 import { Link, useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
 import { AppButton } from "@/shared/ui/core/button";
@@ -39,6 +40,7 @@ export function UserNav() {
   const user = session?.user ?? null;
   const tCommon = useTranslations("Common");
   const t = useTranslations("Auth");
+  const navLabels = useNavLabels();
 
   const avatar = user?.image;
   const name = user?.name;
@@ -59,7 +61,7 @@ export function UserNav() {
         },
       });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to sign out");
+      toast.error(error instanceof Error ? error.message : t("sign_out_failed"));
     } finally {
       setLoading(false);
     }
@@ -77,7 +79,7 @@ export function UserNav() {
           size="icon"
         >
           <AppAvatar
-            alt={user?.name ?? "User"}
+            alt={user?.name ?? tCommon("user")}
             className="size-9 border-0"
             fallbackClassName="text-xs"
             fallbackText={user?.name ?? user?.email ?? undefined}
@@ -109,7 +111,7 @@ export function UserNav() {
                 href={item.href as Route}
               >
                 {item.icon != null && <item.icon />}
-                <span>{item.label}</span>
+                <span>{navLabels[item.labelKey]}</span>
                 {item.shortcut != null && (
                   <DropdownMenuShortcut className="opacity-0 transition-opacity group-hover:opacity-100">
                     {item.shortcut}
@@ -152,7 +154,7 @@ export function UserNav() {
                   className="cursor-pointer"
                   disabled={loading}
                   isLoading={loading}
-                  loadingText="Logout..."
+                  loadingText={t("logout_loading")}
                   onClick={() => void handleSignOut()}
                   variant="destructive"
                 >

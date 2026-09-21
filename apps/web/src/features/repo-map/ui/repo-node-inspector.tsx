@@ -15,6 +15,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
@@ -32,6 +33,7 @@ type Props = {
 };
 
 export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const { availableActions, children, explain, inspect, node } = data;
   const stats = node.stats as Record<string, number>;
 
@@ -42,7 +44,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
     ...inspect.hotspotHints,
     ...inspect.configHints,
     ...(inspect.entrypointReason != null
-      ? [`Entrypoint context: ${inspect.entrypointReason}`]
+      ? [`${t("entrypoint_context")}: ${inspect.entrypointReason}`]
       : []),
   ];
 
@@ -60,59 +62,67 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
   const activeStats = [
     {
       icon: <Activity className="text-foreground" />,
-      label: "Files",
+      label: t("stat_labels_files"),
       value: stats.pathCount,
     },
-    { icon: <Zap className="text-destructive" />, label: "Risks", value: stats.riskCount },
-    { icon: <Compass className="text-success" />, label: "APIs", value: stats.apiCount },
+    {
+      icon: <Zap className="text-destructive" />,
+      label: t("stat_labels_risks"),
+      value: stats.riskCount,
+    },
+    {
+      icon: <Compass className="text-success" />,
+      label: t("stat_labels_apis"),
+      value: stats.apiCount,
+    },
     {
       icon: <Layers className="text-warning" />,
-      label: "Coupling",
+      label: t("stat_labels_coupling"),
       value: stats.changeCouplingCount,
     },
     {
       icon: <ShieldCheck className="text-warning" />,
-      label: "Warnings",
+      label: t("stat_labels_warnings"),
       value: stats.graphWarningCount,
     },
     {
       icon: <Activity className="text-pink-400" />,
-      label: "Churn",
+      label: t("stat_labels_churn"),
       value: stats.churnCount,
     },
     {
       icon: <Target className="text-destructive" />,
-      label: "Hotspots",
+      label: t("stat_labels_hotspots"),
       value: stats.hotspotCount,
     },
     {
       icon: <FileText className="text-blue" />,
-      label: "Configs",
+      label: t("stat_labels_configs"),
       value: stats.configCount,
     },
     {
       icon: <Zap className="text-purple-400" />,
-      label: "Dep Risks",
+      label: t("stat_labels_dep_risks"),
       value: stats.dependencyHotspotCount,
     },
     {
       icon: <ArrowRight className="text-success" />,
-      label: "Entries",
+      label: t("stat_labels_entries"),
       value: stats.entrypointCount,
     },
     {
       icon: <Boxes className="text-cyan-400" />,
-      label: "Frameworks",
+      label: t("stat_labels_frameworks"),
       value: stats.frameworkCount,
     },
     {
       icon: <FileSearch className="text-gray-400" />,
-      label: "Orphans",
+      label: t("stat_labels_orphans"),
       value: stats.orphanCount,
     },
     {
       icon: <GitBranch className="text-purple-400" />,
-      label: "Deps",
+      label: t("stat_labels_deps"),
       value: explain.relationships.dependsOn.length,
     },
   ].filter((stat) => stat.value != null && stat.value > 0);
@@ -147,7 +157,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           ))}
         </div>
         <AppButton
-          aria-label="Close node inspector"
+          aria-label={t("close_node_inspector")}
           className="shrink-0"
           onClick={onClose}
           size="icon"
@@ -161,9 +171,9 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
         <div className="flex flex-col gap-8 p-4">
           {explain.whyImportant && (
             <section className="flex flex-col gap-2">
-              <div className="text-xs">Business Impact</div>
-              <p className="border-primary pl-3 text-xs italic">
-                &quot;{explain.whyImportant}&quot;
+              <div className="text-xs">{t("business_impact")}</div>
+              <p className="italic border border-primary pl-3 text-xs">
+                {`"${explain.whyImportant}"`}
               </p>
             </section>
           )}
@@ -175,7 +185,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
 
             <div className="flex items-center justify-between">
               <div className="flex flex-col gap-1">
-                <div className="text-sm">Inferred Role</div>
+                <div className="text-sm">{t("inferred_role")}</div>
                 <p className="text-xs">{explain.role}</p>
               </div>
               <AppBadge
@@ -226,7 +236,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
 
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2 text-xs">
-              <Compass /> Synthesis
+              <Compass /> {t("synthesis")}
             </div>
             <div className="flex flex-col gap-3">
               {explain.summary.map((line: string, i: number) => (
@@ -244,7 +254,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           {(children.length > 0 || allFileReferences.length > 0) && (
             <section className="flex flex-col gap-3">
               <div className="flex items-center gap-2 text-xs">
-                <Boxes /> Module Composition
+                <Boxes /> {t("module_composition")}
               </div>
 
               {children.length > 0 && (
@@ -269,7 +279,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           {connections.length > 0 && (
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-1 text-xs">
-                <Compass /> Explore Connections
+                <Compass /> {t("explore_connections")}
               </div>
               <div className="flex flex-col gap-1">
                 {connections.map((path) => (
@@ -292,7 +302,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
 
           {inspect.neighborBuckets && Object.keys(inspect.neighborBuckets).length > 0 && (
             <section className="flex flex-col gap-2">
-              <div className="text-xs">Architectural Neighbors</div>
+              <div className="text-xs">{t("architectural_neighbors")}</div>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(inspect.neighborBuckets).map(
                   ([bucket, paths]) =>
@@ -302,7 +312,9 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                         key={bucket}
                       >
                         <div className="text-[10px] text-muted-foreground">{bucket}</div>
-                        <div className="text-xs">{paths.length} related modules</div>
+                        <div className="text-xs">
+                          {t("related_modules", { count: paths.length })}
+                        </div>
                       </div>
                     ),
                 )}
@@ -312,7 +324,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
 
           {inspect.recommendedActions.length > 0 && (
             <section className="flex flex-col gap-3">
-              <div className="text-warning text-xs">Recommended Actions</div>
+              <div className="text-warning text-xs">{t("recommended_actions")}</div>
               <div className="flex flex-col gap-2">
                 {inspect.recommendedActions.map((action, i) => (
                   <div
@@ -329,7 +341,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
 
           {data.related.docs.length > 0 && (
             <section className="flex flex-col gap-3">
-              <div className="text-xs">Related Docs</div>
+              <div className="text-xs">{t("related_docs")}</div>
               <div className="flex flex-wrap gap-2">
                 {data.related.docs.map((doc) => (
                   <AppBadge
@@ -337,7 +349,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                     key={doc.id}
                     variant="secondary"
                   >
-                    {doc.docType}: {doc.title}
+                    {doc.docType} {doc.title}
                   </AppBadge>
                 ))}
               </div>
@@ -346,7 +358,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
 
           {data.related.findings.length > 0 && (
             <section className="flex flex-col gap-3">
-              <div className="text-xs">Recent PR Findings</div>
+              <div className="text-xs">{t("recent_pr_findings")}</div>
               <div className="flex flex-col gap-2">
                 {data.related.findings.slice(0, 4).map((finding) => (
                   <div
@@ -355,7 +367,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                   >
                     <div className="mb-1 flex items-center justify-between gap-2">
                       <span className="font-medium">
-                        PR #{finding.prNumber} · {finding.findingType}
+                        {`PR #${finding.prNumber} · ${finding.findingType}`}
                       </span>
                       <AppBadge variant="outline">{finding.filePath.split("/").pop()}</AppBadge>
                     </div>
@@ -368,19 +380,23 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1 rounded-md border bg-muted p-2">
-              <div className="text-muted-foreground text-xs">Depends On</div>
-              <div className="font-bold text-xs">{inspect.dependsOn.length} modules</div>
+              <div className="text-muted-foreground text-xs">{t("depends_on")}</div>
+              <div className="font-bold text-xs">
+                {t("depends_on_modules", { count: inspect.dependsOn.length })}
+              </div>
             </div>
             <div className="flex flex-col gap-1 rounded-md border bg-muted p-2">
-              <div className="text-muted-foreground text-xs">Used By</div>
-              <div className="font-bold text-xs">{inspect.usedBy.length} consumers</div>
+              <div className="text-muted-foreground text-xs">{t("used_by")}</div>
+              <div className="font-bold text-xs">
+                {t("used_by_consumers", { count: inspect.usedBy.length })}
+              </div>
             </div>
           </div>
 
           {allHints.length > 0 && (
             <div className="flex flex-col gap-3 rounded-xl border bg-muted p-4">
               <div className="flex items-center gap-2 font-bold text-warning text-xs">
-                <Lightbulb /> Technical Context
+                <Lightbulb /> {t("technical_context")}
               </div>
               <div className="flex flex-col gap-3">
                 {allHints.map((hint, i) => (
@@ -398,7 +414,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           <div className="flex gap-2">
             {availableActions.canQuickAudit && (
               <AppButton className="w-full gap-2">
-                <FileSearch /> Start Quick Audit
+                <FileSearch /> {t("start_quick_audit")}
               </AppButton>
             )}
             {availableActions.canDocumentFile && (
@@ -406,7 +422,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                 className="w-full gap-2"
                 variant="outline"
               >
-                <SearchCode /> Document Logic
+                <SearchCode /> {t("document_logic")}
               </AppButton>
             )}
           </div>

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
 import { sidebarMenu } from "@/shared/config/navigation";
+import { useNavLabels } from "@/shared/config/navigation-labels";
 import { cn } from "@/shared/lib/cn";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/core/collapsible";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
@@ -32,6 +33,8 @@ import { SidebarLink } from "./sidebar-link";
 
 export function AppSidebar() {
   const t = useTranslations("Dashboard");
+  const tCommon = useTranslations("Common");
+  const navLabels = useNavLabels();
   const { state } = useSidebar();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     trpc.repo.getSlim.useInfiniteQuery(
@@ -58,7 +61,7 @@ export function AppSidebar() {
       collapsible="offcanvas"
       variant="sidebar"
     >
-      <nav aria-label="Main navigation">
+      <nav aria-label={tCommon("main_navigation")}>
         <SidebarHeader>
           <SidebarMenu>
             {sidebarMenu.map((item) => {
@@ -67,6 +70,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.href}>
                   <SidebarLink
                     {...item}
+                    label={navLabels[item.labelKey]}
                     notificationsCount={dynamicBadge}
                   />
                 </SidebarMenuItem>
@@ -79,7 +83,7 @@ export function AppSidebar() {
 
       <SidebarContent className="max-h-[calc(100dvh-HeaderHeight-FooterHeight)] overflow-hidden">
         <ScrollArea className="h-full">
-          <nav aria-label="Repositories">
+          <nav aria-label={tCommon("nav_repositories")}>
             <Collapsible
               className="group/collapsible"
               defaultOpen
@@ -124,9 +128,11 @@ export function AppSidebar() {
                         )),
                       )}
                       {!isLoading && data?.pages[0]?.items.length === 0 && state === "expanded" && (
-                        <div className="truncate px-4 py-2 text-muted-foreground text-xs">
-                          {t("repo_empty_title")}
-                        </div>
+                        <SidebarMenuItem>
+                          <div className="truncate px-4 py-2 text-muted-foreground text-xs">
+                            {t("repo_empty_title")}
+                          </div>
+                        </SidebarMenuItem>
                       )}
                       {hasNextPage && (
                         <AppTooltip
@@ -157,7 +163,7 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarSeparator className="m-0" />
       <SidebarFooter>
-        <nav aria-label="Support and Documentation">
+        <nav aria-label={tCommon("support_and_documentation")}>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarLink

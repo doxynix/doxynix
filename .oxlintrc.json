@@ -60,17 +60,11 @@
       }
     },
     {
-      "files": [
-        "**/src/shared/ui/**/*.{ts,tsx}",
-        "**/shared/ui/**/*.{ts,tsx}",
-        "**/widgets/**/*.{ts,tsx}",
-        "**/entities/**/*.{ts,tsx}",
-        "**/features/**/*.{ts,tsx}"
-      ],
+      "files": ["**/src/shared/ui/core/**/*.{ts,tsx}", "**/shared/ui/core/**/*.{ts,tsx}"],
       "rules": {
-        "react/jsx-no-constructed-context-values": "off",
-        "react/no-array-index-key": "off",
-        "react/set-state-in-effect": "off"
+        "no-param-reassign": "off",
+        "no-shadow": "off",
+        "react/jsx-no-constructed-context-values": "off"
       }
     },
     {
@@ -99,17 +93,19 @@
         "**/tests/**/*.{ts,tsx}"
       ],
       "rules": {
+        "no-shadow": "off",
         "react/no-array-index-key": "off",
         "require-yield": "off",
         "typescript/no-non-null-assertion": "off",
+        "typescript/no-unnecessary-type-assertion": "warn",
         "typescript/only-throw-error": "off",
+        "typescript/unbound-method": "off",
         "vitest/expect-expect": [
           "error",
           {
             "assertFunctionNames": ["expect", "expectDenied", "expectValidationFail", "fc.assert"]
           }
         ],
-        "typescript/no-unnecessary-type-assertion": "warn",
         "vitest/no-focused-tests": "error",
         "vitest/prefer-expect-resolves": "error",
         "vitest/require-mock-type-parameters": "off"
@@ -139,15 +135,10 @@
     "import/no-named-as-default": "off",
     "import/no-named-as-default-member": "off",
     "import/no-unassigned-import": "off",
-    "jsx-a11y/aria-role": ["error", { "ignoreNonDOM": true }],
-    "jsx-a11y/control-has-associated-label": "off",
-    "jsx-a11y/label-has-associated-control": "off",
-    "jsx-a11y/no-noninteractive-element-interactions": "off",
     "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
     "no-implicit-coercion": ["error", { "allow": ["!!"] }],
-
     "no-new": "error",
-    "no-param-reassign": "off",
+    "no-param-reassign": "error",
     "no-shadow": "off",
     "no-underscore-dangle": [
       "error",
@@ -201,7 +192,7 @@
     "react/jsx-no-script-url": "error",
     "react/jsx-no-target-blank": "error",
     "react/jsx-no-useless-fragment": "off",
-    "react/no-array-index-key": "error",
+    "react/no-array-index-key": "off",
     "react/no-unstable-nested-components": ["error", { "allowAsProps": true }],
     "react/react-in-jsx-scope": "off",
     "react/rules-of-hooks": "error",
@@ -210,7 +201,7 @@
       "error",
       {
         "ts-expect-error": "allow-with-description",
-        "ts-ignore": true
+        "ts-ignore": "allow-with-description"
       }
     ],
     "typescript/consistent-return": "off",
@@ -230,7 +221,9 @@
     "typescript/no-misused-promises": [
       "error",
       {
-        "checksVoidReturn": false
+        "checksVoidReturn": {
+          "attributes": false
+        }
       }
     ],
     "typescript/no-namespace": "error",
@@ -253,12 +246,20 @@
     "typescript/no-unsafe-type-assertion": "off",
     "typescript/only-throw-error": "error",
     "typescript/prefer-includes": "error",
-    "typescript/prefer-nullish-coalescing": "off",
+    "typescript/prefer-nullish-coalescing": [
+      "error",
+      {
+        "ignorePrimitives": {
+          "boolean": true,
+          "string": true
+        }
+      }
+    ],
     "typescript/prefer-optional-chain": "error",
-    "typescript/restrict-template-expressions": "off",
+    "typescript/restrict-template-expressions": "error",
     "typescript/return-await": ["error", "in-try-catch"],
     "typescript/switch-exhaustiveness-check": "error",
-    "typescript/unbound-method": "off",
+    "typescript/unbound-method": "error",
     "unicorn/catch-error-name": "error",
     "unicorn/consistent-function-scoping": "off",
     "unicorn/error-message": "error",
@@ -332,5 +333,5 @@
     "react": {
       "version": "19.0.0"
     }
-  },
+  }
 }

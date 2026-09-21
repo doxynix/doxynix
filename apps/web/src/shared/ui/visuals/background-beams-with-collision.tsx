@@ -194,25 +194,25 @@ const CollisionMechanism = forwardRef<
           beamOptions.className,
         )}
         initial={{
-          rotate: beamOptions.rotate || 0,
-          translateX: beamOptions.initialX || "0px",
-          translateY: beamOptions.initialY || "-200px",
+          rotate: beamOptions.rotate ?? 0,
+          translateX: beamOptions.initialX ?? "0px",
+          translateY: beamOptions.initialY ?? "-200px",
         }}
         key={beamKey}
         ref={beamRef}
         transition={{
-          delay: beamOptions.delay || 0,
-          duration: beamOptions.duration || 8,
+          delay: beamOptions.delay ?? 0,
+          duration: beamOptions.duration ?? 8,
           ease: "linear",
           repeat: Infinity,
-          repeatDelay: beamOptions.repeatDelay || 0,
+          repeatDelay: beamOptions.repeatDelay ?? 0,
           repeatType: "loop",
         }}
         variants={{
           animate: {
-            rotate: beamOptions.rotate || 0,
-            translateX: beamOptions.translateX || "0px",
-            translateY: beamOptions.translateY || "1800px",
+            rotate: beamOptions.rotate ?? 0,
+            translateX: beamOptions.translateX ?? "0px",
+            translateY: beamOptions.translateY ?? "1800px",
           },
         }}
       />
@@ -236,15 +236,17 @@ const CollisionMechanism = forwardRef<
 CollisionMechanism.displayName = "CollisionMechanism";
 
 const Explosion = ({ ...props }: HTMLProps<HTMLDivElement>) => {
-  const spans = Array.from({ length: 20 }, (_, index) => ({
-    // eslint-disable-next-line react-hooks/purity
-    directionX: Math.floor(Math.random() * 80 - 40),
-    // eslint-disable-next-line react-hooks/purity
-    directionY: Math.floor(Math.random() * -50 - 10),
-    id: index,
-    initialX: 0,
-    initialY: 0,
-  }));
+  // Randomize the burst once per mount via lazy state initializers (keeps rendering pure).
+  const [spans] = useState(() =>
+    Array.from({ length: 20 }, (_, index) => ({
+      directionX: Math.floor(Math.random() * 80 - 40),
+      directionY: Math.floor(Math.random() * -50 - 10),
+      id: index,
+      initialX: 0,
+      initialY: 0,
+    })),
+  );
+  const [sparkDuration] = useState(() => Math.random() * 1.5 + 0.5);
 
   return (
     <div
@@ -268,8 +270,7 @@ const Explosion = ({ ...props }: HTMLProps<HTMLDivElement>) => {
           className="absolute size-1 rounded-full bg-linear-to-b from-foreground to-primary"
           initial={{ opacity: 1, x: span.initialX, y: span.initialY }}
           key={span.id}
-          // eslint-disable-next-line react-hooks/purity
-          transition={{ duration: Math.random() * 1.5 + 0.5, ease: "easeOut" }}
+          transition={{ duration: sparkDuration, ease: "easeOut" }}
         />
       ))}
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 
 import { AppBadge } from "../core/badge";
@@ -39,6 +40,7 @@ export function CodeComparison({
   filename,
   goodCode,
 }: Readonly<Props>) {
+  const tCommon = useTranslations("Common");
   const { resolvedTheme } = useTheme();
   const isMounted = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
 
@@ -70,7 +72,7 @@ export function CodeComparison({
           className="pointer-events-none absolute top-1/2 left-1/2 hidden size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border font-bold text-xs md:flex"
           variant="outline"
         >
-          VS
+          {tCommon("vs")}
         </AppBadge>
       </div>
     </div>

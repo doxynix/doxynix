@@ -77,7 +77,7 @@ const ChartContainer = forwardRef<
 ChartContainer.displayName = "Chart";
 
 const ChartStyle = ({ config, id }: { config: ChartConfig; id: string }) => {
-  const colorConfig = Object.entries(config).filter(([, config]) => config.theme || config.color);
+  const colorConfig = Object.entries(config).filter(([, config]) => config.theme ?? config.color);
 
   if (!colorConfig.length) {
     return null;

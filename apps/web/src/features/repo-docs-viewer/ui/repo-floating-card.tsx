@@ -22,6 +22,7 @@ import {
   Terminal,
   Unplug,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
@@ -34,51 +35,51 @@ const MARKERS_CONFIG = {
   api: {
     color: "border-none bg-blue-500/10 text-blue-500",
     icon: Terminal,
-    label: "API Endpoint",
+    markerKey: "marker_api_endpoint" as const,
   },
   client: {
     color: "border-none bg-violet-500/10 text-violet-400",
     icon: Laptop,
-    label: "Client-Side",
+    markerKey: "marker_client_side" as const,
   },
   config: {
     color: "border-none bg-background/15 text-background",
     icon: Settings,
-    label: "Config",
+    markerKey: "marker_config" as const,
   },
   entrypoint: {
     color: "border-none bg-amber-500/10 text-amber-500",
     icon: Play,
-    label: "Entrypoint",
+    markerKey: "marker_entrypoint" as const,
   },
   risk: {
     color: "border-none bg-destructive/10 text-destructive",
     icon: ShieldAlert,
-    label: "High Risk",
+    markerKey: "marker_high_risk" as const,
   },
   server: {
     color: "border-none bg-emerald-500/10 text-emerald-400",
     icon: Server,
-    label: "Server-Side",
+    markerKey: "marker_server_side" as const,
   },
   shared: {
     color: "border-none bg-orange-500/10 text-orange-400",
     icon: Layers,
-    label: "Shared",
+    markerKey: "marker_shared" as const,
   },
 } as const;
 
 const STATS_CONFIG = {
-  apiCount: { icon: Unplug, label: "API Routes" },
-  changeCouplingCount: { icon: RefreshCw, label: "Couplings" },
-  churnCount: { icon: GitBranch, label: "Churns" },
-  dependencyHotspotCount: { icon: Network, label: "Centrality" },
-  entrypointCount: { icon: PlayCircle, label: "Entrypoints" },
-  frameworkCount: { icon: Cpu, label: "Frameworks" },
-  graphWarningCount: { icon: AlertCircle, label: "Unresolved" },
-  hotspotCount: { icon: Flame, label: "Hotspots" },
-  orphanCount: { icon: Link2Off, label: "Orphan" },
-  riskCount: { icon: ShieldAlert, isDestructive: true, label: "Vulnerabilities" },
+  apiCount: { icon: Unplug, statKey: "stats_api_routes" as const },
+  changeCouplingCount: { icon: RefreshCw, statKey: "stats_couplings" as const },
+  churnCount: { icon: GitBranch, statKey: "stats_churns" as const },
+  dependencyHotspotCount: { icon: Network, statKey: "stats_centrality" as const },
+  entrypointCount: { icon: PlayCircle, statKey: "stats_entrypoints" as const },
+  frameworkCount: { icon: Cpu, statKey: "stats_frameworks" as const },
+  graphWarningCount: { icon: AlertCircle, statKey: "stats_unresolved" as const },
+  hotspotCount: { icon: Flame, statKey: "stats_hotspots" as const },
+  orphanCount: { icon: Link2Off, statKey: "stats_orphan" as const },
+  riskCount: { icon: ShieldAlert, isDestructive: true, statKey: "stats_vulnerabilities" as const },
 } as const;
 
 type Props = {
@@ -90,6 +91,7 @@ type Props = {
 export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Props>) {
   const { aid } = useRepoParams();
   const [coords, setCoords] = useState<null | { x: number; y: number }>(null);
+  const t = useTranslations("Dashboard");
 
   if ((anchorEl == null || hoveredFile == null) && coords !== null) {
     setCoords(null);
@@ -204,7 +206,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
                     variant="secondary"
                   >
                     <Icon className="size-2.5" />
-                    {marker.label}
+                    {t(marker.markerKey)}
                   </AppBadge>
                 );
               })}
@@ -215,7 +217,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
             {node.score > 0 && (
               <div className="flex items-center gap-1.5 font-bold text-[10px]">
                 <AlertTriangle className="size-3" />
-                <span>Importance Score:</span>
+                <span>{t("importance_score")}</span>
                 <span>{node.score}</span>
               </div>
             )}
@@ -234,7 +236,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
                     >
                       <div className="flex min-w-0 items-center gap-1">
                         <Icon />
-                        <span className="truncate">{config.label}:</span>
+                        <span className="truncate">{t(config.statKey)}</span>
                       </div>
                       <span
                         className={cn(

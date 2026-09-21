@@ -1,17 +1,35 @@
 import { Body, Button, Container, Head, Html, Section, Text } from "@react-email/components";
 
+export type AuthEmailKey =
+  | "email_preview_text"
+  | "email_confirm_sign_in"
+  | "email_login_request_sent"
+  | "email_click_to_complete"
+  | "email_10_minutes"
+  | "email_log_in_button"
+  | "email_fallback_instruction"
+  | "email_ignore_if_not_requested";
+
 type EmailProps = {
   host: string;
+  t: (key: AuthEmailKey) => string;
   url: string;
 };
 
-export function AuthEmail({ host, url }: Readonly<EmailProps>) {
+/**
+ * Synchronous email template rendered via `@react-email/render`
+ * (renderToStaticMarkup), which does not support async React components.
+ * Localized strings are injected as a translate function from the caller so the
+ * template has no dependency on the Next.js request scope (emails are sent from
+ * background/plugin contexts).
+ */
+export function AuthEmail({ host, t, url }: Readonly<EmailProps>) {
   return (
     <Html>
       <Head />
       <Body style={{ background: "#ffffff", padding: "24px 0" }}>
         <Text style={{ color: "transparent", display: "none", height: 0, overflow: "hidden" }}>
-          Login link for Doxynix. Valid for 10 minutes.
+          {t("email_preview_text")}
         </Text>
         <Section>
           <Container
@@ -34,17 +52,17 @@ export function AuthEmail({ host, url }: Readonly<EmailProps>) {
               style={{ display: "block", margin: "0 auto 20px" }}
             /> */}
             <Text style={{ fontSize: 20, fontWeight: 600, lineHeight: "1.4", margin: "0 0 14px" }}>
-              Confirm Sign In
+              {t("email_confirm_sign_in")}
             </Text>
 
             <Text style={{ fontSize: 15, lineHeight: "1.6", margin: "0 0 14px" }}>
-              A login request was sent to this email{" "}
+              {t("email_login_request_sent")}{" "}
               <span style={{ color: "#000000", fontWeight: 600 }}>{host}</span>.
             </Text>
 
             <Text style={{ fontSize: 15, lineHeight: "1.6", margin: "0 0 22px" }}>
-              Click the button below to complete your login. Link expires in{" "}
-              <span style={{ color: "#000000", fontWeight: 700 }}>10 minutes</span>.
+              {t("email_click_to_complete")}{" "}
+              <span style={{ color: "#000000", fontWeight: 700 }}>{t("email_10_minutes")}</span>.
             </Text>
 
             <Button
@@ -59,24 +77,24 @@ export function AuthEmail({ host, url }: Readonly<EmailProps>) {
                 textDecoration: "none",
               }}
             >
-              Log in
+              {t("email_log_in_button")}
             </Button>
 
             <Text
               style={{ color: "#555555", fontSize: 13, lineHeight: "1.6", margin: "22px 0 10px" }}
             >
-              If the button doesn&apos;t work, copy and paste this link into your browser:
+              {t("email_fallback_instruction")}
             </Text>
 
             <Text style={{ fontSize: 13, margin: "0 0 24px", wordBreak: "break-all" }}>{url}</Text>
 
             <Text style={{ color: "#888888", fontSize: 12, lineHeight: "1.6", margin: 0 }}>
-              If you didn&apos;t request this, you can safely ignore this email.
+              {t("email_ignore_if_not_requested")}
             </Text>
           </Container>
 
           <Text style={{ color: "#888888", fontSize: 12, margin: "14px 0 0", textAlign: "center" }}>
-            © 2026 Doxynix · {host}
+            {`© 2026 Doxynix · ${host}`}
           </Text>
         </Section>
       </Body>

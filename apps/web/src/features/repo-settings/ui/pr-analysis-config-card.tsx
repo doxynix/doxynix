@@ -8,6 +8,7 @@ import {
 } from "@doxynix/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Layout, Loader2, Palette, ShieldCheck, Zap } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -31,35 +32,43 @@ type Props = {
   repoId: string;
 };
 
-const AREAS = [
-  {
-    desc: "Vulnerability detection, sensitive data leaks, and OWASP compliance check.",
-    icon: ShieldCheck,
-    id: PRFocusArea.SECURITY,
-    label: "Security",
-  },
-  {
-    desc: "Identifying computational bottlenecks, memory leaks, and N+1 query patterns.",
-    icon: Zap,
-    id: PRFocusArea.PERFORMANCE,
-    label: "Performance",
-  },
-  {
-    desc: "Patterns validation, modularity, and adherence to SOLID/DRY principles.",
-    icon: Layout,
-    id: PRFocusArea.ARCHITECTURE,
-    label: "Architecture",
-  },
-  {
-    desc: "Code cleanliness, naming consistency, and long-term maintainability.",
-    icon: Palette,
-    id: PRFocusArea.STYLE,
-    label: "Style",
-  },
-] as const;
+type Area = {
+  desc: string;
+  icon: typeof ShieldCheck;
+  id: PRFocusArea;
+  label: string;
+};
 
 export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const utils = trpc.useUtils();
+
+  const AREAS: readonly Area[] = [
+    {
+      desc: t("settings_pr_focus_security_desc"),
+      icon: ShieldCheck,
+      id: PRFocusArea.SECURITY,
+      label: t("settings_pr_focus_security_label"),
+    },
+    {
+      desc: t("settings_pr_focus_performance_desc"),
+      icon: Zap,
+      id: PRFocusArea.PERFORMANCE,
+      label: t("settings_pr_focus_performance_label"),
+    },
+    {
+      desc: t("settings_pr_focus_architecture_desc"),
+      icon: Layout,
+      id: PRFocusArea.ARCHITECTURE,
+      label: t("settings_pr_focus_architecture_label"),
+    },
+    {
+      desc: t("settings_pr_focus_style_desc"),
+      icon: Palette,
+      id: PRFocusArea.STYLE,
+      label: t("settings_pr_focus_style_label"),
+    },
+  ] as const;
 
   const { data: config, isLoading } = trpc.analysis.getRepoConfig.useQuery({ repoId });
 
@@ -110,8 +119,8 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>AI Pull Request Analysis</CardTitle>
-            <CardDescription>Configure how AI reviews your code changes</CardDescription>
+            <CardTitle>{t("settings_pr_card_title")}</CardTitle>
+            <CardDescription>{t("settings_pr_card_desc")}</CardDescription>
           </div>
           <Switch
             checked={isEnabled}
@@ -127,7 +136,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
       <CardContent className="flex flex-col gap-6">
         <div className={isEnabled === true ? "opacity-100" : "pointer-events-none opacity-50"}>
           <div className="mb-6 flex flex-col gap-2">
-            <Label htmlFor={commentStyleId}>Comment Style</Label>
+            <Label htmlFor={commentStyleId}>{t("settings_pr_comment_style_label")}</Label>
             <Select
               onValueChange={(v) =>
                 form.setValue("commentStyle", v as UpdatePRConfigInputValues["commentStyle"], {
@@ -140,18 +149,22 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
                 className="w-full"
                 id={commentStyleId}
               >
-                <SelectValue placeholder="Select style" />
+                <SelectValue placeholder={t("settings_pr_comment_style_placeholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={PRCommentStyle.DETAILED}>Detailed (In-depth review)</SelectItem>
-                <SelectItem value={PRCommentStyle.CONCISE}>Concise (Short summaries)</SelectItem>
-                <SelectItem value={PRCommentStyle.OFF}>Off (No comments)</SelectItem>
+                <SelectItem value={PRCommentStyle.DETAILED}>
+                  {t("settings_pr_style_detailed")}
+                </SelectItem>
+                <SelectItem value={PRCommentStyle.CONCISE}>
+                  {t("settings_pr_style_concise")}
+                </SelectItem>
+                <SelectItem value={PRCommentStyle.OFF}>{t("settings_pr_style_off")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="mb-6 flex flex-col gap-3">
-            <Label htmlFor={focusAreasId}>Focus Areas</Label>
+            <Label htmlFor={focusAreasId}>{t("settings_pr_focus_areas_label")}</Label>
             <div className="grid grid-cols-2 gap-4">
               {AREAS.map((area) => {
                 const isSelected = currentFocusAreas.includes(area.id);
@@ -176,7 +189,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
                       id={areaId}
                       onChange={() => {
                         const next = isSelected
-                          ? currentFocusAreas.filter((id) => id !== area.id)
+                          ? currentFocusAreas.filter((curr) => curr !== area.id)
                           : [...currentFocusAreas, area.id];
                         form.setValue("focusAreas", next, { shouldDirty: true });
                       }}
@@ -202,10 +215,8 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
                         tabIndex={-1}
                       />
                     </div>
-                    <div>
-                      <p className="font-bold text-sm">{area.label}</p>
-                      <p className="mt-1 text-muted-foreground text-xs">{area.desc}</p>
-                    </div>
+                    <p className="font-bold text-sm">{area.label}</p>
+                    <p className="mt-1 text-muted-foreground text-xs">{area.desc}</p>
                   </label>
                 );
               })}
@@ -214,7 +225,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
 
           <div className="mb-8 flex flex-col gap-4">
             <div className="flex justify-between text-sm">
-              <Label htmlFor={tokenBudgetId}>Token Budget</Label>
+              <Label htmlFor={tokenBudgetId}>{t("settings_pr_token_budget_label")}</Label>
               <span className="font-mono text-muted-foreground">
                 {tokenBudget?.toLocaleString()}
               </span>
@@ -231,9 +242,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
               step={5000}
               value={[tokenBudget ?? 30_000]}
             />
-            <p className="text-muted-foreground text-xs">
-              Higher budget allows analyzing larger pull requests but costs more.
-            </p>
+            <p className="text-muted-foreground text-xs">{t("settings_pr_token_budget_hint")}</p>
           </div>
 
           <div className="flex items-center justify-between">
@@ -242,11 +251,9 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
                 className="text-sm"
                 htmlFor={ciTriggersId}
               >
-                Skip CI Triggers
+                {t("settings_pr_skip_ci_label")}
               </Label>
-              <p className="text-muted-foreground text-xs">
-                Add [skip ci] to bot commits to save actions minutes.
-              </p>
+              <p className="text-muted-foreground text-xs">{t("settings_pr_skip_ci_hint")}</p>
             </div>
             <Switch
               checked={ciSkip}
@@ -261,7 +268,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
             isLoading={isUpdating}
             onClick={() => void form.handleSubmit(onSubmit)()}
           >
-            Save Configuration
+            {t("settings_pr_save_config")}
           </LoadingButton>
         </div>
       </CardContent>

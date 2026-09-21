@@ -2,6 +2,7 @@
 
 import { Fragment, type ReactNode } from "react";
 import type { Route } from "next";
+import { useTranslations } from "next-intl";
 
 import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
@@ -48,6 +49,7 @@ export function AppBreadcrumbs({
   separator = "/",
   showSeparatorAtStart = false,
 }: Readonly<Props>) {
+  const tCommon = useTranslations("Common");
   const isCollapsed = items.length > maxItems;
 
   const visibleItems = isCollapsed
@@ -78,7 +80,7 @@ export function AppBreadcrumbs({
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <AppButton
-                          aria-label="Show hidden elements"
+                          aria-label={tCommon("show_hidden_elements")}
                           className="size-7 cursor-pointer"
                           size="icon"
                           variant="ghost"

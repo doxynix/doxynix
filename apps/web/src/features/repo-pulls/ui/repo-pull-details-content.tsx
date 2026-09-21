@@ -13,7 +13,7 @@ import {
   ShieldCheck,
   Wand2,
 } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
@@ -43,16 +43,31 @@ type Props = {
   repoId: string;
 };
 
-const STATUS_CONFIG = {
-  ANALYZING: { className: "text-foreground", label: "Analyzing" },
-  COMPLETED: { className: "text-success", label: "Completed" },
-  FAILED: { className: "text-destructive", label: "Failed" },
-  PENDING: { className: "text-warning", label: "Pending" },
-} as const;
+type StatusConfigKey = "ANALYZING" | "COMPLETED" | "FAILED" | "PENDING";
+
+type PrDetailsItem =
+  | { isCopy: true; isStatus?: false; isTime?: false; label: string; value: string | undefined }
+  | { isStatus: true; isCopy?: false; isTime?: false; label: string; value: unknown }
+  | { isTime: true; isCopy?: false; isStatus?: false; label: string; value: Date | null }
+  | { isCopy?: false; isStatus?: false; isTime?: false; label: string; value: number };
+
+type ImpactStat = {
+  label: string;
+  value: string | number;
+};
 
 export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }: Readonly<Props>) {
   const locale = useLocale();
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
   const utils = trpc.useUtils();
+
+  const STATUS_CONFIG: Record<StatusConfigKey, { className: string; label: string }> = {
+    ANALYZING: { className: "text-foreground", label: t("repo_pull_status_analyzing") },
+    COMPLETED: { className: "text-success", label: t("repo_pull_status_completed") },
+    FAILED: { className: "text-destructive", label: tCommon("failed") },
+    PENDING: { className: "text-warning", label: t("repo_pull_status_pending") },
+  } as const;
 
   const { data: comments, isLoading: isCommentsLoading } = trpc.analysis.getComments.useQuery(
     { analysisId: analysis?.analysis.id ?? "" },
@@ -63,14 +78,14 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
 
   const createFixMutation = trpc.analysis.createFix.useMutation({
     onError: (err) => {
-      toast.error("Failed to generate autofix", {
+      toast.error(t("repo_pull_fix_error"), {
         description: err.message,
       });
     },
     onSuccess: (data) => {
       if (data.success === true && data.fixId != null) {
-        toast.success("AI Autofix has been queued!", {
-          description: "Our agents are generating code corrections. You will be notified.",
+        toast.success(t("repo_pull_fix_queued"), {
+          description: t("repo_pull_fix_queued_desc"),
         });
         void utils.analysis.getByRepository.invalidate({ repoId });
       }
@@ -117,32 +132,36 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
     });
   };
 
-  const PR_DETAILS_ITEMS = [
-    { isCopy: true, label: "Base SHA", value: analysis?.analysis.baseSha.slice(0, 7) },
-    { isStatus: true, label: "Status", value: analysis?.analysis.status },
-    { label: "Changed files", value: impact?.summary.affectedFiles ?? 0 },
-    { label: "Affected zones", value: impact?.summary.affectedZones ?? 0 },
+  const PR_DETAILS_ITEMS: PrDetailsItem[] = [
+    {
+      isCopy: true,
+      label: t("repo_pull_detail_base_sha"),
+      value: analysis?.analysis.baseSha.slice(0, 7),
+    },
+    { isStatus: true, label: tCommon("status"), value: analysis?.analysis.status },
+    { label: t("repo_pull_detail_changed_files"), value: impact?.summary.affectedFiles ?? 0 },
+    { label: t("repo_pull_detail_affected_zones"), value: impact?.summary.affectedZones ?? 0 },
     {
       isTime: true,
-      label: "Created",
+      label: tCommon("created"),
       value: analysis?.analysis.createdAt ?? null,
     },
   ];
 
-  const IMPACT_STATS = [
-    { label: "Nodes", value: impact?.summary.affectedNodes ?? 0 },
-    { label: "Findings", value: impact?.summary.findings ?? 0 },
-    { label: "Fixes", value: impact?.summary.linkedFixes ?? 0 },
+  const IMPACT_STATS: ImpactStat[] = [
+    { label: t("repo_pull_stat_nodes"), value: impact?.summary.affectedNodes ?? 0 },
+    { label: t("repo_pull_stat_findings"), value: impact?.summary.findings ?? 0 },
+    { label: t("repo_pull_stat_fixes"), value: impact?.summary.linkedFixes ?? 0 },
     {
-      label: "Primary View",
-      value: impact?.navigationHints.recommendedView ?? "map",
+      label: t("repo_pull_stat_primary_view"),
+      value: impact?.navigationHints.recommendedView ?? t("repo_pull_stat_primary_view_default"),
     },
     {
-      label: "Total Issues",
+      label: t("repo_pull_stat_total_issues"),
       value: comments?.renderedComments.length ?? 0,
     },
     {
-      label: "Generated Fixes",
+      label: t("repo_pull_stat_generated_fixes"),
       value: fixes.length,
     },
   ];
@@ -154,7 +173,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <FolderTree />
-              Affected Zones
+              {t("repo_pull_affected_zones")}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
@@ -172,8 +191,12 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     <AppBadge variant="outline">{zone.impactScore}</AppBadge>
                   </div>
                   <div className="mb-3 flex flex-wrap gap-3 text-muted-foreground text-xs">
-                    <span>{zone.fileCount} files</span>
-                    <span>{zone.findingCount} findings</span>
+                    <span>
+                      {zone.fileCount} {t("repo_pull_unit_files")}
+                    </span>
+                    <span>
+                      {zone.findingCount} {t("repo_pull_unit_findings")}
+                    </span>
                     <span>{zone.kind}</span>
                     <span>{zone.relatedChangedFiles}</span>
                   </div>
@@ -183,15 +206,13 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     variant="outline"
                   >
                     <Link href={buildRepoMapHref({ name, nodeId: zone.nodeId, owner })}>
-                      <Map /> Open in map
+                      <Map /> {t("repo_pull_open_in_map")}
                     </Link>
                   </AppButton>
                 </div>
               ))
             ) : (
-              <p className="text-muted-foreground text-sm">
-                No structural zones were resolved for this PR yet.
-              </p>
+              <p className="text-muted-foreground text-sm">{t("repo_pull_no_zones")}</p>
             )}
           </CardContent>
         </Card>
@@ -199,7 +220,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Inspect /> Critical Hotspots
+              <Inspect /> {t("repo_pull_critical_hotspots")}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
@@ -219,8 +240,12 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                   </div>
                   <p className="text-muted-foreground text-xs">{node.whyAffected}</p>
                   <div className="mb-3 flex flex-wrap gap-3 text-muted-foreground text-xs">
-                    <span>{node.fileCount} files</span>
-                    <span>{node.findingCount} findings</span>
+                    <span>
+                      {node.fileCount} {t("repo_pull_unit_files")}
+                    </span>
+                    <span>
+                      {node.findingCount} {t("repo_pull_unit_findings")}
+                    </span>
                     <span>{node.kind}</span>
                     <span>{node.relatedChangedFiles}</span>
                   </div>
@@ -230,15 +255,13 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     variant="outline"
                   >
                     <Link href={buildRepoMapHref({ name, nodeId: node.nodeId, owner })}>
-                      <Map /> Open in map
+                      <Map /> {t("repo_pull_open_in_map")}
                     </Link>
                   </AppButton>
                 </div>
               ))
             ) : (
-              <p className="text-muted-foreground text-sm">
-                No structural zones were resolved for this PR yet.
-              </p>
+              <p className="text-muted-foreground text-sm">{t("repo_pull_no_zones")}</p>
             )}
           </CardContent>
         </Card>
@@ -247,7 +270,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <FileIcon />
-              Changed Files
+              {t("repo_pull_changed_files")}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
@@ -263,8 +286,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                   </div>
                   <div className="mb-3 flex flex-wrap gap-3 text-muted-foreground text-xs">
                     <span className="text-success">+{file.additions}</span>
-                    <span className="text-destructive">-{file.deletions}</span>
-                    <span>{file.findingCount} findings</span>
+                    <span className="text-destructive">−{file.deletions}</span>
+                    <span>
+                      {file.findingCount} {t("repo_pull_unit_findings")}
+                    </span>
                     {file.zoneLabel != null && <span>{file.zoneLabel}</span>}
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -282,7 +307,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                         })}
                       >
                         <FileCode />
-                        Code
+                        {t("repo_pull_view_code")}
                       </Link>
                     </AppButton>
                     {file.zoneId != null && (
@@ -292,7 +317,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                         variant="ghost"
                       >
                         <Link href={buildRepoMapHref({ name, nodeId: file.zoneId, owner })}>
-                          <Map /> Map
+                          <Map /> {t("repo_pull_view_map")}
                         </Link>
                       </AppButton>
                     )}
@@ -303,7 +328,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                         variant="ghost"
                       >
                         <Link href={buildRepoDocsHref({ name, nodeId: file.nodeId, owner })}>
-                          <FileText /> Docs
+                          <FileText /> {t("repo_pull_view_docs")}
                         </Link>
                       </AppButton>
                     )}
@@ -311,9 +336,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                 </div>
               ))
             ) : (
-              <p className="text-muted-foreground text-sm">
-                No changed file snapshot is available.
-              </p>
+              <p className="text-muted-foreground text-sm">{t("repo_pull_no_changed_snapshot")}</p>
             )}
           </CardContent>
         </Card>
@@ -322,7 +345,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
               <ShieldCheck />
-              Detected Issues ({comments?.renderedComments.length ?? 0})
+              {t("repo_pull_detected_issues")} ({comments?.renderedComments.length ?? 0})
             </CardTitle>
             {comments != null && comments.renderedComments.length > 0 && (
               <AppButton
@@ -336,7 +359,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                 ) : (
                   <Wand2 className="size-3.5" />
                 )}
-                Autofix All Issues
+                {t("repo_pull_autofix_all")}
               </AppButton>
             )}
           </CardHeader>
@@ -359,7 +382,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                           {comment.findingType}
                         </span>
                         <span className="font-bold text-muted-foreground text-xs">
-                          Risk: {comment.riskLevel}
+                          {t("repo_pull_risk_label", { level: comment.riskLevel })}
                         </span>
                       </div>
                     </div>
@@ -381,16 +404,14 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                         ) : (
                           <Wand2 className="size-3.5" />
                         )}
-                        Autofix Issue
+                        {t("repo_pull_autofix_single")}
                       </AppButton>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground text-sm">
-                No inline comments were posted for this PR analysis.
-              </p>
+              <p className="text-muted-foreground text-sm">{t("repo_pull_no_comments")}</p>
             )}
           </CardContent>
         </Card>
@@ -399,7 +420,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
       <div className="flex flex-col gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="font-bold text-sm">PR Details</CardTitle>
+            <CardTitle className="font-bold text-sm">{t("repo_pull_details_title")}</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-2 text-sm">
             {PR_DETAILS_ITEMS.map((item) => (
@@ -412,7 +433,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                   {item.isCopy === true && (
                     <CopyButton
                       className="opacity-100"
-                      tooltipText="Copy SHA"
+                      tooltipText={t("repo_pull_copy_sha")}
                       value={analysis?.analysis.baseSha ?? ""}
                     />
                   )}
@@ -431,7 +452,9 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                       locale={locale}
                     />
                   ) : (
-                    <span className={cn("font-medium text-xs")}>N/A</span> // FIXME: haven't figured it out yet, but I think {item.value should go here
+                    <span className={cn("font-medium text-xs")}>
+                      {item.value ?? t("repo_pull_na")}
+                    </span>
                   )}
                 </div>
               </div>
@@ -443,7 +466,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Activity />
-              Impact Summary
+              {t("repo_pull_impact_summary")}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
@@ -472,7 +495,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                       owner,
                     })}
                   >
-                    <Search /> Inspect primary node
+                    <Search /> {t("repo_pull_inspect_primary")}
                   </Link>
                 </AppButton>
                 {impact.navigationHints.primaryFilePath != null && (
@@ -489,7 +512,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                         path: impact.navigationHints.primaryFilePath,
                       })}
                     >
-                      <FileCode /> Open code
+                      <FileCode /> {t("repo_pull_open_code")}
                     </Link>
                   </AppButton>
                 )}
@@ -502,7 +525,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="flex flex-row items-center gap-2 text-base">
               <Search />
-              Top Findings
+              {t("repo_pull_top_findings")}
             </CardTitle>
             <AppButton
               className="flex items-center gap-1.5 bg-success font-semibold text-success-foreground text-xs hover:bg-success/90"
@@ -515,7 +538,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
               ) : (
                 <Wand2 className="size-3.5" />
               )}
-              Autofix All Issues
+              {t("repo_pull_autofix_all")}
             </AppButton>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
@@ -539,9 +562,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                 </div>
               ))
             ) : (
-              <p className="text-muted-foreground text-sm">
-                No persisted findings are available for this PR analysis.
-              </p>
+              <p className="text-muted-foreground text-sm">{t("repo_pull_no_findings")}</p>
             )}
           </CardContent>
         </Card>
@@ -549,7 +570,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
         {fixes.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Linked Fixes</CardTitle>
+              <CardTitle className="text-base">{t("repo_pull_linked_fixes")}</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               {fixes.map((fix) => (
@@ -569,12 +590,12 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                         size="sm"
                         variant="outline"
                       >
-                        Add to PR Draft
+                        {t("repo_pull_add_to_draft")}
                       </AppButton>
                     )}
                     {fix.githubPrUrl != null && (
                       <ExternalLink href={fix.githubPrUrl}>
-                        Open GitHub PR #{fix.githubPrNumber ?? "?"}
+                        {t("repo_pull_open_github_pr", { number: fix.githubPrNumber ?? "?" })}
                       </ExternalLink>
                     )}
                   </div>

@@ -1,7 +1,3 @@
-/* eslint-disable sonarjs/regex-complexity */
-/* eslint-disable sonarjs/slow-regex */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { compact, isString } from "es-toolkit";
 
 import { appLogger } from "../core/app-logger";
@@ -17,6 +13,30 @@ type AiTextLike = {
   content?: unknown;
   output?: unknown;
   text?: unknown;
+};
+
+/**
+ * Minimal structural view of the tree-sitter API surface used by the skeletonizer
+ * (the tree-sitter runtime is typed as `any` upstream in tree-sitter-signals).
+ */
+type TreeSitterNode = {
+  child: (index: number) => null | TreeSitterNode;
+  childCount: number;
+  delete: () => void;
+  endIndex: number;
+  startIndex: number;
+  type: string;
+};
+
+type TreeSitterTree = {
+  delete: () => void;
+  rootNode: TreeSitterNode;
+};
+
+type TreeSitterParser = {
+  delete: () => void;
+  parse: (code: string) => TreeSitterTree;
+  setLanguage: (language: unknown) => void;
 };
 
 function isAiTextLike(v: unknown): v is AiTextLike {
@@ -95,17 +115,18 @@ export const CodeOptimizer = {
       return code.slice(0, 5000);
     }
 
-    let tree: any = null;
-    let parser: any = null;
+    let tree: null | TreeSitterTree = null;
+    let parser: null | TreeSitterParser = null;
 
     try {
       const Parser = await getRuntime();
-      parser = new Parser();
+      const runtimeParser: TreeSitterParser = new Parser();
+      parser = runtimeParser;
 
       const lang = await loadLanguage(ext, spec);
-      parser.setLanguage(lang);
+      runtimeParser.setLanguage(lang);
 
-      tree = parser.parse(code);
+      tree = runtimeParser.parse(code);
       const root = tree.rootNode;
 
       const bodyNodeTypes = new Set([
@@ -117,13 +138,16 @@ export const CodeOptimizer = {
       ]);
       const rangesToReplace: Array<{ end: number; start: number }> = [];
 
-      const findBodies = (node: any) => {
+      const findBodies = (node: TreeSitterNode) => {
         if (bodyNodeTypes.has(node.type) && node.endIndex - node.startIndex > 60) {
           rangesToReplace.push({ end: node.endIndex, start: node.startIndex });
           return;
         }
         for (let i = 0; i < node.childCount; i++) {
-          findBodies(node.child(i));
+          const child = node.child(i);
+          if (child != null) {
+            findBodies(child);
+          }
         }
       };
 
@@ -137,14 +161,14 @@ export const CodeOptimizer = {
       }
 
       tree.delete();
-      parser.delete();
+      runtimeParser.delete();
       return result;
     } catch (error) {
       appLogger.error({ error, msg: "Polyglot skeletonizer error:" });
       return code.slice(0, 5000);
     } finally {
-      tree?.delete?.();
-      parser?.delete?.();
+      tree?.delete();
+      parser?.delete();
     }
   },
 

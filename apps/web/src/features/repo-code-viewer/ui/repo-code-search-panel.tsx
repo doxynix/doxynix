@@ -10,6 +10,7 @@ import {
 } from "@codemirror/search";
 import type { EditorView } from "@codemirror/view";
 import { CaseSensitive, MoveLeft, Replace, ReplaceAll, Search, WholeWord, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
 import { Input } from "@/shared/ui/core/input";
@@ -32,6 +33,7 @@ const onKeyDown = (e: KeyboardEvent, action: () => void) => {
 };
 
 export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const inputRef = useRef<HTMLInputElement>(null);
   const initialQuery = getSearchQuery(view.state);
   const [options, setOptions] = useState({
@@ -105,7 +107,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
             onKeyDown={(e) =>
               onKeyDown(e, () => (e.shiftKey ? findPrevious(view) : findNext(view)))
             }
-            placeholder="Find..."
+            placeholder={t("repo_code_find")}
             ref={inputRef}
             value={search}
           />
@@ -118,7 +120,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
                   : "text-muted-foreground hover:bg-primary/90",
               )}
               onClick={() => toggleOption("caseSensitive")}
-              tooltipText="Match Case (Aa)"
+              tooltipText={t("repo_code_match_case")}
             >
               <CaseSensitive className="size-3.5" />
             </RepoCodeActionButton>
@@ -130,7 +132,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
                   : "text-muted-foreground hover:bg-primary/90",
               )}
               onClick={() => toggleOption("wholeWord")}
-              tooltipText="Whole Word (\bW\b)"
+              tooltipText={t("repo_code_whole_word")}
             >
               <WholeWord className="size-3.5" />
             </RepoCodeActionButton>
@@ -143,19 +145,21 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
                   : "text-muted-foreground hover:bg-primary/90",
               )}
               onClick={() => toggleOption("regexp")}
-              tooltipText="Regular Expression (.*)"
+              tooltipText={t("repo_code_regexp")}
             >
               <span className="font-bold text-[10px] leading-none">.*</span>
             </RepoCodeActionButton>
           </kbd>
         </div>
         <p className="pointer-events-none rounded bg-muted px-1.5 py-0.5 font-medium text-[10px] text-muted-foreground">
-          {stats.totalMatches > 0 ? `${stats.currentMatch} of ${stats.totalMatches}` : "No results"}
+          {stats.totalMatches > 0
+            ? t("repo_code_match_of", { current: stats.currentMatch, total: stats.totalMatches })
+            : t("repo_code_no_results")}
         </p>
         <RepoCodeActionButton
           className="h-8 w-8 p-0"
           onClick={() => findPrevious(view)}
-          tooltipText="Previous match (Shift+Enter)"
+          tooltipText={t("repo_code_prev_match")}
         >
           <MoveLeft className="rotate-90" />
         </RepoCodeActionButton>
@@ -163,7 +167,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
         <RepoCodeActionButton
           className="h-8 w-8 p-0"
           onClick={() => findNext(view)}
-          tooltipText="Next match (Enter)"
+          tooltipText={t("repo_code_next_match")}
         >
           <MoveLeft className="-rotate-90" />
         </RepoCodeActionButton>
@@ -174,31 +178,31 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
           className="h-8 w-48 text-xs"
           onChange={onReplaceChange}
           onKeyDown={(e) => onKeyDown(e, () => replaceNext(view))}
-          placeholder="Replace with..."
+          placeholder={t("repo_code_replace_with")}
           value={replace}
         />
         <RepoCodeActionButton
           className="h-8 px-2"
           onClick={() => replaceNext(view)}
-          tooltipText="Replace (Enter)"
+          tooltipText={t("repo_code_replace_hint")}
         >
           <Replace className="mr-1.5" />
-          Replace
+          {t("repo_code_replace")}
         </RepoCodeActionButton>
 
         <RepoCodeActionButton
           className="h-8 px-2"
           onClick={() => replaceAll(view)}
-          tooltipText="Replace all"
+          tooltipText={t("repo_code_replace_all_hint")}
         >
           <ReplaceAll className="mr-1.5" />
-          All
+          {t("repo_code_replace_all")}
         </RepoCodeActionButton>
 
         <RepoCodeActionButton
           className="ml-2 h-8 w-8 p-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
           onClick={onClose}
-          tooltipText="Close (Esc)"
+          tooltipText={t("repo_code_close")}
         >
           <X />
         </RepoCodeActionButton>

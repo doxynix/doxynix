@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   CartesianGrid,
   Cell,
@@ -24,6 +25,8 @@ type Props = {
 };
 
 export function ComplexityScatterChart({ data }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
+
   const chartData = data.map((item) => ({
     fullPath: item.path,
     name: item.path.split("/").pop(),
@@ -54,7 +57,7 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
               fontSize: 10,
               offset: 0,
               position: "bottom",
-              value: "Lines of Code",
+              value: t("lines_of_code"),
             }}
             name="Lines"
             stroke="var(--muted-foreground)"
@@ -71,7 +74,7 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
               fill: "var(--muted-foreground)",
               fontSize: 10,
               position: "insideLeft",
-              value: "Complexity",
+              value: t("complexity_label"),
             }}
             name="Complexity"
             stroke="var(--muted-foreground)"
@@ -94,13 +97,16 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
                     <p className="font-mono text-[10px] text-blue-400">{data.name}</p>
                     <div className="mt-1 flex flex-col gap-1">
                       <p className="text-foreground text-xs">
-                        Complexity: <span className="font-bold">{data.y}</span>
+                        {`${t("tooltip_complexity")}: `}
+                        <span className="font-bold">{data.y}</span>
                       </p>
                       <p className="text-foreground text-xs">
-                        Lines: <span className="font-bold">{data.x}</span>
+                        {`${t("tooltip_lines")}: `}
+                        <span className="font-bold">{data.x}</span>
                       </p>
                       <p className="text-orange-500 text-xs">
-                        Risk Score: <span className="font-bold">{data.z}</span>
+                        {`${t("tooltip_risk_score")}: `}
+                        <span className="font-bold">{data.z}</span>
                       </p>
                     </div>
                   </div>
@@ -112,13 +118,13 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
           />
 
           <ReferenceLine
-            label={{ fill: "#ef4444", fontSize: 10, value: "High Complexity" }}
+            label={{ fill: "#ef4444", fontSize: 10, value: t("high_complexity") }}
             stroke="#ef4444"
             strokeDasharray="3 3"
             y={15}
           />
           <ReferenceLine
-            label={{ fill: "#f59e0b", fontSize: 10, value: "Large File" }}
+            label={{ fill: "#f59e0b", fontSize: 10, value: t("large_file") }}
             stroke="#f59e0b"
             strokeDasharray="3 3"
             x={300}
@@ -126,7 +132,7 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
 
           <Scatter
             data={chartData}
-            name="Files"
+            name={t("chart_files")}
           >
             {chartData.map((entry, index) => (
               <Cell

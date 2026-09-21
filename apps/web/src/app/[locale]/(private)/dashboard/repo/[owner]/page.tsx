@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
+import { createRepoMetadata } from "@/shared/lib/metadata";
 import type { RepoPageProps } from "@/shared/lib/next.types";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppSearch } from "@/shared/ui/kit/app-search";
@@ -12,13 +12,7 @@ import { RepoListContainer } from "@/features/repo/ui/repo-list-container";
 
 import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 
-export async function generateMetadata({ params }: RepoPageProps): Promise<Metadata> {
-  const { owner } = await params;
-  return {
-    description: `Repository overview for ${owner}`,
-    title: owner,
-  };
-}
+export const generateMetadata = createRepoMetadata("owner");
 
 export default async function OwnerPage({ params }: Readonly<RepoPageProps>) {
   const t = await getTranslations("Dashboard");

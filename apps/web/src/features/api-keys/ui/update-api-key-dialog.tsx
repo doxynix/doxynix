@@ -72,7 +72,7 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
       <AppTooltip content={tCommon("edit")}>
         <DialogTrigger asChild>
           <AppButton
-            aria-label="Update key"
+            aria-label={t("settings_api_keys_update_aria")}
             className="text-muted-foreground not-md:opacity-100 opacity-0 transition-opacity group-hover:opacity-100"
             size="icon"
             variant="ghost"
@@ -92,7 +92,7 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
               <DialogTitle>{t("settings_api_keys_edit_title")}</DialogTitle>
               <DialogDescription>
                 {t("settings_api_keys_update_key_desc")}{" "}
-                <span className="font-bold text-foreground">{apiKey.prefix}...</span>
+                <span className="font-bold text-foreground">{`${apiKey.prefix}...`}</span>
               </DialogDescription>
             </DialogHeader>
 
@@ -106,7 +106,7 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
                 className="cursor-pointer"
                 disabled={!form.formState.isDirty || !form.formState.isValid || update.isPending}
                 isLoading={update.isPending}
-                loadingText="Saving..."
+                loadingText={tCommon("saving")}
                 type="submit"
               >
                 {tCommon("update")}

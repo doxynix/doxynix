@@ -1,4 +1,5 @@
 import { CircleOff } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/shared/ui/core/table";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
@@ -11,12 +12,14 @@ type Props = {
 };
 
 export function AuditLogList({ logs }: Readonly<Props>) {
+  const t = useTranslations("AuditLogs");
+
   if (logs.length === 0) {
     return (
       <EmptyState
-        description={"Start using Doxynix to see your activity"}
+        description={t("empty_desc")}
         icon={CircleOff}
-        title={"No activity records found"}
+        title={t("empty_title")}
       />
     );
   }
@@ -25,11 +28,11 @@ export function AuditLogList({ logs }: Readonly<Props>) {
     <Table>
       <TableHeader>
         <TableRow className="hover:bg-transparent">
-          <TableHead>Event</TableHead>
-          <TableHead>Entity</TableHead>
-          <TableHead>Target</TableHead>
-          <TableHead>Source</TableHead>
-          <TableHead className="text-right">Time</TableHead>
+          <TableHead>{t("col_event")}</TableHead>
+          <TableHead>{t("col_entity")}</TableHead>
+          <TableHead>{t("col_target")}</TableHead>
+          <TableHead>{t("col_source")}</TableHead>
+          <TableHead className="text-right">{t("col_time")}</TableHead>
           <TableHead />
         </TableRow>
       </TableHeader>

@@ -1,21 +1,18 @@
-import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+
+import { createMetadata } from "@/shared/lib/metadata";
 
 import { SessionsList } from "@/features/sessions/ui/sessions-list";
 
-export const metadata: Metadata = {
-  description: "View and manage your active security sessions and logged-in devices.",
-  title: "Active Sessions",
-};
+export const generateMetadata = createMetadata("sessions_title", "sessions_desc");
 
-export default function SessionsSettingsPage() {
+export default async function SessionsSettingsPage() {
+  const t = await getTranslations("Sessions");
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <h1 className="font-bold text-2xl tracking-tight">Active Sessions</h1>
-        <p className="text-muted-foreground text-sm">
-          Here is a list of devices that have logged into your account. Revoke any unfamiliar
-          sessions.
-        </p>
+        <h1 className="font-bold text-2xl tracking-tight">{t("page_title")}</h1>
+        <p className="text-muted-foreground text-sm">{t("page_desc")}</p>
       </div>
 
       <SessionsList />
