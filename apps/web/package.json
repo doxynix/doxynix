@@ -3,6 +3,7 @@
   "version": "3.1.10",
   "private": true,
   "license": "AGPL-3.0-only",
+  "type": "module",
   "exports": {
     "./trpc": {
       "types": "./src/server/modules/index.ts"
@@ -36,6 +37,8 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "lint:fsd": "steiger ./src",
+    "lint:i18n": "eloqnt lint",
+    "lint:locales": "bun run scripts/check-locales.ts",
     "start": "bun with-doppler \"next start\"",
     "test": "bun with-doppler \"cross-env TZ=UTC vitest run --config vitest.config.ts --no-file-parallelism\"",
     "test:coverage": "bun with-doppler \"cross-env TZ=UTC vitest run --coverage --config vitest.config.ts --no-file-parallelism\"",
@@ -45,7 +48,7 @@
     "test:unit": "bun with-doppler \"cross-env TZ=UTC vitest run src --config vitest.config.ts\"",
     "type-check": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" tsc -b",
     "type-check:coverage": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" type-coverage --detail",
-    "validate": "biome check . && oxlint && bun run lint:fsd && bun run arch:check",
+    "validate": "biome check . && oxlint && bun run lint:fsd && bun run lint:i18n && bun run lint:locales && bun run arch:check && bun type-check",
     "with-doppler": "bun ../../scripts/doppler.ts"
   },
   "dependencies": {
@@ -109,7 +112,10 @@
     "@secretlint/core": "13.0.5",
     "@secretlint/secretlint-rule-preset-canary": "13.0.5",
     "@sentry/nextjs": "10.73.0",
+    "@shikijs/langs": "4.4.3",
     "@shikijs/rehype": "4.4.3",
+    "@shikijs/themes": "4.4.3",
+    "@shikijs/transformers": "4.4.3",
     "@t3-oss/env-nextjs": "0.13.11",
     "@tanstack/react-query": "catalog:",
     "@to-skills/typedoc": "1.0.9",
@@ -157,7 +163,6 @@
     "leasot": "14.4.0",
     "linguist-languages": "9.5.0",
     "lucide-react": "1.43.0",
-    "marked": "18.0.12",
     "mcp-handler": "1.1.0",
     "mermaid": "12.0.0",
     "modern-screenshot": "4.7.0",
@@ -196,6 +201,7 @@
     "remark-breaks": "4.0.0",
     "remark-emoji": "5.0.2",
     "remark-gfm": "4.0.1",
+    "remark-github-blockquote-alert": "2.1.0",
     "remark-math": "6.0.0",
     "remark-parse": "11.0.0",
     "remark-rehype": "11.1.2",
@@ -226,6 +232,7 @@
     "@bundle-stats/plugin-webpack-filter": "4.22.3",
     "@changesets/cli": "2.31.1",
     "@doxynix/config": "workspace:*",
+    "@eloqnt/cli": "0.6.30",
     "@faker-js/faker": "10.6.0",
     "@feature-sliced/steiger-plugin": "0.7.0",
     "@hey-api/openapi-ts": "0.99.0",
@@ -237,7 +244,6 @@
     "@prisma/generator-helper": "7.10.0",
     "@secretlint/secretlint-rule-pattern": "13.0.5",
     "@secretlint/secretlint-rule-preset-recommend": "13.0.5",
-    "@shikijs/transformers": "4.4.3",
     "@stryker-mutator/core": "10.0.0",
     "@stryker-mutator/jest-runner": "10.0.0",
     "@stryker-mutator/typescript-checker": "10.0.0",
