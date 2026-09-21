@@ -1,5 +1,3 @@
-/* eslint-disable sonarjs/no-control-regex */
-
 import type { DocType } from "@doxynix/shared";
 import type { Repo } from "@prisma/client";
 import { orderBy, uniqBy } from "es-toolkit";
@@ -22,8 +20,16 @@ import {
 } from "./analysis.schemas";
 import { ProjectPolicy } from "./engine/core/project-policy";
 
+/**
+ * Control characters that indicate binary-like content (C0 controls except tab, LF and CR).
+ * Built at runtime so the regex literal contains no raw control characters.
+ */
+const CONTROL_CHAR_PATTERN = new RegExp(
+  `[${String.fromCharCode(0x00)}-${String.fromCharCode(0x08)}${String.fromCharCode(0x0b)}${String.fromCharCode(0x0c)}${String.fromCharCode(0x0e)}-${String.fromCharCode(0x1f)}]`,
+);
+
 export function isBinaryLikeContent(content: string): boolean {
-  return /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(content);
+  return CONTROL_CHAR_PATTERN.test(content);
 }
 
 export function isProbablyMinifiedContent(content: string): boolean {

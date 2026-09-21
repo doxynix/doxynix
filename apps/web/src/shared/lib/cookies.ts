@@ -18,7 +18,6 @@ export function setClientCookie(name: string, value: boolean | string, maxAge: n
 
   const secure = window.location.protocol === "https:" ? "Secure;" : "";
 
-  // eslint-disable-next-line unicorn/no-document-cookie
   document.cookie = `${name}=${encodeURIComponent(String(value))}; max-age=${maxAge}; path=/; SameSite=Lax; ${secure}`;
 }
 

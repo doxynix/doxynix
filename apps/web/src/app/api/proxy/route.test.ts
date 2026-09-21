@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/no-hardcoded-ip */
 import dns from "node:dns";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";

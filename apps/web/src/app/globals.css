@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "remark-github-blockquote-alert/alert.css";
 @plugin "tailwind-scrollbar";
 @plugin "@tailwindcss/typography";
 
@@ -674,4 +675,13 @@
 ::view-transition-new(root) {
   mix-blend-mode: normal;
   animation: none;
+}
+
+/* GitHub-style markdown alerts inside prose (server-rendered docs/PR views) */
+.prose .markdown-alert {
+  margin-bottom: 1rem;
+}
+
+.prose .markdown-alert .markdown-alert-title {
+  margin-bottom: 0.25rem;
 }

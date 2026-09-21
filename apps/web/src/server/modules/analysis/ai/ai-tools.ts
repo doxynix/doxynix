@@ -307,12 +307,13 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
     // TODO: extract to a shared utility
     triggerRepositoryAnalysis: tool({
       description: "Queue and start a complete static code analysis run for a repository.",
-      execute: async ({ branch, repoId: inputRepoId }) => {
+      execute: async ({ branch: inputBranch, repoId: inputRepoId }) => {
         const trpc = await apiForUser(userId);
         const targetRepoId = inputRepoId ?? repoId;
+        const targetBranch = inputBranch ?? branch;
 
         return trpc.analysis.analyze({
-          branch,
+          branch: targetBranch,
           docTypes: ["README", "API", "ARCHITECTURE", "CONTRIBUTING", "CHANGELOG"],
           files: ["**/*"],
           language: "English",

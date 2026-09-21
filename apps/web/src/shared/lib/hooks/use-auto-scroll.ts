@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  type DependencyList,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { type DependencyList, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 export function useAutoScroll<T extends HTMLElement>(
   deps: DependencyList,
@@ -27,31 +20,28 @@ export function useAutoScroll<T extends HTMLElement>(
 
   const throttleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const getContainer = useCallback((): HTMLElement | null => {
+  const getContainer = (): HTMLElement | null => {
     const root = scrollRef.current;
     if (root == null) {
       return null;
     }
     return root.querySelector(selector);
-  }, [selector]);
+  };
 
-  const scrollToBottom = useCallback(
-    (behavior: ScrollBehavior = "smooth") => {
-      const container = getContainer();
-      if (container == null) {
-        return;
-      }
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    const container = getContainer();
+    if (container == null) {
+      return;
+    }
 
-      container.scrollTo({
-        behavior,
-        top: container.scrollHeight,
-      });
-      setIsAutoScroll(true);
-    },
-    [getContainer],
-  );
+    container.scrollTo({
+      behavior,
+      top: container.scrollHeight,
+    });
+    setIsAutoScroll(true);
+  };
 
-  const handleScrollThrottled = useCallback(() => {
+  const handleScrollThrottled = () => {
     if (throttleTimeoutRef.current) {
       return;
     }
@@ -71,7 +61,7 @@ export function useAutoScroll<T extends HTMLElement>(
       setIsAutoScroll(isAtBottom);
       setShowScrollButton(!isAtBottom);
     }, throttleMs);
-  }, [getContainer, throttleMs]);
+  };
 
   useEffect(() => {
     const container = getContainer();
@@ -86,6 +76,9 @@ export function useAutoScroll<T extends HTMLElement>(
         clearTimeout(throttleTimeoutRef.current);
       }
     };
+    // React Compiler memoizes these plain functions, so they are referentially stable at
+    // runtime; the compiler-blind exhaustive-deps rule flags them as recreated each render.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [handleScrollThrottled, getContainer]);
 
   useEffect(() => {
@@ -113,7 +106,10 @@ export function useAutoScroll<T extends HTMLElement>(
     }
 
     return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // The auto-scroll effect intentionally re-subscribes on dynamic caller deps (e.g. new chat
+    // messages or filtered logs); the deps list cannot be statically verified, so `...deps`
+    // (the re-run trigger) is an accepted exception to exhaustive-deps.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [getContainer, ...deps]);
 
   return {

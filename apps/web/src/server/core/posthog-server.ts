@@ -5,12 +5,10 @@ import { NEXT_PUBLIC_POSTHOG_HOST, NEXT_PUBLIC_POSTHOG_KEY } from "@/shared/conf
 let posthogClient: null | PostHog = null;
 
 export function getPostHogClient(): PostHog {
-  if (posthogClient == null) {
-    posthogClient = new PostHog(NEXT_PUBLIC_POSTHOG_KEY, {
-      flushAt: 1,
-      flushInterval: 0,
-      host: NEXT_PUBLIC_POSTHOG_HOST,
-    });
-  }
+  posthogClient ??= new PostHog(NEXT_PUBLIC_POSTHOG_KEY, {
+    flushAt: 1,
+    flushInterval: 0,
+    host: NEXT_PUBLIC_POSTHOG_HOST,
+  });
   return posthogClient;
 }

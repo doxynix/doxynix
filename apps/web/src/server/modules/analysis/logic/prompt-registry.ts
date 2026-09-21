@@ -217,9 +217,7 @@ let globalRegistry: null | PromptRegistry = null;
  * Get or create global prompt registry
  */
 export function getGlobalPromptRegistry(): PromptRegistry {
-  if (!globalRegistry) {
-    globalRegistry = new PromptRegistry();
-  }
+  globalRegistry ??= new PromptRegistry();
   return globalRegistry;
 }
 

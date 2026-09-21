@@ -13,6 +13,7 @@ import {
   magicLink,
   twoFactor,
 } from "better-auth/plugins";
+import { createTranslator } from "next-intl";
 import { Resend } from "resend";
 
 import { IS_PROD } from "@/shared/config/env.flags";
@@ -23,6 +24,7 @@ import {
   RESEND_API_KEY,
   TURNSTILE_SECRET_KEY,
 } from "@/shared/config/env.server";
+import { DEFAULT_LOCALE } from "@/shared/config/locales";
 
 import { AuthEmail } from "@/server/core/auth-email";
 
@@ -378,7 +380,19 @@ export const auth = betterAuth({
             where: { emailHash: getNormalizedHash(cleanEmail) },
           });
 
-          const html = await render(createElement(AuthEmail, { host, url }));
+          // No Next.js request scope here (better-auth plugin callback), so the
+          // translator is built explicitly with a static locale and messages.
+          // Non-literal specifier (as in src/shared/i18n/request.ts) keeps tsc in
+          // node contexts (the CLI compiles web sources via `@/server/*`) from
+          // statically resolving the JSON module.
+          const authLocale: string = DEFAULT_LOCALE;
+          const { default: authMessages } = await import(`../../../messages/${authLocale}.json`);
+          const t = createTranslator({
+            locale: authLocale,
+            messages: authMessages,
+            namespace: "Auth",
+          });
+          const html = await render(createElement(AuthEmail, { host, t, url }));
 
           await resend.emails.send({
             from: "Doxynix Auth <auth@doxynix.space>",

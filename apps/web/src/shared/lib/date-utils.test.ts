@@ -9,8 +9,13 @@ const RELATIVE_YESTERDAY: Record<Locale, string> = {
   en: "yesterday",
   es: "ayer",
   fr: "hier",
+  it: "ieri",
+  ja: "昨日",
+  ko: "어제",
+  pl: "wczoraj",
   "pt-BR": "ontem",
   ru: "вчера",
+  tr: "dün",
   "zh-CN": "昨天",
 };
 
@@ -19,8 +24,13 @@ const RELATIVE_LAST_MONTH: Record<Locale, string> = {
   en: "last month",
   es: "el mes pasado",
   fr: "le mois dernier",
+  it: "mese scorso",
+  ja: "先月",
+  ko: "지난달",
+  pl: "w zeszłym miesiącu",
   "pt-BR": "mês passado",
   ru: "в прошлом месяце",
+  tr: "geçen ay",
   "zh-CN": "上个月",
 };
 
@@ -31,8 +41,13 @@ const FULL_DATE_PART: Record<Locale, string> = {
   en: "January 2, 2026",
   es: "2 de enero de 2026",
   fr: "2 janvier 2026",
+  it: "2 gennaio 2026",
+  ja: "2026年1月2日",
+  ko: "2026년 1월 2일",
+  pl: "2 stycznia 2026",
   "pt-BR": "2 de janeiro de 2026",
   ru: "2 января 2026",
+  tr: "2 Ocak 2026",
   "zh-CN": "2026年1月2日",
 };
 

@@ -437,7 +437,6 @@ main()
     await prisma.$disconnect();
     console.log("Seeding completed. Database is now full of life.");
   })
-  // eslint-disable-next-line unicorn/prefer-top-level-await
   .catch(async (error) => {
     console.error("Seeding failed:", error);
     await prisma.$disconnect();

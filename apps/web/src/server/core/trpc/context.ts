@@ -14,13 +14,11 @@ type Props = {
 export async function createContext({ req }: Props) {
   let store = requestContext.getStore();
 
-  if (store == null) {
-    store = buildRequestStore({
-      method: req.method,
-      path: req.nextUrl.pathname,
-      req,
-    });
-  }
+  store ??= buildRequestStore({
+    method: req.method,
+    path: req.nextUrl.pathname,
+    req,
+  });
 
   let sessionContext: NonNullable<typeof auth.$Infer.Session> | null = null;
 
@@ -51,11 +49,9 @@ export async function createContext({ req }: Props) {
     }
   }
 
-  if (sessionContext == null) {
-    sessionContext = await auth.api.getSession({
-      headers: req.headers,
-    });
-  }
+  sessionContext ??= await auth.api.getSession({
+    headers: req.headers,
+  });
 
   if (sessionContext?.user != null) {
     store.userId = Number(sessionContext.user.id);

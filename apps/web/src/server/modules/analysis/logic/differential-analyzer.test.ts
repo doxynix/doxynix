@@ -242,7 +242,6 @@ ${"+a\n".repeat(301)}`;
     vi.mocked(callWithFallback).mockResolvedValue({
       findings: [
         {
-          // secretlint-disable-next-line
           codeSnippet: 'const stripe = "sk_live_aaaaaaaaaaaaaaaaaaaaaaaa";',
           file: "src/auth.ts",
           line: 11,

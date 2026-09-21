@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/no-hardcoded-ip */
 import type { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
