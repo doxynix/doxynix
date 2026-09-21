@@ -2,7 +2,7 @@
 
 import type { ComponentType } from "react";
 import { Book, ChartNoAxesColumn } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { useRouter } from "@/shared/i18n/navigation";
 import type { User } from "@/shared/lib/auth-client";
@@ -17,27 +17,28 @@ type Props = {
 
 type FeatureCard = { desc: string; icon: ComponentType<{ className?: string }>; title: string };
 
-const FEATURE_CARDS = [
-  {
-    desc: "Generate comprehensive documentation for your repositories in seconds.",
-    icon: Book,
-    title: "Auto-Documentation",
-  },
-  {
-    desc: "Visualize codebase health, complexity, and contribution patterns.",
-    icon: ChartNoAxesColumn,
-    title: "Code Metrics",
-  },
-  {
-    desc: "Connect directly with your GitHub repositories for real-time updates.",
-    icon: GitHubIcon,
-    title: "Seamless Integration",
-  },
-] as const satisfies readonly FeatureCard[];
-
 export function WelcomeFlow({ user }: Readonly<Props>) {
+  const t = useTranslations("Welcome");
   const router = useRouter();
   const locale = useLocale();
+
+  const FEATURE_CARDS = [
+    {
+      desc: t("feature_autodocs_desc"),
+      icon: Book,
+      title: t("feature_autodocs_title"),
+    },
+    {
+      desc: t("feature_metrics_desc"),
+      icon: ChartNoAxesColumn,
+      title: t("feature_metrics_title"),
+    },
+    {
+      desc: t("feature_integration_desc"),
+      icon: GitHubIcon,
+      title: t("feature_integration_title"),
+    },
+  ] as const satisfies readonly FeatureCard[];
 
   const handleSuccess = () => {
     router.push("/dashboard", { locale });
@@ -48,18 +49,14 @@ export function WelcomeFlow({ user }: Readonly<Props>) {
       <div className="fade-in zoom-in-95 w-full max-w-md animate-in duration-300 ease-out">
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="font-bold text-2xl tracking-tight">
-              What should we call you?
-            </CardTitle>
-            <CardDescription className="text-sm">
-              Please enter your name so we can personalize your experience.
-            </CardDescription>
+            <CardTitle className="font-bold text-2xl tracking-tight">{t("form_title")}</CardTitle>
+            <CardDescription className="text-sm">{t("form_desc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <ProfileDetailsForm
-              buttonText="Continue to Dashboard"
+              buttonText={t("form_button")}
               isWelcome
-              loadingText="Setting up your workspace..."
+              loadingText={t("form_loading")}
               onSuccess={handleSuccess}
               user={user}
             />

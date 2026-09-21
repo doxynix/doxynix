@@ -2,7 +2,7 @@
 
 import { type ComponentType, useState } from "react";
 import { Clock, Download, Eye, Globe, Hash, Shield } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
@@ -31,6 +31,7 @@ type Props = {
 export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
   const [open, setOpen] = useState(false);
   const locale = useLocale();
+  const t = useTranslations("Dashboard");
 
   const formattedJson = JSON.stringify(log.rawPayload, null, 2);
 
@@ -51,7 +52,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
       onOpenChange={setOpen}
       open={open}
     >
-      <AppTooltip content="View Raw">
+      <AppTooltip content={t("view_raw")}>
         <SheetTrigger asChild>
           <AppButton
             className="opacity-0 transition-opacity group-hover:opacity-100"
@@ -68,7 +69,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
             <div className="flex items-center justify-between">
               <div className="flex flex-col gap-1">
                 <SheetTitle className="font-semibold text-xl tracking-tight">
-                  Event Details
+                  {t("event_details")}
                 </SheetTitle>
                 <SheetDescription className="text-muted-foreground text-xs">
                   {log.entityType} • {log.actionTitle}
@@ -77,7 +78,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
               <div className="flex items-center gap-2">
                 <CopyButton
                   className="flex opacity-100"
-                  tooltipText="Copy JSON"
+                  tooltipText={t("copy_json")}
                   value={formattedJson}
                 />
                 <AppButton
@@ -87,7 +88,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
                   variant="outline"
                 >
                   <Download />
-                  Export JSON
+                  {t("export_json")}
                 </AppButton>
               </div>
             </div>
@@ -98,25 +99,25 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
                 copyValue={log.requestId ?? ""}
                 icon={Hash}
                 isCopy
-                label="Request ID"
+                label={t("request_id")}
                 value={log.requestId ?? "N/A"}
               />
               <MetaItem
                 className="p-4"
                 icon={Globe}
-                label="IP Address"
+                label={t("ip_address")}
                 value={log.ip ?? "system"}
               />
               <MetaItem
                 className="p-4"
                 icon={Shield}
-                label="User Agent"
+                label={t("user_agent")}
                 value={log.browser}
               />
               <MetaItem
                 className="p-4"
                 icon={Clock}
-                label="Timestamp"
+                label={t("timestamp")}
                 value={formatFullDate(log.createdAt, locale)}
               />
             </div>

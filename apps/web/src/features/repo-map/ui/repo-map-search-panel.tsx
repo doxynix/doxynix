@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { type Node, useNodes, useReactFlow } from "@xyflow/react";
+import { useTranslations } from "next-intl";
 import { parseAsString, useQueryStates } from "nuqs";
 
 import { AppSearch } from "@/shared/ui/kit/app-search";
@@ -8,6 +9,7 @@ import { computeShouldDim, matchRepoMapNodes } from "../model/match-repo-map-nod
 import type { RepoMapNodeData } from "../model/repo-map.types";
 
 export function RepoMapSearchPanel() {
+  const t = useTranslations("Dashboard");
   const { fitView, setNodes } = useReactFlow();
   const [params] = useQueryStates({ search: parseAsString.withDefault("") });
   const nodes = useNodes<Node<RepoMapNodeData>>();
@@ -65,7 +67,7 @@ export function RepoMapSearchPanel() {
 
   return (
     <div className="relative z-50 flex items-center">
-      <AppSearch placeholder="Find..." />
+      <AppSearch placeholder={t("repo_map_search_placeholder")} />
     </div>
   );
 }

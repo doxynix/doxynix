@@ -44,7 +44,7 @@ export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
       trigger={
         <AppTooltip content={t("settings_api_keys_revoke_key")}>
           <AppButton
-            aria-label="Revoke key"
+            aria-label={t("settings_api_keys_revoke_aria")}
             className="text-destructive not-md:opacity-100 opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
             onClick={(e) => {
               e.preventDefault();

@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 
 import { ImageResponse } from "next/og";
+import { getTranslations } from "next-intl/server";
 import { join } from "pathe";
 
 export const size = { height: 630, width: 1200 };
@@ -12,6 +13,7 @@ export default async function Image({
   params: Promise<{ name: string; owner: string }>;
 }) {
   const { name, owner } = await params;
+  const t = await getTranslations("Dashboard");
 
   const fontPath = join(process.cwd(), "src/app/fonts/Inter-Regular.ttf");
   const fontData = readFileSync(fontPath);
@@ -111,7 +113,7 @@ export default async function Image({
                 letterSpacing: "0.05em",
               }}
             >
-              REPO ANALYSIS
+              {t("repo_og_repo_analysis")}
             </div>
           </div>
 
@@ -124,7 +126,7 @@ export default async function Image({
               marginBottom: 4,
             }}
           >
-            {owner} /
+            {owner}/
           </div>
 
           <div
@@ -198,11 +200,11 @@ export default async function Image({
       >
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ color: "#a1a1aa", display: "flex", fontSize: 24, marginBottom: 8 }}>
-            Automated documentation &
+            {t("repo_og_auto_docs")}
           </div>
           <div style={{ alignItems: "center", display: "flex", gap: 10 }}>
             <span style={{ color: "#e4e4e7", display: "flex", fontSize: 24 }}>
-              Quality Metrics Report
+              {t("repo_og_quality_metrics")}
             </span>
           </div>
         </div>
@@ -237,10 +239,10 @@ export default async function Image({
                 textTransform: "uppercase",
               }}
             >
-              Overall Grade
+              {t("repo_og_overall_grade")}
             </span>
             <span style={{ color: "#b9b9b9", display: "flex", fontSize: 14, marginTop: 4 }}>
-              Doxynix Score
+              {t("repo_og_doxynix_score")}
             </span>
           </div>
 

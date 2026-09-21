@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Book, Check, ChevronDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
@@ -24,6 +25,8 @@ import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dial
 export function NotificationsRepoFilter() {
   const [filters, setFilters] = useQueryStates(notificationsParsers);
   const { setOpen: setOpenCreateDialog } = useCreateRepoActions();
+  const t = useTranslations("Notifications");
+  const tCommon = useTranslations("Common");
 
   const [open, setOpen] = useState(false);
 
@@ -48,7 +51,7 @@ export function NotificationsRepoFilter() {
   );
 
   const label =
-    selectedRepo != null ? `${selectedRepo.owner}/${selectedRepo.name}` : "All repositories";
+    selectedRepo != null ? `${selectedRepo.owner}/${selectedRepo.name}` : t("all_repos");
 
   return (
     <Popover
@@ -74,10 +77,10 @@ export function NotificationsRepoFilter() {
         className="p-0"
       >
         <Command>
-          <CommandInput placeholder="Search repository..." />
+          <CommandInput placeholder={t("search_repo_placeholder")} />
           <CommandList>
             <CommandEmpty>
-              {repos?.items.length === 0 || repos == null ? null : "No repository found"}
+              {repos?.items.length === 0 || repos == null ? null : t("no_repo_found")}
             </CommandEmpty>
             <CommandGroup>
               <CommandItem
@@ -87,7 +90,7 @@ export function NotificationsRepoFilter() {
                 <Check
                   className={cn("mr-1", filters.owner == null ? "opacity-100" : "opacity-0")}
                 />
-                All repositories
+                {t("all_repos")}
               </CommandItem>
               {isLoading && (
                 <div className="flex flex-col gap-2 p-2">
@@ -101,7 +104,7 @@ export function NotificationsRepoFilter() {
               )}
               {(repos?.items.length === 0 || repos == null) && !isLoading ? (
                 <div className="flex flex-col items-center gap-4 p-4 text-center text-sm">
-                  <p>Repositories not found</p>
+                  <p>{t("repos_not_found")}</p>
                   <AppButton
                     className="w-fit cursor-pointer"
                     onClick={() => {
@@ -110,7 +113,7 @@ export function NotificationsRepoFilter() {
                     }}
                     size="sm"
                   >
-                    Add
+                    {tCommon("add")}
                   </AppButton>
                 </div>
               ) : (

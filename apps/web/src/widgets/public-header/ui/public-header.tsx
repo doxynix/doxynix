@@ -3,6 +3,7 @@ import { Menu } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { publicHeaderMenu } from "@/shared/config/navigation";
+import type { PublicNavLabelKey } from "@/shared/config/navigation.types";
 import { Link } from "@/shared/i18n/navigation";
 import { Logo } from "@/shared/ui/branding/doxynix-logo";
 import { AppButton } from "@/shared/ui/core/button";
@@ -20,6 +21,13 @@ import { PublicHeaderCtaSlot } from "./public-header-cta-slot";
 
 export async function PublicHeader() {
   const t = await getTranslations("Common");
+
+  const publicNavLabels: Record<PublicNavLabelKey, string> = {
+    about: t("nav_about"),
+    help: t("nav_help"),
+    high_five: t("nav_high_five"),
+    home: t("nav_home"),
+  };
 
   return (
     <header className="w-full">
@@ -40,14 +48,16 @@ export async function PublicHeader() {
                 href={item.href as Route}
               >
                 {item.icon != null && <item.icon />}
-                {item.label}
+                {publicNavLabels[item.labelKey]}
               </Link>
             </AppButton>
           ))}
         </nav>
         <div className="flex items-center gap-4">
-          <AppTooltip content="Work in Progress">
-            <span className="rounded bg-warning/20 p-1 py-0.5 text-warning text-xs">BETA</span>
+          <AppTooltip content={t("work_in_progress")}>
+            <span className="rounded bg-warning/20 p-1 py-0.5 text-warning text-xs">
+              {t("beta")}
+            </span>
           </AppTooltip>
           <PublicHeaderCtaSlot />
           <div className="flex items-center gap-2 md:hidden">
@@ -86,7 +96,7 @@ export async function PublicHeader() {
                             href={item.href as Route}
                           >
                             {item.icon != null && <item.icon />}
-                            {item.label}
+                            {publicNavLabels[item.labelKey]}
                           </Link>
                         </AppButton>
                       </SheetClose>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { LogOut, Monitor, RefreshCw, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
@@ -17,6 +18,7 @@ import { ConnectionCard } from "@/entities/connection/ui/connection-card";
 export function SessionsList() {
   const { data: currentSessionContext } = authClient.useSession();
   const currentSessionId = currentSessionContext?.session.id;
+  const t = useTranslations("Sessions");
 
   const [revokingSessionToken, setRevokingSessionToken] = useState<null | string>(null);
 
@@ -33,7 +35,7 @@ export function SessionsList() {
     },
     onError: (err) => toast.error(err.message),
     onSuccess: () => {
-      toast.success("Device session revoked successfully");
+      toast.success(t("device_session_revoked"));
       setRevokingSessionToken(null);
       void utils.user.getActiveSessions.invalidate();
     },
@@ -48,7 +50,7 @@ export function SessionsList() {
     },
     onError: (err) => toast.error(err.message),
     onSuccess: () => {
-      toast.success("Logged out from all other devices");
+      toast.success(t("logged_out_all_devices"));
       void utils.user.getActiveSessions.invalidate();
     },
   });
@@ -65,12 +67,12 @@ export function SessionsList() {
             className="gap-2"
             disabled={revokeOtherSessions.isPending}
             isLoading={revokeOtherSessions.isPending}
-            loadingText="Revoking..."
+            loadingText={t("revoking")}
             onClick={() => revokeOtherSessions.mutate()}
             size="sm"
             variant="destructive"
           >
-            <LogOut size={16} /> Sign out of all other devices
+            <LogOut size={16} /> {t("sign_out_all_devices")}
           </LoadingButton>
         </div>
       )}
@@ -78,7 +80,7 @@ export function SessionsList() {
       {isLoading ? (
         <div className="py-8 text-center text-muted-foreground text-xs">
           <RefreshCw className="mx-auto mb-2 animate-spin text-muted-foreground" />
-          Loading active sessions...
+          {t("loading_sessions")}
         </div>
       ) : (
         <div className="grid gap-3">
@@ -94,32 +96,33 @@ export function SessionsList() {
                       disabled
                       size="sm"
                     >
-                      Current
+                      {t("current")}
                     </AppButton>
                   ) : (
                     <DangerActionDialog
-                      confirmLabel="Revoke"
-                      description={`Are you sure you want to end session on "${session.userAgent}"?`}
-                      destructiveAlertContent={
-                        <p>The user on this device will be immediately signed out of Doxynix.</p>
-                      }
+                      confirmLabel={t("revoke")}
+                      description={t("revoke_description", { userAgent: session.userAgent })}
+                      destructiveAlertContent={<p>{t("revoke_alert_content")}</p>}
                       isLoading={revokeSession.isPending}
                       onConfirm={() => revokeSession.mutate(session.token)}
                       onOpenChange={(open) => setRevokingSessionToken(open ? session.token : null)}
                       open={revokingSessionToken === session.token}
-                      title="Revoke Device Session"
+                      title={t("revoke_device_session")}
                       trigger={
                         <AppButton
                           size="sm"
                           variant="destructive"
                         >
-                          <Trash2 className="size-4" />
+                          <Trash2 />
                         </AppButton>
                       }
                     />
                   )
                 }
-                description={`IP: ${session.ipAddress ?? "Unknown"} • Created on ${dateStr}`}
+                description={t("ip_created", {
+                  date: dateStr,
+                  ip: session.ipAddress ?? t("unknown"),
+                })}
                 icon={
                   <Monitor
                     className={
@@ -128,7 +131,7 @@ export function SessionsList() {
                   />
                 }
                 key={session.id}
-                status={isCurrentDevice ? "This Device" : undefined}
+                status={isCurrentDevice ? t("this_device") : undefined}
                 title={session.userAgent}
               />
             );

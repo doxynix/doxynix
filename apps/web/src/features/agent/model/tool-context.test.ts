@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getDynamicToolContext, getToolBaseLabel } from "./tool-context";
+import { getDynamicToolContext, getToolBaseLabel, prettifyToolName } from "./tool-context";
 
 describe("getToolBaseLabel", () => {
   it("uses the provided label for known tools", () => {
@@ -8,12 +8,19 @@ describe("getToolBaseLabel", () => {
     expect(getToolBaseLabel("getFileContent", labels)).toBe("Read File");
   });
 
-  it("derives a spaced label for unknown tools", () => {
-    expect(getToolBaseLabel("openPullRequest", {})).toBe("Executing open Pull Request");
+  it("returns null for unknown tools so callers can localize the fallback", () => {
+    expect(getToolBaseLabel("openPullRequest", {})).toBeNull();
+    expect(getToolBaseLabel("finish", {})).toBeNull();
+  });
+});
+
+describe("prettifyToolName", () => {
+  it("splits camelCase tool names into spaced words", () => {
+    expect(prettifyToolName("openPullRequest")).toBe("open Pull Request");
   });
 
   it("leaves single-word tool names untouched", () => {
-    expect(getToolBaseLabel("finish", {})).toBe("Executing finish");
+    expect(prettifyToolName("finish")).toBe("finish");
   });
 });
 

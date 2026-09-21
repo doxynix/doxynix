@@ -9,6 +9,7 @@ import {
 import type { DialogProps } from "@radix-ui/react-dialog";
 import { Command as CommandPrimitive } from "cmdk";
 import { Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/shared/ui/core/dialog";
@@ -34,11 +35,13 @@ interface CommandDialogProps extends DialogProps {
 }
 
 const CommandDialog = ({ children, shouldFilter, ...props }: CommandDialogProps) => {
+  const t = useTranslations("Common");
+
   return (
     <Dialog {...props}>
       <DialogContent className="overflow-hidden p-0">
-        <DialogTitle className="sr-only">Command Menu</DialogTitle>
-        <DialogDescription className="sr-only">Search commands and navigate</DialogDescription>
+        <DialogTitle className="sr-only">{t("command_menu_title")}</DialogTitle>
+        <DialogDescription className="sr-only">{t("command_menu_desc")}</DialogDescription>
         <Command
           className="[&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground **:[[cmdk-group]]:px-2 **:[[cmdk-input]]:h-12 **:[[cmdk-item]]:px-2 **:[[cmdk-item]]:py-3"
           shouldFilter={shouldFilter}

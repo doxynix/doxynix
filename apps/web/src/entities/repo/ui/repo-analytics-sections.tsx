@@ -12,6 +12,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
@@ -29,18 +30,20 @@ export function SnapshotsSection({
   onboarding: NonNullable<RepoMetricsItem>["onboarding"];
   quality: NonNullable<RepoMetricsItem>["quality"];
 }>) {
+  const t = useTranslations("Dashboard");
+
   const qualityStats = [
-    { label: "Health", value: quality.health },
-    { label: "Complexity", value: quality.complexity },
-    { label: "Modularity", value: quality.modularity },
-    { label: "Tech Debt", value: quality.techDebt },
+    { label: t("quality_health"), value: quality.health },
+    { label: t("quality_complexity"), value: quality.complexity },
+    { label: t("quality_modularity"), value: quality.modularity },
+    { label: t("quality_tech_debt"), value: quality.techDebt },
   ];
 
   const architectureStats = [
-    { label: "Entrypoints", value: architecture.entrypoints.length },
-    { label: "Cycles", value: architecture.dependencyCycles.length },
-    { label: "Orphans", value: architecture.orphanModules.length },
-    { label: "Operations", value: architecture.routeInventory?.estimatedOperations ?? 0 },
+    { label: t("arch_entrypoints"), value: architecture.entrypoints.length },
+    { label: t("arch_cycles"), value: architecture.dependencyCycles.length },
+    { label: t("arch_orphans"), value: architecture.orphanModules.length },
+    { label: t("arch_operations"), value: architecture.routeInventory?.estimatedOperations ?? 0 },
   ];
 
   return (
@@ -48,7 +51,7 @@ export function SnapshotsSection({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <GitBranch className="size-4" /> Quality Snapshot
+            <GitBranch /> {t("quality_snapshot")}
           </CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
@@ -64,7 +67,7 @@ export function SnapshotsSection({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Network className="size-4" /> Architecture Snapshot
+            <Network /> {t("architecture_snapshot")}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 text-sm">
@@ -83,16 +86,16 @@ export function SnapshotsSection({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Users className="size-4" /> Onboarding
+            <Users /> {t("onboarding")}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Score</span>
+            <span className="text-muted-foreground">{t("onboarding_score")}</span>
             <span className="font-medium">{onboarding.score}</span>
           </div>
           <div>
-            <p className="mb-2 text-muted-foreground text-xs uppercase">Setup Steps</p>
+            <p className="mb-2 text-muted-foreground text-xs uppercase">{t("setup_steps")}</p>
             <ul className="flex flex-col gap-2 text-xs">
               {onboarding.guide.setup_steps.map((step) => (
                 <li
@@ -116,6 +119,8 @@ export function DomainIntelligenceSection({
 }: Readonly<{
   domain: NonNullable<RepoMetricsItem>["domain"];
 }>) {
+  const t = useTranslations("Dashboard");
+
   if (domain.analysis == null) {
     return null;
   }
@@ -123,13 +128,13 @@ export function DomainIntelligenceSection({
   return (
     <section className="flex flex-col gap-4">
       <h3 className="flex items-center gap-2 font-bold text-lg tracking-tight">
-        <Fingerprint className="size-5 text-blue-400" /> Domain Intelligence
+        <Fingerprint className="size-5 text-blue-400" /> {t("domain_intelligence")}
       </h3>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader className="py-4">
-            <CardTitle className="font-semibold text-sm">Core Entities</CardTitle>
-            <CardDescription>Primary domain objects and their responsibilities</CardDescription>
+            <CardTitle className="font-semibold text-sm">{t("core_entities")}</CardTitle>
+            <CardDescription>{t("core_entities_desc")}</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {domain.analysis.core_entities.map((entity) => (
@@ -143,7 +148,7 @@ export function DomainIntelligenceSection({
                     className="h-4 text-[10px]"
                     variant="outline"
                   >
-                    {entity.logic_complexity} Complexity
+                    {entity.logic_complexity} {t("entity_complexity")}
                   </AppBadge>
                 </div>
                 <p className="text-[11px] text-muted-foreground leading-relaxed">
@@ -155,7 +160,7 @@ export function DomainIntelligenceSection({
         </Card>
         <Card>
           <CardHeader className="py-4">
-            <CardTitle className="font-semibold text-sm">Business Rules</CardTitle>
+            <CardTitle className="font-semibold text-sm">{t("business_rules")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="flex flex-col gap-3">
@@ -183,12 +188,14 @@ export function TechDebtAndComplexitySection({
   architecture: NonNullable<RepoMetricsItem>["architecture"];
   recommendations: NonNullable<RepoMetricsItem>["recommendations"];
 }>) {
+  const t = useTranslations("Dashboard");
+
   return (
     <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <Card className="lg:col-span-1">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <HistoryIcon className="size-4 text-zinc-400" /> Tech Debt Inventory
+            <HistoryIcon className="size-4 text-zinc-400" /> {t("tech_debt_inventory")}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
@@ -205,7 +212,7 @@ export function TechDebtAndComplexitySection({
                 className="h-4 text-[9px]"
                 variant="outline"
               >
-                {item.remediation_effort} Effort
+                {item.remediation_effort} {t("remediation_effort")}
               </AppBadge>
             </div>
           ))}
@@ -214,10 +221,10 @@ export function TechDebtAndComplexitySection({
 
       <Card className="lg:col-span-2">
         <CardHeader>
-          <CardTitle className="font-semibold text-sm">Complexity vs Size Analysis</CardTitle>
-          <CardDescription className="text-xs">
-            Correlation between file volume and cognitive load
-          </CardDescription>
+          <CardTitle className="font-semibold text-sm">
+            {t("complexity_vs_size_analysis")}
+          </CardTitle>
+          <CardDescription className="text-xs">{t("complexity_vs_size_desc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <ComplexityScatterChart data={architecture.hotspotSignals} />
@@ -236,17 +243,19 @@ export function RefactoringBacklogSection({
   recommendations: NonNullable<RepoMetricsItem>["recommendations"];
   runningFixId: null | string;
 }>) {
+  const t = useTranslations("Dashboard");
+
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-2 font-bold text-lg tracking-tight">
-          <LayoutTemplate className="size-5 text-emerald-400" /> Refactoring Backlog
+          <LayoutTemplate className="size-5 text-emerald-400" /> {t("refactoring_backlog")}
         </h3>
         <AppBadge
           className="border-emerald-400/30 text-emerald-400"
           variant="outline"
         >
-          {recommendations.refactoringTargets.length} Targets Identified
+          {t("targets_identified", { count: recommendations.refactoringTargets.length })}
         </AppBadge>
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -262,7 +271,7 @@ export function RefactoringBacklogSection({
               </div>
               <div className="flex items-center gap-2">
                 <AppBadge className="h-4 border-none bg-emerald-500/10 text-[9px] text-emerald-400">
-                  +{item.impact_on_health} Health
+                  {`+${item.impact_on_health} ${t("health")}`}
                 </AppBadge>
                 <AppBadge
                   className="h-4 text-[9px] uppercase"
@@ -282,7 +291,7 @@ export function RefactoringBacklogSection({
               {item.original_code != null && (
                 <div className="relative">
                   <div className="absolute top-2 right-2 font-bold text-[9px] text-destructive/50 uppercase">
-                    Legacy
+                    {t("legacy")}
                   </div>
                   <pre className="max-h-40 overflow-x-auto rounded border bg-zinc-950 p-3 font-mono text-[10px] text-zinc-500">
                     {item.original_code}
@@ -309,7 +318,7 @@ export function RefactoringBacklogSection({
                   ) : (
                     <Sparkles className="size-3.5" />
                   )}
-                  Auto Refactor
+                  {t("auto_refactor")}
                 </AppButton>
               </div>
             </CardContent>
@@ -329,12 +338,14 @@ export function PerformanceAndScalingSection({
   recommendations: NonNullable<RepoMetricsItem>["recommendations"];
   runningFixId: null | string;
 }>) {
+  const t = useTranslations("Dashboard");
+
   return (
     <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <Card className="border-orange-500/20 bg-orange-500/5 lg:col-span-2">
         <CardHeader className="py-4">
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Cpu className="size-4 text-orange-400" /> Performance Audit
+            <Cpu className="size-4 text-orange-400" /> {t("performance_audit")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -342,10 +353,10 @@ export function PerformanceAndScalingSection({
             <table className="w-full text-left text-xs">
               <thead className="bg-orange-500/10 font-bold text-orange-200 uppercase">
                 <tr>
-                  <th className="p-2">Issue</th>
-                  <th className="p-2">Location</th>
-                  <th className="p-2">Optimization Strategy</th>
-                  <th className="w-20 p-2 text-center">Action</th>
+                  <th className="p-2">{t("table_issue")}</th>
+                  <th className="p-2">{t("table_location")}</th>
+                  <th className="p-2">{t("table_optimization_strategy")}</th>
+                  <th className="w-20 p-2 text-center">{t("table_action")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-orange-500/10">
@@ -378,7 +389,7 @@ export function PerformanceAndScalingSection({
                         ) : (
                           <Sparkles className="size-3" />
                         )}
-                        Fix
+                        {t("fix")}
                       </AppButton>
                     </td>
                   </tr>
@@ -392,18 +403,20 @@ export function PerformanceAndScalingSection({
       <Card className="border-blue-500/20">
         <CardHeader className="py-4">
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Database className="size-4 text-blue-400" /> Scaling & State
+            <Database className="size-4 text-blue-400" /> {t("scaling_and_state")}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <p className="font-bold text-[10px] text-blue-400 uppercase">Statelessness</p>
+            <p className="font-bold text-[10px] text-blue-400 uppercase">{t("statelessness")}</p>
             <p className="text-xs text-zinc-300 leading-relaxed">
               {recommendations.infrastructure?.statelessness_check}
             </p>
           </div>
           <div className="flex flex-col gap-1">
-            <p className="font-bold text-[10px] text-blue-400 uppercase">Concurrency Risks</p>
+            <p className="font-bold text-[10px] text-blue-400 uppercase">
+              {t("concurrency_risks")}
+            </p>
             <div className="flex flex-wrap gap-1">
               {recommendations.infrastructure?.concurrency_risks.map((risk, i) => (
                 <AppBadge

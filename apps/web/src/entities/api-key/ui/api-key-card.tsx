@@ -51,7 +51,7 @@ export function ApiKeyCard({
       </CardHeader>
       <CardContent>
         <Input
-          aria-label="Key prefix"
+          aria-label={t("api_key_prefix")}
           className="truncate rounded-xl border border-border bg-surface-hover p-2 font-mono text-muted-foreground text-xs"
           readOnly
           value={maskValue}

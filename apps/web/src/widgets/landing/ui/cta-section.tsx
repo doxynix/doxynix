@@ -24,7 +24,7 @@ export async function CTASection() {
         </div>
       </BackgroundBeamsWithCollision>
       <ScrollButton
-        ariaLabel="Scroll to brands section"
+        ariaLabel={t("scroll_to_brands")}
         arrowClassName="-rotate-90"
         buttonClassName="animate-float absolute bottom-0"
         targetId="hero"

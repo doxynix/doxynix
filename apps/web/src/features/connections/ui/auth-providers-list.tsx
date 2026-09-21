@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { type JSX, useState } from "react";
 import { ExternalLinkIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
@@ -23,47 +24,49 @@ type Props = {
   user: LinkedUser | null;
 };
 
-const OAUTH_PROVIDERS = [
-  {
-    description: "Access your code and repositories.",
-    icon: <GitHubIcon className="size-5" />,
-    id: "github" as const,
-    manageUrl: "https://github.com/settings/applications",
-    name: "GitHub",
-  },
-  // {
-  //   description: "Log in with your Google account.",
-  //   icon: <GoogleIcon className="size-5" />,
-  //   id: "google" as const,
-  //   manageUrl: "https://myaccount.google.com/permissions",
-  //   name: "Google",
-  // },
-  {
-    description: "Secure login via Yandex ID.",
-    icon: <YandexIcon className="size-5" />,
-    id: "yandex" as const,
-    manageUrl: "https://passport.yandex.ru/profile/access",
-    name: "Yandex",
-  },
-] as const;
+type OAuthProvider = {
+  description: string;
+  icon: JSX.Element;
+  id: "github" | "yandex";
+  manageUrl: string;
+  name: string;
+};
 
 export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const [disconnectingProvider, setDisconnectingProvider] = useState<null | string>(null);
   const [loadingProvider, setLoadingProvider] = useState<null | string>(null);
 
   const canDisconnectAny = accounts.length > 1 || (user?.email != null && user.emailVerified);
 
+  const OAUTH_PROVIDERS: readonly OAuthProvider[] = [
+    {
+      description: t("settings_auth_github_desc"),
+      icon: <GitHubIcon className="size-5" />,
+      id: "github",
+      manageUrl: "https://github.com/settings/applications",
+      name: t("settings_auth_github_name"),
+    },
+    {
+      description: t("settings_auth_yandex_desc"),
+      icon: <YandexIcon className="size-5" />,
+      id: "yandex",
+      manageUrl: "https://passport.yandex.ru/profile/access",
+      name: t("settings_auth_yandex_name"),
+    },
+  ] as const;
+
   const utils = trpc.useUtils();
   const disconnect = trpc.user.disconnectAccount.useMutation({
     onError: (err) => toast.error(err.message),
     onSuccess: () => {
-      toast.success("Account unlinked successfully");
+      toast.success(t("settings_auth_unlink_success"));
       void utils.user.getLinkedAccounts.invalidate();
       setDisconnectingProvider(null);
     },
   });
 
-  const handleConnect = async (provider: "github" | "google" | "yandex") => {
+  const handleConnect = async (provider: "github" | "yandex") => {
     try {
       setLoadingProvider(provider);
       await authClient.signIn.social({
@@ -71,7 +74,7 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
         provider,
       });
     } catch {
-      toast.error("Linking failed. Please try again.");
+      toast.error(t("settings_auth_link_failed"));
     } finally {
       setLoadingProvider(null);
     }
@@ -111,10 +114,14 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
                 provider={provider}
               />
             }
-            description={isConnected ? `Connected as ${identity}` : provider.description}
+            description={
+              isConnected
+                ? t("settings_auth_connected_as", { identity: identity ?? "" })
+                : provider.description
+            }
             icon={customIcon}
             key={provider.id}
-            status={isConnected ? "Connected" : undefined}
+            status={isConnected ? t("settings_auth_status_connected") : undefined}
             title={provider.name}
           />
         );
@@ -123,11 +130,9 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
   );
 }
 
-type OAuthProvider = (typeof OAUTH_PROVIDERS)[number];
-
 type LinkedAccount = LinkedAccounts[number];
 
-type AuthProviderId = (typeof OAUTH_PROVIDERS)[number]["id"];
+type AuthProviderId = OAuthProvider["id"];
 
 type ProviderActionProps = {
   canDisconnectAny: boolean;
@@ -154,6 +159,8 @@ function ProviderAction({
   onOpenChange,
   provider,
 }: Readonly<ProviderActionProps>) {
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
   const isConnected = linked != null;
 
   if (!isConnected) {
@@ -165,21 +172,21 @@ function ProviderAction({
         size="sm"
         variant="outline"
       >
-        Connect
+        {tCommon("connect")}
       </LoadingButton>
     );
   }
 
   if (!canDisconnectAny) {
     return (
-      <AppTooltip content="You cannot delete your last connection">
+      <AppTooltip content={t("settings_auth_cannot_disconnect_last")}>
         <div>
           <AppButton
             disabled
             size="sm"
             variant="destructive"
           >
-            Disconnect
+            {tCommon("disconnect")}
           </AppButton>
         </div>
       </AppTooltip>
@@ -188,11 +195,11 @@ function ProviderAction({
 
   return (
     <DangerActionDialog
-      confirmLabel="Disconnect"
-      description={`Are you sure you want to unlink your ${provider.name} account?`}
+      confirmLabel={tCommon("disconnect")}
+      description={t("settings_auth_disconnect_confirmation", { name: provider.name })}
       destructiveAlertContent={
         <div className="flex flex-col gap-2">
-          <p>This will remove your ability to sign in using this method.</p>
+          <p>{t("settings_auth_disconnect_alert")}</p>
         </div>
       }
       isLoading={isMutationPending}
@@ -201,23 +208,24 @@ function ProviderAction({
       open={isDisconnecting}
       successAlertContent={
         <p>
-          To fully revoke Doxynix permissions on the {provider.name} side, visit your{" "}
+          {t("settings_auth_disconnect_protip_pre")}{" "}
           <ExternalLink
             className="inline-flex items-center gap-1 underline hover:no-underline"
             href={provider.manageUrl}
           >
-            {provider.name} Settings <ExternalLinkIcon className="size-3" />
+            {t("settings_auth_disconnect_protip_link", { name: provider.name })}{" "}
+            <ExternalLinkIcon className="size-3" />
           </ExternalLink>
         </p>
       }
-      successAlertTitle="Pro-tip"
-      title={`Disconnect ${provider.name}`}
+      successAlertTitle={t("settings_auth_disconnect_protip_title")}
+      title={t("settings_auth_disconnect_title", { name: provider.name })}
       trigger={
         <AppButton
           size="sm"
           variant="destructive"
         >
-          Disconnect
+          {tCommon("disconnect")}
         </AppButton>
       }
     />

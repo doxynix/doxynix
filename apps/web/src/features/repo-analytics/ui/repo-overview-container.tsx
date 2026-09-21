@@ -1,6 +1,7 @@
 "use client";
 
 import { BarChart3 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
@@ -14,6 +15,7 @@ import { RepoOverview } from "./repo-overview";
 type Props = { repoId: string };
 
 export function RepoOverviewContainer({ repoId }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const { aid, name, owner } = useRepoParams();
   const { data, isLoading } = trpc.analysis.getWorkspace.useQuery({
     aid: aid ?? undefined,
@@ -34,9 +36,9 @@ export function RepoOverviewContainer({ repoId }: Readonly<Props>) {
               owner={owner}
             />
           }
-          description="Run a full analysis to generate insights and overview."
+          description={t("repo_overview_empty_desc")}
           icon={BarChart3}
-          title="No analysis found"
+          title={t("repo_overview_empty_title")}
         />
       </div>
     );

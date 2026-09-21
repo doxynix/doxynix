@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
@@ -19,6 +20,7 @@ type Props = {
 };
 
 export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const { data: analysis, isLoading: isAnalysisLoading } = trpc.analysis.getByPRNumber.useQuery({
     prNumber,
     repoId,
@@ -37,7 +39,7 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
   }
 
   if (analysis == null) {
-    return <div>Analysis not found for this PR.</div>;
+    return <div>{t("repo_pull_not_found")}</div>;
   }
 
   const riskScore = impact?.analysis.riskScore ?? analysis.analysis.riskScore;
@@ -47,10 +49,12 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
       <div className="flex items-center justify-between border-b pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="font-bold text-2xl">Pull Request #{analysis.analysis.prNumber}</h1>
-            <AppTooltip content="Open on GitHub">
+            <h1 className="font-bold text-2xl">
+              {t("repo_pull_title_prefix")}#{analysis.analysis.prNumber}
+            </h1>
+            <AppTooltip content={t("repo_open_on_github_tooltip")}>
               <ExternalLink
-                aria-label="Open on Github"
+                aria-label={t("repo_open_on_github_tooltip")}
                 className="flex size-6 items-center justify-center text-muted-foreground hover:text-foreground"
                 href={`https://github.com/${owner}/${name}/pull/${prNumber}`}
               >
@@ -62,7 +66,7 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
             <p className="text-muted-foreground text-sm">{analysis.analysis.headSha.slice(0, 7)}</p>
             <CopyButton
               className="opacity-100"
-              tooltipText="Copy SHA"
+              tooltipText={t("repo_pull_copy_sha")}
               value={analysis.analysis.headSha}
             />
           </div>
@@ -71,7 +75,7 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
         <div className="flex items-center gap-4">
           {riskScore != null && (
             <div className="text-right">
-              <p className="text-muted-foreground text-xs">Risk Score</p>
+              <p className="text-muted-foreground text-xs">{t("repo_pull_risk_score")}</p>
               <p
                 className={cn(
                   "font-black text-3xl",
@@ -82,7 +86,8 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
                       : "text-success",
                 )}
               >
-                {riskScore}/10
+                {riskScore}
+                /10
               </p>
             </div>
           )}

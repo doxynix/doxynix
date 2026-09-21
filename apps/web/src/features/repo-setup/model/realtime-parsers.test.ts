@@ -25,13 +25,13 @@ describe("analysisParsers", () => {
 
   describe("parseStatusMessage", () => {
     it("should extract valid string logs successfully", () => {
-      expect(parseStatusMessage("Cloning repository...")).toBe("Cloning repository...");
+      expect(parseStatusMessage("Cloning repository...", "fallback")).toBe("Cloning repository...");
     });
 
-    it("should fallback to default analyzing text placeholder on invalid types", () => {
-      expect(parseStatusMessage(null)).toBe("Analyzing repository…");
-      expect(parseStatusMessage(123)).toBe("Analyzing repository…");
-      expect(parseStatusMessage({})).toBe("Analyzing repository…");
+    it("should fallback to the provided placeholder on invalid types", () => {
+      expect(parseStatusMessage(null, "Analyzing repository…")).toBe("Analyzing repository…");
+      expect(parseStatusMessage(123, "Analyzing repository…")).toBe("Analyzing repository…");
+      expect(parseStatusMessage({}, "Analyzing repository…")).toBe("Analyzing repository…");
     });
   });
 

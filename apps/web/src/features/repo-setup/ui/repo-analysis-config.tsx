@@ -39,14 +39,6 @@ type DocOption = {
   label: string;
 };
 
-const DOC_OPTIONS = [
-  { desc: "Project overview & setup", icon: BookOpen, id: "README", label: "Overview" },
-  { desc: "Endpoints & schemas", icon: Code2, id: "API", label: "API Reference" },
-  { desc: "Deep system logic", icon: GitGraph, id: "ARCHITECTURE", label: "Architecture" },
-  { desc: "Guide for developers", icon: Users, id: "CONTRIBUTING", label: "How to guides" },
-  { desc: "Release history", icon: HistoryIcon, id: "CHANGELOG", label: "History" },
-] as const satisfies readonly DocOption[];
-
 type Props = {
   actions: ActionsType;
   disabled: boolean;
@@ -55,6 +47,7 @@ type Props = {
 
 export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>) {
   const languageLabelId = useId();
+  const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
   const translationKeys = LOCALES.map(
     (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const,
@@ -62,16 +55,42 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
 
   const isSelectionEmpty = state.selectedFilesCount === 0 || state.selectedDocs.length === 0;
 
+  const DOC_OPTIONS: readonly DocOption[] = [
+    {
+      desc: t("setup_doc_readme_desc"),
+      icon: BookOpen,
+      id: "README",
+      label: t("setup_doc_readme_label"),
+    },
+    { desc: t("setup_doc_api_desc"), icon: Code2, id: "API", label: t("setup_doc_api_label") },
+    {
+      desc: t("setup_doc_architecture_desc"),
+      icon: GitGraph,
+      id: "ARCHITECTURE",
+      label: t("setup_doc_architecture_label"),
+    },
+    {
+      desc: t("setup_doc_contributing_desc"),
+      icon: Users,
+      id: "CONTRIBUTING",
+      label: t("setup_doc_contributing_label"),
+    },
+    {
+      desc: t("setup_doc_changelog_desc"),
+      icon: HistoryIcon,
+      id: "CHANGELOG",
+      label: t("setup_doc_changelog_label"),
+    },
+  ] as const;
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Settings className="size-5" />
-          Analysis Configuration
+          {t("setup_analysis_title")}
         </CardTitle>
-        <CardDescription>
-          Fine-tune how Doxynix should interpret and document your code.
-        </CardDescription>
+        <CardDescription>{t("setup_analysis_desc")}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6 overflow-y-auto">
         <div className="grid gap-4 md:grid-cols-2">
@@ -81,7 +100,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
               id={languageLabelId}
             >
               <Languages />
-              Output Language
+              {t("setup_output_language")}
             </Label>
             <Select
               onValueChange={actions.setAnalysisLocale}
@@ -122,7 +141,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
         <div className="flex flex-col gap-3">
           <Label className="flex items-center gap-2 text-muted-foreground text-sm">
             <FileText />
-            Documentation Types
+            {t("setup_doc_types_label")}
           </Label>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {DOC_OPTIONS.map((opt) => {
@@ -164,10 +183,8 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                       tabIndex={-1}
                     />
                   </div>
-                  <div>
-                    <p className="font-bold text-sm">{opt.label}</p>
-                    <p className="mt-1 text-muted-foreground text-xs">{opt.desc}</p>
-                  </div>
+                  <p className="font-bold text-sm">{opt.label}</p>
+                  <p className="mt-1 text-muted-foreground text-xs">{opt.desc}</p>
                 </label>
               );
             })}
@@ -177,12 +194,12 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
         <div className="flex flex-col gap-3">
           <Label className="flex items-center gap-2 text-muted-foreground text-sm">
             <MessageSquareText />
-            Custom Instructions (optional)
+            {t("setup_custom_instructions_label")}
           </Label>
           <Textarea
             className="h-30 resize-none"
             onChange={(e) => actions.setInstructions(e.target.value)}
-            placeholder="e.g. 'Use technical tone', 'Highlight security risks', 'Add code examples'..."
+            placeholder={t("setup_custom_instructions_placeholder")}
             value={state.instructions}
           />
         </div>
@@ -192,11 +209,11 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
             className="w-fit cursor-pointer gap-2"
             disabled={disabled || isSelectionEmpty}
             isLoading={disabled}
-            loadingText="Processing..."
+            loadingText={tCommon("processing")}
             onClick={actions.handleStartAnalysis}
           >
             <Play />
-            Start Analysis
+            {t("setup_start_analysis")}
           </LoadingButton>
         </div>
       </CardContent>

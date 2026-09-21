@@ -5,7 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { VercelToolbar } from "@vercel/toolbar/next";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
 import NextTopLoader from "nextjs-toploader";
 
@@ -13,8 +13,10 @@ import "../globals.css";
 
 import { APP_URL } from "@/shared/config/env.client";
 import { IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/config/env.flags";
+import { DEFAULT_LOCALE, LOCALES } from "@/shared/config/locales";
 import { routing } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
+import { getSitemapUrl } from "@/shared/lib/sitemap.utils";
 import { Toaster } from "@/shared/ui/core/sonner";
 import { A11yProvider } from "@/shared/ui/kit/a11y-provider";
 import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
@@ -49,73 +51,96 @@ export const viewport: Viewport = {
   width: "device-width",
 };
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "./",
-  },
-
-  authors: [{ name: "Kramarich", url: "https://github.com/Kramarich0" }],
-
-  creator: "Doxynix Team",
-
-  description:
-    "Stop writing docs manually. Doxynix analyzes your codebase to generate onboarding guides, architecture diagrams, and real-time complexity metrics instantly.",
-
-  keywords: [
-    "code analysis",
-    "documentation generator",
-    "metrics",
-    "github analysis",
-    "doxynix",
-    "technical debt",
-    "static analysis",
-    "developer tools",
-  ],
-
-  metadataBase: new URL(APP_URL),
-  openGraph: {
-    description:
-      "Automate your engineering documentation. Get instant architecture maps, bus factor analysis, and onboarding guides for your repositories.",
-    images: [
-      {
-        alt: "Doxynix Dashboard Preview",
-        height: 630,
-        url: "/opengraph-image.png",
-        width: 1200,
-      },
-    ],
-    locale: "en_US",
-    siteName: "Doxynix",
-    title: "Doxynix: Turn Legacy Code into Clear Documentation",
-    type: "website",
-    url: APP_URL,
-  },
-
-  robots: {
-    follow: true,
-    googleBot: {
-      follow: true,
-      index: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
-    },
-    index: true,
-  },
-
-  title: {
-    default: "Doxynix - AI Code Analysis & Documentation Generator",
-    template: "%s | Doxynix",
-  },
-
-  twitter: {
-    card: "summary_large_image",
-    creator: "@doxynix",
-    description:
-      "Generate comprehensive documentation and code metrics in one click. Perfect for managing technical debt and onboarding new developers.",
-    title: "Doxynix - AI Powered Code Documentation",
-  },
+const OG_LOCALE_MAP: Record<string, string> = {
+  de: "de_DE",
+  en: "en_US",
+  es: "es_ES",
+  fr: "fr_FR",
+  it: "it_IT",
+  ja: "ja_JP",
+  ko: "ko_KR",
+  pl: "pl_PL",
+  "pt-BR": "pt_BR",
+  ru: "ru_RU",
+  tr: "tr_TR",
+  "zh-CN": "zh_CN",
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = await getTranslations("Metadata");
+
+  const languageAlternates: Record<string, string> = {};
+  LOCALES.forEach((loc) => {
+    languageAlternates[loc] = getSitemapUrl(APP_URL, "", loc, DEFAULT_LOCALE);
+  });
+  languageAlternates["x-default"] = getSitemapUrl(APP_URL, "", DEFAULT_LOCALE, DEFAULT_LOCALE);
+
+  const currentCanonicalUrl = getSitemapUrl(APP_URL, "", locale, DEFAULT_LOCALE);
+
+  const title = t("landing_title");
+  const description = t("landing_desc");
+
+  return {
+    alternates: {
+      canonical: currentCanonicalUrl,
+      languages: languageAlternates,
+    },
+
+    authors: [{ name: "Kramarich", url: "https://github.com/Kramarich0" }],
+    creator: "Doxynix Team",
+    description,
+
+    keywords: [
+      "code analysis",
+      "documentation generator",
+      "architecture map",
+      "metrics",
+      "static analysis",
+      "ast parsing",
+      "github analysis",
+      "doxynix",
+      "technical debt",
+      "bus factor",
+      "developer tools",
+    ],
+
+    metadataBase: new URL(APP_URL),
+
+    openGraph: {
+      description,
+      locale: OG_LOCALE_MAP[locale] ?? "en_US",
+      siteName: "Doxynix",
+      title,
+      type: "website",
+      url: currentCanonicalUrl,
+    },
+
+    robots: {
+      follow: true,
+      googleBot: {
+        follow: true,
+        index: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+      index: true,
+    },
+
+    title: {
+      default: `Doxynix — ${title}`,
+      template: "%s | Doxynix",
+    },
+
+    twitter: {
+      card: "summary_large_image",
+      creator: "@doxynix",
+      description,
+      title: `Doxynix — ${title}`,
+    },
+  };
+}
 
 export default async function LocaleLayout({
   children,
@@ -139,12 +164,12 @@ export default async function LocaleLayout({
           "antialiased",
         )}
       >
-        <A11yProvider>
-          <SkipLink />
-          <NextIntlClientProvider
-            locale={locale}
-            messages={messages}
-          >
+        <NextIntlClientProvider
+          locale={locale}
+          messages={messages}
+        >
+          <A11yProvider>
+            <SkipLink />
             <ThemeProvider
               attribute="class"
               defaultTheme="system"
@@ -172,8 +197,8 @@ export default async function LocaleLayout({
               {IS_DEV && !IS_ANALYZE && <VercelToolbar />}
               <ConsoleEasterEgg />
             </ThemeProvider>
-          </NextIntlClientProvider>
-        </A11yProvider>
+          </A11yProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

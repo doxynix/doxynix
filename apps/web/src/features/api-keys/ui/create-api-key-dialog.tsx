@@ -99,7 +99,7 @@ export function CreateApiKeyDialog() {
                   className="cursor-pointer"
                   disabled={!form.formState.isValid || create.isPending}
                   isLoading={create.isPending}
-                  loadingText="Saving..."
+                  loadingText={tCommon("saving")}
                   type="submit"
                 >
                   {tCommon("create")}

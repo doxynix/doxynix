@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { DocType } from "@doxynix/shared";
 import { FileText } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
@@ -20,6 +21,7 @@ type Props = { id: string };
 const EMPTY_DOCS: AvailableDocs = [];
 
 export function RepoDocsContainer({ id }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const { aid, name, owner } = useRepoParams();
   const [node] = useQueryState("node", parseAsString);
   const autoSelectedNodeRef = useRef<null | string>(null);
@@ -79,9 +81,9 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
               owner={owner}
             />
           }
-          description="Run AI analysis to automatically generate README, API specs, and architecture docs."
+          description={t("repo_docs_empty_desc")}
           icon={FileText}
-          title="No documentation generated"
+          title={t("repo_docs_empty_title")}
         />
       </div>
     );

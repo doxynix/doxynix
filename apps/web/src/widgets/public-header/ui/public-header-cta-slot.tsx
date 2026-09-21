@@ -1,11 +1,13 @@
 "use client";
 
 import { MoveLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Link, usePathname } from "@/shared/i18n/navigation";
 import { AppButton } from "@/shared/ui/core/button";
 
 export function PublicHeaderCtaSlot() {
+  const tCommon = useTranslations("Common");
   const pathname = usePathname();
 
   if (pathname.includes("/auth")) {
@@ -16,7 +18,7 @@ export function PublicHeaderCtaSlot() {
       >
         <Link href="/">
           <MoveLeft size={16} />
-          Back Home
+          {tCommon("back_home")}
         </Link>
       </AppButton>
     );
@@ -28,7 +30,7 @@ export function PublicHeaderCtaSlot() {
       variant="outline"
     >
       <Link href="/auth">
-        Get Started
+        {tCommon("get_started")}
         <MoveLeft
           className="rotate-180"
           size={16}

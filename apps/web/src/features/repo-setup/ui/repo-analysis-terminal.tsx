@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowDown, Terminal as TerminalIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
 import { useAutoScroll } from "@/shared/lib/hooks/use-auto-scroll";
@@ -22,11 +23,10 @@ type Props = {
   title?: string;
 };
 
-export function AnalysisTerminal({
-  logs,
-  maxHeight = "h-75",
-  title = "Analysis Output",
-}: Readonly<Props>) {
+export function AnalysisTerminal({ logs, maxHeight = "h-75", title }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
+  const defaultTitle = t("repo_terminal_title");
+  const displayTitle = title ?? defaultTitle;
   const { counts, filter, filteredLogs, search, setFilter } = useTerminalLogs(logs);
 
   const { scrollRef, scrollToBottom, showScrollButton } = useAutoScroll<HTMLDivElement>([
@@ -43,7 +43,7 @@ export function AnalysisTerminal({
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
             <TerminalIcon />
-            <span className="text-foreground">{title}</span>
+            <span className="text-foreground">{displayTitle}</span>
           </div>
 
           <Tabs
@@ -55,14 +55,14 @@ export function AnalysisTerminal({
                 className="text-xs"
                 value="all"
               >
-                All <AppBadge variant="outline">{counts.all}</AppBadge>
+                {t("repo_terminal_tab_all")} <AppBadge variant="outline">{counts.all}</AppBadge>
               </TabsTrigger>
               {counts.error > 0 && (
                 <TabsTrigger
                   className="data-[state=active]:text-destructive"
                   value="error"
                 >
-                  Errors
+                  {t("repo_terminal_tab_errors")}
                   <AppBadge
                     className="border-destructive text-destructive"
                     variant="outline"
@@ -77,7 +77,7 @@ export function AnalysisTerminal({
                   className="data-[state=active]:text-warning"
                   value="warn"
                 >
-                  Warns
+                  {t("repo_terminal_tab_warns")}
                   <AppBadge
                     className="border-warning text-warning"
                     variant="outline"
@@ -92,7 +92,7 @@ export function AnalysisTerminal({
                   className="data-[state=active]:text-success"
                   value="success"
                 >
-                  Success
+                  {t("repo_terminal_tab_success")}
                   <AppBadge
                     className="border-success text-success"
                     variant="outline"
@@ -106,10 +106,10 @@ export function AnalysisTerminal({
         </div>
 
         <div className="flex items-center gap-2">
-          <AppSearch placeholder="Filter terminal output..." />
+          <AppSearch placeholder={t("repo_terminal_search_placeholder")} />
           <CopyButton
             className="opacity-100"
-            tooltipText="Copy filtered logs"
+            tooltipText={t("repo_terminal_copy_logs")}
             value={clipboardValue}
           />
         </div>
@@ -122,7 +122,7 @@ export function AnalysisTerminal({
         >
           {filteredLogs.length === 0 && logs.length > 0 && (
             <div className="flex flex-col items-center justify-center py-12">
-              <p>No matching logs found</p>
+              <p>{t("repo_terminal_no_matches")}</p>
             </div>
           )}
           {logs.length === 0 && (
@@ -173,7 +173,9 @@ function LogLine({ log, searchQuery }: Readonly<{ log: LogEntry; searchQuery: st
 
   return (
     <div className="flex items-start gap-3 rounded-xl p-2 font-mono transition-colors hover:bg-accent">
-      {log.timestamp !== "" && <span className="select-none text-xs">[{log.timestamp}]</span>}
+      {log.timestamp !== "" && (
+        <span className="select-none text-xs">{`[` + log.timestamp + `]`}</span>
+      )}
 
       <div
         className={cn(

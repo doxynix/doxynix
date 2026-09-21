@@ -1,6 +1,7 @@
 "use client";
 
 import { Package } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { AppBadge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
@@ -14,6 +15,7 @@ type Props = { group: AuthorGroup };
 
 export function HighFiveCard({ group }: Readonly<Props>) {
   const { author, authorLink, avatar, packages } = group;
+  const t = useTranslations("Dashboard");
 
   const uniqueLicenses = Array.from(new Set(packages.map((p) => p.license)));
 
@@ -54,7 +56,7 @@ export function HighFiveCard({ group }: Readonly<Props>) {
       <CardContent className="flex grow flex-col gap-4 pt-0">
         <div className="flex flex-col gap-2">
           <p className="text-muted-foreground text-xs">
-            {packages.length} {packages.length === 1 ? "package" : "packages"}
+            {t("package_count", { count: packages.length })}
           </p>
           <div className="flex flex-wrap gap-1.5">
             {packages.map((pkg) => (
@@ -66,7 +68,7 @@ export function HighFiveCard({ group }: Readonly<Props>) {
                 <span className="truncate">
                   {pkg.name.includes("/") ? (
                     <>
-                      <span className="text-muted-foreground">{pkg.name.split("/")[0]}/</span>
+                      <span className="text-muted-foreground">{`${pkg.name.split("/")[0]}/`}</span>
                       <span>{pkg.name.split("/")[1]}</span>
                     </>
                   ) : (
@@ -83,7 +85,7 @@ export function HighFiveCard({ group }: Readonly<Props>) {
             className="ml-auto flex w-fit items-center gap-2 text-muted-foreground text-xs transition-colors hover:text-foreground"
             href={authorLink}
           >
-            View
+            {t("view")}
             <GitHubIcon className="size-4" />
           </ExternalLink>
         </div>

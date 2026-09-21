@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
@@ -26,16 +27,17 @@ export function RepoMetrics({ data, repoId }: Readonly<Props>) {
   const { architecture, domain, onboarding, quality, recommendations, reference, risks, security } =
     data;
   const utils = trpc.useUtils();
+  const t = useTranslations("Dashboard");
 
   const [runningFixId, setRunningFixId] = useState<null | string>(null);
 
   const createFixMutation = trpc.analysis.createFix.useMutation({
     onError: (err) => {
-      toast.error(`Failed to trigger fix: ${err.message}`);
+      toast.error(t("repo_fix_trigger_failed", { error: err.message }));
     },
     onSuccess: (res) => {
       if (res.success === true && res.fixId != null) {
-        toast.info("AI patch generation started in the background...");
+        toast.info(t("repo_fix_started"));
         setRunningFixId(res.fixId);
       }
     },
@@ -56,12 +58,12 @@ export function RepoMetrics({ data, repoId }: Readonly<Props>) {
 
   const stageGeneratedFixMutation = trpc.analysis.stageGeneratedFix.useMutation({
     onError: (err) => {
-      toast.error(`Staging failed: ${err.message}`);
+      toast.error(t("repo_fix_staging_failed", { error: err.message }));
       setRunningFixId(null);
     },
     onSuccess: (res) => {
       if (res.success) {
-        toast.success(`AI changes successfully staged! Draft count: ${res.stagedCount}`);
+        toast.success(t("repo_fix_staged", { count: res.stagedCount }));
         setRunningFixId(null);
         void utils.analysis.getStagedFiles.invalidate();
       }

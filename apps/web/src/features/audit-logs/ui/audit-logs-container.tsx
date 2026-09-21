@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
 import { Spinner } from "@/shared/ui/core/spinner";
@@ -9,6 +10,7 @@ import { LoadingButton } from "@/shared/ui/kit/loading-button";
 import { AuditLogList } from "./audit-logs-list";
 
 export function AuditLogsContainer() {
+  const t = useTranslations("AuditLogs");
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     trpc.audit.getActivityLogs.useInfiniteQuery(
       { limit: 20 },
@@ -39,7 +41,7 @@ export function AuditLogsContainer() {
             size="sm"
             variant="ghost"
           >
-            <ChevronDown /> Load more
+            <ChevronDown /> {t("load_more")}
           </LoadingButton>
         )}
       </div>

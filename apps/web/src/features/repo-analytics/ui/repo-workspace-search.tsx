@@ -9,6 +9,7 @@ import {
   Route as RouteIcon,
   type Search,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
@@ -35,6 +36,7 @@ type Props = {
 };
 
 export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
@@ -61,12 +63,12 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
 
   const getEmptyLabel = () => {
     if (!isQueryEnabled) {
-      return "Search files, nodes, routes, and doc sections";
+      return t("workspace_search_hint");
     }
     if (isFetching) {
       return null;
     }
-    return "No structural matches found";
+    return t("workspace_search_empty");
   };
 
   const emptyLabel = getEmptyLabel();
@@ -81,7 +83,7 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
         onClickCapture={() => setIsVisible(true)}
         onFocusCapture={() => setIsVisible(true)}
       >
-        <AppSearch placeholder="Search workspace..." />
+        <AppSearch placeholder={t("workspace_search_placeholder")} />
       </div>
 
       {isVisible && isQueryEnabled && (

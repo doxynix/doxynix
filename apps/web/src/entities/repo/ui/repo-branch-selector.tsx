@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, ChevronDown, GitBranch } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
 import { AppBadge } from "@/shared/ui/core/badge";
@@ -33,6 +34,7 @@ export function RepoBranchSelector({
   onSelect,
   selectedBranch,
 }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const open = useRepoBranchOpen();
   const { setOpen } = useRepoBranchActions();
 
@@ -50,7 +52,7 @@ export function RepoBranchSelector({
         >
           <div className="flex items-center gap-2 truncate">
             <GitBranch className="size-3" />
-            {selectedBranch || "Select branch..."}
+            {selectedBranch || t("repo_branch_placeholder")}
           </div>
           <ChevronDown className="ml-2 opacity-50" />
         </AppButton>
@@ -60,10 +62,10 @@ export function RepoBranchSelector({
         className="p-0"
       >
         <Command>
-          <CommandInput placeholder="Search branch..." />
+          <CommandInput placeholder={t("repo_branch_search")} />
           <CommandList>
             {!isLoading && (branches?.length ?? 0) > 0 && (
-              <CommandEmpty>No branch found</CommandEmpty>
+              <CommandEmpty>{t("repo_branch_no_branch_found")}</CommandEmpty>
             )}
             <CommandGroup>
               {isLoading && (
@@ -77,7 +79,7 @@ export function RepoBranchSelector({
                 </div>
               )}
               {(branches?.length === 0 || branches == null) && !isLoading ? (
-                <p>Branches not found</p>
+                <p>{t("repo_branch_not_found")}</p>
               ) : (
                 branches?.map((b) => (
                   <CommandItem
@@ -90,7 +92,9 @@ export function RepoBranchSelector({
                   >
                     <Check className={cn(selectedBranch === b ? "opacity-100" : "opacity-0")} />
                     {b}
-                    {defaultBranch === b && <AppBadge variant="outline">default</AppBadge>}
+                    {defaultBranch === b && (
+                      <AppBadge variant="outline">{t("repo_branch_default")}</AppBadge>
+                    )}
                   </CommandItem>
                 ))
               )}

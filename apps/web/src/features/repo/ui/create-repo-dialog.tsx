@@ -254,7 +254,7 @@ export function CreateRepoDialog() {
                         </ExternalLink>
                       </AppTooltip>
                     ))}
-                    <AppTooltip content="Add new">
+                    <AppTooltip content={t("repo_add_new_tooltip")}>
                       <LoadingButton
                         className="size-6"
                         disabled={loading}
@@ -292,9 +292,7 @@ export function CreateRepoDialog() {
                 ) : myGithubData == null ? (
                   <div className="h-70 rounded-xl border p-1">
                     <div className="flex h-full flex-col items-center justify-center p-4 text-center">
-                      <p className="mb-3 text-muted-foreground text-sm">
-                        Failed to load repositories.
-                      </p>
+                      <p className="mb-3 text-muted-foreground text-sm">{t("repo_failed_load")}</p>
                       <AppButton
                         className="h-8 gap-2"
                         onClick={() => void refetchMyRepos()}
@@ -302,7 +300,7 @@ export function CreateRepoDialog() {
                         type="button"
                         variant="outline"
                       >
-                        <RefreshCcw className="h-3.5 w-3.5" /> Retry
+                        <RefreshCcw className="h-3.5 w-3.5" /> {tCommon("retry")}
                       </AppButton>
                     </div>
                   </div>
@@ -310,37 +308,35 @@ export function CreateRepoDialog() {
                   <div className="h-70 rounded-xl border p-1">
                     <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
                       <p className="mb-3 text-muted-foreground text-sm">
-                        First, you need to link your GitHub profile.
+                        {t("repo_link_github_profile")}
                       </p>
                       <LoadingButton
                         className="cursor-pointer"
                         disabled={loadingOauth}
                         isLoading={loadingOauth}
-                        loadingText="Processing..."
+                        loadingText={tCommon("processing")}
                         onClick={() => void handleSignIn()}
                         type="button"
                         variant="outline"
                       >
-                        <GitHubIcon /> Link
+                        <GitHubIcon /> {tCommon("link")}
                       </LoadingButton>
                     </div>
                   </div>
                 ) : oauthStatus === "invalid" ? (
                   <div className="h-70 rounded-xl border p-1">
                     <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
-                      <p className="mb-3 text-muted-foreground text-sm">
-                        Your GitHub authorization expired. Please relink your account.
-                      </p>
+                      <p className="mb-3 text-muted-foreground text-sm">{t("repo_auth_expired")}</p>
                       <LoadingButton
                         className="cursor-pointer"
                         disabled={loadingOauth}
                         isLoading={loadingOauth}
-                        loadingText="Processing..."
+                        loadingText={tCommon("processing")}
                         onClick={() => void handleSignIn()}
                         type="button"
                         variant="outline"
                       >
-                        <GitHubIcon /> Relink
+                        <GitHubIcon /> {tCommon("relink")}
                       </LoadingButton>
                     </div>
                   </div>
@@ -352,18 +348,18 @@ export function CreateRepoDialog() {
                     {myGithubData.items.length > 0 && myGithubData.installations?.length === 0 && (
                       <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
                         <p className="mb-3 text-muted-foreground text-sm">
-                          Want private and org repositories? Install our GitHub App!
+                          {t("repo_install_github_prompt")}
                         </p>
                         <LoadingButton
                           className="cursor-pointer"
                           disabled={loading}
                           isLoading={loading}
-                          loadingText="Connecting..."
+                          loadingText={tCommon("connecting")}
                           onClick={() => void handleInstallGitHubApp()}
                           type="button"
                           variant="outline"
                         >
-                          <GitHubIcon /> Install
+                          <GitHubIcon /> {tCommon("install")}
                         </LoadingButton>
                       </div>
                     )}
@@ -373,7 +369,7 @@ export function CreateRepoDialog() {
                         {myGithubData.installations?.length === 0 ? (
                           <>
                             <p className="mb-3 font-medium text-muted-foreground text-sm">
-                              Install our GitHub App to grant access to your repositories.
+                              {t("repo_install_github_desc")}
                             </p>
                             <LoadingButton
                               disabled={loading}
@@ -382,12 +378,12 @@ export function CreateRepoDialog() {
                               type="button"
                               variant="outline"
                             >
-                              <GitHubIcon /> Install App
+                              <GitHubIcon /> {tCommon("install_app")}
                             </LoadingButton>
                           </>
                         ) : (
                           <p className="flex h-full items-center justify-center p-4 text-center text-muted-foreground text-sm">
-                            No repositories found. Ensure you granted access to them.
+                            {t("repo_no_repos_found")}
                           </p>
                         )}
                       </div>
@@ -410,7 +406,7 @@ export function CreateRepoDialog() {
                 className="cursor-pointer"
                 disabled={create.isPending || !form.formState.isValid || !urlValue}
                 isLoading={create.isPending}
-                loadingText="Adding..."
+                loadingText={tCommon("adding")}
               >
                 {tCommon("add")}
               </LoadingButton>

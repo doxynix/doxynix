@@ -32,7 +32,7 @@ function repo(overrides: Partial<RepoInput> = {}): RepoInput {
 }
 
 describe("getGitMetrics", () => {
-  it("wires every metric with its label, tooltip and icon", () => {
+  it("wires every metric with its label, tooltipKey and icon", () => {
     const items = getGitMetrics(repo(), "en");
 
     expect(items.map((m) => m.id)).toEqual([
@@ -48,7 +48,7 @@ describe("getGitMetrics", () => {
     expect(items[0]).toMatchObject({
       color: "#3178c6",
       label: "TypeScript",
-      tooltip: "Primary Language",
+      tooltipKey: "git_metric_primary_language",
     });
     expect(items[1]?.label).toBe(42);
     expect(items[3]?.label).toBe("main");

@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
@@ -12,6 +13,8 @@ import { PasskeysList } from "./passkeys-list";
 import { TwoFactorCard } from "./two-factor-card";
 
 export function ConnectionsListContainer() {
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
   const { data: githubData, isLoading: isGithubLoading } =
     trpc.githubApp.getMyGithubRepos.useQuery();
 
@@ -44,10 +47,8 @@ export function ConnectionsListContainer() {
     <div className="grid gap-10">
       <section className="flex flex-col gap-4">
         <div>
-          <h2>Authentication</h2>
-          <p className="text-muted-foreground text-sm">
-            Manage your account protection and login methods.
-          </p>
+          <h2>{t("settings_connections_auth_title")}</h2>
+          <p className="text-muted-foreground text-sm">{t("settings_connections_auth_desc")}</p>
         </div>
         <div className="flex flex-col gap-3">
           <TwoFactorCard />
@@ -60,10 +61,9 @@ export function ConnectionsListContainer() {
 
       <section className="flex flex-col gap-4">
         <div>
-          <h2>Biometric Devices</h2>
+          <h2>{t("settings_connections_biometric_title")}</h2>
           <p className="text-muted-foreground text-sm">
-            Use your device&apos;s fingerprint (TouchID) or face scanner (FaceID) to sign in
-            securely without passwords.
+            {t("settings_connections_biometric_desc")}
           </p>
         </div>
         <PasskeysList />
@@ -72,19 +72,17 @@ export function ConnectionsListContainer() {
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2>GitHub Installations</h2>
-            <p className="text-muted-foreground text-sm">
-              Organizations and accounts where Doxynix is installed.
-            </p>
+            <h2>{t("settings_connections_github_title")}</h2>
+            <p className="text-muted-foreground text-sm">{t("settings_connections_github_desc")}</p>
           </div>
           <LoadingButton
             disabled={isFetching}
             isLoading={isFetching}
-            loadingText="Processing..."
+            loadingText={tCommon("processing")}
             onClick={() => void handleInstall()}
             variant="outline"
           >
-            <Plus /> Add New
+            <Plus /> {tCommon("add_new")}
           </LoadingButton>
         </div>
         <GitHubInstallationsList installations={githubData?.installations ?? []} />

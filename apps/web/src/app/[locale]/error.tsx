@@ -57,21 +57,15 @@ export default function ErrorPage({
 
   const finalId = requestId ?? error.digest ?? "No-ID";
 
-  const emailSubject = `[Bug Report] Doxynix - Error ${finalId}`;
+  const emailSubject = t("bug_report_subject", { id: finalId });
 
-  const emailBody = `
-    Describe what you were doing before the error (optional):
-    >>> WRITE HERE <<<
-
-    ------------------------------------------------
-    Technical Information (Please, do not edit):
-    ------------------------------------------------
-    Error ID: ${finalId}
-    Page: ${techInfo.url}
-    Screen: ${techInfo.screen}
-    Time: ${techInfo.time}
-    User Agent: ${techInfo.ua}
-  `.trim();
+  const emailBody = t("bug_report_body", {
+    id: finalId,
+    screen: techInfo.screen,
+    time: techInfo.time,
+    ua: techInfo.ua,
+    url: techInfo.url,
+  }).trim();
 
   const mailtoLink = `mailto:support@doxynix.space?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
 
@@ -90,7 +84,7 @@ export default function ErrorPage({
         <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted p-2 text-left">
           <div className="group flex items-center justify-between">
             <code className="break-all text-xs">
-              {requestId ?? error.digest ?? "System Failure"}
+              {requestId ?? error.digest ?? t("system_failure")}
             </code>
             <CopyButton
               className="opacity-100"
@@ -101,7 +95,7 @@ export default function ErrorPage({
 
           {IS_DEV && (
             <div className="border-border border-t pt-2">
-              <p className="font-semibold text-destructive text-xs uppercase">Debug Error:</p>
+              <p className="font-semibold text-destructive text-xs uppercase">{t("debug_error")}</p>
               <p className="truncate text-destructive text-xs">{error.message}</p>
             </div>
           )}
@@ -128,7 +122,7 @@ export default function ErrorPage({
             className="underline hover:no-underline"
             href={mailtoLink}
           >
-            support@doxynix.space
+            {t("contact_email")}
           </a>
         </div>
         <AppButton
@@ -141,7 +135,7 @@ export default function ErrorPage({
             className="flex items-center gap-2.5"
             href="https://status.doxynix.space"
           >
-            Check System Status
+            {tCommon("check_system_status")}
           </ExternalLink>
         </AppButton>
       </footer>

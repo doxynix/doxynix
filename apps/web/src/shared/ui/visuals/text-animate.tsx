@@ -1,7 +1,6 @@
-/* eslint-disable react-hooks/static-components */
 "use client";
 
-import { type ElementType, memo } from "react";
+import { type ElementType, useState } from "react";
 import { AnimatePresence, type MotionProps, motion, type Variants } from "motion/react";
 
 import { cn } from "@/shared/lib/cn";
@@ -92,16 +91,6 @@ const defaultContainerVariants = {
       delayChildren: 0,
       staggerChildren: 0.05,
     },
-  },
-};
-
-const defaultItemVariants: Variants = {
-  exit: {
-    opacity: 0,
-  },
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
   },
 };
 
@@ -318,7 +307,9 @@ const TextAnimateBase = ({
   variants,
   ...props
 }: TextAnimateProps) => {
-  const MotionComponent = motion.create(Component);
+  // The motion wrapper is created lazily once per mount (lazy state initializer keeps the render
+  // pure and avoids re-creating the component identity on every render).
+  const [MotionComponent] = useState(() => motion.create(Component));
 
   let segments: string[] = [];
   switch (by) {
@@ -369,29 +360,26 @@ const TextAnimateBase = ({
         },
         item: variants,
       }
-    : // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      animation
-      ? {
-          container: {
-            ...selectedAnimation.container,
-            exit: {
-              ...containerExit,
-              transition: {
-                staggerChildren: duration / segments.length,
-                staggerDirection: -1,
-              },
-            },
-            show: {
-              ...containerShow,
-              transition: {
-                delayChildren: delay,
-                staggerChildren: duration / segments.length,
-              },
+    : {
+        container: {
+          ...selectedAnimation.container,
+          exit: {
+            ...containerExit,
+            transition: {
+              staggerChildren: duration / segments.length,
+              staggerDirection: -1,
             },
           },
-          item: selectedAnimation.item,
-        }
-      : { container: defaultContainerVariants, item: defaultItemVariants };
+          show: {
+            ...containerShow,
+            transition: {
+              delayChildren: delay,
+              staggerChildren: duration / segments.length,
+            },
+          },
+        },
+        item: selectedAnimation.item,
+      };
 
   return (
     <AnimatePresence mode="popLayout">
@@ -427,5 +415,5 @@ const TextAnimateBase = ({
   );
 };
 
-// Export the memoized version
-export const TextAnimate = memo(TextAnimateBase);
+// Export the plain component; React Compiler memoizes render output automatically
+export const TextAnimate = TextAnimateBase;

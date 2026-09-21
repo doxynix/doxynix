@@ -1,5 +1,4 @@
-import type { Metadata } from "next";
-
+import { createRepoMetadata } from "@/shared/lib/metadata";
 import type { RepoPageProps } from "@/shared/lib/next.types";
 
 import { RepoMetricsContainer } from "@/features/repo-analytics/ui/repo-metrics-container";
@@ -7,13 +6,7 @@ import { RepoOverviewContainer } from "@/features/repo-analytics/ui/repo-overvie
 
 import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 
-export async function generateMetadata({ params }: RepoPageProps): Promise<Metadata> {
-  const { name, owner } = await params;
-
-  return {
-    title: `${owner}/${name}`,
-  };
-}
+export const generateMetadata = createRepoMetadata("overview");
 
 export default async function RepoOwnerNamePage({ params }: Readonly<RepoPageProps>) {
   const { name, owner } = await params;

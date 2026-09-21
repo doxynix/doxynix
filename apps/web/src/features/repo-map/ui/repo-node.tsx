@@ -17,6 +17,7 @@ import {
   ShieldAlert,
   Zap,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
 import { AppBadge } from "@/shared/ui/core/badge";
@@ -28,6 +29,7 @@ import type { RepoMapNodeData } from "../model/repo-map.types";
 type Props = NodeProps<Node<RepoMapNodeData, "repoNode">>;
 
 export const RepoNode = ({ data }: Props) => {
+  const t = useTranslations("Dashboard");
   const dimByHover = data.repoMap?.dimByHover ?? false;
   const dimByFilter = data.repoMap?.dimByFilter ?? false;
   const dimBySearch = data.repoMap?.dimBySearch ?? false;
@@ -159,7 +161,7 @@ export const RepoNode = ({ data }: Props) => {
           {data.score > 0 && (
             <div className="col-span-2 mt-1">
               <div className="flex justify-between text-[10px] text-muted-foreground">
-                <span>Complexity Score</span>
+                <span>{t("complexity_score")}</span>
                 <span>{data.score}</span>
               </div>
               <Progress

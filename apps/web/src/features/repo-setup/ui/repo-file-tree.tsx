@@ -1,5 +1,6 @@
 import { startTransition } from "react";
 import { Check, Folder, FolderOpen, Search, Sparkles, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Tree, type TreeApi } from "react-arborist";
 
 import { cn } from "@/shared/lib/cn";
@@ -24,6 +25,7 @@ type Props = {
 };
 
 export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const [measureRef, size] = useResizeObserver<HTMLDivElement>();
 
   const handleExpandAll = () => {
@@ -38,22 +40,22 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
   };
 
   const treeActions = [
-    { icon: FolderOpen, label: "Expand All", onClick: handleExpandAll },
-    { icon: Folder, label: "Collapse All", onClick: handleCollapseAll },
+    { icon: FolderOpen, label: t("repo_file_tree_expand_all"), onClick: handleExpandAll },
+    { icon: Folder, label: t("repo_file_tree_collapse_all"), onClick: handleCollapseAll },
   ] satisfies ActionItem[];
 
   const selectionActions = [
-    { icon: Check, label: "Select All", onClick: actions.handleSelectAll },
+    { icon: Check, label: t("repo_file_tree_select_all"), onClick: actions.handleSelectAll },
     {
       icon: Sparkles,
-      label: "Select Recommended",
+      label: t("repo_file_tree_select_recommended"),
       onClick: actions.handleSelectRecommended,
-      tooltip: "Automatically select files for analysis",
+      tooltip: t("repo_file_tree_select_recommended_tooltip"),
     },
     {
       className: "text-destructive hover:bg-destructive/10 hover:text-destructive",
       icon: X,
-      label: "Clear",
+      label: t("repo_file_tree_clear"),
       onClick: actions.handleClearAll,
     },
   ] satisfies ActionItem[];
@@ -73,14 +75,14 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
               onChange={(e) => {
                 void actions.setSearchTerm(e.target.value);
               }}
-              placeholder="Search files..."
+              placeholder={t("repo_file_tree_search_placeholder")}
               type="search"
               value={state.searchTerm}
             />
           </div>
         </div>
         <div className="flex flex-1 flex-col gap-2">
-          <span className="font-medium text-sm">Select Branch</span>
+          <span className="font-medium text-sm">{t("repo_file_tree_select_branch")}</span>
           <RepoBranchSelector
             branches={state.branches}
             defaultBranch={repo.defaultBranch}
@@ -134,7 +136,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
               );
             })}
           </div>
-          <span>Files selected: {state.selectedFilesCount}</span>
+          <span>{t("repo_file_tree_selected_count", { count: state.selectedFilesCount })}</span>
         </div>
       </div>
 
@@ -144,14 +146,13 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
       >
         {isSearchEmpty && (
           <p className="absolute inset-0 z-10 flex items-center justify-center truncate text-muted-foreground text-sm">
-            Nothing found for &quot;<span className="max-w-60 truncate">{state.searchTerm}</span>
-            &quot;
+            {t("repo_file_tree_nothing_found", { term: state.searchTerm })}
           </p>
         )}
 
         {isRepoEmpty && (
           <p className="absolute inset-0 z-10 flex items-center justify-center text-muted-foreground text-sm">
-            Repository is empty
+            {t("repo_file_tree_empty_repo")}
           </p>
         )}
         <div
@@ -177,7 +178,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
                 onRename={() => {}}
                 openByDefault={false}
                 overscanCount={30}
-                ref={(api) => actions.setTreeApi(api || null)}
+                ref={(api) => actions.setTreeApi(api ?? null)}
                 rowHeight={32}
                 searchMatch={(node, term) =>
                   node.data.name.toLowerCase().includes(term.toLowerCase())

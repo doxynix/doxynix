@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 export function useCopyToClipboard(timeout = 2000) {
+  const t = useTranslations("Common");
   const [isCopied, setIsCopied] = useState(false);
 
   const copy = async (value: string) => {
@@ -12,7 +14,7 @@ export function useCopyToClipboard(timeout = 2000) {
     const isClipboardAvailable = typeof navigator !== "undefined" && "clipboard" in navigator;
 
     if (!isClipboardAvailable) {
-      toast.error("Clipboard API not available");
+      toast.error(t("clipboard_unavailable"));
       return;
     }
 
@@ -22,7 +24,7 @@ export function useCopyToClipboard(timeout = 2000) {
       setTimeout(() => setIsCopied(false), timeout);
     } catch (error) {
       console.error("Failed to copy:", error);
-      toast.error("Copy failed");
+      toast.error(t("copy_failed"));
       setIsCopied(false);
     }
   };

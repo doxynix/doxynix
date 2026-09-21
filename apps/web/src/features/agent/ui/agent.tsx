@@ -7,6 +7,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
 import { ArrowDown, Bot, ChevronDown, FileText, Pencil, RotateCw, UserRound } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
@@ -24,7 +25,7 @@ import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
-import { TOOL_INVALIDATIONS, toolLabels } from "../model/agent-config";
+import { TOOL_INVALIDATIONS, toolLabelKeys } from "../model/agent-config";
 import { useAgentIsOpen } from "../model/use-agent.store";
 import { AgentForm } from "./agent-form";
 import { AgentHeader } from "./agent-header";
@@ -43,12 +44,19 @@ type LocalFileAttachment = {
   url: string;
 };
 
+function MarkdownLoading() {
+  const t = useTranslations("Agent");
+  return <div className="animate-pulse text-muted-foreground text-xs">{t("agent_loading")}</div>;
+}
+
 const MarkdownRenderer = dynamic(() => import("./agent-text-message").then((mod) => mod.default), {
-  loading: () => <div className="animate-pulse text-muted-foreground text-xs">Loading...</div>,
+  loading: () => <MarkdownLoading />,
   ssr: false,
 });
 
 export function Agent() {
+  const t = useTranslations("Agent");
+  const tCommon = useTranslations("Common");
   const isOpen = useAgentIsOpen();
 
   const [expanded, setExpanded] = useState(false);
@@ -160,7 +168,7 @@ export function Agent() {
 
       const base64Promise = new Promise<string>((resolve, reject) => {
         reader.onload = (event) => resolve(event.target?.result as string);
-        reader.onerror = () => reject(reader.error ?? new Error("File read failed"));
+        reader.onerror = () => reject(reader.error ?? new Error(t("file_read_failed")));
       });
 
       reader.readAsDataURL(file);
@@ -250,320 +258,325 @@ export function Agent() {
             type: "tween",
           }}
         >
-          <Card className="flex h-full w-full flex-col overflow-hidden p-0">
-            <ResizablePanelGroup
-              className="flex h-full"
-              key={expanded ? "expanded" : "collapsed"}
-              orientation="horizontal"
-            >
-              {expanded && (
-                <>
-                  <ResizablePanel
-                    defaultSize="15%"
-                    id="agent-sidebar"
-                    maxSize="50%"
-                    minSize="15%"
-                  >
-                    <AgentSidebar
-                      onNewChat={handleNewChat}
-                      sessionId={sessionId}
-                      sessions={sessions}
-                      setSessionId={setSessionId}
-                    />
-                  </ResizablePanel>
-                  <ResizableHandle style={{ position: "relative", zIndex: 9999 }} />
-                </>
-              )}
-
-              <ResizablePanel
-                className="flex h-full flex-col"
-                defaultSize={expanded ? "85%" : "100%"}
-                id="agent-main"
+          <aside
+            aria-label={t("assistant_name")}
+            className="flex h-full w-full"
+          >
+            <Card className="flex h-full w-full flex-col overflow-hidden p-0">
+              <ResizablePanelGroup
+                className="flex h-full"
+                key={expanded ? "expanded" : "collapsed"}
+                orientation="horizontal"
               >
-                <AgentHeader
-                  expanded={expanded}
-                  setExpanded={setExpanded}
-                />
+                {expanded && (
+                  <>
+                    <ResizablePanel
+                      defaultSize="15%"
+                      id="agent-sidebar"
+                      maxSize="50%"
+                      minSize="15%"
+                    >
+                      <AgentSidebar
+                        onNewChat={handleNewChat}
+                        sessionId={sessionId}
+                        sessions={sessions}
+                        setSessionId={setSessionId}
+                      />
+                    </ResizablePanel>
+                    <ResizableHandle style={{ position: "relative", zIndex: 9999 }} />
+                  </>
+                )}
 
-                <div className="group relative flex min-h-0 flex-1 flex-col">
-                  <ScrollArea
-                    className="h-full min-h-0 flex-1"
-                    ref={scrollRef}
-                  >
-                    {messages.length === 0 && !isHistoryLoading && (
-                      <div className="fade-in pointer-events-none flex animate-in select-none flex-col items-center gap-3 pt-24">
-                        <DxnxLogo className="size-64" />
-                        <p className="text-muted-foreground text-sm">
-                          Autonomous repository engineering assistant
-                        </p>
-                      </div>
-                    )}
-                    <div className="flex flex-col gap-4 p-4">
-                      {messages.map((message) => {
-                        const fullMessageText =
-                          message.parts
-                            .filter(
-                              (p: any): p is { text: string; type: "text" } => p?.type === "text",
-                            )
-                            .map((p: any) => p.text)
-                            .join("\n") || "";
+                <ResizablePanel
+                  className="flex h-full flex-col"
+                  defaultSize={expanded ? "85%" : "100%"}
+                  id="agent-main"
+                >
+                  <AgentHeader
+                    expanded={expanded}
+                    setExpanded={setExpanded}
+                  />
 
-                        const isAssistant = message.role === "assistant";
-                        const isEditing = editingMessageId === message.id;
+                  <div className="group relative flex min-h-0 flex-1 flex-col">
+                    <ScrollArea
+                      className="h-full min-h-0 flex-1"
+                      ref={scrollRef}
+                    >
+                      {messages.length === 0 && !isHistoryLoading && (
+                        <div className="fade-in pointer-events-none flex animate-in select-none flex-col items-center gap-3 pt-24">
+                          <DxnxLogo className="size-64" />
+                          <p className="text-muted-foreground text-sm">
+                            {t("assistant_description")}
+                          </p>
+                        </div>
+                      )}
+                      <div className="flex flex-col gap-4 p-4">
+                        {messages.map((message) => {
+                          const fullMessageText =
+                            message.parts
+                              .filter(
+                                (p: any): p is { text: string; type: "text" } => p?.type === "text",
+                              )
+                              .map((p: any) => p.text)
+                              .join("\n") || "";
 
-                        return (
-                          <div
-                            className="group fade-in flex w-full animate-in flex-col gap-2 border-b py-5 duration-300 last:border-0"
-                            key={message.id}
-                          >
+                          const isAssistant = message.role === "assistant";
+                          const isEditing = editingMessageId === message.id;
+
+                          return (
                             <div
-                              className={cn(
-                                "flex items-center gap-2 font-semibold text-muted-foreground text-xs",
-                                isAssistant ? "justify-start" : "justify-end",
-                              )}
+                              className="group fade-in flex w-full animate-in flex-col gap-2 border-b py-5 duration-300 last:border-0"
+                              key={message.id}
                             >
-                              {isAssistant ? <Bot /> : <UserRound />}
-                              <span>{isAssistant ? "Dxnx_" : "You"}</span>
-                            </div>
-
-                            {isEditing ? (
-                              <div className="fade-in ml-auto flex w-full animate-in flex-col gap-2 duration-200">
-                                <Textarea
-                                  className="max-h-32 min-h-16 resize-none rounded-xl border p-2 text-xs"
-                                  onChange={(e) => setEditInput(e.target.value)}
-                                  value={editInput}
-                                />
-                                <div className="flex items-center justify-end gap-1.5">
-                                  <AppButton
-                                    className="text-xs"
-                                    onClick={() => {
-                                      void (async () => {
-                                        if (editInput.trim() === "") {
-                                          return;
-                                        }
-                                        setEditingMessageId(null);
-                                        await sendMessage({
-                                          messageId: message.id,
-                                          text: editInput,
-                                        });
-                                      })();
-                                    }}
-                                    size="sm"
-                                  >
-                                    Save & Submit
-                                  </AppButton>
-                                  <AppButton
-                                    className="text-xs"
-                                    onClick={() => setEditingMessageId(null)}
-                                    size="sm"
-                                    variant="ghost"
-                                  >
-                                    Cancel
-                                  </AppButton>
-                                </div>
-                              </div>
-                            ) : (
                               <div
                                 className={cn(
-                                  "flex flex-col gap-3 text-foreground text-sm",
-                                  isAssistant ? "mr-auto text-left" : "ml-auto text-right",
+                                  "flex items-center gap-2 font-semibold text-muted-foreground text-xs",
+                                  isAssistant ? "justify-start" : "justify-end",
                                 )}
                               >
-                                {message.parts.map((rawPart: any, index: number) => {
-                                  const part = rawPart as MessagePart;
-
-                                  if (part.type === "reasoning") {
-                                    const reasoningPart = part as {
-                                      text: string;
-                                      type: "reasoning";
-                                    };
-                                    const partKey = `${message.id}-reasoning-${index}`;
-                                    return (
-                                      <Collapsible
-                                        className="group/collapsible my-1 rounded-r-lg border-l-2 pl-3 text-muted-foreground text-xs italic"
-                                        key={partKey}
-                                      >
-                                        <div className="flex items-center justify-between gap-1">
-                                          <div className="font-semibold text-xs uppercase">
-                                            Thinking Process
-                                          </div>
-                                          <CollapsibleTrigger asChild>
-                                            <AppButton
-                                              size="icon"
-                                              variant="ghost"
-                                            >
-                                              <ChevronDown className="group-data-[state=open]/collapsible:rotate-180" />
-                                            </AppButton>
-                                          </CollapsibleTrigger>
-                                        </div>
-                                        <CollapsibleContent>
-                                          <MarkdownRenderer
-                                            content={reasoningPart.text}
-                                            id={partKey}
-                                            isStreaming={isLoading}
-                                            key={`${partKey}-md`}
-                                          />
-                                        </CollapsibleContent>
-                                      </Collapsible>
-                                    );
-                                  }
-
-                                  if (part.type.startsWith("tool-")) {
-                                    return (
-                                      <ToolCallIndicator
-                                        addToolApprovalResponse={(e) =>
-                                          void addToolApprovalResponse(e)
-                                        }
-                                        key={`${message.id}-tool-${index}`}
-                                        part={part}
-                                        toolLabels={toolLabels}
-                                      />
-                                    );
-                                  }
-
-                                  if (part.type === "text") {
-                                    const textPart = part as { text: string; type: "text" };
-                                    return (
-                                      <MarkdownRenderer
-                                        content={textPart.text}
-                                        id={`${message.id}-text-${index}`}
-                                        isStreaming={isLoading}
-                                        key={`${message.id}-text-${index}`}
-                                      />
-                                    );
-                                  }
-
-                                  if (part.type === "file") {
-                                    const filePart = part as {
-                                      filename?: string;
-                                      mediaType: string;
-                                      type: "file";
-                                      url: string;
-                                    };
-                                    const isImage = filePart.mediaType.startsWith("image/");
-
-                                    return (
-                                      <div
-                                        className={cn(
-                                          "my-2 max-w-50 overflow-hidden rounded-xl border bg-background",
-                                          isAssistant ? "mr-auto" : "ml-auto",
-                                        )}
-                                        key={`${message.id}-file-${index}`}
-                                      >
-                                        {isImage ? (
-                                          <Image
-                                            alt={filePart.filename ?? "Attachment"}
-                                            className="h-auto max-h-38 w-full object-cover"
-                                            height={200}
-                                            src={filePart.url}
-                                            width={200}
-                                          />
-                                        ) : (
-                                          <div className="flex items-center gap-2 p-3 text-foreground text-xs">
-                                            <FileText />
-                                            <span className="truncate font-medium">
-                                              {filePart.filename ?? "Document"}
-                                            </span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  }
-
-                                  return null;
-                                })}
+                                {isAssistant ? <Bot /> : <UserRound />}
+                                <span>{isAssistant ? t("assistant_name") : t("you")}</span>
                               </div>
-                            )}
 
-                            <div
-                              className={cn(
-                                "mt-1 flex items-center gap-1.5",
-                                isAssistant ? "justify-start" : "justify-end",
-                              )}
-                            >
-                              {fullMessageText.trim() !== "" && (
-                                <>
-                                  <CopyButton
-                                    className="size-9 px-3"
-                                    tooltipText="Copy response"
-                                    value={fullMessageText}
+                              {isEditing ? (
+                                <div className="fade-in ml-auto flex w-full animate-in flex-col gap-2 duration-200">
+                                  <Textarea
+                                    className="max-h-32 min-h-16 resize-none rounded-xl border p-2 text-xs"
+                                    onChange={(e) => setEditInput(e.target.value)}
+                                    value={editInput}
                                   />
-                                  <AppTooltip content="Retry">
+                                  <div className="flex items-center justify-end gap-1.5">
                                     <AppButton
-                                      className="opacity-0 group-hover:opacity-100"
-                                      disabled={isLoading}
+                                      className="text-xs"
                                       onClick={() => {
                                         void (async () => {
-                                          await regenerate({ messageId: message.id });
+                                          if (editInput.trim() === "") {
+                                            return;
+                                          }
+                                          setEditingMessageId(null);
+                                          await sendMessage({
+                                            messageId: message.id,
+                                            text: editInput,
+                                          });
                                         })();
                                       }}
-                                      size="icon"
+                                      size="sm"
+                                    >
+                                      {t("save_and_submit")}
+                                    </AppButton>
+                                    <AppButton
+                                      className="text-xs"
+                                      onClick={() => setEditingMessageId(null)}
+                                      size="sm"
                                       variant="ghost"
                                     >
-                                      <RotateCw />
+                                      {tCommon("cancel")}
                                     </AppButton>
-                                  </AppTooltip>
-                                </>
-                              )}
-
-                              {!isAssistant && !isEditing && (
-                                <AppButton
-                                  className="opacity-0 group-hover:opacity-100"
-                                  onClick={() => {
-                                    setEditingMessageId(message.id);
-                                    setEditInput(fullMessageText);
-                                  }}
-                                  size="icon"
-                                  variant="ghost"
+                                  </div>
+                                </div>
+                              ) : (
+                                <div
+                                  className={cn(
+                                    "flex flex-col gap-3 text-foreground text-sm",
+                                    isAssistant ? "mr-auto text-left" : "ml-auto text-right",
+                                  )}
                                 >
-                                  <Pencil />
-                                </AppButton>
+                                  {message.parts.map((rawPart: any, index: number) => {
+                                    const part = rawPart as MessagePart;
+
+                                    if (part.type === "reasoning") {
+                                      const reasoningPart = part as {
+                                        text: string;
+                                        type: "reasoning";
+                                      };
+                                      const partKey = `${message.id}-reasoning-${index}`;
+                                      return (
+                                        <Collapsible
+                                          className="group/collapsible my-1 rounded-r-lg border-l-2 pl-3 text-muted-foreground text-xs italic"
+                                          key={partKey}
+                                        >
+                                          <div className="flex items-center justify-between gap-1">
+                                            <div className="font-semibold text-xs uppercase">
+                                              {t("thinking_process")}
+                                            </div>
+                                            <CollapsibleTrigger asChild>
+                                              <AppButton
+                                                size="icon"
+                                                variant="ghost"
+                                              >
+                                                <ChevronDown className="group-data-[state=open]/collapsible:rotate-180" />
+                                              </AppButton>
+                                            </CollapsibleTrigger>
+                                          </div>
+                                          <CollapsibleContent>
+                                            <MarkdownRenderer
+                                              content={reasoningPart.text}
+                                              id={partKey}
+                                              isStreaming={isLoading}
+                                              key={`${partKey}-md`}
+                                            />
+                                          </CollapsibleContent>
+                                        </Collapsible>
+                                      );
+                                    }
+
+                                    if (part.type.startsWith("tool-")) {
+                                      return (
+                                        <ToolCallIndicator
+                                          addToolApprovalResponse={(e) =>
+                                            void addToolApprovalResponse(e)
+                                          }
+                                          key={`${message.id}-tool-${index}`}
+                                          part={part}
+                                          toolLabelKeys={toolLabelKeys}
+                                        />
+                                      );
+                                    }
+
+                                    if (part.type === "text") {
+                                      const textPart = part as { text: string; type: "text" };
+                                      return (
+                                        <MarkdownRenderer
+                                          content={textPart.text}
+                                          id={`${message.id}-text-${index}`}
+                                          isStreaming={isLoading}
+                                          key={`${message.id}-text-${index}`}
+                                        />
+                                      );
+                                    }
+
+                                    if (part.type === "file") {
+                                      const filePart = part as {
+                                        filename?: string;
+                                        mediaType: string;
+                                        type: "file";
+                                        url: string;
+                                      };
+                                      const isImage = filePart.mediaType.startsWith("image/");
+
+                                      return (
+                                        <div
+                                          className={cn(
+                                            "my-2 max-w-50 overflow-hidden rounded-xl border bg-background",
+                                            isAssistant ? "mr-auto" : "ml-auto",
+                                          )}
+                                          key={`${message.id}-file-${index}`}
+                                        >
+                                          {isImage ? (
+                                            <Image
+                                              alt={filePart.filename ?? t("attachment_fallback")}
+                                              className="h-auto max-h-38 w-full object-cover"
+                                              height={200}
+                                              src={filePart.url}
+                                              width={200}
+                                            />
+                                          ) : (
+                                            <div className="flex items-center gap-2 p-3 text-foreground text-xs">
+                                              <FileText />
+                                              <span className="truncate font-medium">
+                                                {filePart.filename ?? t("document_fallback")}
+                                              </span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    }
+
+                                    return null;
+                                  })}
+                                </div>
                               )}
+
+                              <div
+                                className={cn(
+                                  "mt-1 flex items-center gap-1.5",
+                                  isAssistant ? "justify-start" : "justify-end",
+                                )}
+                              >
+                                {fullMessageText.trim() !== "" && (
+                                  <>
+                                    <CopyButton
+                                      className="size-9 px-3"
+                                      tooltipText={t("copy_response")}
+                                      value={fullMessageText}
+                                    />
+                                    <AppTooltip content={tCommon("retry")}>
+                                      <AppButton
+                                        className="opacity-0 group-hover:opacity-100"
+                                        disabled={isLoading}
+                                        onClick={() => {
+                                          void (async () => {
+                                            await regenerate({ messageId: message.id });
+                                          })();
+                                        }}
+                                        size="icon"
+                                        variant="ghost"
+                                      >
+                                        <RotateCw />
+                                      </AppButton>
+                                    </AppTooltip>
+                                  </>
+                                )}
+
+                                {!isAssistant && !isEditing && (
+                                  <AppButton
+                                    className="opacity-0 group-hover:opacity-100"
+                                    onClick={() => {
+                                      setEditingMessageId(message.id);
+                                      setEditInput(fullMessageText);
+                                    }}
+                                    size="icon"
+                                    variant="ghost"
+                                  >
+                                    <Pencil />
+                                  </AppButton>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
-                      {status === "submitted" && (
-                        <p className="text-muted-foreground text-xs">Thinking...</p>
+                          );
+                        })}
+                        {status === "submitted" && (
+                          <p className="text-muted-foreground text-xs">{t("thinking")}</p>
+                        )}
+                      </div>
+                    </ScrollArea>
+
+                    <AppButton
+                      className={cn(
+                        "absolute bottom-4 left-1/2 z-10 -translate-x-1/2",
+                        showScrollButton
+                          ? "pointer-events-auto scale-100 opacity-100"
+                          : "pointer-events-none scale-90 opacity-0",
                       )}
-                    </div>
-                  </ScrollArea>
+                      onClick={() => scrollToBottom("smooth")}
+                      size="icon"
+                      variant="secondary"
+                    >
+                      <ArrowDown />
+                    </AppButton>
+                  </div>
 
-                  <AppButton
-                    className={cn(
-                      "absolute bottom-4 left-1/2 z-10 -translate-x-1/2",
-                      showScrollButton
-                        ? "pointer-events-auto scale-100 opacity-100"
-                        : "pointer-events-none scale-90 opacity-0",
-                    )}
-                    onClick={() => scrollToBottom("smooth")}
-                    size="icon"
-                    variant="secondary"
-                  >
-                    <ArrowDown />
-                  </AppButton>
-                </div>
-
-                <AgentForm
-                  attachments={attachments}
-                  handleFileChange={(e) => {
-                    void (async () => {
-                      await handleFileChange(e);
-                    })();
-                  }}
-                  input={input}
-                  isLoading={isLoading}
-                  onSubmit={(e) => {
-                    void (async () => {
-                      await handleCustomSubmit(e);
-                    })();
-                  }}
-                  setAttachments={setAttachments}
-                  setInput={setInput}
-                />
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </Card>
+                  <AgentForm
+                    attachments={attachments}
+                    handleFileChange={(e) => {
+                      void (async () => {
+                        await handleFileChange(e);
+                      })();
+                    }}
+                    input={input}
+                    isLoading={isLoading}
+                    onSubmit={(e) => {
+                      void (async () => {
+                        await handleCustomSubmit(e);
+                      })();
+                    }}
+                    setAttachments={setAttachments}
+                    setInput={setInput}
+                  />
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            </Card>
+          </aside>
         </motion.div>
       ) : null}
     </AnimatePresence>

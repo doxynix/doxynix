@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Copy } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
 import { useCopyToClipboard } from "@/shared/lib/hooks/use-copy-to-clipboard";
@@ -20,18 +21,20 @@ export function CopyButton({
   className,
   disabled,
   tooltipSide,
-  tooltipText = "Copy ID",
+  tooltipText,
   value,
 }: Readonly<Props>) {
   const { copy, isCopied } = useCopyToClipboard();
+  const tCommon = useTranslations("Common");
+  const label = tooltipText ?? tCommon("copy_id");
 
   return (
     <AppTooltip
-      content={tooltipText}
+      content={label}
       side={tooltipSide}
     >
       <AppButton
-        aria-label={tooltipText}
+        aria-label={label}
         className={cn(
           "relative size-6 not-md:opacity-100 transition-standard duration-300",
           "group/copy-btn",
@@ -60,7 +63,7 @@ export function CopyButton({
           )}
         />
 
-        <span className="sr-only">Copy</span>
+        <span className="sr-only">{tCommon("copy")}</span>
       </AppButton>
     </AppTooltip>
   );

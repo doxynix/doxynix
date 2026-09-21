@@ -39,19 +39,21 @@ import { Input } from "@/shared/ui/core/input";
 import { YandexIcon } from "@/shared/ui/icons/yandex-icon";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-const MagicLinkSchema = z.object({
-  email: z
-    .email({
-      error: "Please enter a valid email address",
-    })
-    .check(
-      z.maxLength(254, {
-        error: "Email address cannot exceed 254 characters",
-      }),
-    ),
-});
+function createMagicLinkSchema(invalidEmailError: string, emailTooLongError: string) {
+  return z.object({
+    email: z
+      .email({
+        error: invalidEmailError,
+      })
+      .check(
+        z.maxLength(254, {
+          error: emailTooLongError,
+        }),
+      ),
+  });
+}
 
-type MagicLinkSchemaValue = z.infer<typeof MagicLinkSchema>;
+type MagicLinkSchemaValue = z.infer<ReturnType<typeof createMagicLinkSchema>>;
 
 type AllowedProviders = "yandex";
 
@@ -61,34 +63,11 @@ type AuthProvider = {
   text: string;
 };
 
-const BUTTONS = [
-  { icon: YandexIcon, provider: "yandex", text: "Continue with Yandex" },
-] as const satisfies readonly AuthProvider[];
-
 type AuthBenefit = {
   desc: string;
   icon: ComponentType<{ className?: string }>;
   title: string;
 };
-
-const AUTH_BENEFITS = [
-  {
-    desc: "Seamless integration with your existing workflow and identity providers.",
-    icon: Sparkles,
-    title: "Instant Access",
-  },
-  {
-    desc: "Your source code stays private. We only process metadata for analysis.",
-    icon: ShieldCheck,
-    title: "Enterprise Security",
-  },
-] as const satisfies readonly AuthBenefit[];
-
-const TRUST_POINTS = [
-  "OAuth 2.0 Secure",
-  "Non-custodial analysis",
-  "Cloudflare Protected",
-] as const;
 
 export function AuthForm() {
   const router = useRouter();
@@ -97,6 +76,34 @@ export function AuthForm() {
   const turnstileRef = useRef<TurnstileInstance>(null);
   const pendingDataRef = useRef<MagicLinkSchemaValue | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<null | string>(null);
+
+  const MagicLinkSchema = createMagicLinkSchema(
+    t("error_invalid_email"),
+    t("error_email_too_long"),
+  );
+
+  const BUTTONS = [
+    { icon: YandexIcon, provider: "yandex" as const, text: t("continue_with_yandex") },
+  ] as const satisfies readonly AuthProvider[];
+
+  const AUTH_BENEFITS = [
+    {
+      desc: t("benefit_instant_access_desc"),
+      icon: Sparkles,
+      title: t("benefit_instant_access_title"),
+    },
+    {
+      desc: t("benefit_enterprise_security_desc"),
+      icon: ShieldCheck,
+      title: t("benefit_enterprise_security_title"),
+    },
+  ] as const satisfies readonly AuthBenefit[];
+
+  const TRUST_POINTS = [
+    t("trust_oauth_secure"),
+    t("trust_non_custodial"),
+    t("trust_cloudflare_protected"),
+  ] as const;
 
   const [isSent, setIsSent] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState<null | string>(null);
@@ -192,7 +199,7 @@ export function AuthForm() {
         provider,
       });
     } catch {
-      toast.error("Social sign-in failed. Please try again.");
+      toast.error(t("error_social_signin_failed"));
     } finally {
       setLoadingProvider(null);
     }
@@ -202,7 +209,7 @@ export function AuthForm() {
     e.preventDefault();
     const minLen = isBackupMode ? 8 : 6;
     if (twoFactorCode.trim().length < minLen) {
-      toast.error(isBackupMode ? "Enter a valid backup code" : "Enter the 6-digit code");
+      toast.error(isBackupMode ? t("error_enter_backup_code") : t("error_enter_6digit_code"));
       return;
     }
 
@@ -225,11 +232,11 @@ export function AuthForm() {
         }
       }
 
-      toast.success("Authenticated successfully!");
+      toast.success(t("success_authenticated"));
       void setTwoFactorParam(null);
       router.replace("/dashboard");
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "Verification failed";
+      const msg = error instanceof Error ? error.message : t("error_verification_failed");
       toast.error(msg);
     } finally {
       setIsTwoFactorVerifying(false);
@@ -251,15 +258,13 @@ export function AuthForm() {
 
       if (error) {
         if ("code" in error && error.code === "NO_CREDENTIALS") {
-          toast.error(
-            "No security keys found on this device. Please log in using email or social accounts first.",
-          );
+          toast.error(t("error_no_security_keys"));
         } else {
-          toast.error(error.message ?? "Authentication failed");
+          toast.error(error.message ?? t("error_authentication_failed"));
         }
       }
     } catch {
-      toast.error("Passkey authentication failed. Please try another method.");
+      toast.error(t("error_passkey_failed"));
     } finally {
       setLoadingProvider(null);
     }
@@ -278,7 +283,7 @@ export function AuthForm() {
     setTurnstileToken(null);
     setIsVerifying(false);
     pendingDataRef.current = null;
-    toast.error("Verification service error.");
+    toast.error(t("error_verification_service"));
   };
 
   const onTurnstileExpire = () => {
@@ -289,7 +294,7 @@ export function AuthForm() {
     setTurnstileToken(null);
     setIsVerifying(false);
     pendingDataRef.current = null;
-    toast.error("Verification expired.");
+    toast.error(t("error_verification_expired"));
   };
 
   const turnstileOptions = {
@@ -319,13 +324,10 @@ export function AuthForm() {
 
           <div className="flex flex-col gap-5">
             <h1 className="font-bold text-4xl xl:text-6xl">
-              Engineering insights, <br />
-              <span className="text-muted-foreground">delivered instantly.</span>
+              {t("hero_title")} <br />
+              <span className="text-muted-foreground">{t("hero_subtitle")}</span>
             </h1>
-            <p className="text-base text-muted-foreground">
-              Step into your workspace to analyze repository health, generate precise documentation,
-              and track engineering velocity. Clean, secure, and built for modern teams.
-            </p>
+            <p className="text-base text-muted-foreground">{t("hero_description")}</p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -377,10 +379,8 @@ export function AuthForm() {
 
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-2">
-                <h2 className="font-semibold text-2xl">Welcome back</h2>
-                <p className="text-muted-foreground text-sm">
-                  Choose your preferred way to sign in.
-                </p>
+                <h2 className="font-semibold text-2xl">{t("welcome_back")}</h2>
+                <p className="text-muted-foreground text-sm">{t("choose_signin_method")}</p>
               </div>
             </div>
 
@@ -405,7 +405,9 @@ export function AuthForm() {
                         <span className="truncate font-medium text-sm">{item.text}</span>
                       </div>
                       {isLastUsed && (
-                        <AppBadge className="absolute -top-2 -right-2 text-xs">Last used</AppBadge>
+                        <AppBadge className="absolute -top-2 -right-2 text-xs">
+                          {t("last_used")}
+                        </AppBadge>
                       )}
                     </div>
                   </LoadingButton>
@@ -415,7 +417,7 @@ export function AuthForm() {
                 className="relative w-full cursor-pointer rounded-2xl border-border bg-background px-3 py-5 text-foreground transition-colors hover:bg-surface-hover"
                 disabled={disabled}
                 isLoading={loadingProvider === "passkey"}
-                loadingText="Verifying security key..."
+                loadingText={t("verifying_security_key")}
                 onClick={() => void handlePasskeySignIn()}
                 type="button"
                 variant="outline"
@@ -425,10 +427,14 @@ export function AuthForm() {
                     <span className="flex shrink-0 items-center justify-center">
                       <Fingerprint className="size-4 text-muted-foreground" />
                     </span>
-                    <span className="truncate font-medium text-sm">Continue with Passkey</span>
+                    <span className="truncate font-medium text-sm">
+                      {t("continue_with_passkey")}
+                    </span>
                   </div>
                   {lastLogin === "passkey" && (
-                    <AppBadge className="absolute -top-2 -right-2 text-xs">Last used</AppBadge>
+                    <AppBadge className="absolute -top-2 -right-2 text-xs">
+                      {t("last_used")}
+                    </AppBadge>
                   )}
                 </div>
               </LoadingButton>
@@ -445,10 +451,8 @@ export function AuthForm() {
 
             <div className="flex flex-col gap-4 rounded-[1.35rem] border border-border bg-background p-5">
               <div className="flex flex-col gap-1">
-                <p className="font-medium text-foreground text-sm">Work email</p>
-                <p className="text-muted-foreground text-sm">
-                  We will send a one-time sign-in link. No password, no friction.
-                </p>
+                <p className="font-medium text-foreground text-sm">{t("work_email")}</p>
+                <p className="text-muted-foreground text-sm">{t("work_email_description")}</p>
               </div>
               <Form {...form}>
                 <form
@@ -460,7 +464,7 @@ export function AuthForm() {
                     name="email"
                     render={({ field }) => (
                       <FormItem className="relative flex flex-col gap-2">
-                        <FormLabel className="text-muted-foreground">Email</FormLabel>
+                        <FormLabel className="text-muted-foreground">{t("email_label")}</FormLabel>
                         <FormControl>
                           <Input
                             /* oxlint-disable-next-line jsx-a11y/autocomplete-valid */
@@ -476,7 +480,9 @@ export function AuthForm() {
                           <FormMessage className="fade-in slide-in-from-top-1 animate-in text-xs" />
                         </div>
                         {lastLogin === "magic-link" && (
-                          <AppBadge className="absolute top-2 -right-2 text-xs">Last used</AppBadge>
+                          <AppBadge className="absolute top-2 -right-2 text-xs">
+                            {t("last_used")}
+                          </AppBadge>
                         )}
                       </FormItem>
                     )}
@@ -485,10 +491,10 @@ export function AuthForm() {
                     className="h-12 w-full cursor-pointer rounded-2xl"
                     disabled={disabled}
                     isLoading={loadingProvider === "email" || isVerifying}
-                    loadingText={isVerifying ? "Security check..." : t("login_loading")}
+                    loadingText={isVerifying ? t("security_check") : t("login_loading")}
                     type="submit"
                   >
-                    {t("login_btn")}
+                    {tCommon("login_btn")}
                   </LoadingButton>
                 </form>
               </Form>
@@ -528,10 +534,10 @@ export function AuthForm() {
                 </div>
                 <div className="text-left">
                   <h3 className="font-semibold text-sm">
-                    {isBackupMode ? "Backup Recovery" : "Two-Factor Verification"}
+                    {isBackupMode ? t("backup_recovery") : t("two_factor_verification")}
                   </h3>
                   <p className="text-[11px] text-muted-foreground">
-                    {isBackupMode ? "Use 8-char recovery code" : "Enter 6-digit TOTP code"}
+                    {isBackupMode ? t("use_recovery_code") : t("enter_totp_code")}
                   </p>
                 </div>
               </div>
@@ -565,10 +571,10 @@ export function AuthForm() {
                   twoFactorCode.trim().length < 6
                 }
                 isLoading={isTwoFactorVerifying}
-                loadingText="Verifying..."
+                loadingText={t("verifying")}
                 type="submit"
               >
-                Verify <ArrowRight size={16} />
+                {t("verify")} <ArrowRight size={16} />
               </LoadingButton>
 
               <AppButton
@@ -581,7 +587,7 @@ export function AuthForm() {
                 type="button"
                 variant="link"
               >
-                {isBackupMode ? "Back to Authenticator App" : "Lost your device? Use Backup Code"}
+                {isBackupMode ? t("back_to_authenticator") : t("use_backup_code")}
               </AppButton>
             </form>
           </div>

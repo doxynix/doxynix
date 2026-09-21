@@ -15,6 +15,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { TreeApi } from "react-arborist";
 import { toast } from "sonner";
 
@@ -56,6 +57,8 @@ type Props = {
 };
 
 export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Readonly<Props>) {
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
   const { data: session } = authClient.useSession();
   const userId = session?.user.id;
 
@@ -121,21 +124,21 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
   const auditMutation = trpc.analysis.quickFileAudit.useMutation({
     onError: () => setIsAiLoading(false),
     onMutate: () => setIsAiLoading(true),
-    onSuccess: () => toast.info("Audit started..."),
+    onSuccess: () => toast.info(t("repo_code_audit_started")),
   });
 
   const documentMutation = trpc.analysis.documentFile.useMutation({
     onError: () => setIsAiLoading(false),
     onMutate: () => setIsAiLoading(true),
-    onSuccess: () => toast.info("Documentation generation started..."),
+    onSuccess: () => toast.info(t("repo_code_docgen_started")),
   });
 
   const stageMutation = trpc.analysis.stageFile.useMutation({
     onError: (error) => {
-      toast.error(`Failed to stage changes: ${error.message}`);
+      toast.error(t("repo_code_stage_failed", { message: error.message }));
     },
     onSuccess: (data) => {
-      toast.success(`Changes staged for PR. Total files in draft: ${data.stagedCount}`);
+      toast.success(t("repo_code_stage_success", { count: data.stagedCount }));
     },
   });
 
@@ -215,9 +218,9 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
   };
 
   const pinMutation = trpc.analysis.pinAuditToDocs.useMutation({
-    onError: (err) => toast.error(`Failed to save: ${err.message}`),
+    onError: (err) => toast.error(tCommon("save_failed", { message: err.message })),
     onSuccess: () => {
-      toast.success("Audit saved to project documentation");
+      toast.success(t("repo_code_pin_success"));
     },
   });
 
@@ -225,35 +228,35 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
     {
       icon: Download,
       onClick: handleDownload,
-      tooltipText: "Download file",
+      tooltipText: t("repo_code_action_download"),
     },
     {
       disabled: isAiLoading || auditMutation.isPending,
       icon: Sparkles,
       onClick: handleAudit,
-      tooltipText: "Quick AI Audit",
+      tooltipText: t("repo_code_action_audit"),
     },
     {
       icon: Edit3,
       onClick: () => setMode("edit"),
-      tooltipText: "Edit file",
+      tooltipText: t("repo_code_action_edit"),
     },
     {
       disabled: isAiLoading || documentMutation.isPending,
       icon: FileText,
       onClick: handleDocument,
-      tooltipText: "Document file",
+      tooltipText: t("repo_code_action_document"),
     },
     {
       icon: FileChartLine,
       onClick: () => setIsAuditDismissed(false),
-      tooltipText: "Show documentation",
+      tooltipText: t("repo_code_action_show_docs"),
     },
     {
       hidden: fileData.meta.url == null,
       href: fileData.meta.url ?? undefined,
       icon: GitHubIcon,
-      tooltipText: "Open file on Github",
+      tooltipText: t("repo_code_action_open_github"),
     },
   ];
 
@@ -261,21 +264,21 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
     {
       hideTooltip: true,
       icon: X,
-      label: "Cancel",
+      label: tCommon("cancel"),
       onClick: () => {
         setLocalContent(fileData.content);
         setMode("view");
       },
-      tooltipText: "Discard changes",
+      tooltipText: t("repo_code_action_discard"),
     },
     {
       hideTooltip: true,
       icon: Save,
-      label: "Save Changes",
+      label: t("repo_code_action_save_changes"),
       onClick: () => {
         setMode("view");
       },
-      tooltipText: "Save to repository",
+      tooltipText: t("repo_code_action_save_to_repo"),
       variant: "outline" as const,
     },
   ];
@@ -304,7 +307,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
           />
           <CopyButton
             className="shrink-0 opacity-100"
-            tooltipText="Copy file path"
+            tooltipText={t("repo_code_copy_path")}
             value={path}
           />
         </div>
@@ -323,7 +326,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
               ))}
               <CopyButton
                 className="size-8 px-3 opacity-100"
-                tooltipText="Copy file"
+                tooltipText={t("repo_code_copy_file")}
                 value={localContent}
               />
             </>
@@ -354,7 +357,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
           <div className="mb-3 flex items-center justify-between border-b pb-2">
             <h3 className="flex items-center gap-1 font-bold text-xs">
               <Sparkles />
-              AI File Audit
+              {t("repo_code_audit_title")}
             </h3>
             <AppButton
               onClick={() => setIsAuditDismissed(true)}
@@ -400,7 +403,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
                   ) : (
                     <Save className="size-3" />
                   )}
-                  Pin to Docs
+                  {t("repo_code_pin_to_docs")}
                 </AppButton>
               </div>
             </>
@@ -414,7 +417,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
             <Sparkles />
             <div className="flex flex-col">
               <span className="font-semibold text-[11px] tracking-tight">
-                Documentation Preview
+                {t("repo_code_doc_preview")}
               </span>
             </div>
           </div>
@@ -425,7 +428,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
               variant="ghost"
             >
               <X className="mr-1 h-3 w-3" />
-              Discard
+              {tCommon("discard")}
             </AppButton>
             <AppButton
               disabled={stageMutation.isPending}
@@ -438,7 +441,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
               ) : (
                 <Check className="mr-1 h-3 w-3" />
               )}
-              Accept Changes
+              {tCommon("accept_changes")}
             </AppButton>
           </div>
         </div>

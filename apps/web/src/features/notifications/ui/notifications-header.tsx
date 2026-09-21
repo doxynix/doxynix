@@ -2,6 +2,7 @@
 
 import { NotifyType } from "@doxynix/shared";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
 import { AppButton } from "@/shared/ui/core/button";
@@ -41,10 +42,13 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
     void setFilters({ [key]: value, page: null });
   };
 
+  const t = useTranslations("Notifications");
+  const tCommon = useTranslations("Common");
+
   const TABS = [
-    { count: stats?.total, id: "all", label: "All", value: "all" },
-    { count: stats?.read, id: "read", label: "Read", value: "read" },
-    { count: stats?.unread, id: "unread", label: "Unread", value: "unread" },
+    { count: stats?.total, id: "all", label: t("tab_all"), value: "all" },
+    { count: stats?.read, id: "read", label: t("tab_read"), value: "read" },
+    { count: stats?.unread, id: "unread", label: t("tab_unread"), value: "unread" },
   ] satisfies TabItem[];
 
   const handleReset = () => {
@@ -70,7 +74,7 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
           onValueChange={(v) => handleUpdate("isRead", v === "all" ? null : v === "read")}
           value={tabValue}
         >
-          <TabsList aria-label="Filter notifications by status">
+          <TabsList aria-label={t("filter_by_status")}>
             {TABS.map((t) => (
               <TabsTrigger
                 className="m-0.5"
@@ -78,7 +82,7 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
                 key={t.id}
                 value={t.value}
               >
-                {t.label} ({t.count ?? 0})
+                {`${t.label} (${t.count ?? 0})`}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -91,7 +95,7 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
           ))}
         </Tabs>
 
-        <AppSearch placeholder="Search notification..." />
+        <AppSearch placeholder={t("search_placeholder")} />
 
         <NotificationsRepoFilter />
 
@@ -102,17 +106,17 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
           value={filters.type ?? "all"}
         >
           <SelectTrigger
-            aria-label="Filter by notification type"
+            aria-label={t("filter_by_type")}
             className=""
           >
-            <SelectValue placeholder="Type" />
+            <SelectValue placeholder={t("type_placeholder")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All types</SelectItem>
-            <SelectItem value={NotifyType.INFO}>Info</SelectItem>
-            <SelectItem value={NotifyType.SUCCESS}>Success</SelectItem>
-            <SelectItem value={NotifyType.WARNING}>Warning</SelectItem>
-            <SelectItem value={NotifyType.ERROR}>Error</SelectItem>
+            <SelectItem value="all">{t("all_types")}</SelectItem>
+            <SelectItem value={NotifyType.INFO}>{t("type_info")}</SelectItem>
+            <SelectItem value={NotifyType.SUCCESS}>{t("type_success")}</SelectItem>
+            <SelectItem value={NotifyType.WARNING}>{t("type_warning")}</SelectItem>
+            <SelectItem value={NotifyType.ERROR}>{t("type_error")}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -122,7 +126,7 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
           onClick={handleReset}
           variant="outline"
         >
-          Reset
+          {tCommon("reset")}
           <X />
         </AppButton>
       </div>

@@ -120,7 +120,7 @@ export default async function PrivacyPage() {
               className="hover:no-underline"
               href="mailto:legal@doxynix.space?subject=Privacy Policy Question"
             >
-              legal@doxynix.space
+              {t("contact_email")}
             </a>
           </div>
         </section>

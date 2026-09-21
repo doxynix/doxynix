@@ -34,11 +34,11 @@ export function TrendsWidget({ className, repoId }: Readonly<Props>) {
   const [activeTab, setActiveTab] = useState("overview");
 
   const chartConfig = {
-    complexity: { color: "var(--chart-3)", label: "Complexity" },
-    health: { color: "var(--chart-1)", label: "Health" },
-    onboarding: { color: "var(--chart-4)", label: "Onboarding" },
-    security: { color: "var(--chart-2)", label: "Security" },
-    techDebt: { color: "var(--chart-5)", label: "Tech Debt" },
+    complexity: { color: "var(--chart-3)", label: t("quality_complexity") },
+    health: { color: "var(--chart-1)", label: t("quality_health") },
+    onboarding: { color: "var(--chart-4)", label: t("quality_onboarding") },
+    security: { color: "var(--chart-2)", label: t("quality_security") },
+    techDebt: { color: "var(--chart-5)", label: t("quality_tech_debt") },
   } satisfies ChartConfig;
 
   if (isLoading) {
@@ -65,13 +65,13 @@ export function TrendsWidget({ className, repoId }: Readonly<Props>) {
                 className="text-xs"
                 value="overview"
               >
-                Overview
+                {t("repo_trends_tab_overview")}
               </TabsTrigger>
               <TabsTrigger
                 className="text-xs"
                 value="engineering"
               >
-                Engineering
+                {t("repo_trends_tab_engineering")}
               </TabsTrigger>
             </TabsList>
 
@@ -90,7 +90,7 @@ export function TrendsWidget({ className, repoId }: Readonly<Props>) {
       <CardContent className="pt-6">
         {!hasData ? (
           <div className="flex h-80 w-full flex-col items-center justify-center gap-2 rounded-xl border">
-            <p className="text-muted-foreground text-sm">No data</p>
+            <p className="text-muted-foreground text-sm">{t("repo_trends_no_data")}</p>
           </div>
         ) : (
           <TrendsChart

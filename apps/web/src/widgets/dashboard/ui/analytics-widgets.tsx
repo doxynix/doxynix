@@ -33,6 +33,7 @@ import type { DashboardStats } from "../model/dashboard.types";
 type Props = { data: DashboardStats };
 
 export function EcosystemStatusWidget({ data }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const repoCount = data.overview.repoCount;
   const docsCount = data.overview.docsCount;
   const maxPossibleDocs = data.overview.repoCount * 5;
@@ -47,14 +48,14 @@ export function EcosystemStatusWidget({ data }: Readonly<Props>) {
         <CardTitle className="flex items-center justify-between text-base">
           <span className="flex items-center gap-2">
             <BookOpenCheck />
-            Ecosystem Status
+            {t("ecosystem_status")}
           </span>
           {!isEmpty && (
             <AppBadge
               className="font-mono"
               variant="outline"
             >
-              {docCoverage}% Documented
+              {docCoverage}% {t("documented")}
             </AppBadge>
           )}
         </CardTitle>
@@ -62,7 +63,7 @@ export function EcosystemStatusWidget({ data }: Readonly<Props>) {
       <CardContent className="pt-4">
         {isEmpty ? (
           <div className="flex h-62.5 flex-col items-center justify-center gap-2 rounded-xl border">
-            <p className="text-muted-foreground text-sm">No repositories found in ecosystem</p>
+            <p className="text-muted-foreground text-sm">{t("no_repositories_in_ecosystem")}</p>
           </div>
         ) : (
           <QualityRadar scores={data.overview.avgScores} />
@@ -73,25 +74,26 @@ export function EcosystemStatusWidget({ data }: Readonly<Props>) {
 }
 
 export function SystemRisksWidget({ data }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
+
   return (
     <Card className="border-destructive/20">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-destructive text-sm">
-          <AlertTriangle /> Global Risks
+          <AlertTriangle /> {t("global_risks")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {data.risks.busFactorRepos === 0 ? (
-          <p className="text-muted-foreground text-sm">No data yet</p>
+          <p className="text-muted-foreground text-sm">{t("no_data_yet")}</p>
         ) : (
           <div className="flex gap-3 text-sm">
             <Users />
             <div className="flex flex-col gap-1">
-              <p>Knowledge Concentration</p>
+              <p>{t("knowledge_concentration")}</p>
               <p className="mt-1 text-muted-foreground text-xs">
                 <span className="font-bold text-destructive">{data.risks.busFactorRepos}</span>{" "}
-                repositories have a Bus Factor of 1. If the key maintainer leaves, the code becomes
-                legacy.
+                {t("bus_factor_description")}
               </p>
             </div>
           </div>
@@ -102,6 +104,7 @@ export function SystemRisksWidget({ data }: Readonly<Props>) {
 }
 
 export function RefactoringTargetsWidget({ data }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const hasHotspots = data.risks.topHotspots.length > 0;
   const hasCoupling = data.risks.topCoupling.length > 0;
   const isEmpty = !hasHotspots && !hasCoupling;
@@ -110,22 +113,20 @@ export function RefactoringTargetsWidget({ data }: Readonly<Props>) {
     <Card>
       <CardHeader className="border-b pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
-          <Flame className="text-destructive" /> High-Impact Action Items
+          <Flame className="text-destructive" /> {t("high_impact_action_items")}
         </CardTitle>
       </CardHeader>
       <CardContent className={cn("grid grid-cols-1 gap-6 pt-4", !isEmpty && "md:grid-cols-2")}>
         {isEmpty ? (
           <div className="col-span-full py-10 text-center">
-            <p className="text-muted-foreground text-sm">
-              No high-impact risks identified in current scope
-            </p>
+            <p className="text-muted-foreground text-sm">{t("no_high_impact_risks")}</p>
           </div>
         ) : (
           <>
             {hasHotspots && (
               <div className="flex flex-col gap-2">
                 <p className="flex items-center gap-1 text-muted-foreground text-sm">
-                  <Target /> Refactoring Targets
+                  <Target /> {t("refactoring_targets")}
                 </p>
                 {data.risks.topHotspots.map((h, i) => (
                   <div
@@ -140,7 +141,7 @@ export function RefactoringTargetsWidget({ data }: Readonly<Props>) {
                       className="h-5 text-[10px]"
                       variant="destructive"
                     >
-                      {h.score} pts
+                      {t("points", { count: h.score })}
                     </AppBadge>
                   </div>
                 ))}
@@ -150,7 +151,7 @@ export function RefactoringTargetsWidget({ data }: Readonly<Props>) {
             {hasCoupling && (
               <div className="flex flex-col gap-2">
                 <p className="flex items-center gap-1 text-muted-foreground text-sm">
-                  <GitMerge /> Hidden Dependencies (Change Coupling)
+                  <GitMerge /> {t("hidden_dependencies")}
                 </p>
                 {data.risks.topCoupling.map((c, i) => (
                   <div
@@ -161,7 +162,7 @@ export function RefactoringTargetsWidget({ data }: Readonly<Props>) {
                     <ArrowLeftRight />
                     <span className="truncate">{c.to_path.split("/").pop()}</span>
                     <span className="ml-auto text-muted-foreground">
-                      {c.commits} <span>commits</span>
+                      {c.commits} <span>{t("commits")}</span>
                     </span>
                   </div>
                 ))}
@@ -175,18 +176,19 @@ export function RefactoringTargetsWidget({ data }: Readonly<Props>) {
 }
 
 export function HealthExtremesWidget({ data }: Readonly<Props>) {
-  const hasData = !!(data.highlights.topPerformer || data.highlights.mostCritical);
+  const t = useTranslations("Dashboard");
+  const hasData = !!(data.highlights.topPerformer ?? data.highlights.mostCritical);
 
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm">
-          <HeartPulse /> Health Extremes
+          <HeartPulse /> {t("health_extremes")}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
         {!hasData ? (
-          <p className="text-muted-foreground text-sm">No extremes detected for this period</p>
+          <p className="text-muted-foreground text-sm">{t("no_extremes")}</p>
         ) : (
           <>
             {data.highlights.topPerformer && (
@@ -231,7 +233,7 @@ export function LanguagesWidget({ data }: Readonly<Props>) {
       <CardContent>
         <div className="flex flex-col gap-4">
           {data.languages.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No data yet</p>
+            <p className="text-muted-foreground text-sm">{t("no_data_yet")}</p>
           ) : (
             data.languages.map((lang) => {
               const percentage =
@@ -251,13 +253,13 @@ export function LanguagesWidget({ data }: Readonly<Props>) {
                       <span className="font-medium">{lang.name}</span>
                     </div>
                     <span className="text-muted-foreground">
-                      {lang.value.toLocaleString(locale)} lines
+                      {lang.value.toLocaleString(locale)} {t("lines")}
                       {` (${percentage.toFixed(1)}%)`}
                     </span>
                   </div>
 
                   <Progress
-                    aria-label={`Usage of ${lang.name} language`}
+                    aria-label={t("stat_lang_usage", { lang: lang.name })}
                     indicatorStyle={{ backgroundColor: lang.color }}
                     value={percentage}
                   />
@@ -286,7 +288,7 @@ export function RecentActivityWidget({ data }: Readonly<Props>) {
       <CardContent>
         <div className="flex flex-col gap-4">
           {data.recentActivity.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No recent analyses</p>
+            <p className="text-muted-foreground text-sm">{t("no_recent_analyses")}</p>
           ) : (
             data.recentActivity.map((activity) => (
               <div
@@ -311,9 +313,9 @@ export function RecentActivityWidget({ data }: Readonly<Props>) {
                       <span className="truncate font-bold">{activity.repoName}</span>
                     </Link>
                     <span className="text-muted-foreground text-xs">
-                      {activity.status === "DONE" && "Analysis completed"}
-                      {activity.status === "FAILED" && "Analysis failed"}
-                      {activity.status === "PENDING" && "Analysis started"}
+                      {activity.status === "DONE" && t("analysis_completed")}
+                      {activity.status === "FAILED" && t("analysis_failed")}
+                      {activity.status === "PENDING" && t("analysis_started")}
                       {" • "}
                       <TimeAgo
                         date={activity.createdAt}

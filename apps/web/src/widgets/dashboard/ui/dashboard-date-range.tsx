@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { format, subDays, subHours, subMinutes } from "date-fns";
 import { Check, Clock } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 import type { DateRange } from "react-day-picker";
 
@@ -18,37 +19,32 @@ import { hasUrlStateChanged, resolveDateRange } from "../model/date-range";
 const DATE_PERIODS = [
   {
     getValue: () => ({ from: subMinutes(new Date(), 15), to: new Date() }),
-    label: "Last 15 mins",
     period: "15m",
   },
   {
     getValue: () => ({ from: subHours(new Date(), 1), to: new Date() }),
-    label: "Last 1 hour",
     period: "1h",
   },
   {
     getValue: () => ({ from: subDays(new Date(), 1), to: new Date() }),
-    label: "Last 24 hours",
     period: "24h",
   },
   {
     getValue: () => ({ from: subDays(new Date(), 7), to: new Date() }),
-    label: "Last 7 days",
     period: "7d",
   },
   {
     getValue: () => ({ from: subDays(new Date(), 30), to: new Date() }),
-    label: "Last 30 days",
     period: "30d",
   },
   {
     getValue: () => ({ from: subDays(new Date(), 90), to: new Date() }),
-    label: "Last 90 days",
     period: "90d",
   },
 ] as const;
 
 export function DashboardDatePeriod() {
+  const t = useTranslations("Dashboard");
   const [urlState, setUrlState] = useQueryStates(dashboardParsers);
 
   const [tempDate, setTempDate] = useState<DateRange | undefined>(() =>
@@ -88,13 +84,15 @@ export function DashboardDatePeriod() {
         >
           <Clock />
           {activePeriod ? (
-            activePeriod.label
+            t(activePeriod.period)
           ) : urlState.from && urlState.to ? (
             <>
-              {format(urlState.from, "dd MMM")} - {format(urlState.to, "dd MMM, yyyy")}
+              {format(urlState.from, "dd MMM")}
+              {" - "}
+              {format(urlState.to, "dd MMM, yyyy")}
             </>
           ) : (
-            "Select Period"
+            t("select_period")
           )}
         </AppButton>
       </PopoverTrigger>
@@ -104,7 +102,9 @@ export function DashboardDatePeriod() {
       >
         <div className="flex">
           <div className="flex w-40 flex-col p-2">
-            <p className="px-2 py-1.5 text-center text-muted-foreground text-xs">Quick Range</p>
+            <p className="px-2 py-1.5 text-center text-muted-foreground text-xs">
+              {t("quick_range")}
+            </p>
             <div className="flex flex-col gap-1">
               {DATE_PERIODS.map((p) => (
                 <AppButton
@@ -118,7 +118,7 @@ export function DashboardDatePeriod() {
                   size="sm"
                   variant="ghost"
                 >
-                  {p.label}
+                  {t(p.period)}
                   {urlState.period === p.period && <Check />}
                 </AppButton>
               ))}
@@ -128,13 +128,13 @@ export function DashboardDatePeriod() {
           <div className="flex flex-col border-l">
             <div className="flex gap-4 border-b p-3 text-center">
               <div className="flex flex-1 flex-col gap-1">
-                <span className="text-xs">Start Date</span>
+                <span className="text-xs">{t("start_date")}</span>
                 <div className="text-xs">
                   {tempDate?.from ? format(tempDate.from, "yyyy-MM-dd") : "YYYY-MM-DD"}
                 </div>
               </div>
               <div className="flex flex-1 flex-col gap-1">
-                <span className="text-xs">End Date</span>
+                <span className="text-xs">{t("end_date")}</span>
                 <div className="text-xs">
                   {tempDate?.to ? format(tempDate.to, "yyyy-MM-dd") : "YYYY-MM-DD"}
                 </div>

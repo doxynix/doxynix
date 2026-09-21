@@ -3,6 +3,7 @@
 import type { ComponentType } from "react";
 import { Panel } from "@xyflow/react";
 import { Eye, EyeOff, FocusIcon, Maximize, ZoomIn, ZoomOut } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
@@ -19,15 +20,21 @@ type ControlItem = {
 };
 
 export function RepoMapCustomControls() {
+  const t = useTranslations("Dashboard");
   const hide = useMapControlsHide();
   const { toggleControls } = useMapControlsActions();
   const map = useMapCommands();
 
   const CONTROLS_CONFIG: ControlItem[] = [
-    { action: map.zoomIn, icon: ZoomIn, id: "zoom-in", label: "Zoom In (Z then I)" },
-    { action: map.zoomOut, icon: ZoomOut, id: "zoom-out", label: "Zoom Out (Z then O)" },
-    { action: map.fitView, icon: Maximize, id: "fit-view", label: "Fit View (F then V)" },
-    { action: map.focusSelected, icon: FocusIcon, id: "focus", label: "Focus Selected (F then S)" },
+    { action: map.zoomIn, icon: ZoomIn, id: "zoom-in", label: t("repo_map_zoom_in") },
+    { action: map.zoomOut, icon: ZoomOut, id: "zoom-out", label: t("repo_map_zoom_out") },
+    { action: map.fitView, icon: Maximize, id: "fit-view", label: t("repo_map_fit_view") },
+    {
+      action: map.focusSelected,
+      icon: FocusIcon,
+      id: "focus",
+      label: t("repo_map_focus_selected"),
+    },
   ];
 
   return (
@@ -59,7 +66,7 @@ export function RepoMapCustomControls() {
       ))}
 
       <AppTooltip
-        content="Toggle Controls (T then C)"
+        content={t("repo_map_toggle_controls")}
         side="left"
       >
         <AppButton

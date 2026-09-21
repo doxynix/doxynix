@@ -34,7 +34,7 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
                 className={cn(visibility.color)}
                 variant="outline"
               >
-                {visibility.label}
+                {t(visibility.labelKey)}
               </AppBadge>
             </div>
           </div>

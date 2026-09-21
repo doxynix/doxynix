@@ -1,4 +1,5 @@
 import { Play } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Link } from "@/shared/i18n/navigation";
 import { AppButton } from "@/shared/ui/core/button";
@@ -6,6 +7,7 @@ import { AppButton } from "@/shared/ui/core/button";
 type Props = { name: string; owner: string };
 
 export function RepoAnalyzeButton({ name, owner }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const href = `/dashboard/repo/${encodeURIComponent(owner)}/${encodeURIComponent(name)}/analyze`;
 
   return (
@@ -17,7 +19,7 @@ export function RepoAnalyzeButton({ name, owner }: Readonly<Props>) {
     >
       <Link href={href}>
         <Play />
-        Run Analysis
+        {t("repo_analyze_run")}
       </Link>
     </AppButton>
   );

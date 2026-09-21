@@ -14,6 +14,7 @@ import {
   Terminal,
   Users2,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 import { toast } from "sonner";
 
@@ -44,12 +45,19 @@ const DOC_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   README: BookOpen,
 };
 
-const DOC_LABELS: Record<string, string> = {
-  API: "API Reference",
-  ARCHITECTURE: "Architecture",
-  CHANGELOG: "History",
-  CONTRIBUTING: "How to Guides",
-  README: "Overview",
+type DocLabelKey =
+  | "repo_docs_api_reference"
+  | "repo_docs_architecture"
+  | "repo_docs_history"
+  | "repo_docs_how_to_guides"
+  | "repo_docs_overview";
+
+const DOC_LABEL_KEYS: Record<string, DocLabelKey> = {
+  API: "repo_docs_api_reference",
+  ARCHITECTURE: "repo_docs_architecture",
+  CHANGELOG: "repo_docs_history",
+  CONTRIBUTING: "repo_docs_how_to_guides",
+  README: "repo_docs_overview",
 };
 
 type Props = {
@@ -60,15 +68,20 @@ type Props = {
   repoId: string;
 };
 
+function RepoSwaggerLoading() {
+  const t = useTranslations("Dashboard");
+  return (
+    <div className="flex h-40 w-full items-center justify-center gap-2">
+      <Spinner />
+      <span>{t("repo_docs_loading_console")}</span>
+    </div>
+  );
+}
+
 const RepoSwagger = dynamic(
   () => import("@/entities/repo/ui/repo-swagger").then((m) => m.RepoSwagger),
   {
-    loading: () => (
-      <div className="flex h-40 w-full items-center justify-center gap-2">
-        <Spinner />
-        <span>Loading Interactive Console...</span>
-      </div>
-    ),
+    loading: () => <RepoSwaggerLoading />,
     ssr: false,
   },
 );
@@ -80,6 +93,7 @@ export function RepoDocs({
   onTabChange,
   repoId,
 }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const [apiMode, setApiMode] = useState<"md" | "swagger">("md");
   const [activePath] = useQueryState("path", parseAsString);
   const { aid } = useRepoParams();
@@ -99,11 +113,11 @@ export function RepoDocs({
 
   const stageMutation = trpc.analysis.stageFile.useMutation({
     onError: (error) => {
-      toast.error(`Failed to stage changes: ${error.message}`);
+      toast.error(t("repo_docs_stage_failed", { error: error.message }));
     },
     onSuccess: (data) => {
       void utils.analysis.getStagedFiles.invalidate();
-      toast.success(`Changes staged for PR. Total files in draft: ${data.stagedCount}`);
+      toast.success(t("repo_docs_staged", { count: data.stagedCount }));
     },
   });
 
@@ -141,7 +155,6 @@ export function RepoDocs({
     }
 
     const headingElements = headings
-      /* eslint-disable-next-line unicorn/prefer-query-selector */
       .map((h) => document.getElementById(h.id))
       .filter((el): el is HTMLElement => el !== null);
 
@@ -220,11 +233,16 @@ export function RepoDocs({
           const activeDocPath = isCodeDoc ? (docContent?.sourcePath ?? activePath) : undefined;
 
           const fileName =
-            activeDocPath != null ? (activeDocPath.split("/").pop() ?? "File Audit") : "File Audit";
+            activeDocPath != null
+              ? (activeDocPath.split("/").pop() ?? t("repo_docs_file_audit"))
+              : t("repo_docs_file_audit");
 
+          const docLabelKey = DOC_LABEL_KEYS[doc.type];
           const cardTitle = isCodeDoc
-            ? `Audit: ${fileName}`
-            : (DOC_LABELS[doc.type] ?? doc.type.toLowerCase().replace("_", " "));
+            ? t("repo_docs_audit_card_title", { name: fileName })
+            : docLabelKey != null
+              ? t(docLabelKey)
+              : doc.type.toLowerCase().replace("_", " ");
 
           return (
             <TabsContent
@@ -248,20 +266,22 @@ export function RepoDocs({
                       <div className="flex items-center gap-3">
                         <h2 className="font-bold text-2xl tracking-tight">
                           {doc.type === "API" && apiMode === "swagger"
-                            ? "Interactive Console"
+                            ? t("repo_docs_interactive_console")
                             : cardTitle}
                         </h2>
                       </div>
                       <div className="flex flex-wrap items-center gap-3 text-muted-foreground text-xs">
-                        <span>Version: {doc.version.slice(0, 7)}</span>
-                        <span>Updated: {formatFullDate(doc.updatedAt)}</span>
+                        <span>{t("repo_docs_version", { version: doc.version.slice(0, 7) })}</span>
+                        <span>
+                          {t("repo_docs_updated", { date: formatFullDate(doc.updatedAt) })}
+                        </span>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     {isActive && (
                       <>
-                        <AppTooltip content="Add to draft">
+                        <AppTooltip content={t("repo_docs_add_to_draft")}>
                           <LoadingButton
                             disabled={stageMutation.isPending || !isReadyToStage}
                             isLoading={stageMutation.isPending}
@@ -300,7 +320,7 @@ export function RepoDocs({
                         </AppTooltip>
                         {!isCurrentApiSwagger && (
                           <>
-                            <AppTooltip content="Download file">
+                            <AppTooltip content={t("repo_docs_download_file")}>
                               <AppButton
                                 disabled={isDocLoading}
                                 onClick={handleDownload}
@@ -313,7 +333,7 @@ export function RepoDocs({
                             <CopyButton
                               className="size-8 px-3 opacity-100"
                               disabled={isDocLoading}
-                              tooltipText="Copy file"
+                              tooltipText={t("repo_docs_copy_file")}
                               value={docContent?.raw ?? ""}
                             />
                           </>
@@ -329,7 +349,7 @@ export function RepoDocs({
                           size="sm"
                           variant={apiMode === "md" ? "secondary" : "ghost"}
                         >
-                          <FileText className="mr-1.5 size-3" /> Docs
+                          <FileText className="mr-1.5 size-3" /> {t("repo_docs_docs")}
                         </AppButton>
                         <AppButton
                           className="h-7 px-3 text-xs"
@@ -337,7 +357,7 @@ export function RepoDocs({
                           size="sm"
                           variant={apiMode === "swagger" ? "secondary" : "ghost"}
                         >
-                          <Terminal className="mr-1.5 size-3" /> Console
+                          <Terminal className="mr-1.5 size-3" /> {t("repo_docs_console")}
                         </AppButton>
                       </div>
                     )}
@@ -352,19 +372,21 @@ export function RepoDocs({
                         <p className="text-muted-foreground text-xs">{nodeContext.explain.role}</p>
                       </div>
                       <AppBadge variant="outline">
-                        {nodeContext.related.docs.length} related sections
+                        {t("repo_docs_related_sections", {
+                          count: nodeContext.related.docs.length,
+                        })}
                       </AppBadge>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {nodeContext.related.docs
-                        .filter((doc) => doc.docType === activeTab)
+                        .filter((relatedDoc) => relatedDoc.docType === activeTab)
                         .slice(0, 6)
-                        .map((doc) => (
+                        .map((relatedDoc) => (
                           <AppBadge
-                            key={doc.id}
+                            key={relatedDoc.id}
                             variant="secondary"
                           >
-                            {doc.title}
+                            {relatedDoc.title}
                           </AppBadge>
                         ))}
                     </div>

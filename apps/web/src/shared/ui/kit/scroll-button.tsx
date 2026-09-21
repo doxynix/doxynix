@@ -1,6 +1,7 @@
 "use client";
 
 import { MoveRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { smoothScrollTo } from "@/shared/lib/scroll";
 
@@ -16,16 +17,17 @@ type Props = {
 };
 
 export function ScrollButton({
-  ariaLabel = "Scroll to next section",
+  ariaLabel,
   arrowClassName,
   buttonClassName,
   duration = 800,
   offset = 80,
   targetId,
 }: Readonly<Props>) {
+  const t = useTranslations("Common");
   return (
     <AppButton
-      aria-label={ariaLabel}
+      aria-label={ariaLabel ?? t("scroll_to_next_section")}
       className={buttonClassName}
       onClick={() => {
         smoothScrollTo(targetId, offset, duration);

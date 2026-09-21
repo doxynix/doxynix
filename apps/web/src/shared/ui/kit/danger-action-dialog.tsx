@@ -103,7 +103,7 @@ export function DangerActionDialog({
           <LoadingButton
             className="cursor-pointer"
             isLoading={isLoading}
-            loadingText="Deleting..."
+            loadingText={tCommon("deleting")}
             onClick={onConfirm}
             variant="destructive"
           >

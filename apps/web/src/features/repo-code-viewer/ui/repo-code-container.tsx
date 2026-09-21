@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 import type { TreeApi } from "react-arborist";
 
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export function RepoCodeContainer({ repo }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
   const [path, setPath] = useQueryState("path", parseAsString);
   const [node, setNode] = useQueryState("node", parseAsString);
   const [treeApi, setTreeApi] = useState<TreeApi<FileNode> | undefined>();
@@ -83,7 +85,7 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
             />
           ) : (
             <p className="flex h-full items-center justify-center text-muted-foreground">
-              Select a file to view its content
+              {t("repo_code_select_file")}
             </p>
           )}
         </ResizablePanel>

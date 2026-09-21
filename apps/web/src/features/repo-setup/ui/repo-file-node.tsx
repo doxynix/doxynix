@@ -1,4 +1,5 @@
 import { ChevronDown, ChevronRight, FileIcon, Folder, FolderOpen, Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { NodeRendererProps } from "react-arborist";
 
 import { cn } from "@/shared/lib/cn";
@@ -15,6 +16,7 @@ type RepoFileNodeProps = NodeRendererProps<FileNode> & {
 };
 
 export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFileNodeProps) {
+  const t = useTranslations("Dashboard");
   const isFolder = !node.isLeaf;
   const isRecommended = node.data.recommended;
   const isSelected = mySelectedIds.has(node.id);
@@ -47,7 +49,9 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
               ) : (
                 <ChevronRight className="size-3.5" />
               )}
-              <span className="sr-only">Toggle folder {node.data.name}</span>
+              <span className="sr-only">
+                {t("repo_code_toggle_folder", { name: node.data.name })}
+              </span>
             </AppButton>
           )}
         </div>
@@ -57,7 +61,7 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
           onPointerDown={(e) => e.stopPropagation()}
         >
           <Checkbox
-            aria-label={`Select ${node.data.name}`}
+            aria-label={t("repo_file_node_select", { name: node.data.name })}
             checked={selectionState}
             onCheckedChange={() => onMyToggle(node.id, node.data)}
             tabIndex={-1}
@@ -86,7 +90,7 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
             variant="outline"
           >
             <Sparkles className="size-2.5" />
-            Core
+            {t("repo_code_core")}
           </AppBadge>
         )}
       </div>
