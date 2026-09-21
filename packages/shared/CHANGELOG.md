@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://github.com/doxynix/doxynix/compare/shared-v0.2.0...shared-v0.3.0) (2026-09-21)
+
+
+### Features
+
+* **web:** expand i18n to five new locales and harden event listeners & tooling ([#2143](https://github.com/doxynix/doxynix/issues/2143)) ([90698f2](https://github.com/doxynix/doxynix/commit/90698f2702495e4dae8eac6e58541047ccc87c0f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/config bumped to 1.2.0
+
 ## [0.2.0](https://github.com/doxynix/doxynix/compare/shared-v0.1.0...shared-v0.2.0) (2026-09-05)
 
 

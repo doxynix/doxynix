@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.2.0](https://github.com/doxynix/doxynix/compare/cli-v2.1.10...cli-v2.2.0) (2026-09-21)
+
+
+### Features
+
+* **web:** expand i18n to five new locales and harden event listeners & tooling ([#2143](https://github.com/doxynix/doxynix/issues/2143)) ([90698f2](https://github.com/doxynix/doxynix/commit/90698f2702495e4dae8eac6e58541047ccc87c0f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/config bumped to 1.2.0
+    * @doxynix/shared bumped to 0.3.0
+    * @doxynix/web bumped to 3.2.0
+
 ## [2.1.10](https://github.com/doxynix/doxynix/compare/cli-v2.1.9...cli-v2.1.10) (2026-09-18)
 
 
