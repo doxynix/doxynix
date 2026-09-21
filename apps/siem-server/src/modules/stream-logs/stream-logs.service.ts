@@ -8,17 +8,19 @@ export async function handleLogStream(c: Context) {
   c.header("Cache-Control", "no-cache");
 
   return streamSSE(c, async (stream) => {
-    const listener = async (data: LogsIngestedPayload) => {
-      try {
-        for (const log of data.logs) {
-          await stream.writeSSE({
-            data: JSON.stringify(log),
-            event: "log",
-          });
+    const listener = (data: LogsIngestedPayload) => {
+      void (async () => {
+        try {
+          for (const log of data.logs) {
+            await stream.writeSSE({
+              data: JSON.stringify(log),
+              event: "log",
+            });
+          }
+        } catch {
+          bus.off(APP_EVENTS.LOGS_INGESTED, listener);
         }
-      } catch {
-        bus.off(APP_EVENTS.LOGS_INGESTED, listener);
-      }
+      })();
     };
 
     bus.on(APP_EVENTS.LOGS_INGESTED, listener);
