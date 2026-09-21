@@ -25,10 +25,7 @@
     {
       "description": "Group Better-Auth packages",
       "groupName": "Better Auth",
-      "matchPackageNames": [
-        "/^better-auth$/",
-        "/^@better-auth//"
-      ]
+      "matchPackageNames": ["/^better-auth$/", "/^@better-auth//"]
     },
     {
       "description": "Group Database ORMs and Generators",
@@ -46,9 +43,7 @@
     {
       "description": "Group TanStack packages",
       "groupName": "TanStack ecosystem",
-      "matchPackageNames": [
-        "/^@tanstack//"
-      ]
+      "matchPackageNames": ["/^@tanstack//"]
     },
     {
       "description": "Group CodeMirror and editor extensions",
@@ -150,10 +145,7 @@
     {
       "description": "Group GitHub API and Octokit libraries",
       "groupName": "Octokit & GitHub tools",
-      "matchPackageNames": [
-        "/^@octokit//",
-        "/^octokit-plugin-/"
-      ]
+      "matchPackageNames": ["/^@octokit//", "/^octokit-plugin-/"]
     },
     {
       "description": "Group all TypeScript definitions",

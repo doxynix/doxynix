@@ -11,9 +11,12 @@
         "@cspell/dict-en_us": "4.4.37",
         "@cspell/dict-es-es": "3.0.8",
         "@cspell/dict-fr-fr": "2.3.2",
+        "@cspell/dict-it-it": "3.1.6",
+        "@cspell/dict-pl_pl": "3.0.6",
         "@cspell/dict-pt-br": "2.4.2",
         "@cspell/dict-pt-pt": "3.0.6",
         "@cspell/dict-ru_ru": "2.3.2",
+        "@cspell/dict-tr-tr": "3.0.6",
         "@secretlint/secretlint-rule-preset-recommend": "13.0.5",
         "@types/node": "26.5.0",
         "@types/react-dom": "19.2.7",
@@ -880,6 +883,8 @@
 
     "@cspell/dict-html-symbol-entities": ["@cspell/dict-html-symbol-entities@4.0.5", "", {}, "sha512-429alTD4cE0FIwpMucvSN35Ld87HCyuM8mF731KU5Rm4Je2SG6hmVx7nkBsLyrmH3sQukTcr1GaiZsiEg8svPA=="],
 
+    "@cspell/dict-it-it": ["@cspell/dict-it-it@3.1.6", "", {}, "sha512-q0o4dTm2RrdczvzQ/ENS+FL9TgPTMxoTdlAMtBE9tZjjUOiYcDkBeHBrmsX1Aq7Wz2xdEiUce2oD9Dn268nDOg=="],
+
     "@cspell/dict-java": ["@cspell/dict-java@5.0.12", "", {}, "sha512-qPSNhTcl7LGJ5Qp6VN71H8zqvRQK04S08T67knMq9hTA8U7G1sTKzLmBaDOFhq17vNX/+rT+rbRYp+B5Nwza1A=="],
 
     "@cspell/dict-julia": ["@cspell/dict-julia@1.1.1", "", {}, "sha512-WylJR9TQ2cgwd5BWEOfdO3zvDB+L7kYFm0I9u0s9jKHWQ6yKmfKeMjU9oXxTBxIufhCXm92SKwwVNAC7gjv+yA=="],
@@ -905,6 +910,8 @@
     "@cspell/dict-npm": ["@cspell/dict-npm@5.2.50", "", {}, "sha512-JZhJb0wrWpqnzDBM1VG8f6zZPRCOo6YMxct0hFhgBnbOTIHQiqZf9S1BSXCRMmmQlAWqFXjKNDp+rf7ZiJcO9w=="],
 
     "@cspell/dict-php": ["@cspell/dict-php@4.1.3", "", {}, "sha512-41oKzl7rLVrrVZA/Gs0ESnP6KliEX7c+IwaaNmOL3PAoHasFDVEmIFeENIzuDdM12UcHT+MlLkAm3Qw/lS/ERA=="],
+
+    "@cspell/dict-pl_pl": ["@cspell/dict-pl_pl@3.0.6", "", {}, "sha512-vJUyjQ7fxxGXrXXK9+r2FHNUb8TBeEouusm7syabkl0RPg1YqFwbSTDQziysuGO8EpgX8zo2q+hO1aGiMasc5Q=="],
 
     "@cspell/dict-powershell": ["@cspell/dict-powershell@5.0.17", "", {}, "sha512-khOoIdBgKRk2scnr7888pf70yJ1Tr3RGdnYcAN0MJ2vtaNRKoOTCFc13gXUkNDHwEyhMI1h9oz3KsT180F2amw=="],
 
@@ -937,6 +944,8 @@
     "@cspell/dict-swift": ["@cspell/dict-swift@2.0.6", "", {}, "sha512-PnpNbrIbex2aqU1kMgwEKvCzgbkHtj3dlFLPMqW1vSniop7YxaDTtvTUO4zA++ugYAEL+UK8vYrBwDPTjjvSnA=="],
 
     "@cspell/dict-terraform": ["@cspell/dict-terraform@1.1.4", "", {}, "sha512-Ere42ilvMFvQA4GlcN0OKlruMPR6EsvaB+iTHzj2xc+NJGRK64V7yApUcWrOrSgTiM/vhWXPIsK3OMfiAiNdmA=="],
+
+    "@cspell/dict-tr-tr": ["@cspell/dict-tr-tr@3.0.6", "", {}, "sha512-KwJZviO34acqij7AL9rkac1DOVYq27QIzwGm4x5YC58O16JVHspyPRRbF+sK3SLB4WeZ+ESbITXKrdICqaHB0A=="],
 
     "@cspell/dict-typescript": ["@cspell/dict-typescript@3.2.3", "", {}, "sha512-zXh1wYsNljQZfWWdSPYwQhpwiuW0KPW1dSd8idjMRvSD0aSvWWHoWlrMsmZeRl4qM4QCEAjua8+cjflm41cQBg=="],
 

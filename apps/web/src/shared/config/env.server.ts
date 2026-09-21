@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod/v4-mini";
+import { z } from "zod/mini";
 
 import { NEXT_PUBLIC_GOOGLE_CLIENT_ID } from "./env.client";
 import {

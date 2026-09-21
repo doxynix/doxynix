@@ -1,5 +1,5 @@
 import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod/v4-mini";
+import { z } from "zod/mini";
 
 import { envShared, isSharedValidationSkipped, sharedSchema, stringSchema } from "./env.shared";
 

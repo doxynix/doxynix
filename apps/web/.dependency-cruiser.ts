@@ -100,4 +100,4 @@ const config: IConfiguration = {
   },
 };
 
-module.exports = config;
+export default config;

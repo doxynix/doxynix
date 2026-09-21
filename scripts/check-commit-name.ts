@@ -1,5 +1,21 @@
 import { readFileSync } from "node:fs";
 
+const ALLOWED_SCOPES = [
+  "ci",
+  "cli",
+  "config",
+  "db",
+  "deps",
+  "root",
+  "security",
+  "shared",
+  "siem-client",
+  "siem-server",
+  "skills",
+  "tooling",
+  "web",
+];
+
 export function validateCommitMessage(commitMessage: string): { valid: boolean; reason?: string } {
   const trimmed = commitMessage.trim();
 
@@ -35,6 +51,15 @@ export function validateCommitMessage(commitMessage: string): { valid: boolean; 
     };
   }
 
+  const scopeMatch = firstLine.match(/^[a-z]+\(([a-zA-Z0-9_.-]+)\)/);
+  const scope = scopeMatch?.[1];
+  if (scope !== undefined && !ALLOWED_SCOPES.includes(scope)) {
+    return {
+      reason: `Scope "${scope}" is not allowed. Allowed scopes: ${ALLOWED_SCOPES.join(", ")}. Omit the scope entirely to skip it.`,
+      valid: false,
+    };
+  }
+
   return { valid: true };
 }
 
@@ -64,7 +89,10 @@ export function checkCommitName(commitMsgFile?: string): boolean {
       );
       console.error("   perf     - A code change that improves performance");
       console.error("   ci       - Changes to CI configuration files and scripts");
-      console.error("\n📝 Example: feat(auth): add login validation");
+      console.error("\n📋 Allowed scopes:");
+      console.error("   web, siem-server, siem-client, cli, shared, config, root");
+      console.error("   (scope is optional — type: description is always fine)");
+      console.error("\n📝 Example: feat(cli): add login validation");
       console.error(`\n❌ Your message: "${commitMsg.split("\n")[0]?.trim() ?? ""}"`);
     }
     return false;

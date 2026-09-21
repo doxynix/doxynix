@@ -1,4 +1,4 @@
-import { z } from "zod/v4-mini";
+import { z } from "zod/mini";
 
 export const stringSchema = z.string().check(z.minLength(1));
 export const numericSchema = z.string().check(z.regex(/^\d+$/));
