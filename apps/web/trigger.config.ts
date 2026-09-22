@@ -1,7 +1,7 @@
 import { execSync } from "node:child_process";
 import fs from "node:fs";
 
-import { additionalFiles } from "@trigger.dev/build/extensions/core";
+import { additionalFiles, additionalPackages } from "@trigger.dev/build/extensions/core";
 import { prismaExtension } from "@trigger.dev/build/extensions/prisma";
 import { defineConfig } from "@trigger.dev/sdk";
 
@@ -23,6 +23,9 @@ export default defineConfig({
           "node_modules/web-tree-sitter/tree-sitter.wasm",
           "node_modules/tree-sitter-wasms/out/*.wasm",
         ],
+      }),
+      additionalPackages({
+        packages: ["web-tree-sitter", "tree-sitter-wasms"],
       }),
       {
         name: "zenstack-generate",
