@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.3.4](https://github.com/doxynix/doxynix/compare/doxynix-v4.3.3...doxynix-v4.3.4) (2026-09-22)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2148](https://github.com/doxynix/doxynix/issues/2148)) ([99b7242](https://github.com/doxynix/doxynix/commit/99b7242f2bb1e243ec87e4dd67ff9e8cae66ad82))
+* **root:** restore bun packageManager; deploy trigger via local bundle ([#2157](https://github.com/doxynix/doxynix/issues/2157)) ([2694846](https://github.com/doxynix/doxynix/commit/269484678f1a09240a2af8fca8c99c2936119778))
+
 ## [4.3.3](https://github.com/doxynix/doxynix/compare/doxynix-v4.3.2...doxynix-v4.3.3) (2026-09-22)
 
 
