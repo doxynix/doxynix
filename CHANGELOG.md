@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.3](https://github.com/doxynix/doxynix/compare/doxynix-v4.3.2...doxynix-v4.3.3) (2026-09-22)
+
+
+### Bug Fixes
+
+* **root:** use devEngines.packageManager for bun ([#2154](https://github.com/doxynix/doxynix/issues/2154)) ([6315751](https://github.com/doxynix/doxynix/commit/6315751e9d7c14b591c2456392204f77d7ff81cb))
+
 ## [4.3.2](https://github.com/doxynix/doxynix/compare/doxynix-v4.3.1...doxynix-v4.3.2) (2026-09-22)
 
 
