@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.3.1](https://github.com/doxynix/doxynix/compare/doxynix-v4.3.0...doxynix-v4.3.1) (2026-09-22)
+
+
+### Bug Fixes
+
+* **ci:** move required notify check to global workflow ([#2146](https://github.com/doxynix/doxynix/issues/2146)) ([3b3cc8c](https://github.com/doxynix/doxynix/commit/3b3cc8cbedda126229ade708aa6bcd7dff928697))
+* **ci:** pass NPM_CONFIG_TOKEN to bun publish ([#2145](https://github.com/doxynix/doxynix/issues/2145)) ([c3ea63c](https://github.com/doxynix/doxynix/commit/c3ea63ca0dcb3a8a5251c32ac2ae2819d07969a6))
+
 ## [4.3.0](https://github.com/doxynix/doxynix/compare/doxynix-v4.2.10...doxynix-v4.3.0) (2026-09-21)
 
 
