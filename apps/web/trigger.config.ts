@@ -1,12 +1,18 @@
 import { execSync } from "node:child_process";
 import fs from "node:fs";
 
-import { additionalFiles } from "@trigger.dev/build/extensions/core";
+import { additionalFiles, additionalPackages } from "@trigger.dev/build/extensions/core";
 import { prismaExtension } from "@trigger.dev/build/extensions/prisma";
 import { defineConfig } from "@trigger.dev/sdk";
 
 if (!process.env.DATABASE_URL!) {
   process.env.DATABASE_URL = "postgresql://postgres:password@localhost:5432/db";
+}
+
+if (!process.env.DIRECT_URL) {
+  // prisma.config.ts requires DIRECT_URL at config load (zenstack generate).
+  // Client generation does not connect to the DB, so a local fallback is fine.
+  process.env.DIRECT_URL = "postgresql://postgres:password@localhost:5432/db";
 }
 
 export default defineConfig({
@@ -17,6 +23,9 @@ export default defineConfig({
           "node_modules/web-tree-sitter/tree-sitter.wasm",
           "node_modules/tree-sitter-wasms/out/*.wasm",
         ],
+      }),
+      additionalPackages({
+        packages: ["web-tree-sitter", "tree-sitter-wasms"],
       }),
       {
         name: "zenstack-generate",

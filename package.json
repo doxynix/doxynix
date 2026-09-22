@@ -2,12 +2,7 @@
   "name": "doxynix",
   "version": "4.3.3",
   "private": true,
-  "devEngines": {
-    "packageManager": {
-      "name": "bun",
-      "version": "1.4.0"
-    }
-  },
+  "packageManager": "bun@1.4.0",
   "workspaces": [
     "apps/*",
     "packages/*"
