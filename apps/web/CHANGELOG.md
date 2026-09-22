@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.1](https://github.com/doxynix/doxynix/compare/web-v3.2.0...web-v3.2.1) (2026-09-22)
+
+
+### Bug Fixes
+
+* **web:** pin node engines to 24.x for vercel ([#2152](https://github.com/doxynix/doxynix/issues/2152)) ([cd7778e](https://github.com/doxynix/doxynix/commit/cd7778eceaf25f1ccc03e3b6590757df19c2dad1))
+
 ## [3.2.0](https://github.com/doxynix/doxynix/compare/web-v3.1.10...web-v3.2.0) (2026-09-21)
 
 
