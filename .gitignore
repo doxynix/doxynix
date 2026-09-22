@@ -32,6 +32,10 @@ out/
 *.tsbuildinfo
 next-env.d.ts
 
+# Python
+__pycache__/
+*.py[cod]
+
 *.log
 logs/
 npm-debug.log*
