@@ -36,7 +36,7 @@
     "@doxynix/shared": "workspace:*",
     "@doxynix/web": "workspace:*",
     "@trpc/server": "catalog:",
-    "dependency-cruiser": "18.3.1",
+    "dependency-cruiser": "18.4.0",
     "tsup": "8.5.1"
   },
   "publishConfig": {
