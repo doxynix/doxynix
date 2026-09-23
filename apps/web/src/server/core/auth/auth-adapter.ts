@@ -86,6 +86,10 @@ function transformPayloadData(data: Record<string, unknown>): Record<string, unk
     }
   }
 
+  if (result.image === "") {
+    result.image = null;
+  }
+
   return result;
 }
 
