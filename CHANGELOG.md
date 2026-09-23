@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.5](https://github.com/doxynix/doxynix/compare/doxynix-v4.3.4...doxynix-v4.3.5) (2026-09-23)
+
+
+### Bug Fixes
+
+* **web:** normalize empty avatar url to null ([#2160](https://github.com/doxynix/doxynix/issues/2160)) ([7b55c0a](https://github.com/doxynix/doxynix/commit/7b55c0aec1c6bbdb19e701cb5574537d14e99dfa))
+
 ## [4.3.4](https://github.com/doxynix/doxynix/compare/doxynix-v4.3.3...doxynix-v4.3.4) (2026-09-22)
 
 
