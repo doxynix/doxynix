@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@doxynix/config": "workspace:*",
-    "dependency-cruiser": "18.3.1",
+    "dependency-cruiser": "18.4.0",
     "drizzle-kit": "0.31.10"
   }
 }
