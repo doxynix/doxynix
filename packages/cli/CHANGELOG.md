@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.2.3](https://github.com/doxynix/doxynix/compare/cli-v2.2.2...cli-v2.2.3) (2026-09-23)
+
+
+### Bug Fixes
+
+* **web:** normalize empty avatar url to null ([#2160](https://github.com/doxynix/doxynix/issues/2160)) ([7b55c0a](https://github.com/doxynix/doxynix/commit/7b55c0aec1c6bbdb19e701cb5574537d14e99dfa))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 3.2.3
+
 ## [2.2.2](https://github.com/doxynix/doxynix/compare/cli-v2.2.1...cli-v2.2.2) (2026-09-22)
 
 
