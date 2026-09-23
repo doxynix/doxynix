@@ -10,7 +10,7 @@ export class PromptCancelledError extends Error {
 }
 
 export async function guardPrompt<T>(
-  promptPromise: Promise<T | symbol>,
+  promptPromise: Promise<T | typeof p.CANCEL_SYMBOL>,
   cancelMessage = "Operation cancelled.",
 ): Promise<T> {
   const result = await promptPromise;
@@ -18,7 +18,7 @@ export async function guardPrompt<T>(
     p.cancel(cancelMessage);
     throw new PromptCancelledError(cancelMessage);
   }
-  return result as T;
+  return result;
 }
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
