@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.6](https://github.com/doxynix/doxynix/compare/doxynix-v4.3.5...doxynix-v4.3.6) (2026-09-23)
+
+
+### Bug Fixes
+
+* **deps:** update dependency react-resizable-panels to v4.13.1 ([#2163](https://github.com/doxynix/doxynix/issues/2163)) ([986c343](https://github.com/doxynix/doxynix/commit/986c343cf4efce8f0c190bea28a34048ef98b855))
+
 ## [4.3.5](https://github.com/doxynix/doxynix/compare/doxynix-v4.3.4...doxynix-v4.3.5) (2026-09-23)
 
 
