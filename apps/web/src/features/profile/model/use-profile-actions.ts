@@ -92,7 +92,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
       toast.success(t("settings_profile_remove_avatar_toast_success"));
 
       await authClient.updateUser({
-        image: "",
+        image: null,
       });
 
       utils.user.me.setData(undefined, (old) => {
