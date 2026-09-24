@@ -40,7 +40,7 @@
     "@hono/zod-validator": "0.9.1",
     "@t3-oss/env-core": "0.13.11",
     "better-auth": "catalog:",
-    "drizzle-orm": "0.45.2",
+    "drizzle-orm": "0.45.3",
     "drizzle-zod": "0.8.3",
     "es-toolkit": "catalog:",
     "hono": "catalog:",
@@ -52,6 +52,6 @@
   "devDependencies": {
     "@doxynix/config": "workspace:*",
     "dependency-cruiser": "18.4.0",
-    "drizzle-kit": "0.31.10"
+    "drizzle-kit": "0.31.11"
   }
 }
