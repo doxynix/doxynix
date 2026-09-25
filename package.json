@@ -57,7 +57,7 @@
     "mermaid": "12.0.0",
     "minimatch": "9.0.9",
     "nanoid": "3.3.19",
-    "next": "16.3.5",
+    "next": "16.3.6",
     "nodemailer": "10.0.10",
     "postcss": "8.5.28",
     "qs": "6.16.0",
@@ -91,7 +91,7 @@
     "oxlint": "1.85.0",
     "oxlint-tsgolint": "7.0.2002",
     "secretlint": "13.0.5",
-    "turbo": "2.11.2",
+    "turbo": "2.11.3",
     "typescript": "7.0.2"
   },
   "catalog": {
