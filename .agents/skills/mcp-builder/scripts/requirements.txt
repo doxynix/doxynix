@@ -1,2 +1,2 @@
-anthropic==1.7.0
+anthropic==1.8.0
 mcp==2.2.0
