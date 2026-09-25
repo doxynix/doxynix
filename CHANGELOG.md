@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.11](https://github.com/doxynix/doxynix/compare/doxynix-v4.3.10...doxynix-v4.3.11) (2026-09-25)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2174](https://github.com/doxynix/doxynix/issues/2174)) ([1514ade](https://github.com/doxynix/doxynix/commit/1514adea9c49a77acf4182024bb0c10ce34ca62e))
+
 ## [4.3.10](https://github.com/doxynix/doxynix/compare/doxynix-v4.3.9...doxynix-v4.3.10) (2026-09-25)
 
 
