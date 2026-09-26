@@ -8,7 +8,7 @@ import { REDIS_CONFIG } from "@/server/utils/redis";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
 
 import type { FileActionNodeContext } from "../analysis.schemas";
-import { repoAnalysisService } from "../analysis.service";
+import { runDocumentFilePreview } from "../logic/document-file-preview";
 import { toDocumentFilePreview } from "../logic/repo-file-action-preview";
 import type { SyncFileActionMeta } from "../logic/repo-file-action-state";
 
@@ -27,10 +27,7 @@ export const documentFileTask = task({
     syncMeta: SyncFileActionMeta;
     userId: number;
   }) => {
-    const documentedCode = await repoAnalysisService.runDocumentFilePreview(
-      payload.userId,
-      payload,
-    );
+    const documentedCode = await runDocumentFilePreview(payload.userId, payload);
 
     const result = toDocumentFilePreview({
       ...documentedCode,
