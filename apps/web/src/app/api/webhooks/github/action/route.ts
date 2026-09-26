@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import * as z from "zod";
 
 import { prisma } from "@/server/core/db";
-import { repoAnalysisService } from "@/server/modules/analysis/analysis.service";
+import { analysisLifecycleService } from "@/server/modules/analysis/services/analysis-lifecycle.service";
 import { verifyAndUseApiKey } from "@/server/utils/verify-and-use-api-key";
 
 export async function POST(req: Request) {
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const analysisResponse = await repoAnalysisService.analyze(prisma, keyRecord.userId, {
+    const analysisResponse = await analysisLifecycleService.analyze(prisma, keyRecord.userId, {
       branch: branch ?? dbRepo.defaultBranch,
       docTypes: ["README", "API", "ARCHITECTURE", "CONTRIBUTING", "CHANGELOG"],
       files: ["**/*"],
