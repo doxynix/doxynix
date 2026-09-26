@@ -1,6 +1,6 @@
 {
   "name": "doxynix",
-  "version": "4.3.12",
+  "version": "4.3.13",
   "private": true,
   "packageManager": "bun@1.4.0",
   "workspaces": [
