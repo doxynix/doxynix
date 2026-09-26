@@ -51,14 +51,14 @@ export function CopyButton({
       >
         <Copy
           className={cn(
-            "absolute size-3.5 transition-standard duration-300",
+            "absolute size-3.5 transition-standard duration-200",
             isCopied ? "scale-0 opacity-0" : "scale-100 opacity-100",
           )}
         />
 
         <Check
           className={cn(
-            "absolute size-3.5 text-success transition-standard duration-300",
+            "absolute size-3.5 text-success transition-standard duration-200",
             isCopied ? "scale-100 opacity-100" : "scale-0 opacity-0",
           )}
         />

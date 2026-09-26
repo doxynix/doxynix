@@ -4,6 +4,7 @@ import { del } from "@vercel/blob";
 import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
+import { auth } from "@/server/core/auth";
 import { prisma } from "@/server/core/db";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 import { formatUserAgent } from "@/server/utils/ua-parser";
@@ -109,20 +110,21 @@ export const userRouter = createTRPCRouter({
     }),
 
   getActiveSessions: protectedProcedure.query(async ({ ctx }) => {
-    const userId = Number(ctx.session.user.id);
+    if (ctx.session.session.id === "api-key") {
+      return [];
+    }
 
-    const sessions = await ctx.prisma.session.findMany({
-      orderBy: { createdAt: "desc" },
-      where: { userId },
-    });
+    const sessions = await auth.api.listSessions({ headers: ctx.req.headers });
 
-    return sessions.map((session) => ({
-      createdAt: session.createdAt,
-      id: session.id,
-      ipAddress: session.ipAddress,
-      token: session.token,
-      userAgent: formatUserAgent(session.userAgent),
-    }));
+    return sessions
+      .toSorted((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .map((session) => ({
+        createdAt: session.createdAt,
+        id: session.id,
+        ipAddress: session.ipAddress,
+        token: session.token,
+        userAgent: formatUserAgent(session.userAgent ?? null),
+      }));
   }),
 
   getLinkedAccounts: protectedProcedure.query(async ({ ctx }) => {

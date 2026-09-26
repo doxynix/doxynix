@@ -10,7 +10,11 @@ export const generateMetadata = createMetadata("forbidden_title", "forbidden_des
 export default async function ForbiddenPage() {
   const t = await getTranslations("Error");
   return (
-    <div className="flex h-[70dvh] w-full flex-col items-center justify-center">
+    <main
+      className="flex h-[70dvh] w-full flex-col items-center justify-center"
+      id="main-content"
+      tabIndex={-1}
+    >
       <div className="flex max-w-md flex-col items-center gap-6 text-center">
         <div className="flex size-20 items-center justify-center rounded-full bg-warning/10 text-warning">
           <Lock size={40} />
@@ -24,6 +28,6 @@ export default async function ForbiddenPage() {
           <Link href="/">{t("back_to_home")}</Link>
         </AppButton>
       </div>
-    </div>
+    </main>
   );
 }

@@ -28,7 +28,7 @@ export function RepoCodeNode({ activePath, node, onSelect, style }: RepoCodeNode
   return (
     <AppButton
       className={cn(
-        "flex h-7 w-full cursor-pointer items-center justify-start rounded-xl text-muted-foreground outline-none transition-colors hover:bg-surface-hover",
+        "flex h-7 w-full cursor-pointer items-center justify-start rounded-xl text-muted-foreground outline-hidden transition-colors hover:bg-surface-hover",
         isActive && "bg-surface-selected text-foreground hover:bg-surface-selected",
       )}
       onClick={handleClick}

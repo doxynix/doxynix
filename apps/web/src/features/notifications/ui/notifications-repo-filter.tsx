@@ -62,7 +62,7 @@ export function NotificationsRepoFilter() {
         <AppButton
           aria-expanded={open}
           aria-haspopup="listbox"
-          className="cursor-pointer justify-between"
+          className="justify-between"
           variant="outline"
         >
           <div className="flex w-60 items-center gap-2 truncate">
@@ -106,7 +106,7 @@ export function NotificationsRepoFilter() {
                 <div className="flex flex-col items-center gap-4 p-4 text-center text-sm">
                   <p>{t("repos_not_found")}</p>
                   <AppButton
-                    className="w-fit cursor-pointer"
+                    className="w-fit"
                     onClick={() => {
                       setOpen(false);
                       setOpenCreateDialog(true);

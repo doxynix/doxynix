@@ -29,7 +29,7 @@ export async function HeroSection() {
           animation="blurIn"
           as="h1"
           className="not-md:hidden font-bold text-4xl tracking-tighter sm:text-5xl md:text-7xl lg:text-8xl"
-          duration={1}
+          duration={1.4}
           startOnView={false}
         >
           {t("section_hero_title")}
@@ -39,17 +39,17 @@ export async function HeroSection() {
           animation="slideRight"
           as="p"
           className="not-md:hidden max-w-xl text-base text-muted-foreground sm:text-lg md:text-xl"
-          duration={1}
+          duration={1.4}
           startOnView={false}
         >
           {t("section_hero_desc")}
         </TextAnimate>
 
-        <h1 className="fade-in slide-in-from-left-2 animate-in font-bold text-4xl tracking-tighter duration-200 sm:text-5xl md:hidden md:text-7xl lg:text-8xl">
+        <h1 className="fade-in slide-in-from-left-2 animate-in font-bold text-4xl tracking-tighter duration-300 sm:text-5xl md:hidden md:text-7xl lg:text-8xl">
           {t("section_hero_title")}
         </h1>
 
-        <p className="fade-in slide-in-from-left-2 max-w-xl animate-in text-base text-muted-foreground duration-200 sm:text-lg md:hidden md:text-xl">
+        <p className="fade-in slide-in-from-left-2 max-w-xl animate-in text-base text-muted-foreground duration-300 sm:text-lg md:hidden md:text-xl">
           {t("section_hero_desc")}
         </p>
 

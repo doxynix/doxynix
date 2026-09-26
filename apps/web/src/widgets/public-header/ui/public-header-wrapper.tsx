@@ -39,12 +39,12 @@ export function PublicHeaderWrapper({ children }: Readonly<{ children: ReactNode
       <motion.div
         animate={isHidden ? "hidden" : "visible"}
         className={
-          "glass-panel fixed top-0 z-50 w-full border-border border-b bg-background/76 transition-standard supports-backdrop-filter:bg-background/64"
+          "glass-panel fixed top-0 z-50 w-full border-border border-b bg-background/76 supports-backdrop-filter:bg-background/64"
         }
         onFocusCapture={() => setIsHidden(false)}
         transition={{
-          duration: 0.18,
-          ease: [0.4, 0, 0.2, 1],
+          duration: 0.25,
+          ease: [0.16, 1, 0.3, 1],
         }}
         variants={{
           hidden: {

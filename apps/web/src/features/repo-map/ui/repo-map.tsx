@@ -10,6 +10,7 @@ import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 
 import { cn } from "@/shared/lib/cn";
+import { usePanelLayout } from "@/shared/lib/hooks/use-panel-layout";
 import { AppButton } from "@/shared/ui/core/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ui/core/resizable";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
@@ -58,6 +59,7 @@ export function RepoMap({
   const t = useTranslations("Dashboard");
   const { resolvedTheme } = useTheme();
   const { fitView } = useReactFlow();
+  const { defaultLayout, onLayoutChanged } = usePanelLayout("repo-map");
   const {
     edges,
     layoutReady,
@@ -145,7 +147,7 @@ export function RepoMap({
       <div className="flex shrink-0 items-center justify-between p-3">
         <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto">
           <AppButton
-            className="h-5 cursor-pointer gap-1 bg-transparent text-xs hover:bg-transparent md:px-1"
+            className="h-5 gap-1 bg-transparent text-xs hover:bg-transparent md:px-1"
             onClick={() => onNavigate(null)}
             size="sm"
             variant="ghost"
@@ -166,10 +168,14 @@ export function RepoMap({
 
       <ResizablePanelGroup
         className="relative"
+        defaultLayout={defaultLayout}
+        id="repo-map"
+        onLayoutChanged={onLayoutChanged}
         orientation="horizontal"
       >
         <ResizablePanel
           defaultSize="70%"
+          id="repo-map-canvas"
           maxSize="100%"
           minSize="30%"
         >
@@ -261,7 +267,10 @@ export function RepoMap({
 
         <ResizableHandle />
 
-        <ResizablePanel defaultSize="30%">
+        <ResizablePanel
+          defaultSize="30%"
+          id="repo-map-sidebar"
+        >
           <RepoMapSidebar
             nodeId={selectedNodeId}
             onClose={() => onSelect(null)}

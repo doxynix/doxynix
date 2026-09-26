@@ -18,7 +18,6 @@ type Props = {
 
 export function ProfileCard({ user: initialUser }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
-  const tCommon = useTranslations("Common");
   const { data: session } = authClient.useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const currentUser = session?.user ?? initialUser;
@@ -72,10 +71,9 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
             {avatarUrl && (
               <LoadingButton
                 aria-label={t("settings_profile_delete_avatar")}
-                className="absolute right-0 bottom-0 cursor-pointer"
+                className="absolute right-0 bottom-0"
                 disabled={removeAvatar.isPending}
                 isLoading={removeAvatar.isPending}
-                loadingText=""
                 onClick={() => removeAvatar.mutate()}
                 size="icon"
                 variant="destructive"
@@ -95,9 +93,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
             />
 
             <LoadingButton
-              className="cursor-pointer"
               isLoading={isUploading}
-              loadingText={tCommon("loading")}
               onClick={() => fileInputRef.current?.click()}
               variant="outline"
             >

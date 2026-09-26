@@ -27,6 +27,7 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
 
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+  const sidebarWidth = Number(cookieStore.get("sidebar_width")?.value);
 
   return (
     <>
@@ -34,6 +35,7 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
       <SidebarProvider
         className="flex h-dvh w-full flex-col overflow-hidden"
         defaultOpen={defaultOpen}
+        defaultWidth={sidebarWidth > 0 ? sidebarWidth : undefined}
       >
         <div className="z-50 w-full shrink-0 border-b">
           <AppHeader />

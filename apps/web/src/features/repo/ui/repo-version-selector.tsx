@@ -35,7 +35,10 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
       onValueChange={(e) => void setAid(e)}
       value={selectedAid || history[0]?.id}
     >
-      <SelectTrigger className="w-60">
+      <SelectTrigger
+        aria-label={t("repo_version_placeholder")}
+        className="w-60"
+      >
         <GitCommit />
         <SelectValue placeholder={t("repo_version_placeholder")} />
       </SelectTrigger>

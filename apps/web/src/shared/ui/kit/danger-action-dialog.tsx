@@ -93,17 +93,10 @@ export function DangerActionDialog({
 
         <DialogFooter>
           <DialogClose asChild>
-            <AppButton
-              className="cursor-pointer"
-              variant="outline"
-            >
-              {tCommon("cancel")}
-            </AppButton>
+            <AppButton variant="outline">{tCommon("cancel")}</AppButton>
           </DialogClose>
           <LoadingButton
-            className="cursor-pointer"
             isLoading={isLoading}
-            loadingText={tCommon("deleting")}
             onClick={onConfirm}
             variant="destructive"
           >

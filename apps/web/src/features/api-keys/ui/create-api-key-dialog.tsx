@@ -64,10 +64,7 @@ export function CreateApiKeyDialog() {
       open={open}
     >
       <DialogTrigger asChild>
-        <AppButton
-          className="cursor-pointer"
-          variant="outline"
-        >
+        <AppButton variant="outline">
           <Plus />
           {t("settings_api_keys_create_api_key")}
         </AppButton>
@@ -96,10 +93,8 @@ export function CreateApiKeyDialog() {
 
               <DialogFooter>
                 <LoadingButton
-                  className="cursor-pointer"
                   disabled={!form.formState.isValid || create.isPending}
                   isLoading={create.isPending}
-                  loadingText={tCommon("saving")}
                   type="submit"
                 >
                   {tCommon("create")}
@@ -139,7 +134,7 @@ export function CreateApiKeyDialog() {
 
             <DialogFooter>
               <AppButton
-                className="w-full cursor-pointer"
+                className="w-full"
                 onClick={() => handleOpenChange(false)}
               >
                 {tCommon("done")}

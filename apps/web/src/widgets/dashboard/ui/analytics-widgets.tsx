@@ -128,10 +128,10 @@ export function RefactoringTargetsWidget({ data }: Readonly<Props>) {
                 <p className="flex items-center gap-1 text-muted-foreground text-sm">
                   <Target /> {t("refactoring_targets")}
                 </p>
-                {data.risks.topHotspots.map((h, i) => (
+                {data.risks.topHotspots.map((h) => (
                   <div
                     className="flex items-center justify-between rounded-xl border border-border p-2 text-xs"
-                    key={i}
+                    key={`${h.repo_name}/${h.path}`}
                   >
                     <span className="max-w-50 truncate text-muted-foreground">
                       {h.repo_name}/
@@ -153,10 +153,10 @@ export function RefactoringTargetsWidget({ data }: Readonly<Props>) {
                 <p className="flex items-center gap-1 text-muted-foreground text-sm">
                   <GitMerge /> {t("hidden_dependencies")}
                 </p>
-                {data.risks.topCoupling.map((c, i) => (
+                {data.risks.topCoupling.map((c) => (
                   <div
                     className="flex items-center gap-2 rounded-xl border border-border p-2 text-xs"
-                    key={i}
+                    key={`${c.from_path}->${c.to_path}`}
                   >
                     <span className="truncate">{c.from_path.split("/").pop()}</span>
                     <ArrowLeftRight />

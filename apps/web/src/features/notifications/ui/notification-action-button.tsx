@@ -33,7 +33,6 @@ export function NotificationActionButton({
         )}
         disabled={disabled}
         isLoading={isPending}
-        loadingText=""
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();

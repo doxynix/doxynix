@@ -56,7 +56,6 @@ export function WelcomeFlow({ user }: Readonly<Props>) {
             <ProfileDetailsForm
               buttonText={t("form_button")}
               isWelcome
-              loadingText={t("form_loading")}
               onSuccess={handleSuccess}
               user={user}
             />

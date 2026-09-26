@@ -59,7 +59,7 @@ export function AppHeader() {
         <div className="flex items-center gap-2.5">
           <AppTooltip content={tCommon("toggle_sidebar_shortcut")}>
             <SidebarTrigger
-              className="text-muted-foreground hover:cursor-pointer"
+              className="text-muted-foreground"
               variant="ghost"
             />
           </AppTooltip>

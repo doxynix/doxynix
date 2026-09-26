@@ -24,7 +24,6 @@ import { useProfileActions } from "../model/use-profile-actions";
 type Props = {
   buttonText?: string;
   isWelcome?: boolean;
-  loadingText?: string;
   onSuccess?: () => void;
   user: User;
 };
@@ -32,7 +31,6 @@ type Props = {
 export function ProfileDetailsForm({
   buttonText,
   isWelcome = false,
-  loadingText,
   onSuccess,
   user,
 }: Readonly<Props>) {
@@ -126,10 +124,8 @@ export function ProfileDetailsForm({
         />
         <div className="flex justify-end">
           <LoadingButton
-            className="cursor-pointer"
             disabled={(!isWelcome && !isDirty) || !isValid || updateProfile.isPending}
             isLoading={updateProfile.isPending}
-            loadingText={loadingText ?? t("settings_profile_saving")}
           >
             {buttonText ?? tCommon("save")}
           </LoadingButton>

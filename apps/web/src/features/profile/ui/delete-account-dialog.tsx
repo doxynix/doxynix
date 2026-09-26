@@ -35,7 +35,7 @@ export function DeleteAccountDialog() {
       title={t("settings_danger_delete_account_dialog_title")}
       trigger={
         <AppButton
-          className="w-fit cursor-pointer"
+          className="w-fit"
           variant="destructive"
         >
           {t("settings_danger_delete_account_title")} <Trash2 />

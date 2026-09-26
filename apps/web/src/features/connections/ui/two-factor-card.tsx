@@ -281,7 +281,6 @@ export function TwoFactorCard() {
                 className="w-full"
                 disabled={verificationCode.length !== 6 || enable2FA.isPending || isGenerating}
                 isLoading={enable2FA.isPending}
-                loadingText={t("settings_2fa_activating")}
                 onClick={() => enable2FA.mutate(verificationCode)}
               >
                 {t("settings_2fa_verify_and_enable")}
