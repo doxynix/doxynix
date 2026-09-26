@@ -36,7 +36,7 @@ type StructureNodePayload = NonNullable<
   ReturnType<ReturnType<typeof createAnalyzeContextBuilder>["getStructureNode"]>
 >;
 
-type TopLevelImpactNode = {
+export type TopLevelImpactNode = {
   id: string;
   kind: string;
   label: string;

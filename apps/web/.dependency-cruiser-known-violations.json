@@ -3914,5 +3914,49 @@
       "severity": "error",
       "name": "vsa-no-cross-slice-imports"
     }
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/node-explainer.ts",
+    "to": "src/server/modules/analysis/logic/graph-navigator.ts",
+    "unresolvedTo": "./graph-navigator",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/graph-navigator.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.mapper.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/node-explainer.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
   }
 ]

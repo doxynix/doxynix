@@ -16,7 +16,6 @@ import { TASK_CONFIGS } from "@/server/utils/task-config";
 import { cleanup, readAndFilterFiles } from "@/server/utils/utils";
 
 import { generateDeepDocs, runAiPipeline } from "../ai/ai-pipeline";
-import { repoAnalysisService } from "../analysis.service";
 import type { RepoMetrics } from "../engine/core/metrics.types";
 import { analyzeRepository } from "../engine/metrics/code-metrics";
 import {
@@ -25,6 +24,7 @@ import {
   computeGitChurnHotspots,
 } from "../engine/metrics/common-metrics";
 import { buildRepositoryArtifacts } from "../engine/pipeline/artifacts";
+import { analysisLifecycleService } from "../services/analysis-lifecycle.service";
 
 type TaskPayload = {
   analysisId: string;
@@ -193,7 +193,7 @@ export const analyzeRepoTask = task({
         percent: 95,
         userId,
       });
-      await repoAnalysisService.saveResults({
+      await analysisLifecycleService.saveResults({
         aiResult,
         analysisId,
         busFactor,
