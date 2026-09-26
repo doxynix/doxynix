@@ -111,7 +111,7 @@
     "@scalar/nextjs-api-reference": "0.12.2",
     "@secretlint/core": "13.0.5",
     "@secretlint/secretlint-rule-preset-canary": "13.0.5",
-    "@sentry/nextjs": "10.75.2",
+    "@sentry/nextjs": "11.0.0",
     "@shikijs/langs": "4.4.3",
     "@shikijs/rehype": "4.4.3",
     "@shikijs/themes": "4.4.3",
