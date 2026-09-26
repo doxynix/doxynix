@@ -2,7 +2,6 @@ import YAML from "yaml";
 
 import { appLogger } from "@/server/core/app-logger";
 import { getFileExtension } from "@/server/utils/path-operations";
-import type { OpenApiInventory } from "@/server/utils/types";
 
 const IGNORED_EXTENSIONS = new Set([
   ".cpp",
@@ -109,3 +108,9 @@ export class OpenApiDiscoveryEngine {
     return /["']?(openapi|swagger)["']?\s*:\s*/i.test(sample) && sample.includes("paths");
   }
 }
+
+export type OpenApiInventory = {
+  estimatedOperations: number;
+  pathPatterns: string[];
+  sourceFiles: string[];
+};

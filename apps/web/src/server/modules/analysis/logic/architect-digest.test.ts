@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { RepositoryFact } from "@/server/utils/types";
-
 import type { ProjectMap } from "../engine/core/analysis-result.schemas";
+import type { RepositoryFact } from "../engine/core/discovery.types";
 import type { DocumentationInputModel } from "../engine/core/documentation.types";
 import type { RepoMetrics } from "../engine/core/metrics.types";
 import {

@@ -1,5 +1,4 @@
-import type { AnalysisCoverage, DependencyNodeMetric } from "@/server/utils/types";
-
+import type { AnalysisCoverage, DependencyNodeMetric } from "../../engine/core/discovery.types";
 import type {
   ChangeCouplingRef,
   DependencyGraphEvidence,

@@ -1,8 +1,6 @@
-import type { DocType } from "@doxynix/shared";
+import type { DocType, RepoSearchResult } from "@doxynix/shared";
 import type { Repo } from "@prisma/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-import type { RepoSearchResult } from "@/server/utils/types";
 
 import type {
   FileActionInput,

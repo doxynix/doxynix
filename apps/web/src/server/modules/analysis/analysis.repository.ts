@@ -4,9 +4,9 @@ import { TRPCError } from "@trpc/server";
 import { uniq } from "es-toolkit";
 
 import type { DbClient } from "@/server/core/db";
-import type { PRChangedFileSnapshot } from "@/server/utils/types";
 
 import { pickLatestDocsByType } from "./analysis.utils";
+import type { PRChangedFileSnapshot } from "./logic/pr.types";
 
 type PRAnalysisCreateInput = {
   baseSha: string;

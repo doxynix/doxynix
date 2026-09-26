@@ -1,8 +1,8 @@
+import type { RepoSearchResult } from "@doxynix/shared";
 import { basename } from "pathe";
 
 import type { DbClient } from "@/server/core/db";
 import { normalizeSearchInput, tokenizeSearchInput } from "@/server/utils/search";
-import type { RepoSearchResult } from "@/server/utils/types";
 
 import { analysisRepo } from "../analysis.repository";
 import { dedupeSearchResults, scoreSearchMatch } from "../analysis.utils";

@@ -2,16 +2,13 @@ import type { Repo } from "@prisma/client";
 
 import type {
   AnalysisCoverage,
-  ChurnHotspot,
   DependencyNodeMetric,
   GraphReliability,
-  OpenApiInventory,
   RepositoryFact,
   RepositoryFinding,
-  TeamRole,
-  TsStaticHint,
-} from "@/server/utils/types";
-
+} from "../../engine/core/discovery.types";
+import type { OpenApiInventory } from "../extractors/openapi-inventory";
+import type { TsStaticHint } from "../extractors/ts-static-hints";
 import type { DuplicationReport } from "../metrics/duplication-metrics";
 import type {
   ChangeCouplingRef,
@@ -130,4 +127,16 @@ export type ArtifactBuildParams = {
 export type ArtifactBuildResult = {
   facts: RepositoryFact[];
   findings: RepositoryFinding[];
+};
+
+export type ChurnHotspot = {
+  churnScore: number;
+  commitsInWindow: number;
+  path: string;
+};
+
+export type TeamRole = {
+  login: string;
+  role: string;
+  share: number;
 };

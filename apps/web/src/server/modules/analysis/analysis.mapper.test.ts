@@ -20,8 +20,6 @@ vi.mock("@/server/utils/language-metadata", () => ({ getLanguageColor: mocks.get
 vi.mock("@/server/utils/markdown-to-html", () => ({ markdownToHtml: mocks.markdownToHtml }));
 vi.mock("@/server/utils/string-utils", () => ({ hasText: mocks.hasText }));
 
-import type { PRImpactPayload } from "@/server/utils/types";
-
 import { analysisMapper } from "./analysis.mapper";
 import type { LatestCompletedAnalysis, RepoWithLatestAnalysisAndDocs } from "./analysis.repository";
 import type { ImpactAnalysis, ParsedFinding } from "./analysis.schemas";
@@ -31,6 +29,7 @@ import defaultAiResult from "./fixtures/default-ai-result.json";
 import defaultMetrics from "./fixtures/default-metrics.json";
 import type { StructureNodePayload } from "./logic/graph-navigator";
 import type { NodeExplainPayload } from "./logic/node-explainer";
+import type { PRImpactPayload } from "./logic/pr.types";
 import type { StoredDocument } from "./logic/structure-shared";
 
 type TopLevelNode = {

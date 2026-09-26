@@ -58,3 +58,88 @@ export type GeneratedDiff = {
   filePath: string;
   patch: string; // Unified diff format
 };
+
+export type PRChangedFileSnapshot = {
+  additions: number;
+  deletions: number;
+  filePath: string;
+  previousFilePath: null | string;
+  status: "added" | "modified" | "removed" | "renamed";
+};
+
+export type PRImpactPayload = {
+  affectedNodes: Array<{
+    fileCount: number;
+    findingCount: number;
+    impactScore: number;
+    kind: string;
+    label: string;
+    nodeId: string;
+    nodeType: "file" | "group";
+    path: string;
+    relatedChangedFiles: string[];
+    whyAffected: string;
+    zoneId: null | string;
+  }>;
+  affectedZones: Array<{
+    fileCount: number;
+    findingCount: number;
+    impactScore: number;
+    kind: string;
+    label: string;
+    nodeId: string;
+    path: string;
+    relatedChangedFiles: string[];
+  }>;
+  analysis: {
+    baseSha: string;
+    createdAt: Date;
+    headSha: string;
+    id: string;
+    prNumber: number;
+    riskScore: null | number;
+    status: string;
+  };
+  changedFiles: Array<
+    PRChangedFileSnapshot & {
+      findingCount: number;
+      nodeId: null | string;
+      nodeLabel: null | string;
+      targetView: "code" | "map";
+      zoneId: null | string;
+      zoneLabel: null | string;
+    }
+  >;
+  fixes: Array<{
+    githubPrNumber: null | number;
+    githubPrUrl: null | string;
+    id: string;
+    status: string;
+    title: string;
+  }>;
+  navigationHints: {
+    primaryFilePath: null | string;
+    primaryNodeId: null | string;
+    recommendedView: "code" | "docs" | "map";
+  };
+  summary: {
+    affectedFiles: number;
+    affectedNodes: number;
+    affectedZones: number;
+    findings: number;
+    linkedFixes: number;
+  };
+  topFindings: Array<{
+    filePath: string;
+    findingType: string;
+    id: string;
+    line: number;
+    message: string;
+    messageHtml: string;
+    nodeId: null | string;
+    riskLevel: number;
+    title: string;
+    zoneId: null | string;
+    zoneLabel: null | string;
+  }>;
+};

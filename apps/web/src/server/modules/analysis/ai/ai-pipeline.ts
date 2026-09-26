@@ -3,10 +3,13 @@ import type { Repo } from "@prisma/client";
 
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
 import { llmLimiter } from "@/server/utils/llm-limiter";
-import type { RepositoryFact, RepositoryFinding } from "@/server/utils/types";
 
 import type { AIResult } from "../engine/core/analysis-result.schemas";
-import type { RepositoryEvidence } from "../engine/core/discovery.types";
+import type {
+  RepositoryEvidence,
+  RepositoryFact,
+  RepositoryFinding,
+} from "../engine/core/discovery.types";
 import type { RepoMetrics } from "../engine/core/metrics.types";
 import { buildDocumentationInputModel } from "../engine/pipeline/documentation-input";
 import { buildArchitectDigest } from "../logic/architect-digest";

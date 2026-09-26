@@ -1,7 +1,5 @@
 import { extname, normalize } from "pathe";
 
-import type { TsStaticHint } from "@/server/utils/types";
-
 import { COMPLEXITY_SCORING } from "../core/scoring-constants";
 
 const TS_LIKE = new Set([".cjs", ".cts", ".js", ".jsx", ".mjs", ".mts", ".ts", ".tsx"]);
@@ -120,3 +118,10 @@ export function collectTypeScriptStaticHints(
 
   return hints;
 }
+
+export type TsStaticHint = {
+  detail: string;
+  kind: "explicit-any" | "long-function" | "many-params";
+  line?: number;
+  path: string;
+};

@@ -1,6 +1,5 @@
-import type { RepoWorkspacePayload } from "@/server/utils/types";
-
 import type { analysisMapper } from "../analysis.mapper";
+import type { RepoWorkspacePayload } from "../logic/workspace.types";
 import type { StructureMapPayload } from "./graph-navigator";
 
 type RepoOverview = NonNullable<ReturnType<typeof analysisMapper.toOverview>>;

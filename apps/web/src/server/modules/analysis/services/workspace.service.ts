@@ -2,13 +2,13 @@ import { uniq } from "es-toolkit";
 import { normalize } from "pathe";
 
 import type { DbClient } from "@/server/core/db";
-import type { RepoNodeContextPayload, RepoWorkspacePayload } from "@/server/utils/types";
 
 import { analysisMapper } from "../analysis.mapper";
 import { analysisRepo } from "../analysis.repository";
 import { createAnalyzeContextBuilder } from "../logic/analyze-context-builder";
 import { buildInteractiveBriefNodePayload } from "../logic/brief";
 import { matchDocSections } from "../logic/doc-section-matcher";
+import type { RepoNodeContextPayload, RepoWorkspacePayload } from "../logic/workspace.types";
 import { buildWorkspacePayload } from "../logic/workspace-payload";
 
 export const workspaceService = {

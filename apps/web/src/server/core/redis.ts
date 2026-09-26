@@ -1,9 +1,9 @@
 import { Redis } from "@upstash/redis";
 
 import { REDIS_CONFIG } from "@/server/utils/redis";
-import type { FileActionPreviewResult, StagedFile } from "@/server/utils/types";
 
 import { appLogger } from "./app-logger";
+import type { FileActionPreviewResult, StagedFile } from "./redis.types";
 
 export const redisClient = Redis.fromEnv();
 
