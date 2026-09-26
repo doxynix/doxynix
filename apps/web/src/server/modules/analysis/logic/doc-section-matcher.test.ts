@@ -77,6 +77,33 @@ describe("matchDocSections", () => {
     expect(result[0]?.title).toBe("Notes");
   });
 
+  it("matches a section already linked to the node in the dependency graph", () => {
+    // The graph is the ONLY route to a match here: the node label and the related
+    // file list are both chosen so the title/body heuristics cannot fire.
+    const result = matchDocSections({
+      docs: [doc({ content: "# Overview\n\nThe service named payments handles all billing." })],
+      graph: { nodes: [{ id: "file:src/payments.ts", label: "payments" }] },
+      nodeId: "file:src/payments.ts",
+      nodeLabel: "Zzz Unrelated Label",
+      relatedFiles: [],
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.title).toBe("Overview");
+  });
+
+  it("ignores the graph link when the node id does not match", () => {
+    const result = matchDocSections({
+      docs: [doc({ content: "# Overview\n\nThe service named payments handles all billing." })],
+      graph: { nodes: [{ id: "file:src/payments.ts", label: "payments" }] },
+      nodeId: "file:src/shipping.ts",
+      nodeLabel: "Zzz Unrelated Label",
+      relatedFiles: [],
+    });
+
+    expect(result).toEqual([]);
+  });
+
   it("is case insensitive on both label and file terms", () => {
     const result = matchDocSections({
       docs: [doc({ content: "# CORE SERVICES\n\nBody." })],
