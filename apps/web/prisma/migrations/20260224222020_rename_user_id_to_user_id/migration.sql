@@ -1,4 +1,4 @@
--- 1. Сначала удаляем старые внешние ключи и индексы (Prisma их пересоздаст позже)
+-- 1. First, drop old foreign keys and indexes (Prisma will recreate them later)
 ALTER TABLE "api_keys" DROP CONSTRAINT IF EXISTS "api_keys_userId_fkey";
 ALTER TABLE "notifications" DROP CONSTRAINT IF EXISTS "notifications_userId_fkey";
 

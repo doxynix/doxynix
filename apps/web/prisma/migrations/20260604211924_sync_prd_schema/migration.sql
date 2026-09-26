@@ -7,24 +7,24 @@ DROP INDEX IF EXISTS "pull_request_analyses_repo_id_pr_number_key";
 -- AlterTable
 ALTER TABLE "generated_fixes" DROP COLUMN IF EXISTS "diff_json";
 
--- AlterTable (ЗАКОММЕНТИРОВАНО: этот ключ уже переименован в БД)
+-- AlterTable (COMMENTED OUT: this constraint has already been renamed in the DB)
 -- ALTER TABLE "pr_analysis_configs" RENAME CONSTRAINT "PullRequestAnalysisConfig_pkey" TO "pr_analysis_configs_pkey";
 ALTER TABLE "pr_analysis_configs" DROP COLUMN "comment_style";
 ALTER TABLE "pr_analysis_configs" ADD COLUMN "comment_style" "PRCommentStyle" NOT NULL DEFAULT 'DETAILED';
 ALTER TABLE "pr_analysis_configs" DROP COLUMN "focus_areas";
 ALTER TABLE "pr_analysis_configs" ADD COLUMN "focus_areas" "PRFocusArea"[] DEFAULT ARRAY['SECURITY', 'PERFORMANCE']::"PRFocusArea"[];
 
--- CreateIndex (ЗАКОММЕНТИРОВАНО: этот уникальный индекс уже создан в одной из прошлых миграций!)
+-- CreateIndex (COMMENTED OUT: this unique index was already created in a previous migration!)
 -- CREATE UNIQUE INDEX "pull_request_analyses_repo_id_pr_number_head_sha_key" ON "pull_request_analyses"("repo_id", "pr_number", "head_sha");
 
--- RenameForeignKey (ЗАКОММЕНТИРОВАНО: этот ключ уже переименован в БД)
+-- RenameForeignKey (COMMENTED OUT: this foreign key has already been renamed in the DB)
 -- ALTER TABLE "pr_analysis_configs" RENAME CONSTRAINT "PullRequestAnalysisConfig_repo_id_fkey" TO "pr_analysis_configs_repo_id_fkey";
 
 -- AddForeignKey
 ALTER TABLE "documents" ADD CONSTRAINT "documents_analysis_id_fkey" FOREIGN KEY ("analysis_id") REFERENCES "analyses"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
--- RenameIndex (ЗАКОММЕНТИРОВАНО: этот индекс уже имеет верное имя)
+-- RenameIndex (COMMENTED OUT: this index already has the correct name)
 -- ALTER INDEX "PullRequestAnalysisConfig_public_id_key" RENAME TO "pr_analysis_configs_public_id_key";
 
--- RenameIndex (ЗАКОММЕНТИРОВАНО: этот индекс уже имеет верное имя)
+-- RenameIndex (COMMENTED OUT: this index already has the correct name)
 -- ALTER INDEX "PullRequestAnalysisConfig_repo_id_key" RENAME TO "pr_analysis_configs_repo_id_key";

@@ -128,7 +128,7 @@ def load_pr(event_path):
             event = json.load(handle)
         pr = event.get("pull_request")
         if pr:
-            pr_url = pr.get("html_url", "не PR")
+            pr_url = pr.get("html_url", "no PR")
             pr_user = pr.get("user", {}).get("login", "—")
             additions = str(pr.get("additions", 0))
             deletions = str(pr.get("deletions", 0))

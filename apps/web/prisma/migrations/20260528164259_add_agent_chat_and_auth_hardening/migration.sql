@@ -1,12 +1,12 @@
 -- =========================================================================
--- 1. Удаляем старые внешние ключи (foreign keys) для безопасного изменения типов
+-- 1. Drop old foreign keys for safe type alterations
 -- =========================================================================
 ALTER TABLE "chat_messages" DROP CONSTRAINT IF EXISTS "chat_messages_sessionId_fkey";
 ALTER TABLE "chat_sessions" DROP CONSTRAINT IF EXISTS "chat_sessions_repoId_fkey";
 ALTER TABLE "chat_sessions" DROP CONSTRAINT IF EXISTS "chat_sessions_userId_fkey";
 
 -- =========================================================================
--- 2. Удаляем старые неактуальные индексы
+-- 2. Drop obsolete indexes
 -- =========================================================================
 DROP INDEX IF EXISTS "analyses_jobId_idx";
 DROP INDEX IF EXISTS "analyses_status_idx";
@@ -26,17 +26,17 @@ DROP INDEX IF EXISTS "verification_tokens_identifier_token_key";
 DROP INDEX IF EXISTS "verification_tokens_token_key";
 
 -- =========================================================================
--- 3. Безопасное обновление таблицы "analyses" (переименование колонки)
+-- 3. Safely update table "analyses" (column rename)
 -- =========================================================================
 ALTER TABLE "analyses" RENAME COLUMN "jobId" TO "job_id";
 
 -- =========================================================================
--- 4. Безопасное обновление таблицы "pull_request_analyses" (переименование)
+-- 4. Safely update table "pull_request_analyses" (column rename)
 -- =========================================================================
 ALTER TABLE "pull_request_analyses" RENAME COLUMN "jobId" TO "job_id";
 
 -- =========================================================================
--- 5. Безопасное обновление таблицы "documents" (умная дедупликация и NOT NULL)
+-- 5. Safely update table "documents" (smart deduplication and NOT NULL)
 -- =========================================================================
 DELETE FROM "documents" a
 USING "documents" b
@@ -46,61 +46,61 @@ WHERE a.id < b.id
   AND a.type = b.type
   AND COALESCE(a.path, '') = COALESCE(b.path, '');
 
--- Теперь безопасно заполняем оставшиеся одиночные NULL пустой строкой
+-- Safely fill remaining single NULLs with an empty string
 UPDATE "documents" SET "path" = '' WHERE "path" IS NULL;
 ALTER TABLE "documents" ALTER COLUMN "path" SET NOT NULL;
 ALTER TABLE "documents" ALTER COLUMN "path" SET DEFAULT '';
 
 -- =========================================================================
--- 6. Безопасное обновление таблицы "verification_tokens"
+-- 6. Safely update table "verification_tokens"
 -- =========================================================================
--- Добавляем новое обязательное поле с дефолтным значением (безопасно для существующих строк)
+-- Add new required column with a default value (safe for existing rows)
 ALTER TABLE "verification_tokens" ADD COLUMN "identifier_hash" TEXT NOT NULL DEFAULT '';
--- Устраняем возможные NULL перед установкой NOT NULL
+-- Eliminate potential NULLs before setting NOT NULL
 UPDATE "verification_tokens" SET "token_hash" = '' WHERE "token_hash" IS NULL;
 ALTER TABLE "verification_tokens" ALTER COLUMN "token_hash" SET NOT NULL;
 ALTER TABLE "verification_tokens" ALTER COLUMN "token_hash" SET DEFAULT '';
 
 -- =========================================================================
--- 7. Безопасное обновление таблицы "chat_sessions"
+-- 7. Safely update table "chat_sessions"
 -- =========================================================================
--- Сбрасываем ограничение первичного ключа для изменения типа колонки "id"
+-- Drop primary key constraint to alter "id" column type
 ALTER TABLE "chat_sessions" DROP CONSTRAINT IF EXISTS "chat_sessions_pkey";
 
--- Переименовываем колонки в camelCase -> snake_case (данные сохраняются!)
+-- Rename columns camelCase -> snake_case (data is preserved!)
 ALTER TABLE "chat_sessions" RENAME COLUMN "createdAt" TO "created_at";
 ALTER TABLE "chat_sessions" RENAME COLUMN "repoId" TO "repo_id";
 ALTER TABLE "chat_sessions" RENAME COLUMN "updatedAt" TO "updated_at";
 ALTER TABLE "chat_sessions" RENAME COLUMN "userId" TO "user_id";
 
--- Принудительно конвертируем поле "id" из TEXT в UUID (используем безопасный кастинг Postgres)
+-- Explicitly convert "id" from TEXT to UUID (using Postgres safe casting)
 ALTER TABLE "chat_sessions" ALTER COLUMN "id" TYPE uuid USING "id"::uuid;
 
--- Восстанавливаем первичный ключ
+-- Restore primary key
 ALTER TABLE "chat_sessions" ADD CONSTRAINT "chat_sessions_pkey" PRIMARY KEY ("id");
 
 -- =========================================================================
--- 8. Безопасное обновление таблицы "chat_messages"
+-- 8. Safely update table "chat_messages"
 -- =========================================================================
--- Сбрасываем ограничение первичного ключа
+-- Drop primary key constraint
 ALTER TABLE "chat_messages" DROP CONSTRAINT IF EXISTS "chat_messages_pkey";
 
--- Переименовываем колонки (данные сохраняются!)
+-- Rename columns (data is preserved!)
 ALTER TABLE "chat_messages" RENAME COLUMN "createdAt" TO "created_at";
 ALTER TABLE "chat_messages" RENAME COLUMN "sessionId" TO "session_id";
 
--- КРИТИЧЕСКИЙ ФИКС: Удаляем "битые" строки с NULL перед изменением типа на UUID!
+-- CRITICAL FIX: Delete corrupted rows with NULL before casting type to UUID!
 DELETE FROM "chat_messages" WHERE "session_id" IS NULL;
 
--- Конвертируем id и session_id в UUID
+-- Convert id and session_id to UUID
 ALTER TABLE "chat_messages" ALTER COLUMN "id" TYPE uuid USING "id"::uuid;
 ALTER TABLE "chat_messages" ALTER COLUMN "session_id" TYPE uuid USING "session_id"::uuid;
 
--- Восстанавливаем первичный ключ
+-- Restore primary key
 ALTER TABLE "chat_messages" ADD CONSTRAINT "chat_messages_pkey" PRIMARY KEY ("id");
 
 -- =========================================================================
--- 9. Создание новых оптимизированных индексов
+-- 9. Create new optimized indexes
 -- =========================================================================
 CREATE INDEX IF NOT EXISTS "analyses_job_id_idx" ON "analyses"("job_id");
 CREATE INDEX IF NOT EXISTS "chat_messages_session_id_idx" ON "chat_messages"("session_id");
@@ -113,7 +113,7 @@ CREATE INDEX IF NOT EXISTS "sessions_user_id_idx" ON "sessions"("user_id");
 CREATE UNIQUE INDEX IF NOT EXISTS "verification_tokens_identifier_hash_token_hash_key" ON "verification_tokens"("identifier_hash", "token_hash");
 
 -- =========================================================================
--- 10. Восстанавливаем внешние ключи (foreign keys) с новыми типами UUID
+-- 10. Restore foreign keys with new UUID types
 -- =========================================================================
 ALTER TABLE "chat_sessions" ADD CONSTRAINT "chat_sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "chat_sessions" ADD CONSTRAINT "chat_sessions_repo_id_fkey" FOREIGN KEY ("repo_id") REFERENCES "repos"("id") ON DELETE CASCADE ON UPDATE CASCADE;

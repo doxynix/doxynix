@@ -9,16 +9,18 @@ export class PromptCancelledError extends Error {
   }
 }
 
+type WithoutCancel<T> = T extends symbol ? never : T;
+
 export async function guardPrompt<T>(
   promptPromise: Promise<T | typeof p.CANCEL_SYMBOL>,
   cancelMessage = "Operation cancelled.",
-): Promise<T> {
+): Promise<WithoutCancel<T>> {
   const result = await promptPromise;
   if (p.isCancel(result)) {
     p.cancel(cancelMessage);
     throw new PromptCancelledError(cancelMessage);
   }
-  return result;
+  return result as WithoutCancel<T>;
 }
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

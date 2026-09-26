@@ -25,7 +25,8 @@
     "**/playwright-report/**",
     "**/test-results/**",
     "**/.stryker-tmp/**",
-    "**/.trigger/**"
+    "**/.trigger/**",
+    "**/.opencode/**"
   ],
   "options": {
     "typeAware": true
