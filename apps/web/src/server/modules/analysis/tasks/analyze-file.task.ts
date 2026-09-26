@@ -7,7 +7,7 @@ import { redisService } from "@/server/core/redis";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
 
 import type { FileActionNodeContext } from "../analysis.schemas";
-import { runQuickFileAudit } from "../analysis.utils";
+import { runQuickFileAudit } from "../logic/quick-file-audit";
 import { toQuickFileAuditPreview } from "../logic/repo-file-action-preview";
 import type { SyncFileActionMeta } from "../logic/repo-file-action-state";
 

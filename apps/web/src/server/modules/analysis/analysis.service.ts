@@ -43,7 +43,6 @@ import {
   buildContextSection,
   buildDocumentFallback,
   dedupeSearchResults,
-  deriveMaintenanceStatus,
   describeContextQualifier,
   getNonActionableReason,
   isBinaryLikeContent,
@@ -52,7 +51,12 @@ import {
 import type { AIResult } from "./engine/core/analysis-result.schemas";
 import type { RepoMetrics } from "./engine/core/metrics.types";
 import { calculateTeamRoles } from "./engine/metrics/common-metrics";
-import { calculateHealthScore } from "./engine/metrics/complexity";
+import {
+  buildFinalMetrics,
+  buildResultToStore,
+  computeHealthScore,
+  computeOnboardingScore,
+} from "./logic/analysis-scoring";
 import { createAnalyzeContextBuilder } from "./logic/analyze-context-builder";
 import {
   buildInteractiveBriefNodePayload,
@@ -60,13 +64,15 @@ import {
   buildInteractiveBriefPayload,
 } from "./logic/brief";
 import { calculateDocumentationOutputScore } from "./logic/doc-priority";
+import { matchDocSections } from "./logic/doc-section-matcher";
+import { applyDocumentSurgicalEdit } from "./logic/document-surgical-edit";
 import { FixService } from "./logic/fix-generator";
 import { buildTopLevelNodes } from "./logic/graph-navigator";
+import { mapChangedFilesToImpactNodes } from "./logic/impact-file-mapper";
 import { coerceAnalysisPayload } from "./logic/payload";
 import { buildSyncFileActionMeta } from "./logic/repo-file-action-state";
 import { DocumentFormatter } from "./logic/section-graph-linker";
-import { makeStructureNodeId } from "./logic/structure-shared";
-import { applySurgicalEditBlock } from "./logic/surgical-edit";
+import { buildWorkspacePayload } from "./logic/workspace-payload";
 
 type GeneratedDocsData = {
   generatedApiMarkdown?: string;
@@ -338,41 +344,13 @@ export const repoAnalysisService = {
     const nodeDetailCache = new Map<string, ReturnType<typeof analyzeContext.getStructureNode>>();
     const findingsByFile = analysisMapper.countFindingsByFile(findings);
 
-    const changedFileItems = changedFiles.map((file) => {
-      const normalizedFilePath = normalize(file.filePath);
-      const normalizedPreviousPath =
-        file.previousFilePath == null ? null : normalize(file.previousFilePath);
-      const directNodeId = interestingPaths.has(normalizedFilePath)
-        ? makeStructureNodeId("file", normalizedFilePath)
-        : null;
-      const zoneNode = analysisMapper.matchTopLevelZone(
-        topLevelNodes,
-        normalizedFilePath,
-        normalizedPreviousPath,
-      );
-      const matchedNodeId = directNodeId ?? zoneNode?.id ?? null;
-      const matchedNode =
-        matchedNodeId == null
-          ? null
-          : analysisMapper.resolveMatchedNode(
-              matchedNodeId,
-              analyzeContext,
-              nodeById,
-              nodeDetailCache,
-            );
-      const findingCount = findingsByFile.get(normalizedFilePath) ?? 0;
-
-      return {
-        ...file,
-        filePath: normalizedFilePath,
-        findingCount,
-        nodeId: matchedNodeId,
-        nodeLabel: matchedNode?.label ?? null,
-        previousFilePath: normalizedPreviousPath,
-        targetView: directNodeId != null ? ("code" as const) : ("map" as const),
-        zoneId: zoneNode?.id ?? null,
-        zoneLabel: zoneNode?.label ?? null,
-      };
+    const changedFileItems = mapChangedFilesToImpactNodes({
+      analyzeContext,
+      changedFiles,
+      findingsByFile,
+      interestingPaths,
+      nodeById,
+      nodeDetailCache,
     });
 
     const affectedZones = analysisMapper.buildAffectedZones(changedFileItems, findings, nodeById);
@@ -717,68 +695,7 @@ export const repoAnalysisService = {
       return null;
     }
 
-    return {
-      analysisRef: structure.analysisRef,
-      docs: {
-        availableCount: overview.docs.availableCount,
-        availableTypes: overview.docs.availableTypes,
-        hasSwagger: overview.docs.hasSwagger,
-        items: overview.docs.items.map((item) => ({
-          id: item.id,
-          source: item.source === "llm" ? "llm" : null,
-          status: item.status,
-          type: item.type,
-          updatedAt: item.updatedAt,
-          version: item.version,
-        })),
-      },
-      mostComplexFiles: overview.mostComplexFiles,
-      navigation: {
-        defaultNodeId: structure.selection.defaultNodeId,
-        keyZones: structure.graph.nodes,
-        primaryEntrypoints: structure.overview.primaryEntrypoints,
-        primaryModules: structure.overview.primaryModules,
-      },
-      repo: {
-        defaultBranch: overview.repo.defaultBranch,
-        description: overview.repo.description,
-        forks: overview.repo.forks,
-        id: overview.repo.id,
-        language: overview.repo.language,
-        languageColor: overview.repo.languageColor,
-        license: overview.repo.license,
-        name: overview.repo.name,
-        openIssues: overview.repo.openIssues,
-        owner: overview.repo.owner,
-        ownerAvatarUrl: overview.repo.ownerAvatarUrl,
-        pushedAt: overview.repo.pushedAt,
-        size: overview.repo.size,
-        stars: overview.repo.stars,
-        topics: overview.repo.topics,
-        url: overview.repo.url,
-        visibility: overview.repo.visibility,
-      },
-      secondary: {
-        languages: overview.languages,
-        scores: overview.scores,
-        signals: overview.signals,
-        stats: overview.stats,
-      },
-      summary: {
-        architectureStyle: structure.overview.architectureStyle,
-        maintenance: overview.maintenance,
-        purpose: structure.overview.purpose,
-        repositoryKind: structure.overview.repositoryKind,
-        stack: structure.overview.stack,
-      },
-      topRisks: overview.topRisks.map((risk) => ({
-        id: risk.id,
-        severity: risk.severity,
-        suggestedNextChange: risk.suggestedNextChange,
-        summary: risk.summary,
-        title: risk.title,
-      })),
-    };
+    return buildWorkspacePayload({ overview, structure });
   },
 
   async highlightFile(content: string, path: string) {
@@ -796,44 +713,14 @@ export const repoAnalysisService = {
     analyzeContext: ReturnType<typeof createAnalyzeContextBuilder>,
   ) {
     const docs = await analysisRepo.loadLatestDocumentsWithContent(db, repoId);
-    const graph = analyzeContext.getStructureMap()?.graph ?? null;
 
-    const fileTerms = relatedFiles.flatMap((path) => {
-      const fileName = basename(path);
-      return [fileName.toLowerCase(), path.toLowerCase()];
+    return matchDocSections({
+      docs,
+      graph: analyzeContext.getStructureMap()?.graph ?? null,
+      nodeId,
+      nodeLabel,
+      relatedFiles,
     });
-
-    const searchLabel = nodeLabel.toLowerCase();
-
-    return docs
-      .flatMap((doc) => {
-        const formatted = DocumentFormatter.withGraphLinks(
-          doc.content,
-          graph,
-          doc.type,
-          doc.version,
-        );
-
-        return formatted.sections
-          .filter((section) => {
-            const lowerTitle = section.title.toLowerCase();
-            const lowerContent = section.content.toLowerCase();
-
-            return (
-              section.graphNodeIds.includes(nodeId) ||
-              lowerTitle.includes(searchLabel) ||
-              fileTerms.some((term) => lowerTitle.includes(term) || lowerContent.includes(term))
-            );
-          })
-          .slice(0, 4)
-          .map((section) => ({
-            docId: doc.publicId,
-            docType: doc.type,
-            id: section.id,
-            title: section.title,
-          }));
-      })
-      .slice(0, 8);
   },
 
   async runDocumentFilePreview(
@@ -970,62 +857,37 @@ export const repoAnalysisService = {
 
     const teamRoles = calculateTeamRoles(rawContributors);
 
-    const scoringContext: AIResult & GeneratedDocsData = {
+    const docOutputScore = calculateDocumentationOutputScore({
       ...aiResult,
       ...generatedDocsData,
-    };
-
-    const docOutputScore = calculateDocumentationOutputScore(scoringContext);
-
-    const onboardingScore = Math.min(
-      100,
-      docOutputScore.score +
-        (hardMetrics.docDensity > 10 ? 10 : 0) +
-        (hardMetrics.entrypoints.length > 0 ? 15 : 0) +
-        (hardMetrics.configFiles > 0 ? 10 : 0) +
-        (repositoryFacts.some((fact) => fact.category === "architecture") ? 10 : 0),
-    );
-
-    const finalHealthScore = calculateHealthScore({
-      busFactor,
-      complexityScore: hardMetrics.complexityScore,
-      dependencyCycles: hardMetrics.dependencyCycles.length,
-      docDensity: hardMetrics.docDensity,
-      duplicationPercentage: hardMetrics.duplicationReport.duplicationPercentage,
-      repo,
-      securityScore: hardMetrics.securityScore,
-      techDebtScore: hardMetrics.techDebtScore,
     });
 
-    const resultToStore = {
-      ...aiResult,
-      complexityScore: hardMetrics.complexityScore,
-      findings: repositoryFindings,
-      mostComplexFiles: hardMetrics.mostComplexFiles,
-      onboardingScore,
-      repository_facts: repositoryFacts,
-      securityScore: hardMetrics.securityScore,
-      techDebtScore: hardMetrics.techDebtScore,
-      vulnerabilities: hardMetrics.securityFindings.map((f) => ({
-        description: f.message,
-        file: f.path,
-        lineHint: f.line != null ? `line ${f.line}` : undefined,
-        risk: f.severity === "error" ? "HIGH" : "MODERATE",
-        suggestion:
-          "Review the flagged secret-like value and replace it with a safe managed secret.",
-      })),
-    };
+    const onboardingScore = computeOnboardingScore({
+      docOutputScore: docOutputScore.score,
+      hardMetrics,
+      repositoryFacts,
+    });
 
-    const finalMetrics: RepoMetrics = {
-      ...hardMetrics,
+    const finalHealthScore = computeHealthScore({ busFactor, hardMetrics, repo });
+
+    const resultToStore = buildResultToStore({
+      aiResult,
+      hardMetrics,
+      onboardingScore,
+      repositoryFacts,
+      repositoryFindings,
+    });
+
+    const finalMetrics = buildFinalMetrics({
       busFactor,
       factCount: repositoryFacts.length,
+      finalHealthScore,
       findingCount: repositoryFindings.length,
-      healthScore: finalHealthScore,
-      maintenanceStatus: deriveMaintenanceStatus(repo),
+      hardMetrics,
       onboardingScore,
+      repo,
       teamRoles,
-    };
+    });
 
     appLogger.info({
       analysisId,
@@ -1264,33 +1126,3 @@ export const repoAnalysisService = {
     );
   },
 };
-
-function applyDocumentSurgicalEdit(params: {
-  filePath: string;
-  original: string;
-  replace: string;
-  search: string;
-}): string {
-  const { filePath, original, replace, search } = params;
-
-  const { content, kind, similarity } = applySurgicalEditBlock({
-    fileContent: original.replaceAll("\r\n", "\n"),
-    replaceBlock: replace.replaceAll("\r\n", "\n"),
-    searchBlock: search.replaceAll("\r\n", "\n"),
-  });
-
-  if (kind === "fuzzy") {
-    appLogger.info({
-      filePath,
-      msg: `Fuzzy documenter match applied (similarity: ${Math.round(similarity * 100)}%)`,
-    });
-  } else if (kind === "none") {
-    appLogger.error({
-      filePath,
-      msg: "Documenter surgical block match failed. Original code block not found.",
-      searchLength: search.length,
-    });
-  }
-
-  return content;
-}
