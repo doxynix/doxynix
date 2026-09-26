@@ -43,7 +43,7 @@
     "test": "bun with-doppler \"cross-env TZ=UTC vitest run --config vitest.config.ts --no-file-parallelism\"",
     "test:coverage": "bun with-doppler \"cross-env TZ=UTC vitest run --coverage --config vitest.config.ts --no-file-parallelism\"",
     "test:e2e": "bun with-doppler \"playwright test\"",
-    "test:int": "bun with-doppler \"cross-env TZ=UTC vitest run src/tests/integration --config vitest.config.ts --no-file-parallelism\"",
+    "test:int": "bun with-doppler \"cross-env TZ=UTC vitest run --config vitest.integration.config.ts\"",
     "test:stryker": "bun with-doppler \"stryker run vitest.stryker.config.ts\"",
     "test:unit": "bun with-doppler \"cross-env TZ=UTC vitest run src --config vitest.config.ts\"",
     "type-check": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" tsc -b",

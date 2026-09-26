@@ -247,6 +247,11 @@ jobs:
           flags: unit
           fail_ci_if_error: false
 
+      # Run after the coverage upload: these tests TRUNCATE shared tables, so a
+      # flake here must not cost us the unit coverage report.
+      - name: Run Integration Tests
+        run: bun --filter @doxynix/web test:int
+
   build:
     needs: [quality, types, tests, changes, init]
     runs-on: ubuntu-latest
