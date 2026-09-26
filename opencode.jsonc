@@ -1,100 +1,168 @@
 {
-  "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "context7": {
-      "command": ["bun", "x", "@upstash/context7-mcp@latest"],
-      "timeout": 60000,
-      "type": "local"
-    },
-    "doxynix": {
-      "command": [
-        "doppler",
-        "run",
-        "--silent",
-        "--project",
-        "doxynix-siem",
-        "--config",
-        "dev_personal",
-        "--",
-        "sh",
-        "-c",
-        "bun x -y mcp-remote https://doxynix.space/api/mcp --header \"Authorization: Bearer $DOXYNIX_API_KEY\""
-      ],
-      "timeout": 60000,
-      "type": "local"
-    },
-    "linear": {
-      "command": [
-        "doppler",
-        "run",
-        "--project",
-        "doxynix-siem",
-        "--config",
-        "dev_personal",
-        "--",
-        "bun",
-        "x",
-        "-y",
-        "@touchlab/linear-mcp-integration"
-      ],
-      "environment": {
-        "DOPPLER_NO_CHECK_VERSION": "true"
-      },
-      "timeout": 60000,
-      "type": "local"
-    },
-    "local-git": {
-      "command": ["bun", "x", "-y", "@cyanheads/git-mcp-server"],
-      "timeout": 60000,
-      "type": "local"
-    },
-    "local-podman": {
-      "command": ["bun", "x", "podman-mcp-server"],
-      "timeout": 60000,
-      "type": "local"
-    },
-    "local-postgres": {
-      "command": [
-        "doppler",
-        "run",
-        "--silent",
-        "--project",
-        "doxynix-siem",
-        "--config",
-        "dev_personal",
-        "--",
-        "sh",
-        "-c",
-        "bun x @iflow-mcp/postgresql-mcp-server --connection-string \"$DATABASE_URL\""
-      ],
-      "timeout": 60000,
-      "type": "local"
-    },
-    "memory": {
-      "command": ["bun", "x", "-y", "@modelcontextprotocol/server-memory"],
-      "timeout": 60000,
-      "type": "local"
-    },
-    "tavily-search": {
-      "command": [
-        "doppler",
-        "run",
-        "--silent",
-        "--project",
-        "doxynix-siem",
-        "--config",
-        "dev_personal",
-        "--",
-        "bun",
-        "x",
-        "-y",
-        "tavily-mcp"
-      ],
-      "environment": {
-        "DOPPLER_NO_CHECK_VERSION": "true"
-      },
-      "timeout": 60000,
-      "type": "local"
+  "agents": {
+    "build": {
+      "permissions": [{ "action": "subagent", "effect": "allow", "resource": "reviewer" }]
     }
+  },
+  "commands": {
+    "git-linear": {
+      "description": "Take a Linear issue (DXNX-NNN) through branch, implement, validate, PR",
+      "template": "Execute the task from Linear strictly following the workflow in .agents/skills/linear-git-workflow/SKILL.md. If no ticket is provided, ask for DXNX-NNN via the question tool. Steps: 1) Read the issue using linear_search_issues; 2) Create branch <type>/dxnx-<n>-<kebab> from main; 3) Implement (load the relevant skill: zenstack-migration / drizzle-migration / hono-rpc-endpoint); 4) Run bun run validate + type-check + arch:check; 5) Commit following Conventional Commits WITHOUT the ticket in the subject (the inject-ticket hook will add Closes to the footer automatically), strictly no --no-verify; 6) Push and create a PR targeting main with Closes DXNX-NNN in the body."
+    },
+    "review": {
+      "description": "Review current changes with the readonly reviewer subagent",
+      "template": "Use the reviewer subagent to review the current git diff for correctness, security issues and missing tests. List findings in severity order with file and line references."
+    },
+    "validate": {
+      "description": "Run repo validation (biome, oxlint, type-check)",
+      "template": "Run `bun run validate` in the repository root and fix any errors it reports, following .agents/skills/verification-before-completion/SKILL.md."
+    }
+  },
+  "compaction": {
+    "auto": false
+  },
+  "default_agent": "build",
+  "mcp": {
+    "servers": {
+      "context7": {
+        "command": ["bun", "x", "@upstash/context7-mcp@latest"],
+        "type": "local"
+      },
+      "doxynix": {
+        "command": [
+          "doppler",
+          "run",
+          "--silent",
+          "--project",
+          "doxynix-siem",
+          "--config",
+          "dev_personal",
+          "--",
+          "sh",
+          "-c",
+          "bun x -y mcp-remote https://doxynix.space/api/mcp --header \"Authorization: Bearer $DOXYNIX_API_KEY\""
+        ],
+        "type": "local"
+      },
+      "linear": {
+        "command": [
+          "doppler",
+          "run",
+          "--project",
+          "doxynix-siem",
+          "--config",
+          "dev_personal",
+          "--",
+          "bun",
+          "x",
+          "-y",
+          "@touchlab/linear-mcp-integration"
+        ],
+        "environment": {
+          "DOPPLER_NO_CHECK_VERSION": "true"
+        },
+        "type": "local"
+      },
+      "local-git": {
+        "command": ["bun", "x", "-y", "@cyanheads/git-mcp-server"],
+        "type": "local"
+      },
+      "local-podman": {
+        "command": ["bun", "x", "podman-mcp-server"],
+        "type": "local"
+      },
+      "local-postgres-siem": {
+        "command": [
+          "doppler",
+          "run",
+          "--silent",
+          "--project",
+          "doxynix-siem",
+          "--config",
+          "dev_personal",
+          "--",
+          "sh",
+          "-c",
+          "bun x @iflow-mcp/postgresql-mcp-server --connection-string \"$DATABASE_URL\""
+        ],
+        "type": "local"
+      },
+      "local-postgres-web": {
+        "command": [
+          "doppler",
+          "run",
+          "--silent",
+          "--project",
+          "doxynix",
+          "--config",
+          "dev_personal",
+          "--",
+          "sh",
+          "-c",
+          "bun x @iflow-mcp/postgresql-mcp-server --connection-string \"$DATABASE_URL\""
+        ],
+        "type": "local"
+      },
+      "memory": {
+        "command": ["bun", "x", "-y", "@modelcontextprotocol/server-memory"],
+        "type": "local"
+      },
+      "tavily-search": {
+        "command": [
+          "doppler",
+          "run",
+          "--silent",
+          "--project",
+          "doxynix-siem",
+          "--config",
+          "dev_personal",
+          "--",
+          "bun",
+          "x",
+          "-y",
+          "tavily-mcp"
+        ],
+        "environment": {
+          "DOPPLER_NO_CHECK_VERSION": "true"
+        },
+        "type": "local"
+      }
+    },
+    "timeout": {
+      "catalog": 30000,
+      "startup": 45000
+    }
+  },
+  "permissions": [
+    { "action": "external_directory", "effect": "ask", "resource": "*" },
+    { "action": "shell", "effect": "ask", "resource": "*" },
+    { "action": "shell", "effect": "allow", "resource": "git status *" },
+    { "action": "shell", "effect": "allow", "resource": "git diff *" },
+    { "action": "shell", "effect": "allow", "resource": "git log *" },
+    { "action": "shell", "effect": "allow", "resource": "bun test*" },
+    { "action": "shell", "effect": "allow", "resource": "bun run test*" },
+    { "action": "shell", "effect": "allow", "resource": "bun run type-check*" },
+    { "action": "shell", "effect": "allow", "resource": "bun run lint*" },
+    { "action": "shell", "effect": "allow", "resource": "bun run format:check*" },
+    { "action": "shell", "effect": "deny", "resource": "git push *--force*" },
+    { "action": "shell", "effect": "deny", "resource": "rm -rf *" },
+    { "action": "shell", "effect": "deny", "resource": "rm -fr *" },
+    { "action": "shell", "effect": "deny", "resource": "doppler secrets *" },
+    { "action": "shell", "effect": "deny", "resource": "printenv*" },
+    { "action": "shell", "effect": "deny", "resource": "env" },
+    { "action": "shell", "effect": "deny", "resource": "* *.env*" },
+    { "action": "read", "effect": "allow", "resource": "*" },
+    { "action": "read", "effect": "deny", "resource": "*.env" },
+    { "action": "read", "effect": "deny", "resource": "*.env.*" },
+    { "action": "read", "effect": "deny", "resource": "**/.env*" },
+    { "action": "read", "effect": "deny", "resource": "**/secrets/**" },
+    { "action": "edit", "effect": "deny", "resource": "*.env" },
+    { "action": "edit", "effect": "deny", "resource": "*.env.*" },
+    { "action": "edit", "effect": "deny", "resource": "**/.env*" }
+  ],
+  "skills": ["./.agents/skills"],
+  "tool_output": {
+    "max_bytes": 30000,
+    "max_lines": 500
   }
 }

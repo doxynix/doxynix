@@ -36,18 +36,18 @@ latest_per_repo AS (
     ORDER BY repo_id, period_group, created_at DESC
 )
 SELECT
-    -- Счётчики
+    -- Counters
     (SELECT COUNT(*)::int FROM user_repos ur CROSS JOIN periods p WHERE ur.created_at < p.cur_end) AS "repoCount",
     (SELECT COUNT(*)::int FROM documents d JOIN user_repos ur ON d.repo_id = ur.id CROSS JOIN periods p WHERE d.created_at < p.cur_end) AS "docCount",
 
-    -- Статусы (по всем анализам пользователя)
+    -- Statuses (across all user analyses)
     (SELECT COUNT(CASE WHEN a.status = 'FAILED' THEN 1 END)::int FROM analyses a JOIN user_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at < p.cur_end) AS "failedCount",
     (SELECT COUNT(CASE WHEN a.status = 'PENDING' THEN 1 END)::int FROM analyses a JOIN user_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at < p.cur_end) AS "pendingCount",
     (SELECT COUNT(CASE WHEN a.status = 'DONE' THEN 1 END)::int FROM analyses a JOIN user_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at < p.cur_end) AS "successCount",
     (SELECT COUNT(CASE WHEN a.status = 'NEW' THEN 1 END)::int FROM analyses a JOIN user_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at < p.cur_end) AS "newCount",
     (SELECT COUNT(*)::int FROM analyses a JOIN user_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at < p.cur_end) AS "totalCount",
 
-    -- Метрики
+    -- Metrics
     COALESCE((SELECT AVG(score) FROM latest_per_repo WHERE is_current), 0)::float AS "avgHealth",
     COALESCE((SELECT AVG(security_score) FROM latest_per_repo WHERE is_current), 0)::float AS "avgSecurity",
     COALESCE((SELECT AVG(complexity_score) FROM latest_per_repo WHERE is_current), 0)::float AS "avgComplexity",
@@ -55,17 +55,17 @@ SELECT
     COALESCE((SELECT AVG(tech_debt_score) FROM latest_per_repo WHERE is_current), 0)::float AS "avgTechDebt",
     COALESCE((SELECT COUNT(DISTINCT repo_id) FROM latest_per_repo WHERE is_current AND score < 50), 0)::int AS "criticalRepoCount",
 
-    -- Экстремумы
+    -- Extremes
     (SELECT jsonb_build_object('name', repo_name, 'score', score) FROM latest_per_repo WHERE is_current AND score < 50 ORDER BY score ASC LIMIT 1) AS "worstRepo",
     (SELECT jsonb_build_object('name', repo_name, 'score', score) FROM latest_per_repo WHERE is_current ORDER BY score DESC NULLS LAST LIMIT 1) AS "bestRepo",
 
-    -- Активность
+    -- Activity
     (SELECT COALESCE(jsonb_agg(ra ORDER BY ra."createdAt" DESC), '[]'::jsonb) FROM (
         SELECT a.public_id as id, a.progress, a.status, a.created_at as "createdAt", ur.name AS "repoName", ur.owner AS "repoOwner"
         FROM analyses a JOIN user_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at < p.cur_end ORDER BY a.created_at DESC LIMIT 5
     ) ra) AS "recentActivity",
 
-    -- Языки
+    -- Languages
     (SELECT COALESCE(jsonb_agg(jsonb_build_object('name', final_name, 'color', final_color, 'value', sum_lines) ORDER BY sum_lines DESC), '[]'::jsonb) FROM (
         SELECT
             CASE WHEN rn <= 5 THEN name ELSE 'Other' END AS final_name,
@@ -79,7 +79,7 @@ SELECT
         ) ls GROUP BY 1, 2
     ) sub) AS "languages",
 
-    -- Риски и LOC
+    -- Risks and LOC
     COALESCE((SELECT SUM(COALESCE((metrics_json->>'totalLoc')::numeric, 0))::int FROM latest_per_repo WHERE is_current = true), 0) AS "totalLoc",
     COALESCE((SELECT COUNT(*)::int FROM latest_per_repo WHERE is_current = true AND COALESCE((metrics_json->>'busFactor')::int, 0) = 1), 0) AS "busFactorRepos",
 
@@ -95,7 +95,7 @@ SELECT
         WHERE is_current = true ORDER BY commits DESC LIMIT 3
     ) sub) AS "topCoupling",
 
-    -- Дельты
+    -- Deltas
     COALESCE((SELECT AVG(score) FROM latest_per_repo WHERE is_current) - (SELECT AVG(score) FROM latest_per_repo WHERE is_previous), 0)::int AS "healthDelta",
     COALESCE((SELECT AVG(security_score) FROM latest_per_repo WHERE is_current) - (SELECT AVG(security_score) FROM latest_per_repo WHERE is_previous), 0)::int AS "securityDelta",
     COALESCE((SELECT AVG(complexity_score) FROM latest_per_repo WHERE is_current) - (SELECT AVG(complexity_score) FROM latest_per_repo WHERE is_previous), 0)::int AS "complexityDelta",
