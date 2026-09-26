@@ -216,7 +216,7 @@ export function SecurityOverviewCard({
   };
 
   return (
-    <Card className="border-destructive/20 bg-background shadow-sm">
+    <Card className="border-destructive/20 bg-background">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="flex items-center gap-2 font-bold text-xl tracking-tight">
           <ShieldAlert className="size-5 animate-pulse text-destructive" />{" "}
@@ -277,13 +277,13 @@ export function SecurityOverviewCard({
               {t("repo_analytics_critical_vulns")}
             </span>
             <div className="flex flex-col gap-2">
-              {security.vulnerabilities.map((vuln, idx) => {
+              {security.vulnerabilities.map((vuln) => {
                 const isCurrentlyFixing = runningFixId === vuln.file;
 
                 return (
                   <Collapsible
                     className="group rounded-lg border border-border bg-muted/30 p-2.5 transition-standard hover:bg-muted/50"
-                    key={idx}
+                    key={vuln.file}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex flex-col gap-1">

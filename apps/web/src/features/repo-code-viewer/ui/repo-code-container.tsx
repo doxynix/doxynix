@@ -6,6 +6,7 @@ import { parseAsString, useQueryState } from "nuqs";
 import type { TreeApi } from "react-arborist";
 
 import { trpc } from "@/shared/api/trpc";
+import { usePanelLayout } from "@/shared/lib/hooks/use-panel-layout";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ui/core/resizable";
 
 import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
@@ -50,11 +51,19 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
     void setPath(nextPath);
   }, [nodeContext?.related.files, path, setPath]);
 
+  const { defaultLayout, onLayoutChanged } = usePanelLayout("repo-code");
+
   return (
     <div className="flex h-[calc(100dvh-260px)] overflow-hidden rounded-xl border bg-background">
-      <ResizablePanelGroup orientation="horizontal">
+      <ResizablePanelGroup
+        defaultLayout={defaultLayout}
+        id="repo-code"
+        onLayoutChanged={onLayoutChanged}
+        orientation="horizontal"
+      >
         <ResizablePanel
           defaultSize="50%"
+          id="repo-code-tree"
           maxSize="50%"
           minSize="25%"
         >
@@ -72,7 +81,10 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
 
         <ResizableHandle />
 
-        <ResizablePanel defaultSize="50%">
+        <ResizablePanel
+          defaultSize="50%"
+          id="repo-code-browser"
+        >
           {isLoading ? (
             <CodeSkeleton />
           ) : path != null && data ? (

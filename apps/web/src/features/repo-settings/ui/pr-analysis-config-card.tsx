@@ -123,6 +123,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
             <CardDescription>{t("settings_pr_card_desc")}</CardDescription>
           </div>
           <Switch
+            aria-label={t("settings_pr_card_title")}
             checked={isEnabled}
             className="data-[state=checked]:bg-foreground"
             onCheckedChange={(checked) => {
@@ -134,7 +135,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
       </CardHeader>
 
       <CardContent className="flex flex-col gap-6">
-        <div className={isEnabled === true ? "opacity-100" : "pointer-events-none opacity-50"}>
+        <div className={isEnabled === true ? "opacity-100" : "pointer-events-none opacity-75"}>
           <div className="mb-6 flex flex-col gap-2">
             <Label htmlFor={commentStyleId}>{t("settings_pr_comment_style_label")}</Label>
             <Select
@@ -240,6 +241,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
                 }
               }}
               step={5000}
+              thumbLabel={t("settings_pr_token_budget_label")}
               value={[tokenBudget ?? 30_000]}
             />
             <p className="text-muted-foreground text-xs">{t("settings_pr_token_budget_hint")}</p>

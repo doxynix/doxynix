@@ -33,7 +33,7 @@ export function SidebarLink({
     <SidebarMenuButton
       asChild
       className={cn(
-        "group/link flex cursor-default transition-colors",
+        "group/link flex cursor-pointer transition-colors",
         isActive
           ? "bg-sidebar-accent font-bold text-sidebar-accent-foreground hover:bg-sidebar-accent"
           : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
@@ -48,13 +48,13 @@ export function SidebarLink({
         {Icon != null && <Icon className="size-3.5" />}
         {avatar != null && (
           <AppAvatar
-            alt={title}
+            alt=""
             fallbackText={title}
             sizeClassName="size-6"
             src={avatar}
           />
         )}
-        <span className="truncate">{title}</span>
+        <span className="min-w-0 flex-1 truncate">{title}</span>
 
         <div className="ml-auto flex items-center gap-2">
           {notificationsCount != null && notificationsCount > 0 && (

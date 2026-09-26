@@ -16,7 +16,11 @@ export default function UnauthorizedPage() {
   }, []);
 
   return (
-    <div className="flex h-dvh w-full flex-col items-center justify-center bg-background">
+    <main
+      className="flex h-dvh w-full flex-col items-center justify-center bg-background"
+      id="main-content"
+      tabIndex={-1}
+    >
       <div className="flex max-w-md flex-col items-center gap-6 text-center">
         <div className="flex size-20 items-center justify-center rounded-full bg-destructive/10 text-destructive">
           <ShieldAlert size={40} />
@@ -32,6 +36,6 @@ export default function UnauthorizedPage() {
           </Link>
         </AppButton>
       </div>
-    </div>
+    </main>
   );
 }

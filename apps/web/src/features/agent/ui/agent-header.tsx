@@ -15,10 +15,11 @@ type Props = {
 
 export function AgentHeader({ expanded, setExpanded }: Readonly<Props>) {
   const t = useTranslations("Agent");
+  const tCommon = useTranslations("Common");
   const closeAgent = useAgentClose();
 
   return (
-    <div className="flex h-12 w-full items-center justify-between border-b bg-card px-4 py-6">
+    <div className="flex h-12 w-full items-center justify-between border-b bg-card px-4">
       <div className="flex items-center gap-3">
         <div>
           <div className="flex items-center gap-1.5">
@@ -35,6 +36,7 @@ export function AgentHeader({ expanded, setExpanded }: Readonly<Props>) {
 
       <div className="flex items-center gap-1">
         <AppButton
+          aria-label={expanded ? t("collapse_agent") : t("expand_agent")}
           onClick={() => setExpanded(!expanded)}
           size="icon"
           variant="ghost"
@@ -43,6 +45,7 @@ export function AgentHeader({ expanded, setExpanded }: Readonly<Props>) {
         </AppButton>
 
         <AppButton
+          aria-label={tCommon("close")}
           onClick={closeAgent}
           size="icon"
           variant="ghost"

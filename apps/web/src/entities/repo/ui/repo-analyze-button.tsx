@@ -13,7 +13,7 @@ export function RepoAnalyzeButton({ name, owner }: Readonly<Props>) {
   return (
     <AppButton
       asChild
-      className="mt-2 cursor-pointer"
+      className="mt-2"
       size="sm"
       variant="outline"
     >

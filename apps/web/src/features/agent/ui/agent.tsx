@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl";
 import { trpc } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { useAutoScroll } from "@/shared/lib/hooks/use-auto-scroll";
+import { usePanelLayout } from "@/shared/lib/hooks/use-panel-layout";
 import { DxnxLogo } from "@/shared/ui/branding/dxnx-logo";
 import { AppButton } from "@/shared/ui/core/button";
 import { Card } from "@/shared/ui/core/card";
@@ -22,6 +23,7 @@ import { useSidebar } from "@/shared/ui/core/sidebar";
 import { Textarea } from "@/shared/ui/core/textarea";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
+import { AnimatedShinyText } from "@/shared/ui/visuals/animated-shiny-text";
 
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
@@ -58,6 +60,8 @@ export function Agent() {
   const t = useTranslations("Agent");
   const tCommon = useTranslations("Common");
   const isOpen = useAgentIsOpen();
+
+  const { defaultLayout, onLayoutChanged } = usePanelLayout("agent");
 
   const [expanded, setExpanded] = useState(false);
   const [editingMessageId, setEditingMessageId] = useState<null | string>(null);
@@ -225,8 +229,13 @@ export function Agent() {
   const isRepoOwnerPage = owner !== "" && name !== "";
   const wrapperClasses = cn(
     "fixed z-50 flex overflow-hidden",
-    "transition-[left] duration-200 ease-linear",
-    expanded ? (open ? "left-[272px]" : "left-4") : "left-[calc(100vw-450px)]",
+    "transition-[left] duration-300 ease-out-expo",
+    "group-data-[resizing]/sidebar-wrapper:transition-none",
+    expanded
+      ? open
+        ? "left-[calc(var(--sidebar-width)+1rem)]"
+        : "left-4"
+      : "left-[calc(100vw-450px)]",
   );
 
   return (
@@ -253,8 +262,8 @@ export function Agent() {
             y: 12,
           }}
           transition={{
-            duration: 0.24,
-            ease: "easeInOut",
+            duration: 0.45,
+            ease: [0.16, 1, 0.3, 1],
             type: "tween",
           }}
         >
@@ -265,16 +274,19 @@ export function Agent() {
             <Card className="flex h-full w-full flex-col overflow-hidden p-0">
               <ResizablePanelGroup
                 className="flex h-full"
+                defaultLayout={defaultLayout}
+                id="agent"
                 key={expanded ? "expanded" : "collapsed"}
+                onLayoutChanged={onLayoutChanged}
                 orientation="horizontal"
               >
                 {expanded && (
                   <>
                     <ResizablePanel
-                      defaultSize="15%"
+                      defaultSize="180px"
                       id="agent-sidebar"
                       maxSize="50%"
-                      minSize="15%"
+                      minSize="180px"
                     >
                       <AgentSidebar
                         onNewChat={handleNewChat}
@@ -283,7 +295,7 @@ export function Agent() {
                         setSessionId={setSessionId}
                       />
                     </ResizablePanel>
-                    <ResizableHandle style={{ position: "relative", zIndex: 9999 }} />
+                    <ResizableHandle className="z-[9999]" />
                   </>
                 )}
 
@@ -297,7 +309,7 @@ export function Agent() {
                     setExpanded={setExpanded}
                   />
 
-                  <div className="group relative flex min-h-0 flex-1 flex-col">
+                  <div className="relative flex min-h-0 flex-1 flex-col">
                     <ScrollArea
                       className="h-full min-h-0 flex-1"
                       ref={scrollRef}
@@ -322,6 +334,8 @@ export function Agent() {
 
                           const isAssistant = message.role === "assistant";
                           const isEditing = editingMessageId === message.id;
+                          const isStreamingThis =
+                            isLoading && isAssistant && message.id === messages.at(-1)?.id;
 
                           return (
                             <div
@@ -377,7 +391,7 @@ export function Agent() {
                               ) : (
                                 <div
                                   className={cn(
-                                    "flex flex-col gap-3 text-foreground text-sm",
+                                    "flex max-w-full flex-col gap-3 text-foreground text-sm",
                                     isAssistant ? "mr-auto text-left" : "ml-auto text-right",
                                   )}
                                 >
@@ -393,6 +407,9 @@ export function Agent() {
                                       return (
                                         <Collapsible
                                           className="group/collapsible my-1 rounded-r-lg border-l-2 pl-3 text-muted-foreground text-xs italic"
+                                          defaultOpen={
+                                            isLoading && message.id === messages.at(-1)?.id
+                                          }
                                           key={partKey}
                                         >
                                           <div className="flex items-center justify-between gap-1">
@@ -401,6 +418,7 @@ export function Agent() {
                                             </div>
                                             <CollapsibleTrigger asChild>
                                               <AppButton
+                                                aria-label={t("thinking_process")}
                                                 size="icon"
                                                 variant="ghost"
                                               >
@@ -412,7 +430,7 @@ export function Agent() {
                                             <MarkdownRenderer
                                               content={reasoningPart.text}
                                               id={partKey}
-                                              isStreaming={isLoading}
+                                              isStreaming={isStreamingThis}
                                               key={`${partKey}-md`}
                                             />
                                           </CollapsibleContent>
@@ -439,7 +457,7 @@ export function Agent() {
                                         <MarkdownRenderer
                                           content={textPart.text}
                                           id={`${message.id}-text-${index}`}
-                                          isStreaming={isLoading}
+                                          isStreaming={isStreamingThis}
                                           key={`${message.id}-text-${index}`}
                                         />
                                       );
@@ -502,7 +520,8 @@ export function Agent() {
                                     />
                                     <AppTooltip content={tCommon("retry")}>
                                       <AppButton
-                                        className="opacity-0 group-hover:opacity-100"
+                                        aria-label={tCommon("retry")}
+                                        className="opacity-0 duration-300 group-hover:opacity-100"
                                         disabled={isLoading}
                                         onClick={() => {
                                           void (async () => {
@@ -520,7 +539,8 @@ export function Agent() {
 
                                 {!isAssistant && !isEditing && (
                                   <AppButton
-                                    className="opacity-0 group-hover:opacity-100"
+                                    aria-label={tCommon("edit")}
+                                    className="opacity-0 duration-300 group-hover:opacity-100"
                                     onClick={() => {
                                       setEditingMessageId(message.id);
                                       setEditInput(fullMessageText);
@@ -536,12 +556,15 @@ export function Agent() {
                           );
                         })}
                         {status === "submitted" && (
-                          <p className="text-muted-foreground text-xs">{t("thinking")}</p>
+                          <AnimatedShinyText className="mx-0 self-start text-xs">
+                            {t("thinking")}
+                          </AnimatedShinyText>
                         )}
                       </div>
                     </ScrollArea>
 
                     <AppButton
+                      aria-label={t("scroll_to_bottom")}
                       className={cn(
                         "absolute bottom-4 left-1/2 z-10 -translate-x-1/2",
                         showScrollButton

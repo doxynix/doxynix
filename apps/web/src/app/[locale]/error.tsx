@@ -102,16 +102,8 @@ export default function ErrorPage({
         </div>
 
         <div className="flex flex-col items-center justify-center gap-3 pt-4 sm:flex-row">
-          <BackOrLinkButton
-            className="cursor-pointer"
-            label={tCommon("back")}
-          />
-          <AppButton
-            className="cursor-pointer"
-            onClick={reset}
-          >
-            {t("try_recover_btn")}
-          </AppButton>
+          <BackOrLinkButton label={tCommon("back")} />
+          <AppButton onClick={reset}>{t("try_recover_btn")}</AppButton>
         </div>
       </div>
 

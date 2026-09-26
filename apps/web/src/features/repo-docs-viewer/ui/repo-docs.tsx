@@ -246,7 +246,7 @@ export function RepoDocs({
 
           return (
             <TabsContent
-              className="mt-0 flex min-h-0 flex-1 flex-col outline-none data-[state=inactive]:hidden"
+              className="mt-0 flex min-h-0 flex-1 flex-col outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50 data-[state=inactive]:hidden"
               key={doc.type}
               value={doc.type}
             >
@@ -283,9 +283,9 @@ export function RepoDocs({
                       <>
                         <AppTooltip content={t("repo_docs_add_to_draft")}>
                           <LoadingButton
+                            aria-label={t("repo_docs_add_to_draft")}
                             disabled={stageMutation.isPending || !isReadyToStage}
                             isLoading={stageMutation.isPending}
-                            loadingText=""
                             onClick={() => {
                               if (isCurrentApiSwagger) {
                                 const swaggerContent = metrics?.reference.swagger;
@@ -322,6 +322,7 @@ export function RepoDocs({
                           <>
                             <AppTooltip content={t("repo_docs_download_file")}>
                               <AppButton
+                                aria-label={t("repo_docs_download_file")}
                                 disabled={isDocLoading}
                                 onClick={handleDownload}
                                 size="icon"

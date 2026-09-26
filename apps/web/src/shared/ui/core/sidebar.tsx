@@ -4,8 +4,11 @@ import {
   type ComponentProps,
   type CSSProperties,
   createContext,
+  type KeyboardEvent,
+  type PointerEvent,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { Slot } from "@radix-ui/react-slot";
@@ -16,6 +19,7 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/shared/lib/cn";
 import { setClientCookie } from "@/shared/lib/cookies";
 import { useIsMobile } from "@/shared/lib/hooks/use-mobile";
+import { useResizable } from "@/shared/lib/hooks/use-resizable";
 import { AppButton } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 import { Separator } from "@/shared/ui/core/separator";
@@ -31,19 +35,34 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/core/toolti
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // TIME: 1 year
-const SIDEBAR_WIDTH = "16rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 // const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
+const SIDEBAR_MIN_WIDTH = 200;
+const SIDEBAR_MAX_WIDTH = 480;
+const SIDEBAR_DEFAULT_WIDTH = 256;
+const SIDEBAR_WIDTH_STORAGE_KEY = "app-sidebar-width";
+const SIDEBAR_WIDTH_COOKIE_NAME = "sidebar_width";
+/** How far a closed sidebar must be dragged before it reopens. */
+const SIDEBAR_REOPEN_DRAG = 24;
+
 type SidebarContextProps = {
   isMobile: boolean;
+  isResizing: boolean;
   open: boolean;
   openMobile: boolean;
+  /** Handlers for SidebarRail: resize while open, reopen while closed. */
+  railProps: {
+    onClick: () => void;
+    onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
+    onPointerDown: (event: PointerEvent<HTMLElement>) => void;
+  };
   setOpen: (open: boolean) => void;
   setOpenMobile: (open: boolean) => void;
   state: "collapsed" | "expanded";
   toggleSidebar: () => void;
+  width: number;
 };
 
 const SidebarContext = createContext<null | SidebarContextProps>(null);
@@ -61,12 +80,15 @@ function SidebarProvider({
   children,
   className,
   defaultOpen = true,
+  defaultWidth,
   onOpenChange: setOpenProp,
   open: openProp,
   style,
   ...props
 }: ComponentProps<"div"> & {
   defaultOpen?: boolean;
+  /** Width the server read from the cookie, so the first paint is already right. */
+  defaultWidth?: number;
   onOpenChange?: (open: boolean) => void;
   open?: boolean;
 }) {
@@ -97,6 +119,106 @@ function SidebarProvider({
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
   };
 
+  // A drag is followed by a click; swallow that click so finishing a resize or a
+  // reopen does not immediately toggle the sidebar back.
+  const suppressClickRef = useRef(false);
+
+  // One rail drives everything: drag to resize, drag to the edge to collapse,
+  // and drag outwards from the closed state to reopen.
+  const { handleProps, isResizing, setWidth, width } = useResizable({
+    defaultWidth: SIDEBAR_DEFAULT_WIDTH,
+    initialWidth: defaultWidth,
+    maxWidth: SIDEBAR_MAX_WIDTH,
+    minWidth: SIDEBAR_MIN_WIDTH,
+    onDragEnd: (finalWidth, didMove) => {
+      if (didMove) {
+        suppressClickRef.current = true;
+      }
+      if (finalWidth <= SIDEBAR_MIN_WIDTH) {
+        setOpen(false);
+      }
+    },
+    side: "left",
+    storageKey: SIDEBAR_WIDTH_STORAGE_KEY,
+  });
+
+  // Mirrored into a cookie so the next server render already knows the width and
+  // the panel does not snap to it after hydration.
+  useEffect(() => {
+    if (isResizing) {
+      return;
+    }
+
+    setClientCookie(SIDEBAR_WIDTH_COOKIE_NAME, String(width), SIDEBAR_COOKIE_MAX_AGE);
+  }, [isResizing, width]);
+
+  // Pointer x where a reopen drag started, or null when no such drag is active.
+  const reopenFromRef = useRef<null | number>(null);
+
+  // Latest refs so the reopen gesture keeps one stable set of window listeners.
+  // Re-registering them mid-drag (which happens as soon as `open` flips) drops
+  // the tail of the movement and leaves the panel at its minimum width.
+  const gestureRef = useRef({ setOpen, setWidth });
+  // No dep array on purpose: this is the useLatest pattern, so the gesture
+  // handlers always see the current setters without re-subscribing listeners.
+  useEffect(() => {
+    gestureRef.current = { setOpen, setWidth };
+  });
+
+  useEffect(() => {
+    const handlePointerMove = (event: globalThis.PointerEvent) => {
+      const from = reopenFromRef.current;
+      if (from === null || event.clientX - from < SIDEBAR_REOPEN_DRAG) {
+        return;
+      }
+
+      suppressClickRef.current = true;
+      gestureRef.current.setOpen(true);
+      gestureRef.current.setWidth(event.clientX);
+    };
+
+    const stop = () => {
+      reopenFromRef.current = null;
+    };
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", stop);
+      window.removeEventListener("pointercancel", stop);
+    };
+  }, []);
+
+  const railProps = {
+    onClick: () => {
+      if (suppressClickRef.current) {
+        suppressClickRef.current = false;
+        return;
+      }
+
+      toggleSidebar();
+    },
+    onKeyDown: handleProps.onKeyDown,
+    onPointerDown: (event: PointerEvent<HTMLElement>) => {
+      if (event.button !== 0) {
+        return;
+      }
+
+      if (open) {
+        handleProps.onPointerDown(event);
+        return;
+      }
+
+      // Closed: the rail sits at the viewport edge, so horizontal travel is the
+      // new width. Wait for real travel before committing to reopening.
+      event.preventDefault();
+      reopenFromRef.current = event.clientX;
+    },
+  };
+
   // Adds a keyboard shortcut to toggle the sidebar.
   // useEffect(() => {
   //   const handleKeyDown = (event: KeyboardEvent) => {
@@ -116,12 +238,15 @@ function SidebarProvider({
 
   const contextValue: SidebarContextProps = {
     isMobile,
+    isResizing,
     open,
     openMobile,
+    railProps,
     setOpen,
     setOpenMobile,
     state,
     toggleSidebar,
+    width,
   };
 
   return (
@@ -131,10 +256,11 @@ function SidebarProvider({
           "group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar has-data-[variant=sidebar]:bg-background",
           className,
         )}
+        data-resizing={isResizing || undefined}
         data-slot="sidebar-wrapper"
         style={
           {
-            "--sidebar-width": SIDEBAR_WIDTH,
+            "--sidebar-width": `${width}px`,
             "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
             ...style,
           } as CSSProperties
@@ -160,7 +286,7 @@ function Sidebar({
   variant?: "floating" | "inset" | "sidebar";
 }) {
   const tCommon = useTranslations("Common");
-  const { isMobile, openMobile, setOpenMobile, state } = useSidebar();
+  const { isMobile, isResizing, openMobile, setOpenMobile, state } = useSidebar();
 
   if (collapsible === "none") {
     return (
@@ -210,6 +336,7 @@ function Sidebar({
     <div
       className="group peer hidden text-sidebar-foreground md:block"
       data-collapsible={state === "collapsed" ? collapsible : ""}
+      data-resizing={isResizing || undefined}
       data-side={side}
       data-slot="sidebar"
       data-state={state}
@@ -218,9 +345,10 @@ function Sidebar({
       {/* This is what handles the sidebar gap on desktop */}
       <div
         className={cn(
-          "relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear",
+          "relative w-(--sidebar-width) bg-transparent transition-[width] duration-300 ease-out-expo",
           "group-data-[collapsible=offcanvas]:w-0",
           "group-data-[side=right]:rotate-180",
+          "group-data-[resizing]:transition-none",
           variant === "floating" || variant === "inset"
             ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]"
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)",
@@ -230,7 +358,8 @@ function Sidebar({
       <aside
         aria-label={tCommon("sidebar")}
         className={cn(
-          "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
+          "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-300 ease-out-expo md:flex",
+          "group-data-[resizing]:transition-none",
           side === "left"
             ? "left-0 group-data-[collapsible=offcanvas]:-left-(--sidebar-width)"
             : "right-0 group-data-[collapsible=offcanvas]:-right-(--sidebar-width)",
@@ -279,26 +408,37 @@ function SidebarTrigger({ className, onClick, ...props }: ComponentProps<typeof 
   );
 }
 
+/**
+ * The single sidebar affordance: drag to resize, drag to the minimum to
+ * collapse, drag outwards from the closed state to reopen. A plain click (no
+ * travel) still toggles.
+ */
 function SidebarRail({ className, ...props }: ComponentProps<"button">) {
   const tCommon = useTranslations("Common");
-  const { toggleSidebar } = useSidebar();
+  const { railProps, state } = useSidebar();
 
   return (
     <button
-      aria-label={tCommon("toggle_sidebar")}
+      aria-label={tCommon("resize_sidebar")}
       className={cn(
-        "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-standard ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-0.5 hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex",
-        "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
-        "[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
-        "group-data-[collapsible=offcanvas]:translate-x-0 hover:group-data-[collapsible=offcanvas]:bg-sidebar group-data-[collapsible=offcanvas]:after:left-full",
-        "[[data-side=left][data-collapsible=offcanvas]_&]:-right-2",
-        "[[data-side=right][data-collapsible=offcanvas]_&]:-left-2",
+        "z-20 hidden w-4 cursor-col-resize touch-none select-none transition-standard ease-out sm:flex",
+        "after:absolute after:inset-y-0 after:left-1/2 after:w-0.5 hover:after:bg-sidebar-border",
+        "focus-visible:after:bg-sidebar-border",
+        // The negative offset straddles the boundary: half the grab area inside
+        // the panel, half outside, with the hairline exactly on the edge. A
+        // translate would push the hairline inboard instead.
+        state === "expanded"
+          ? // Absolute so the rail inherits the panel's vertical bounds and stops
+            // below the app header, which is stacked above the whole sidebar.
+            "absolute inset-y-0 -right-2"
+          : // Offcanvas slides the panel off-screen, taking an absolute rail with
+            // it, so a closed sidebar falls back to a viewport-anchored strip.
+            "fixed inset-y-0 -left-2",
         className,
       )}
       data-sidebar="rail"
       data-slot="sidebar-rail"
-      onClick={toggleSidebar}
-      tabIndex={-1}
+      {...railProps}
       {...props}
     />
   );
@@ -366,7 +506,7 @@ function SidebarContent({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       className={cn(
-        "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
+        "flex min-h-0 min-w-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
         className,
       )}
       data-sidebar="content"
@@ -397,7 +537,7 @@ function SidebarGroupLabel({
   return (
     <Comp
       className={cn(
-        "flex h-8 shrink-0 items-center rounded-xl px-2 font-medium text-xs outline-hidden ring-sidebar-ring transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
+        "flex h-8 shrink-0 items-center rounded-xl px-2 font-medium text-xs outline-hidden ring-sidebar-ring transition-[margin,opacity] duration-200 ease-out focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
         "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
         className,
       )}

@@ -43,9 +43,10 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
 
   return (
     <div className="fade-in flex h-full animate-in flex-col">
-      <div className="flex h-12 items-center justify-between border-b bg-card px-4 py-6">
-        <h3 className="font-bold text-muted-foreground text-xs">{t("history_title")}</h3>
+      <div className="flex h-12 items-center justify-between border-b bg-card px-4">
+        <h2 className="font-bold text-muted-foreground text-xs">{t("history_title")}</h2>
         <AppButton
+          aria-label={t("new_chat")}
           className="size-6"
           onClick={onNewChat}
           size="icon"
@@ -73,7 +74,7 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
                   >
                     <div className="flex min-w-0 items-center gap-1">
                       <Folder className="text-muted-foreground" />
-                      <span className="truncate">{repoKey}</span>
+                      <span className="min-w-0 truncate">{repoKey}</span>
                     </div>
                     <ChevronDown className="text-muted-foreground group-data-[state=open]/folder:rotate-180" />
                   </AppButton>
@@ -83,7 +84,7 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
                   {repoSessions.map((session: any) => (
                     <AppButton
                       className={cn(
-                        "justify-start gap-1 truncate text-left text-xs",
+                        "w-full min-w-0 max-w-full justify-start gap-1 text-left text-xs",
                         sessionId === session.id ? "bg-accent text-foreground" : "",
                       )}
                       key={session.id}
@@ -91,7 +92,7 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
                       variant="ghost"
                     >
                       <MessageSquare className="text-muted-foreground" />
-                      <span className="truncate">{session.title}</span>
+                      <span className="min-w-0 flex-1 truncate text-left">{session.title}</span>
                     </AppButton>
                   ))}
                 </CollapsibleContent>
@@ -101,11 +102,11 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
 
           {globalSessions.length > 0 && (
             <div className="mt-4 flex flex-col gap-1">
-              <h4 className="mb-1 px-2 text-xs">{t("global_chats")}</h4>
+              <h3 className="mb-1 px-2 text-xs">{t("global_chats")}</h3>
               {globalSessions.map((session: any) => (
                 <AppButton
                   className={cn(
-                    "justify-start gap-1 text-left text-xs",
+                    "w-full min-w-0 max-w-full justify-start gap-1 text-left text-xs",
                     sessionId === session.id ? "bg-accent text-foreground" : "",
                   )}
                   key={session.id}
@@ -113,7 +114,7 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
                   variant="ghost"
                 >
                   <MessageSquare />
-                  <span className="truncate">{session.title}</span>
+                  <span className="min-w-0 flex-1 truncate text-left">{session.title}</span>
                 </AppButton>
               ))}
             </div>

@@ -8,16 +8,11 @@ import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 type Props = {
   code: string;
-  lang: string;
   isStreaming: boolean;
+  lang: string;
 };
 
-/**
- * Streams a code block as a layout-stable plain `<pre>` and swaps in the
- * Shiki-highlighted HTML once the block settles (message stopped streaming
- * + a short debounce). Avoids re-running the highlighter on every token.
- */
-export function ChatCodeBlock({ code, lang, isStreaming }: Readonly<Props>) {
+export function ChatCodeBlock({ code, isStreaming, lang }: Readonly<Props>) {
   const { resolvedTheme } = useTheme();
   const theme = resolvedTheme === "light" ? "light" : "dark";
   const [html, setHtml] = useState<string | null>(null);

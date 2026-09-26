@@ -92,7 +92,7 @@ export function PricingSection() {
               <AppButton
                 asChild
                 className={cn(
-                  "mb-8 w-full cursor-pointer",
+                  "mb-8 w-full",
                   plan.popular && "bg-foreground text-background hover:bg-accent-foreground",
                 )}
                 onClick={() =>

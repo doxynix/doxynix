@@ -48,7 +48,7 @@ export default async function PrivacyPage() {
   return (
     <div className="container mx-auto max-w-3xl animate-fade-in px-4 py-12 pt-24">
       <BackOrLinkButton
-        className="mb-4 cursor-pointer"
+        className="mb-4"
         label={tCommon("back")}
         showIcon
         variant="link"

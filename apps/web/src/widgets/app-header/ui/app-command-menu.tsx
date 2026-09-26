@@ -235,7 +235,7 @@ export function AppCommandMenu() {
               <div className="flex w-full items-center justify-between">
                 <span>{t("command_menu_label_2")}</span>
                 <AppButton
-                  className="cursor-pointer bg-transparent text-muted-foreground"
+                  className="bg-transparent text-muted-foreground"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -246,10 +246,7 @@ export function AppCommandMenu() {
                 >
                   {isReposExpanded ? t("command_collapse") : t("command_expand")}
                   <ChevronDown
-                    className={cn(
-                      "transition-standard transition-transform",
-                      isReposExpanded && "rotate-180",
-                    )}
+                    className={cn("transition-transform", isReposExpanded && "rotate-180")}
                   />
                 </AppButton>
               </div>
@@ -266,7 +263,7 @@ export function AppCommandMenu() {
                       value={`${repo.owner}/${repo.name}`}
                     >
                       <AppAvatar
-                        alt={`${repo.owner}/${repo.name}`}
+                        alt=""
                         fallbackText={repo.owner}
                         sizeClassName="size-8"
                         src={repo.avatar}

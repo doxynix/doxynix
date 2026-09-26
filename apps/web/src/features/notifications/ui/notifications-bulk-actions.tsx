@@ -51,10 +51,9 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
   return (
     <div className="ml-auto flex items-center gap-2">
       <LoadingButton
-        className="flex cursor-pointer"
+        className="flex"
         disabled={isMarkAllDisabled}
         isLoading={markAllAsRead.isPending}
-        loadingText={tCommon("processing")}
         onClick={() => markAllAsRead.mutate({ ...filters, search: debouncedSearch })}
         variant="outline"
       >
@@ -66,7 +65,7 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
       >
         <DialogTrigger asChild>
           <AppButton
-            className="flex cursor-pointer"
+            className="flex"
             disabled={isDeleteReadDisabled}
             variant="destructive"
           >
@@ -89,17 +88,10 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>
-              <AppButton
-                className="cursor-pointer"
-                variant="outline"
-              >
-                {tCommon("cancel")}
-              </AppButton>
+              <AppButton variant="outline">{tCommon("cancel")}</AppButton>
             </DialogClose>
             <LoadingButton
-              className="cursor-pointer"
               isLoading={deleteRead.isPending}
-              loadingText={t("deleting")}
               onClick={handleDelete}
               variant="destructive"
             >

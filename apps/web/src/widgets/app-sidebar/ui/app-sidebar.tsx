@@ -83,7 +83,10 @@ export function AppSidebar() {
 
       <SidebarContent className="max-h-[calc(100dvh-HeaderHeight-FooterHeight)] overflow-hidden">
         <ScrollArea className="h-full">
-          <nav aria-label={tCommon("nav_repositories")}>
+          <nav
+            aria-label={tCommon("nav_repositories")}
+            className="min-w-0"
+          >
             <Collapsible
               className="group/collapsible"
               defaultOpen
@@ -95,12 +98,12 @@ export function AppSidebar() {
                 >
                   <CollapsibleTrigger
                     className={cn(
-                      "mb-1 flex w-full cursor-pointer justify-between px-3 text-muted-foreground hover:bg-accent hover:text-foreground",
+                      "mb-1 flex w-full justify-between px-3 text-muted-foreground hover:bg-accent hover:text-foreground",
                     )}
                     disabled={state === "collapsed"}
                   >
                     <span>{t("recent_repositories")}</span>
-                    <ChevronDown className="ml-auto transition-standard transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
                 <CollapsibleContent>
@@ -116,7 +119,7 @@ export function AppSidebar() {
                       {data?.pages.map((page) =>
                         page.items.map((repo) => (
                           <SidebarMenuItem
-                            className="max-w-60"
+                            className="min-w-0 max-w-[calc(var(--sidebar-width)-1.0625rem)]"
                             key={repo.id}
                           >
                             <SidebarLink
@@ -142,7 +145,7 @@ export function AppSidebar() {
                         >
                           <SidebarMenuItem className="truncate">
                             <LoadingButton
-                              className="flex h-8 w-full cursor-pointer items-center justify-start text-muted-foreground text-xs"
+                              className="flex h-8 w-full items-center justify-start text-muted-foreground text-xs"
                               disabled={isFetchingNextPage}
                               isLoading={isFetchingNextPage}
                               onClick={() => void fetchNextPage()}

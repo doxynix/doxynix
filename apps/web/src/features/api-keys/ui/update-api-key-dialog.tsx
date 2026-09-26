@@ -103,10 +103,8 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
 
             <DialogFooter>
               <LoadingButton
-                className="cursor-pointer"
                 disabled={!form.formState.isDirty || !form.formState.isValid || update.isPending}
                 isLoading={update.isPending}
-                loadingText={tCommon("saving")}
                 type="submit"
               >
                 {tCommon("update")}

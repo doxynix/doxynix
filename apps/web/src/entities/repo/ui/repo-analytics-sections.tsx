@@ -127,9 +127,9 @@ export function DomainIntelligenceSection({
 
   return (
     <section className="flex flex-col gap-4">
-      <h3 className="flex items-center gap-2 font-bold text-lg tracking-tight">
+      <h2 className="flex items-center gap-2 font-bold text-lg tracking-tight">
         <Fingerprint className="size-5 text-blue-400" /> {t("domain_intelligence")}
-      </h3>
+      </h2>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader className="py-4">
@@ -164,10 +164,10 @@ export function DomainIntelligenceSection({
           </CardHeader>
           <CardContent>
             <ul className="flex flex-col gap-3">
-              {domain.analysis.business_rules.map((rule, i) => (
+              {domain.analysis.business_rules.map((rule) => (
                 <li
                   className="flex items-start gap-2 text-xs text-zinc-300"
-                  key={i}
+                  key={rule}
                 >
                   <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-500" />
                   <span>{rule}</span>
@@ -199,10 +199,10 @@ export function TechDebtAndComplexitySection({
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
-          {recommendations.techDebtInventory?.map((item, i) => (
+          {recommendations.techDebtInventory?.map((item) => (
             <div
               className="flex items-center justify-between rounded border bg-muted/10 p-2"
-              key={i}
+              key={`${item.type}:${item.description}`}
             >
               <div className="flex flex-col gap-0.5">
                 <span className="font-bold text-[10px] text-zinc-500 uppercase">{item.type}</span>
@@ -248,9 +248,9 @@ export function RefactoringBacklogSection({
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="flex items-center gap-2 font-bold text-lg tracking-tight">
+        <h2 className="flex items-center gap-2 font-bold text-lg tracking-tight">
           <LayoutTemplate className="size-5 text-emerald-400" /> {t("refactoring_backlog")}
-        </h3>
+        </h2>
         <AppBadge
           className="border-emerald-400/30 text-emerald-400"
           variant="outline"
@@ -360,10 +360,10 @@ export function PerformanceAndScalingSection({
                 </tr>
               </thead>
               <tbody className="divide-y divide-orange-500/10">
-                {recommendations.performanceAudit?.map((item, i) => (
+                {recommendations.performanceAudit?.map((item) => (
                   <tr
                     className="transition-colors hover:bg-orange-500/5"
-                    key={i}
+                    key={`${item.location}:${item.issue}`}
                   >
                     <td className="p-2 font-medium text-zinc-200">{item.issue}</td>
                     <td className="p-2 font-mono text-[10px] text-orange-300/70">
@@ -418,10 +418,10 @@ export function PerformanceAndScalingSection({
               {t("concurrency_risks")}
             </p>
             <div className="flex flex-wrap gap-1">
-              {recommendations.infrastructure?.concurrency_risks.map((risk, i) => (
+              {recommendations.infrastructure?.concurrency_risks.map((risk) => (
                 <AppBadge
                   className="py-0 text-[9px]"
-                  key={i}
+                  key={risk}
                   variant="secondary"
                 >
                   {risk}

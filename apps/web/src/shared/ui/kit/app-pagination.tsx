@@ -73,7 +73,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
         <PaginationItem>
           <PaginationLink
             aria-disabled={isPrevDisabled}
-            className={cn(navBtnClass, isPrevDisabled ? "opacity-50" : "cursor-pointer")}
+            className={cn(navBtnClass, isPrevDisabled && "opacity-50")}
             disabled={isPrevDisabled}
             onClick={() => !isPrevDisabled && handlePageChange(meta.currentPage - 1, "prev")}
             tabIndex={isPrevDisabled ? -1 : undefined}
@@ -100,10 +100,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
             <PaginationItem key={page}>
               <PaginationLink
                 aria-disabled={isPageDisabled}
-                className={cn(
-                  !isPageDisabled && "cursor-pointer",
-                  page === meta.currentPage && "text-foreground opacity-100!",
-                )}
+                className={cn(page === meta.currentPage && "text-foreground opacity-100!")}
                 disabled={isPageDisabled}
                 isActive={page === meta.currentPage}
                 onClick={() => !isPageDisabled && handlePageChange(page, page)}
@@ -118,11 +115,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
         <PaginationItem>
           <PaginationLink
             aria-disabled={isNextDisabled}
-            className={cn(
-              navBtnClass,
-              "pr-2.5 pl-4",
-              isNextDisabled ? "opacity-50" : "cursor-pointer",
-            )}
+            className={cn(navBtnClass, "pr-2.5 pl-4", isNextDisabled && "opacity-50")}
             disabled={isNextDisabled}
             onClick={() => !isNextDisabled && handlePageChange(meta.currentPage + 1, "next")}
             tabIndex={isNextDisabled ? -1 : undefined}

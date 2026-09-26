@@ -108,7 +108,7 @@ function LogoLink({ children, isInteractive }: Readonly<Props>) {
   return (
     <Link
       aria-label={tCommon("doxynix_home")}
-      className="cursor-pointer hover:text-muted-foreground"
+      className="hover:text-muted-foreground"
       href="/"
     >
       {children}

@@ -70,6 +70,7 @@ export function RepoMapCustomControls() {
         side="left"
       >
         <AppButton
+          aria-label={t("repo_map_toggle_controls")}
           onClick={toggleControls}
           size="icon"
           variant="outline"

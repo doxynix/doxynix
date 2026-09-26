@@ -56,7 +56,7 @@ export function DeleteRepoDialog({ id }: Readonly<Props>) {
       title={t("settings_repo_delete_title")}
       trigger={
         <AppButton
-          className="w-fit cursor-pointer"
+          className="w-fit"
           variant="destructive"
         >
           {t("settings_repo_delete_button")} <Trash2 />

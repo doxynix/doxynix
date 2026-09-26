@@ -44,7 +44,7 @@ export function DeleteAllReposDialog({ hasRepos }: Readonly<Props>) {
       title={`${t("settings_danger_delete_all_repos")}?`}
       trigger={
         <AppButton
-          className="w-fit cursor-pointer"
+          className="w-fit"
           disabled={!hasRepos}
           variant="destructive"
         >

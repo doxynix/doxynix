@@ -55,15 +55,15 @@ const BentoCard = ({
   >
     <div>{background}</div>
     <div className="p-4">
-      <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 transition-standard lg:group-hover:-translate-y-10">
-        <Icon className="size-12 origin-left transform-gpu transition-standard ease-in-out group-hover:scale-75" />
+      <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 transition-standard duration-300 ease-out-expo lg:group-hover:-translate-y-10">
+        <Icon className="size-12 origin-left transform-gpu transition-standard duration-300 ease-out-expo group-hover:scale-75" />
         <h3 className="font-semibold text-xl">{name}</h3>
         <p className="max-w-lg text-muted-foreground">{description}</p>
       </div>
 
       <div
         className={cn(
-          "pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center transition-standard group-hover:translate-y-0 group-hover:opacity-100 lg:hidden",
+          "pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center transition-standard duration-300 ease-out-expo group-hover:translate-y-0 group-hover:opacity-100 lg:hidden",
         )}
       >
         <AppButton
@@ -82,7 +82,7 @@ const BentoCard = ({
 
     <div
       className={cn(
-        "pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-standard group-hover:translate-y-0 group-hover:opacity-100 lg:flex",
+        "pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-standard duration-300 ease-out-expo group-hover:translate-y-0 group-hover:opacity-100 lg:flex",
       )}
     >
       <AppButton
