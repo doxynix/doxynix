@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.14](https://github.com/doxynix/doxynix/compare/doxynix-v4.3.13...doxynix-v4.3.14) (2026-09-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency posthog-js to v1.434.10 ([#2181](https://github.com/doxynix/doxynix/issues/2181)) ([625023a](https://github.com/doxynix/doxynix/commit/625023a41ad5cc6cd82f3115093f49d017371cb4))
+
 ## [4.3.13](https://github.com/doxynix/doxynix/compare/doxynix-v4.3.12...doxynix-v4.3.13) (2026-09-26)
 
 
