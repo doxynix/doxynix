@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.3.0](https://github.com/doxynix/doxynix/compare/web-v3.2.12...web-v3.3.0) (2026-09-26)
+
+
+### Features
+
+* **web:** migrate to AI SDK v7 with native tool approval ([#2183](https://github.com/doxynix/doxynix/issues/2183)) ([3f16cb8](https://github.com/doxynix/doxynix/commit/3f16cb8d10cb8a9484661af622725638073c0574))
+
 ## [3.2.12](https://github.com/doxynix/doxynix/compare/web-v3.2.11...web-v3.2.12) (2026-09-26)
 
 

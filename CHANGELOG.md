@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.0](https://github.com/doxynix/doxynix/compare/doxynix-v4.3.14...doxynix-v4.4.0) (2026-09-26)
+
+
+### Features
+
+* **web:** migrate to AI SDK v7 with native tool approval ([#2183](https://github.com/doxynix/doxynix/issues/2183)) ([3f16cb8](https://github.com/doxynix/doxynix/commit/3f16cb8d10cb8a9484661af622725638073c0574))
+
 ## [4.3.14](https://github.com/doxynix/doxynix/compare/doxynix-v4.3.13...doxynix-v4.3.14) (2026-09-26)
 
 
