@@ -1,6 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import { markdownToHtml } from "./markdown-to-html";
+
+// `rehypeShiki` builds its highlighter lazily on first use: loading the two themes
+// and the language grammars costs ~10s cold. Paid once here, as a fixture, instead
+// of inside the first test's budget - where in a full-suite run it exceeded 15s.
+beforeAll(async () => {
+  await markdownToHtml({ content: "```ts\nconst warm = 1;\n```" });
+}, 120_000);
 
 describe("markdown-to-html", () => {
   it("returns empty output for blank content", async () => {
