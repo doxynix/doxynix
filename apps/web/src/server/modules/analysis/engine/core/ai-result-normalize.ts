@@ -502,6 +502,7 @@ export function isSchemaMismatchError(error: unknown): boolean {
   }
   return (
     error.name === "AI_NoObjectGeneratedError" ||
+    error.name === "AI_NoOutputGeneratedError" ||
     error.message.includes("did not match schema") ||
     error.message.includes("No object generated")
   );

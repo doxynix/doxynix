@@ -47,17 +47,17 @@ const LLM_API_TIMEOUT_MS = 300_000; // TIME: 5 minutes
 
 export async function callWithFallback<T>({
   attemptMetadata = {},
-  frequencyPenalty = 0,
+  frequencyPenalty,
   maxOutputTokens = 65_536,
   models,
   outputSchema,
-  presencePenalty = 0,
+  presencePenalty,
   prompt,
   providerOptions,
   stepCount = 10,
   stopSequences,
   stream = true,
-  system,
+  system: instructions,
   taskType = "default",
   temperature,
   tools,
@@ -85,17 +85,6 @@ export async function callWithFallback<T>({
         : [{ label: "structured", useTools: false }];
 
     for (const attempt of attempts) {
-      const abortController = new AbortController();
-      const timeoutId = setTimeout(() => {
-        appLogger.warn({
-          model: modelName,
-          msg: `LLM API call timed out after ${LLM_API_TIMEOUT_MS / 1000}s. Aborting request...`,
-          taskType,
-          ...attemptMetadata,
-        });
-        abortController.abort();
-      }, LLM_API_TIMEOUT_MS);
-
       try {
         appLogger.info({
           attempt: attempt.label,
@@ -108,17 +97,8 @@ export async function callWithFallback<T>({
         if (outputSchema != null) {
           const activeTools = attempt.useTools ? tools : undefined;
           const result = await tracedAi.generateText({
-            abortSignal: abortController.signal,
-            experimental_telemetry: {
-              functionId: `gen-${taskType}`,
-              isEnabled: true,
-              metadata: {
-                ...attemptMetadata,
-                attempt: attempt.label,
-                taskType,
-              },
-            },
             frequencyPenalty,
+            instructions,
             maxOutputTokens,
             model: google(modelName),
             output: ai.Output.object({ schema: outputSchema }),
@@ -126,15 +106,17 @@ export async function callWithFallback<T>({
             prompt,
             providerOptions,
             stopSequences,
-            stopWhen: activeTools != null ? ai.stepCountIs(stepCount) : undefined,
-            system,
+            stopWhen: activeTools != null ? ai.isStepCount(stepCount) : undefined,
+            telemetry: {
+              functionId: `gen-${taskType}`,
+            },
             temperature: finalTemperature,
+            timeout: { stepMs: LLM_API_TIMEOUT_MS },
             tools: activeTools,
             topK: finalTopK,
             topP: finalTopP,
           });
 
-          clearTimeout(timeoutId);
           taskLogger.success(
             `AI (${String(attemptMetadata.phase ?? taskType)}): responded successfully.`,
           );
@@ -144,32 +126,25 @@ export async function callWithFallback<T>({
         if (!stream) {
           const activeTools = attempt.useTools ? tools : undefined;
           const result = await tracedAi.generateText({
-            abortSignal: abortController.signal,
-            experimental_telemetry: {
-              functionId: `gen-text-${taskType}`,
-              isEnabled: true,
-              metadata: {
-                ...attemptMetadata,
-                attempt: attempt.label,
-                taskType,
-              },
-            },
             frequencyPenalty,
+            instructions,
             maxOutputTokens,
             model: google(modelName),
             presencePenalty,
             prompt,
             providerOptions,
             stopSequences,
-            stopWhen: activeTools != null ? ai.stepCountIs(stepCount) : undefined,
-            system,
+            stopWhen: activeTools != null ? ai.isStepCount(stepCount) : undefined,
+            telemetry: {
+              functionId: `gen-text-${taskType}`,
+            },
             temperature: finalTemperature,
+            timeout: { stepMs: LLM_API_TIMEOUT_MS },
             tools: activeTools,
             topK: finalTopK,
             topP: finalTopP,
           });
 
-          clearTimeout(timeoutId);
           taskLogger.success(
             `AI Text (${String(attemptMetadata.phase ?? taskType)}): generated successfully.`,
           );
@@ -178,26 +153,20 @@ export async function callWithFallback<T>({
 
         const activeTools = attempt.useTools ? tools : undefined;
         const result = tracedAi.streamText({
-          abortSignal: abortController.signal,
-          experimental_telemetry: {
-            functionId: `stream-${taskType}`,
-            isEnabled: true,
-            metadata: {
-              ...attemptMetadata,
-              attempt: attempt.label,
-              taskType,
-            },
-          },
           frequencyPenalty,
+          instructions,
           maxOutputTokens,
           model: google(modelName),
           presencePenalty,
           prompt,
           providerOptions,
           stopSequences,
-          stopWhen: activeTools != null ? ai.stepCountIs(stepCount) : undefined,
-          system,
+          stopWhen: activeTools != null ? ai.isStepCount(stepCount) : undefined,
+          telemetry: {
+            functionId: `stream-${taskType}`,
+          },
           temperature: finalTemperature,
+          timeout: { stepMs: LLM_API_TIMEOUT_MS },
           tools: activeTools,
           topK: finalTopK,
           topP: finalTopP,
@@ -205,15 +174,26 @@ export async function callWithFallback<T>({
 
         let fullText = "";
         let streamError: unknown = null;
+        let chunkBuffer = "";
         const { aiChunks, aiThoughts, taskLogs } = TRIGGER_CONFIG.metadataKeys;
+        const flushChunkBuffer = () => {
+          if (chunkBuffer.length === 0) {
+            return;
+          }
+          try {
+            metadata.append(aiChunks, chunkBuffer);
+          } catch (error) {
+            appLogger.debug({ error: error, msg: "Metadata append failed for text-delta" });
+          }
+          chunkBuffer = "";
+        };
 
-        for await (const part of result.fullStream) {
+        for await (const part of result.stream) {
           if (part.type === "text-delta") {
             fullText += part.text;
-            try {
-              metadata.append(aiChunks, part.text);
-            } catch (error) {
-              appLogger.debug({ error: error, msg: "Metadata append failed for text-delta" });
+            chunkBuffer += part.text;
+            if (chunkBuffer.length >= 128) {
+              flushChunkBuffer();
             }
           } else if (part.type === "reasoning-delta") {
             try {
@@ -248,13 +228,25 @@ export async function callWithFallback<T>({
             streamError = part.error ?? new Error("Unknown stream error");
           }
 
-          if (part.type === "finish" || part.type === "error") {
-            clearTimeout(timeoutId);
+          if (part.type === "finish") {
+            flushChunkBuffer();
+            appLogger.info({
+              finishReason: part.finishReason,
+              msg: `Model stream finished (${taskType}).`,
+              taskType,
+              totalUsage: part.totalUsage,
+              ...attemptMetadata,
+            });
+            break;
+          }
+
+          if (part.type === "error") {
+            flushChunkBuffer();
             break;
           }
         }
 
-        clearTimeout(timeoutId);
+        flushChunkBuffer();
         if (streamError != null) {
           throw streamError instanceof Error ? streamError : new Error(String(streamError));
         }
@@ -262,8 +254,6 @@ export async function callWithFallback<T>({
         taskLogger.success(`AI: finished generation.`);
         return fullText as T;
       } catch (error) {
-        clearTimeout(timeoutId);
-
         lastError = error;
         const schemaMismatch = isSchemaMismatchError(error);
         appLogger.warn({
@@ -275,9 +265,6 @@ export async function callWithFallback<T>({
             ? "Structured output schema mismatch, trying fallback attempt/model"
             : "Model call failed, trying next model",
         });
-
-        if (schemaMismatch && attempt.useTools) {
-        }
       }
     }
   }

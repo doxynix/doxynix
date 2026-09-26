@@ -85,7 +85,6 @@ export function Agent() {
 
   const { addToolApprovalResponse, messages, regenerate, sendMessage, setMessages, status } =
     useChat({
-      experimental_throttle: 50,
       id: sessionId ?? undefined,
       messages:
         history?.map((msg) => ({
@@ -99,6 +98,7 @@ export function Agent() {
         void utils.agent.getSessionHistory.invalidate({ sessionId: sessionId ?? "" });
       },
       sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
+      throttle: 32,
       transport: new DefaultChatTransport({
         api: "/api/agent/chat",
         body: () => ({

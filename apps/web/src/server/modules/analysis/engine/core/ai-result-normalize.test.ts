@@ -198,6 +198,10 @@ describe("isSchemaMismatchError", () => {
     const aiError = new Error("boom");
     aiError.name = "AI_NoObjectGeneratedError";
     expect(isSchemaMismatchError(aiError)).toBe(true);
+
+    const noOutputError = new Error("boom");
+    noOutputError.name = "AI_NoOutputGeneratedError";
+    expect(isSchemaMismatchError(noOutputError)).toBe(true);
   });
 
   it("rejects unrelated errors and non-error values", () => {

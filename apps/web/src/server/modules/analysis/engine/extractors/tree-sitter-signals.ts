@@ -442,16 +442,7 @@ export async function loadLanguage(ext: string, spec: LanguageSpec) {
 }
 
 function resolveGrammarWasmPath(spec: LanguageSpec): string {
-  let pkgOutDir = "";
-  try {
-    const pkgMain = nodeRequire.resolve("tree-sitter-wasms");
-    pkgOutDir = resolve(pkgMain, "../../out");
-  } catch {
-    // Fallback if not resolvable directly
-  }
-
   const candidates = [
-    pkgOutDir ? resolve(pkgOutDir, spec.wasm) : "",
     resolve(process.cwd(), spec.wasm),
     resolve(process.cwd(), "node_modules/tree-sitter-wasms/out", spec.wasm),
     resolve((import.meta.dirname as string | undefined) ?? "", "../../../vendor/wasms", spec.wasm),

@@ -1,8 +1,16 @@
 import { headers } from "next/headers";
 import { ChatRole } from "@doxynix/shared";
-import { convertToModelMessages, generateText, stepCountIs, streamText } from "ai";
+import {
+  convertToModelMessages,
+  createUIMessageStreamResponse,
+  generateText,
+  isStepCount,
+  streamText,
+  toUIMessageStream,
+} from "ai";
 import { dedent } from "es-toolkit";
 
+import { TOOL_APPROVAL_SECRET } from "@/shared/config/env.server";
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
@@ -14,7 +22,7 @@ import {
   AGENT_SYSTEM_PROMPT,
   GENERATE_CHAT_TITLE_PROMPT,
 } from "@/server/modules/agent/agent.prompts";
-import { getAgentTools } from "@/server/modules/agent/agent.tools";
+import { getAgentTools, MUTATION_TOOLS } from "@/server/modules/agent/agent.tools";
 import { processMessageParts } from "@/server/modules/agent/agent-storage";
 import { getActiveModels } from "@/server/modules/analysis/ai/ai-constants";
 
@@ -113,15 +121,20 @@ export async function POST(req: Request) {
 - Only prompt for a repository ID if the user explicitly wants to target a completely different project.`;
 
   const result = streamText({
+    experimental_toolApprovalSecret: TOOL_APPROVAL_SECRET,
+    instructions: dynamicSystemPrompt,
     messages: modelMessages,
     model: google(agentModelId),
-    stopWhen: stepCountIs(10),
-    system: dynamicSystemPrompt,
+    stopWhen: isStepCount(10),
+    timeout: { chunkMs: 20_000, stepMs: 55_000, toolMs: 40_000 },
+    toolApproval: Object.fromEntries(
+      MUTATION_TOOLS.map((name) => [name, "user-approval"] as const),
+    ) as Record<(typeof MUTATION_TOOLS)[number], "user-approval">,
     tools: getAgentTools(resolvedRepoId),
   });
 
-  return result.toUIMessageStreamResponse({
-    onFinish: async ({ messages: callbackMessages, responseMessage }) => {
+  const uiMessageStream = toUIMessageStream({
+    onEnd: async ({ messages: callbackMessages, responseMessage }) => {
       if (sessionId != null) {
         await prisma.chatMessage.create({
           data: {
@@ -149,7 +162,7 @@ export async function POST(req: Request) {
             }
 
             if (rawUserText.trim().length > 0) {
-              const utilityModelId = activeModels.SENTINEL[0] ?? "gemini-3.1-flash-lite";
+              const utilityModelId = activeModels.SENTINEL[0] ?? "gemini-3.5-flash-lite";
 
               const { text: generatedTitle } = await generateText({
                 model: google(utilityModelId),
@@ -174,10 +187,13 @@ export async function POST(req: Request) {
             }
           }
         } catch (error) {
-          appLogger.error({ error, msg: "Async chat title generation failed in onFinish:" });
+          appLogger.error({ error, msg: "Async chat title generation failed in onEnd:" });
         }
       }
     },
     originalMessages: messages,
+    stream: result.stream,
   });
+
+  return createUIMessageStreamResponse({ stream: uiMessageStream });
 }
