@@ -117,9 +117,13 @@ function stripPluginTitle(children: ReactNode): ReactNode {
   });
 }
 
-type BlockProps = { children?: ReactNode; className?: string };
+/** Most markdown blocks are rendered with our own classes and ignore any incoming className. */
+type BlockProps = Readonly<{ children?: ReactNode }>;
 
-function Blockquote({ children, className }: BlockProps) {
+/** `react-markdown` forwards the node's className, which blockquote and code both need. */
+type ClassableBlockProps = Readonly<BlockProps & { className?: string }>;
+
+function Blockquote({ children, className }: ClassableBlockProps) {
   const t = useTranslations("Dashboard");
   const reveal = useReveal();
   const alertType = isMarkdownAlert(className);
@@ -157,7 +161,7 @@ function Blockquote({ children, className }: BlockProps) {
   );
 }
 
-function Code({ children, className, ...props }: BlockProps) {
+function Code({ children, className, ...props }: ClassableBlockProps) {
   const isStreaming = useContext(StreamContext);
   const isInline = !(className?.includes("language-") ?? false) && !String(children).includes("\n");
   const lang = /language-([\w-]+)/.exec(className ?? "")?.[1] ?? "text";
