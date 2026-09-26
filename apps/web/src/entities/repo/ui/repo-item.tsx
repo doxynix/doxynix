@@ -19,7 +19,7 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
 
   return (
     <AppButton
-      className="h-auto w-full max-w-md cursor-pointer justify-start px-3 py-2 text-left"
+      className="h-auto w-full max-w-md justify-start px-3 py-2 text-left"
       disabled={disabled}
       onClick={onClick}
       type="button"

@@ -136,10 +136,8 @@ export function PasskeysList() {
             </div>
             <DialogFooter>
               <LoadingButton
-                className="cursor-pointer"
                 disabled={deviceName.trim().length === 0 || createPasskey.isPending}
                 isLoading={createPasskey.isPending}
-                loadingText={t("settings_passkey_verifying")}
                 onClick={() => createPasskey.mutate(deviceName)}
               >
                 {t("settings_passkey_register")}

@@ -379,7 +379,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
               <div className="group relative">
                 <div className="absolute top-3 right-3 z-10 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                   <CopyButton
-                    className="bg-background/80 shadow-md hover:bg-background"
+                    className="bg-background/80 hover:bg-background"
                     tooltipText={tCommon("copy_code")}
                     value={rawCode}
                   />

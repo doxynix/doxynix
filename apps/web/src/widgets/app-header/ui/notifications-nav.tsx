@@ -39,7 +39,7 @@ export function NotificationsNav() {
         <DropdownMenuTrigger asChild>
           <AppButton
             aria-label={t("notifications_title")}
-            className="relative cursor-pointer text-muted-foreground"
+            className="relative text-muted-foreground"
             size="icon"
             variant="ghost"
           >
@@ -54,7 +54,7 @@ export function NotificationsNav() {
         <div className="flex items-center justify-between p-2">
           <h2>{t("notifications_title")}</h2>
           <AppButton
-            className="cursor-pointer text-xs"
+            className="text-xs"
             disabled={markAllAsRead.isPending || unreadCount === 0}
             onClick={() => markAllAsRead.mutate()}
             variant="link"

@@ -18,7 +18,7 @@ export default async function HighFivePage() {
   return (
     <div className="container relative mx-auto min-h-dvh max-w-5xl animate-fade-in overflow-hidden px-4 py-12 pt-24">
       <BackOrLinkButton
-        className="mb-8 cursor-pointer"
+        className="mb-8"
         label={tCommon("back")}
         showIcon
         variant="link"

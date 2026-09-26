@@ -40,7 +40,6 @@ type Props = {
 };
 
 export function PrDraftSheet({ repoId }: Readonly<Props>) {
-  const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
   const [open, setOpen] = useState(false);
   const [removingFiles, setRemovingFiles] = useState<Set<string>>(new Set());
@@ -166,7 +165,6 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
                           className="hover:bg-destructive/10 hover:text-destructive"
                           disabled={isRemoving}
                           isLoading={isRemoving}
-                          loadingText=""
                           onClick={() => {
                             setRemovingFiles((prev) => {
                               const next = new Set(prev);
@@ -255,7 +253,6 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
             disabled={filesCount === 0 || openPrMutation.isPending}
             form="pr-form"
             isLoading={openPrMutation.isPending}
-            loadingText={tCommon("processing")}
             type="submit"
           >
             <GitPullRequest /> {t("repo_pr_draft_open_pr_button")}

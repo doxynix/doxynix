@@ -13,7 +13,6 @@ export function CreateRepoButton() {
 
   return (
     <AppButton
-      className="cursor-pointer"
       onClick={() => setOpen(true)}
       variant="outline"
     >

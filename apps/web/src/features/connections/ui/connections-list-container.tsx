@@ -78,7 +78,6 @@ export function ConnectionsListContainer() {
           <LoadingButton
             disabled={isFetching}
             isLoading={isFetching}
-            loadingText={tCommon("processing")}
             onClick={() => void handleInstall()}
             variant="outline"
           >

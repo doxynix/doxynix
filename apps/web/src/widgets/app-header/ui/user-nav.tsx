@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import type { Route } from "next";
 import { LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -34,8 +34,17 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
+const noopSubscribe = () => () => {};
+const getHydratedSnapshot = () => true;
+const getServerHydratedSnapshot = () => false;
+
 export function UserNav() {
   const { data: session, isPending } = authClient.useSession();
+  const isHydrated = useSyncExternalStore(
+    noopSubscribe,
+    getHydratedSnapshot,
+    getServerHydratedSnapshot,
+  );
   const router = useRouter();
   const user = session?.user ?? null;
   const tCommon = useTranslations("Common");
@@ -67,7 +76,7 @@ export function UserNav() {
     }
   }
 
-  if (isPending) {
+  if (!isHydrated || isPending) {
     return <Skeleton className="size-9 rounded-full" />;
   }
 
@@ -75,7 +84,7 @@ export function UserNav() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <AppButton
-          className="flex cursor-pointer items-center gap-3"
+          className="flex items-center gap-3"
           size="icon"
         >
           <AppAvatar
@@ -143,7 +152,6 @@ export function UserNav() {
               <div className="flex justify-end gap-2">
                 <DialogClose asChild>
                   <AppButton
-                    className="cursor-pointer"
                     disabled={loading}
                     variant="outline"
                   >
@@ -151,10 +159,8 @@ export function UserNav() {
                   </AppButton>
                 </DialogClose>
                 <LoadingButton
-                  className="cursor-pointer"
                   disabled={loading}
                   isLoading={loading}
-                  loadingText={t("logout_loading")}
                   onClick={() => void handleSignOut()}
                   variant="destructive"
                 >

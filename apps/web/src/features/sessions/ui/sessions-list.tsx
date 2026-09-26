@@ -67,7 +67,6 @@ export function SessionsList() {
             className="gap-2"
             disabled={revokeOtherSessions.isPending}
             isLoading={revokeOtherSessions.isPending}
-            loadingText={t("revoking")}
             onClick={() => revokeOtherSessions.mutate()}
             size="sm"
             variant="destructive"
@@ -110,6 +109,7 @@ export function SessionsList() {
                       title={t("revoke_device_session")}
                       trigger={
                         <AppButton
+                          aria-label={t("revoke_device_session")}
                           size="sm"
                           variant="destructive"
                         >

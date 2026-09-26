@@ -198,7 +198,12 @@ export default function GlobalError({
             <code> {requestId ?? error.digest ?? "System Failure"}</code>
           </div>
 
-          <button onClick={() => reset()}>Try to restart the app</button>
+          <button
+            onClick={() => reset()}
+            type="button"
+          >
+            Try to restart the app
+          </button>
 
           <footer className="mt-12 text-sm">
             Doxynix Infrastructure Support If the error persists, contact us:{" "}

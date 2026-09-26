@@ -74,7 +74,6 @@ export function SystemStatus({ className }: Readonly<{ className?: string }>) {
       ) : (
         <AppButton
           asChild
-          className="cursor-pointer"
           size="sm"
           variant="outline"
         >

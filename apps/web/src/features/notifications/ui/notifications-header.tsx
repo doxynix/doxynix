@@ -105,10 +105,7 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
           }
           value={filters.type ?? "all"}
         >
-          <SelectTrigger
-            aria-label={t("filter_by_type")}
-            className=""
-          >
+          <SelectTrigger aria-label={t("filter_by_type")}>
             <SelectValue placeholder={t("type_placeholder")} />
           </SelectTrigger>
           <SelectContent>

@@ -81,7 +81,7 @@ export function AppBreadcrumbs({
                       <DropdownMenuTrigger asChild>
                         <AppButton
                           aria-label={tCommon("show_hidden_elements")}
-                          className="size-7 cursor-pointer"
+                          className="size-7"
                           size="icon"
                           variant="ghost"
                         >
@@ -92,11 +92,11 @@ export function AppBreadcrumbs({
                         align="start"
                         className="min-w-45"
                       >
-                        {collapsedItems.map((collapsed, idx) => (
+                        {collapsedItems.map((collapsed) => (
                           <DropdownMenuItem
                             asChild={!!collapsed.href}
                             className="cursor-pointer"
-                            key={idx}
+                            key={collapsed.href ?? collapsed.label}
                             onSelect={() => {
                               if (collapsed.href == null) {
                                 collapsed.onClick?.();
@@ -105,7 +105,7 @@ export function AppBreadcrumbs({
                           >
                             {collapsed.href ? (
                               <Link
-                                className="w-full cursor-pointer truncate"
+                                className="w-full truncate"
                                 href={collapsed.href as Route}
                                 onClick={collapsed.onClick}
                               >

@@ -19,7 +19,7 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
   const tCommon = useTranslations("Common");
   return (
     <div className="flex flex-col gap-4 overflow-y-auto p-6">
-      <h3 className="text-2xl">{t("repo_map_overview_project_brain")}</h3>
+      <h2 className="text-2xl">{t("repo_map_overview_project_brain")}</h2>
       <div className="flex items-center gap-2">
         {workspace.analysisRef?.commitSha != null && (
           <AppBadge

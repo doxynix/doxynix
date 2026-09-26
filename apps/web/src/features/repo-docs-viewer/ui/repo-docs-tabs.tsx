@@ -60,6 +60,11 @@ export function RepoDocsTabs({
 
   const codeDocFiles = availableDocs.filter((doc) => doc.type === "CODE_DOC");
 
+  const activeItem = uniqueTabs.find((item) => activeTab === item.value);
+  const activeIsCodeDocRoot = activeItem?.value === "CODE_DOC";
+  const showFileAudits = activeItem !== undefined && activeIsCodeDocRoot && codeDocFiles.length > 0;
+  const showHeadings = activeItem !== undefined && !activeIsCodeDocRoot && headings.length > 0;
+
   return (
     <div className="flex w-72 shrink-0 flex-col gap-4">
       <h2 className="px-2 py-1 font-bold">{t("repo_docs_title")}</h2>
@@ -71,71 +76,71 @@ export function RepoDocsTabs({
           const isCodeDocRoot = item.value === "CODE_DOC";
 
           return (
-            <div
-              className="flex w-full flex-col"
+            <TabsTrigger
+              className={cn("w-full items-center justify-start gap-3 p-3 transition-standard")}
               key={item.id}
+              value={item.value}
             >
-              <TabsTrigger
-                className={cn("w-full items-center justify-start gap-3 p-3 transition-standard")}
-                value={item.value}
-              >
-                <item.icon className={cn(isActive ? "text-foreground" : "text-muted-foreground")} />
-                <span className="grow text-left font-medium text-sm">
-                  {isCodeDocRoot
-                    ? t("repo_docs_file_audits")
-                    : docMeta
-                      ? t(docMeta.labelKey)
-                      : item.value.toLowerCase().replace("_", " ")}
-                </span>
-                {isActive && <ChevronRight className="text-muted-foreground" />}
-              </TabsTrigger>
-
-              {isActive && isCodeDocRoot && codeDocFiles.length > 0 && (
-                <div className="slide-in-from-top-1 fade-in mt-1 mb-3 ml-10 flex animate-in flex-col gap-2 border-l pl-3.5 duration-300">
-                  {codeDocFiles.map((file) => {
-                    const isFileActive = activePath === file.path;
-                    return (
-                      <AppButton
-                        className={cn(
-                          "flex w-full cursor-pointer items-center justify-start gap-1 truncate py-1 text-left text-xs transition-standard hover:text-foreground",
-                          isFileActive
-                            ? "bg-accent font-semibold text-foreground"
-                            : "text-muted-foreground",
-                        )}
-                        key={file.id}
-                        onClick={() => void setActivePath(file.path)}
-                        variant="ghost"
-                      >
-                        <FileText /> {file.path?.split("/").pop() ?? "File"}
-                      </AppButton>
-                    );
-                  })}
-                </div>
-              )}
-
-              {isActive && !isCodeDocRoot && headings.length > 0 && (
-                <div className="slide-in-from-top-1 fade-in mt-1 mb-3 ml-10 flex animate-in flex-col gap-2.5 border-l pl-3.5 duration-300">
-                  {headings.map((heading) => (
-                    <a
-                      className={cn(
-                        "block text-xs transition-standard hover:text-foreground",
-                        heading.level === 3
-                          ? "pl-3 text-muted-foreground"
-                          : "text-muted-foreground",
-                        activeHeadingId === heading.id && "font-semibold",
-                      )}
-                      href={`#${heading.id}`}
-                      key={heading.id}
-                    >
-                      {heading.text}
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
+              <item.icon className={cn(isActive ? "text-foreground" : "text-muted-foreground")} />
+              <span className="grow text-left font-medium text-sm">
+                {isCodeDocRoot
+                  ? t("repo_docs_file_audits")
+                  : docMeta
+                    ? t(docMeta.labelKey)
+                    : item.value.toLowerCase().replace("_", " ")}
+              </span>
+              {isActive && <ChevronRight className="text-muted-foreground" />}
+            </TabsTrigger>
           );
         })}
       </TabsList>
+
+      {showFileAudits && (
+        <div
+          className="slide-in-from-top-1 fade-in mt-1 mb-3 ml-10 flex animate-in flex-col gap-2 border-l pl-3.5 duration-300"
+          key={activeItem.value}
+        >
+          {codeDocFiles.map((file) => {
+            const isFileActive = activePath === file.path;
+            return (
+              <AppButton
+                className={cn(
+                  "flex w-full cursor-pointer items-center justify-start gap-1 truncate py-1 text-left text-xs transition-standard hover:text-foreground",
+                  isFileActive
+                    ? "bg-accent font-semibold text-foreground"
+                    : "text-muted-foreground",
+                )}
+                key={file.id}
+                onClick={() => void setActivePath(file.path)}
+                variant="ghost"
+              >
+                <FileText /> {file.path?.split("/").pop() ?? "File"}
+              </AppButton>
+            );
+          })}
+        </div>
+      )}
+
+      {showHeadings && (
+        <div
+          className="slide-in-from-top-1 fade-in mt-1 mb-3 ml-10 flex animate-in flex-col gap-2.5 border-l pl-3.5 duration-300"
+          key={activeItem.value}
+        >
+          {headings.map((heading) => (
+            <a
+              className={cn(
+                "block text-xs transition-standard hover:text-foreground",
+                heading.level === 3 ? "pl-3 text-muted-foreground" : "text-muted-foreground",
+                activeHeadingId === heading.id && "font-semibold",
+              )}
+              href={`#${heading.id}`}
+              key={heading.id}
+            >
+              {heading.text}
+            </a>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

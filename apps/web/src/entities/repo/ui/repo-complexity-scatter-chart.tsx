@@ -93,7 +93,7 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
               if (active && payload.length > 0) {
                 const data = payload[0]?.payload;
                 return (
-                  <div className="rounded-md border border-border bg-popover p-2 shadow-md">
+                  <div className="rounded-md border border-border bg-popover p-2">
                     <p className="font-mono text-[10px] text-blue-400">{data.name}</p>
                     <div className="mt-1 flex flex-col gap-1">
                       <p className="text-foreground text-xs">

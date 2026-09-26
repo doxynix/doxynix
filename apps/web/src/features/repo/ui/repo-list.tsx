@@ -25,7 +25,6 @@ export function RepoList({ meta, repos }: Readonly<Props>) {
       <EmptyState
         action={
           <AppButton
-            className="cursor-pointer"
             onClick={() => setOpen(true)}
             variant="secondary"
           >

@@ -44,7 +44,7 @@ export function DeleteByOwnerDialog({ owner }: Readonly<Props>) {
       title={`${t("settings_danger_delete_all_repos")}?`}
       trigger={
         <AppButton
-          className="w-fit cursor-pointer"
+          className="w-fit"
           variant="destructive"
         >
           {t("settings_danger_delete_all_repos")} <Trash2 />

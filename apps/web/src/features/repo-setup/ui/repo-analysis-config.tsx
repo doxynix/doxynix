@@ -47,7 +47,6 @@ type Props = {
 
 export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>) {
   const languageLabelId = useId();
-  const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
   const translationKeys = LOCALES.map(
     (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const,
@@ -206,10 +205,9 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
 
         <div className="flex justify-end">
           <LoadingButton
-            className="w-fit cursor-pointer gap-2"
+            className="w-fit gap-2"
             disabled={disabled || isSelectionEmpty}
             isLoading={disabled}
-            loadingText={tCommon("processing")}
             onClick={actions.handleStartAnalysis}
           >
             <Play />

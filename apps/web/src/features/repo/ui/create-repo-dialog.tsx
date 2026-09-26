@@ -259,7 +259,6 @@ export function CreateRepoDialog() {
                         className="size-6"
                         disabled={loading}
                         isLoading={loading}
-                        loadingText=""
                         onClick={() => void handleInstallGitHubApp()}
                         size="icon"
                         type="button"
@@ -311,10 +310,8 @@ export function CreateRepoDialog() {
                         {t("repo_link_github_profile")}
                       </p>
                       <LoadingButton
-                        className="cursor-pointer"
                         disabled={loadingOauth}
                         isLoading={loadingOauth}
-                        loadingText={tCommon("processing")}
                         onClick={() => void handleSignIn()}
                         type="button"
                         variant="outline"
@@ -328,10 +325,8 @@ export function CreateRepoDialog() {
                     <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
                       <p className="mb-3 text-muted-foreground text-sm">{t("repo_auth_expired")}</p>
                       <LoadingButton
-                        className="cursor-pointer"
                         disabled={loadingOauth}
                         isLoading={loadingOauth}
-                        loadingText={tCommon("processing")}
                         onClick={() => void handleSignIn()}
                         type="button"
                         variant="outline"
@@ -351,10 +346,8 @@ export function CreateRepoDialog() {
                           {t("repo_install_github_prompt")}
                         </p>
                         <LoadingButton
-                          className="cursor-pointer"
                           disabled={loading}
                           isLoading={loading}
-                          loadingText={tCommon("connecting")}
                           onClick={() => void handleInstallGitHubApp()}
                           type="button"
                           variant="outline"
@@ -403,10 +396,8 @@ export function CreateRepoDialog() {
             </div>
             <DialogFooter>
               <LoadingButton
-                className="cursor-pointer"
                 disabled={create.isPending || !form.formState.isValid || !urlValue}
                 isLoading={create.isPending}
-                loadingText={tCommon("adding")}
               >
                 {tCommon("add")}
               </LoadingButton>

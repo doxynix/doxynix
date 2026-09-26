@@ -308,7 +308,7 @@ export function AuthForm() {
       <div className="flex w-full items-center justify-center gap-10">
         <div
           className={cn(
-            "hidden max-w-2xl flex-col gap-8 transition-all duration-300 ease-out lg:flex",
+            "hidden max-w-2xl flex-col gap-8 transition-standard duration-300 ease-out lg:flex",
             isSent || isTwoFactorRequired
               ? "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"
               : "relative scale-100 opacity-100",
@@ -363,7 +363,7 @@ export function AuthForm() {
         <div className="fade-in slide-in-from-bottom-4 relative flex w-full max-w-lg animate-in items-center justify-center">
           <div
             className={cn(
-              "relative flex w-full flex-col gap-6 rounded-[1.75rem] border border-border bg-card p-6 transition-all duration-300 ease-out sm:p-8",
+              "relative flex w-full flex-col gap-6 rounded-[1.75rem] border border-border bg-card p-6 transition-standard duration-300 ease-out sm:p-8",
               isSent || isTwoFactorRequired
                 ? "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"
                 : "relative scale-100 opacity-100",
@@ -389,11 +389,10 @@ export function AuthForm() {
                 const isLastUsed = lastLogin === item.provider;
                 return (
                   <LoadingButton
-                    className="relative w-full cursor-pointer rounded-2xl border-border bg-background px-3 py-5 text-foreground transition-colors hover:bg-surface-hover"
+                    className="relative w-full rounded-2xl border-border bg-background px-3 py-5 text-foreground transition-colors hover:bg-surface-hover"
                     disabled={disabled}
                     isLoading={loadingProvider === item.provider}
                     key={item.provider}
-                    loadingText={t("login_loading")}
                     onClick={() => void handleSignIn(item.provider)}
                     variant="outline"
                   >
@@ -414,10 +413,9 @@ export function AuthForm() {
                 );
               })}
               <LoadingButton
-                className="relative w-full cursor-pointer rounded-2xl border-border bg-background px-3 py-5 text-foreground transition-colors hover:bg-surface-hover"
+                className="relative w-full rounded-2xl border-border bg-background px-3 py-5 text-foreground transition-colors hover:bg-surface-hover"
                 disabled={disabled}
                 isLoading={loadingProvider === "passkey"}
-                loadingText={t("verifying_security_key")}
                 onClick={() => void handlePasskeySignIn()}
                 type="button"
                 variant="outline"
@@ -488,10 +486,9 @@ export function AuthForm() {
                     )}
                   />
                   <LoadingButton
-                    className="h-12 w-full cursor-pointer rounded-2xl"
+                    className="h-12 w-full rounded-2xl"
                     disabled={disabled}
                     isLoading={loadingProvider === "email" || isVerifying}
-                    loadingText={isVerifying ? t("security_check") : t("login_loading")}
                     type="submit"
                   >
                     {tCommon("login_btn")}
@@ -520,7 +517,7 @@ export function AuthForm() {
 
           <div
             className={cn(
-              "relative flex w-full flex-col gap-6 rounded-[1.75rem] border border-border bg-card p-6 text-center transition-all duration-300 ease-out sm:p-8",
+              "relative flex w-full flex-col gap-6 rounded-[1.75rem] border border-border bg-card p-6 text-center transition-standard duration-300 ease-out sm:p-8",
               isTwoFactorRequired
                 ? "relative scale-100 opacity-100"
                 : "pointer-events-none absolute inset-0 scale-[0.98] opacity-0",
@@ -533,9 +530,9 @@ export function AuthForm() {
                   {isBackupMode ? <KeyRound size={20} /> : <ShieldCheck size={20} />}
                 </div>
                 <div className="text-left">
-                  <h3 className="font-semibold text-sm">
+                  <h2 className="font-semibold text-sm">
                     {isBackupMode ? t("backup_recovery") : t("two_factor_verification")}
-                  </h3>
+                  </h2>
                   <p className="text-[11px] text-muted-foreground">
                     {isBackupMode ? t("use_recovery_code") : t("enter_totp_code")}
                   </p>
@@ -564,14 +561,13 @@ export function AuthForm() {
               />
 
               <LoadingButton
-                className="h-12 w-full cursor-pointer gap-2 rounded-2xl"
+                className="h-12 w-full gap-2 rounded-2xl"
                 disabled={
                   twoFactorCode.trim().length === 0 ||
                   isTwoFactorVerifying ||
                   twoFactorCode.trim().length < 6
                 }
                 isLoading={isTwoFactorVerifying}
-                loadingText={t("verifying")}
                 type="submit"
               >
                 {t("verify")} <ArrowRight size={16} />
@@ -594,7 +590,7 @@ export function AuthForm() {
 
           <div
             className={cn(
-              "relative flex w-full flex-col items-center justify-center gap-4 rounded-[1.75rem] border border-border bg-card p-8 text-center transition-all duration-300 ease-out",
+              "relative flex w-full flex-col items-center justify-center gap-4 rounded-[1.75rem] border border-border bg-card p-8 text-center transition-standard duration-300 ease-out",
               isSent
                 ? "relative scale-100 opacity-100"
                 : "pointer-events-none absolute inset-0 scale-[0.98] opacity-0",
@@ -612,7 +608,7 @@ export function AuthForm() {
               </span>
             </p>
             <AppButton
-              className="mt-2 cursor-pointer"
+              className="mt-2"
               onClick={() => setIsSent(false)}
               variant="outline"
             >
