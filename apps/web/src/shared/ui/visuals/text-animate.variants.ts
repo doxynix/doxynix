@@ -51,6 +51,14 @@ function hasPerPropertyTransitions(transition: TransitionMap): boolean {
   );
 }
 
+function resolveBaseDuration(transition: TransitionMap, kind: "enter" | "exit"): number {
+  if (typeof transition.duration === "number" && transition.duration > 0) {
+    return transition.duration;
+  }
+
+  return kind === "enter" ? ENTER_DURATION : EXIT_DURATION;
+}
+
 export function withTastefulEasing(
   transition: TransitionMap,
   kind: "enter" | "exit",
@@ -60,12 +68,7 @@ export function withTastefulEasing(
     return transition;
   }
 
-  const current =
-    typeof transition.duration === "number" && transition.duration > 0
-      ? transition.duration
-      : kind === "enter"
-        ? ENTER_DURATION
-        : EXIT_DURATION;
+  const current = resolveBaseDuration(transition, kind);
 
   return {
     ...transition,
