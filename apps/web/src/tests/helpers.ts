@@ -3,7 +3,33 @@ import { expect } from "vitest";
 
 import { prisma } from "@/server/core/db";
 
+/**
+ * `cleanupDatabase` TRUNCATEs, so pointing it at a development database destroys
+ * real data. Integration tests must therefore run against a disposable database:
+ * CI provides `test_db`; locally set DATABASE_URL to something matching this.
+ */
+const DISPOSABLE_DATABASE_PATTERN = /test/i;
+
+export async function assertDisposableDatabase() {
+  // current_database() returns the internal `name` type, which Prisma cannot
+  // deserialize, hence the explicit cast to text.
+  const rows = await prisma.$queryRawUnsafe<Array<{ database_name: string }>>(
+    "SELECT current_database()::text AS database_name;",
+  );
+  const databaseName = rows[0]?.database_name ?? "";
+
+  if (!DISPOSABLE_DATABASE_PATTERN.test(databaseName)) {
+    throw new Error(
+      `Refusing to run integration tests against database "${databaseName}": ` +
+        "cleanupDatabase() truncates it. Point DATABASE_URL at a disposable " +
+        'database whose name contains "test" (CI uses "test_db").',
+    );
+  }
+}
+
 export async function cleanupDatabase() {
+  await assertDisposableDatabase();
+
   const tablenames = [
     "audit_logs",
     "documents",
@@ -15,18 +41,14 @@ export async function cleanupDatabase() {
     "verification_tokens",
   ];
 
-  try {
-    for (const table of tablenames) {
-      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE;`);
-    }
-    await prisma.user.deleteMany({
-      where: {
-        OR: [{ email: { contains: "@test.com" } }, { email: { contains: "@git.hub" } }],
-      },
-    });
-  } catch (error) {
-    console.warn("Cleanup warning (might be foreign key race):", error);
+  for (const table of tablenames) {
+    await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE;`);
   }
+  await prisma.user.deleteMany({
+    where: {
+      OR: [{ email: { contains: "@test.com" } }, { email: { contains: "@git.hub" } }],
+    },
+  });
 }
 
 export async function createTestUser(name: string, role: "ADMIN" | "USER" = "USER") {
