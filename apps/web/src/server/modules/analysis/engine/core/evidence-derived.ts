@@ -1,7 +1,6 @@
 import { countBy, orderBy, uniqBy } from "es-toolkit";
 
-import type { DependencyNodeMetric } from "@/server/utils/types";
-
+import type { DependencyNodeMetric } from "../../engine/core/discovery.types";
 import type {
   ConfigRef,
   EntrypointRef,

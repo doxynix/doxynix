@@ -1,8 +1,7 @@
 import { normalize } from "pathe";
 
-import type { PRChangedFileSnapshot } from "@/server/utils/types";
-
 import { analysisMapper, type TopLevelImpactNode } from "../analysis.mapper";
+import type { PRChangedFileSnapshot } from "../logic/pr.types";
 import type { createAnalyzeContextBuilder } from "./analyze-context-builder";
 import { makeStructureNodeId } from "./structure-shared";
 

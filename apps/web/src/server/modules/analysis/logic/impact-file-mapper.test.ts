@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { PRChangedFileSnapshot } from "@/server/utils/types";
-
 import type { TopLevelImpactNode } from "../analysis.mapper";
+import type { PRChangedFileSnapshot } from "../logic/pr.types";
 import { mapChangedFilesToImpactNodes } from "./impact-file-mapper";
 
 function zone(id: string, path: string, label = id): TopLevelImpactNode {

@@ -1,10 +1,8 @@
 import type { Repo } from "@prisma/client";
 
-import type { TeamRole } from "@/server/utils/types";
-
 import { deriveMaintenanceStatus } from "../analysis.utils";
 import type { AIResult } from "../engine/core/analysis-result.schemas";
-import type { RepoMetrics } from "../engine/core/metrics.types";
+import type { RepoMetrics, TeamRole } from "../engine/core/metrics.types";
 import { calculateHealthScore } from "../engine/metrics/complexity";
 
 const MAX_ONBOARDING_SCORE = 100;

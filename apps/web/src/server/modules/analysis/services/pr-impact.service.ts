@@ -1,11 +1,11 @@
 import type { DbClient } from "@/server/core/db";
-import type { PRImpactPayload } from "@/server/utils/types";
 
 import { analysisMapper } from "../analysis.mapper";
 import { analysisRepo } from "../analysis.repository";
 import { createAnalyzeContextBuilder } from "../logic/analyze-context-builder";
 import { buildTopLevelNodes } from "../logic/graph-navigator";
 import { mapChangedFilesToImpactNodes } from "../logic/impact-file-mapper";
+import type { PRImpactPayload } from "../logic/pr.types";
 
 export const prImpactService = {
   async getAnalysis(db: DbClient, analysisId: string) {

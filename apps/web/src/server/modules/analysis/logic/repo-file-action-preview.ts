@@ -1,5 +1,4 @@
-import type { FileActionPreviewResult } from "@/server/utils/types";
-
+import type { FileActionPreviewResult } from "../../../core/redis.types";
 import type { DocumentFilePreviewResult, QuickFileAuditResult } from "../analysis.schemas";
 import { formatQuickFileAuditMarkdown } from "../analysis.utils";
 import type { SyncFileActionMeta } from "./repo-file-action-state";

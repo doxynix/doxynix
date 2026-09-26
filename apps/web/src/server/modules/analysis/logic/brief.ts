@@ -3,7 +3,7 @@ import type {
   InteractiveBriefNodePayload,
   InteractiveBriefPanel,
   InteractiveBriefPayload,
-} from "@/server/utils/types";
+} from "../logic/workspace.types";
 
 function toAvailableActions(params: {
   canDrillDeeper: boolean;
