@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.4.0](https://github.com/doxynix/doxynix/compare/web-v3.3.0...web-v3.4.0) (2026-09-26)
+
+
+### Features
+
+* **web:** refresh design system and add resizable sidebar ([#2184](https://github.com/doxynix/doxynix/issues/2184)) ([f4012f7](https://github.com/doxynix/doxynix/commit/f4012f7700dadf01aff4a94609d28220ea9123dc))
+
 ## [3.3.0](https://github.com/doxynix/doxynix/compare/web-v3.2.12...web-v3.3.0) (2026-09-26)
 
 

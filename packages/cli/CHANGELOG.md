@@ -1,5 +1,26 @@
 # Changelog
 
+## [3.1.0](https://github.com/doxynix/doxynix/compare/cli-v3.0.0...cli-v3.1.0) (2026-09-26)
+
+
+### Features
+
+* **web:** expand i18n to five new locales and harden event listeners & tooling ([#2143](https://github.com/doxynix/doxynix/issues/2143)) ([90698f2](https://github.com/doxynix/doxynix/commit/90698f2702495e4dae8eac6e58541047ccc87c0f))
+
+
+### Bug Fixes
+
+* **cli:** re-sync the version line with the published 3.0.0 ([#2188](https://github.com/doxynix/doxynix/issues/2188)) ([aa877e1](https://github.com/doxynix/doxynix/commit/aa877e1cee094c8266d92b178b5b0a46162cf5e6))
+* **deps:** update all other non-major dependencies ([#2148](https://github.com/doxynix/doxynix/issues/2148)) ([99b7242](https://github.com/doxynix/doxynix/commit/99b7242f2bb1e243ec87e4dd67ff9e8cae66ad82))
+* **web:** normalize empty avatar url to null ([#2160](https://github.com/doxynix/doxynix/issues/2160)) ([7b55c0a](https://github.com/doxynix/doxynix/commit/7b55c0aec1c6bbdb19e701cb5574537d14e99dfa))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 3.4.0
+
 ## [2.2.13](https://github.com/doxynix/doxynix/compare/cli-v2.2.12...cli-v2.2.13) (2026-09-26)
 
 
