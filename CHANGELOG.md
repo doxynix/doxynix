@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.5.0](https://github.com/doxynix/doxynix/compare/doxynix-v4.4.0...doxynix-v4.5.0) (2026-09-26)
+
+
+### Features
+
+* **web:** refresh design system and add resizable sidebar ([#2184](https://github.com/doxynix/doxynix/issues/2184)) ([f4012f7](https://github.com/doxynix/doxynix/commit/f4012f7700dadf01aff4a94609d28220ea9123dc))
+
 ## [4.4.0](https://github.com/doxynix/doxynix/compare/doxynix-v4.3.14...doxynix-v4.4.0) (2026-09-26)
 
 
