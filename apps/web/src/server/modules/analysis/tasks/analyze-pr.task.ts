@@ -1,6 +1,5 @@
 import type { Octokit } from "@octokit/rest";
 import { task } from "@trigger.dev/sdk";
-import { normalize } from "pathe";
 import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
@@ -13,154 +12,10 @@ import { analysisRepo } from "../analysis.repository";
 import { persistedFindingSchema } from "../analysis.schemas";
 import { CommentFormatter, gitHubCommentPoster } from "../logic/comment-poster";
 import { DifferentialAnalyzer } from "../logic/differential-analyzer";
-import type { PRFinding } from "../logic/pr.types";
+import { healAndPartitionFindings } from "../logic/patch-healer";
+import { mergePrBody } from "../logic/pr-body";
 import { PRConfigService } from "../logic/pr-config";
-import { lineSimilarity } from "../logic/surgical-edit";
 import { taskLogger } from "../logic/task-logger";
-
-function mergePrBody(existingBody: null | string, aiSummary: string): string {
-  const body = existingBody ?? "";
-  const startMarker = "<!-- DOXYNIX_START -->";
-  const endMarker = "<!-- DOXYNIX_END -->";
-
-  const formattedSummary = `${startMarker}\n\n${aiSummary}\n\n${endMarker}`;
-
-  const startIndex = body.indexOf(startMarker);
-  const endIndex = body.indexOf(endMarker);
-
-  if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-    const before = body.slice(0, startIndex);
-    const after = body.slice(endIndex + endMarker.length);
-    return `${before}${formattedSummary}${after}`;
-  }
-
-  if (body.trim().length === 0) {
-    return formattedSummary;
-  }
-
-  return `${body}\n\n---\n\n${formattedSummary}`;
-}
-
-function getCommentableLinesFromPatch(patch: string): Set<number> {
-  const commentable = new Set<number>();
-  if (!patch) {
-    return commentable;
-  }
-
-  const lines = patch.split("\n");
-  let currentNewFileLine = 0;
-
-  for (const line of lines) {
-    if (line.startsWith("@@")) {
-      const match = /@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/.exec(line);
-      if (match?.[1] != null) {
-        currentNewFileLine = Number.parseInt(match[1], 10);
-      }
-      continue;
-    }
-
-    if (currentNewFileLine === 0 || line.startsWith("\\")) {
-      continue;
-    }
-
-    if (line.startsWith("+")) {
-      if (!line.startsWith("+++")) {
-        commentable.add(currentNewFileLine);
-        currentNewFileLine++;
-      }
-    } else if (line.startsWith("-")) {
-      if (line.startsWith("---")) {
-        continue;
-      }
-    } else {
-      commentable.add(currentNewFileLine);
-      currentNewFileLine++;
-    }
-  }
-
-  return commentable;
-}
-
-function buildLineMappingFromPatch(patch: string): Map<string, number> {
-  const lineMap = new Map<string, number>();
-  if (!patch) {
-    return lineMap;
-  }
-
-  const lines = patch.split("\n");
-  let currentNewFileLine = 0;
-
-  for (const line of lines) {
-    if (line.startsWith("@@")) {
-      const match = /@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/.exec(line);
-      if (match?.[1] != null) {
-        currentNewFileLine = Number.parseInt(match[1], 10);
-      }
-      continue;
-    }
-
-    if (currentNewFileLine === 0 || line.startsWith("\\")) {
-      continue;
-    }
-
-    if (line.startsWith("+")) {
-      if (!line.startsWith("+++")) {
-        const cleanText = line.slice(1).trim();
-        if (cleanText.length > 0) {
-          lineMap.set(cleanText, currentNewFileLine);
-        }
-        currentNewFileLine++;
-      }
-    } else if (line.startsWith("-")) {
-      if (line.startsWith("---")) {
-        continue;
-      }
-    } else {
-      currentNewFileLine++;
-    }
-  }
-
-  return lineMap;
-}
-
-function healFindingLine(
-  lineMap: Map<string, number>,
-  codeSnippet: string,
-  hallucinatedLine: number,
-): number {
-  const snippetLines = codeSnippet
-    .split("\n")
-    .map((l) => l.replace(/^[+-]/, "").trim())
-    .filter(Boolean);
-
-  for (const snippetLine of snippetLines) {
-    const exact = lineMap.get(snippetLine);
-    if (exact != null) {
-      return exact;
-    }
-
-    for (const [mapText, mapLine] of lineMap.entries()) {
-      if (mapText.includes(snippetLine) || snippetLine.includes(mapText)) {
-        return mapLine;
-      }
-    }
-
-    let bestScore = 0;
-    let bestLine = hallucinatedLine;
-    for (const [mapText, mapLine] of lineMap.entries()) {
-      const score = lineSimilarity(snippetLine, mapText);
-      if (score > bestScore && score > 0.75) {
-        bestScore = score;
-        bestLine = mapLine;
-      }
-    }
-    if (bestScore > 0) {
-      return bestLine;
-    }
-  }
-
-  return hallucinatedLine;
-}
 
 async function updateCommitStatus(
   octokit: Octokit,
@@ -299,40 +154,8 @@ export const analyzePrTask = task({
         },
       );
 
-      const fileLineMaps = new Map<string, Map<string, number>>();
-      const fileCommentableLines = new Map<string, Set<number>>();
-
-      for (const file of changedFiles) {
-        if (file.patch != null) {
-          const normName = normalize(file.filename);
-          fileLineMaps.set(normName, buildLineMappingFromPatch(file.patch));
-          fileCommentableLines.set(normName, getCommentableLinesFromPatch(file.patch));
-        }
-      }
-
-      const validatedInlineFindings: PRFinding[] = [];
-
-      for (const finding of result.findings) {
-        const normPath = normalize(finding.file);
-        const lineMap = fileLineMaps.get(normPath);
-        const commentableLines = fileCommentableLines.get(normPath);
-
-        let correctedLine = finding.line;
-        if (lineMap != null && finding.codeSnippet != null) {
-          correctedLine = healFindingLine(lineMap, finding.codeSnippet, finding.line);
-        }
-
-        const updatedFinding = {
-          ...finding,
-          line: correctedLine,
-        };
-
-        if (commentableLines?.has(correctedLine)) {
-          validatedInlineFindings.push(updatedFinding);
-        } else {
-          finding.line = correctedLine;
-        }
-      }
+      const { commentable: validatedInlineFindings, findings: healedFindings } =
+        healAndPartitionFindings({ changedFiles, findings: result.findings });
 
       if (result.summary && result.summary.trim().length > 0) {
         try {
@@ -341,7 +164,7 @@ export const analyzePrTask = task({
             payload.owner,
             payload.repoName,
             payload.prNumber,
-            result.findings,
+            healedFindings,
           );
           const { data: prData } = await octokit.rest.pulls.get({
             owner: payload.owner,
@@ -368,7 +191,7 @@ export const analyzePrTask = task({
         }
       }
 
-      const finalFindings = [...result.findings];
+      const finalFindings = [...healedFindings];
 
       if (finalFindings.length === 0) {
         finalFindings.push({
@@ -439,7 +262,7 @@ export const analyzePrTask = task({
         payload.repoName,
         payload.headSha,
         "success",
-        `Doxynix Analysis completed. ${result.findings.length} findings identified.`,
+        `Doxynix Analysis completed. ${healedFindings.length} findings identified.`,
         payload.prNumber,
       );
 
@@ -447,13 +270,13 @@ export const analyzePrTask = task({
         payload.repoId,
         payload.prNumber,
         duration,
-        result.findings.length,
+        healedFindings.length,
       );
 
       return {
         analysisId: payload.analysisId,
         duration,
-        findings: result.findings.length,
+        findings: healedFindings.length,
         riskScore: result.riskScore,
         success: true,
       };
