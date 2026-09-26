@@ -1,10 +1,10 @@
 import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
+import { MUTATION_TOOLS } from "@/server/modules/agent/agent.tools";
 
 export interface RawTool {
   execute: unknown;
-  needsApproval?: boolean;
   inputSchema: unknown;
   description?: string;
 }
@@ -22,8 +22,8 @@ export function filterAndPrepareTools(agentTools: Record<string, RawTool>) {
       continue;
     }
 
-    if (toolObj.needsApproval === true) {
-      appLogger.debug({ msg: "Skipping approval-required tool in MCP registration", tool: name });
+    if ((MUTATION_TOOLS as readonly string[]).includes(name)) {
+      appLogger.debug({ msg: "Skipping mutation tool in MCP registration", tool: name });
       continue;
     }
 

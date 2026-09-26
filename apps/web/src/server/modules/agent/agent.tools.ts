@@ -3,6 +3,13 @@ import * as z from "zod";
 
 import { api } from "@/server/core/trpc/server";
 
+export const MUTATION_TOOLS = [
+  "applyFix",
+  "deleteRepository",
+  "openPullRequest",
+  "revokeApiKey",
+] as const;
+
 export const getAgentTools = (currentRepoId?: string) => ({
   applyFix: tool({
     description: "Apply a generated code correction (creates a Pull Request on GitHub).",
@@ -35,7 +42,6 @@ export const getAgentTools = (currentRepoId?: string) => ({
       repoId: z.uuid().optional().describe("Optional custom repository UUID"),
       title: z.string().describe("The title of the Pull Request"),
     }),
-    needsApproval: true,
   }),
 
   clearReadNotifications: tool({
@@ -112,7 +118,6 @@ export const getAgentTools = (currentRepoId?: string) => ({
     inputSchema: z.object({
       repoId: z.uuid().describe("The unique public UUID of the repository to delete"),
     }),
-    needsApproval: true,
   }),
 
   documentFile: tool({
@@ -389,7 +394,6 @@ export const getAgentTools = (currentRepoId?: string) => ({
       repoId: z.uuid().optional().describe("The public UUID of the repository"),
       title: z.string().min(1).describe("The title of the Pull Request"),
     }),
-    needsApproval: true,
   }),
 
   pinAuditToDocuments: tool({
@@ -496,7 +500,6 @@ export const getAgentTools = (currentRepoId?: string) => ({
         .string()
         .describe("The UUID or the friendly name (e.g., 'CI-CD-key') of the API key to revoke"),
     }),
-    needsApproval: true,
   }),
 
   searchWorkspace: tool({

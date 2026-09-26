@@ -39,7 +39,7 @@ function buildTools(profile: RepositoryToolProfile) {
 type ToolValue = {
   description: string;
   execute: (input: Record<string, unknown>) => Promise<unknown>;
-  inputSchema: z.ZodTypeAny;
+  inputSchema: z.ZodType;
 };
 
 function getTool(toolSet: Record<string, unknown>, name: string): ToolValue {

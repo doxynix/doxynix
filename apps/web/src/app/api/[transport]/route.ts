@@ -12,7 +12,7 @@ import { filterAndPrepareTools } from "./mcp-utils";
 
 type GenericExecuteFn = (
   args: Record<string, unknown>,
-  context: ToolExecutionOptions,
+  context: ToolExecutionOptions<unknown>,
 ) => Promise<unknown>;
 
 const handler = createMcpHandler(
@@ -26,7 +26,8 @@ const handler = createMcpHandler(
         async (args) => {
           try {
             const parsedArgs = tool.inputSchema.parse(args);
-            const dummyContext: ToolExecutionOptions = {
+            const dummyContext: ToolExecutionOptions<unknown> = {
+              context: undefined,
               messages: [],
               toolCallId: `mcp-${tool.name}-${Date.now()}`,
             };

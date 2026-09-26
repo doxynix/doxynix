@@ -46,6 +46,7 @@ const envServer = createEnv({
     REDIS_TCP_URL: process.env.REDIS_TCP_URL,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     RESEND_WEBHOOK_SECRET: process.env.RESEND_WEBHOOK_SECRET,
+    TOOL_APPROVAL_SECRET: process.env.TOOL_APPROVAL_SECRET,
     TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
     VERCEL_BLOB_CALLBACK_URL: process.env.VERCEL_BLOB_CALLBACK_URL,
@@ -87,6 +88,7 @@ const envServer = createEnv({
     REDIS_TCP_URL: stringSchema,
     RESEND_API_KEY: stringSchema,
     RESEND_WEBHOOK_SECRET: stringSchema,
+    TOOL_APPROVAL_SECRET: stringSchema,
     TURNSTILE_SECRET_KEY: stringSchema,
     UPLOADTHING_TOKEN: stringSchema,
     VERCEL_BLOB_CALLBACK_URL: z.url(),
@@ -103,6 +105,7 @@ export const BETTERSTACK_TOKEN = envServer.BETTERSTACK_API_TOKEN;
 export const BETTER_AUTH_URL = envServer.BETTER_AUTH_URL;
 export const BETTER_AUTH_SECRET = envServer.BETTER_AUTH_SECRET;
 export const TURNSTILE_SECRET_KEY = envServer.TURNSTILE_SECRET_KEY;
+export const TOOL_APPROVAL_SECRET = envServer.TOOL_APPROVAL_SECRET;
 export const RESEND_API_KEY = envServer.RESEND_API_KEY;
 export const RESEND_WEBHOOK_SECRET = envServer.RESEND_WEBHOOK_SECRET;
 export const APP_VERSION = envServer.APP_VERSION;
