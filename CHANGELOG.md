@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.5.3](https://github.com/doxynix/doxynix/compare/doxynix-v4.5.2...doxynix-v4.5.3) (2026-09-26)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2202](https://github.com/doxynix/doxynix/issues/2202)) ([61d318c](https://github.com/doxynix/doxynix/commit/61d318c45fd22c98205fd77c93ea98f157258483))
+* **web:** warm the shiki highlighter outside the test timeout ([#2197](https://github.com/doxynix/doxynix/issues/2197)) ([03e0b7b](https://github.com/doxynix/doxynix/commit/03e0b7b10f13aeb41430778726ae834febb69477))
+
 ## [4.5.2](https://github.com/doxynix/doxynix/compare/doxynix-v4.5.1...doxynix-v4.5.2) (2026-09-26)
 
 
