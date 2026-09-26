@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.4.3](https://github.com/doxynix/doxynix/compare/web-v3.4.2...web-v3.4.3) (2026-09-26)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2202](https://github.com/doxynix/doxynix/issues/2202)) ([61d318c](https://github.com/doxynix/doxynix/commit/61d318c45fd22c98205fd77c93ea98f157258483))
+* **web:** warm the shiki highlighter outside the test timeout ([#2197](https://github.com/doxynix/doxynix/issues/2197)) ([03e0b7b](https://github.com/doxynix/doxynix/commit/03e0b7b10f13aeb41430778726ae834febb69477))
+
 ## [3.4.2](https://github.com/doxynix/doxynix/compare/web-v3.4.1...web-v3.4.2) (2026-09-26)
 
 
