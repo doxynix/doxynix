@@ -1,9 +1,9 @@
 {
-  ".": "4.3.14",
+  ".": "4.4.0",
   "apps/siem-client": "0.3.2",
   "apps/siem-server": "0.3.1",
-  "apps/web": "3.2.12",
-  "packages/cli": "2.2.12",
+  "apps/web": "3.3.0",
+  "packages/cli": "2.2.13",
   "packages/config": "1.2.0",
   "packages/shared": "0.3.0"
 }
