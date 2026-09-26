@@ -36,7 +36,7 @@
     "@react-stately/datepicker": "3.17.1",
     "@remixicon/react": "4.9.0",
     "@tanstack/react-query": "catalog:",
-    "@tanstack/react-router": "1.170.38",
+    "@tanstack/react-router": "1.170.39",
     "@tanstack/react-router-devtools": "1.167.2",
     "better-auth": "catalog:",
     "clsx": "catalog:",
