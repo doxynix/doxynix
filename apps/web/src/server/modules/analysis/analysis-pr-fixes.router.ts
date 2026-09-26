@@ -12,6 +12,7 @@ import {
 } from "./analysis.schemas";
 import { PRConfigService } from "./logic/pr-config";
 import { fixesService } from "./services/fixes.service";
+import { stagingService } from "./services/staging.service";
 
 export const analysisPrFixesRouter = {
   applyFix: protectedProcedure
@@ -30,7 +31,7 @@ export const analysisPrFixesRouter = {
   clearStaging: protectedProcedure
     .input(z.object({ repoId: z.uuid() }))
     .mutation(async ({ ctx, input }) => {
-      return fixesService.clearStaging(ctx.session.user.id, input.repoId);
+      return stagingService.clearStaging(ctx.session.user.id, input.repoId);
     }),
   configureRepository: protectedProcedure
     .input(UpdatePRConfigInput)
@@ -93,7 +94,7 @@ export const analysisPrFixesRouter = {
   getStagedFiles: protectedProcedure
     .input(z.object({ repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      return fixesService.getStagedFiles(ctx.session.user.id, input.repoId);
+      return stagingService.getStagedFiles(ctx.session.user.id, input.repoId);
     }),
   openPullRequest: protectedProcedure
     .input(
@@ -115,7 +116,7 @@ export const analysisPrFixesRouter = {
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return fixesService.stageFile(
+      return stagingService.stageFile(
         ctx.session.user.id,
         input.repoId,
         input.filePath,
@@ -130,11 +131,11 @@ export const analysisPrFixesRouter = {
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return fixesService.stageGeneratedFix(ctx.db, ctx.redis, ctx.session.user.id, input);
+      return stagingService.stageGeneratedFix(ctx.db, ctx.redis, ctx.session.user.id, input);
     }),
   unstageFile: protectedProcedure
     .input(z.object({ filePath: z.string(), repoId: z.uuid() }))
     .mutation(async ({ ctx, input }) => {
-      return fixesService.unstageFile(ctx.session.user.id, input.repoId, input.filePath);
+      return stagingService.unstageFile(ctx.session.user.id, input.repoId, input.filePath);
     }),
 };
