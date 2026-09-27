@@ -87,7 +87,7 @@ async function fetchInstallationRepos(installationId: number): Promise<RepoItemF
   }
 }
 
-async function fetchOauthRepos(account: { accessToken: null | string; id: number | string }) {
+async function fetchOauthRepos(account: { accessToken: null | string; id: string }) {
   if (account.accessToken == null) {
     return [];
   }

@@ -147,9 +147,12 @@ describe("openapi.json tracks the routers", () => {
  */
 const FORBIDDEN_RESPONSE_KEYS = [
   "accessToken",
+  "backupCodes",
   "changedFilesJson",
+  "credentialID",
   "emailHash",
   "findingsJson",
+  "hashedKey",
   "idToken",
   "impersonatedBy",
   "logs",
@@ -158,6 +161,8 @@ const FORBIDDEN_RESPONSE_KEYS = [
   "publicId",
   "publicKey",
   "refreshToken",
+  "secret",
+  "token",
   "tokenHash",
 ] as const;
 

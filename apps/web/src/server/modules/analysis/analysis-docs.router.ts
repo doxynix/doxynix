@@ -34,6 +34,13 @@ export const analysisDocsRouter = {
     .query(async ({ ctx, input }) => {
       return docsService.getAvailableDocs(ctx.db, input.repoId, input.aid);
     }),
+  // No `.output()` yet, unlike its siblings. The response is
+  // `{ ...FileActionPreviewResult, html }` read from Redis, not a Prisma row,
+  // so it currently leaks nothing from FORBIDDEN_RESPONSE_KEYS. The reason to
+  // leave it is the cache: a zod output schema validates at runtime, so any
+  // entry written before a `FileActionPreviewResult` shape change would start
+  // throwing instead of returning. That needs a versioned key or a payload
+  // migration alongside the schema, not a schema on its own.
   getDocumentContent: protectedProcedure
     .input(
       z.object({

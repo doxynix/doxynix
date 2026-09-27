@@ -6,7 +6,7 @@ export const REDIS_CONFIG = {
   keys: {
     // Audit results for a specific file
     fileAction: (
-      userId: number | string,
+      userId: string,
       path: string,
       action: "document-file-preview" | "quick-file-audit",
     ): string => `file-result:${userId}:${action}:${path}`,
@@ -15,7 +15,7 @@ export const REDIS_CONFIG = {
     fixResult: (fixId: string): string => `fix-result:${fixId}`,
 
     // Staging area for batch PRs
-    prStaging: (userId: number | string, repoId: string): string => `pr-stage:${userId}:${repoId}`,
+    prStaging: (userId: string, repoId: string): string => `pr-stage:${userId}:${repoId}`,
   },
 
   // Key TTL in seconds

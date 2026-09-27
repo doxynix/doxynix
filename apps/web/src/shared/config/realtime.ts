@@ -2,7 +2,7 @@ export const REALTIME_CONFIG = {
   channels: {
     news: "public-news",
     system: "system-broadcast",
-    user: (userId: number | string) => `user:${userId}`,
+    user: (userId: string) => `user:${userId}`,
   },
   events: {
     system: {
