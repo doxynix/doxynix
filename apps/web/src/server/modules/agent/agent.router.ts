@@ -1,7 +1,8 @@
-import { TRPCError } from "@trpc/server";
 import * as z from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
+
+import { agentService } from "./agent.service";
 
 export const agentChatRouter = createTRPCRouter({
   createSession: protectedProcedure
@@ -12,51 +13,13 @@ export const agentChatRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const userId = Number(ctx.session.user.id);
-      let internalRepoId: number | undefined;
-
-      if (input.repoId != null) {
-        const repo = await ctx.db.repo.findFirst({
-          select: { id: true },
-          where: {
-            publicId: input.repoId,
-            userId,
-          },
-        });
-
-        if (repo == null) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Repository not found or access denied",
-          });
-        }
-
-        internalRepoId = repo.id;
-      }
-
-      return ctx.db.chatSession.create({
-        data: {
-          repoId: internalRepoId,
-          title: input.title,
-          userId,
-        },
-      });
+      return agentService.createSession(ctx.db, Number(ctx.session.user.id), input);
     }),
 
   getSessionHistory: protectedProcedure
     .input(z.object({ sessionId: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      const rawMessages = await ctx.db.chatMessage.findMany({
-        orderBy: { createdAt: "asc" },
-        where: { sessionId: input.sessionId },
-      });
-
-      return rawMessages.map((msg) => ({
-        createdAt: msg.createdAt,
-        id: msg.id,
-        parts: JSON.parse(msg.parts),
-        role: msg.role,
-      }));
+      return agentService.getSessionHistory(ctx.db, Number(ctx.session.user.id), input.sessionId);
     }),
 
   listSessions: protectedProcedure
@@ -73,39 +36,6 @@ export const agentChatRouter = createTRPCRouter({
         .optional(),
     )
     .query(async ({ ctx, input }) => {
-      const userId = Number(ctx.session.user.id);
-      let internalRepoId: null | number = null;
-
-      if (input?.currentRepo != null) {
-        const repo = await ctx.db.repo.findUnique({
-          select: { id: true },
-          where: {
-            owner_name_userId: {
-              name: input.currentRepo.name,
-              owner: input.currentRepo.owner,
-              userId,
-            },
-          },
-        });
-        if (repo != null) {
-          internalRepoId = repo.id;
-        }
-      }
-
-      return ctx.db.chatSession.findMany({
-        include: {
-          repo: {
-            select: {
-              name: true,
-              owner: true,
-            },
-          },
-        },
-        orderBy: { updatedAt: "desc" },
-        where: {
-          repoId: internalRepoId,
-          userId,
-        },
-      });
+      return agentService.listSessions(ctx.db, Number(ctx.session.user.id), input);
     }),
 });

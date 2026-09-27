@@ -20,23 +20,17 @@ export function SessionsList() {
   const currentSessionId = currentSessionContext?.session.id;
   const t = useTranslations("Sessions");
 
-  const [revokingSessionToken, setRevokingSessionToken] = useState<null | string>(null);
+  const [revokingSessionId, setRevokingSessionId] = useState<null | string>(null);
 
   const utils = trpc.useUtils();
 
   const { data: sessions = [], isLoading } = trpc.user.getActiveSessions.useQuery();
 
-  const revokeSession = useMutation({
-    mutationFn: async (token: string) => {
-      const { error } = await authClient.revokeSession({ token });
-      if (error) {
-        throw new Error(error.message);
-      }
-    },
+  const revokeSession = trpc.user.revokeSession.useMutation({
     onError: (err) => toast.error(err.message),
     onSuccess: () => {
       toast.success(t("device_session_revoked"));
-      setRevokingSessionToken(null);
+      setRevokingSessionId(null);
       void utils.user.getActiveSessions.invalidate();
     },
   });
@@ -103,9 +97,9 @@ export function SessionsList() {
                       description={t("revoke_description", { userAgent: session.userAgent })}
                       destructiveAlertContent={<p>{t("revoke_alert_content")}</p>}
                       isLoading={revokeSession.isPending}
-                      onConfirm={() => revokeSession.mutate(session.token)}
-                      onOpenChange={(open) => setRevokingSessionToken(open ? session.token : null)}
-                      open={revokingSessionToken === session.token}
+                      onConfirm={() => revokeSession.mutate({ sessionId: session.id })}
+                      onOpenChange={(open) => setRevokingSessionId(open ? session.id : null)}
+                      open={revokingSessionId === session.id}
                       title={t("revoke_device_session")}
                       trigger={
                         <AppButton

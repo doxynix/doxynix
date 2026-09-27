@@ -4,13 +4,10 @@ import {
   PublicRepoSchema,
   StatusSchema,
 } from "@doxynix/shared";
-import type { Prisma } from "@prisma/client";
 import * as z from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
-import { getPaginationMeta } from "@/server/utils/pagination";
 
-import { repoMapper } from "./repo.mapper";
 import { RepoFilterSchema } from "./repo.schemas";
 import { repoService } from "./repo.service";
 
@@ -86,49 +83,7 @@ export const repoRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { cursor, limit, owner, search, sortBy, sortOrder, status, visibility } = input;
-      const page = Math.min(Math.max(1, cursor ?? 1), 1_000_000);
-      const skip = (page - 1) * limit;
-
-      const where = repoService.buildWhereClause({ owner, search, status, visibility });
-      const contextWhere: Prisma.RepoWhereInput =
-        owner == null ? {} : { owner: { equals: owner, mode: "insensitive" } };
-
-      const [items, totalCount, filteredCount] = await Promise.all([
-        ctx.db.repo.findMany({
-          include: {
-            analyses: {
-              orderBy: { createdAt: "desc" },
-              select: {
-                complexityScore: true,
-                createdAt: true,
-                onboardingScore: true,
-                score: true,
-                securityScore: true,
-                status: true,
-                techDebtScore: true,
-              },
-              take: 1,
-            },
-          },
-          orderBy: { [sortBy]: sortOrder },
-          skip,
-          take: limit,
-          where,
-        }),
-        ctx.db.repo.count({ where: contextWhere }),
-        ctx.db.repo.count({ where }),
-      ]);
-
-      const meta = getPaginationMeta({
-        filteredCount,
-        limit,
-        page,
-        search: search ?? undefined,
-        totalCount,
-      });
-
-      return repoMapper.toPaginatedList(items, meta);
+      return repoService.getAll(ctx.db, input);
     }),
 
   getByName: protectedProcedure

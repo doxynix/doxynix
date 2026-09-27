@@ -84,9 +84,7 @@ export function registerProfileCommand(program: Command) {
         () => profileService.getActiveSessions(),
       );
 
-      const safeSessions = sessions.map(({ token: _token, ...sess }) => sess);
-
-      if (output.json(safeSessions, options.json)) {
+      if (output.json(sessions, options.json)) {
         return;
       }
 
