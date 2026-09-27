@@ -5,32 +5,6 @@ import { getNormalizedHash, getRawHash } from "@/server/utils/hash";
 
 import { prisma } from "../db";
 
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
-  const proto = Object.getPrototypeOf(value);
-  return proto === null || proto === Object.prototype;
-}
-
-function tryCoerceToNumber(value: unknown): any {
-  if (typeof value === "string" && /^\d+$/.test(value)) {
-    return Number.parseInt(value, 10);
-  }
-
-  if (isPlainObject(value)) {
-    const obj = { ...value };
-    for (const key of Object.keys(obj)) {
-      if (key === "id" || key === "userId") {
-        obj[key] = tryCoerceToNumber(obj[key]);
-      }
-    }
-    return obj;
-  }
-
-  return value;
-}
-
 const HASH_FIELD_MAP: Record<string, { hashField: string; hashFn: (val: string) => string }> = {
   email: {
     hashField: "emailHash",
@@ -50,36 +24,10 @@ const HASH_FIELD_MAP: Record<string, { hashField: string; hashFn: (val: string) 
   },
 };
 
-function coerceOutputIds(data: unknown): unknown {
-  if (data == null) {
-    return data;
-  }
-
-  if (Array.isArray(data)) {
-    return data.map((e) => coerceOutputIds(e));
-  }
-
-  if (isPlainObject(data)) {
-    const result = { ...data };
-    for (const key of Object.keys(result)) {
-      if ((key === "id" || key === "userId") && typeof result[key] === "number") {
-        result[key] = String(result[key]);
-      }
-    }
-    return result;
-  }
-
-  return data;
-}
-
 function transformPayloadData(data: Record<string, unknown>): Record<string, unknown> {
   const result = { ...data };
 
   for (const key of Object.keys(result)) {
-    if (key === "id" || key === "userId") {
-      result[key] = tryCoerceToNumber(result[key]);
-    }
-
     const hashMapping = HASH_FIELD_MAP[key];
     if (hashMapping && typeof result[key] === "string") {
       result[hashMapping.hashField] = hashMapping.hashFn(result[key]);
@@ -108,7 +56,7 @@ export function createAdapterInstance(client: any): DBAdapter {
         where: { id: record.id },
       });
 
-      return coerceOutputIds(record) as any;
+      return record;
     },
 
     count: async ({ model, where }) => {
@@ -127,7 +75,7 @@ export function createAdapterInstance(client: any): DBAdapter {
         data: patchedData,
       });
 
-      return coerceOutputIds(created) as any;
+      return created;
     },
 
     delete: async ({ model, where }) => {
@@ -163,7 +111,7 @@ export function createAdapterInstance(client: any): DBAdapter {
         ...(offset !== undefined && { skip: offset }),
       });
 
-      return coerceOutputIds(records) as any[];
+      return records as any[];
     },
 
     findOne: async ({ model, where }) => {
@@ -174,7 +122,7 @@ export function createAdapterInstance(client: any): DBAdapter {
         where: prismaWhere,
       });
 
-      return coerceOutputIds(record) as any;
+      return record;
     },
 
     id: "custom-prisma-adapter",
@@ -205,7 +153,7 @@ export function createAdapterInstance(client: any): DBAdapter {
         where: { id: record.id },
       });
 
-      return coerceOutputIds(updated) as any;
+      return updated;
     },
 
     transaction: async (callback) => {
@@ -235,7 +183,7 @@ export function createAdapterInstance(client: any): DBAdapter {
         where: { id: record.id },
       });
 
-      return coerceOutputIds(updated) as any;
+      return updated;
     },
 
     updateMany: async ({ model, update, where }) => {
@@ -263,9 +211,6 @@ function mapWhere(conditions?: Where[]): Record<string, unknown> {
     let field = cond.field;
 
     let value = cond.value;
-    if (field === "id" || field === "userId") {
-      value = tryCoerceToNumber(value);
-    }
 
     const hashMapping = HASH_FIELD_MAP[field];
     if (hashMapping && typeof value === "string") {

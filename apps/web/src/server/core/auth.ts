@@ -79,10 +79,10 @@ export const auth = betterAuth({
           const baAccount = account as {
             image?: null | string;
             providerId?: string;
-            userId: number | string;
+            userId: string;
           };
           const dbUser = await prisma.user.findUnique({
-            where: { id: Number(baAccount.userId) },
+            where: { id: baAccount.userId },
           });
 
           if (dbUser != null && dbUser.image == null && baAccount.image != null) {
@@ -102,7 +102,7 @@ export const auth = betterAuth({
         before: async (account) => {
           const payload = { ...account } as Record<string, unknown>;
           const dbUser = await prisma.user.findUnique({
-            where: { id: Number(payload.userId) },
+            where: { id: payload.userId as string },
           });
 
           if (dbUser != null) {
@@ -134,7 +134,7 @@ export const auth = betterAuth({
         after: async (session) => {
           const dbUser = await prisma.user.findUnique({
             select: { createdAt: true, id: true, role: true },
-            where: { id: Number(session.userId) },
+            where: { id: session.userId },
           });
 
           if (dbUser != null) {
@@ -162,7 +162,7 @@ export const auth = betterAuth({
         },
         before: async (session) => {
           const dbUser = await prisma.user.findUnique({
-            where: { id: Number(session.userId) },
+            where: { id: session.userId },
           });
 
           if (dbUser?.emailHash != null) {
@@ -218,12 +218,12 @@ export const auth = betterAuth({
       },
       update: {
         before: async (session) => {
-          if (session.id == null || Number.isNaN(Number(session.id))) {
+          if (session.id == null) {
             return { data: session };
           }
 
           const dbSession = await prisma.session.findUnique({
-            where: { id: Number(session.id) },
+            where: { id: session.id },
           });
 
           if (dbSession != null) {
