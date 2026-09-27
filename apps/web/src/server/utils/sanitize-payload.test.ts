@@ -85,7 +85,13 @@ describe("shared/lib/utils:sanitizePayload", () => {
 
   it("redacts raw strings containing bearer tokens or github PATs", () => {
     const strWithGh = "Authorization: github_pat_11AAAAAA00000000000000_BBBBBBBBBBBBBBBBBBBB";
-    const strWithBearer = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
+    const segment = (value: string) => Buffer.from(value).toString("base64url");
+    const jwt = [
+      segment(JSON.stringify({ alg: "HS256", typ: "JWT" })),
+      segment("payload"),
+      segment("signature"),
+    ].join(".");
+    const strWithBearer = `Bearer ${jwt}`;
 
     expect(sanitizePayload(strWithGh)).toContain("[REDACTED_GH_TOKEN]");
     expect(sanitizePayload(strWithBearer)).toBe("Bearer [REDACTED]");
