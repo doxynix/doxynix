@@ -8,17 +8,12 @@ import type { DbClient } from "@/server/core/db";
 import { DocumentFormatter } from "../logic/section-graph-linker";
 import { docsService } from "./docs.service";
 
-const INPUT = { analysisId: 12, docType: "README" as const, repoId: 7 };
+const ANALYSIS_ID = "0195f000-0000-7000-8000-000000000001";
+const REPO_ID = "0195f000-0000-7000-8000-000000000002";
 
-const EXPECTED_SELECT = [
-  "content",
-  "createdAt",
-  "path",
-  "publicId",
-  "type",
-  "updatedAt",
-  "version",
-];
+const INPUT = { analysisId: ANALYSIS_ID, docType: "README" as const, repoId: REPO_ID };
+
+const EXPECTED_SELECT = ["content", "createdAt", "id", "path", "type", "updatedAt", "version"];
 
 const CONTENT =
   "# doxynix\n\nBootstrapped by file app.ts which mounts the router.\n\n## API\n\nRoutes live here.\n";
@@ -56,8 +51,8 @@ const makeRow: RowBuilder = (keys) => {
   const values: Record<string, unknown> = {
     content: CONTENT,
     createdAt: new Date("2026-01-01T00:00:00.000Z"),
+    id: "0195f000-0000-7000-8000-000000000003",
     path: "README.md",
-    publicId: "doc-1",
     type: "README",
     updatedAt: new Date("2026-01-02T00:00:00.000Z"),
     version: "abc123",
@@ -115,12 +110,15 @@ describe("docsService.getWithGraphLinks", () => {
     ).toBe(true);
   });
 
-  it("no longer returns the internal id / repoId / analysisId the old spec listed", async () => {
+  it("returns the document id but no longer leaks repoId / analysisId", async () => {
     const { db } = makeDb(makeRow);
 
     const result = await docsService.getWithGraphLinks(db, INPUT);
 
-    for (const key of ["analysisId", "id", "repoId"]) {
+    // `id` is now the primary key and part of the declared contract. The foreign
+    // keys it replaced are not: the router output schema does not list them.
+    expect(result.id).toBeDefined();
+    for (const key of ["analysisId", "repoId"]) {
       expect(Object.hasOwn(result, key)).toBe(false);
     }
   });

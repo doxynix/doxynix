@@ -4,12 +4,12 @@ import { AnalysisLatestOutputSchema, analysisLatestSelect } from "./analysis-lat
 
 const KEYS = [
   "complexityScore",
+  "id",
   "jobId",
   "message",
   "onboardingScore",
   "progress",
   "publicAccessToken",
-  "publicId",
   "score",
   "securityScore",
   "status",
@@ -21,7 +21,6 @@ const DROPPED_KEYS = [
   "commitSha",
   "createdAt",
   "error",
-  "id",
   "logs",
   "metricsJson",
   "repoId",
@@ -30,12 +29,12 @@ const DROPPED_KEYS = [
 
 const makeRow = (overrides: Record<string, unknown> = {}) => ({
   complexityScore: 70,
+  id: "0195f000-0000-7000-8000-000000000000",
   jobId: "job_1",
   message: "Completed successfully",
   onboardingScore: 64,
   progress: 100,
   publicAccessToken: null as null | string,
-  publicId: "0195f000-0000-7000-8000-000000000000",
   score: 91,
   securityScore: 88,
   status: "DONE" as const,
@@ -82,9 +81,9 @@ describe("AnalysisLatestOutputSchema", () => {
       commitSha: "abc123",
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       error: "boom",
-      id: 42,
       logs: "line1",
       metricsJson: { fileCount: 1 },
+      publicId: "0195f000-0000-7000-8000-000000000000",
       repoId: 7,
       resultJson: { findings: [] },
     };

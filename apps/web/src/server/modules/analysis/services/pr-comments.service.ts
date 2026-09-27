@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { TRPCError } from "@trpc/server";
+import * as z from "zod";
 
 import type { DbClient } from "@/server/core/db";
 import { getInstallationClient } from "@/server/core/github/github-provider";
@@ -126,3 +127,10 @@ export const prCommentsService = {
     return { commentId: localComment.id, success: true };
   },
 };
+
+export const PostCommentToPROutput = z.object({
+  commentId: z.uuid(),
+  success: z.boolean(),
+});
+
+export type PostCommentToPROutput = z.infer<typeof PostCommentToPROutput>;

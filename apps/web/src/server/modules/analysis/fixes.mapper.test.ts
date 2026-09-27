@@ -36,10 +36,9 @@ function makeFix(overrides: Partial<GeneratedFixRecord> = {}): GeneratedFixRecor
     estimatedImpact: null,
     githubPrNumber: null,
     githubPrUrl: null,
-    id: 42,
+    id: "018f0000-0000-7000-8000-000000000001",
     prAnalysisId: null,
-    publicId: "018f0000-0000-7000-8000-000000000001",
-    repoId: 7,
+    repoId: "018f0000-0000-7000-8000-000000000009",
     status: "DRAFT",
     title: "AI Suggested Improvements",
     updatedAt: new Date("2026-01-02T00:00:00Z"),
@@ -53,7 +52,7 @@ function makeSummaryFix(
   return {
     githubPrNumber: null,
     githubPrUrl: null,
-    publicId: "018f0000-0000-7000-8000-000000000002",
+    id: "018f0000-0000-7000-8000-000000000002",
     status: "PR_OPENED",
     title: "Fix the thing",
     ...overrides,
@@ -62,7 +61,7 @@ function makeSummaryFix(
 
 describe("fixesMapper", () => {
   describe("toPublic", () => {
-    it("maps the publicId to id and exposes only DTO fields", () => {
+    it("maps the primary key to id and exposes only DTO fields", () => {
       const result = fixesMapper.toPublic(makeFix());
 
       expect(result).toStrictEqual({
@@ -97,7 +96,7 @@ describe("fixesMapper", () => {
       const row = makeFix({ githubPrNumber: null, githubPrUrl: null, title: "" });
       const result = GeneratedFixDTO.parse(fixesMapper.toPublic(row));
 
-      expect(result.id).toBe(row.publicId);
+      expect(result.id).toBe(row.id);
       expect(result.title).toBe("");
       expect(GeneratedFixDTO.safeParse(result).success).toBe(true);
     });
@@ -126,7 +125,7 @@ describe("fixesMapper", () => {
         expect(Object.hasOwn(result, field)).toBe(false);
       }
       for (const key of PUBLIC_ID_KEYS) {
-        expect(result[key]).toBe(row.publicId);
+        expect(result[key]).toBe(row.id);
       }
     });
   });
@@ -174,7 +173,7 @@ describe("fixesMapper", () => {
       for (const field of INTERNAL_ONLY) {
         expect(Object.hasOwn(result, field)).toBe(false);
       }
-      expect(result.id).toBe(makeFix().publicId);
+      expect(result.id).toBe(makeFix().id);
     });
   });
 

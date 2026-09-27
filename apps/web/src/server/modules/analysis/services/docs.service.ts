@@ -23,6 +23,39 @@ export const GetWithGraphLinksInput = z.object({
   repoId: z.uuid(),
 });
 
+/**
+ * Mirrors `DocumentSection` in logic/section-graph-linker.ts. `id` is the
+ * `section-<type>-<title>` anchor built by `generateSectionId`, not a database
+ * key, and `graphNodeIds` holds `file:<path>` node ids - both stay strings.
+ */
+const DocumentSectionSchema = z.object({
+  content: z.string(),
+  endLine: z.number().optional(),
+  graphNodeIds: z.array(z.string()),
+  id: z.string(),
+  startLine: z.number().optional(),
+  title: z.string(),
+});
+
+export const GetWithGraphLinksOutput = z.object({
+  content: z.string(),
+  createdAt: z.date(),
+  id: z.uuid(),
+  path: z.string().nullable(),
+  sections: z.array(DocumentSectionSchema),
+  type: z.string(),
+  updatedAt: z.date(),
+  version: z.string(),
+});
+
+export type GetWithGraphLinksOutput = z.infer<typeof GetWithGraphLinksOutput>;
+
+export const PinAuditToDocsOutput = z.object({
+  documentId: z.uuid(),
+});
+
+export type PinAuditToDocsOutput = z.infer<typeof PinAuditToDocsOutput>;
+
 export const docsService = {
   async getAvailableDocs(db: DbClient, repoId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
@@ -172,7 +205,7 @@ export const docsService = {
 
     const markdownContent = cachedData.content;
 
-    return db.document.create({
+    const document = await db.document.create({
       data: {
         content: markdownContent,
         path: input.path,
@@ -185,6 +218,9 @@ export const docsService = {
             }
           : {}),
       },
+      select: { id: true },
     });
+
+    return { documentId: document.id };
   },
 };

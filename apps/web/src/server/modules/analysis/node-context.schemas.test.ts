@@ -19,8 +19,14 @@ import {
 } from "./logic/structure-shared";
 import type { RepoNodeContextPayload } from "./logic/workspace.types";
 
+const ANALYSIS_ID = "0195f000-0000-7000-8000-000000000001";
+const PR_ANALYSIS_ID = "0195f000-0000-7000-8000-000000000002";
+const COMMENT_ID = "0195f000-0000-7000-8000-000000000003";
+const FIX_ID = "0195f000-0000-7000-8000-000000000004";
+const DOC_ID = "0195f000-0000-7000-8000-000000000005";
+
 const ANALYSIS_REF: AnalysisRef = {
-  analysisId: "an-1",
+  analysisId: ANALYSIS_ID,
   commitSha: "abc123",
   createdAt: new Date("2024-01-01T00:00:00.000Z"),
 };
@@ -115,7 +121,7 @@ const makeContext = (): StructureContext =>
 const makeSummaryFix = (): GeneratedFixSummaryRecord => ({
   githubPrNumber: 55,
   githubPrUrl: "https://github.com/o/r/pull/55",
-  publicId: "fix-1",
+  id: FIX_ID,
   status: "PR_OPENED",
   title: "Fix the thing",
 });
@@ -124,9 +130,9 @@ const RELATED_FINDING = {
   body: "Unbounded recursion",
   filePath: "src/app.ts",
   findingType: "PERFORMANCE",
-  id: "comment-1",
+  id: COMMENT_ID,
   line: 42,
-  prAnalysisId: "an-1",
+  prAnalysisId: PR_ANALYSIS_ID,
   prNumber: 55,
   riskLevel: 8,
 };
@@ -163,7 +169,7 @@ function buildNodeContextPayload(nodeId: string): RepoNodeContextPayload {
         docs: [
           {
             content: "# app\n\nsrc/app.ts is the runtime entrypoint.",
-            publicId: "doc-1",
+            id: DOC_ID,
             type: "README",
             version: "abc123",
           },

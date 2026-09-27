@@ -5,7 +5,7 @@ import { buildDocSearchTerms, matchDocSections } from "./doc-section-matcher";
 
 function doc(overrides: Partial<MatchableDoc> & { content: string }): MatchableDoc {
   return {
-    publicId: "doc-1",
+    id: "doc-1",
     type: "ARCHITECTURE",
     version: "sha1",
     ...overrides,
@@ -118,7 +118,7 @@ describe("matchDocSections", () => {
 
   it("carries the owning document id and type onto each match", () => {
     const result = matchDocSections({
-      docs: [doc({ content: "# Core\n\nBody.", publicId: "doc-42", type: "README" })],
+      docs: [doc({ content: "# Core\n\nBody.", id: "doc-42", type: "README" })],
       graph: null,
       nodeId: "group:core",
       nodeLabel: "Core",
@@ -148,9 +148,9 @@ describe("matchDocSections", () => {
   it("caps matches across documents", () => {
     const result = matchDocSections({
       docs: [
-        doc({ content: "# Core A\n\nx", publicId: "d1" }),
-        doc({ content: "# Core B\n\nx", publicId: "d2" }),
-        doc({ content: "# Core C\n\nx", publicId: "d3" }),
+        doc({ content: "# Core A\n\nx", id: "d1" }),
+        doc({ content: "# Core B\n\nx", id: "d2" }),
+        doc({ content: "# Core C\n\nx", id: "d3" }),
       ],
       graph: null,
       nodeId: "group:core",
@@ -166,7 +166,7 @@ describe("matchDocSections", () => {
   it("defaults to at most four sections per document and eight overall", () => {
     const perDoc = Array.from({ length: 6 }, (_, i) => `# Core ${i}\n\nx`).join("\n\n");
     const result = matchDocSections({
-      docs: [doc({ content: perDoc, publicId: "d1" }), doc({ content: perDoc, publicId: "d2" })],
+      docs: [doc({ content: perDoc, id: "d1" }), doc({ content: perDoc, id: "d2" })],
       graph: null,
       nodeId: "group:core",
       nodeLabel: "Core",
