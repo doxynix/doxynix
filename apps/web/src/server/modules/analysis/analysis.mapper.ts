@@ -8,10 +8,13 @@ import { getLanguageColor } from "@/server/utils/language-metadata";
 import { markdownToHtml } from "@/server/utils/markdown-to-html";
 import { hasText } from "@/server/utils/string-utils";
 
-import type { LatestCompletedAnalysis, RepoWithLatestAnalysisAndDocs } from "./analysis.repository";
+import type {
+  ImpactAnalysis,
+  LatestCompletedAnalysis,
+  RepoWithLatestAnalysisAndDocs,
+} from "./analysis.repository";
 import {
   changedFileSnapshotSchema,
-  type ImpactAnalysis,
   type ParsedFinding,
   persistedFindingSchema,
 } from "./analysis.schemas";

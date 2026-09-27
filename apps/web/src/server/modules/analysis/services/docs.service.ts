@@ -96,6 +96,15 @@ export const docsService = {
 
   async getWithGraphLinks(db: DbClient, input: z.infer<typeof GetWithGraphLinksInput>) {
     const document = await db.document.findFirst({
+      select: {
+        content: true,
+        createdAt: true,
+        path: true,
+        publicId: true,
+        type: true,
+        updatedAt: true,
+        version: true,
+      },
       where: {
         analysisId: input.analysisId,
         repoId: input.repoId,

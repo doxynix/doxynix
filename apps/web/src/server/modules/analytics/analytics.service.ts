@@ -3,6 +3,7 @@ import { subDays, subHours, subMinutes } from "date-fns";
 
 import type { DbClient } from "@/server/core/db";
 
+import { analyticsMapper, type RecentActivityRecord } from "./analytics.mapper";
 import {
   type AnalyticsInput,
   type DashboardStats,
@@ -93,9 +94,9 @@ export const analyticsService = {
         techDebtDelta: data.techDebtDelta ?? 0,
         totalLoc: data.totalLoc ?? 0,
       },
-      recentActivity: (data.recentActivity as Record<string, unknown>[]).map((activity) => ({
-        ...activity,
-      })),
+      recentActivity: (data.recentActivity as RecentActivityRecord[]).map((activity) =>
+        analyticsMapper.toRecentActivity(activity),
+      ),
       risks: {
         busFactorRepos: data.busFactorRepos ?? 0,
         topCoupling: data.topCoupling ?? [],
@@ -147,24 +148,6 @@ export const analyticsService = {
       getTrends(userId, startDate, endDate, input.repoId ?? null),
     );
 
-    const dateFormatter = new Intl.DateTimeFormat("en-US", {
-      day: "numeric",
-      month: "short",
-      timeZone: "UTC",
-    });
-
-    return trends.map((t) => {
-      const dateKey = t.dateKey ?? new Date();
-
-      return {
-        complexity: t.complexity ?? 0,
-        date: dateFormatter.format(dateKey),
-        fullDate: dateKey.toISOString().slice(0, 10),
-        health: t.health ?? 0,
-        onboarding: t.onboarding ?? 0,
-        security: t.security ?? 0,
-        techDebt: t.techDebt ?? 0,
-      };
-    });
+    return trends.map((trend) => analyticsMapper.toTrend(trend));
   },
 };

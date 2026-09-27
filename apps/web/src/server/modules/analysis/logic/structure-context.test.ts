@@ -78,6 +78,36 @@ describe("buildBreadcrumbs", () => {
       expect.objectContaining({ id: "file:app.ts", label: "app.ts", nodeType: "file" }),
     ]);
   });
+
+  // `NodeContextOutputSchema` requires `nodeType` on
+  // `explain.relationships.breadcrumbs`, so every reachable path has to emit
+  // one of the two literals.
+  it.each([
+    ["file", "src/features/ui/button.tsx"],
+    ["file", "app.ts"],
+    ["group", "src/features"],
+    ["group", "src"],
+  ] as const)("always stamps nodeType on every crumb for %s %s", (nodeType, path) => {
+    const crumbs = buildBreadcrumbs(nodeType, path);
+
+    expect(crumbs.length).toBeGreaterThan(0);
+    for (const crumb of crumbs) {
+      expect(["file", "group"]).toContain(crumb.nodeType);
+    }
+    // Only the final crumb may be a file; everything above it is a group.
+    expect(crumbs.slice(0, -1).every((crumb) => crumb.nodeType === "group")).toBe(true);
+    expect(crumbs.at(-1)?.nodeType).toBe(nodeType);
+  });
+
+  // The only inputs that reach the `parts.length === 0` early return are the
+  // ones `pathe.normalize` collapses to "/" (i.e. a bare root path). It emits
+  // zero crumbs rather than a crumb without a nodeType, so the required field is
+  // never missing. ("", "." and "./" normalize to "." / "./", which do produce a
+  // single crumb - and that crumb carries nodeType, per the case above.)
+  it.each(["/", "//", "///"])("returns no crumbs at all for the root path %o", (path) => {
+    expect(buildBreadcrumbs("file", path)).toEqual([]);
+    expect(buildBreadcrumbs("group", path)).toEqual([]);
+  });
 });
 
 describe("collectNodeScopePaths", () => {

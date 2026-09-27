@@ -30,7 +30,7 @@ export function buildInteractiveBriefPanel(params: {
     whyImportant: string;
   };
   structureNode: {
-    breadcrumbs: Array<{ id: string; label: string; path: string }>;
+    breadcrumbs: InteractiveBriefPanel["breadcrumbs"];
     canDrillDeeper: boolean;
     children: InteractiveBriefPanel["node"][];
     edges: InteractiveBriefPayload["structure"]["edges"];
@@ -108,7 +108,7 @@ export function buildInteractiveBriefNodePayload(params: {
   };
   structureNode: {
     analysisRef: InteractiveBriefNodePayload["analysisRef"];
-    breadcrumbs: Array<{ id: string; label: string; path: string }>;
+    breadcrumbs: InteractiveBriefPanel["breadcrumbs"];
     canDrillDeeper: boolean;
     children: InteractiveBriefPanel["node"][];
     edges: InteractiveBriefPayload["structure"]["edges"];

@@ -2,7 +2,10 @@ import type { AnalysisRefView } from "@doxynix/shared";
 
 import type { AnalysisCoverage } from "../engine/core/discovery.types";
 
-/** Payloads the workspace and node-inspector screens read. */
+export type Breadcrumb = { id: string; label: string; path: string };
+
+export type RelationshipBreadcrumb = Breadcrumb & { nodeType: "file" | "group" };
+
 export type RepoWorkspacePayload = {
   analysisRef: AnalysisRefView | null;
   docs: InteractiveBriefDocsSummary & {
@@ -143,7 +146,7 @@ export type InteractiveBriefDocsSummary = {
 
 export type InteractiveBriefPanel = {
   availableActions: InteractiveBriefActionAvailability;
-  breadcrumbs: Array<{ id: string; label: string; path: string }>;
+  breadcrumbs: Breadcrumb[];
   drilldownPreview: {
     childCount: number;
     childLabels: string[];
@@ -155,7 +158,7 @@ export type InteractiveBriefPanel = {
     relationships: {
       apiHints: string[];
       apiSurface: boolean;
-      breadcrumbs: Array<{ id: string; label: string; path: string }>;
+      breadcrumbs: RelationshipBreadcrumb[];
       contains: string[];
       dependsOn: string[];
       entrypoint: boolean;

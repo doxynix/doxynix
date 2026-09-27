@@ -42,6 +42,45 @@ We welcome Pull Requests! Our workflow relies on **Conventional Commits** and **
 2. **Code:** Make your changes. Please adhere to the existing coding style.
 3. **Tests:** Ensure all existing tests pass, and add new tests for your changes where necessary.
 
+### Running Tests
+
+```bash
+bun run test    # unit suite
+bun run validate # biome + oxlint + FSD/i18n checks + arch:check + type-check
+```
+
+The integration suite (`apps/web/src/tests/integration`) is separate: it exercises the ZenStack
+access policies against a **real** Postgres, and `cleanupDatabase()` `TRUNCATE`s shared tables
+between files. It therefore refuses to run against anything but a disposable database whose name
+contains `test` — pointing it at a development database destroys real data.
+
+To run it locally:
+
+1. **Create the database.** `scripts/init-dbs.sql` provisions `dxnx_web_test` on a fresh
+   `compose.yml` volume. For an existing volume, create it by hand:
+
+   ```bash
+   docker compose exec postgres psql -U postgres -c "CREATE DATABASE dxnx_web_test"
+   ```
+
+2. **Set `DATABASE_URL`** in the Doppler config `tst` to point at `dxnx_web_test`. That is the
+   only variable the suite needs from Doppler; the rest it injects itself in
+   `apps/web/src/tests/setup-env.ts`.
+3. **Push the schema:**
+
+   ```bash
+   bun --filter @doxynix/web db:push:test
+   ```
+
+   This uses `prisma db push` rather than `migrate deploy`: the database is disposable, so it
+   needs no migration history, and `deploy` fails with `P3005` on a database that already has
+   tables but no `_prisma_migrations` table.
+4. **Run the suite:**
+
+   ```bash
+   bun --filter @doxynix/web test:int
+   ```
+
 ### Commit Formatting (Conventional Commits)
 
 Your commits **must** follow the Conventional Commits specification to enable automated Changelog generation.

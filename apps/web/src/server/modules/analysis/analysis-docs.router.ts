@@ -3,6 +3,7 @@ import * as z from "zod";
 
 import { protectedProcedure } from "@/server/core/trpc/init";
 
+import { AnalysisScopeInputSchema } from "./analysis.schemas";
 import { docsService, GetWithGraphLinksInput } from "./services/docs.service";
 import { FileActionResult, fileActionsService } from "./services/file-actions.service";
 
@@ -24,7 +25,7 @@ export const analysisDocsRouter = {
     return fileActionsService.documentFile(ctx.db, Number(ctx.session.user.id), input);
   }),
   getAvailableDocs: protectedProcedure
-    .input(z.object({ aid: z.string().optional(), repoId: z.uuid() }))
+    .input(AnalysisScopeInputSchema)
     .query(async ({ ctx, input }) => {
       return docsService.getAvailableDocs(ctx.db, input.repoId, input.aid);
     }),
