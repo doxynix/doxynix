@@ -30,9 +30,7 @@ Welcome to the **Doxynix Monorepo**. This codebase is managed via **Bun**, **Tur
 
 Before claiming ANY task or PR is complete, you MUST execute and confirm zero errors on:
 
-1. `bun run validate` (Biome check & Oxlint)
-2. `bun run type-check` (Turbo TypeScript compiler across all workspaces)
-3. `bun run arch:check` (Dependency-cruiser architectural boundary check)
+`bun run validate` (all checks)
 
 ---
 
