@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.4](https://github.com/doxynix/doxynix/compare/siem-client-v0.3.3...siem-client-v0.3.4) (2026-09-27)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2211](https://github.com/doxynix/doxynix/issues/2211)) ([ebd9924](https://github.com/doxynix/doxynix/commit/ebd99241e6c1aa754827f880dae738094f1274b6))
+
 ## [0.3.3](https://github.com/doxynix/doxynix/compare/siem-client-v0.3.2...siem-client-v0.3.3) (2026-09-26)
 
 
