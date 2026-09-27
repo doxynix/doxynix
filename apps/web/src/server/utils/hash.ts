@@ -16,14 +16,9 @@ const HEX_REGEX = /^[\da-f]{8}$/;
  * Generates a cryptographic checksum (first 8 characters of HMAC-SHA256) for the key payload.
  */
 function calculateChecksum(payload: string): string {
-  return (
-    crypto
-      .createHmac("sha256", API_KEY_CHECKSUM_SECRET)
-      // codeql[js/insufficient-password-hash] HMAC integrity checksum for API keys, not a password hash
-      .update(payload)
-      .digest("hex")
-      .slice(0, CHECKSUM_LENGTH)
-  );
+  const hasher = crypto.createHmac("sha256", API_KEY_CHECKSUM_SECRET);
+  // codeql[js/insufficient-password-hash] HMAC integrity checksum for API keys, not a password hash
+  return hasher.update(payload).digest("hex").slice(0, CHECKSUM_LENGTH);
 }
 
 /**
@@ -95,8 +90,9 @@ export function getRawHash(value: string): string {
  * USE STRICTLY FOR HIGH-ENTROPY STRINGS!
  */
 export function getApiKeyHash(payload: string): string {
+  const hasher = crypto.createHmac("sha256", API_KEY_PEPPER);
   // codeql[js/insufficient-password-hash] API key payload has 192 bits of entropy; HMAC-SHA256 with a pepper is not a password hash
-  return crypto.createHmac("sha256", API_KEY_PEPPER).update(payload).digest("hex");
+  return hasher.update(payload).digest("hex");
 }
 
 /**
