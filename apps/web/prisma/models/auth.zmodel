@@ -3,9 +3,7 @@ import "./core"
 
 model User {
   /// @zod.custom.omit(["model"])
-  id                  Int                  @id @default(autoincrement()) @omit
-  /// @zod.custom.omit(["model"])
-  publicId            String               @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  id                  String               @id @default(dbgenerated("uuidv7()")) @db.Uuid @omit
   /// @encrypted
   /// @zod.string.email({ message: "Incorrect email" })
   email               String?              @db.Citext @email(message: "Incorrect email")
@@ -54,11 +52,9 @@ model User {
 
 model Account {
   /// @zod.custom.omit(["model"])
-  id                    Int       @id @default(autoincrement()) @omit
+  id                    String    @id @default(dbgenerated("uuidv7()")) @db.Uuid @omit
   /// @zod.custom.omit(["model"])
-  publicId              String    @unique @default(uuid(7)) @map("public_id") @db.Uuid
-  /// @zod.custom.omit(["model"])
-  userId                Int       @map("user_id") @omit
+  userId                String    @map("user_id") @db.Uuid @omit
   accountId             String    @map("account_id")
   providerId            String    @map("provider_id")
   /// @encrypted
@@ -105,13 +101,13 @@ model Account {
 
 model Passkey {
   /// @zod.custom.omit(["model"])
-  id           String    @id @default(uuid(7)) @db.Uuid
+  id           String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   /// @zod.string.trim().max(100, { message: "Name cannot exceed 100 characters" })
   name         String?   @length(max: 100)
   /// @zod.custom.omit(["model"])
   publicKey    String    @map("public_key") @omit
   /// @zod.custom.omit(["model"])
-  userId       Int       @map("user_id") @omit
+  userId       String    @map("user_id") @db.Uuid @omit
   /// @zod.custom.omit(["model"])
   credentialID String    @unique @map("credential_id") @omit
   /// @zod.number.int().min(0)
@@ -133,7 +129,7 @@ model Passkey {
 
 model TwoFactor {
   /// @zod.custom.omit(["model"])
-  id          String   @id @default(uuid(7)) @db.Uuid
+  id          String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
   // NOTE: Better-auth encrypts on its own (AES-256-GCM), so encrypting again makes no sense
   /// @zod.custom.omit(["model"])
   secret      String   @omit
@@ -142,7 +138,7 @@ model TwoFactor {
   backupCodes String   @map("backup_codes") @omit
   verified    Boolean  @default(false)
   /// @zod.custom.omit(["model"])
-  userId      Int      @unique @map("user_id") @omit
+  userId      String   @unique @map("user_id") @db.Uuid @omit
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -155,9 +151,7 @@ model TwoFactor {
 
 model Session {
   /// @zod.custom.omit(["model"])
-  id        Int      @id @default(autoincrement()) @omit
-  /// @zod.custom.omit(["model"])
-  publicId  String   @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid @omit
   /// @encrypted
   /// @zod.custom.omit(["model"])
   token     String   @unique @omit
@@ -168,7 +162,7 @@ model Session {
   ipAddress String?  @map("ip_address")
   userAgent String?  @map("user_agent")
   /// @zod.custom.omit(["model"])
-  userId    Int      @map("user_id") @omit
+  userId    String   @map("user_id") @db.Uuid @omit
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -182,7 +176,7 @@ model Session {
 
 
 model Verification {
-  id             String   @id @default(uuid(7)) @db.Uuid
+  id             String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
   /// @encrypted
   identifier     String
   /// @encryption:hash(identifier)?normalize=lowercase&normalize=trim
@@ -204,7 +198,7 @@ model Verification {
 }
 
 model BannedEmail {
-  id        Int               @id @default(autoincrement())
+  id        String            @id @default(dbgenerated("uuidv7()")) @db.Uuid
   /// @encrypted
   /// @zod.string.email({ message: "Incorrect email" })
   email     String            @db.Citext
