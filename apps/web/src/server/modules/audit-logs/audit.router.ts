@@ -1,12 +1,9 @@
-import { TRPCError } from "@trpc/server";
 import * as z from "zod";
 
-import { highlightCode } from "@/shared/lib/shiki";
-
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
-import { AUDIT_BUSINESS_MODELS } from "@/server/utils/constants";
 
-import { mapAuditLogToDTO, sanitizeObject } from "./audit.mapper";
+import { auditService } from "./audit.service";
+import { ActivityLogsOutputSchema } from "./audit-logs.schemas";
 
 export const auditRouter = createTRPCRouter({
   getActivityLogs: protectedProcedure
@@ -16,50 +13,15 @@ export const auditRouter = createTRPCRouter({
         limit: z.number().min(1).max(100).default(20),
       }),
     )
+    .output(ActivityLogsOutputSchema)
     .query(async ({ ctx, input }) => {
-      const { cursor, limit } = input;
-      const userId = Number(ctx.session.user.id);
-
-      const items = await ctx.db.auditLog.findMany({
-        cursor: cursor != null ? { id: cursor } : undefined,
-        orderBy: { createdAt: "desc" },
-        take: limit + 1,
-        where: {
-          model: {
-            in: AUDIT_BUSINESS_MODELS,
-          },
-          userId,
-        },
-      });
-
-      let nextCursor: typeof cursor | undefined;
-      if (items.length > limit) {
-        const nextItem = items.pop();
-        nextCursor = nextItem?.id;
-      }
-
-      return {
-        items: items.map((item) => mapAuditLogToDTO(item)),
-        nextCursor,
-      };
+      return auditService.getActivityLogs(ctx.db, Number(ctx.session.user.id), input);
     }),
 
   getLogPayloadHtml: protectedProcedure
     .input(z.object({ logId: z.string() }))
+    .output(z.string())
     .query(async ({ ctx, input }) => {
-      const log = await ctx.db.auditLog.findUnique({
-        select: { payload: true },
-        where: { id: input.logId, userId: Number(ctx.session.user.id) },
-      });
-
-      if (log == null) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
-
-      const cleanPayload = sanitizeObject(log.payload);
-
-      const jsonString = JSON.stringify(cleanPayload, null, 2);
-
-      return highlightCode(jsonString, "json", "dark", input.logId);
+      return auditService.getLogPayloadHtml(ctx.db, Number(ctx.session.user.id), input.logId);
     }),
 });

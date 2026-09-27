@@ -5,8 +5,8 @@ import { TRPCError } from "@trpc/server";
 import type { DbClient } from "@/server/core/db";
 import { getRepoInfo } from "@/server/core/github/github-api";
 import { GitHubAuthRequiredError, parseUrl } from "@/server/core/github/github-provider";
-import { handlePrismaError, isOctokitError } from "@/server/utils/handle-error";
-import { getPaginationMeta } from "@/server/utils/pagination";
+import { handlePrismaError, toOctokitTrpcError } from "@/server/utils/handle-error";
+import { clampPage, getPaginationMeta } from "@/server/utils/pagination";
 import { normalizeSearchInput, tokenizeSearchInput } from "@/server/utils/search";
 
 import { repoMapper } from "./repo.mapper";
@@ -20,6 +20,16 @@ function buildRepoSearchClause(term: string): Prisma.RepoWhereInput {
       { description: { contains: term, mode: "insensitive" } },
     ],
   };
+}
+
+function mergeClauses(clauses: Prisma.RepoWhereInput[]): Prisma.RepoWhereInput {
+  const defined = clauses.filter((clause) => Object.keys(clause).length > 0);
+
+  if (defined.length <= 1) {
+    return defined[0] ?? {};
+  }
+
+  return { AND: defined };
 }
 
 export const repoService = {
@@ -39,26 +49,27 @@ export const repoService = {
       normalizedSearch != null ? buildRepoSearchClause(normalizedSearch) : {};
 
     const tokenSearchFilter: Prisma.RepoWhereInput =
-      searchTerms.length > 1
+      searchTerms.length > 0
         ? {
             AND: searchTerms.map((term) => buildRepoSearchClause(term)),
           }
         : {};
 
     const searchFilter: Prisma.RepoWhereInput =
-      normalizedSearch != null && searchTerms.length > 1
-        ? { OR: [rawSearchFilter, tokenSearchFilter] }
+      normalizedSearch != null && searchTerms.length > 0
+        ? normalizedSearch === searchTerms[0] && searchTerms.length === 1
+          ? rawSearchFilter
+          : { OR: [rawSearchFilter, tokenSearchFilter] }
         : rawSearchFilter;
 
-    return {
-      ...(filters.visibility != null && { visibility: filters.visibility }),
-      ...(normalizedOwner != null &&
-        normalizedOwner.length > 0 && {
-          owner: { equals: normalizedOwner, mode: "insensitive" },
-        }),
-      ...statusFilter,
-      ...searchFilter,
-    };
+    return mergeClauses([
+      filters.visibility != null ? { visibility: filters.visibility } : {},
+      normalizedOwner != null && normalizedOwner.length > 0
+        ? { owner: { equals: normalizedOwner, mode: "insensitive" } }
+        : {},
+      statusFilter,
+      searchFilter,
+    ]);
   },
 
   async createRepo(db: DbClient, userId: number, url: string) {
@@ -84,33 +95,7 @@ export const repoService = {
           message: "Connect your GitHub account or install the app to access this repository.",
         });
       }
-      if (isOctokitError(error)) {
-        if (error.status === 401) {
-          throw new TRPCError({
-            code: "UNAUTHORIZED",
-            message: "GitHub token expired",
-          });
-        }
-        if (error.status === 404) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Repository not found on GitHub",
-          });
-        }
-        if (error.status === 403) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "GitHub denied access to this repository",
-          });
-        }
-        if (error.status === 429) {
-          throw new TRPCError({
-            code: "TOO_MANY_REQUESTS",
-            message: "GitHub API limit exceeded",
-          });
-        }
-      }
-      throw error;
+      throw toOctokitTrpcError(error) ?? error;
     }
 
     try {
@@ -187,7 +172,7 @@ export const repoService = {
 
   async getAll(db: DbClient, input: RepoFiltersInput) {
     const { cursor, limit, owner, search, sortBy, sortOrder, status, visibility } = input;
-    const page = Math.min(Math.max(1, cursor ?? 1), 1_000_000);
+    const page = clampPage(cursor);
     const skip = (page - 1) * limit;
 
     const where = this.buildWhereClause({ owner, search, status, visibility });
@@ -246,12 +231,7 @@ export const repoService = {
       return null;
     }
 
-    return {
-      ...repo,
-      id: repo.publicId,
-      message: "Repository found",
-      status: repo.analyses[0]?.status ?? Status.NEW,
-    };
+    return { ...repoMapper.toPublicFields(repo), status: repoMapper.latestStatus(repo.analyses) };
   },
   async getByOwner(db: DbClient, owner: string) {
     const repo = await db.repo.findFirst({
@@ -264,16 +244,12 @@ export const repoService = {
       return null;
     }
 
-    return {
-      ...repo,
-      id: repo.publicId,
-      message: "Owner found",
-    };
+    return { ...repoMapper.toPublicFields(repo), status: Status.NEW };
   },
 
   async getSlim(db: DbClient, input: RepoFiltersInput) {
     const { cursor, limit, owner, search, status, visibility } = input;
-    const page = Math.max(1, cursor ?? 1);
+    const page = clampPage(cursor);
     const skip = (page - 1) * limit;
 
     const where = this.buildWhereClause({ owner, search, status, visibility });
@@ -294,12 +270,7 @@ export const repoService = {
     const totalCount = await db.repo.count({ where });
 
     return {
-      items: items.map((r) => ({
-        avatar: r.ownerAvatarUrl,
-        id: r.publicId,
-        name: r.name,
-        owner: r.owner,
-      })),
+      items: items.map((item) => repoMapper.toSlim(item)),
       meta: {
         nextCursor: skip + items.length < totalCount ? page + 1 : null,
         totalCount,

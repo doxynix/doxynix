@@ -25,5 +25,10 @@ export const AuditLogSchema = z.object({
   targetName: z.string(),
 });
 
+export const ActivityLogsOutputSchema = z.object({
+  items: z.array(AuditLogSchema),
+  nextCursor: z.string().optional(),
+});
+
 export type AuditLogType = z.infer<typeof AuditLogSchema>;
 export type AuditSeverityType = z.infer<typeof AuditSeveritySchema>;

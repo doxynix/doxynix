@@ -1,4 +1,5 @@
 import { Status } from "@doxynix/shared";
+import type { inferRouterOutputs } from "@trpc/server";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/server/utils/language-metadata", () => ({
@@ -6,11 +7,13 @@ vi.mock("@/server/utils/language-metadata", () => ({
 }));
 
 import type { PaginationMeta } from "@doxynix/shared";
+import { PublicRepoSchema } from "@doxynix/shared";
 
 import { getLanguageColor } from "@/server/utils/language-metadata";
 
-import type { RepoWithAnalyses } from "./repo.mapper";
+import type { RepoWithAnalyses, SlimRepo, SlimRepoRecord } from "./repo.mapper";
 import { repoMapper } from "./repo.mapper";
+import type { repoRouter } from "./repo.router";
 
 function makeRepoWithAnalyses(overrides?: Partial<RepoWithAnalyses>): RepoWithAnalyses {
   return {
@@ -111,6 +114,85 @@ describe("repoMapper.toPublic", () => {
     expect(result.techDebtScore).toBeNull();
     expect(result.onboardingScore).toBeNull();
     expect(result.status).toBe("PENDING");
+  });
+});
+
+describe("repoMapper.toSlim", () => {
+  function makeSlimRow(overrides?: Partial<SlimRepoRecord>): SlimRepoRecord {
+    return {
+      name: "test-repo",
+      owner: "test-owner",
+      ownerAvatarUrl: "https://avatars.githubusercontent.com/u/1",
+      publicId: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      ...overrides,
+    };
+  }
+
+  it("renames publicId -> id and ownerAvatarUrl -> avatar", () => {
+    const row = makeSlimRow();
+
+    expect(repoMapper.toSlim(row)).toStrictEqual({
+      avatar: "https://avatars.githubusercontent.com/u/1",
+      id: row.publicId,
+      name: "test-repo",
+      owner: "test-owner",
+    });
+  });
+
+  it("keeps a null avatar as null", () => {
+    expect(repoMapper.toSlim(makeSlimRow({ ownerAvatarUrl: null })).avatar).toBeNull();
+  });
+
+  it("leaks no internal column", () => {
+    expect(Object.keys(repoMapper.toSlim(makeSlimRow())).sort()).toStrictEqual([
+      "avatar",
+      "id",
+      "name",
+      "owner",
+    ]);
+  });
+
+  it("stays structurally identical to the getSlim .output() schema", () => {
+    type RouterSlim = inferRouterOutputs<typeof repoRouter>["getSlim"]["items"][number];
+    type AssertIdentical<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+    const identical: AssertIdentical<SlimRepo, RouterSlim> = true;
+
+    expect(identical).toBe(true);
+  });
+});
+
+describe("repoMapper.toPublicFields", () => {
+  it("produces exactly the PublicRepoSchema keys once status is supplied", () => {
+    const fields = repoMapper.toPublicFields(
+      makeRepoWithAnalyses({ publicId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b" }),
+    );
+    const parsed = PublicRepoSchema.parse({ ...fields, status: Status.NEW });
+
+    expect(Object.keys(parsed).sort()).toStrictEqual(Object.keys(PublicRepoSchema.shape).sort());
+  });
+
+  it("substitutes publicId for the internal numeric id", () => {
+    const repo = makeRepoWithAnalyses();
+
+    expect(repoMapper.toPublicFields(repo).id).toBe(repo.publicId);
+  });
+
+  it("leaks no internal column", () => {
+    const fields = repoMapper.toPublicFields(makeRepoWithAnalyses());
+
+    expect(Object.keys(fields)).not.toContain("publicId");
+    expect(Object.keys(fields)).not.toContain("userId");
+    expect(Object.keys(fields)).not.toContain("analyses");
+  });
+});
+
+describe("repoMapper.latestStatus", () => {
+  it("returns the first analysis status", () => {
+    expect(repoMapper.latestStatus([{ status: Status.DONE }])).toBe(Status.DONE);
+  });
+
+  it("returns Status.NEW when there are no analyses", () => {
+    expect(repoMapper.latestStatus([])).toBe(Status.NEW);
   });
 });
 

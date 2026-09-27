@@ -1,10 +1,7 @@
-import { NotificationSchema, type PaginationMeta, PaginationMetaSchema } from "@doxynix/shared";
-import type { Prisma } from "@prisma/client";
+import { NotificationSchema, PaginationMetaSchema } from "@doxynix/shared";
 import * as z from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
-import { handlePrismaError } from "@/server/utils/handle-error";
-import { getPaginationMeta } from "@/server/utils/pagination";
 
 import { NotificationsBulkFilterSchema, NotificationsFilterSchema } from "./notification.schemas";
 import { notificationsService } from "./notifications.service";
@@ -14,15 +11,7 @@ export const notificationRouter = createTRPCRouter({
     .input(z.object({ id: z.uuid() }))
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      try {
-        await ctx.db.notification.delete({
-          where: { publicId: input.id },
-        });
-
-        return { message: "Notification deleted", success: true };
-      } catch (error) {
-        handlePrismaError(error, { notFound: "Notification not found" });
-      }
+      return notificationsService.deleteOne(ctx.db, input.id);
     }),
 
   deleteRead: protectedProcedure
@@ -35,94 +24,21 @@ export const notificationRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const where = notificationsService.buildWhereClause(input);
-
-      try {
-        const result = await ctx.db.notification.deleteMany({
-          where: { ...where, isRead: true },
-        });
-        return {
-          deletedCount: result.count,
-          message: `Deleted ${result.count} read notifications`,
-          success: true,
-        };
-      } catch (error) {
-        handlePrismaError(error, { notFound: "Notification not found" });
-      }
+      return notificationsService.deleteRead(ctx.db, input);
     }),
 
   getAll: protectedProcedure
     .input(NotificationsFilterSchema)
-    .output(
-      z.object({
-        items: z.array(NotificationSchema),
-        meta: PaginationMetaSchema,
-      }),
-    )
+    .output(z.object({ items: z.array(NotificationSchema), meta: PaginationMetaSchema }))
     .query(async ({ ctx, input }) => {
-      const { cursor, isRead, limit, repoName, repoOwner, search, type } = input;
-
-      const page = Math.min(Math.max(1, cursor ?? 1), 1_000_000);
-      const skip = (page - 1) * limit;
-
-      const where = notificationsService.buildWhereClause({
-        isRead,
-        repoName,
-        repoOwner,
-        search,
-        type,
-      });
-
-      const [items, totalCount, filteredCount] = await Promise.all([
-        ctx.db.notification.findMany({
-          include: { repo: { select: { name: true, owner: true } } },
-          orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-          skip,
-          take: limit,
-          where,
-        }),
-        ctx.db.notification.count(),
-        ctx.db.notification.count({ where }),
-      ]);
-
-      const meta = getPaginationMeta({
-        filteredCount,
-        limit,
-        page,
-        search: search ?? undefined,
-        totalCount,
-      });
-
-      return notificationMapper.toPaginatedList(items, meta);
+      return notificationsService.getAll(ctx.db, input);
     }),
 
   getStats: protectedProcedure
     .input(z.object({}).optional())
-    .output(
-      z.object({
-        read: z.number().int(),
-        total: z.number().int(),
-        unread: z.number().int(),
-      }),
-    )
+    .output(z.object({ read: z.number().int(), total: z.number().int(), unread: z.number().int() }))
     .query(async ({ ctx }) => {
-      try {
-        const groups = await ctx.db.notification.groupBy({
-          _count: { _all: true },
-          by: ["isRead"],
-        });
-
-        const read = groups.find((g) => g.isRead)?._count._all ?? 0;
-        const unread = groups.find((g) => !g.isRead)?._count._all ?? 0;
-
-        return {
-          read,
-          total: read + unread,
-          unread,
-        };
-      } catch (error) {
-        handlePrismaError(error);
-      }
+      return notificationsService.getStats(ctx.db);
     }),
 
   markAllAsRead: protectedProcedure
@@ -135,66 +51,13 @@ export const notificationRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const where = notificationsService.buildWhereClause(input);
-
-      try {
-        const result = await ctx.db.notification.updateMany({
-          data: { isRead: true },
-          where: { ...where, isRead: false },
-        });
-
-        const updatedCount = result.count;
-
-        return {
-          message: `Marked ${updatedCount} notifications as read`,
-          success: true,
-          updatedCount,
-        };
-      } catch (error) {
-        handlePrismaError(error);
-      }
+      return notificationsService.markAllAsRead(ctx.db, input);
     }),
 
   markAs: protectedProcedure
     .input(z.object({ id: z.uuid(), isRead: z.boolean() }))
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      try {
-        await ctx.db.notification.update({
-          data: { isRead: input.isRead },
-          where: { publicId: input.id },
-        });
-        return { message: input.isRead ? "Marked as read" : "Marked as unread", success: true };
-      } catch (error) {
-        handlePrismaError(error, { notFound: "Notification not found" });
-      }
+      return notificationsService.markAs(ctx.db, input.id, input.isRead);
     }),
 });
-
-type NotificationWithRepo = Prisma.NotificationGetPayload<{
-  include: {
-    repo: {
-      select: {
-        name: true;
-        owner: true;
-      };
-    };
-  };
-}>;
-
-export const notificationMapper = {
-  toPaginatedList(items: NotificationWithRepo[], meta: PaginationMeta) {
-    return {
-      items: items.map((item) => this.toPublic(item)),
-      meta,
-    };
-  },
-
-  toPublic(n: NotificationWithRepo) {
-    return {
-      ...n,
-      id: n.publicId,
-      repo: n.repo != null ? { name: n.repo.name, owner: n.repo.owner } : null,
-    };
-  },
-};

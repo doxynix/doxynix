@@ -1,251 +1,57 @@
 import { PublicUserSchema, UpdateProfileSchema } from "@doxynix/shared";
-import { TRPCError } from "@trpc/server";
-import { del } from "@vercel/blob";
 import * as z from "zod";
 
-import { appLogger } from "@/server/core/app-logger";
-import { auth } from "@/server/core/auth";
-import { prisma } from "@/server/core/db";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
-import { formatUserAgent } from "@/server/utils/ua-parser";
+
+import { userService } from "./user.service";
 
 export const userRouter = createTRPCRouter({
   deleteAccount: protectedProcedure
     .input(z.object({}).optional())
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx }) => {
-      const userId = Number(ctx.session.user.id);
-      const user = await prisma.user.findUnique({
-        select: { imageKey: true },
-        where: { id: userId },
-      });
-
-      if (user == null) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
-      }
-
-      await ctx.db.user.delete({
-        where: { id: userId },
-      });
-
-      if (user.imageKey != null) {
-        try {
-          await del(user.imageKey);
-        } catch (error) {
-          appLogger.error({
-            error: error instanceof Error ? error.message : String(error),
-            imageKey: user.imageKey,
-            msg: "Failed to delete avatar on account deletion",
-            userId,
-          });
-        }
-      }
-
-      return {
-        message: "Your account and all associated data have been permanently deleted",
-        success: true,
-      };
+      return userService.deleteAccount(ctx.db, Number(ctx.session.user.id));
     }),
 
   disconnectAccount: protectedProcedure
     .input(z.object({ provider: z.enum(["github", "google", "yandex"]) }))
     .mutation(async ({ ctx, input }) => {
-      const userId = Number(ctx.session.user.id);
-
-      await ctx.prisma.$transaction(
-        async (tx) => {
-          // Check if the account exists
-          const accountToDelete = await tx.account.findUnique({
-            where: {
-              userId_providerId: {
-                providerId: input.provider,
-                userId,
-              },
-            },
-          });
-
-          if (accountToDelete == null) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: "Account not found or already disconnected.",
-            });
-          }
-
-          // Re-validate account count and email auth within transaction
-          const accountCount = await tx.account.count({
-            where: { userId },
-          });
-
-          const user = await tx.user.findUnique({
-            select: { email: true, emailVerified: true },
-            where: { id: userId },
-          });
-
-          const hasEmailAuth = user?.email != null && user.emailVerified;
-
-          if (accountCount <= 1 && !hasEmailAuth) {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message:
-                "You cannot disconnect your only authentication method. Add another one first.",
-            });
-          }
-
-          // Perform the delete
-          await tx.account.delete({
-            where: {
-              userId_providerId: {
-                providerId: input.provider,
-                userId,
-              },
-            },
-          });
-        },
-        {
-          isolationLevel: "Serializable",
-        },
-      );
-
-      return { success: true };
+      return userService.disconnectAccount(ctx.db, Number(ctx.session.user.id), input.provider);
     }),
 
   getActiveSessions: protectedProcedure.query(async ({ ctx }) => {
-    if (ctx.session.session.id === "api-key") {
-      return [];
-    }
-
-    const sessions = await auth.api.listSessions({ headers: ctx.req.headers });
-
-    return sessions
-      .toSorted((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .map((session) => ({
-        createdAt: session.createdAt,
-        id: session.id,
-        ipAddress: session.ipAddress,
-        token: session.token,
-        userAgent: formatUserAgent(session.userAgent ?? null),
-      }));
+    return userService.getActiveSessions(ctx.req.headers, ctx.session.session.id === "api-key");
   }),
 
   getLinkedAccounts: protectedProcedure.query(async ({ ctx }) => {
-    const userId = Number(ctx.session.user.id);
-
-    const [accounts, user] = await Promise.all([
-      ctx.db.account.findMany({
-        orderBy: { providerId: "asc" },
-        select: {
-          accountId: true,
-          email: true,
-          image: true,
-          name: true,
-          providerId: true,
-        },
-        where: { userId },
-      }),
-      ctx.db.user.findUnique({
-        select: { email: true, emailVerified: true },
-        where: { id: userId },
-      }),
-    ]);
-
-    const mappedAccounts = accounts.map((acc) => ({
-      accountId: acc.accountId,
-      email: acc.email,
-      image: acc.image,
-      name: acc.name,
-      provider: acc.providerId,
-    }));
-
-    return { accounts: mappedAccounts, user };
+    return userService.getLinkedAccounts(ctx.db, Number(ctx.session.user.id));
   }),
 
   me: protectedProcedure
     .input(z.object({}).optional())
     .output(z.object({ message: z.string(), user: PublicUserSchema }))
     .query(async ({ ctx }) => {
-      const user = await ctx.db.user.findUnique({
-        where: { id: Number(ctx.session.user.id) },
-      });
-
-      if (user == null) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
-      }
-
-      return {
-        message: "User found",
-        user: {
-          createdAt: user.createdAt,
-          email: user.email,
-          emailVerified: user.emailVerified,
-          id: user.publicId,
-          image: user.image,
-          name: user.name,
-          role: user.role,
-          updatedAt: user.updatedAt,
-        },
-      };
+      return userService.getMe(ctx.db, Number(ctx.session.user.id));
     }),
 
   removeAvatar: protectedProcedure
     .input(z.object({}).optional())
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx }) => {
-      const userId = Number(ctx.session.user.id);
-      // NOTE: uses plain Prisma
-      const user = await prisma.user.findUnique({
-        select: { imageKey: true },
-        where: { id: userId },
-      });
+      return userService.removeAvatar(ctx.db, Number(ctx.session.user.id));
+    }),
 
-      const keyToDelete = user?.imageKey;
-
-      await ctx.db.user.update({
-        data: {
-          image: null,
-          imageKey: null,
-        },
-        where: { id: userId },
-      });
-
-      if (keyToDelete != null) {
-        try {
-          await del(keyToDelete);
-        } catch (error) {
-          appLogger.error({
-            error: error instanceof Error ? error.message : String(error),
-            keyToDelete,
-            msg: "Failed to delete avatar from Vercel Blob during removal",
-            userId,
-          });
-        }
-      }
-
-      return { message: "Profile Picture removed", success: true };
+  revokeSession: protectedProcedure
+    .input(z.object({ sessionId: z.string().min(1).max(255) }))
+    .output(z.object({ success: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      return userService.revokeSession(ctx.req.headers, input.sessionId);
     }),
 
   updateUser: protectedProcedure
     .input(UpdateProfileSchema)
     .output(z.object({ message: z.string(), user: PublicUserSchema }))
     .mutation(async ({ ctx, input }) => {
-      const updatedUser = await ctx.db.user.update({
-        data: {
-          name: input.name,
-        },
-        where: { id: Number(ctx.session.user.id) },
-      });
-
-      return {
-        message: "Credentials updated",
-        user: {
-          createdAt: updatedUser.createdAt,
-          email: updatedUser.email,
-          emailVerified: updatedUser.emailVerified,
-          id: updatedUser.publicId,
-          image: updatedUser.image,
-          name: updatedUser.name,
-          role: updatedUser.role,
-          updatedAt: updatedUser.updatedAt,
-        },
-      };
+      return userService.updateUser(ctx.db, Number(ctx.session.user.id), input);
     }),
 });

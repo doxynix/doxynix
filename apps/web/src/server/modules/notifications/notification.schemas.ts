@@ -32,3 +32,5 @@ export const NotificationsBulkFilterSchema = z
     type: z.enum(NotifyType).optional(),
   })
   .superRefine(validateRepoPair);
+
+export type NotificationsBulkFilterInput = z.infer<typeof NotificationsBulkFilterSchema>;

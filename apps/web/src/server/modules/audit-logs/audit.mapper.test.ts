@@ -5,7 +5,7 @@ vi.mock("@/server/utils/ua-parser", () => ({
   formatUserAgent: vi.fn().mockReturnValue("Mocked Browser"),
 }));
 
-import { mapAuditLogToDTO, sanitizeObject } from "./audit.mapper";
+import { auditMapper } from "./audit.mapper";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -38,37 +38,10 @@ function makeAuditLog(overrides: Partial<AuditLog> = {}): AuditLog {
 }
 
 // ===========================================================================
-// sanitizeObject
+// auditMapper.toDto
 // ===========================================================================
 
-describe("sanitizeObject", () => {
-  it("returns {} for null", () => {
-    expect(sanitizeObject(null)).toEqual({});
-  });
-
-  it("returns {} for a number", () => {
-    expect(sanitizeObject(42)).toEqual({});
-  });
-
-  it("returns {} for a string", () => {
-    expect(sanitizeObject("str")).toEqual({});
-  });
-
-  it("removes SKIP_FIELDS while preserving other keys", () => {
-    const input = { id: 1, name: "x", nested: { a: 1 }, repoId: 2 };
-    expect(sanitizeObject(input)).toEqual({ name: "x", nested: { a: 1 } });
-  });
-
-  it("converts bigint values to strings", () => {
-    expect(sanitizeObject({ n: 10n })).toEqual({ n: "10" });
-  });
-});
-
-// ===========================================================================
-// mapAuditLogToDTO
-// ===========================================================================
-
-describe("mapAuditLogToDTO", () => {
+describe("auditMapper.toDto", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -89,7 +62,7 @@ describe("mapAuditLogToDTO", () => {
       'operation "%s" → actionTitle "%s", severity "%s"',
       (operation, expectedTitle, expectedSeverity) => {
         const log = makeAuditLog({ operation });
-        const dto = mapAuditLogToDTO(log);
+        const dto = auditMapper.toDto(log);
 
         expect(dto.actionTitle).toBe(expectedTitle);
         expect(dto.severity).toBe(expectedSeverity);
@@ -107,7 +80,7 @@ describe("mapAuditLogToDTO", () => {
         model: "Repo",
         payload: { data: { fullName: "org/repo" } },
       });
-      expect(mapAuditLogToDTO(log).targetName).toBe("org/repo");
+      expect(auditMapper.toDto(log).targetName).toBe("org/repo");
     });
 
     it("Repo with data.name (no fullName) uses name", () => {
@@ -115,7 +88,7 @@ describe("mapAuditLogToDTO", () => {
         model: "Repo",
         payload: { data: { name: "my-repo" } },
       });
-      expect(mapAuditLogToDTO(log).targetName).toBe("my-repo");
+      expect(auditMapper.toDto(log).targetName).toBe("my-repo");
     });
 
     it("Repo with where.name (no data) uses where.name", () => {
@@ -123,12 +96,12 @@ describe("mapAuditLogToDTO", () => {
         model: "Repo",
         payload: { where: { name: "target-repo" } },
       });
-      expect(mapAuditLogToDTO(log).targetName).toBe("target-repo");
+      expect(auditMapper.toDto(log).targetName).toBe("target-repo");
     });
 
     it('Repo with nothing falls back to "Repository"', () => {
       const log = makeAuditLog({ model: "Repo", payload: {} });
-      expect(mapAuditLogToDTO(log).targetName).toBe("Repository");
+      expect(auditMapper.toDto(log).targetName).toBe("Repository");
     });
 
     it("User with data.name uses name", () => {
@@ -136,7 +109,7 @@ describe("mapAuditLogToDTO", () => {
         model: "User",
         payload: { data: { name: "Alice" } },
       });
-      expect(mapAuditLogToDTO(log).targetName).toBe("Alice");
+      expect(auditMapper.toDto(log).targetName).toBe("Alice");
     });
 
     it('User without data.name falls back to "Personal Profile"', () => {
@@ -144,7 +117,7 @@ describe("mapAuditLogToDTO", () => {
         model: "User",
         payload: { data: {} },
       });
-      expect(mapAuditLogToDTO(log).targetName).toBe("Personal Profile");
+      expect(auditMapper.toDto(log).targetName).toBe("Personal Profile");
     });
 
     it('Account with data.provider "github" → "github login"', () => {
@@ -152,7 +125,7 @@ describe("mapAuditLogToDTO", () => {
         model: "Account",
         payload: { data: { provider: "github" } },
       });
-      expect(mapAuditLogToDTO(log).targetName).toBe("github login");
+      expect(auditMapper.toDto(log).targetName).toBe("github login");
     });
 
     it("default model with where.id sliced to 8 chars", () => {
@@ -160,7 +133,7 @@ describe("mapAuditLogToDTO", () => {
         model: "Notification",
         payload: { where: { id: "abc12345def" } },
       });
-      expect(mapAuditLogToDTO(log).targetName).toBe("abc12345");
+      expect(auditMapper.toDto(log).targetName).toBe("abc12345");
     });
 
     it('default model with no where.id falls back to "System Entity"', () => {
@@ -168,7 +141,7 @@ describe("mapAuditLogToDTO", () => {
         model: "Notification",
         payload: {},
       });
-      expect(mapAuditLogToDTO(log).targetName).toBe("System Entity");
+      expect(auditMapper.toDto(log).targetName).toBe("System Entity");
     });
   });
 
@@ -181,7 +154,7 @@ describe("mapAuditLogToDTO", () => {
       const log = makeAuditLog({
         payload: { data: { emailVerified: true, firstName: "John" } },
       });
-      const dto = mapAuditLogToDTO(log);
+      const dto = auditMapper.toDto(log);
 
       // Biome sorts object keys, which determines Object.entries iteration order
       expect(dto.details).toEqual([
@@ -194,39 +167,39 @@ describe("mapAuditLogToDTO", () => {
       const log = makeAuditLog({
         payload: { data: { deleted: null, metadata: { a: 1 }, name: "x" } },
       });
-      const dto = mapAuditLogToDTO(log);
+      const dto = auditMapper.toDto(log);
 
       expect(dto.details).toEqual([{ label: "name", value: "x" }]);
     });
 
     it("returns null details when data is empty", () => {
       const log = makeAuditLog({ payload: { data: {} } });
-      expect(mapAuditLogToDTO(log).details).toBeNull();
+      expect(auditMapper.toDto(log).details).toBeNull();
     });
 
     it('internal userAgent → deviceType "system"', () => {
       const log = makeAuditLog({ userAgent: "internal" });
-      expect(mapAuditLogToDTO(log).deviceType).toBe("system");
+      expect(auditMapper.toDto(log).deviceType).toBe("system");
     });
 
     it("iPhone UA → deviceType mobile", () => {
       const log = makeAuditLog({ userAgent: IPHONE_UA });
-      expect(mapAuditLogToDTO(log).deviceType).toBe("mobile");
+      expect(auditMapper.toDto(log).deviceType).toBe("mobile");
     });
 
     it("iPad UA → deviceType tablet", () => {
       const log = makeAuditLog({ userAgent: IPAD_UA });
-      expect(mapAuditLogToDTO(log).deviceType).toBe("tablet");
+      expect(auditMapper.toDto(log).deviceType).toBe("tablet");
     });
 
     it("Desktop UA → deviceType desktop", () => {
       const log = makeAuditLog({ userAgent: DESKTOP_UA });
-      expect(mapAuditLogToDTO(log).deviceType).toBe("desktop");
+      expect(auditMapper.toDto(log).deviceType).toBe("desktop");
     });
 
     it("null userAgent → deviceType desktop", () => {
       const log = makeAuditLog({ userAgent: null });
-      expect(mapAuditLogToDTO(log).deviceType).toBe("desktop");
+      expect(auditMapper.toDto(log).deviceType).toBe("desktop");
     });
   });
 
@@ -239,7 +212,7 @@ describe("mapAuditLogToDTO", () => {
       const log = makeAuditLog({
         payload: { data: { id: 1, name: "x", repoId: 2 }, where: { userId: "u1" } },
       });
-      const dto = mapAuditLogToDTO(log);
+      const dto = auditMapper.toDto(log);
 
       expect(dto.rawPayload).toEqual({ data: { name: "x" }, where: {} });
     });
