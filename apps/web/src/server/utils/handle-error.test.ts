@@ -2,7 +2,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { handlePrismaError } from "@/server/utils/handle-error";
+import { handlePrismaError, toOctokitTrpcError } from "@/server/utils/handle-error";
 
 type KnownErrorOptions = {
   clientVersion: string;
@@ -157,6 +157,63 @@ describe("handlePrismaError", () => {
     expect(trpcError.message).toBe("Custom required field message");
   });
 
+  it("should map P2034 to BAD_REQUEST with the default concurrency message", () => {
+    const error = new PrismaClientKnownRequestError("Transaction failed", {
+      clientVersion: "test",
+      code: "P2034",
+    });
+
+    const trpcError = captureTrpcError(() => handlePrismaError(error));
+
+    expect(trpcError.code).toBe("BAD_REQUEST");
+    expect(trpcError.message).toBe("Conflicting concurrent update, please retry");
+  });
+
+  it("should let a caller's custom message override the P2034 default", () => {
+    const error = new PrismaClientKnownRequestError("Transaction failed", {
+      clientVersion: "test",
+      code: "P2034",
+    });
+    const map = {
+      custom: "This account was modified by another request. Please try again.",
+    };
+
+    const trpcError = captureTrpcError(() => handlePrismaError(error, map));
+
+    expect(trpcError.code).toBe("BAD_REQUEST");
+    expect(trpcError.message).toBe(
+      "This account was modified by another request. Please try again.",
+    );
+  });
+
+  it("should map P2010 to INTERNAL_SERVER_ERROR, not NOT_FOUND", () => {
+    const error = new PrismaClientKnownRequestError("Raw query failed", {
+      clientVersion: "test",
+      code: "P2010",
+    });
+
+    const trpcError = captureTrpcError(() => handlePrismaError(error));
+
+    expect(trpcError.code).toBe("INTERNAL_SERVER_ERROR");
+    expect(trpcError.message).toBe("Database query failed");
+    expect(loggerState.error).not.toHaveBeenCalled();
+  });
+
+  it("should not apply a caller's notFound message to a P2010 raw query failure", () => {
+    const error = new PrismaClientKnownRequestError("Raw query failed", {
+      clientVersion: "test",
+      code: "P2010",
+    });
+    const map = {
+      notFound: "Repository not found",
+    };
+
+    const trpcError = captureTrpcError(() => handlePrismaError(error, map));
+
+    expect(trpcError.code).toBe("INTERNAL_SERVER_ERROR");
+    expect(trpcError.message).toBe("Database query failed");
+  });
+
   it("should return INTERNAL_SERVER_ERROR for unhandled prisma error code", () => {
     const error = new PrismaClientKnownRequestError("Unhandled prisma code", {
       clientVersion: "test",
@@ -184,5 +241,47 @@ describe("handlePrismaError", () => {
       error,
       msg: "Unknown Prisma Error:",
     });
+  });
+});
+
+describe("toOctokitTrpcError", () => {
+  it("should map 401 to UNAUTHORIZED with token expired message", () => {
+    const trpcError = toOctokitTrpcError({ message: "Bad credentials", status: 401 });
+
+    expect(trpcError?.code).toBe("UNAUTHORIZED");
+    expect(trpcError?.message).toBe("GitHub token expired");
+  });
+
+  it("should map 403 to FORBIDDEN with denied access message", () => {
+    const trpcError = toOctokitTrpcError({ message: "Forbidden", status: 403 });
+
+    expect(trpcError?.code).toBe("FORBIDDEN");
+    expect(trpcError?.message).toBe("GitHub denied access to this repository");
+  });
+
+  it("should map 404 to NOT_FOUND with repository not found message", () => {
+    const trpcError = toOctokitTrpcError({ message: "Not Found", status: 404 });
+
+    expect(trpcError?.code).toBe("NOT_FOUND");
+    expect(trpcError?.message).toBe("Repository not found on GitHub");
+  });
+
+  it("should map 429 to TOO_MANY_REQUESTS with API limit message", () => {
+    const trpcError = toOctokitTrpcError({ message: "Too many requests", status: 429 });
+
+    expect(trpcError?.code).toBe("TOO_MANY_REQUESTS");
+    expect(trpcError?.message).toBe("GitHub API limit exceeded");
+  });
+
+  it("should return undefined for unmapped octokit statuses so the caller rethrows", () => {
+    const trpcError = toOctokitTrpcError({ message: "Server Error", status: 500 });
+
+    expect(trpcError).toBeUndefined();
+  });
+
+  it("should return undefined for non-octokit errors", () => {
+    const trpcError = toOctokitTrpcError(new Error("boom"));
+
+    expect(trpcError).toBeUndefined();
   });
 });

@@ -48,7 +48,11 @@ const prismaErrorMap: Record<string, PrismaErrorMeta | undefined> = {
     defaultMessage: "Required field is missing",
     mapKey: "notNull",
   },
-  P2010: { code: "NOT_FOUND", defaultMessage: "Record not found", mapKey: "notFound" },
+  P2010: {
+    code: "INTERNAL_SERVER_ERROR",
+    defaultMessage: "Database query failed",
+    mapKey: "custom",
+  },
   P2016: { code: "NOT_FOUND", defaultMessage: "Record not found", mapKey: "notFound" },
   P2025: { code: "NOT_FOUND", defaultMessage: "Record not found", mapKey: "notFound" },
   P2030: {
@@ -56,7 +60,11 @@ const prismaErrorMap: Record<string, PrismaErrorMeta | undefined> = {
     defaultMessage: "Foreign key constraint failed",
     mapKey: "custom",
   },
-  P2034: { code: "BAD_REQUEST", defaultMessage: "Data constraint error", mapKey: "custom" },
+  P2034: {
+    code: "BAD_REQUEST",
+    defaultMessage: "Conflicting concurrent update, please retry",
+    mapKey: "custom",
+  },
 };
 
 export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
@@ -121,4 +129,28 @@ export function isOctokitError(error: unknown): error is OctokitError {
     "message" in error &&
     typeof (error as Record<string, unknown>).message === "string"
   );
+}
+
+type OctokitStatusMapping = {
+  code: TRPCError["code"];
+  message: string;
+};
+
+const octokitStatusMap: Record<number, OctokitStatusMapping> = {
+  401: { code: "UNAUTHORIZED", message: "GitHub token expired" },
+  403: { code: "FORBIDDEN", message: "GitHub denied access to this repository" },
+  404: { code: "NOT_FOUND", message: "Repository not found on GitHub" },
+  429: { code: "TOO_MANY_REQUESTS", message: "GitHub API limit exceeded" },
+};
+
+export function toOctokitTrpcError(error: unknown): TRPCError | undefined {
+  if (!isOctokitError(error)) {
+    return undefined;
+  }
+
+  const mapping = octokitStatusMap[error.status];
+
+  return mapping == null
+    ? undefined
+    : new TRPCError({ code: mapping.code, message: mapping.message });
 }

@@ -40,7 +40,18 @@ const SENSITIVE_KEYS = new Set([
 ]);
 
 const GITHUB_TOKEN_REGEX = /(github_pat_\w+|gh[oprsu]_\w{36,})/g;
-const BEARER_TOKEN_REGEX = /(\bbearer\s+)[^\s,;]+/gi;
+
+const BEARER_TOKEN_REGEX = /(bearer\s+)[^\s,;]+/gi;
+
+const MAX_STRING_LENGTH = 1024;
+
+function redactPatterns(value: string): string {
+  let safe = value;
+  if (safe.includes("gh") || safe.includes("github_pat_")) {
+    safe = safe.replaceAll(GITHUB_TOKEN_REGEX, "[REDACTED_GH_TOKEN]");
+  }
+  return safe.replaceAll(BEARER_TOKEN_REGEX, "$1[REDACTED]");
+}
 
 function redactValue(key: string, value: unknown): unknown {
   const lowerKey = key.toLowerCase();
@@ -55,28 +66,16 @@ function redactValue(key: string, value: unknown): unknown {
   }
 
   if (typeof value === "string") {
-    let safeString = value;
-    if (safeString.length > 8192) {
-      return `${safeString.slice(0, 1024)}... [TRUNCATED, ORIGINAL LENGTH: ${safeString.length}]`;
+    const safe = redactPatterns(value);
+    if (safe.length <= MAX_STRING_LENGTH) {
+      return safe;
     }
-    if (safeString.includes("gh") || safeString.includes("github_pat_")) {
-      safeString = safeString.replaceAll(GITHUB_TOKEN_REGEX, "[REDACTED_GH_TOKEN]");
-    }
-    if (/bearer\s+/i.test(safeString)) {
-      safeString = safeString.replaceAll(BEARER_TOKEN_REGEX, "$1[REDACTED]");
-    }
-    return safeString;
+    return `${safe.slice(0, MAX_STRING_LENGTH)}... [TRUNCATED, ORIGINAL LENGTH: ${value.length}]`;
   }
 
   return value;
 }
 
-/**
- * Cleans the given object of secrets and technical fields before logging.
- * Safely handles circular references and BigInt.
- *
- * @param obj Data to clean
- */
 export function sanitizePayload(obj: unknown): unknown {
   if (typeof obj === "string") {
     return redactValue("", obj);
@@ -100,12 +99,53 @@ export function sanitizePayload(obj: unknown): unknown {
   }
 }
 
+/**
+ * Technical Prisma keys that must never be persisted in an audit-log payload.
+ * Shared with the audit-log mapper, which skips them when building the detail rows.
+ */
+export const SKIP_FIELDS = new Set([
+  "analysisId",
+  "githubId",
+  "id",
+  "include",
+  "jobId",
+  "nodeId",
+  "prAnalysisId",
+  "repoId",
+  "select",
+  "userId",
+]);
+
+function auditReplacer(key: string, value: unknown): unknown {
+  if (SKIP_FIELDS.has(key)) {
+    return undefined;
+  }
+
+  if (typeof value === "bigint") {
+    return value.toString();
+  }
+
+  return value;
+}
+
+export function sanitizeObject(obj: unknown): Record<string, unknown> {
+  if (obj == null || typeof obj !== "object") {
+    return {};
+  }
+
+  try {
+    const sanitized = safeJsonClone(obj, auditReplacer);
+
+    return sanitized != null && typeof sanitized === "object"
+      ? (sanitized as Record<string, unknown>)
+      : {};
+  } catch {
+    return { _error: "Sanitization failed" };
+  }
+}
+
 const mask = (val: unknown) => (typeof val === "string" ? "[ENCRYPTED_MASKED]" : val);
 
-/**
- * Recursively masks PII data based on the ENCRYPTED_METADATA_MAP
- * to prevent encrypted fields from leaking into the raw payload of audit logs.
- */
 export function maskSensitiveFields(modelName: string, data: unknown): unknown {
   if (data == null || typeof data !== "object") {
     return data;

@@ -1,5 +1,11 @@
 import * as z from "zod";
 
+const MAX_PAGE = 1_000_000;
+
+export function clampPage(cursor: null | number | undefined): number {
+  return Math.min(Math.max(1, cursor ?? 1), MAX_PAGE);
+}
+
 export function getPaginationMeta(params: {
   filteredCount: number;
   limit: number;
@@ -28,7 +34,7 @@ export function getPaginationMeta(params: {
 }
 
 export const PaginationSchema = z.object({
-  cursor: z.coerce.number().int().min(1).max(1_000_000).nullish(),
+  cursor: z.coerce.number().int().min(1).max(MAX_PAGE).nullish(),
   limit: z.coerce.number().int().min(1).max(100).default(10),
   search: z.string().trim().max(1000).optional(),
 });
