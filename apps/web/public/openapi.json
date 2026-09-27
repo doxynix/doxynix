@@ -3,6 +3,7 @@
     "title": "Doxynix API",
     "version": "1.0.0"
   },
+  "jsonSchemaDialect": "https://spec.openapis.org/oas/3.1/dialect/base",
   "openapi": "3.1.1",
   "paths": {
     "/agent.createSession": {
@@ -59,14 +60,14 @@
         "tags": [
           "agent"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/agent.getSessionHistory": {
@@ -103,10 +104,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -194,10 +200,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -254,14 +265,14 @@
         "tags": [
           "analysis"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/analysis.cancel": {
@@ -296,14 +307,14 @@
         "tags": [
           "analysis"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/analysis.getDetailedMetrics": {
@@ -340,10 +351,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -382,10 +398,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -549,10 +570,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -591,10 +617,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -631,14 +662,14 @@
         "tags": [
           "analysis"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/analysis.getAvailableDocs": {
@@ -675,10 +706,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -717,10 +753,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -759,10 +800,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -875,10 +921,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -917,10 +968,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -971,14 +1027,14 @@
         "tags": [
           "analysis"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/analysis.quickFileAudit": {
@@ -1013,14 +1069,14 @@
         "tags": [
           "analysis"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/analysis.applyFix": {
@@ -1076,14 +1132,14 @@
         "tags": [
           "analysis"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/analysis.clearStaging": {
@@ -1118,14 +1174,14 @@
         "tags": [
           "analysis"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/analysis.configureRepository": {
@@ -1160,14 +1216,14 @@
         "tags": [
           "analysis"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/analysis.createFix": {
@@ -1222,14 +1278,14 @@
         "tags": [
           "analysis"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/analysis.getById": {
@@ -1331,10 +1387,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -1432,10 +1493,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -1474,10 +1540,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -1516,10 +1587,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -1556,14 +1632,14 @@
         "tags": [
           "analysis"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/analysis.stageFile": {
@@ -1598,14 +1674,14 @@
         "tags": [
           "analysis"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/analysis.stageGeneratedFix": {
@@ -1640,14 +1716,14 @@
         "tags": [
           "analysis"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/analysis.unstageFile": {
@@ -1682,14 +1758,14 @@
         "tags": [
           "analysis"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/analysis.getAnalysis": {
@@ -1726,10 +1802,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -1768,10 +1849,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -1810,10 +1896,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -1852,10 +1943,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -2879,10 +2975,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -2921,10 +3022,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -2963,10 +3069,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -3005,10 +3116,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -3063,14 +3179,14 @@
         "tags": [
           "analysis"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/analysis.searchWorkspace": {
@@ -3107,10 +3223,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -3448,10 +3569,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -3529,10 +3655,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -3585,14 +3716,14 @@
         "tags": [
           "apikey"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/apikey.list": {
@@ -3737,10 +3868,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -3793,14 +3929,14 @@
         "tags": [
           "apikey"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/apikey.touch": {
@@ -3847,14 +3983,14 @@
         "tags": [
           "apikey"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/apikey.update": {
@@ -3905,14 +4041,14 @@
         "tags": [
           "apikey"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/audit.getActivityLogs": {
@@ -4067,10 +4203,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -4112,10 +4253,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -4154,10 +4300,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -4196,10 +4347,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -4248,14 +4404,14 @@
         "tags": [
           "githubApp"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/githubBrowse.getBranches": {
@@ -4292,10 +4448,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -4334,10 +4495,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -4376,10 +4542,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -4418,10 +4589,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -4472,10 +4648,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -4528,14 +4709,14 @@
         "tags": [
           "notification"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/notification.deleteRead": {
@@ -4592,14 +4773,14 @@
         "tags": [
           "notification"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/notification.getAll": {
@@ -4759,10 +4940,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -4827,10 +5013,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -4889,14 +5080,14 @@
         "tags": [
           "notification"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/notification.markAs": {
@@ -4947,14 +5138,14 @@
         "tags": [
           "notification"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/repo.create": {
@@ -5143,14 +5334,14 @@
         "tags": [
           "repo"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/repo.delete": {
@@ -5201,14 +5392,14 @@
         "tags": [
           "repo"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/repo.deleteAll": {
@@ -5259,14 +5450,14 @@
         "tags": [
           "repo"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/repo.deleteByOwner": {
@@ -5321,14 +5512,14 @@
         "tags": [
           "repo"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/repo.getAll": {
@@ -5602,10 +5793,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -5788,10 +5984,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -5974,10 +6175,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -6077,10 +6283,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -6133,14 +6344,14 @@
         "tags": [
           "user"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/user.disconnectAccount": {
@@ -6175,14 +6386,14 @@
         "tags": [
           "user"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/user.getActiveSessions": {
@@ -6219,10 +6430,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -6261,10 +6477,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -6373,10 +6594,15 @@
         ],
         "parameters": [
           {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "in": "query",
             "name": "input",
             "required": true,
-            "schema": {}
+            "style": "deepObject"
           }
         ]
       }
@@ -6429,14 +6655,14 @@
         "tags": [
           "user"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/user.revokeSession": {
@@ -6483,14 +6709,14 @@
         "tags": [
           "user"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     },
     "/user.updateUser": {
@@ -6595,14 +6821,14 @@
         "tags": [
           "user"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "input",
-            "required": true,
-            "schema": {}
-          }
-        ]
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        }
       }
     }
   }

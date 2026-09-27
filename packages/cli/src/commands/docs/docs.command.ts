@@ -252,10 +252,8 @@ export function registerDocsCommand(program: Command) {
       );
 
       p.note(
-        `Document ID:  ${brand.highlight(String(doc.id))}\n` +
-          `Type:         ${brand.info(doc.type)}\n` +
-          `Target Path:  ${pc.cyan(doc.path ?? filePath)}\n` +
-          `Version:      ${brand.muted(doc.version)}`,
+        `Document ID:  ${brand.highlight(doc.documentId)}\n` +
+          `Pinned to:    ${pc.cyan(repoContext.target)}`,
         "Documentation Created",
       );
 

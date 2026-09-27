@@ -81,8 +81,13 @@ All agents must leverage modular skills located in `.agents/skills/`:
      column. A CI step in `.github/workflows/web-ci.yml` fails the build if
      either appears.
    - Generate keys on the server, never in the application. Use
-     `@default(dbgenerated("uuidv7()"))`, not Prisma's `@default(uuid(7))` —
-     the latter asks Postgres for a v4 and reintroduces a version split.
+     `@default(dbgenerated("uuidv7()"))` over Prisma's `@default(uuid(7))`.
+     Both produce a v7; the difference is that the latter is generated in the
+     Prisma client from the application host's clock, so `id` and `createdAt`
+     read time from two different machines, and any writer not going through
+     Prisma must supply its own `id`. Unrelated: Better Auth's
+     `advanced.database.generateId: "uuid"` does produce a v4 via
+     `gen_random_uuid()` — that is why it stays `false` here.
    - Never generate `id` in application code. That is how `POST /api/agent/chat`
      came to accept a client-supplied v4 uuid as a `ChatSession` primary key.
    - Do **not** put `@omit` on `id`. `@omit` is a ZenStack attribute that removes

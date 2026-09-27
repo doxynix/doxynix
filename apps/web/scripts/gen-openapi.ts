@@ -144,14 +144,25 @@ for (const [label, procedure] of procedures) {
 
   const input = procedure._def?.inputs;
   if (input != null) {
-    operation.parameters = [
-      {
-        in: "query",
-        name: "input",
+    const schema = toJsonSchema(input, "input");
+
+    if (method === "post") {
+      // A mutation takes its input as a JSON request body, not a query string.
+      operation.requestBody = {
+        content: { "application/json": { schema } },
         required: true,
-        schema: toJsonSchema(input, "input"),
-      },
-    ];
+      };
+    } else {
+      operation.parameters = [
+        {
+          content: { "application/json": { schema } },
+          in: "query",
+          name: "input",
+          required: true,
+          style: "deepObject",
+        },
+      ];
+    }
   }
 
   paths[path] = { ...paths[path], [method]: operation };
@@ -159,6 +170,7 @@ for (const [label, procedure] of procedures) {
 
 const document = {
   info: { title: "Doxynix API", version: "1.0.0" },
+  jsonSchemaDialect: "https://spec.openapis.org/oas/3.1/dialect/base",
   openapi: "3.1.1",
   paths,
 };

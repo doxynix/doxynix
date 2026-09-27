@@ -719,7 +719,7 @@ export function registerPrCommand(program: Command) {
 
         p.outro(
           brand.muted("Inspect review findings with: ") +
-            brand.highlight(`dxnx pr comments ${analysis.publicId}`),
+            brand.highlight(`dxnx pr comments ${analysis.id}`),
         );
       },
     );
