@@ -9,7 +9,7 @@ export type GeneratedFixSummaryRecord = Prisma.GeneratedFixGetPayload<{
   select: {
     githubPrNumber: true;
     githubPrUrl: true;
-    publicId: true;
+    id: true;
     status: true;
     title: true;
   };
@@ -26,7 +26,7 @@ export const fixesMapper = {
       estimatedImpact: fix.estimatedImpact,
       githubPrNumber: fix.githubPrNumber,
       githubPrUrl: fix.githubPrUrl,
-      id: fix.publicId,
+      id: fix.id,
       resultJson,
       status: fix.status,
       title: fix.title,
@@ -41,7 +41,7 @@ export const fixesMapper = {
       estimatedImpact: fix.estimatedImpact,
       githubPrNumber: fix.githubPrNumber,
       githubPrUrl: fix.githubPrUrl,
-      id: fix.publicId,
+      id: fix.id,
       status: fix.status,
       title: fix.title,
     };
@@ -51,7 +51,7 @@ export const fixesMapper = {
     return {
       githubPrNumber: fix.githubPrNumber,
       githubPrUrl: fix.githubPrUrl,
-      id: fix.publicId,
+      id: fix.id,
       status: fix.status,
       title: fix.title,
     };

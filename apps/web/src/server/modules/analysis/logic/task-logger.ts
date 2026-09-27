@@ -61,7 +61,7 @@ export const taskLogger = {
         status,
       },
       select: { repo: { select: { userId: true } } },
-      where: { publicId: analysisId },
+      where: { id: analysisId },
     });
 
     await publishAnalysisProgress({
@@ -94,7 +94,7 @@ export const taskLogger = {
   /**
    * Updates the current stage status.
    */
-  async milestone(params: { analysisId: string; msg: string; percent: number; userId: number }) {
+  async milestone(params: { analysisId: string; msg: string; percent: number; userId: string }) {
     const { analysisId, msg, percent, userId } = params;
 
     this.info(`STAGE: ${msg} (${percent}%)`);
@@ -125,7 +125,7 @@ async function publishAnalysisProgress(params: {
   message: string;
   progress: number;
   status: Status;
-  userId: number;
+  userId: string;
 }) {
   await realtimeService.user(params.userId).publish(REALTIME_CONFIG.events.user.analysisProgress, {
     analysisId: params.analysisId,

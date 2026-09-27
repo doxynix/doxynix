@@ -232,7 +232,7 @@ export const analysisMapper = {
     if (!parsed.success) {
       appLogger.warn({
         error: z.treeifyError(parsed.error),
-        id: analysis.publicId,
+        id: analysis.id,
         msg: "Zod mismatch",
       });
       return {
@@ -397,17 +397,14 @@ export const analysisMapper = {
   },
 
   toAnalysisRef(
-    analysis:
-      | null
-      | Pick<LatestCompletedAnalysis, "commitSha" | "createdAt" | "publicId">
-      | undefined,
+    analysis: null | Pick<LatestCompletedAnalysis, "commitSha" | "createdAt" | "id"> | undefined,
   ): AnalysisRef | null {
     if (analysis == null) {
       return null;
     }
 
     return {
-      analysisId: analysis.publicId,
+      analysisId: analysis.id,
       commitSha: analysis.commitSha,
       createdAt: analysis.createdAt,
     };
@@ -551,7 +548,7 @@ export const analysisMapper = {
         defaultBranch: repo.defaultBranch,
         description: repo.description,
         forks: repo.forks,
-        id: repo.publicId,
+        id: repo.id,
         language: repo.language,
         languageColor: getLanguageColor(repo.language),
         license: repo.license,

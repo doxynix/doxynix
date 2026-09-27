@@ -72,7 +72,7 @@ export const repoService = {
     ]);
   },
 
-  async createRepo(db: DbClient, userId: number, url: string) {
+  async createRepo(db: DbClient, userId: string, url: string) {
     let repoInfo;
     try {
       repoInfo = parseUrl(url);
@@ -134,7 +134,7 @@ export const repoService = {
   async delete(db: DbClient, id: string) {
     try {
       await db.repo.delete({
-        where: { publicId: id },
+        where: { id: id },
       });
 
       return { message: "Repository deleted", success: true };
@@ -257,10 +257,10 @@ export const repoService = {
     const items = await db.repo.findMany({
       orderBy: { updatedAt: "desc" },
       select: {
+        id: true,
         name: true,
         owner: true,
         ownerAvatarUrl: true,
-        publicId: true,
       },
       skip,
       take: limit,

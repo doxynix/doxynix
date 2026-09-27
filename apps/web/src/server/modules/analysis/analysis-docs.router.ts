@@ -22,7 +22,7 @@ const FileActionInputSchema = z.object({
 
 export const analysisDocsRouter = {
   documentFile: protectedProcedure.input(FileActionInputSchema).mutation(async ({ ctx, input }) => {
-    return fileActionsService.documentFile(ctx.db, Number(ctx.session.user.id), input);
+    return fileActionsService.documentFile(ctx.db, ctx.session.user.id, input);
   }),
   getAvailableDocs: protectedProcedure
     .input(AnalysisScopeInputSchema)
@@ -80,6 +80,6 @@ export const analysisDocsRouter = {
   quickFileAudit: protectedProcedure
     .input(FileActionInputSchema)
     .mutation(async ({ ctx, input }) => {
-      return fileActionsService.quickFileAudit(ctx.db, Number(ctx.session.user.id), input);
+      return fileActionsService.quickFileAudit(ctx.db, ctx.session.user.id, input);
     }),
 };

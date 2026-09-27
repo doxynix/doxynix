@@ -18,9 +18,9 @@ import type { AIResult } from "../engine/core/analysis-result.schemas";
 import { DocumentFormatter } from "../logic/section-graph-linker";
 
 export const GetWithGraphLinksInput = z.object({
-  analysisId: z.number(),
+  analysisId: z.uuid(),
   docType: DocTypeSchema,
-  repoId: z.number(),
+  repoId: z.uuid(),
 });
 
 export const docsService = {
@@ -52,13 +52,13 @@ export const docsService = {
     const doc = await db.document.findFirst({
       where: {
         repo: {
-          publicId: repoId,
+          id: repoId,
         },
         type,
         ...(path != null ? { path } : {}),
         ...(path == null && {
           analysis: {
-            publicId: analysis.publicId,
+            id: analysis.id,
           },
         }),
       },
@@ -75,16 +75,16 @@ export const docsService = {
           name: repo.name,
           owner: repo.owner,
         }),
-      [`doc-html-${doc.publicId}`],
+      [`doc-html-${doc.id}`],
       {
         revalidate: false,
-        tags: ["docs", doc.publicId],
+        tags: ["docs", doc.id],
       },
     )();
 
     return {
       html,
-      id: doc.publicId,
+      id: doc.id,
       materializedPath: resolveDocumentMaterializedPath({
         sourcePath: doc.path,
         type: doc.type,
@@ -99,8 +99,8 @@ export const docsService = {
       select: {
         content: true,
         createdAt: true,
+        id: true,
         path: true,
-        publicId: true,
         type: true,
         updatedAt: true,
         version: true,
@@ -161,11 +161,11 @@ export const docsService = {
 
     const { analysisId, commitSha } = cachedData.contentRef ?? {};
 
-    let internalAnalysisId: number | undefined;
+    let internalAnalysisId: string | undefined;
     if (analysisId != null) {
       const analysis = await db.analysis.findUnique({
         select: { id: true },
-        where: { publicId: analysisId },
+        where: { id: analysisId },
       });
       internalAnalysisId = analysis?.id;
     }
@@ -176,7 +176,7 @@ export const docsService = {
       data: {
         content: markdownContent,
         path: input.path,
-        repo: { connect: { publicId: input.repoId } },
+        repo: { connect: { id: input.repoId } },
         type: "CODE_DOC",
         version: commitSha ?? "manual",
         ...(internalAnalysisId != null

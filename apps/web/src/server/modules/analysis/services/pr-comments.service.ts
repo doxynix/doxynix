@@ -23,12 +23,12 @@ export const prCommentsService = {
         body: true,
         filePath: true,
         findingType: true,
+        id: true,
         line: true,
-        publicId: true,
         riskLevel: true,
       },
       where: {
-        analysis: { publicId: analysisId },
+        analysis: { id: analysisId },
       },
     });
 
@@ -43,17 +43,17 @@ export const prCommentsService = {
               name: repoContext.name,
               owner: repoContext.owner,
             }),
-          [`comment-html-${c.publicId}`],
+          [`comment-html-${c.id}`],
           {
             revalidate: false,
-            tags: ["comments", c.publicId],
+            tags: ["comments", c.id],
           },
         )();
         return {
           bodyHtml: html,
           filePath: c.filePath,
           findingType: c.findingType,
-          id: c.publicId,
+          id: c.id,
           line: c.line,
           riskLevel: c.riskLevel,
         };
@@ -67,7 +67,7 @@ export const prCommentsService = {
 
   async postCommentToPR(db: DbClient, input: { body: string; prNumber: number; repoId: string }) {
     const repo = await db.repo.findUnique({
-      where: { publicId: input.repoId },
+      where: { id: input.repoId },
     });
 
     if (repo == null) {

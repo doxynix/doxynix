@@ -83,7 +83,7 @@ export const docSyncService = {
         branch: branchName,
         createdByUser: false,
         description: `Automatically generated documentation update based on commit ${commitSha.slice(0, 7)}.`,
-        repoId: repo.publicId,
+        repoId: repo.id,
         title: "Doxynix: Sync Project Documentation",
       });
 
@@ -95,14 +95,14 @@ export const docSyncService = {
           filePath,
           newContent,
         })),
-        fixId: fix.publicId,
+        fixId: fix.id,
         owner: repo.owner,
-        repoId: repo.publicId,
+        repoId: repo.id,
         repoName: repo.name,
         title: "📝 Doxynix: Sync latest project documentation",
       });
 
-      await analysisRepo.updateStatus(db, fix.publicId, "PR_OPENED", {
+      await analysisRepo.updateStatus(db, fix.id, "PR_OPENED", {
         githubPrNumber: result.prNumber,
         githubPrUrl: result.prUrl,
       });
@@ -116,7 +116,7 @@ export const docSyncService = {
       return result;
     } catch (error) {
       if (fix != null) {
-        await analysisRepo.updateStatus(db, fix.publicId, "FAILED").catch((dbError) => {
+        await analysisRepo.updateStatus(db, fix.id, "FAILED").catch((dbError) => {
           appLogger.error({ error: dbError, msg: "Failed to update failed fix status in DB" });
         });
       }

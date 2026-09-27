@@ -24,7 +24,7 @@ export const notificationMapper = {
     return {
       body: n.body,
       createdAt: n.createdAt,
-      id: n.publicId,
+      id: n.id,
       isRead: n.isRead,
       repo: n.repo != null ? { name: n.repo.name, owner: n.repo.owner } : null,
       title: n.title,

@@ -10,13 +10,13 @@ export const userRouter = createTRPCRouter({
     .input(z.object({}).optional())
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx }) => {
-      return userService.deleteAccount(ctx.db, Number(ctx.session.user.id));
+      return userService.deleteAccount(ctx.db, ctx.session.user.id);
     }),
 
   disconnectAccount: protectedProcedure
     .input(z.object({ provider: z.enum(["github", "google", "yandex"]) }))
     .mutation(async ({ ctx, input }) => {
-      return userService.disconnectAccount(ctx.db, Number(ctx.session.user.id), input.provider);
+      return userService.disconnectAccount(ctx.db, ctx.session.user.id, input.provider);
     }),
 
   getActiveSessions: protectedProcedure.query(async ({ ctx }) => {
@@ -24,21 +24,21 @@ export const userRouter = createTRPCRouter({
   }),
 
   getLinkedAccounts: protectedProcedure.query(async ({ ctx }) => {
-    return userService.getLinkedAccounts(ctx.db, Number(ctx.session.user.id));
+    return userService.getLinkedAccounts(ctx.db, ctx.session.user.id);
   }),
 
   me: protectedProcedure
     .input(z.object({}).optional())
     .output(z.object({ message: z.string(), user: PublicUserSchema }))
     .query(async ({ ctx }) => {
-      return userService.getMe(ctx.db, Number(ctx.session.user.id));
+      return userService.getMe(ctx.db, ctx.session.user.id);
     }),
 
   removeAvatar: protectedProcedure
     .input(z.object({}).optional())
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx }) => {
-      return userService.removeAvatar(ctx.db, Number(ctx.session.user.id));
+      return userService.removeAvatar(ctx.db, ctx.session.user.id);
     }),
 
   revokeSession: protectedProcedure
@@ -52,6 +52,6 @@ export const userRouter = createTRPCRouter({
     .input(UpdateProfileSchema)
     .output(z.object({ message: z.string(), user: PublicUserSchema }))
     .mutation(async ({ ctx, input }) => {
-      return userService.updateUser(ctx.db, Number(ctx.session.user.id), input);
+      return userService.updateUser(ctx.db, ctx.session.user.id, input);
     }),
 });

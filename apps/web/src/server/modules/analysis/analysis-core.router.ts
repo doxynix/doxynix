@@ -22,7 +22,7 @@ export const analysisCoreRouter = {
     )
     .output(z.object({ jobId: z.string(), publicAccessToken: z.string(), status: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      return analysisLifecycleService.analyze(ctx.db, Number(ctx.session.user.id), input);
+      return analysisLifecycleService.analyze(ctx.db, ctx.session.user.id, input);
     }),
   cancel: protectedProcedure
     .input(z.object({ analysisId: z.uuid() }))

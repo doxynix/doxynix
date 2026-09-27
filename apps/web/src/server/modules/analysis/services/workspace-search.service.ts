@@ -135,7 +135,7 @@ export const workspaceSearchService = {
           description: `${doc.type} section`,
           docSectionId: section.id,
           docType: doc.type,
-          id: `${doc.publicId}:${section.id}`,
+          id: `${doc.id}:${section.id}`,
           kind: "doc-section",
           label: section.title,
           nodeId: section.graphNodeIds[0] ?? null,

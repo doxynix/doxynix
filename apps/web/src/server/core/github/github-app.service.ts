@@ -15,7 +15,7 @@ import { getInstallationInfo, getPublicClient } from "./github-provider";
 import { githubTokenService } from "./github-token.service";
 
 export const githubAppService = {
-  async getInstallUrl(prisma: PrismaClientExtended, userId: number) {
+  async getInstallUrl(prisma: PrismaClientExtended, userId: string) {
     const state = crypto.randomBytes(32).toString("base64url");
     const identifier = `github_install_${userId}`;
 
@@ -35,7 +35,7 @@ export const githubAppService = {
     return `https://github.com/apps/doxynix/installations/new?state=${state}`;
   },
 
-  async getMyRepos(db: DbClient, prisma: PrismaClientExtended, userId: number) {
+  async getMyRepos(db: DbClient, prisma: PrismaClientExtended, userId: string) {
     await this.syncInstallations(prisma, userId);
 
     const installations = await db.githubInstallation.findMany({
@@ -93,13 +93,13 @@ export const githubAppService = {
 
   async saveInstallation(
     prisma: PrismaClientExtended,
-    userIdNum: number,
+    userId: string,
     installationId: string,
     state: string,
   ) {
     const instIdBigInt = BigInt(installationId);
     const inputInstIdNum = Number(installationId);
-    const identifier = `github_install_${userIdNum}`;
+    const identifier = `github_install_${userId}`;
 
     const validState = await prisma.verification.findFirst({
       where: {
@@ -110,14 +110,14 @@ export const githubAppService = {
     });
 
     if (validState == null) {
-      appLogger.warn({ msg: "CSRF/Replay attack or expired state", userId: userIdNum });
+      appLogger.warn({ msg: "CSRF/Replay attack or expired state", userId: userId });
       throw new TRPCError({
         code: "FORBIDDEN",
         message: "Invalid, expired, or already used security state. Please try installing again.",
       });
     }
 
-    const validToken = await githubTokenService.getValidToken(userIdNum);
+    const validToken = await githubTokenService.getValidToken(userId);
 
     if (validToken == null) {
       throw new TRPCError({
@@ -154,7 +154,7 @@ export const githubAppService = {
       appLogger.warn({
         installationId,
         msg: "IDOR attempt: User tried to claim unowned installation",
-        userId: userIdNum,
+        userId: userId,
       });
       throw new TRPCError({
         code: "FORBIDDEN",
@@ -195,11 +195,11 @@ export const githubAppService = {
             htmlUrl: installationInfo.html_url,
             isSuspended: false,
             repositorySelection: repoSelection,
-            userId: userIdNum,
+            userId: userId,
           },
           where: {
             id: instIdBigInt,
-            OR: [{ userId: null }, { userId: userIdNum }],
+            OR: [{ userId: null }, { userId: userId }],
           },
         });
 
@@ -226,7 +226,7 @@ export const githubAppService = {
               repositorySelection: repoSelection,
               targetId: BigInt(installationInfo.target_id),
               targetType,
-              userId: userIdNum,
+              userId: userId,
             },
           });
         }
@@ -246,7 +246,7 @@ export const githubAppService = {
     return { success: true };
   },
 
-  async syncInstallations(prisma: PrismaClientExtended, userId: number): Promise<void> {
+  async syncInstallations(prisma: PrismaClientExtended, userId: string): Promise<void> {
     const validToken = await githubTokenService.getValidToken(userId);
     if (validToken == null) {
       return;

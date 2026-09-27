@@ -28,7 +28,7 @@ import { applyDocumentSurgicalEdit } from "./document-surgical-edit";
  */
 
 export async function runDocumentFilePreview(
-  userId: number,
+  userId: string,
   input: FileActionRequest,
 ): Promise<DocumentFilePreviewResult> {
   const rawContent = input.content.trim();

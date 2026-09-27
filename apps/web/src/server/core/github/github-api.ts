@@ -111,7 +111,7 @@ async function fetchOauthRepos(account: { accessToken: null | string; id: number
  * Complexity: 8 branches
  */
 
-export async function getMyRepos(prisma: DbClient, userId: number): Promise<RepoItemFields[]> {
+export async function getMyRepos(prisma: DbClient, userId: string): Promise<RepoItemFields[]> {
   try {
     const [installations, oauthAccounts] = await Promise.all([
       prisma.githubInstallation.findMany({
@@ -152,7 +152,7 @@ export async function getMyRepos(prisma: DbClient, userId: number): Promise<Repo
 
 export async function searchRepos(
   prisma: DbClient,
-  userId: number,
+  userId: string,
   query: string,
   limit: number | undefined,
 ): Promise<RepoItemFields[]> {
@@ -192,7 +192,7 @@ export async function searchRepos(
  * Retries with fallback on auth errors
  */
 
-export async function getRepoInfo(prisma: DbClient, userId: number, owner: string, name: string) {
+export async function getRepoInfo(prisma: DbClient, userId: string, owner: string, name: string) {
   const context = await resolveClientContext(prisma, userId, {
     allowPublicFallback: true,
     allowSystemFallback: true,
@@ -211,7 +211,7 @@ export async function getRepoInfo(prisma: DbClient, userId: number, owner: strin
 
 export async function getRepoBranches(
   prisma: DbClient,
-  userId: number,
+  userId: string,
   owner: string,
   name: string,
 ) {
@@ -244,7 +244,7 @@ export async function getRepoBranches(
 
 export async function getRepoTree(
   prisma: DbClient,
-  userId: number,
+  userId: string,
   owner: string,
   name: string,
   branch?: string,
@@ -312,7 +312,7 @@ type GitHubFileResponse = {
 
 export async function getFileContent(
   prisma: DbClient,
-  userId: number,
+  userId: string,
   owner: string,
   name: string,
   path: string,
@@ -355,7 +355,7 @@ export async function getFileContent(
 
 export async function executeWithFallback<T>(
   prisma: DbClient,
-  userId: number,
+  userId: string,
   initialOctokit: OctokitInstance,
   initialType: GitHubContextType,
   operation: (client: OctokitInstance) => Promise<T>,
@@ -406,7 +406,7 @@ type BusFactorResult = {
  */
 export async function calculateBusFactor(
   repo: Repo,
-  userId: number,
+  userId: string,
   prisma: DbClient,
 ): Promise<BusFactorResult> {
   taskLogger.info("GitHub: Analyzing contributor history to calculate Bus Factor...");

@@ -72,7 +72,7 @@ export const analysisPrFixesRouter = {
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return fixesService.createFix(ctx.db, Number(ctx.session.user.id), input);
+      return fixesService.createFix(ctx.db, ctx.session.user.id, input);
     }),
   getById: protectedProcedure
     .input(z.object({ fixId: z.uuid() }))

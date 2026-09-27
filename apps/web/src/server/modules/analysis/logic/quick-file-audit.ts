@@ -28,7 +28,7 @@ import {
  * router that ultimately calls it.
  */
 export async function runQuickFileAudit(
-  userId: number,
+  userId: string,
   input: FileActionInput,
 ): Promise<QuickFileAuditResult> {
   const rawContent = input.content.trim();

@@ -34,11 +34,11 @@ export const repoRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const newRepo = await repoService.createRepo(ctx.db, Number(ctx.session.user.id), input.url);
+      const newRepo = await repoService.createRepo(ctx.db, ctx.session.user.id, input.url);
 
       return {
         message: "Repository added",
-        repo: { ...newRepo, id: newRepo.publicId, status: "NEW" },
+        repo: { ...newRepo, id: newRepo.id, status: "NEW" },
         success: true,
       };
     }),

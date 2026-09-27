@@ -26,7 +26,7 @@ export function coerceAnalysisPayload(
   if (!parsed.success) {
     appLogger.warn({
       error: z.treeifyError(parsed.error),
-      id: analysis.publicId,
+      id: analysis.id,
       msg: "Zod mismatch",
     });
     return {
@@ -81,7 +81,7 @@ export function normalizeWriterStatuses(aiResult: AIResult | null) {
 export function toDocSummary(doc: StoredDocument, aiResult: AIResult | null) {
   const status = getWriterStatus(doc.type, aiResult);
   return {
-    id: doc.publicId,
+    id: doc.id,
     path: doc.path,
     source: status === "llm" ? "llm" : null,
     status,

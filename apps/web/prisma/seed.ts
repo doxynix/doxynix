@@ -47,7 +47,7 @@ function parseSeedNumber(value: string | undefined, fallback: number): number {
   return Number(trimmed);
 }
 
-function createStressRepo(index: number, userId: number): Prisma.RepoCreateManyInput {
+function createStressRepo(index: number, userId: string): Prisma.RepoCreateManyInput {
   const ownerPool = [
     "vercel",
     "facebook",
@@ -102,7 +102,7 @@ function createStressRepo(index: number, userId: number): Prisma.RepoCreateManyI
   };
 }
 
-function createStressNotification(index: number, repoIds: number[], userId: number) {
+function createStressNotification(index: number, repoIds: string[], userId: string) {
   const keywordPool = ["react", "query", "tanstack", "nextjs", "typescript", "postgres"];
   const keyword = keywordPool[index % keywordPool.length];
   const repoId = repoIds.length > 0 ? repoIds[index % repoIds.length] : undefined;

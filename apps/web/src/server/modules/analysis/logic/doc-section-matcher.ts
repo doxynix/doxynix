@@ -17,7 +17,7 @@ export type DocSectionMatch = {
 
 export type MatchableDoc = {
   content: string;
-  publicId: string;
+  id: string;
   type: DocType;
   version: string;
 };
@@ -72,7 +72,7 @@ export function matchDocSections(params: {
         })
         .slice(0, perDocLimit)
         .map((section) => ({
-          docId: doc.publicId,
+          docId: doc.id,
           docType: doc.type,
           id: section.id,
           title: section.title,

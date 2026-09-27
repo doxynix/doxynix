@@ -22,9 +22,9 @@ export const latestCompletedAnalysisSelect = {
   commitSha: true,
   complexityScore: true,
   createdAt: true,
+  id: true,
   metricsJson: true,
   onboardingScore: true,
-  publicId: true,
   resultJson: true,
   score: true,
   securityScore: true,
@@ -50,25 +50,25 @@ export const repoWithLatestAnalysisAndDocsSelect = {
     select: {
       analysis: {
         select: {
-          publicId: true,
+          id: true,
         },
       },
       createdAt: true,
+      id: true,
       path: true,
-      publicId: true,
       type: true,
       updatedAt: true,
       version: true,
     },
   },
   forks: true,
+  id: true,
   language: true,
   license: true,
   name: true,
   openIssues: true,
   owner: true,
   ownerAvatarUrl: true,
-  publicId: true,
   pushedAt: true,
   size: true,
   stars: true,
@@ -93,7 +93,7 @@ export type ImpactAnalysis = NonNullable<ImpactAnalysisRecord>;
 export const analysisRepo = {
   async addComments(
     db: DbClient,
-    analysisId: number,
+    analysisId: string,
     comments: Array<{
       body: string;
       filePath: string;
@@ -130,11 +130,11 @@ export const analysisRepo = {
         branch: input.branch,
         createdByUser: input.createdByUser ?? false,
         description: input.description,
-        repo: { connect: { publicId: input.repoId } },
+        repo: { connect: { id: input.repoId } },
         status: "DRAFT",
         title: input.title,
         ...(input.prAnalysisId != null && {
-          prAnalysis: { connect: { publicId: input.prAnalysisId } },
+          prAnalysis: { connect: { id: input.prAnalysisId } },
         }),
       },
     });
@@ -149,7 +149,7 @@ export const analysisRepo = {
         prNumber: input.prNumber,
         repo: {
           connect: {
-            publicId: input.repoId,
+            id: input.repoId,
           },
         },
         repoName: input.repoName,
@@ -160,7 +160,7 @@ export const analysisRepo = {
 
   async getById(db: DbClient, id: string) {
     return db.generatedFix.findUnique({
-      where: { publicId: id },
+      where: { id },
     });
   },
 
@@ -176,18 +176,18 @@ export const analysisRepo = {
       where: {
         prNumber,
         repo: {
-          publicId: repoId,
+          id: repoId,
         },
       },
     });
   },
 
-  async getByRepoId(db: DbClient, repoPublicId: string, status?: FixStatus) {
+  async getByRepoId(db: DbClient, repoId: string, status?: FixStatus) {
     return db.generatedFix.findMany({
       orderBy: { createdAt: "desc" },
       where: {
         repo: {
-          publicId: repoPublicId,
+          id: repoId,
         },
         ...(status != null && { status }),
       },
@@ -199,9 +199,9 @@ export const analysisRepo = {
       select: {
         commitSha: true,
         createdAt: true,
-        publicId: true,
+        id: true,
       },
-      where: { repo: { publicId: repoId }, status: "DONE" },
+      where: { repo: { id: repoId }, status: "DONE" },
     });
 
     if (analysis == null) {
@@ -209,7 +209,7 @@ export const analysisRepo = {
     }
 
     return {
-      analysisId: analysis.publicId,
+      analysisId: analysis.id,
       commitSha: analysis.commitSha,
       createdAt: analysis.createdAt,
     };
@@ -229,14 +229,14 @@ export const analysisRepo = {
           where: { commitSha, status: "DONE" },
         },
       },
-      where: { publicId: repoId },
+      where: { id: repoId },
     });
   },
 
   async getRepoSnapshot(db: DbClient, repoId: string, aid?: string) {
     const repo = await db.repo.findUnique({
       select: repoWithLatestAnalysisAndDocsSelect,
-      where: { publicId: repoId },
+      where: { id: repoId },
     });
 
     if (repo == null) {
@@ -246,7 +246,7 @@ export const analysisRepo = {
     if (aid != null) {
       const targetAnalysis = await db.analysis.findFirst({
         select: latestCompletedAnalysisSelect,
-        where: { publicId: aid, status: "DONE" },
+        where: { id: aid, status: "DONE" },
       });
 
       if (targetAnalysis == null) {
@@ -256,7 +256,7 @@ export const analysisRepo = {
       return {
         ...repo,
         analyses: [targetAnalysis],
-        documents: repo.documents.filter((d) => d.analysis?.publicId === aid),
+        documents: repo.documents.filter((d) => d.analysis?.id === aid),
       };
     }
 
@@ -279,8 +279,8 @@ export const analysisRepo = {
             body: true,
             filePath: true,
             findingType: true,
+            id: true,
             line: true,
-            publicId: true,
             riskLevel: true,
           },
         },
@@ -291,20 +291,20 @@ export const analysisRepo = {
           select: {
             githubPrNumber: true,
             githubPrUrl: true,
-            publicId: true,
+            id: true,
             status: true,
             title: true,
           },
         },
         headSha: true,
+        id: true,
         prNumber: true,
-        publicId: true,
         riskScore: true,
         status: true,
       },
       where: {
         prNumber,
-        repo: { publicId: repoId },
+        repo: { id: repoId },
       },
     });
   },
@@ -313,16 +313,16 @@ export const analysisRepo = {
     const docs = await db.document.findMany({
       orderBy: { updatedAt: "desc" },
       select: {
-        analysis: { select: { publicId: true } },
+        analysis: { select: { id: true } },
         content: true,
-        publicId: true,
+        id: true,
         type: true,
         updatedAt: true,
         version: true,
       },
       where: {
-        repo: { publicId: repoId },
-        ...(aid != null ? { analysis: { publicId: aid } } : {}),
+        repo: { id: repoId },
+        ...(aid != null ? { analysis: { id: aid } } : {}),
       },
     });
 
@@ -340,14 +340,14 @@ export const analysisRepo = {
       select: {
         githubPrNumber: true,
         githubPrUrl: true,
-        publicId: true,
+        id: true,
         status: true,
         title: true,
       },
       take: 8,
       where: {
         prAnalysis: {
-          publicId: { in: uniqueIds },
+          id: { in: uniqueIds },
         },
       },
     });
@@ -365,20 +365,20 @@ export const analysisRepo = {
       select: {
         analysis: {
           select: {
+            id: true,
             prNumber: true,
-            publicId: true,
           },
         },
         body: true,
         filePath: true,
         findingType: true,
+        id: true,
         line: true,
-        publicId: true,
         riskLevel: true,
       },
       take: 12,
       where: {
-        analysis: { repo: { publicId: repoId } },
+        analysis: { repo: { id: repoId } },
         filePath: { in: relatedFiles },
       },
     });
@@ -387,15 +387,15 @@ export const analysisRepo = {
       body: comment.body,
       filePath: comment.filePath,
       findingType: comment.findingType,
-      id: comment.publicId,
+      id: comment.id,
       line: comment.line,
-      prAnalysisId: comment.analysis.publicId,
+      prAnalysisId: comment.analysis.id,
       prNumber: comment.analysis.prNumber,
       riskLevel: comment.riskLevel,
     }));
   },
 
-  async storeChangedFilesSnapshot(db: DbClient, id: number, changedFiles: PRChangedFileSnapshot[]) {
+  async storeChangedFilesSnapshot(db: DbClient, id: string, changedFiles: PRChangedFileSnapshot[]) {
     return db.pullRequestAnalysis.update({
       data: {
         changedFilesJson: changedFiles,
@@ -404,7 +404,7 @@ export const analysisRepo = {
     });
   },
 
-  async updatePRAnalysis(db: DbClient, id: number, data: { baseSha?: string; headSha?: string }) {
+  async updatePRAnalysis(db: DbClient, id: string, data: { baseSha?: string; headSha?: string }) {
     return db.pullRequestAnalysis.update({
       data: {
         ...(data.baseSha != null && { baseSha: data.baseSha }),
@@ -416,7 +416,7 @@ export const analysisRepo = {
 
   async updatePRAnalysisStatus(
     db: DbClient,
-    id: number,
+    id: string,
     status: PRAnalysisStatus,
     // `findingsJson` can be a validated JSON payload; keep it untyped here to allow
     // passing different persisted shapes (validated via Zod where appropriate).
@@ -454,7 +454,7 @@ export const analysisRepo = {
         githubPrUrl: data?.githubPrUrl,
         status,
       },
-      where: { publicId: id },
+      where: { id },
     });
   },
 };

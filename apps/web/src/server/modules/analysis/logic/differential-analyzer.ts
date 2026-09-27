@@ -33,7 +33,7 @@ type PRDiffInfo = {
 type PRAnalysisMetadata = {
   branch: string;
   repoId: string;
-  userId: number;
+  userId: string;
 };
 
 /**

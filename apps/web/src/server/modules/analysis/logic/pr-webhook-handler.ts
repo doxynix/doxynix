@@ -60,7 +60,7 @@ export async function handlePullRequestEvent(payload: PullRequestEvent): Promise
     }
 
     // Check if PR analysis is enabled
-    const config = await PRConfigService.getConfig(repo.publicId, prisma);
+    const config = await PRConfigService.getConfig(repo.id, prisma);
     if (!config.enabled) {
       appLogger.debug({
         msg: "pr_webhook_analysis_disabled",
@@ -73,7 +73,7 @@ export async function handlePullRequestEvent(payload: PullRequestEvent): Promise
     // Check for existing analysis (DB record)
     const existingAnalysis = await analysisRepo.getByRepoAndPRNumber(
       prisma,
-      repo.publicId,
+      repo.id,
       pull_request.number,
     );
 
@@ -86,7 +86,7 @@ export async function handlePullRequestEvent(payload: PullRequestEvent): Promise
       return;
     }
 
-    let analysisId: number;
+    let prAnalysisId: string;
 
     if (existingAnalysis == null) {
       // Create new analysis
@@ -95,11 +95,11 @@ export async function handlePullRequestEvent(payload: PullRequestEvent): Promise
         headSha: pull_request.head.sha,
         owner: repository.owner.login,
         prNumber: pull_request.number,
-        repoId: repo.publicId,
+        repoId: repo.id,
         repoName: repository.name,
       });
 
-      analysisId = analysis.id;
+      prAnalysisId = analysis.id;
 
       appLogger.info({
         analysisId: analysis.id,
@@ -112,15 +112,15 @@ export async function handlePullRequestEvent(payload: PullRequestEvent): Promise
         baseSha: pull_request.base.sha,
         headSha: pull_request.head.sha,
       });
-      analysisId = updatedAnalysis.id;
+      prAnalysisId = updatedAnalysis.id;
     }
 
     // Trigger Trigger.dev task for differential analysis
     await analyzePrTask.trigger({
-      analysisId,
       baseSha: pull_request.base.sha,
       headSha: pull_request.head.sha,
       owner: repository.owner.login,
+      prAnalysisId,
       prNumber: pull_request.number,
       repoId: repo.id,
       repoName: repository.name,

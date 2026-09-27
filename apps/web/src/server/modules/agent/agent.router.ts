@@ -13,13 +13,13 @@ export const agentChatRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return agentService.createSession(ctx.db, Number(ctx.session.user.id), input);
+      return agentService.createSession(ctx.db, ctx.session.user.id, input);
     }),
 
   getSessionHistory: protectedProcedure
     .input(z.object({ sessionId: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      return agentService.getSessionHistory(ctx.db, Number(ctx.session.user.id), input.sessionId);
+      return agentService.getSessionHistory(ctx.db, ctx.session.user.id, input.sessionId);
     }),
 
   listSessions: protectedProcedure
@@ -36,6 +36,6 @@ export const agentChatRouter = createTRPCRouter({
         .optional(),
     )
     .query(async ({ ctx, input }) => {
-      return agentService.listSessions(ctx.db, Number(ctx.session.user.id), input);
+      return agentService.listSessions(ctx.db, ctx.session.user.id, input);
     }),
 });

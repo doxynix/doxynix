@@ -4,11 +4,11 @@ import * as z from "zod";
 
 export const analysisLatestSelect = {
   complexityScore: true,
+  id: true,
   jobId: true,
   message: true,
   onboardingScore: true,
   progress: true,
-  publicId: true,
   score: true,
   securityScore: true,
   status: true,
@@ -19,12 +19,12 @@ export const analysisLatestSelect = {
 export const AnalysisLatestOutputSchema = z
   .strictObject({
     complexityScore: z.number().int().nullable(),
+    id: z.uuid(),
     jobId: z.string().nullable(),
     message: z.string().nullable(),
     onboardingScore: z.number().int().nullable(),
     progress: z.number().int(),
     publicAccessToken: z.string().nullable(),
-    publicId: z.string(),
     score: z.number().int().nullable(),
     securityScore: z.number().int().nullable(),
     status: StatusSchema,

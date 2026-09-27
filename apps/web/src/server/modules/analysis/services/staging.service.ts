@@ -52,10 +52,10 @@ export const stagingService = {
     const fix = await db.generatedFix.findUnique({
       include: {
         repo: {
-          select: { publicId: true },
+          select: { id: true },
         },
       },
-      where: { publicId: input.fixId },
+      where: { id: input.fixId },
     });
 
     if (fix == null) {
@@ -65,7 +65,7 @@ export const stagingService = {
       });
     }
 
-    if (fix.repo.publicId !== input.repoId) {
+    if (fix.repo.id !== input.repoId) {
       throw new TRPCError({
         code: "FORBIDDEN",
         message: "Generated fix does not belong to the specified repository",

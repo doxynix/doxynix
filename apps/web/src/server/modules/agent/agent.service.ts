@@ -14,13 +14,13 @@ export type ListSessionsInput = {
 };
 
 export const agentService = {
-  async createSession(db: DbClient, userId: number, input: CreateSessionInput) {
-    let internalRepoId: number | undefined;
+  async createSession(db: DbClient, userId: string, input: CreateSessionInput) {
+    let internalRepoId: string | undefined;
 
     if (input.repoId != null) {
       const repo = await db.repo.findFirst({
         select: { id: true },
-        where: { publicId: input.repoId, userId },
+        where: { id: input.repoId, userId },
       });
 
       if (repo == null) {
@@ -38,7 +38,7 @@ export const agentService = {
     });
   },
 
-  async getSessionHistory(db: DbClient, userId: number, sessionId: string) {
+  async getSessionHistory(db: DbClient, userId: string, sessionId: string) {
     const rawMessages = await db.chatMessage.findMany({
       orderBy: { createdAt: "asc" },
       where: { session: { userId }, sessionId },
@@ -47,8 +47,8 @@ export const agentService = {
     return rawMessages.map((msg) => agentMapper.toSessionMessage(msg));
   },
 
-  async listSessions(db: DbClient, userId: number, input: ListSessionsInput | undefined) {
-    let internalRepoId: null | number = null;
+  async listSessions(db: DbClient, userId: string, input: ListSessionsInput | undefined) {
+    let internalRepoId: null | string = null;
 
     if (input?.currentRepo != null) {
       const repo = await db.repo.findUnique({
