@@ -1,4 +1,4 @@
--- @param {Int} $1:user_id
+-- @param {String} $1:user_id
 -- @param {DateTime} $2:current_period_start
 -- @param {DateTime} $3:previous_period_start
 -- @param {DateTime} $4:period_end
@@ -11,9 +11,9 @@ WITH periods AS (
         $2::timestamp AS prev_end
 ),
 user_repos AS (
-    SELECT id, name, owner, public_id, created_at
+    SELECT id, name, owner, created_at
     FROM repos
-    WHERE user_id = $1
+    WHERE user_id = $1::uuid
 ),
 base_data AS (
     SELECT
@@ -61,7 +61,7 @@ SELECT
 
     -- Activity
     (SELECT COALESCE(jsonb_agg(ra ORDER BY ra."createdAt" DESC), '[]'::jsonb) FROM (
-        SELECT a.public_id as id, a.progress, a.status, a.created_at as "createdAt", ur.name AS "repoName", ur.owner AS "repoOwner"
+        SELECT a.id, a.progress, a.status, a.created_at as "createdAt", ur.name AS "repoName", ur.owner AS "repoOwner"
         FROM analyses a JOIN user_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at < p.cur_end ORDER BY a.created_at DESC LIMIT 5
     ) ra) AS "recentActivity",
 
