@@ -137,8 +137,8 @@ export function Agent() {
       return;
     }
 
-    lastMessage.parts.forEach((part: any) => {
-      const isToolCall = typeof part?.type === "string" && part.type.startsWith("tool-");
+    lastMessage.parts.forEach((part) => {
+      const isToolCall = typeof part.type === "string" && part.type.startsWith("tool-");
       if (isToolCall) {
         const toolPart = part as { state?: string; type: string };
         if (toolPart.state === "output-available") {
@@ -395,7 +395,7 @@ export function Agent() {
                                     isAssistant ? "mr-auto text-left" : "ml-auto text-right",
                                   )}
                                 >
-                                  {message.parts.map((rawPart: any, index: number) => {
+                                  {message.parts.map((rawPart, index) => {
                                     const part = rawPart as MessagePart;
 
                                     if (part.type === "reasoning") {

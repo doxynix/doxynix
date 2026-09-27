@@ -105,7 +105,7 @@ export function RepoDocsTabs({
             return (
               <AppButton
                 className={cn(
-                  "flex w-full cursor-pointer items-center justify-start gap-1 truncate py-1 text-left text-xs transition-standard hover:text-foreground",
+                  "flex w-full items-center justify-start gap-1 truncate py-1 text-left text-xs transition-standard hover:text-foreground",
                   isFileActive
                     ? "bg-accent font-semibold text-foreground"
                     : "text-muted-foreground",
