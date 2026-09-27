@@ -35,6 +35,8 @@ vi.mock("./github-provider", () => ({
 }));
 
 const prismaMocks = { account: { findMany: vi.fn() } };
+
+const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 const prismaMock = prismaMocks as unknown as DbClient;
 
 const createOctokitMock = (contributors: Array<{ contributions: number; login: string }>) => ({
@@ -54,7 +56,7 @@ describe("github-api: Core Logic & Resilient Algorithms", () => {
 
   describe("calculateBusFactor (50% rule algorithm)", () => {
     const makeRepo = (visibility: "PRIVATE" | "PUBLIC" = "PUBLIC"): Repo =>
-      ({ id: 1, name: "repo", owner: "acme", visibility }) as Repo;
+      ({ id: "repo-uuid", name: "repo", owner: "acme", visibility }) as Repo;
 
     it("calculates bus factor = 1 when single contributor owns >= 50% commits", async () => {
       const octokit = createOctokitMock([
@@ -64,7 +66,7 @@ describe("github-api: Core Logic & Resilient Algorithms", () => {
 
       mocks.resolveClientContext.mockResolvedValue({ octokit, type: "oauth" });
 
-      const result = await calculateBusFactor(makeRepo(), 1, prismaMock);
+      const result = await calculateBusFactor(makeRepo(), USER_ID, prismaMock);
 
       expect(result.busFactor).toBe(1);
       expect(result.rawContributors[0]?.login).toBe("lead");
@@ -80,7 +82,7 @@ describe("github-api: Core Logic & Resilient Algorithms", () => {
 
       mocks.resolveClientContext.mockResolvedValue({ octokit, type: "oauth" });
 
-      const result = await calculateBusFactor(makeRepo(), 1, prismaMock);
+      const result = await calculateBusFactor(makeRepo(), USER_ID, prismaMock);
 
       expect(result.busFactor).toBe(2);
     });
@@ -90,7 +92,7 @@ describe("github-api: Core Logic & Resilient Algorithms", () => {
 
       mocks.resolveClientContext.mockResolvedValue({ octokit, type: "oauth" });
 
-      const result = await calculateBusFactor(makeRepo(), 1, prismaMock);
+      const result = await calculateBusFactor(makeRepo(), USER_ID, prismaMock);
 
       expect(result.busFactor).toBe(0);
     });
@@ -100,9 +102,9 @@ describe("github-api: Core Logic & Resilient Algorithms", () => {
 
       mocks.resolveClientContext.mockResolvedValue({ octokit, type: "public" });
 
-      await expect(calculateBusFactor(makeRepo("PRIVATE"), 1, prismaMock)).rejects.toBeInstanceOf(
-        mocks.GitHubAuthRequiredError,
-      );
+      await expect(
+        calculateBusFactor(makeRepo("PRIVATE"), USER_ID, prismaMock),
+      ).rejects.toBeInstanceOf(mocks.GitHubAuthRequiredError);
     });
   });
 
@@ -144,7 +146,7 @@ describe("github-api: Core Logic & Resilient Algorithms", () => {
         .mockRejectedValueOnce(Object.assign(new Error("Auth expired"), { status: 401 }))
         .mockResolvedValueOnce("recovered-data");
 
-      const result = await executeWithFallback(prismaMock, 1, {} as any, "installation", op);
+      const result = await executeWithFallback(prismaMock, USER_ID, {} as any, "installation", op);
 
       expect(result).toBe("recovered-data");
       expect(mocks.getPublicClient).toHaveBeenCalledWith("backup-token");

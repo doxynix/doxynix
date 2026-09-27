@@ -34,21 +34,20 @@ function makeRepoWithAnalyses(overrides?: Partial<RepoWithAnalyses>): RepoWithAn
     forks: 7,
     githubCreatedAt: new Date("2024-01-01"),
     githubId: 12_345,
-    id: 1,
+    id: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
     language: "TypeScript",
     license: "MIT",
     name: "test-repo",
     openIssues: 3,
     owner: "test-owner",
     ownerAvatarUrl: "https://avatars.githubusercontent.com/u/1",
-    publicId: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
     pushedAt: new Date("2025-01-15"),
     size: 1024,
     stars: 42,
     topics: ["test"],
     updatedAt: new Date("2025-01-15"),
     url: "https://github.com/test-owner/test-repo",
-    userId: 1,
+    userId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d",
     visibility: "PUBLIC" as const,
     ...overrides,
   };
@@ -74,7 +73,7 @@ describe("repoMapper.toPublic", () => {
     expect(result.securityScore).toBe(88);
     expect(result.techDebtScore).toBe(30);
     expect(result.status).toBe("DONE");
-    expect(result.id).toBe(repo.publicId);
+    expect(result.id).toBe(repo.id);
     expect(result.languageColor).toBe("#3178c6");
     expect(getLanguageColor).toHaveBeenCalledWith("TypeScript");
   });
@@ -120,20 +119,20 @@ describe("repoMapper.toPublic", () => {
 describe("repoMapper.toSlim", () => {
   function makeSlimRow(overrides?: Partial<SlimRepoRecord>): SlimRepoRecord {
     return {
+      id: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
       name: "test-repo",
       owner: "test-owner",
       ownerAvatarUrl: "https://avatars.githubusercontent.com/u/1",
-      publicId: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
       ...overrides,
     };
   }
 
-  it("renames publicId -> id and ownerAvatarUrl -> avatar", () => {
+  it("maps the primary key to id and ownerAvatarUrl to avatar", () => {
     const row = makeSlimRow();
 
     expect(repoMapper.toSlim(row)).toStrictEqual({
       avatar: "https://avatars.githubusercontent.com/u/1",
-      id: row.publicId,
+      id: row.id,
       name: "test-repo",
       owner: "test-owner",
     });
@@ -164,17 +163,17 @@ describe("repoMapper.toSlim", () => {
 describe("repoMapper.toPublicFields", () => {
   it("produces exactly the PublicRepoSchema keys once status is supplied", () => {
     const fields = repoMapper.toPublicFields(
-      makeRepoWithAnalyses({ publicId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b" }),
+      makeRepoWithAnalyses({ id: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b" }),
     );
     const parsed = PublicRepoSchema.parse({ ...fields, status: Status.NEW });
 
     expect(Object.keys(parsed).sort()).toStrictEqual(Object.keys(PublicRepoSchema.shape).sort());
   });
 
-  it("substitutes publicId for the internal numeric id", () => {
+  it("exposes the primary key as id", () => {
     const repo = makeRepoWithAnalyses();
 
-    expect(repoMapper.toPublicFields(repo).id).toBe(repo.publicId);
+    expect(repoMapper.toPublicFields(repo).id).toBe(repo.id);
   });
 
   it("leaks no internal column", () => {
@@ -202,8 +201,8 @@ describe("repoMapper.toPaginatedList", () => {
     const result = repoMapper.toPaginatedList(repos, meta);
 
     expect(result.items).toHaveLength(2);
-    expect(result.items[0]?.id).toBe(repos[0]?.publicId);
-    expect(result.items[1]?.id).toBe(repos[1]?.publicId);
+    expect(result.items[0]?.id).toBe(repos[0]?.id);
+    expect(result.items[1]?.id).toBe(repos[1]?.id);
     expect(result.meta).toBe(meta);
   });
 

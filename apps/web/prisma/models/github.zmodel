@@ -4,7 +4,7 @@ import "./core"
 
 model Repo {
   /// @zod.custom.omit(["model"])
-  id               String                     @id @default(dbgenerated("uuidv7()")) @db.Uuid @omit
+  id               String                     @id @default(dbgenerated("uuidv7()")) @db.Uuid
   githubId         Int                        @map("github_id")
   owner            String                     @db.Citext @length(min: 1, max: 39, message: "Repository owner login cannot exceed 39 characters")
   /// @zod.string.min(1).max(255)

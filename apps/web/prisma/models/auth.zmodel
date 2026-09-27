@@ -3,7 +3,7 @@ import "./core"
 
 model User {
   /// @zod.custom.omit(["model"])
-  id                  String               @id @default(dbgenerated("uuidv7()")) @db.Uuid @omit
+  id                  String               @id @default(dbgenerated("uuidv7()")) @db.Uuid
   /// @encrypted
   /// @zod.string.email({ message: "Incorrect email" })
   email               String?              @db.Citext @email(message: "Incorrect email")
@@ -52,7 +52,7 @@ model User {
 
 model Account {
   /// @zod.custom.omit(["model"])
-  id                    String    @id @default(dbgenerated("uuidv7()")) @db.Uuid @omit
+  id                    String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   /// @zod.custom.omit(["model"])
   userId                String    @map("user_id") @db.Uuid @omit
   accountId             String    @map("account_id")
@@ -151,7 +151,7 @@ model TwoFactor {
 
 model Session {
   /// @zod.custom.omit(["model"])
-  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid @omit
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
   /// @encrypted
   /// @zod.custom.omit(["model"])
   token     String   @unique @omit

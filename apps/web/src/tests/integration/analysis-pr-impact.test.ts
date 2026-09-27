@@ -19,7 +19,7 @@ import { cleanupDatabase, createTestUser, expectDenied } from "../helpers";
 type FixtureOwner = {
   db: Awaited<ReturnType<typeof createTestUser>>["db"];
   name: string;
-  user: { id: number };
+  user: { id: string };
 };
 
 async function createRepoFixture(name: string) {
@@ -38,7 +38,7 @@ async function createRepoFixture(name: string) {
 
   return {
     db: owner.db,
-    fixture: { owner: name.toLowerCase(), repoId: repo.publicId, repoName: repo.name },
+    fixture: { owner: name.toLowerCase(), repoId: repo.id, repoName: repo.name },
     owner: { db: owner.db, name, user: owner.user },
   };
 }
@@ -61,7 +61,7 @@ async function createSecondRepo(owner: FixtureOwner, suffix: string) {
   return {
     fixture: {
       owner: owner.name.toLowerCase(),
-      repoId: repo.publicId,
+      repoId: repo.id,
       repoName: repo.name,
     },
   };
@@ -93,7 +93,7 @@ function createPullRequestAnalysis(
       headSha: "head-sha-1",
       owner: fixture.owner,
       prNumber: overrides.prNumber ?? 42,
-      repo: { connect: { publicId: fixture.repoId } },
+      repo: { connect: { id: fixture.repoId } },
       repoName: fixture.repoName,
       riskScore: overrides.riskScore ?? 5,
       status: (overrides.status ?? "COMPLETED") as never,
@@ -108,9 +108,9 @@ describe("prImpactService.getAnalysis", () => {
     const { db, fixture } = await createRepoFixture("OwnerGet");
     const created = await createPullRequestAnalysis(db, fixture, { riskScore: 7 });
 
-    const found = await prImpactService.getAnalysis(db, created.publicId);
+    const found = await prImpactService.getAnalysis(db, created.id);
 
-    expect(found.publicId).toBe(created.publicId);
+    expect(found.id).toBe(created.id);
     expect(found.prNumber).toBe(42);
     expect(found.riskScore).toBe(7);
     expect(found.baseSha).toBe("base-sha-1");
@@ -141,7 +141,7 @@ describe("prImpactService.listByRepository", () => {
 
     await db.pullRequestComment.create({
       data: {
-        analysis: { connect: { publicId: analysis.publicId } },
+        analysis: { connect: { id: analysis.id } },
         body: "first",
         filePath: "src/index.ts",
         findingType: "COMPLEXITY",
@@ -151,7 +151,7 @@ describe("prImpactService.listByRepository", () => {
     });
     await db.pullRequestComment.create({
       data: {
-        analysis: { connect: { publicId: analysis.publicId } },
+        analysis: { connect: { id: analysis.id } },
         body: "second",
         filePath: "src/other.ts",
         findingType: "BUG",
@@ -165,7 +165,7 @@ describe("prImpactService.listByRepository", () => {
     expect(listed).toMatchObject({
       findingCount: 2,
       headSha: "head-sha-1",
-      id: analysis.publicId,
+      id: analysis.id,
       prNumber: 42,
       riskScore: 5,
       status: "COMPLETED",
@@ -212,7 +212,7 @@ describe("prImpactService.listByRepository", () => {
           headSha: "head-sha-1",
           owner: fixture.owner,
           prNumber: 99,
-          repo: { connect: { publicId: fixture.repoId } },
+          repo: { connect: { id: fixture.repoId } },
           repoName: fixture.repoName,
         },
       }),

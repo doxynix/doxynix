@@ -7,15 +7,14 @@ function makeNotificationRow(overrides?: Record<string, unknown>) {
   return {
     body: "Analysis finished",
     createdAt: new Date("2025-03-01T10:00:00Z"),
-    id: 42,
+    id: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
     isRead: false,
-    publicId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
     repo: { name: "test-repo", owner: "test-owner" },
-    repoId: 7,
+    repoId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5c",
     title: "Analysis done",
     type: NotifyType.SUCCESS,
     updatedAt: new Date("2025-03-01T10:05:00Z"),
-    userId: 1,
+    userId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d",
     ...overrides,
   };
 }
@@ -32,10 +31,10 @@ const EXPECTED_PUBLIC_KEYS = [
 ];
 
 describe("notificationMapper.toPublic", () => {
-  it("should map publicId to id", () => {
+  it("should map the primary key to id", () => {
     const row = makeNotificationRow();
 
-    expect(notificationMapper.toPublic(row).id).toBe(row.publicId);
+    expect(notificationMapper.toPublic(row).id).toBe(row.id);
   });
 
   it("should leak no internal column", () => {
@@ -56,7 +55,7 @@ describe("notificationMapper.toPublic", () => {
 
   it("should map only the selected repo fields", () => {
     const result = notificationMapper.toPublic(
-      makeNotificationRow({ repo: { name: "test-repo", owner: "test-owner", publicId: "leak" } }),
+      makeNotificationRow({ repo: { id: "leak", name: "test-repo", owner: "test-owner" } }),
     );
 
     expect(result.repo).toStrictEqual({ name: "test-repo", owner: "test-owner" });
@@ -79,7 +78,7 @@ describe("notificationMapper.toPaginatedList", () => {
   };
 
   it("should map every item and pass the meta through", () => {
-    const rows = [makeNotificationRow(), makeNotificationRow({ publicId: "other-id" })];
+    const rows = [makeNotificationRow(), makeNotificationRow({ id: "other-id" })];
 
     const result = notificationMapper.toPaginatedList(rows, meta);
 

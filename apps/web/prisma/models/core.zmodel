@@ -3,7 +3,7 @@ import "./github"
 
 model Notification {
   /// @zod.custom.omit(["model"])
-  id        String     @id @default(dbgenerated("uuidv7()")) @db.Uuid @omit
+  id        String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
   /// @zod.string.trim().min(1, { message: "The title cannot be empty" }).max(300, { message: "The title cannot exceed 300 characters" })
   title     String
   /// @zod.string.trim().min(1, { message: "The text of the notification is mandatory" }).max(5000, { message: "The text of the notification cannot exceed 5000 characters" })

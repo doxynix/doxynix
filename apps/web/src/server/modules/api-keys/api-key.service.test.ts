@@ -5,6 +5,7 @@ import type { DbClient } from "@/server/core/db";
 import { apiKeyService } from "@/server/modules/api-keys/api-key.service";
 
 const KEY_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b";
+const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 
 function createApiKeyDbMock(rows: unknown[] = []) {
   const create = vi.fn().mockResolvedValue({});
@@ -113,7 +114,7 @@ describe("apiKeyService.create", () => {
   it("should return the plaintext key exactly once", async () => {
     const { create, db } = createApiKeyDbMock();
 
-    const result = await apiKeyService.create(db, 1, { name: "ci" });
+    const result = await apiKeyService.create(db, USER_ID, { name: "ci" });
 
     expect(result.key).toMatch(/^dxnx_/);
     expect(create).toHaveBeenCalledTimes(1);
@@ -122,7 +123,7 @@ describe("apiKeyService.create", () => {
   it("should persist only the hash and the display prefix", async () => {
     const { create, db } = createApiKeyDbMock();
 
-    const result = await apiKeyService.create(db, 1, { description: "CI token", name: "ci" });
+    const result = await apiKeyService.create(db, USER_ID, { description: "CI token", name: "ci" });
 
     const data = create.mock.calls[0]?.[0]?.data as Record<string, unknown>;
     expect(data.hashedKey).toBeTypeOf("string");

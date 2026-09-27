@@ -27,6 +27,9 @@ const INTERNAL_ONLY = [...SKIP_FIELDS].filter((field) => field !== "id");
 
 const PUBLIC_ID_KEYS = ["id"];
 
+const PR_ANALYSIS_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5e";
+const REPO_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5f";
+
 function makeFix(overrides: Partial<GeneratedFixRecord> = {}): GeneratedFixRecord {
   return {
     branch: "dxnx/fix-1",
@@ -83,7 +86,7 @@ describe("fixesMapper", () => {
         estimatedImpact: 88,
         githubPrNumber: 1234,
         githubPrUrl: "https://github.com/o/r/pull/1234",
-        prAnalysisId: 9,
+        prAnalysisId: PR_ANALYSIS_ID,
         status: "PR_OPENED",
       });
 
@@ -118,7 +121,7 @@ describe("fixesMapper", () => {
     });
 
     it("leaks no internal Prisma column", () => {
-      const row = makeFix({ prAnalysisId: 9, repoId: 7 });
+      const row = makeFix({ prAnalysisId: PR_ANALYSIS_ID, repoId: REPO_ID });
       const result = fixesMapper.toPublic(row) as Record<string, unknown>;
 
       for (const field of INTERNAL_ONLY) {
@@ -166,7 +169,7 @@ describe("fixesMapper", () => {
 
     it("leaks no internal Prisma column on the detailed shape either", () => {
       const result = fixesMapper.toDetailed(
-        makeFix({ prAnalysisId: 9, repoId: 7 }),
+        makeFix({ prAnalysisId: PR_ANALYSIS_ID, repoId: REPO_ID }),
         null,
       ) as Record<string, unknown>;
 

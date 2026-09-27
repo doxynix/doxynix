@@ -28,11 +28,11 @@ async function captureRejection(promise: Promise<unknown>): Promise<Rejection> {
   throw new Error("expected the call to reject, but it resolved");
 }
 
-async function linkAccount(userId: number, providerId: string, accountId: string) {
+async function linkAccount(userId: string, providerId: string, accountId: string) {
   return prisma.account.create({ data: { accountId, providerId, userId } });
 }
 
-const providersOf = (userId: number) =>
+const providersOf = (userId: string) =>
   prisma.account.findMany({
     orderBy: { providerId: "asc" },
     select: { providerId: true },
@@ -52,19 +52,19 @@ describe("User Linked Accounts: disconnectAccount inside the enhanced $transacti
 
     await expect(
       alice.db.$transaction((tx) =>
-        tx.user.findUnique({ select: { publicId: true }, where: { id: alice.user.id } }),
+        tx.user.findUnique({ select: { id: true }, where: { id: alice.user.id } }),
       ),
-    ).resolves.toMatchObject({ publicId: alice.user.publicId });
+    ).resolves.toMatchObject({ id: alice.user.id });
 
     await expect(
       admin.db.$transaction((tx) =>
-        tx.user.findUnique({ select: { publicId: true }, where: { id: alice.user.id } }),
+        tx.user.findUnique({ select: { id: true }, where: { id: alice.user.id } }),
       ),
-    ).resolves.toMatchObject({ publicId: alice.user.publicId });
+    ).resolves.toMatchObject({ id: alice.user.id });
 
     await expect(
       createAnon().db.$transaction((tx) =>
-        tx.user.findUnique({ select: { publicId: true }, where: { id: alice.user.id } }),
+        tx.user.findUnique({ select: { id: true }, where: { id: alice.user.id } }),
       ),
     ).resolves.toBeNull();
 
@@ -77,7 +77,7 @@ describe("User Linked Accounts: disconnectAccount inside the enhanced $transacti
     ).resolves.toBeNull();
 
     const denied = await captureRejection(
-      bob.db.$transaction((tx) => tx.account.delete({ where: { publicId: account.publicId } })),
+      bob.db.$transaction((tx) => tx.account.delete({ where: { id: account.id } })),
     );
     expect(denied.code).toBe("P2004");
     expect(denied.message).toMatch(/denied by policy/i);

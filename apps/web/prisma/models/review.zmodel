@@ -3,7 +3,7 @@ import "./auth"
 
 model Analysis {
   /// @zod.custom.omit(["model"])
-  id              String     @id @default(dbgenerated("uuidv7()")) @db.Uuid @omit
+  id              String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
 
   status          Status     @default(NEW)
   /// @zod.number.int().min(0).max(100)
@@ -48,7 +48,7 @@ model Analysis {
 
 model Document {
   /// @zod.custom.omit(["model"])
-  id         String    @id @default(dbgenerated("uuidv7()")) @db.Uuid @omit
+  id         String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   version    String
   type       DocType
   /// @zod.string.min(1, { message: "Content cannot be empty" })
@@ -75,7 +75,7 @@ model Document {
 
 model PullRequestAnalysis {
   /// @zod.custom.omit(["model"])
-  id               String               @id @default(dbgenerated("uuidv7()")) @db.Uuid @omit
+  id               String               @id @default(dbgenerated("uuidv7()")) @db.Uuid
 
   prNumber         Int                  @map("pr_number")
   owner            String               @db.Citext @length(min: 1, max: 39)
@@ -115,7 +115,7 @@ model PullRequestAnalysis {
 
 model PullRequestAnalysisConfig {
   /// @zod.custom.omit(["model"])
-  id              String         @id @default(dbgenerated("uuidv7()")) @db.Uuid @omit
+  id              String         @id @default(dbgenerated("uuidv7()")) @db.Uuid
 
   enabled         Boolean        @default(false)
   ciSkip          Boolean        @default(false) @map("ci_skip")
@@ -137,7 +137,7 @@ model PullRequestAnalysisConfig {
 
 model PullRequestComment {
   /// @zod.custom.omit(["model"])
-  id              String              @id @default(dbgenerated("uuidv7()")) @db.Uuid @omit
+  id              String              @id @default(dbgenerated("uuidv7()")) @db.Uuid
 
   filePath        String              @map("file_path")
   line            Int
@@ -164,7 +164,7 @@ model PullRequestComment {
 
 model GeneratedFix {
   /// @zod.custom.omit(["model"])
-  id              String               @id @default(dbgenerated("uuidv7()")) @db.Uuid @omit
+  id              String               @id @default(dbgenerated("uuidv7()")) @db.Uuid
 
   title           String               @length(min: 1, max: 255)
   description     String?              @db.Text

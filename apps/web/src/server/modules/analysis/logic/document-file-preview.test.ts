@@ -14,6 +14,8 @@ vi.mock("@vercel/edge-config", () => ({ get: edgeConfigGet }));
 
 const { runDocumentFilePreview } = await import("./document-file-preview");
 
+const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
+
 type CallArgs = {
   attemptMetadata?: Record<string, unknown>;
   prompt: string;
@@ -53,7 +55,7 @@ beforeEach(() => {
 
 describe("runDocumentFilePreview", () => {
   it("documents a normal source file", async () => {
-    const result = await runDocumentFilePreview(7, FILE_ACTION);
+    const result = await runDocumentFilePreview(USER_ID, FILE_ACTION);
 
     expect(callWithFallback).toHaveBeenCalledTimes(1);
     expect(result.path).toBe("src/math/add.ts");
@@ -62,14 +64,14 @@ describe("runDocumentFilePreview", () => {
   });
 
   it("returns the original code untouched when the model proposes no edits", async () => {
-    const result = await runDocumentFilePreview(7, FILE_ACTION);
+    const result = await runDocumentFilePreview(USER_ID, FILE_ACTION);
 
     expect(result.documentation).toBe(SOURCE);
     expect(result.edits).toEqual([]);
   });
 
   it("embeds the target path and the code in the user prompt", async () => {
-    await runDocumentFilePreview(7, FILE_ACTION);
+    await runDocumentFilePreview(USER_ID, FILE_ACTION);
 
     const { prompt } = firstCall();
     expect(prompt).toContain('<target_file path="src/math/add.ts">');
@@ -77,7 +79,7 @@ describe("runDocumentFilePreview", () => {
   });
 
   it("requests a creative pass with the documentation output schema", async () => {
-    await runDocumentFilePreview(7, FILE_ACTION);
+    await runDocumentFilePreview(USER_ID, FILE_ACTION);
 
     expect(firstCall()).toMatchObject({
       attemptMetadata: { filePath: "src/math/add.ts", operation: "document-file-preview" },
@@ -92,7 +94,7 @@ describe("runDocumentFilePreview", () => {
       summary: "Reworded the doc comment.",
     });
 
-    const result = await runDocumentFilePreview(7, FILE_ACTION);
+    const result = await runDocumentFilePreview(USER_ID, FILE_ACTION);
 
     expect(result.documentation).toBe(SOURCE.replace("Adds", "Sums"));
     expect(result.documentation).toContain("/** Sums two numbers. */");
@@ -111,7 +113,7 @@ describe("runDocumentFilePreview", () => {
       summary: "Two edits.",
     });
 
-    const result = await runDocumentFilePreview(7, FILE_ACTION);
+    const result = await runDocumentFilePreview(USER_ID, FILE_ACTION);
 
     expect(result.documentation).toContain("Sums two numbers");
     expect(result.documentation).toContain("// pure");
@@ -124,7 +126,7 @@ describe("runDocumentFilePreview", () => {
       summary: "Hallucinated edit.",
     });
 
-    const result = await runDocumentFilePreview(7, FILE_ACTION);
+    const result = await runDocumentFilePreview(USER_ID, FILE_ACTION);
 
     expect(result.documentation).toBe(SOURCE);
   });
@@ -136,13 +138,13 @@ describe("runDocumentFilePreview", () => {
       summary: "Empty replace.",
     });
 
-    const result = await runDocumentFilePreview(7, FILE_ACTION);
+    const result = await runDocumentFilePreview(USER_ID, FILE_ACTION);
 
     expect(result.documentation).toBe(SOURCE);
   });
 
   it("returns a fallback for empty content without calling the model", async () => {
-    const result = await runDocumentFilePreview(7, { ...FILE_ACTION, content: "\n \t " });
+    const result = await runDocumentFilePreview(USER_ID, { ...FILE_ACTION, content: "\n \t " });
 
     expect(callWithFallback).not.toHaveBeenCalled();
     expect(result.summary).toMatch(/empty/i);
@@ -154,7 +156,7 @@ describe("runDocumentFilePreview", () => {
   });
 
   it("returns a fallback for binary-like content without calling the model", async () => {
-    const result = await runDocumentFilePreview(7, {
+    const result = await runDocumentFilePreview(USER_ID, {
       ...FILE_ACTION,
       content: "binary\u0000\u0001data",
     });
@@ -164,7 +166,7 @@ describe("runDocumentFilePreview", () => {
   });
 
   it("returns a fallback for a lock file without calling the model", async () => {
-    const result = await runDocumentFilePreview(7, {
+    const result = await runDocumentFilePreview(USER_ID, {
       ...FILE_ACTION,
       content: '{"lockfileVersion":3}',
       path: "bun.lock",
@@ -175,7 +177,7 @@ describe("runDocumentFilePreview", () => {
   });
 
   it("returns a fallback for an env file without calling the model", async () => {
-    const result = await runDocumentFilePreview(7, {
+    const result = await runDocumentFilePreview(USER_ID, {
       ...FILE_ACTION,
       content: "TOKEN=abc\n",
       path: ".env",

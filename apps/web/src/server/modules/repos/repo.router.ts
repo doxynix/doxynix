@@ -8,6 +8,7 @@ import * as z from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 
+import { repoMapper } from "./repo.mapper";
 import { RepoFilterSchema } from "./repo.schemas";
 import { repoService } from "./repo.service";
 
@@ -38,7 +39,7 @@ export const repoRouter = createTRPCRouter({
 
       return {
         message: "Repository added",
-        repo: { ...newRepo, id: newRepo.id, status: "NEW" },
+        repo: { ...repoMapper.toPublicFields(newRepo), status: "NEW" },
         success: true,
       };
     }),

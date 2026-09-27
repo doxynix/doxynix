@@ -6,7 +6,7 @@ import type { DbClient } from "@/server/core/db";
 import { agentService } from "./agent.service";
 
 const SESSION_ID = "018f0000-0000-7000-8000-0000000000bb";
-const USER_ID = 42;
+const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 
 function stubDb(messages: ChatMessage[] = []) {
   const calls: unknown[] = [];
