@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.6.0](https://github.com/doxynix/doxynix/compare/doxynix-v4.5.4...doxynix-v4.6.0) (2026-09-27)
+
+
+### Features
+
+* **skills:** add Prisma ORM agent skills ([#2209](https://github.com/doxynix/doxynix/issues/2209)) ([420e7b2](https://github.com/doxynix/doxynix/commit/420e7b269449be7a38433f310d9686a79156384b))
+
 ## [4.5.4](https://github.com/doxynix/doxynix/compare/doxynix-v4.5.3...doxynix-v4.5.4) (2026-09-27)
 
 
