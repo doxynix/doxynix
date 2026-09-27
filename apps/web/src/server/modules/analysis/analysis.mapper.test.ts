@@ -21,8 +21,12 @@ vi.mock("@/server/utils/markdown-to-html", () => ({ markdownToHtml: mocks.markdo
 vi.mock("@/server/utils/string-utils", () => ({ hasText: mocks.hasText }));
 
 import { analysisMapper } from "./analysis.mapper";
-import type { LatestCompletedAnalysis, RepoWithLatestAnalysisAndDocs } from "./analysis.repository";
-import type { ImpactAnalysis, ParsedFinding } from "./analysis.schemas";
+import type {
+  ImpactAnalysis,
+  LatestCompletedAnalysis,
+  RepoWithLatestAnalysisAndDocs,
+} from "./analysis.repository";
+import type { ParsedFinding } from "./analysis.schemas";
 import type { AIResult } from "./engine/core/analysis-result.schemas";
 import type { RepoMetrics } from "./engine/core/metrics.types";
 import defaultAiResult from "./fixtures/default-ai-result.json";

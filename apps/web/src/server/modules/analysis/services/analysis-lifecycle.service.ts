@@ -9,7 +9,9 @@ import { appLogger } from "@/server/core/app-logger";
 import { type DbClient, prisma } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
 
+import { analysisLatestSelect } from "../analysis-latest.schemas";
 import type { AIResult } from "../engine/core/analysis-result.schemas";
+import { parseRepoMetrics } from "../engine/core/metrics.schemas";
 import type { RepoMetrics } from "../engine/core/metrics.types";
 import { calculateTeamRoles } from "../engine/metrics/common-metrics";
 import {
@@ -171,6 +173,7 @@ export const analysisLifecycleService = {
   async getLatest(db: DbClient, repoId: string) {
     const analysis = await db.analysis.findFirst({
       orderBy: { createdAt: "desc" },
+      select: analysisLatestSelect,
       where: {
         repo: { publicId: repoId },
       },
@@ -251,6 +254,13 @@ export const analysisLifecycleService = {
       repo,
       teamRoles,
     });
+
+    if (parseRepoMetrics(finalMetrics) == null) {
+      appLogger.error({
+        analysisId,
+        msg: "Final metrics rejected by RepoMetricsSchema; persisting unvalidated",
+      });
+    }
 
     appLogger.info({
       analysisId,

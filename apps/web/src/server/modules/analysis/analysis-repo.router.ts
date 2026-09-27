@@ -2,6 +2,11 @@ import * as z from "zod";
 
 import { protectedProcedure } from "@/server/core/trpc/init";
 
+import {
+  AnalysisScopeInputSchema,
+  NodeContextInputSchema,
+  NodeContextOutputSchema,
+} from "./analysis.schemas";
 import { prCommentsService } from "./services/pr-comments.service";
 import { prImpactService } from "./services/pr-impact.service";
 import { workspaceService } from "./services/workspace.service";
@@ -39,17 +44,18 @@ export const analysisRepoRouter = {
       return prImpactService.getByRepoAndPRNumber(ctx.db, input.repoId, input.prNumber);
     }),
   getNodeContext: protectedProcedure
-    .input(z.object({ aid: z.string().optional(), nodeId: z.string(), repoId: z.uuid() }))
+    .input(NodeContextInputSchema)
+    .output(NodeContextOutputSchema)
     .query(async ({ ctx, input }) => {
       return workspaceService.getNodeContext(ctx.db, input.repoId, input.nodeId, input.aid);
     }),
   getStructureMap: protectedProcedure
-    .input(z.object({ aid: z.string().optional(), repoId: z.uuid() }))
+    .input(AnalysisScopeInputSchema)
     .query(async ({ ctx, input }) => {
       return workspaceService.getStructureMap(ctx.db, input.repoId, input.aid);
     }),
   getStructureNode: protectedProcedure
-    .input(z.object({ aid: z.string().optional(), nodeId: z.string(), repoId: z.uuid() }))
+    .input(NodeContextInputSchema)
     .query(async ({ ctx, input }) => {
       return workspaceService.getStructureNode(ctx.db, input.repoId, input.nodeId, input.aid);
     }),

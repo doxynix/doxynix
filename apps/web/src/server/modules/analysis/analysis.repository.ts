@@ -6,6 +6,7 @@ import { uniq } from "es-toolkit";
 import type { DbClient } from "@/server/core/db";
 
 import { pickLatestDocsByType } from "./analysis.utils";
+import { fixesMapper } from "./fixes.mapper";
 import type { PRChangedFileSnapshot } from "./logic/pr.types";
 
 type PRAnalysisCreateInput = {
@@ -85,6 +86,9 @@ export type AnalysisRef = {
   commitSha: null | string;
   createdAt: Date;
 };
+
+export type ImpactAnalysisRecord = Awaited<ReturnType<typeof analysisRepo.loadImpactAnalysis>>;
+export type ImpactAnalysis = NonNullable<ImpactAnalysisRecord>;
 
 export const analysisRepo = {
   async addComments(
@@ -348,13 +352,7 @@ export const analysisRepo = {
       },
     });
 
-    return fixes.map((fix) => ({
-      githubPrNumber: fix.githubPrNumber,
-      githubPrUrl: fix.githubPrUrl,
-      id: fix.publicId,
-      status: fix.status,
-      title: fix.title,
-    }));
+    return fixes.map((fix) => fixesMapper.toSummary(fix));
   },
 
   async loadRelatedPrFindings(db: DbClient, repoId: string, relatedFiles: string[]) {

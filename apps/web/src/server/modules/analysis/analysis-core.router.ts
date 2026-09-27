@@ -3,6 +3,8 @@ import * as z from "zod";
 
 import { protectedProcedure } from "@/server/core/trpc/init";
 
+import { AnalysisScopeInputSchema } from "./analysis.schemas";
+import { AnalysisLatestOutputSchema } from "./analysis-latest.schemas";
 import { analysisLifecycleService } from "./services/analysis-lifecycle.service";
 import { workspaceService } from "./services/workspace.service";
 
@@ -28,7 +30,7 @@ export const analysisCoreRouter = {
       return analysisLifecycleService.cancel(ctx.db, input.analysisId);
     }),
   getDetailedMetrics: protectedProcedure
-    .input(z.object({ aid: z.string().optional(), repoId: z.uuid() }))
+    .input(AnalysisScopeInputSchema)
     .query(async ({ ctx, input }) => {
       return workspaceService.getDetailedMetrics(ctx.db, input.repoId, input.aid);
     }),
@@ -39,12 +41,11 @@ export const analysisCoreRouter = {
     }),
   getLatest: protectedProcedure
     .input(z.object({ repoId: z.uuid() }))
+    .output(AnalysisLatestOutputSchema)
     .query(async ({ ctx, input }) => {
       return analysisLifecycleService.getLatest(ctx.db, input.repoId);
     }),
-  getWorkspace: protectedProcedure
-    .input(z.object({ aid: z.string().optional(), repoId: z.uuid() }))
-    .query(async ({ ctx, input }) => {
-      return workspaceService.getWorkspace(ctx.db, input.repoId, input.aid);
-    }),
+  getWorkspace: protectedProcedure.input(AnalysisScopeInputSchema).query(async ({ ctx, input }) => {
+    return workspaceService.getWorkspace(ctx.db, input.repoId, input.aid);
+  }),
 };

@@ -14,7 +14,10 @@ import {
   type FindingForFixSchema,
   type FixApplicationPayloadSchema,
   FixResultSchema,
+  type GeneratedFixDetailedDTO,
+  type GeneratedFixDTO,
 } from "../analysis.schemas";
+import { fixesMapper } from "../fixes.mapper";
 import { FixService } from "../logic/fix-generator";
 import { generateFixTask } from "../tasks/generate-fix.task";
 
@@ -185,7 +188,11 @@ export const fixesService = {
   /**
    * Get fix metadata (no diffs in response)
    */
-  async getById(db: DbClient, redis: Redis, fixId: string) {
+  async getById(
+    db: DbClient,
+    redis: Redis,
+    fixId: string,
+  ): Promise<z.infer<typeof GeneratedFixDetailedDTO>> {
     const fix = await analysisRepo.getById(db, fixId);
 
     if (fix == null) {
@@ -198,19 +205,18 @@ export const fixesService = {
     const cachedResult = await redis.get(REDIS_CONFIG.keys.fixResult(fixId));
     const parsedResult = FixResultSchema.safeParse(cachedResult);
 
-    return {
-      ...fix,
-      id: fix.publicId,
-      resultJson: parsedResult.success ? parsedResult.data : null,
-    };
+    return fixesMapper.toDetailed(fix, parsedResult.success ? parsedResult.data : null);
   },
 
   /**
    * Get all fixes for a repo (metadata only)
    */
-  async getByRepository(db: DbClient, repoId: string) {
+  async getByRepository(
+    db: DbClient,
+    repoId: string,
+  ): Promise<Array<z.infer<typeof GeneratedFixDTO>>> {
     const fixes = await analysisRepo.getByRepoId(db, repoId);
-    return fixes.map((fix) => ({ ...fix, id: fix.publicId }));
+    return fixes.map((fix) => fixesMapper.toPublic(fix));
   },
 
   async openPullRequest(
