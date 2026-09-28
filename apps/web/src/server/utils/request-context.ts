@@ -18,7 +18,7 @@ type RequestStore = {
   requestId: string;
 
   userAgent: string;
-  userId?: number;
+  userId?: string;
   userRole?: string;
 };
 
@@ -107,7 +107,7 @@ type RequestContextInput = {
   path: string;
   req: NextRequest;
   requestId?: string;
-  userId?: number;
+  userId?: string;
   userRole?: string;
 };
 

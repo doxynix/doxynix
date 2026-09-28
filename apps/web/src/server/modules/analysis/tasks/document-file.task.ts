@@ -25,7 +25,7 @@ export const documentFileTask = task({
     path: string;
     repoId: string;
     syncMeta: SyncFileActionMeta;
-    userId: number;
+    userId: string;
   }) => {
     const documentedCode = await runDocumentFilePreview(payload.userId, payload);
 

@@ -22,13 +22,13 @@ export const generateFixTask = task({
     fixId: string;
     prAnalysisId?: string;
     repoId: string;
-    userId: number;
+    userId: string;
   }) => {
     const fixService = new FixService();
 
     try {
       const repo = await prisma.repo.findUnique({
-        where: { publicId: payload.repoId },
+        where: { id: payload.repoId },
       });
 
       if (repo == null) {
@@ -47,7 +47,7 @@ export const generateFixTask = task({
       if (payload.prAnalysisId != null) {
         const prAnalysis = await prisma.pullRequestAnalysis.findUnique({
           select: { headSha: true },
-          where: { publicId: payload.prAnalysisId },
+          where: { id: payload.prAnalysisId },
         });
         if (prAnalysis != null) {
           targetBranch = prAnalysis.headSha;
@@ -66,7 +66,7 @@ export const generateFixTask = task({
               prisma,
               prisma,
               payload.userId,
-              repo.publicId,
+              repo.id,
               filePath,
               targetBranch,
             );

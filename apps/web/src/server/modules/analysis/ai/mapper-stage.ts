@@ -19,7 +19,7 @@ export async function executeMapperPhase(
   hardMetrics: RepoMetrics,
   evidence: RepositoryEvidence,
   analysisId: string,
-  userId: number,
+  userId: string,
   repoId: string,
   branch: string,
 ): Promise<ProjectMap> {

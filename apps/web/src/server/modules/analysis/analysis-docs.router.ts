@@ -4,7 +4,12 @@ import * as z from "zod";
 import { protectedProcedure } from "@/server/core/trpc/init";
 
 import { AnalysisScopeInputSchema } from "./analysis.schemas";
-import { docsService, GetWithGraphLinksInput } from "./services/docs.service";
+import {
+  docsService,
+  GetWithGraphLinksInput,
+  GetWithGraphLinksOutput,
+  PinAuditToDocsOutput,
+} from "./services/docs.service";
 import { FileActionResult, fileActionsService } from "./services/file-actions.service";
 
 const DEFAULT_DOC_LANGUAGE = "English";
@@ -22,7 +27,7 @@ const FileActionInputSchema = z.object({
 
 export const analysisDocsRouter = {
   documentFile: protectedProcedure.input(FileActionInputSchema).mutation(async ({ ctx, input }) => {
-    return fileActionsService.documentFile(ctx.db, Number(ctx.session.user.id), input);
+    return fileActionsService.documentFile(ctx.db, ctx.session.user.id, input);
   }),
   getAvailableDocs: protectedProcedure
     .input(AnalysisScopeInputSchema)
@@ -59,6 +64,7 @@ export const analysisDocsRouter = {
     }),
   getWithGraphLinks: protectedProcedure
     .input(GetWithGraphLinksInput)
+    .output(GetWithGraphLinksOutput)
     .query(async ({ ctx, input }) => {
       return docsService.getWithGraphLinks(ctx.db, input);
     }),
@@ -74,12 +80,13 @@ export const analysisDocsRouter = {
         repoId: z.uuid(),
       }),
     )
+    .output(PinAuditToDocsOutput)
     .mutation(async ({ ctx, input }) => {
       return docsService.pinAuditToDocs(ctx.db, ctx.redis, ctx.session.user.id, input);
     }),
   quickFileAudit: protectedProcedure
     .input(FileActionInputSchema)
     .mutation(async ({ ctx, input }) => {
-      return fileActionsService.quickFileAudit(ctx.db, Number(ctx.session.user.id), input);
+      return fileActionsService.quickFileAudit(ctx.db, ctx.session.user.id, input);
     }),
 };

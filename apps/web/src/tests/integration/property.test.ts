@@ -28,7 +28,7 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
       fc.asyncProperty(fc.uuid(), fc.string({ minLength: 1 }), async (randomUuid, randomName) => {
         const anonDb = enhance(prisma, { user: undefined });
         const repo = await anonDb.repo.findFirst({
-          where: { OR: [{ publicId: randomUuid }, { name: randomName }] },
+          where: { OR: [{ id: randomUuid }, { name: randomName }] },
         });
         return repo == null;
       }),
@@ -50,7 +50,7 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
           try {
             await db.user.update({
               data: { name: newName, role: targetRole },
-              where: { publicId: user.publicId },
+              where: { id: user.id },
             });
             const updated = await prisma.user.findUnique({ where: { id: user.id } });
             return updated?.role !== "ADMIN" || targetRole === "USER";
@@ -73,8 +73,8 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
       fc.asyncProperty(fc.uuid(), fc.date(), async (fakeUuid, fakeDate) => {
         try {
           await db.user.update({
-            data: { createdAt: fakeDate, publicId: fakeUuid },
-            where: { publicId: user.publicId },
+            data: { createdAt: fakeDate, id: fakeUuid },
+            where: { id: user.id },
           });
           return false;
         } catch {

@@ -100,7 +100,7 @@ export const changelogTask = task({
     analysisResult: any;
     language: string;
     repo: any;
-    userId: number;
+    userId: string;
   }) => {
     return runWriterWithLimiter(
       "changelog",
@@ -112,7 +112,7 @@ export const changelogTask = task({
         engineeringDossierPayload: "",
         language: i.language,
         payload: "",
-        repoId: i.repo.publicId,
+        repoId: i.repo.id,
         selectedTokens: 25_000,
         userId: i.userId,
       },

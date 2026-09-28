@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { del } from "@vercel/blob";
 import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
+import * as z from "zod";
 
 import { VERCEL_BLOB_CALLBACK_URL } from "@/shared/config/env.server";
 
@@ -46,9 +47,9 @@ export async function POST(request: Request): Promise<NextResponse> {
           return;
         }
 
-        const userId = Number(rawUserId);
+        const userId = typeof rawUserId === "string" ? rawUserId : null;
 
-        if (rawUserId == null || Number.isNaN(userId) || userId <= 0) {
+        if (userId == null || !z.uuid().safeParse(userId).success) {
           appLogger.error({ msg: "Invalid userId in Blob upload metadata", rawUserId });
           return;
         }

@@ -70,6 +70,15 @@ All agents must leverage modular skills located in `.agents/skills/`:
    - Token budgets must be dynamic. Document sections must anchor to graph node IDs.
    - Consult `.agents/skills/analysis-engine/SKILL.md`.
 3. **File Budget**: Max 400 lines per file (SRP). Break down oversized modules.
+4. **Database Keys**: 20 of 21 models use a single server-generated
+   `uuid` key, `@default(dbgenerated("uuidv7()")) @db.Uuid` — always with
+   `@db.Uuid`, never as `text`. Requires PostgreSQL >= 18. Never generate a key
+   in application code, and never put `@omit` on an `id`: `@omit` is a ZenStack
+   attribute that hides the field from the policy layer, which makes the
+   identifier unreadable. It belongs on secret and `*Id` FK columns only.
+   `uuidv7()` is `VOLATILE`, so sort and filter on `createdAt`, not on the key.
+   `GithubInstallation.id`, `Repo.githubId` and `PullRequestComment.githubCommentId`
+   stay integer — external natural keys from GitHub, not surrogates.
 
 ---
 

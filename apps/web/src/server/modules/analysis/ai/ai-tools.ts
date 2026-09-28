@@ -40,14 +40,14 @@ const TOOL_KEYS_BY_PROFILE: Record<RepositoryToolProfile, readonly string[]> = {
   writer_readme: ["readFile", "readPreviousDocument"],
 };
 
-function buildRepositoryTools(userId: number, repoId: string, branch: string) {
+function buildRepositoryTools(userId: string, repoId: string, branch: string) {
   return {
     getBranches: tool({
       description: "Get all available git branches for this repository.",
       execute: async () => {
         try {
           appLogger.info({ msg: "AI Tool: getBranches", repoId });
-          const repo = await prisma.repo.findUnique({ where: { publicId: repoId } });
+          const repo = await prisma.repo.findUnique({ where: { id: repoId } });
           if (repo == null) {
             return "Error: Repository not found.";
           }
@@ -85,7 +85,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
       execute: async ({ prefix }) => {
         try {
           appLogger.info({ msg: "AI Tool: listFiles", prefix, repoId });
-          const repo = await prisma.repo.findUnique({ where: { publicId: repoId } });
+          const repo = await prisma.repo.findUnique({ where: { id: repoId } });
           if (repo == null) {
             return "Error: Repo not found";
           }
@@ -228,7 +228,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
         try {
           appLogger.info({ docType, msg: "AI Tool: readPreviousDocument", repoId });
 
-          const repo = await prisma.repo.findUnique({ where: { publicId: repoId } });
+          const repo = await prisma.repo.findUnique({ where: { id: repoId } });
           if (repo == null) {
             return "Error: Repository not found.";
           }
@@ -333,7 +333,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
 
 export function buildRepositoryToolProfile(
   profile: RepositoryToolProfile,
-  userId: number,
+  userId: string,
   repoId: string,
   branch: string,
 ): ToolSet {

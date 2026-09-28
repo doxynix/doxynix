@@ -13,7 +13,7 @@ export interface WriterInput {
   payload: string;
   repoId: string;
   selectedTokens: number;
-  userId: number;
+  userId: string;
 }
 
 const WRITER_TIMEOUT_MS = 12 * 60 * 1000;

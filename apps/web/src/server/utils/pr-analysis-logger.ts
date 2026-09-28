@@ -7,7 +7,7 @@ import { appLogger as baseLogger } from "../core/app-logger";
  */
 export const prAnalysisLogger = {
   analyzeCompleted: (
-    repoId: number,
+    repoId: string,
     prNumber: number,
     totalDuration: number,
     findingsCount: number,
@@ -21,11 +21,11 @@ export const prAnalysisLogger = {
     });
   },
 
-  analyzeFailed: (repoId: number, prNumber: number, error: string) => {
+  analyzeFailed: (repoId: string, prNumber: number, error: string) => {
     baseLogger.error({ error, msg: "pr_analysis_failed", prNumber, repoId });
   },
 
-  analyzeStarted: (repoId: number, prNumber: number, tokenBudget: number) => {
+  analyzeStarted: (repoId: string, prNumber: number, tokenBudget: number) => {
     baseLogger.info({
       msg: "pr_analysis_started",
       phase: "initialization",
@@ -35,7 +35,7 @@ export const prAnalysisLogger = {
     });
   },
 
-  commentPostFailed: (repoId: number, prNumber: number, file: string, error: string) => {
+  commentPostFailed: (repoId: string, prNumber: number, file: string, error: string) => {
     baseLogger.error({
       error,
       file,
@@ -45,7 +45,7 @@ export const prAnalysisLogger = {
     });
   },
 
-  commentsPosted: (repoId: number, prNumber: number, commentCount: number) => {
+  commentsPosted: (repoId: string, prNumber: number, commentCount: number) => {
     baseLogger.info({
       comments: commentCount,
       msg: "pr_comments_posted",
@@ -54,11 +54,11 @@ export const prAnalysisLogger = {
     });
   },
 
-  configUpdated: (repoId: number, config: PRAnalysisConfig) => {
+  configUpdated: (repoId: string, config: PRAnalysisConfig) => {
     baseLogger.info({ config, msg: "pr_config_updated", repoId });
   },
 
-  findingsScored: (repoId: number, prNumber: number, findingsCount: number, riskScore: number) => {
+  findingsScored: (repoId: string, prNumber: number, findingsCount: number, riskScore: number) => {
     baseLogger.info({
       msg: "pr_findings_scored",
       prNumber,
@@ -68,7 +68,7 @@ export const prAnalysisLogger = {
     });
   },
 
-  mapperPhaseCompleted: (repoId: number, prNumber: number, findings: number, duration: number) => {
+  mapperPhaseCompleted: (repoId: string, prNumber: number, findings: number, duration: number) => {
     baseLogger.info({
       duration,
       findings,
@@ -85,7 +85,7 @@ export const prAnalysisLogger = {
   },
 
   sentinelPhaseCompleted: (
-    repoId: number,
+    repoId: string,
     prNumber: number,
     findingsCount: number,
     duration: number,
@@ -101,7 +101,7 @@ export const prAnalysisLogger = {
     });
   },
 
-  sentinelPhaseStarted: (repoId: number, prNumber: number) => {
+  sentinelPhaseStarted: (repoId: string, prNumber: number) => {
     baseLogger.info({
       msg: "pr_analysis_phase",
       phase: "sentinel",

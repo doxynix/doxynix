@@ -35,11 +35,11 @@ export async function createContext({ req }: Props) {
             expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
             id: "api-key",
             token: "api-key",
-            userId: String(keyRecord.user.id),
+            userId: keyRecord.user.id,
           },
           user: {
             email: keyRecord.user.email,
-            id: String(keyRecord.user.id),
+            id: keyRecord.user.id,
             image: keyRecord.user.image,
             name: keyRecord.user.name,
             role: keyRecord.user.role,
@@ -54,7 +54,7 @@ export async function createContext({ req }: Props) {
   });
 
   if (sessionContext?.user != null) {
-    store.userId = Number(sessionContext.user.id);
+    store.userId = sessionContext.user.id;
     store.userRole = sessionContext.user.role;
   }
 

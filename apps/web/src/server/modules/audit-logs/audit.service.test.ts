@@ -10,6 +10,7 @@ function createAuditDbMock(rows: unknown[] = []) {
   return { db, findMany };
 }
 
+const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 function makeAuditLog(id: string) {
   return {
     createdAt: new Date("2025-03-01T10:00:00Z"),
@@ -20,7 +21,7 @@ function makeAuditLog(id: string) {
     payload: {},
     requestId: "req-1",
     userAgent: "vitest",
-    userId: 1,
+    userId: USER_ID,
   };
 }
 
@@ -28,7 +29,7 @@ describe("auditService.getActivityLogs pagination", () => {
   it("should order by createdAt desc with an id tiebreaker", async () => {
     const { db, findMany } = createAuditDbMock();
 
-    await auditService.getActivityLogs(db, 1, { limit: 20 });
+    await auditService.getActivityLogs(db, USER_ID, { limit: 20 });
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({ orderBy: [{ createdAt: "desc" }, { id: "desc" }] }),
@@ -38,7 +39,7 @@ describe("auditService.getActivityLogs pagination", () => {
   it("should keep the id cursor and take limit + 1", async () => {
     const { db, findMany } = createAuditDbMock();
 
-    await auditService.getActivityLogs(db, 1, {
+    await auditService.getActivityLogs(db, USER_ID, {
       cursor: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
       limit: 20,
     });
@@ -54,7 +55,7 @@ describe("auditService.getActivityLogs pagination", () => {
   it("should omit the cursor on the first page", async () => {
     const { db, findMany } = createAuditDbMock();
 
-    await auditService.getActivityLogs(db, 1, { limit: 20 });
+    await auditService.getActivityLogs(db, USER_ID, { limit: 20 });
 
     expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ cursor: undefined }));
   });
@@ -62,7 +63,7 @@ describe("auditService.getActivityLogs pagination", () => {
   it("should return no nextCursor when the page is not full", async () => {
     const { db } = createAuditDbMock([makeAuditLog("a"), makeAuditLog("b")]);
 
-    const result = await auditService.getActivityLogs(db, 1, { limit: 20 });
+    const result = await auditService.getActivityLogs(db, USER_ID, { limit: 20 });
 
     expect(result.items).toHaveLength(2);
     expect(result.nextCursor).toBeUndefined();
@@ -71,7 +72,7 @@ describe("auditService.getActivityLogs pagination", () => {
   it("should emit the extra row id as the nextCursor on a full page", async () => {
     const { db } = createAuditDbMock([makeAuditLog("a"), makeAuditLog("b"), makeAuditLog("c")]);
 
-    const result = await auditService.getActivityLogs(db, 1, { limit: 2 });
+    const result = await auditService.getActivityLogs(db, USER_ID, { limit: 2 });
 
     expect(result.items).toHaveLength(2);
     expect(result.nextCursor).toBe("c");

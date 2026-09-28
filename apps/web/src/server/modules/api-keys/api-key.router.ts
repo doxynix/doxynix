@@ -10,7 +10,7 @@ export const apiKeyRouter = createTRPCRouter({
     .input(CreateApiKeySchema)
     .output(z.object({ key: z.string(), message: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      return apiKeyService.create(ctx.db, Number(ctx.session.user.id), input);
+      return apiKeyService.create(ctx.db, ctx.session.user.id, input);
     }),
 
   list: protectedProcedure

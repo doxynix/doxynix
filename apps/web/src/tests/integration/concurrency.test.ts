@@ -41,11 +41,11 @@ describe("Concurrency, Transactions & Integrity", () => {
     });
 
     await Promise.all([
-      prisma.repo.update({ data: { stars: { increment: 1 } }, where: { publicId: repo.publicId } }),
-      prisma.repo.update({ data: { stars: { increment: 1 } }, where: { publicId: repo.publicId } }),
+      prisma.repo.update({ data: { stars: { increment: 1 } }, where: { id: repo.id } }),
+      prisma.repo.update({ data: { stars: { increment: 1 } }, where: { id: repo.id } }),
     ]);
 
-    const final = await prisma.repo.findUnique({ where: { publicId: repo.publicId } });
+    const final = await prisma.repo.findUnique({ where: { id: repo.id } });
     expect(final?.stars).toBe(2);
   });
 
@@ -90,7 +90,7 @@ describe("Concurrency, Transactions & Integrity", () => {
       alice.db.analysis.create({
         data: {
           commitSha: "x",
-          repo: { connect: { publicId: repo.publicId } },
+          repo: { connect: { id: repo.id } },
           score: 101,
           status: "DONE",
         },
@@ -102,12 +102,12 @@ describe("Concurrency, Transactions & Integrity", () => {
       data: {
         commitSha: "x",
         metricsJson: maliciousJson,
-        repo: { connect: { publicId: repo.publicId } },
+        repo: { connect: { id: repo.id } },
         status: "DONE",
       },
     });
 
-    const fetched = await alice.db.analysis.findUnique({ where: { publicId: analysis.publicId } });
+    const fetched = await alice.db.analysis.findUnique({ where: { id: analysis.id } });
     expect(fetched?.metricsJson).toEqual(maliciousJson);
   });
 });

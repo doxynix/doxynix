@@ -94,11 +94,7 @@ export const redisService = {
   },
 
   fileActions: {
-    get: (
-      userId: number | string,
-      path: string,
-      action: "document-file-preview" | "quick-file-audit",
-    ) =>
+    get: (userId: string, path: string, action: "document-file-preview" | "quick-file-audit") =>
       safeRedis(
         () =>
           redisClient.get<FileActionPreviewResult>(
@@ -108,7 +104,7 @@ export const redisService = {
       ),
 
     set: (
-      userId: number | string,
+      userId: string,
       path: string,
       action: "document-file-preview" | "quick-file-audit",
       data: FileActionPreviewResult,
@@ -141,7 +137,7 @@ export const redisService = {
   },
 
   staging: {
-    addFiles: (userId: number | string, repoId: string, entries: Record<string, string>) =>
+    addFiles: (userId: string, repoId: string, entries: Record<string, string>) =>
       safeRedis(
         async () => {
           const key = REDIS_CONFIG.keys.prStaging(userId, repoId);
@@ -157,14 +153,14 @@ export const redisService = {
         },
       ),
 
-    clear: (userId: number | string, repoId: string) =>
+    clear: (userId: string, repoId: string) =>
       safeRedis(() => redisClient.del(REDIS_CONFIG.keys.prStaging(userId, repoId)), {
         meta: { repoId, userId },
         msg: "Redis staging.clear failed",
         rethrow: true,
       }),
 
-    getAll: (userId: number | string, repoId: string): Promise<StagedFile[]> =>
+    getAll: (userId: string, repoId: string): Promise<StagedFile[]> =>
       safeRedis(
         async () => {
           const key = REDIS_CONFIG.keys.prStaging(userId, repoId);
@@ -177,7 +173,7 @@ export const redisService = {
         { fallback: [], meta: { repoId, userId }, msg: "Redis staging.getAll failed" },
       ),
 
-    removeFile: (userId: number | string, repoId: string, filePath: string) =>
+    removeFile: (userId: string, repoId: string, filePath: string) =>
       safeRedis(
         async () => {
           const key = REDIS_CONFIG.keys.prStaging(userId, repoId);

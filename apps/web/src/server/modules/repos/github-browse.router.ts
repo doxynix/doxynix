@@ -10,7 +10,7 @@ export const githubBrowseRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return githubBrowseService.getBranches(
         ctx.prisma,
-        Number(ctx.session.user.id),
+        ctx.session.user.id,
         input.owner,
         input.name,
       );
@@ -28,7 +28,7 @@ export const githubBrowseRouter = createTRPCRouter({
       return githubBrowseService.getFileContent(
         ctx.db,
         ctx.prisma,
-        Number(ctx.session.user.id),
+        ctx.session.user.id,
         input.repoId,
         input.path,
         input.branch,
@@ -46,7 +46,7 @@ export const githubBrowseRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return githubBrowseService.getRepoFiles(
         ctx.prisma,
-        Number(ctx.session.user.id),
+        ctx.session.user.id,
         input.owner,
         input.name,
         input.branch,
@@ -54,6 +54,6 @@ export const githubBrowseRouter = createTRPCRouter({
     }),
 
   searchGithub: protectedProcedure.input(GitHubQuerySchema).query(async ({ ctx, input }) => {
-    return githubBrowseService.searchGithub(ctx.prisma, Number(ctx.session.user.id), input.query);
+    return githubBrowseService.searchGithub(ctx.prisma, ctx.session.user.id, input.query);
   }),
 });

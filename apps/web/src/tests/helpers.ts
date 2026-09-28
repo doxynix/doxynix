@@ -39,6 +39,18 @@ export async function cleanupDatabase() {
     "accounts",
     "sessions",
     "verification_tokens",
+    "pull_request_analyses",
+    "generated_fixes",
+    "pull_request_comments",
+    "chat_sessions",
+    "chat_messages",
+    "notifications",
+    "banned_emails",
+    "github_installations",
+    "passkeys",
+    "pr_analysis_configs",
+    "two_factors",
+    "webhook_deliveries",
   ];
 
   for (const table of tablenames) {

@@ -49,12 +49,12 @@ export const analyzePrTask = task({
   id: "analyze-pr",
   ...TASK_CONFIGS.analyzePr,
   run: async (payload: {
-    analysisId: number;
     baseSha: string;
     headSha: string;
     owner: string;
+    prAnalysisId: string;
     prNumber: number;
-    repoId: number;
+    repoId: string;
     repoName: string;
   }) => {
     let octokitInstance: null | Octokit = null;
@@ -63,7 +63,7 @@ export const analyzePrTask = task({
       const startTime = Date.now();
 
       const repo = await prisma.repo.findUnique({
-        select: { publicId: true, userId: true },
+        select: { id: true, userId: true },
         where: { id: payload.repoId },
       });
 
@@ -96,9 +96,9 @@ export const analyzePrTask = task({
       const projectOverviewJson =
         lastFullAnalysis?.resultJson != null ? JSON.stringify(lastFullAnalysis.resultJson) : "{}";
 
-      const config = await PRConfigService.getConfig(repo.publicId, prisma);
+      const config = await PRConfigService.getConfig(repo.id, prisma);
 
-      await analysisRepo.updatePRAnalysisStatus(prisma, payload.analysisId, "ANALYZING");
+      await analysisRepo.updatePRAnalysisStatus(prisma, payload.prAnalysisId, "ANALYZING");
 
       prAnalysisLogger.analyzeStarted(payload.repoId, payload.prNumber, config.tokenBudget);
 
@@ -126,7 +126,7 @@ export const analyzePrTask = task({
 
       await analysisRepo.storeChangedFilesSnapshot(
         prisma,
-        payload.analysisId,
+        payload.prAnalysisId,
         changedFiles.map((file) => ({
           additions: file.additions,
           deletions: file.deletions,
@@ -149,8 +149,8 @@ export const analyzePrTask = task({
         projectOverviewJson,
         {
           branch: payload.headSha,
-          repoId: repo.publicId,
-          userId: Number(repo.userId),
+          repoId: repo.id,
+          userId: repo.userId,
         },
       );
 
@@ -228,7 +228,7 @@ export const analyzePrTask = task({
             line: c.finding.line,
             riskLevel: c.finding.score,
           }));
-          await analysisRepo.addComments(prisma, payload.analysisId, dbComments);
+          await analysisRepo.addComments(prisma, payload.prAnalysisId, dbComments);
         }
       }
 
@@ -245,13 +245,13 @@ export const analyzePrTask = task({
       const validated = z.array(persistedFindingSchema).safeParse(candidate);
       if (!validated.success) {
         appLogger.warn({
-          analysisId: payload.analysisId,
+          analysisId: payload.prAnalysisId,
           error: z.treeifyError(validated.error),
           msg: "pr_findings_validation_failed",
         });
       }
 
-      await analysisRepo.updatePRAnalysisStatus(prisma, payload.analysisId, "COMPLETED", {
+      await analysisRepo.updatePRAnalysisStatus(prisma, payload.prAnalysisId, "COMPLETED", {
         findingsJson: validated.success ? validated.data : candidate,
         riskScore: result.riskScore,
       });
@@ -274,7 +274,7 @@ export const analyzePrTask = task({
       );
 
       return {
-        analysisId: payload.analysisId,
+        analysisId: payload.prAnalysisId,
         duration,
         findings: healedFindings.length,
         riskScore: result.riskScore,
@@ -296,7 +296,7 @@ export const analyzePrTask = task({
         );
       }
 
-      await analysisRepo.updatePRAnalysisStatus(prisma, payload.analysisId, "FAILED", {
+      await analysisRepo.updatePRAnalysisStatus(prisma, payload.prAnalysisId, "FAILED", {
         error: errorMsg,
       });
 

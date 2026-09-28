@@ -35,13 +35,13 @@ export type SaveResultsParams = {
   repo: Repo;
   repositoryFacts: NonNullable<AIResult["repository_facts"]>;
   repositoryFindings: NonNullable<AIResult["findings"]>;
-  userId: number;
+  userId: string;
 };
 
 export const analysisLifecycleService = {
   async analyze(
     db: DbClient,
-    userId: number,
+    userId: string,
     input: {
       branch?: string;
       docTypes: DocType[];
@@ -57,7 +57,7 @@ export const analysisLifecycleService = {
       data: {
         repo: {
           connect: {
-            publicId: input.repoId,
+            id: input.repoId,
           },
         },
         status: "PENDING",
@@ -67,7 +67,7 @@ export const analysisLifecycleService = {
     const handle = await tasks.trigger(
       "analyze-repo",
       {
-        analysisId: analysis.publicId,
+        analysisId: analysis.id,
         docTypes: input.docTypes,
         instructions: input.instructions,
         language: input.language,
@@ -77,22 +77,22 @@ export const analysisLifecycleService = {
       },
       {
         // concurrencyKey: `user-${userId}`,
-        // idempotencyKey: `analysis-${analysis.publicId}`,
+        // idempotencyKey: `analysis-${analysis.id}`,
         ttl: "30m",
       },
     );
 
     await db.analysis.update({
       data: { jobId: handle.id },
-      where: { publicId: analysis.publicId },
+      where: { id: analysis.id },
     });
 
     return { jobId: handle.id, publicAccessToken: handle.publicAccessToken, status: "QUEUED" };
   },
 
-  async assertRepoAccess(db: DbClient, userId: number, repoId: string) {
+  async assertRepoAccess(db: DbClient, userId: string, repoId: string) {
     const repo = await db.repo.findFirst({
-      where: { publicId: repoId, userId },
+      where: { id: repoId, userId },
     });
 
     if (repo == null) {
@@ -103,7 +103,7 @@ export const analysisLifecycleService = {
 
   async cancel(db: DbClient, analysisId: string) {
     const analysis = await db.analysis.findFirst({
-      where: { publicId: analysisId },
+      where: { id: analysisId },
     });
 
     if (analysis == null) {
@@ -120,7 +120,7 @@ export const analysisLifecycleService = {
           progress: 100,
           status: "FAILED",
         },
-        where: { publicId: analysis.publicId },
+        where: { id: analysis.id },
       });
 
       if (analysis.jobId != null) {
@@ -128,13 +128,13 @@ export const analysisLifecycleService = {
           await runs.cancel(analysis.jobId);
 
           appLogger.info({
-            analysisId: analysis.publicId,
+            analysisId: analysis.id,
             jobId: analysis.jobId,
             msg: "Successfully canceled active Trigger.dev run on cloud",
           });
         } catch (error) {
           appLogger.error({
-            analysisId: analysis.publicId,
+            analysisId: analysis.id,
             error: error instanceof Error ? error.message : String(error),
             jobId: analysis.jobId,
             msg: "Failed to programmatically cancel Trigger.dev run on cloud",
@@ -152,18 +152,18 @@ export const analysisLifecycleService = {
       select: {
         commitSha: true,
         createdAt: true,
+        id: true,
         message: true,
-        publicId: true,
         score: true,
         status: true,
       },
-      where: { repo: { publicId: repoId } },
+      where: { repo: { id: repoId } },
     });
 
     return history.map((h) => ({
       commitSha: h.commitSha,
       createdAt: h.createdAt,
-      id: h.publicId,
+      id: h.id,
       message: h.message,
       score: h.score,
       status: h.status,
@@ -175,7 +175,7 @@ export const analysisLifecycleService = {
       orderBy: { createdAt: "desc" },
       select: analysisLatestSelect,
       where: {
-        repo: { publicId: repoId },
+        repo: { id: repoId },
       },
     });
 
@@ -290,7 +290,7 @@ export const analysisLifecycleService = {
           status: Status.DONE,
           techDebtScore: hardMetrics.techDebtScore,
         },
-        where: { publicId: analysisId },
+        where: { id: analysisId },
       });
 
       const rawDocs: Array<{ content?: string; type: DocType }> = [
@@ -342,7 +342,7 @@ export const analysisLifecycleService = {
     });
 
     await realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.notification, {
-      id: note.publicId,
+      id: note.id,
       title: note.title,
     });
 

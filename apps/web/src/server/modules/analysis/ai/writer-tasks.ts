@@ -112,7 +112,7 @@ export async function executeReadmeWriter(
   allowedPaths: string,
   language: string,
   repoId: string,
-  userId: number,
+  userId: string,
   branch: string,
 ): Promise<WriterResult> {
   return runWriterPrompt({
@@ -134,7 +134,7 @@ export async function executeApiWriter(
   allowedPaths: string,
   language: string,
   repoId: string,
-  userId: number,
+  userId: string,
   branch: string,
 ): Promise<WriterResult> {
   return runWriterPrompt({
@@ -159,7 +159,7 @@ export async function executeArchitectureWriter(
   allowedPaths: string,
   language: string,
   repoId: string,
-  userId: number,
+  userId: string,
   branch: string,
 ): Promise<WriterResult> {
   return runWriterPrompt({
@@ -193,7 +193,7 @@ export async function executeContributingWriter(
   allowedPaths: string,
   language: string,
   repoId: string,
-  userId: number,
+  userId: string,
   branch: string,
 ): Promise<WriterResult> {
   return runWriterPrompt({
@@ -273,7 +273,7 @@ function formatChangelogPullRequests(pullRequests: ChangelogPullRequest[]) {
 export async function executeChangelogWriter(
   analysisId: string,
   analysisResult: AIResult,
-  userId: number,
+  userId: string,
   repo: Repo,
   language: string,
 ): Promise<WriterResult> {
@@ -298,7 +298,7 @@ export async function executeChangelogWriter(
     const previousAnalysis = await prisma.analysis.findFirst({
       orderBy: { createdAt: "desc" },
       where: {
-        publicId: { not: analysisId },
+        id: { not: analysisId },
         repoId: repo.id,
         status: "DONE",
       },

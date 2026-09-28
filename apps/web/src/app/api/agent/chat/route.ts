@@ -41,24 +41,24 @@ export async function POST(req: Request) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-  const userId = session?.user.id != null ? Number(session.user.id) : null;
+  const userId = session?.user.id ?? null;
 
   let resolvedRepoId: string | undefined;
-  let internalRepoId: null | number = null;
+  let internalRepoId: null | string = null;
 
   if (currentRepoId != null) {
     resolvedRepoId = currentRepoId;
 
     const dbRepo = await prisma.repo.findUnique({
       select: { id: true },
-      where: { publicId: currentRepoId },
+      where: { id: currentRepoId },
     });
     if (dbRepo != null) {
       internalRepoId = dbRepo.id;
     }
   } else if (currentRepo?.owner != null && currentRepo?.name != null && userId != null) {
     const dbRepo = await prisma.repo.findUnique({
-      select: { id: true, publicId: true },
+      select: { id: true },
       where: {
         owner_name_userId: {
           name: currentRepo.name,
@@ -69,7 +69,7 @@ export async function POST(req: Request) {
     });
 
     if (dbRepo != null) {
-      resolvedRepoId = dbRepo.publicId;
+      resolvedRepoId = dbRepo.id;
       internalRepoId = dbRepo.id;
     }
   }

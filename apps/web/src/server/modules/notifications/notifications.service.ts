@@ -77,7 +77,7 @@ export const notificationsService = {
 
   async deleteOne(db: DbClient, id: string) {
     try {
-      await db.notification.delete({ where: { publicId: id } });
+      await db.notification.delete({ where: { id: id } });
 
       return { message: "Notification deleted", success: true };
     } catch (error) {
@@ -172,7 +172,7 @@ export const notificationsService = {
 
   async markAs(db: DbClient, id: string, isRead: boolean) {
     try {
-      await db.notification.update({ data: { isRead }, where: { publicId: id } });
+      await db.notification.update({ data: { isRead }, where: { id: id } });
 
       return { message: isRead ? "Marked as read" : "Marked as unread", success: true };
     } catch (error) {

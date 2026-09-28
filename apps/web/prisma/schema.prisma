@@ -122,9 +122,7 @@ enum ChatRole {
 
 model User {
   /// @zod.custom.omit(["model"])
-  id                  Int                  @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId            String               @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  id                  String               @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   /// @encrypted
   /// @zod.string.email({ message: "Incorrect email" })
   email               String?              @db.Citext()
@@ -162,11 +160,9 @@ model User {
 
 model Account {
   /// @zod.custom.omit(["model"])
-  id                    Int       @id() @default(autoincrement())
+  id                    String    @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   /// @zod.custom.omit(["model"])
-  publicId              String    @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  /// @zod.custom.omit(["model"])
-  userId                Int       @map("user_id")
+  userId                String    @map("user_id") @db.Uuid()
   accountId             String    @map("account_id")
   providerId            String    @map("provider_id")
   /// @encrypted
@@ -206,13 +202,13 @@ model Account {
 
 model Passkey {
   /// @zod.custom.omit(["model"])
-  id           String    @id() @default(uuid(7)) @db.Uuid()
+  id           String    @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   /// @zod.string.trim().max(100, { message: "Name cannot exceed 100 characters" })
   name         String?
   /// @zod.custom.omit(["model"])
   publicKey    String    @map("public_key")
   /// @zod.custom.omit(["model"])
-  userId       Int       @map("user_id")
+  userId       String    @map("user_id") @db.Uuid()
   /// @zod.custom.omit(["model"])
   credentialID String    @unique() @map("credential_id")
   /// @zod.number.int().min(0)
@@ -232,14 +228,14 @@ model Passkey {
 
 model TwoFactor {
   /// @zod.custom.omit(["model"])
-  id          String   @id() @default(uuid(7)) @db.Uuid()
+  id          String   @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   /// @zod.custom.omit(["model"])
   secret      String
   /// @zod.custom.omit(["model"])
   backupCodes String   @map("backup_codes")
   verified    Boolean  @default(false)
   /// @zod.custom.omit(["model"])
-  userId      Int      @unique() @map("user_id")
+  userId      String   @unique() @map("user_id") @db.Uuid()
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @default(now()) @updatedAt() @map("updated_at")
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -249,9 +245,7 @@ model TwoFactor {
 
 model Session {
   /// @zod.custom.omit(["model"])
-  id        Int      @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId  String   @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  id        String   @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   /// @encrypted
   /// @zod.custom.omit(["model"])
   token     String   @unique()
@@ -262,7 +256,7 @@ model Session {
   ipAddress String?  @map("ip_address")
   userAgent String?  @map("user_agent")
   /// @zod.custom.omit(["model"])
-  userId    Int      @map("user_id")
+  userId    String   @map("user_id") @db.Uuid()
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -272,7 +266,7 @@ model Session {
 }
 
 model Verification {
-  id             String   @id() @default(uuid(7)) @db.Uuid()
+  id             String   @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   /// @encrypted
   identifier     String
   /// @encryption:hash(identifier)?normalize=lowercase&normalize=trim
@@ -292,7 +286,7 @@ model Verification {
 }
 
 model BannedEmail {
-  id        Int               @id() @default(autoincrement())
+  id        String            @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   /// @encrypted
   /// @zod.string.email({ message: "Incorrect email" })
   email     String            @db.Citext()
@@ -308,9 +302,7 @@ model BannedEmail {
 
 model Repo {
   /// @zod.custom.omit(["model"])
-  id               Int                        @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId         String                     @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  id               String                     @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   githubId         Int                        @map("github_id")
   owner            String                     @db.Citext()
   /// @zod.string.min(1).max(255)
@@ -339,7 +331,7 @@ model Repo {
   githubCreatedAt  DateTime?                  @map("github_created_at")
   updatedAt        DateTime                   @default(now()) @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
-  userId           Int                        @map("user_id")
+  userId           String                     @map("user_id") @db.Uuid()
   user             User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
   analyses         Analysis[]
   documents        Document[]
@@ -374,7 +366,7 @@ model GithubInstallation {
   htmlUrl             String?                @map("html_url")
   createdAt           DateTime               @default(now()) @map("created_at")
   updatedAt           DateTime               @default(now()) @updatedAt() @map("updated_at")
-  userId              Int?                   @map("user_id")
+  userId              String?                @map("user_id") @db.Uuid()
   user                User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, isSuspended, createdAt(sort: Asc)])
@@ -384,9 +376,7 @@ model GithubInstallation {
 
 model Analysis {
   /// @zod.custom.omit(["model"])
-  id              Int        @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId        String     @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  id              String     @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   status          Status     @default(NEW)
   /// @zod.number.int().min(0).max(100)
   progress        Int        @default(0)
@@ -410,7 +400,7 @@ model Analysis {
   createdAt       DateTime   @default(now()) @map("created_at")
   updatedAt       DateTime   @default(now()) @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
-  repoId          Int        @map("repo_id")
+  repoId          String     @map("repo_id") @db.Uuid()
   repo            Repo       @relation(fields: [repoId], references: [id], onDelete: Cascade)
   documents       Document[]
 
@@ -422,9 +412,7 @@ model Analysis {
 
 model Document {
   /// @zod.custom.omit(["model"])
-  id         Int       @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId   String    @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  id         String    @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   version    String
   type       DocType
   /// @zod.string.min(1, { message: "Content cannot be empty" })
@@ -433,9 +421,9 @@ model Document {
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @default(now()) @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
-  repoId     Int       @map("repo_id")
+  repoId     String    @map("repo_id") @db.Uuid()
   repo       Repo      @relation(fields: [repoId], references: [id], onDelete: Cascade)
-  analysisId Int?      @map("analysis_id")
+  analysisId String?   @map("analysis_id") @db.Uuid()
   analysis   Analysis? @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 
   @@unique([repoId, version, type, path])
@@ -446,9 +434,7 @@ model Document {
 
 model PullRequestAnalysis {
   /// @zod.custom.omit(["model"])
-  id               Int                  @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId         String               @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  id               String               @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   prNumber         Int                  @map("pr_number")
   owner            String               @db.Citext()
   repoName         String               @map("repo_name") @db.Citext()
@@ -464,7 +450,7 @@ model PullRequestAnalysis {
   createdAt        DateTime             @default(now()) @map("created_at")
   updatedAt        DateTime             @default(now()) @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
-  repoId           Int                  @map("repo_id")
+  repoId           String               @map("repo_id") @db.Uuid()
   repo             Repo                 @relation("RepoPullRequests", fields: [repoId], references: [id], onDelete: Cascade)
   comments         PullRequestComment[]
   generatedFixes   GeneratedFix[]
@@ -479,9 +465,7 @@ model PullRequestAnalysis {
 
 model PullRequestAnalysisConfig {
   /// @zod.custom.omit(["model"])
-  id              Int            @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId        String         @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  id              String         @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   enabled         Boolean        @default(false)
   ciSkip          Boolean        @default(false) @map("ci_skip")
   commentStyle    PRCommentStyle @default(DETAILED) @map("comment_style")
@@ -491,7 +475,7 @@ model PullRequestAnalysisConfig {
   createdAt       DateTime       @default(now()) @map("created_at")
   updatedAt       DateTime       @default(now()) @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
-  repoId          Int            @unique() @map("repo_id")
+  repoId          String         @unique() @map("repo_id") @db.Uuid()
   repo            Repo           @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
   @@map("pr_analysis_configs")
@@ -499,9 +483,7 @@ model PullRequestAnalysisConfig {
 
 model PullRequestComment {
   /// @zod.custom.omit(["model"])
-  id              Int                 @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId        String              @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  id              String              @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   filePath        String              @map("file_path")
   line            Int
   /// @zod.number.int().min(0).max(10)
@@ -513,7 +495,7 @@ model PullRequestComment {
   createdAt       DateTime            @default(now()) @map("created_at")
   updatedAt       DateTime            @default(now()) @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
-  analysisId      Int                 @map("analysis_id")
+  analysisId      String              @map("analysis_id") @db.Uuid()
   analysis        PullRequestAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 
   @@index([analysisId, filePath])
@@ -522,9 +504,7 @@ model PullRequestComment {
 
 model GeneratedFix {
   /// @zod.custom.omit(["model"])
-  id              Int                  @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId        String               @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  id              String               @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   title           String
   description     String?              @db.Text()
   /// @zod.string.min(1)
@@ -538,10 +518,10 @@ model GeneratedFix {
   updatedAt       DateTime             @default(now()) @updatedAt() @map("updated_at")
   createdByUser   Boolean              @default(false) @map("created_by_user")
   /// @zod.custom.omit(["model"])
-  repoId          Int                  @map("repo_id")
+  repoId          String               @map("repo_id") @db.Uuid()
   repo            Repo                 @relation("RepoGeneratedFixes", fields: [repoId], references: [id], onDelete: Cascade)
   /// @zod.custom.omit(["model"])
-  prAnalysisId    Int?                 @map("pr_analysis_id")
+  prAnalysisId    String?              @map("pr_analysis_id") @db.Uuid()
   prAnalysis      PullRequestAnalysis? @relation(fields: [prAnalysisId], references: [id], onDelete: SetNull)
 
   @@index([repoId, status])
@@ -552,9 +532,7 @@ model GeneratedFix {
 
 model Notification {
   /// @zod.custom.omit(["model"])
-  id        Int        @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId  String     @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  id        String     @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   /// @zod.string.trim().min(1, { message: "The title cannot be empty" }).max(300, { message: "The title cannot exceed 300 characters" })
   title     String
   /// @zod.string.trim().min(1, { message: "The text of the notification is mandatory" }).max(5000, { message: "The text of the notification cannot exceed 5000 characters" })
@@ -564,10 +542,10 @@ model Notification {
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @default(now()) @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
-  userId    Int        @map("user_id")
+  userId    String     @map("user_id") @db.Uuid()
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   /// @zod.custom.omit(["model"])
-  repoId    Int?       @map("repo_id")
+  repoId    String?    @map("repo_id") @db.Uuid()
   repo      Repo?      @relation(fields: [repoId], references: [id], onDelete: SetNull)
 
   @@index([userId, createdAt(sort: Desc)])
@@ -580,7 +558,7 @@ model Notification {
 }
 
 model ApiKey {
-  id          String    @id() @default(uuid(7)) @db.Uuid()
+  id          String    @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   prefix      String
   /// @zod.custom.omit(["model"])
   hashedKey   String    @unique() @map("hashed_key")
@@ -593,7 +571,7 @@ model ApiKey {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @default(now()) @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
-  userId      Int       @map("user_id")
+  userId      String    @map("user_id") @db.Uuid()
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -601,7 +579,7 @@ model ApiKey {
 }
 
 model WebhookDelivery {
-  id         String        @id() @default(uuid(7)) @db.Uuid()
+  id         String        @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   provider   String
   deliveryId String        @map("delivery_id")
   event      String?
@@ -616,13 +594,13 @@ model WebhookDelivery {
 }
 
 model AuditLog {
-  id        String   @id() @default(uuid(7)) @db.Uuid()
+  id        String   @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   requestId String?  @map("request_id")
   model     String
   operation String
   payload   Json
   /// @zod.custom.omit(["model"])
-  userId    Int?     @map("user_id")
+  userId    String?  @map("user_id") @db.Uuid()
   ip        String?  @db.Inet()
   userAgent String?  @map("user_agent")
   createdAt DateTime @default(now()) @map("created_at")
@@ -635,9 +613,9 @@ model AuditLog {
 }
 
 model ChatSession {
-  id        String        @id() @default(uuid(7)) @db.Uuid()
-  userId    Int           @map("user_id")
-  repoId    Int?          @map("repo_id")
+  id        String        @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
+  userId    String        @map("user_id") @db.Uuid()
+  repoId    String?       @map("repo_id") @db.Uuid()
   title     String        @default("New Chat")
   createdAt DateTime      @default(now()) @map("created_at")
   updatedAt DateTime      @updatedAt() @map("updated_at")
@@ -651,7 +629,7 @@ model ChatSession {
 }
 
 model ChatMessage {
-  id        String      @id() @default(uuid(7)) @db.Uuid()
+  id        String      @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   sessionId String      @map("session_id") @db.Uuid()
   session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   role      ChatRole

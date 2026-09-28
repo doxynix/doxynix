@@ -50,9 +50,9 @@ const makeAnalysis = (
     commitSha: "abc123",
     complexityScore: 50,
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
+    id: "an-1",
     metricsJson,
     onboardingScore: 20,
-    publicId: "an-1",
     resultJson,
     score: 70,
     securityScore: 60,
@@ -61,10 +61,10 @@ const makeAnalysis = (
   }) as unknown as LatestCompletedAnalysis;
 
 const makeDoc = (overrides: Partial<StoredDocument>): StoredDocument => ({
-  analysis: { publicId: "an-1" },
+  analysis: { id: "an-1" },
   createdAt: new Date("2024-01-01T00:00:00.000Z"),
+  id: "doc-1",
   path: "README.md",
-  publicId: "doc-1",
   type: "README",
   updatedAt: new Date("2024-01-01T00:00:00.000Z"),
   version: "1",
@@ -118,77 +118,77 @@ describe("dedupeLatestDocsByType", () => {
 
   it("sorts by DOC_TYPE_ORDER: README, ARCHITECTURE, API, CODE_DOC", () => {
     const result = dedupeLatestDocsByType([
-      makeDoc({ publicId: "api-1", type: "API" }),
-      makeDoc({ publicId: "arch-1", type: "ARCHITECTURE" }),
-      makeDoc({ publicId: "readme-1", type: "README" }),
-      makeDoc({ path: "src/a.ts", publicId: "cd-1", type: "CODE_DOC" }),
+      makeDoc({ id: "api-1", type: "API" }),
+      makeDoc({ id: "arch-1", type: "ARCHITECTURE" }),
+      makeDoc({ id: "readme-1", type: "README" }),
+      makeDoc({ id: "cd-1", path: "src/a.ts", type: "CODE_DOC" }),
     ]);
 
-    expect(result.map((doc) => doc.publicId)).toEqual(["readme-1", "arch-1", "api-1", "cd-1"]);
+    expect(result.map((doc) => doc.id)).toEqual(["readme-1", "arch-1", "api-1", "cd-1"]);
   });
 
   it("keeps the doc with the newest updatedAt within a type", () => {
     const result = dedupeLatestDocsByType([
       makeDoc({
-        publicId: "arch-old",
+        id: "arch-old",
         type: "ARCHITECTURE",
         updatedAt: new Date("2024-01-01T00:00:00.000Z"),
       }),
       makeDoc({
-        publicId: "arch-new",
+        id: "arch-new",
         type: "ARCHITECTURE",
         updatedAt: new Date("2024-06-01T00:00:00.000Z"),
       }),
     ]);
 
-    expect(result.map((doc) => doc.publicId)).toEqual(["arch-new"]);
+    expect(result.map((doc) => doc.id)).toEqual(["arch-new"]);
   });
 
   it("dedupes CODE_DOC by path, not by type", () => {
     const result = dedupeLatestDocsByType([
       makeDoc({
+        id: "cd-old",
         path: "src/a.ts",
-        publicId: "cd-old",
         type: "CODE_DOC",
         updatedAt: new Date("2024-01-01T00:00:00.000Z"),
       }),
       makeDoc({
+        id: "cd-new",
         path: "src/a.ts",
-        publicId: "cd-new",
         type: "CODE_DOC",
         updatedAt: new Date("2024-05-01T00:00:00.000Z"),
       }),
-      makeDoc({ path: "src/b.ts", publicId: "cd-b", type: "CODE_DOC" }),
+      makeDoc({ id: "cd-b", path: "src/b.ts", type: "CODE_DOC" }),
     ]);
 
-    expect(result.map((doc) => doc.publicId)).toEqual(["cd-new", "cd-b"]);
+    expect(result.map((doc) => doc.id)).toEqual(["cd-new", "cd-b"]);
   });
 
   it("full scenario: duplicates and types in arbitrary order", () => {
     const result = dedupeLatestDocsByType([
       makeDoc({
-        publicId: "arch-old",
+        id: "arch-old",
         type: "ARCHITECTURE",
         updatedAt: new Date("2024-01-01T00:00:00.000Z"),
       }),
-      makeDoc({ path: "src/b.ts", publicId: "cd-b", type: "CODE_DOC" }),
-      makeDoc({ publicId: "readme-1", type: "README" }),
-      makeDoc({ path: "src/a.ts", publicId: "cd-1", type: "CODE_DOC" }),
-      makeDoc({ publicId: "api-1", type: "API" }),
+      makeDoc({ id: "cd-b", path: "src/b.ts", type: "CODE_DOC" }),
+      makeDoc({ id: "readme-1", type: "README" }),
+      makeDoc({ id: "cd-1", path: "src/a.ts", type: "CODE_DOC" }),
+      makeDoc({ id: "api-1", type: "API" }),
       makeDoc({
+        id: "cd-new",
         path: "src/a.ts",
-        publicId: "cd-new",
         type: "CODE_DOC",
         updatedAt: new Date("2024-05-01T00:00:00.000Z"),
       }),
       makeDoc({
-        publicId: "arch-new",
+        id: "arch-new",
         type: "ARCHITECTURE",
         updatedAt: new Date("2024-06-01T00:00:00.000Z"),
       }),
     ]);
 
-    expect(result.map((doc) => doc.publicId)).toEqual([
+    expect(result.map((doc) => doc.id)).toEqual([
       "readme-1",
       "arch-new",
       "api-1",
@@ -237,7 +237,7 @@ describe("toDocSummary", () => {
     const withLlm = { ...aiResult, analysisRuntime: { writers: { readme: "llm" as const } } };
 
     const summary = toDocSummary(
-      makeDoc({ path: "README.md", publicId: "readme-1", type: "README" }),
+      makeDoc({ id: "readme-1", path: "README.md", type: "README" }),
       withLlm,
     );
 
@@ -253,7 +253,7 @@ describe("toDocSummary", () => {
   });
 
   it("non-llm status yields null source", () => {
-    const summary = toDocSummary(makeDoc({ publicId: "readme-1", type: "README" }), aiResult);
+    const summary = toDocSummary(makeDoc({ id: "readme-1", type: "README" }), aiResult);
 
     expect(summary.source).toBeNull();
     expect(summary.status).toBe("missing");
@@ -261,7 +261,7 @@ describe("toDocSummary", () => {
 
   it("CODE_DOC has no writer key → status null, source null", () => {
     const summary = toDocSummary(
-      makeDoc({ path: "src/a.ts", publicId: "cd-1", type: "CODE_DOC" }),
+      makeDoc({ id: "cd-1", path: "src/a.ts", type: "CODE_DOC" }),
       aiResult,
     );
 

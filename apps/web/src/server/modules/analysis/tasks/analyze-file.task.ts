@@ -24,7 +24,7 @@ export const analyzeFileTask = task({
     path: string;
     repoId: string;
     syncMeta: SyncFileActionMeta;
-    userId: number;
+    userId: string;
   }) => {
     const audit = await runQuickFileAudit(payload.userId, payload);
 

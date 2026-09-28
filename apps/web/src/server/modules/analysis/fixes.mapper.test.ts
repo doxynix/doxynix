@@ -27,6 +27,9 @@ const INTERNAL_ONLY = [...SKIP_FIELDS].filter((field) => field !== "id");
 
 const PUBLIC_ID_KEYS = ["id"];
 
+const PR_ANALYSIS_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5e";
+const REPO_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5f";
+
 function makeFix(overrides: Partial<GeneratedFixRecord> = {}): GeneratedFixRecord {
   return {
     branch: "dxnx/fix-1",
@@ -36,10 +39,9 @@ function makeFix(overrides: Partial<GeneratedFixRecord> = {}): GeneratedFixRecor
     estimatedImpact: null,
     githubPrNumber: null,
     githubPrUrl: null,
-    id: 42,
+    id: "018f0000-0000-7000-8000-000000000001",
     prAnalysisId: null,
-    publicId: "018f0000-0000-7000-8000-000000000001",
-    repoId: 7,
+    repoId: "018f0000-0000-7000-8000-000000000009",
     status: "DRAFT",
     title: "AI Suggested Improvements",
     updatedAt: new Date("2026-01-02T00:00:00Z"),
@@ -53,7 +55,7 @@ function makeSummaryFix(
   return {
     githubPrNumber: null,
     githubPrUrl: null,
-    publicId: "018f0000-0000-7000-8000-000000000002",
+    id: "018f0000-0000-7000-8000-000000000002",
     status: "PR_OPENED",
     title: "Fix the thing",
     ...overrides,
@@ -62,7 +64,7 @@ function makeSummaryFix(
 
 describe("fixesMapper", () => {
   describe("toPublic", () => {
-    it("maps the publicId to id and exposes only DTO fields", () => {
+    it("maps the primary key to id and exposes only DTO fields", () => {
       const result = fixesMapper.toPublic(makeFix());
 
       expect(result).toStrictEqual({
@@ -84,7 +86,7 @@ describe("fixesMapper", () => {
         estimatedImpact: 88,
         githubPrNumber: 1234,
         githubPrUrl: "https://github.com/o/r/pull/1234",
-        prAnalysisId: 9,
+        prAnalysisId: PR_ANALYSIS_ID,
         status: "PR_OPENED",
       });
 
@@ -97,7 +99,7 @@ describe("fixesMapper", () => {
       const row = makeFix({ githubPrNumber: null, githubPrUrl: null, title: "" });
       const result = GeneratedFixDTO.parse(fixesMapper.toPublic(row));
 
-      expect(result.id).toBe(row.publicId);
+      expect(result.id).toBe(row.id);
       expect(result.title).toBe("");
       expect(GeneratedFixDTO.safeParse(result).success).toBe(true);
     });
@@ -119,14 +121,14 @@ describe("fixesMapper", () => {
     });
 
     it("leaks no internal Prisma column", () => {
-      const row = makeFix({ prAnalysisId: 9, repoId: 7 });
+      const row = makeFix({ prAnalysisId: PR_ANALYSIS_ID, repoId: REPO_ID });
       const result = fixesMapper.toPublic(row) as Record<string, unknown>;
 
       for (const field of INTERNAL_ONLY) {
         expect(Object.hasOwn(result, field)).toBe(false);
       }
       for (const key of PUBLIC_ID_KEYS) {
-        expect(result[key]).toBe(row.publicId);
+        expect(result[key]).toBe(row.id);
       }
     });
   });
@@ -167,14 +169,14 @@ describe("fixesMapper", () => {
 
     it("leaks no internal Prisma column on the detailed shape either", () => {
       const result = fixesMapper.toDetailed(
-        makeFix({ prAnalysisId: 9, repoId: 7 }),
+        makeFix({ prAnalysisId: PR_ANALYSIS_ID, repoId: REPO_ID }),
         null,
       ) as Record<string, unknown>;
 
       for (const field of INTERNAL_ONLY) {
         expect(Object.hasOwn(result, field)).toBe(false);
       }
-      expect(result.id).toBe(makeFix().publicId);
+      expect(result.id).toBe(makeFix().id);
     });
   });
 

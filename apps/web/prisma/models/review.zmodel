@@ -3,9 +3,7 @@ import "./auth"
 
 model Analysis {
   /// @zod.custom.omit(["model"])
-  id              Int        @id @default(autoincrement()) @omit
-  /// @zod.custom.omit(["model"])
-  publicId        String     @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  id              String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
 
   status          Status     @default(NEW)
   /// @zod.number.int().min(0).max(100)
@@ -35,7 +33,7 @@ model Analysis {
   updatedAt       DateTime   @default(now()) @updatedAt @map("updated_at")
 
   /// @zod.custom.omit(["model"])
-  repoId          Int        @map("repo_id") @omit
+  repoId          String     @map("repo_id") @db.Uuid @omit
   repo            Repo       @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
   documents       Document[]
@@ -50,9 +48,7 @@ model Analysis {
 
 model Document {
   /// @zod.custom.omit(["model"])
-  id         Int       @id @default(autoincrement()) @omit
-  /// @zod.custom.omit(["model"])
-  publicId   String    @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  id         String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   version    String
   type       DocType
   /// @zod.string.min(1, { message: "Content cannot be empty" })
@@ -62,10 +58,10 @@ model Document {
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at")
   /// @zod.custom.omit(["model"])
-  repoId     Int       @map("repo_id") @omit
+  repoId     String    @map("repo_id") @db.Uuid @omit
   repo       Repo      @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
-  analysisId Int?      @map("analysis_id")
+  analysisId String?   @map("analysis_id") @db.Uuid
   analysis   Analysis? @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 
   @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
@@ -79,9 +75,7 @@ model Document {
 
 model PullRequestAnalysis {
   /// @zod.custom.omit(["model"])
-  id               Int                  @id @default(autoincrement()) @omit
-  /// @zod.custom.omit(["model"])
-  publicId         String               @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  id               String               @id @default(dbgenerated("uuidv7()")) @db.Uuid
 
   prNumber         Int                  @map("pr_number")
   owner            String               @db.Citext @length(min: 1, max: 39)
@@ -103,7 +97,7 @@ model PullRequestAnalysis {
   updatedAt        DateTime             @default(now()) @updatedAt @map("updated_at")
 
   /// @zod.custom.omit(["model"])
-  repoId           Int                  @map("repo_id") @omit
+  repoId           String               @map("repo_id") @db.Uuid @omit
   repo             Repo                 @relation("RepoPullRequests", fields: [repoId], references: [id], onDelete: Cascade)
 
   comments         PullRequestComment[]
@@ -121,9 +115,7 @@ model PullRequestAnalysis {
 
 model PullRequestAnalysisConfig {
   /// @zod.custom.omit(["model"])
-  id              Int            @id @default(autoincrement()) @omit
-  /// @zod.custom.omit(["model"])
-  publicId        String         @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  id              String         @id @default(dbgenerated("uuidv7()")) @db.Uuid
 
   enabled         Boolean        @default(false)
   ciSkip          Boolean        @default(false) @map("ci_skip")
@@ -136,7 +128,7 @@ model PullRequestAnalysisConfig {
   updatedAt       DateTime       @default(now()) @updatedAt @map("updated_at")
 
   /// @zod.custom.omit(["model"])
-  repoId          Int            @unique @map("repo_id")
+  repoId          String         @unique @map("repo_id") @db.Uuid
   repo            Repo           @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
   @@allow('all', auth() == repo.user || auth().role == 'ADMIN')
@@ -145,9 +137,7 @@ model PullRequestAnalysisConfig {
 
 model PullRequestComment {
   /// @zod.custom.omit(["model"])
-  id              Int                 @id @default(autoincrement()) @omit
-  /// @zod.custom.omit(["model"])
-  publicId        String              @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  id              String              @id @default(dbgenerated("uuidv7()")) @db.Uuid
 
   filePath        String              @map("file_path")
   line            Int
@@ -163,7 +153,7 @@ model PullRequestComment {
   updatedAt       DateTime            @default(now()) @updatedAt @map("updated_at")
 
   /// @zod.custom.omit(["model"])
-  analysisId      Int                 @map("analysis_id") @omit
+  analysisId      String              @map("analysis_id") @db.Uuid @omit
   analysis        PullRequestAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 
   @@allow('all', analysis.repo.user == auth() || auth().role == 'ADMIN')
@@ -174,9 +164,7 @@ model PullRequestComment {
 
 model GeneratedFix {
   /// @zod.custom.omit(["model"])
-  id              Int                  @id @default(autoincrement()) @omit
-  /// @zod.custom.omit(["model"])
-  publicId        String               @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  id              String               @id @default(dbgenerated("uuidv7()")) @db.Uuid
 
   title           String               @length(min: 1, max: 255)
   description     String?              @db.Text
@@ -195,11 +183,11 @@ model GeneratedFix {
   createdByUser   Boolean              @default(false) @map("created_by_user")
 
   /// @zod.custom.omit(["model"])
-  repoId          Int                  @map("repo_id") @omit
+  repoId          String               @map("repo_id") @db.Uuid @omit
   repo            Repo                 @relation("RepoGeneratedFixes", fields: [repoId], references: [id], onDelete: Cascade)
 
   /// @zod.custom.omit(["model"])
-  prAnalysisId    Int?                 @map("pr_analysis_id") @omit
+  prAnalysisId    String?              @map("pr_analysis_id") @db.Uuid @omit
   prAnalysis      PullRequestAnalysis? @relation(fields: [prAnalysisId], references: [id], onDelete: SetNull)
 
   @@allow('all', repo.user == auth() || auth().role == 'ADMIN')

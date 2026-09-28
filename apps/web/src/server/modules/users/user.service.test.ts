@@ -12,6 +12,7 @@ const LAST_AUTH_METHOD_MESSAGE =
 
 const BASE_MS = 20;
 const JITTER_MS = 10;
+const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 
 const { sleepCalls } = vi.hoisted(() => ({ sleepCalls: [] as number[] }));
 
@@ -132,7 +133,7 @@ describe("disconnectAccount: P2034 backoff", () => {
   it("grows the delay on each successive retry instead of sleeping a constant", async () => {
     const { db, transactionOptions } = conflictThenSucceed(2);
 
-    await expect(userService.disconnectAccount(db, 7, "github")).resolves.toEqual({
+    await expect(userService.disconnectAccount(db, USER_ID, "github")).resolves.toEqual({
       success: true,
     });
 
@@ -158,7 +159,7 @@ describe("disconnectAccount: P2034 backoff", () => {
       sleepCalls.length = 0;
       const { db } = conflictThenSucceed(1);
 
-      await userService.disconnectAccount(db, 7, "github");
+      await userService.disconnectAccount(db, USER_ID, "github");
 
       const delay = recordedDelay();
       firstDelays.push(delay);

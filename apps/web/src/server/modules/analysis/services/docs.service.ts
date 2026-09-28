@@ -18,10 +18,38 @@ import type { AIResult } from "../engine/core/analysis-result.schemas";
 import { DocumentFormatter } from "../logic/section-graph-linker";
 
 export const GetWithGraphLinksInput = z.object({
-  analysisId: z.number(),
+  analysisId: z.uuid(),
   docType: DocTypeSchema,
-  repoId: z.number(),
+  repoId: z.uuid(),
 });
+
+const DocumentSectionSchema = z.object({
+  content: z.string(),
+  endLine: z.number().optional(),
+  graphNodeIds: z.array(z.string()),
+  id: z.string(),
+  startLine: z.number().optional(),
+  title: z.string(),
+});
+
+export const GetWithGraphLinksOutput = z.object({
+  content: z.string(),
+  createdAt: z.date(),
+  id: z.uuid(),
+  path: z.string().nullable(),
+  sections: z.array(DocumentSectionSchema),
+  type: z.string(),
+  updatedAt: z.date(),
+  version: z.string(),
+});
+
+export type GetWithGraphLinksOutput = z.infer<typeof GetWithGraphLinksOutput>;
+
+export const PinAuditToDocsOutput = z.object({
+  documentId: z.uuid(),
+});
+
+export type PinAuditToDocsOutput = z.infer<typeof PinAuditToDocsOutput>;
 
 export const docsService = {
   async getAvailableDocs(db: DbClient, repoId: string, aid?: string) {
@@ -52,13 +80,13 @@ export const docsService = {
     const doc = await db.document.findFirst({
       where: {
         repo: {
-          publicId: repoId,
+          id: repoId,
         },
         type,
         ...(path != null ? { path } : {}),
         ...(path == null && {
           analysis: {
-            publicId: analysis.publicId,
+            id: analysis.id,
           },
         }),
       },
@@ -75,16 +103,16 @@ export const docsService = {
           name: repo.name,
           owner: repo.owner,
         }),
-      [`doc-html-${doc.publicId}`],
+      [`doc-html-${doc.id}`],
       {
         revalidate: false,
-        tags: ["docs", doc.publicId],
+        tags: ["docs", doc.id],
       },
     )();
 
     return {
       html,
-      id: doc.publicId,
+      id: doc.id,
       materializedPath: resolveDocumentMaterializedPath({
         sourcePath: doc.path,
         type: doc.type,
@@ -99,8 +127,8 @@ export const docsService = {
       select: {
         content: true,
         createdAt: true,
+        id: true,
         path: true,
-        publicId: true,
         type: true,
         updatedAt: true,
         version: true,
@@ -161,22 +189,22 @@ export const docsService = {
 
     const { analysisId, commitSha } = cachedData.contentRef ?? {};
 
-    let internalAnalysisId: number | undefined;
+    let internalAnalysisId: string | undefined;
     if (analysisId != null) {
       const analysis = await db.analysis.findUnique({
         select: { id: true },
-        where: { publicId: analysisId },
+        where: { id: analysisId },
       });
       internalAnalysisId = analysis?.id;
     }
 
     const markdownContent = cachedData.content;
 
-    return db.document.create({
+    const document = await db.document.create({
       data: {
         content: markdownContent,
         path: input.path,
-        repo: { connect: { publicId: input.repoId } },
+        repo: { connect: { id: input.repoId } },
         type: "CODE_DOC",
         version: commitSha ?? "manual",
         ...(internalAnalysisId != null
@@ -185,6 +213,9 @@ export const docsService = {
             }
           : {}),
       },
+      select: { id: true },
     });
+
+    return { documentId: document.id };
   },
 };

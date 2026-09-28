@@ -23,10 +23,10 @@ export type RepoRecord = Prisma.RepoGetPayload<Record<string, never>>;
 
 export type SlimRepoRecord = Prisma.RepoGetPayload<{
   select: {
+    id: true;
     name: true;
     owner: true;
     ownerAvatarUrl: true;
-    publicId: true;
   };
 }>;
 
@@ -81,7 +81,7 @@ export const repoMapper = {
       forks: repo.forks,
       githubCreatedAt: repo.githubCreatedAt,
       githubId: repo.githubId,
-      id: repo.publicId,
+      id: repo.id,
       language: repo.language,
       license: repo.license,
       name: repo.name,
@@ -101,7 +101,7 @@ export const repoMapper = {
   toSlim(repo: SlimRepoRecord): SlimRepo {
     return {
       avatar: repo.ownerAvatarUrl,
-      id: repo.publicId,
+      id: repo.id,
       name: repo.name,
       owner: repo.owner,
     };

@@ -34,7 +34,7 @@ type TaskPayload = {
   language: string;
   selectedBranch?: string;
   selectedFiles: string[];
-  userId: number;
+  userId: string;
 };
 
 export const analyzeRepoTask = task({
@@ -147,7 +147,7 @@ export const analyzeRepoTask = task({
         analysisId,
         language,
         userId,
-        repo.publicId,
+        repo.id,
         selectedBranch ?? repo.defaultBranch,
       );
 

@@ -50,7 +50,7 @@ const t = initTRPC.context<Context>().create({
 
 const withZenStack = t.middleware(async ({ ctx, next }) => {
   const sessionUser = ctx.session?.user;
-  const userId = sessionUser == null ? undefined : Number(sessionUser.id);
+  const userId = sessionUser?.id;
   const userRole = sessionUser?.role == null ? undefined : (sessionUser.role as UserRole);
 
   const protectedDb = enhance(ctx.prisma, {
@@ -74,7 +74,7 @@ const contextMiddleware = t.middleware(async ({ ctx, next, path, type }) => {
     activeStore.path = path;
 
     if (sessionUser?.id != null) {
-      activeStore.userId = Number(sessionUser.id);
+      activeStore.userId = sessionUser.id;
       activeStore.userRole = sessionUser.role;
     }
 
@@ -85,7 +85,7 @@ const contextMiddleware = t.middleware(async ({ ctx, next, path, type }) => {
     method: type,
     path,
     req: ctx.req,
-    userId: sessionUser?.id == null ? undefined : Number(sessionUser.id),
+    userId: sessionUser?.id,
     userRole: sessionUser?.role,
   });
 

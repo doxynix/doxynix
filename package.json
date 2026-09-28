@@ -1,6 +1,6 @@
 {
   "name": "doxynix",
-  "version": "4.6.1",
+  "version": "5.0.0",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -90,7 +90,7 @@
     "oxlint": "1.85.0",
     "oxlint-tsgolint": "7.0.2003",
     "secretlint": "13.0.5",
-    "turbo": "2.11.3",
+    "turbo": "2.11.4",
     "typescript": "7.0.2"
   },
   "packageManager": "bun@1.4.0",

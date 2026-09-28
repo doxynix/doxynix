@@ -40,7 +40,7 @@ async function resolveAuthToken(client: {
 
 export async function getAnalysisContext(
   analysisId: string,
-  userId: number,
+  userId: string,
   forceRefresh?: boolean,
 ) {
   taskLogger.info(`GitHub: Accessing database...`);
@@ -57,7 +57,7 @@ export async function getAnalysisContext(
         },
       },
     },
-    where: { publicId: analysisId },
+    where: { id: analysisId },
   });
 
   if (analysis == null) {

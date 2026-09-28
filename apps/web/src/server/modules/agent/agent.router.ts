@@ -4,6 +4,28 @@ import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 
 import { agentService } from "./agent.service";
 
+const SessionListItemSchema = z.object({
+  createdAt: z.date(),
+  id: z.uuid(),
+  repo: z
+    .object({
+      name: z.string(),
+      owner: z.string(),
+    })
+    .nullable(),
+  title: z.string(),
+  updatedAt: z.date(),
+});
+
+const ListSessionsOutput = z.array(SessionListItemSchema);
+
+const CreateSessionOutput = z.object({
+  createdAt: z.date(),
+  id: z.uuid(),
+  title: z.string(),
+  updatedAt: z.date(),
+});
+
 export const agentChatRouter = createTRPCRouter({
   createSession: protectedProcedure
     .input(
@@ -12,14 +34,15 @@ export const agentChatRouter = createTRPCRouter({
         title: z.string().default("New Chat"),
       }),
     )
+    .output(CreateSessionOutput)
     .mutation(async ({ ctx, input }) => {
-      return agentService.createSession(ctx.db, Number(ctx.session.user.id), input);
+      return agentService.createSession(ctx.db, ctx.session.user.id, input);
     }),
 
   getSessionHistory: protectedProcedure
     .input(z.object({ sessionId: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      return agentService.getSessionHistory(ctx.db, Number(ctx.session.user.id), input.sessionId);
+      return agentService.getSessionHistory(ctx.db, ctx.session.user.id, input.sessionId);
     }),
 
   listSessions: protectedProcedure
@@ -35,7 +58,8 @@ export const agentChatRouter = createTRPCRouter({
         })
         .optional(),
     )
+    .output(ListSessionsOutput)
     .query(async ({ ctx, input }) => {
-      return agentService.listSessions(ctx.db, Number(ctx.session.user.id), input);
+      return agentService.listSessions(ctx.db, ctx.session.user.id, input);
     }),
 });

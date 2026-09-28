@@ -4,9 +4,7 @@ import "./core"
 
 model Repo {
   /// @zod.custom.omit(["model"])
-  id               Int                        @id @default(autoincrement()) @omit
-  /// @zod.custom.omit(["model"])
-  publicId         String                     @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  id               String                     @id @default(dbgenerated("uuidv7()")) @db.Uuid
   githubId         Int                        @map("github_id")
   owner            String                     @db.Citext @length(min: 1, max: 39, message: "Repository owner login cannot exceed 39 characters")
   /// @zod.string.min(1).max(255)
@@ -37,7 +35,7 @@ model Repo {
   updatedAt        DateTime                   @default(now()) @updatedAt @map("updated_at")
 
   /// @zod.custom.omit(["model"])
-  userId           Int                        @map("user_id") @omit
+  userId           String                     @map("user_id") @db.Uuid @omit
   user             User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   analyses         Analysis[]
@@ -82,7 +80,7 @@ model GithubInstallation {
   createdAt           DateTime               @default(now()) @map("created_at")
   updatedAt           DateTime               @default(now()) @updatedAt @map("updated_at")
 
-  userId              Int?                   @map("user_id") @omit
+  userId              String?                @map("user_id") @db.Uuid @omit
   user                User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@allow('read', auth() != null && (userId == auth().id || auth().role == 'ADMIN'))

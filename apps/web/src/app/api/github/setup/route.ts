@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    await githubAppService.saveInstallation(prisma, Number(userId), installationId, state);
+    await githubAppService.saveInstallation(prisma, userId, installationId, state);
   } catch (error) {
     appLogger.error({
       error: error instanceof Error ? error.message : String(error),

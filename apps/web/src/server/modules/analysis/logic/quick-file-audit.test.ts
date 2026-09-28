@@ -15,6 +15,8 @@ vi.mock("@vercel/edge-config", () => ({ get: edgeConfigGet }));
 
 const { runQuickFileAudit } = await import("./quick-file-audit");
 
+const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
+
 type CallArgs = {
   attemptMetadata?: Record<string, unknown>;
   prompt: string;
@@ -55,7 +57,7 @@ beforeEach(() => {
 
 describe("runQuickFileAudit", () => {
   it("audits a normal source file", async () => {
-    const result = await runQuickFileAudit(7, FILE_ACTION);
+    const result = await runQuickFileAudit(USER_ID, FILE_ACTION);
 
     expect(callWithFallback).toHaveBeenCalledTimes(1);
     expect(result.path).toBe("src/math/add.ts");
@@ -64,7 +66,7 @@ describe("runQuickFileAudit", () => {
   });
 
   it("embeds the target path and the code in the user prompt", async () => {
-    await runQuickFileAudit(7, FILE_ACTION);
+    await runQuickFileAudit(USER_ID, FILE_ACTION);
 
     const { prompt } = firstCall();
     expect(prompt).toContain('<target_file path="src/math/add.ts">');
@@ -73,7 +75,7 @@ describe("runQuickFileAudit", () => {
   });
 
   it("tags the call so the AI provider can attribute the request", async () => {
-    await runQuickFileAudit(7, FILE_ACTION);
+    await runQuickFileAudit(USER_ID, FILE_ACTION);
 
     expect(firstCall()).toMatchObject({
       attemptMetadata: { filePath: "src/math/add.ts", operation: "quick-file-audit" },
@@ -82,7 +84,7 @@ describe("runQuickFileAudit", () => {
   });
 
   it("returns a low-confidence fallback for empty content without calling the model", async () => {
-    const result = await runQuickFileAudit(7, { ...FILE_ACTION, content: "   \n  " });
+    const result = await runQuickFileAudit(USER_ID, { ...FILE_ACTION, content: "   \n  " });
 
     expect(callWithFallback).not.toHaveBeenCalled();
     expect(result.confidence).toBe("low");
@@ -91,7 +93,7 @@ describe("runQuickFileAudit", () => {
   });
 
   it("returns a fallback for binary-like content without calling the model", async () => {
-    const result = await runQuickFileAudit(7, {
+    const result = await runQuickFileAudit(USER_ID, {
       ...FILE_ACTION,
       content: `const a = 1;\u0000\u0001\u0002binary`,
     });
@@ -101,7 +103,7 @@ describe("runQuickFileAudit", () => {
   });
 
   it("returns a fallback for a lock file without calling the model", async () => {
-    const result = await runQuickFileAudit(7, {
+    const result = await runQuickFileAudit(USER_ID, {
       ...FILE_ACTION,
       content: '{"lockfileVersion":3,"packages":{}}',
       path: "bun.lock",
@@ -112,7 +114,7 @@ describe("runQuickFileAudit", () => {
   });
 
   it("returns a fallback for an env file without calling the model", async () => {
-    const result = await runQuickFileAudit(7, {
+    const result = await runQuickFileAudit(USER_ID, {
       ...FILE_ACTION,
       content: "API_KEY=secret\n",
       path: ".env",
@@ -123,7 +125,7 @@ describe("runQuickFileAudit", () => {
   });
 
   it("returns a fallback for a generated file without calling the model", async () => {
-    const result = await runQuickFileAudit(7, {
+    const result = await runQuickFileAudit(USER_ID, {
       ...FILE_ACTION,
       content: "export const routes = {};\n",
       path: "src/generated/schema.ts",
@@ -134,7 +136,11 @@ describe("runQuickFileAudit", () => {
   });
 
   it("explains why it skipped the file", async () => {
-    const result = await runQuickFileAudit(7, { ...FILE_ACTION, content: "  ", path: "bun.lock" });
+    const result = await runQuickFileAudit(USER_ID, {
+      ...FILE_ACTION,
+      content: "  ",
+      path: "bun.lock",
+    });
 
     expect(result.summary).toMatch(/empty/i);
     expect(result.summary.length).toBeGreaterThan(20);

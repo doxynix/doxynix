@@ -12,7 +12,7 @@ export type CreateKeyInput = {
 export type UpdateKeyInput = CreateKeyInput & { id: string };
 
 export const apiKeyService = {
-  async create(db: DbClient, userId: number, input: CreateKeyInput) {
+  async create(db: DbClient, userId: string, input: CreateKeyInput) {
     const fullKey = generateApiKey();
     const displayPrefix = fullKey.slice(0, 11);
     const payload = extractPayloadFromKey(fullKey);

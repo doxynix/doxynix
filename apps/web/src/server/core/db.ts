@@ -260,7 +260,7 @@ function createPrismaInstance() {
                     payload: securedPayload,
                     requestId,
                     userAgent: ctxStore?.userAgent ?? "internal",
-                    userId: userId == null ? null : Number(userId),
+                    userId: userId ?? null,
                   },
                 });
 

@@ -102,7 +102,7 @@ export async function orchestrateWriterTasks(
   analysisId: string,
   requestedDocs: DocType[],
   repo: Repo,
-  userId: number,
+  userId: string,
   language: string,
 ): Promise<DeepDocsResult> {
   taskLogger.info("Documentation: Preparing high-fidelity context for AI writers...");
@@ -255,7 +255,7 @@ export async function orchestrateWriterTasks(
 
   const authParams = {
     branch: repo.defaultBranch,
-    repoId: repo.publicId,
+    repoId: repo.id,
     userId,
   };
 

@@ -311,7 +311,7 @@ export class FixService {
     findings: FindingForFix[];
     prAnalysisId?: string;
     repoContext: { framework?: string; language: string };
-    repoId: number | string;
+    repoId: string;
   }): Promise<{
     branch: string;
     diffs: GeneratedDiff[];

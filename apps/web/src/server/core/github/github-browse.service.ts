@@ -36,7 +36,7 @@ function throwBrowseAccessError(params: {
 }
 
 export const githubBrowseService = {
-  async getBranches(prisma: PrismaClientExtended, userId: number, owner: string, name: string) {
+  async getBranches(prisma: PrismaClientExtended, userId: string, owner: string, name: string) {
     try {
       return await getRepoBranches(prisma, userId, owner, name);
     } catch (error) {
@@ -53,13 +53,13 @@ export const githubBrowseService = {
   async getFileContent(
     db: DbClient,
     prisma: PrismaClientExtended,
-    userId: number,
+    userId: string,
     repoId: string,
     path: string,
     branch?: string,
   ) {
     const repo = await db.repo.findUnique({
-      where: { publicId: repoId, userId },
+      where: { id: repoId, userId },
     });
 
     if (repo == null) {
@@ -106,7 +106,7 @@ export const githubBrowseService = {
 
   async getRepoFiles(
     prisma: PrismaClientExtended,
-    userId: number,
+    userId: string,
     owner: string,
     name: string,
     branch?: string,
@@ -138,7 +138,7 @@ export const githubBrowseService = {
     ]);
   },
 
-  async searchGithub(prisma: PrismaClientExtended, userId: number, query: string) {
+  async searchGithub(prisma: PrismaClientExtended, userId: string, query: string) {
     try {
       return await searchRepos(prisma, userId, query, 10);
     } catch (error) {

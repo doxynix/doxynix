@@ -27,7 +27,7 @@ export default async function AnalyzePage({ params }: Readonly<RepoPageProps>) {
       {isRunning ? (
         <RepoAnalysisLive
           accessToken={lastAnalysis.publicAccessToken ?? ""}
-          analysisId={lastAnalysis.publicId}
+          analysisId={lastAnalysis.id}
           jobId={lastAnalysis.jobId ?? ""}
           name={name}
           owner={owner}

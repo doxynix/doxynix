@@ -3,9 +3,7 @@ import "./github"
 
 model Notification {
   /// @zod.custom.omit(["model"])
-  id        Int        @id @default(autoincrement()) @omit
-  /// @zod.custom.omit(["model"])
-  publicId  String     @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  id        String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
   /// @zod.string.trim().min(1, { message: "The title cannot be empty" }).max(300, { message: "The title cannot exceed 300 characters" })
   title     String
   /// @zod.string.trim().min(1, { message: "The text of the notification is mandatory" }).max(5000, { message: "The text of the notification cannot exceed 5000 characters" })
@@ -17,10 +15,10 @@ model Notification {
   updatedAt DateTime   @default(now()) @updatedAt @map("updated_at")
 
   /// @zod.custom.omit(["model"])
-  userId    Int        @map("user_id") @omit
+  userId    String     @map("user_id") @db.Uuid @omit
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   /// @zod.custom.omit(["model"])
-  repoId    Int?       @map("repo_id") @omit
+  repoId    String?    @map("repo_id") @db.Uuid @omit
   repo      Repo?      @relation(fields: [repoId], references: [id], onDelete: SetNull)
 
   @@allow('all', auth() == user || auth().role == "ADMIN")
@@ -35,7 +33,7 @@ model Notification {
 }
 
 model ApiKey {
-  id          String    @id @default(uuid(7)) @db.Uuid
+  id          String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   prefix      String
   /// @zod.custom.omit(["model"])
   hashedKey   String    @unique @map("hashed_key") @omit
@@ -50,7 +48,7 @@ model ApiKey {
   updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
 
   /// @zod.custom.omit(["model"])
-  userId      Int       @map("user_id") @omit
+  userId      String    @map("user_id") @db.Uuid @omit
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@allow('create', auth() == user && userId == auth().id && !revoked)
@@ -65,7 +63,7 @@ model ApiKey {
 
 
 model WebhookDelivery {
-  id         String        @id @default(uuid(7)) @db.Uuid
+  id         String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
   provider   String
   deliveryId String        @map("delivery_id")
   event      String?
@@ -85,13 +83,13 @@ model WebhookDelivery {
 }
 
 model AuditLog {
-  id        String   @id @default(uuid(7)) @db.Uuid
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
   requestId String?  @map("request_id")
   model     String
   operation String
   payload   Json
   /// @zod.custom.omit(["model"])
-  userId    Int?     @map("user_id") @omit
+  userId    String?  @map("user_id") @db.Uuid @omit
   ip        String?  @db.Inet
   userAgent String?  @map("user_agent")
   createdAt DateTime @default(now()) @map("created_at")
@@ -109,9 +107,9 @@ model AuditLog {
 }
 
 model ChatSession {
-  id        String        @id @default(uuid(7)) @db.Uuid
-  userId    Int           @map("user_id")
-  repoId    Int?          @map("repo_id")
+  id        String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId    String        @map("user_id") @db.Uuid
+  repoId    String?       @map("repo_id") @db.Uuid
   title     String        @default("New Chat")
 
   createdAt DateTime      @default(now()) @map("created_at")
@@ -130,7 +128,7 @@ model ChatSession {
 }
 
 model ChatMessage {
-  id        String      @id @default(uuid(7)) @db.Uuid
+  id        String      @id @default(dbgenerated("uuidv7()")) @db.Uuid
   sessionId String      @map("session_id") @db.Uuid
   session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   role      ChatRole

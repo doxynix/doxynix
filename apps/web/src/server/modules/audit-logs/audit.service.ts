@@ -14,7 +14,7 @@ export type ActivityLogsInput = {
 };
 
 export const auditService = {
-  async getActivityLogs(db: DbClient, userId: number, input: ActivityLogsInput) {
+  async getActivityLogs(db: DbClient, userId: string, input: ActivityLogsInput) {
     const { cursor, limit } = input;
 
     const items = await db.auditLog.findMany({
@@ -39,7 +39,7 @@ export const auditService = {
     };
   },
 
-  async getLogPayloadHtml(db: DbClient, userId: number, logId: string) {
+  async getLogPayloadHtml(db: DbClient, userId: string, logId: string) {
     const log = await db.auditLog.findUnique({
       select: { payload: true },
       where: { id: logId, userId },

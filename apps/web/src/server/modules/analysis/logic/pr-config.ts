@@ -32,7 +32,7 @@ export const PRConfigService = {
 
   async getConfig(repoId: string, db: DbClient): Promise<PRAnalysisConfig> {
     const config = await db.pullRequestAnalysisConfig.findFirst({
-      where: { repo: { publicId: repoId } },
+      where: { repo: { id: repoId } },
     });
 
     if (config == null) {
@@ -91,7 +91,7 @@ export const PRConfigService = {
           },
         },
       },
-      where: { publicId: repoId },
+      where: { id: repoId },
     });
 
     return this.getConfig(repoId, db);
