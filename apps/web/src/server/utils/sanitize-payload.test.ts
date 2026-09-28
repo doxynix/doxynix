@@ -1,9 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("./constants", () => ({
-  ENCRYPTED_METADATA_MAP: {
-    ApiKey: { key: true, secret: true },
-    User: { passwordHash: true },
+vi.mock("@/server/core/field-encryption/config", () => ({
+  getSensitiveFieldNames: (model: string) => {
+    const fields: Record<string, string[]> = {
+      ApiKey: ["key", "secret"],
+      User: ["email", "emailHash", "name"],
+    };
+    return new Set(fields[model] ?? []);
   },
 }));
 
