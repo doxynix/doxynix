@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.1](https://github.com/doxynix/doxynix/compare/doxynix-v5.0.0...doxynix-v5.0.1) (2026-09-28)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2223](https://github.com/doxynix/doxynix/issues/2223)) ([a0ca661](https://github.com/doxynix/doxynix/commit/a0ca6611bdfba67ac7414687d9e2cdb9a130afbb))
+
 ## [5.0.0](https://github.com/doxynix/doxynix/compare/doxynix-v4.6.2...doxynix-v5.0.0) (2026-09-28)
 
 
