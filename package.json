@@ -80,7 +80,7 @@
     "@cspell/dict-pt-pt": "3.0.6",
     "@cspell/dict-ru_ru": "2.3.2",
     "@cspell/dict-tr-tr": "3.0.6",
-    "@secretlint/secretlint-rule-preset-recommend": "13.0.5",
+    "@secretlint/secretlint-rule-preset-recommend": "13.0.6",
     "@types/node": "26.6.2",
     "@types/react-dom": "19.3.0",
     "cspell": "10.3.4",
@@ -89,7 +89,7 @@
     "lefthook": "2.1.14",
     "oxlint": "1.85.0",
     "oxlint-tsgolint": "7.0.2003",
-    "secretlint": "13.0.5",
+    "secretlint": "13.0.6",
     "turbo": "2.11.4",
     "typescript": "7.0.2"
   },
