@@ -3,7 +3,7 @@ import { normalize } from "pathe";
 
 import { analysisMapper } from "../analysis.mapper";
 import type { AnalysisRef, RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
-import { buildStructureNodePayload, type StructureNodePayload } from "./graph-navigator";
+import { buildStructureNodePayload } from "./graph-navigator";
 import { SEMANTIC_META } from "./semantics";
 import { collectScopedSignals } from "./signals";
 import {
@@ -11,14 +11,21 @@ import {
   buildStructureContext,
   collectNodeScopePaths,
 } from "./structure-context";
-import { parseStructureNodeId, type StructureContext } from "./structure-shared";
+import {
+  type NodeExplainPayload,
+  parseStructureNodeId,
+  type StructureContext,
+  type StructureNodePayload,
+} from "./structure-shared";
+
+export type { NodeExplainPayload } from "./structure-shared";
 
 export function buildNodeExplainPayloadFromContext(
   context: StructureContext,
   analysisRef: AnalysisRef | null,
   nodeId: string,
   drilldown: StructureNodePayload,
-) {
+): NodeExplainPayload | null {
   const { nodeType, path } = parseStructureNodeId(nodeId);
   const scopedPaths = collectNodeScopePaths(context, nodeType, path);
   if (scopedPaths.length === 0) {
@@ -96,8 +103,6 @@ export function buildNodeExplainPayloadFromContext(
     whyImportant: drilldown.inspect.whyImportant,
   };
 }
-export type NodeExplainPayload = NonNullable<ReturnType<typeof buildNodeExplainPayloadFromContext>>;
-
 export function buildNodeExplainPayload(repo: RepoWithLatestAnalysisAndDocs, nodeId: string) {
   const drilldown = buildStructureNodePayload(repo, nodeId);
   if (drilldown == null) {

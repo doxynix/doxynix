@@ -23,6 +23,8 @@ import {
 } from "./structure-context";
 import {
   isPathInsideScope,
+  type StructureMapPayload as LeafStructureMapPayload,
+  type StructureNodePayload as LeafStructureNodePayload,
   makeStructureNodeId,
   parseStructureNodeId,
   resolveImmediateChildScope,
@@ -30,6 +32,11 @@ import {
   type StructureGroupEntry,
   type StructureNodeType,
 } from "./structure-shared";
+
+export type {
+  LeafStructureMapPayload as StructureMapPayload,
+  LeafStructureNodePayload as StructureNodePayload,
+};
 
 const summarizeImportanceHelper = (input: {
   apiCount: number;
@@ -55,7 +62,7 @@ const summarizeImportanceHelper = (input: {
 export function buildStructureMapPayloadFromContext(
   context: StructureContext,
   analysisRef: AnalysisRef | null,
-) {
+): LeafStructureMapPayload {
   const summarizeImportance = summarizeImportanceHelper;
   const nodes = buildTopLevelNodes(context);
   const nodeLabelById = new Map(nodes.map((node) => [node.id, node.label] as const));
@@ -138,10 +145,6 @@ export function buildStructureMapPayloadFromContext(
     },
   };
 }
-
-export type StructureMapPayload = NonNullable<
-  ReturnType<typeof buildStructureMapPayloadFromContext>
->;
 
 export function buildStructureMapPayload(repo: RepoWithLatestAnalysisAndDocs) {
   const context = buildStructureContext(repo);
@@ -264,7 +267,7 @@ export function buildStructureNodePayloadFromContext(
   context: StructureContext,
   analysisRef: AnalysisRef | null,
   nodeId: string,
-) {
+): LeafStructureNodePayload | null {
   const summarizeImportance = summarizeImportanceHelper;
   const { nodeType, path } = parseStructureNodeId(nodeId);
 
@@ -374,10 +377,6 @@ export function buildStructureNodePayloadFromContext(
     node,
   };
 }
-
-export type StructureNodePayload = NonNullable<
-  ReturnType<typeof buildStructureNodePayloadFromContext>
->;
 
 export function buildStructureNodePayload(repo: RepoWithLatestAnalysisAndDocs, nodeId: string) {
   const context = buildStructureContext(repo);

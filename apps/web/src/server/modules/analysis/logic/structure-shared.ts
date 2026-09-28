@@ -1,6 +1,6 @@
 import { join, normalize } from "pathe";
 
-import type { RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
+import type { AnalysisRef, RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
 import type { AIResult } from "../engine/core/analysis-result.schemas";
 import type { RepoMetrics } from "../engine/core/metrics.types";
 import type { ProjectPolicySemanticKind } from "../engine/core/project-policy-rules";
@@ -62,6 +62,200 @@ export type StructureContext = {
     string,
     Set<"api" | "config" | "entrypoint" | "fact" | "finding" | "hotspot" | "onboarding">
   >;
+};
+
+export type StructureRepositoryKind = "library" | "mixed" | "service" | "unknown";
+
+export type StructureBreadcrumb = {
+  id: string;
+  label: string;
+  nodeType: StructureNodeType;
+  path: string;
+};
+
+export type StructureEdge = {
+  id: string;
+  relation: StructureEdgeRelationType;
+  source: string;
+  target: string;
+  weight: number;
+};
+
+export type StructureNodeMarkers = {
+  api: boolean;
+  client: boolean;
+  config: boolean;
+  entrypoint: boolean;
+  risk: boolean;
+  server: boolean;
+  shared: boolean;
+};
+
+export type StructureNodeStats = {
+  apiCount: number;
+  changeCouplingCount: number;
+  churnCount: number;
+  configCount: number;
+  dependencyHotspotCount: number;
+  entrypointCount: number;
+  frameworkCount: number;
+  graphWarningCount: number;
+  hotspotCount: number;
+  orphanCount: number;
+  pathCount: number;
+  riskCount: number;
+};
+
+export type StructureNodeSummary = {
+  canDrillDeeper: boolean;
+  description: string;
+  id: string;
+  kind: StructureSemanticKind;
+  label: string;
+  markers: StructureNodeMarkers;
+  nodeType: StructureNodeType;
+  path: string;
+  previewPaths: string[];
+  score: number;
+  stats: StructureNodeStats;
+};
+
+export type StructureNeighborBuckets = {
+  apiNeighbors: string[];
+  changeRiskNeighbors: string[];
+  configNeighbors: string[];
+  coupledNeighbors: string[];
+  entryFlowNeighbors: string[];
+  entryNeighbors: string[];
+  graphNeighbors: string[];
+  publicSurfaceNeighbors: string[];
+  relatedChildNeighbors: string[];
+  riskNeighbors: string[];
+};
+
+export type StructureReviewPriority =
+  | { level: "high"; reason: string }
+  | { level: "low"; reason: string }
+  | { level: "medium"; reason: string };
+
+export type StructureInspectPayload = {
+  apiHints: string[];
+  configHints: string[];
+  dependsOn: string[];
+  entrypointReason: null | string;
+  factTitles: string[];
+  frameworkHints: string[];
+  gitHints: string[];
+  graphHints: string[];
+  hotspotHints: string[];
+  kind: string;
+  neighborBuckets: StructureNeighborBuckets;
+  neighborPaths: string[];
+  nextSuggestedPaths: string[];
+  recommendedActions: string[];
+  relatedPaths: string[];
+  reviewPriority: StructureReviewPriority;
+  samplePaths: string[];
+  title: string;
+  usedBy: string[];
+  whyImportant: string;
+};
+
+export type StructureNodeInspectPayload = StructureInspectPayload & {
+  contains: string[];
+};
+
+/**
+ * Payload shapes are declared here, in the slice's leaf module, so that `analysis.mapper`
+ * never has to reach back into `graph-navigator` / `node-explainer` for its types.
+ * Their producers (`buildStructureMapPayloadFromContext`,
+ * `buildStructureNodePayloadFromContext`, `buildNodeExplainPayloadFromContext`) annotate
+ * their return types with these aliases, so the compiler — not a hand-written test —
+ * is what fails if a producer and its declaration ever drift apart.
+ */
+export type StructureMapPayload = {
+  analysisRef: AnalysisRef | null;
+  filters: {
+    api: string[];
+    client: string[];
+    entrypoints: string[];
+    server: string[];
+    shared: string[];
+  };
+  graph: {
+    edges: Array<StructureEdge>;
+    groups: Array<{ description: string; id: string; label: string }>;
+    nodes: Array<StructureNodeSummary>;
+  };
+  inspect: {
+    byNodeId: Record<string, StructureInspectPayload>;
+    defaultNodeId: null | string;
+  };
+  overview: {
+    architectureStyle: string;
+    primaryEntrypoints: string[];
+    primaryModules: string[];
+    purpose: string;
+    repositoryKind: StructureRepositoryKind;
+    stack: string[];
+  };
+  selection: {
+    defaultNodeId: null | string;
+  };
+};
+
+export type StructureNodePayload = {
+  analysisRef: AnalysisRef | null;
+  breadcrumbs: Array<StructureBreadcrumb>;
+  canDrillDeeper: boolean;
+  children: Array<StructureNodeSummary>;
+  edges: Array<StructureEdge>;
+  inspect: StructureNodeInspectPayload;
+  node: StructureNodeSummary;
+};
+
+export type NodeExplainConfidence = "high" | "low" | "medium";
+
+export type NodeExplainNode = {
+  id: string;
+  kind: StructureSemanticKind;
+  label: string;
+  nodeType: StructureNodeType;
+  path: string;
+};
+
+export type NodeExplainRelationships = {
+  apiHints: string[];
+  apiSurface: boolean;
+  breadcrumbs: Array<StructureBreadcrumb>;
+  contains: string[];
+  dependsOn: string[];
+  entrypoint: boolean;
+  entrypointReason: null | string;
+  factTitles: string[];
+  frameworkHints: string[];
+  gitHints: string[];
+  graphHints: string[];
+  hotspotHints: string[];
+  neighborBuckets: StructureNeighborBuckets;
+  neighborPaths: string[];
+  recommendedActions: string[];
+  relatedPaths: string[];
+  reviewPriority: StructureReviewPriority;
+  riskTitles: string[];
+  usedBy: string[];
+};
+
+export type NodeExplainPayload = {
+  analysisRef: AnalysisRef | null;
+  confidence: NodeExplainConfidence;
+  nextSuggestedPaths: string[];
+  node: NodeExplainNode;
+  relationships: NodeExplainRelationships;
+  role: string;
+  sourcePaths: string[];
+  summary: string[];
+  whyImportant: string;
 };
 
 function createSemanticCounts(): Record<StructureSemanticKind, number> {

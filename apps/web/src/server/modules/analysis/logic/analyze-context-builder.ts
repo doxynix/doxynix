@@ -1,22 +1,22 @@
 import { analysisMapper } from "../analysis.mapper";
 import type { AnalysisRef, RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
+import type { AnalyzeContext, AnalyzeEntityContext } from "./analyze-context.types";
 import {
   buildStructureMapPayloadFromContext,
   buildStructureNodePayloadFromContext,
-  type StructureMapPayload,
-  type StructureNodePayload,
 } from "./graph-navigator";
-import { buildNodeExplainPayloadFromContext, type NodeExplainPayload } from "./node-explainer";
+import { buildNodeExplainPayloadFromContext } from "./node-explainer";
 import { buildStructureContext } from "./structure-context";
-import type { StructureContext } from "./structure-shared";
+import type {
+  NodeExplainPayload,
+  StructureContext,
+  StructureMapPayload,
+  StructureNodePayload,
+} from "./structure-shared";
 
-type AnalyzeEntityContext = {
-  analysisRef: AnalysisRef | null;
-  repo: RepoWithLatestAnalysisAndDocs;
-  structureContext: null | StructureContext;
-};
+export type { AnalyzeEntityContext } from "./analyze-context.types";
 
-class AnalyzeContextBuilder {
+class AnalyzeContextBuilder implements AnalyzeContext {
   private readonly analysisRef: AnalysisRef | null;
   private readonly explainByNodeId = new Map<string, NodeExplainPayload | null>();
   private readonly nodeById = new Map<string, null | StructureNodePayload>();
