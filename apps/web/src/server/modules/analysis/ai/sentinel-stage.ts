@@ -1,8 +1,8 @@
+import { getActiveModels, SAFETY_SETTINGS } from "@/server/core/ai/ai-constants";
 import { appLogger } from "@/server/core/app-logger";
 import { callWithFallback } from "@/server/utils/call";
 
 import { type SentinelResult, sentinelSchema } from "../engine/core/analysis-result.schemas";
-import { getActiveModels, SAFETY_SETTINGS } from "./ai-constants";
 import { buildSentinelSystemPrompt, buildSentinelUserPrompt } from "./prompts-refactored";
 
 export async function executeSentinelPhase(

@@ -1,14 +1,17 @@
 import { Body, Button, Container, Head, Html, Section, Text } from "react-email";
 
-export type AuthEmailKey =
-  | "email_preview_text"
-  | "email_confirm_sign_in"
-  | "email_login_request_sent"
-  | "email_click_to_complete"
-  | "email_10_minutes"
-  | "email_log_in_button"
-  | "email_fallback_instruction"
-  | "email_ignore_if_not_requested";
+export const AUTH_EMAIL_KEYS = [
+  "email_10_minutes",
+  "email_click_to_complete",
+  "email_confirm_sign_in",
+  "email_fallback_instruction",
+  "email_ignore_if_not_requested",
+  "email_log_in_button",
+  "email_login_request_sent",
+  "email_preview_text",
+] as const;
+
+export type AuthEmailKey = (typeof AUTH_EMAIL_KEYS)[number];
 
 type EmailProps = {
   host: string;

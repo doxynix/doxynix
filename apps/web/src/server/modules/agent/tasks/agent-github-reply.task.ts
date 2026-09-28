@@ -1,6 +1,8 @@
 import { task } from "@trigger.dev/sdk";
 import { dedent } from "es-toolkit";
 
+import { getActiveModels } from "@/server/core/ai/ai-constants";
+import { buildRepositoryToolProfile } from "@/server/core/ai/ai-tools";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { getInstallationClient } from "@/server/core/github/github-provider";
@@ -8,8 +10,6 @@ import { callWithFallback } from "@/server/utils/call";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
 
-import { getActiveModels } from "../../analysis/ai/ai-constants";
-import { buildRepositoryToolProfile } from "../../analysis/ai/ai-tools";
 import { GITHUB_AGENT_SYSTEM_PROMPT } from "../agent.prompts";
 
 type GithubReplyPayload = {

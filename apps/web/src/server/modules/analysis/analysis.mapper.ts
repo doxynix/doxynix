@@ -20,10 +20,14 @@ import {
 } from "./analysis.schemas";
 import { type AIResult, aiSchema } from "./engine/core/analysis-result.schemas";
 import type { RepoMetrics } from "./engine/core/metrics.types";
-import type { createAnalyzeContextBuilder } from "./logic/analyze-context-builder";
+import type { AnalyzeContext } from "./logic/analyze-context.types";
 import { dedupeLatestDocsByType, normalizeWriterStatuses, toDocSummary } from "./logic/payload";
 import type { PRChangedFileSnapshot, PRImpactPayload } from "./logic/pr.types";
-import { isPathInsideScope } from "./logic/structure-shared";
+import {
+  isPathInsideScope,
+  type StructureNodePayload as LeafStructureNodePayload,
+  type NodeExplainPayload,
+} from "./logic/structure-shared";
 
 type AnalysisRef = {
   analysisId: string;
@@ -31,13 +35,9 @@ type AnalysisRef = {
   createdAt: Date;
 };
 
-type ExplainPayload = NonNullable<
-  ReturnType<ReturnType<typeof createAnalyzeContextBuilder>["getNodeExplain"]>
->;
+type ExplainPayload = NodeExplainPayload;
 
-type StructureNodePayload = NonNullable<
-  ReturnType<ReturnType<typeof createAnalyzeContextBuilder>["getStructureNode"]>
->;
+type StructureNodePayload = LeafStructureNodePayload;
 
 export type TopLevelImpactNode = {
   id: string;
@@ -57,9 +57,9 @@ export const analysisMapper = {
   buildAffectedNodes(
     changedFiles: Array<PRImpactPayload["changedFiles"][number]>,
     findings: ParsedFinding[],
-    analyzeContext: ReturnType<typeof createAnalyzeContextBuilder>,
+    analyzeContext: AnalyzeContext,
     topLevelNodeById: Map<string, TopLevelImpactNode>,
-    nodeDetailCache: Map<string, ReturnType<typeof analyzeContext.getStructureNode>>,
+    nodeDetailCache: Map<string, StructureNodePayload | null>,
   ) {
     const grouped = new Map<string, typeof changedFiles>();
 
@@ -348,9 +348,9 @@ export const analysisMapper = {
 
   resolveMatchedNode(
     nodeId: string,
-    analyzeContext: ReturnType<typeof createAnalyzeContextBuilder>,
+    analyzeContext: AnalyzeContext,
     topLevelNodeById: Map<string, TopLevelImpactNode>,
-    nodeDetailCache: Map<string, ReturnType<typeof analyzeContext.getStructureNode>>,
+    nodeDetailCache: Map<string, StructureNodePayload | null>,
   ) {
     if (nodeId.startsWith("group:")) {
       const node = topLevelNodeById.get(nodeId);

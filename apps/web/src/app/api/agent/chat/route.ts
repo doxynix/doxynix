@@ -13,6 +13,7 @@ import { dedent } from "es-toolkit";
 import { TOOL_APPROVAL_SECRET } from "@/shared/config/env.server";
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
+import { getActiveModels } from "@/server/core/ai/ai-constants";
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
 import { prisma } from "@/server/core/db";
@@ -24,7 +25,6 @@ import {
 } from "@/server/modules/agent/agent.prompts";
 import { getAgentTools, MUTATION_TOOLS } from "@/server/modules/agent/agent.tools";
 import { processMessageParts } from "@/server/modules/agent/agent-storage";
-import { getActiveModels } from "@/server/modules/analysis/ai/ai-constants";
 
 export const maxDuration = 60;
 

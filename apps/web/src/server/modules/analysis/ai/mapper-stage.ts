@@ -1,3 +1,5 @@
+import { getActiveModels, SAFETY_SETTINGS } from "@/server/core/ai/ai-constants";
+import { buildRepositoryToolProfile } from "@/server/core/ai/ai-tools";
 import { appLogger } from "@/server/core/app-logger";
 import { callWithFallback } from "@/server/utils/call";
 
@@ -10,8 +12,6 @@ import type { ProjectMap } from "../engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "../engine/core/discovery.types";
 import type { RepoMetrics } from "../engine/core/metrics.types";
 import { buildMapperSkeleton } from "../logic/mapper-skeleton";
-import { getActiveModels, SAFETY_SETTINGS } from "./ai-constants";
-import { buildRepositoryToolProfile } from "./ai-tools";
 import { buildMapperSystemPrompt, buildMapperUserPrompt } from "./prompts-refactored";
 
 export async function executeMapperPhase(
