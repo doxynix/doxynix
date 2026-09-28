@@ -1,13 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { type EmitterWebhookEvent, Webhooks } from "@octokit/webhooks";
-import type {
-  InstallationEvent,
-  PullRequestEvent,
-  PullRequestReviewCommentEvent,
-  PushEvent,
-  RepositoryEvent,
-  WebhookEventName,
-} from "@octokit/webhooks-types";
+import type { WebhookEventName } from "@octokit/webhooks/types";
 import { Prisma } from "@prisma/client";
 
 import { GITHUB_WEBHOOK_SECRET } from "@/shared/config/env.server";
@@ -28,19 +21,19 @@ const webhooks = new Webhooks({
 });
 
 webhooks.on("installation", async ({ payload }) => {
-  await handleInstallationEvent(payload as InstallationEvent);
+  await handleInstallationEvent(payload);
 });
 
 webhooks.on("pull_request", async ({ payload }) => {
-  await handlePullRequestEvent(payload as PullRequestEvent);
+  await handlePullRequestEvent(payload);
 });
 
 webhooks.on("repository", async ({ payload }) => {
-  await handleRepositoryEvent(payload as RepositoryEvent);
+  await handleRepositoryEvent(payload);
 });
 
 webhooks.on("push", async ({ payload }) => {
-  await handlePushEvent(payload as PushEvent);
+  await handlePushEvent(payload);
 });
 
 webhooks.on("issue_comment.created", async ({ payload }) => {
@@ -114,18 +107,17 @@ webhooks.on("issue_comment.created", async ({ payload }) => {
 });
 
 webhooks.on("pull_request_review_comment", async ({ payload }) => {
-  const commentPayload = payload as PullRequestReviewCommentEvent;
   if (
-    commentPayload.action !== "created" ||
-    (commentPayload.sender.type === "Bot" && commentPayload.sender.login === "doxynix[bot]")
+    payload.action !== "created" ||
+    (payload.sender.type === "Bot" && payload.sender.login === "doxynix[bot]")
   ) {
     return;
   }
 
-  const commentBody = commentPayload.comment.body;
+  const commentBody = payload.comment.body;
   if (commentBody.includes("@doxynix")) {
     const repo = await prisma.repo.findFirst({
-      where: { githubId: commentPayload.repository.id },
+      where: { githubId: payload.repository.id },
     });
 
     if (repo == null) {
@@ -135,12 +127,12 @@ webhooks.on("pull_request_review_comment", async ({ payload }) => {
     await agentGithubReplyTask.trigger({
       branch: repo.defaultBranch,
       commentBody,
-      commentId: commentPayload.comment.id,
+      commentId: payload.comment.id,
       commentType: "review",
-      owner: commentPayload.repository.owner.login,
-      prNumber: commentPayload.pull_request.number,
+      owner: payload.repository.owner.login,
+      prNumber: payload.pull_request.number,
       repoId: repo.id,
-      repoName: commentPayload.repository.name,
+      repoName: payload.repository.name,
       userId: repo.userId,
     });
   }

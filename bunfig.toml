@@ -1,4 +1,4 @@
 [install]
-# minimumReleaseAge = 259200 // TMP
+linker = "isolated"
 exact = true
-default-trusted-dependency = false
+minimumReleaseAge = 259200

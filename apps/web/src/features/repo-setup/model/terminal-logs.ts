@@ -1,12 +1,11 @@
 export const logLevels = ["all", "info", "warn", "error", "success"] as const;
 export type TerminalFilter = (typeof logLevels)[number];
-
-export interface LogEntry {
+export type LogEntry = {
   id: string;
   level: "error" | "info" | "success" | "warn";
   message: string;
   timestamp: string;
-}
+};
 
 export type LogCounts = Record<TerminalFilter, number>;
 

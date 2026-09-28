@@ -15,6 +15,7 @@ import {
 } from "better-auth/plugins";
 import { createTranslator } from "next-intl";
 import { Resend } from "resend";
+import * as z from "zod";
 
 import { IS_PROD } from "@/shared/config/env.flags";
 import {
@@ -41,6 +42,15 @@ const SESSION_UPDATE_AGE = 24 * 60 * 60; // TIME: 24 hours
 const MAGIC_LINK_MAX_AGE = 10 * 60; // TIME: 10 minutes
 
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
+
+const yandexProfileSchema = z.object({
+  default_avatar_id: z.string().nullish(),
+  default_email: z.string().nullish(),
+  display_name: z.string().nullish(),
+  id: z.union([z.string(), z.number()]),
+  is_avatar_empty: z.boolean().nullish(),
+  real_name: z.string().nullish(),
+});
 
 export const auth = betterAuth({
   account: {
@@ -462,7 +472,26 @@ export const auth = betterAuth({
                 Authorization: `OAuth ${token.accessToken}`,
               },
             });
-            const profile = await res.json();
+
+            if (!res.ok) {
+              appLogger.error({
+                msg: "Yandex user info request failed",
+                status: res.status,
+              });
+              throw new APIError("BAD_REQUEST", { message: "YandexUserInfoFailed" });
+            }
+
+            const parsed = yandexProfileSchema.safeParse(await res.json());
+
+            if (!parsed.success) {
+              appLogger.error({
+                error: parsed.error,
+                msg: "Unexpected Yandex user info shape",
+              });
+              throw new APIError("BAD_REQUEST", { message: "YandexUserInfoInvalid" });
+            }
+
+            const profile = parsed.data;
 
             return {
               email: profile.default_email ?? null,

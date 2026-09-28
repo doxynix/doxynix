@@ -1,9 +1,8 @@
-import type { PushEvent } from "@octokit/webhooks-types";
-
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
+import type { PushPayload } from "@/server/core/github/github-webhook.types";
 
-export async function handlePushEvent(payload: PushEvent): Promise<void> {
+export async function handlePushEvent(payload: PushPayload): Promise<void> {
   const { commits, ref, repository } = payload;
 
   const isDefaultBranch = ref === `refs/heads/${repository.default_branch}`;

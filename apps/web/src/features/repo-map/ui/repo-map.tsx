@@ -26,7 +26,6 @@ import { useMapLayout } from "../model/use-map-layout";
 import { enrichNodesWithParents, extractParentGroups } from "../model/use-parent-groups";
 import { useMapControlsHide } from "../model/use-repo-map.store";
 import { RepoMapCustomControls } from "./repo-map-custom-controls";
-import { ExportPanel } from "./repo-map-export-panel";
 import { RepoMapSearchPanel } from "./repo-map-search-panel";
 import { RepoMapSidebar } from "./repo-map-sidebar";
 import { RepoNode } from "./repo-node";
@@ -232,21 +231,6 @@ export function RepoMap({
                     )}
                   </div>
                   <RepoMapSearchPanel />
-                </Panel>
-                <Panel
-                  className="flex flex-col items-end gap-1"
-                  position="top-right"
-                >
-                  <div
-                    className={cn(
-                      "transform transition-standard",
-                      hide
-                        ? "pointer-events-none translate-x-full opacity-0"
-                        : "translate-x-0 opacity-100",
-                    )}
-                  >
-                    <ExportPanel filename="repo-map" />
-                  </div>
                 </Panel>
                 <Background gap={25} />
 

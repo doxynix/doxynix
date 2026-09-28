@@ -52,14 +52,21 @@ export class OpenApiDiscoveryEngine {
 
       try {
         const isJson = file.path.toLowerCase().endsWith(".json");
-        const rawData = isJson
+        const rawData: unknown = isJson
           ? JSON.parse(file.content)
           : YAML.parse(file.content, { logLevel: "error", maxAliasCount: 0 });
-        const data = rawData as MinimalOpenApi | null;
 
-        if (data == null || typeof data !== "object") {
+        if (rawData == null || typeof rawData !== "object" || Array.isArray(rawData)) {
           continue;
         }
+
+        const { paths } = rawData as { paths?: unknown };
+
+        if (paths == null || typeof paths !== "object" || Array.isArray(paths)) {
+          continue;
+        }
+
+        const data = rawData as MinimalOpenApi;
 
         const specPaths = Object.keys(data.paths).filter((p) => p.startsWith("/"));
         if (specPaths.length === 0) {

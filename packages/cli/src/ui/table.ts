@@ -4,10 +4,10 @@ import { getStringWidth } from "./formatters";
 export type TableCell = unknown;
 export type TableRow = TableCell[];
 
-export interface Table {
+export type Table = {
   push(...rows: TableRow[]): void;
   toString(): string;
-}
+};
 
 export function createTable(head: string[]): Table {
   const rows: TableRow[] = [];

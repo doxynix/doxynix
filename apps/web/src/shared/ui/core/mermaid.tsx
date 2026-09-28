@@ -127,12 +127,10 @@ function useMermaid({
             : (explicitTheme ?? "default");
 
         mermaid.initialize({
-          flowchart: {
-            htmlLabels: parsedConfig.flowchart?.htmlLabels ?? true,
-            ...(parsedConfig.flowchart?.padding != null
-              ? { padding: parsedConfig.flowchart.padding }
-              : {}),
-          },
+          htmlLabels: parsedConfig.flowchart?.htmlLabels ?? true,
+          ...(parsedConfig.flowchart?.padding != null
+            ? { flowchart: { padding: parsedConfig.flowchart.padding } }
+            : {}),
           fontFamily: parsedConfig.fontFamily ?? "Inter, sans-serif",
           fontSize: parsedConfig.fontSize ?? 14,
           logLevel: parsedConfig.logLevel ?? "error",

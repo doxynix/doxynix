@@ -1,4 +1,4 @@
-import { Body, Button, Container, Head, Html, Section, Text } from "@react-email/components";
+import { Body, Button, Container, Head, Html, Section, Text } from "react-email";
 
 export type AuthEmailKey =
   | "email_preview_text"

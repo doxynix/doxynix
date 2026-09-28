@@ -1,7 +1,6 @@
-import type { PullRequestEvent } from "@octokit/webhooks-types";
-
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
+import type { PullRequestPayload } from "@/server/core/github/github-webhook.types";
 import { PRConfigService } from "@/server/modules/analysis/logic/pr-config";
 
 import { analysisRepo } from "../analysis.repository";
@@ -11,10 +10,10 @@ import { analyzePrTask } from "../tasks/analyze-pr.task";
  * Handle GitHub PR webhook events (opened, synchronize actions only)
  * Validates config, creates analysis record, and triggers Trigger.dev task for differential analysis
  */
-export async function handlePullRequestEvent(payload: PullRequestEvent): Promise<void> {
+export async function handlePullRequestEvent(payload: PullRequestPayload): Promise<void> {
   const { action, pull_request, repository } = payload;
 
-  if (pull_request.user.type === "Bot") {
+  if (pull_request.user?.type === "Bot") {
     appLogger.debug({
       bot: pull_request.user.login,
       msg: "pr_webhook_ignored_bot",

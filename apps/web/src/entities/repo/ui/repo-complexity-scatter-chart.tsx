@@ -3,11 +3,11 @@
 import { useTranslations } from "next-intl";
 import {
   CartesianGrid,
-  Cell,
   ReferenceLine,
   ResponsiveContainer,
   Scatter,
   ScatterChart,
+  Symbols,
   Tooltip,
   XAxis,
   YAxis,
@@ -133,15 +133,18 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
           <Scatter
             data={chartData}
             name={t("chart_files")}
-          >
-            {chartData.map((entry, index) => (
-              <Cell
+            shape={(props) => (
+              <Symbols
                 className="cursor-crosshair opacity-80 transition-opacity hover:opacity-100"
-                fill={entry.y > 15 ? "var(--destructive)" : "var(--primary)"}
-                key={`cell-${index}`}
+                cx={props.cx}
+                cy={props.cy}
+                fill={props.payload?.y > 15 ? "var(--destructive)" : "var(--primary)"}
+                size={props.size}
+                sizeType={props.sizeType}
+                type={props.type}
               />
-            ))}
-          </Scatter>
+            )}
+          />
         </ScatterChart>
       </ResponsiveContainer>
     </div>

@@ -3,7 +3,7 @@ import path from "node:path";
 import type { NextConfig } from "next";
 import filterWebpackStats from "@bundle-stats/plugin-webpack-filter";
 import withBundleAnalyzer from "@next/bundle-analyzer";
-import { type SentryBuildOptions, withSentryConfig } from "@sentry/nextjs";
+import { type SentryBuildOptions, withSentryConfig } from "@sentry/nextjs/config";
 import createWithVercelToolbar from "@vercel/toolbar/plugins/next";
 import { withAxiom } from "next-axiom";
 import createNextIntlPlugin from "next-intl/plugin";

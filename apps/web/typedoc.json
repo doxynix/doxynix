@@ -21,7 +21,7 @@
     "typedoc-plugin-extras",
     "typedoc-plugin-rename-defaults",
     "@boneskull/typedoc-plugin-mermaid",
-    "@to-skills/typedoc"
+    "@skillit/typedoc"
   ],
   "publicPath": "/docs/",
   "skillsIncludeExamples": true,
