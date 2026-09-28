@@ -128,6 +128,12 @@ jobs:
       - name: Clean tree-sitter symlinks
         run: bun run clean:symlinks
 
+      - name: Prisma Generate
+        run: bun --filter @doxynix/web with-doppler "bun prisma generate"
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+          DIRECT_URL: postgresql://user:password@localhost:5432/test_db
+
       - name: Check Formatting
         run: bun --filter @doxynix/web format:check
 
