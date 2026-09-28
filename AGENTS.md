@@ -83,6 +83,7 @@ Detail: `.agents/skills/architecture/SKILL.md`.
 | Path | Source of truth |
 | --- | --- |
 | `apps/web/prisma/schema.prisma` | ZenStack compiler; edit `prisma/models/*.zmodel` + `schema.zmodel` |
+| `apps/web/src/server/core/field-encryption/config.generated.ts` | `prisma/field-encryption-generator.ts` (DMMF annotations) |
 | `packages/shared/src/enums/index.ts` | `prisma/enum-generator.ts`, run by `db:generate` |
 | `apps/siem-client/src/routeTree.gen.ts` | TanStack Router plugin |
 | `apps/web/messages/en.d.json.ts` | next-intl type generation |

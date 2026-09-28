@@ -10,6 +10,7 @@ model User {
   /// @encryption:hash(email)?normalize=lowercase&normalize=trim
   /// @zod.custom.omit(["model"])
   emailHash           String?              @unique @map("email_hash") @omit
+  /// @encrypted
   /// @zod.string.trim().min(1, { message: "Name required" }).max(50, { message: "Name cannot exceed 50 characters" })
   name                String?              @length(min: 1, max: 50, message: "Name cannot exceed 50 characters")
   emailVerified       Boolean              @default(false) @map("email_verified")
