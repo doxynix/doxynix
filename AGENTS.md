@@ -1,135 +1,193 @@
-# AGENTS.md — Doxynix Monorepo Context & Rules
+# AGENTS.md — Doxynix Monorepo
 
-Welcome to the **Doxynix Monorepo**. This codebase is managed via **Bun**, **Turborepo**, and **TypeScript (Strict)**.
+Bun + Turborepo + TypeScript (strict). Bun workspaces: `apps/web`, `apps/siem-server`,
+`apps/siem-client`, `packages/{cli,config,shared}`. Postgres 18, Valkey 9, ZenStack/Prisma (web),
+Drizzle (siem-server).
 
----
-
-## 🌐 Global Monorepo Rules (Applies to ALL Code)
-
-### 1. Package Manager & Runtimes
-
-- **Package Manager**: **Bun ONLY** (`bun install`, `bun run`, `bun x turbo run`).
-  - Strict prohibition: NEVER run `npm`, `yarn`, or `pnpm` (enforced via `"preinstall": "npx only-allow bun"`).
-- **Tooling & Linters**:
-  - **Linters/Formatters**: **Biome & Oxlint ONLY** (`bun run validate`, `oxlint --fix`).
-  - NEVER install, run, or introduce ESLint or Prettier.
-- **Secrets Management**:
-  - Use **Doppler** for all secret and environment resolution (`bun with-doppler ...`).
-  - NEVER commit or directly edit raw `.env*` or `.doppler.yaml` files.
-
-### 2. Architectural Boundaries & Imports
-
-- **Apps Isolation**: Code inside `apps/*` MUST NEVER directly import code from other `apps/*` (e.g., `apps/web` cannot import from `apps/siem-server`).
-- **Shared Packages**: Apps MUST import shared domain code and schemas ONLY from `@doxynix/packages/*` using workspace protocol (`workspace:*`).
-- **Standard Utilities**:
-  - **Path operations**: Use `pathe` for ALL path manipulations (`join`, `resolve`, `normalize`). NO `node:path`.
-  - **Utilities**: Use `es-toolkit` for array/object manipulation (`uniq`, `compact`, `groupBy`). Avoid manual loops.
-  - **File discovery**: Use `fast-glob` for file searches.
-
-### 3. Verification Before Task Completion
-
-Before claiming ANY task or PR is complete, you MUST execute and confirm zero errors on:
-
-`bun run validate` (all checks)
+`CLAUDE.md` is a symlink to this file. `.cursor/rules/global.mdc` is a stale copy — this file wins.
 
 ---
 
-## 🧠 Skills Integration & Workflows (`.agents/skills/`)
+## Commands
 
-All agents must leverage modular skills located in `.agents/skills/`:
+Bun only. `npm` / `yarn` / `pnpm` are prohibited. Never introduce ESLint or Prettier (Biome +
+Oxlint only).
 
-- **Planning**: For any task touching >2 files, invoke `.agents/skills/writing-plans/SKILL.md` before writing code.
-- **Implementation**: Strictly apply `.agents/skills/ponytail/SKILL.md` (YAGNI, minimal working code, max 400 lines per file).
-- **Debugging**: When investigating errors or failing tests, execute `.agents/skills/systematic-debugging/SKILL.md` (root-cause first, no symptom patching).
-- **Verification**: Always run `.agents/skills/verification-before-completion/SKILL.md` and `.agents/skills/code-review/SKILL.md` before commit.
-- **UI & Components**: For all frontend components, follow `.agents/skills/shadcn/SKILL.md`.
+| Task | Command |
+| --- | --- |
+| Full gate (run before claiming done) | `bun run validate` then `bun run type-check` then `bun run arch:check` |
+| Format | `bun run format` (writes) · `bun run format:check` |
+| Lint / fix | `bun run lint` · `bun run lint:fix` |
+| Tests | `bun run test` — **only `apps/web` has tests**; the other workspaces have no `test` script |
+| One test file | `bun --filter @doxynix/web test src/server/modules/analysis/analysis.mapper.test.ts` |
+| Duplication / dead code | `bun run dup` (jscpd, fails over 5%) · `bun run knip` |
+| Spelling / secrets | `bun run spellcheck` (cspell) · `bun run secretlint` |
 
----
+### Things that will bite you
 
-## 🎯 App Scope 1: Web Platform (`apps/web`)
+- **Doppler.** `db:generate`, `build`, `dev`, `lint`, `type-check`, `test` and `validate` all
+  transitively run `db:generate`, which goes through the `with-doppler` wrapper. Locally that means
+  the Doppler CLI must be installed and logged in. `scripts/doppler.ts` passes straight through when
+  `CI=true`.
+- **`with-doppler` only exists inside `apps/web` and `apps/siem-server`.** There is no such script at
+  the repo root, so `bun with-doppler "bun --filter @doxynix/web db:generate"` (as printed in
+  `README.md`, `apps/web/README.md` and the `zenstack-migration` skill) fails from the root. Use
+  `bun --filter @doxynix/web db:generate` — that script already wraps Doppler.
+- **`bunx` needs shell approval** in this session's `opencode.jsonc` permissions. Prefer
+  `bun run <script>` / `bun --filter <pkg> <script>`.
+- **Prefer `bun run` over ad-hoc binaries** even outside the permission gate: `lint` depends on
+  `db:generate` (so type-aware Oxlint has the Prisma client), while `bunx oxlint` skips that.
+- **`apps/web` `type-check` is memory-heavy** (`NODE_OPTIONS=--max-old-space-size=8192`).
+- `bun run dev` runs the Turborepo TUI and **excludes `@doxynix/cli`**. Infra: `docker compose up -d`
+  (postgres 5432 `postgres/123456`, valkey 6379 pass `123456`).
+- After `bun install`, run `bun run clean:symlinks` — it deletes the circular `tree-sitter-wasms`
+  symlink that breaks WASM grammar loading. `postinstall` does this, but `bun install
+  --ignore-scripts` (what CI does) does not.
 
-**Role**: AI-powered repository analysis, automatic PR generation, interactive documentation, and developer platform.
+### Integration tests (`apps/web` only)
 
-### Stack & Technologies
+`test:int` hits a **real** Postgres, exercises ZenStack policies, and `cleanupDatabase()` `TRUNCATE`s
+shared tables between files. It refuses to run against a database whose name does not contain `test`.
+Setup is in `CONTRIBUTING.md` (create `dxnx_web_test`, point Doppler config `tst` at it, then
+`bun --filter @doxynix/web db:push:test` — `push`, not `migrate deploy`, because the DB is disposable).
 
-- **Framework**: Next.js 16 (App Router) + React 19 + Tailwind CSS v4 + TypeScript (Strict)
-- **API Layer**: tRPC v11 + REST
-- **Database**: PostgreSQL 17 + ZenStack v2 (`schema.zmodel`, `models/*.zmodel`) + Prisma ORM v6
-- **Background Tasks**: Trigger.dev v4 (`trigger.config.ts`, `tasks/*.task.ts`)
-- **Architecture**: Feature-Sliced Design (FSD on Client, VSA on Server)
-
-### Strict Guidelines for `apps/web`
-
-1. **Database Schema Law**:
-   - **NEVER edit `apps/web/prisma/schema.prisma` directly!** It is auto-generated by ZenStack.
-   - Always edit `apps/web/prisma/models/*.zmodel` or `schema.zmodel`.
-   - Apply workflow from `.agents/skills/zenstack-migration/SKILL.md`.
-   - Run generation via: `bun with-doppler "bun --filter @doxynix/web db:generate"`.
-2. **Analysis Pipeline**:
-   - AI AST Analysis follows the Sentinel → Mapper → Architect pipeline on Trigger.dev.
-   - Token budgets must be dynamic. Document sections must anchor to graph node IDs.
-   - Consult `.agents/skills/analysis-engine/SKILL.md`.
-3. **File Budget**: Max 400 lines per file (SRP). Break down oversized modules.
-4. **Database Keys**: 20 of 21 models use a single server-generated
-   `uuid` key, `@default(dbgenerated("uuidv7()")) @db.Uuid` — always with
-   `@db.Uuid`, never as `text`. Requires PostgreSQL >= 18. Never generate a key
-   in application code, and never put `@omit` on an `id`: `@omit` is a ZenStack
-   attribute that hides the field from the policy layer, which makes the
-   identifier unreadable. It belongs on secret and `*Id` FK columns only.
-   `uuidv7()` is `VOLATILE`, so sort and filter on `createdAt`, not on the key.
-   `GithubInstallation.id`, `Repo.githubId` and `PullRequestComment.githubCommentId`
-   stay integer — external natural keys from GitHub, not surrogates.
-
----
-
-## 🎯 App Scope 2: SIEM Server (`apps/siem-server`)
-
-**Role**: High-throughput log intelligence, event ingestion worker, and security anomaly detection system.
-
-### Stack & Technologies
-
-- **Framework**: Hono with End-to-End RPC (`AppType`)
-- **Database**: PostgreSQL + Drizzle ORM (`src/core/db/schema.ts`)
-- **Primary Keys**: UUIDv7 (`sql`uuidv7()``)
-- **Architecture**: **Vertical Slice Architecture** (`src/modules/<slice>`)
-
-### Strict Guidelines for `apps/siem-server`
-
-1. **Database Schema Law**:
-   - Schema modifications strictly live in `src/core/db/schema.ts`.
-   - Primary keys MUST use `uuidv7()`.
-   - Apply workflow from `.agents/skills/drizzle-migration/SKILL.md`.
-   - Run migrations via: `bun --filter @doxynix/siem-server db:migrate`.
-2. **Hono RPC API Law**:
-   - Every slice must contain `.schema.ts`, `.service.ts`, `.router.ts`.
-   - Inbound request payloads MUST use `zValidator("json", Schema)`.
-   - Protected routes must apply `requireAuth`.
-   - Follow workflow in `.agents/skills/hono-rpc-endpoint/SKILL.md`.
-3. **Slice Isolation**: Modules in `src/modules/A` must NOT import internal details of `src/modules/B`.
+`bun run test` is the unit suite only; the unit config *excludes* `src/tests/integration`, so a CLI
+path filter can never reach those files — hence the separate `vitest.integration.config.ts`.
 
 ---
 
-## 🎯 App Scope 3: SIEM Client (`apps/siem-client`)
+## Architecture boundaries
 
-**Role**: Real-time security incident dashboard and log streaming interface.
+- **`apps/*` must not import each other.** The one deliberate exception: `packages/cli` imports
+  `type { AppRouter } from "@doxynix/web/trpc"` (a devDependency, types only, via the `./trpc`
+  export). Do not extend it to runtime imports.
+- Shared domain code and schemas go in `packages/shared` (`workspace:*`), not in an app.
+- **Client FSD** (`apps/web/src/{app,entities,features,widgets,shared}`, `apps/siem-client`):
+  imports flow downward only; no cross-slice imports. `steiger` is the methodology gate
+  (`lint:fsd`).
+- **Server VSA** (`apps/web/src/server/modules`, `apps/siem-server/src/modules`,
+  `packages/cli/src/commands`): slices must not import each other's internals. Only
+  `core`/`utils`/`ui` sit outside a slice.
+- `dep-cruiser` (`arch:check`) is the hard gate, run in pre-commit and CI. It compares against a
+  known-violations baseline — new violations fail, old ones do not. After deliberate refactors,
+  refresh it with `bun --filter @doxynix/<app> arch:baseline` and review the diff.
+- Path ops use `pathe` (never `node:path`), collection helpers use `es-toolkit`, file search uses
+  `fast-glob`.
 
-### Stack & Technologies
-
-- **Framework**: Vite 8 + React 19 + Tailwind CSS v4 + TypeScript (Strict)
-- **Routing**: TanStack Router (File-based routing in `src/routes/`)
-- **RPC Client**: Hono RPC Client (`hcWithType` from `@doxynix/siem-server/client`)
-- **Architecture**: Feature-Sliced Design (`shared` -> `entities` -> `features` -> `widgets` -> `routes`)
-
-### Strict Guidelines for `apps/siem-client`
-
-1. **FSD Import Flow**: Imports MUST flow downwards ONLY (`routes` -> `widgets` -> `features` -> `entities` -> `shared`). Cross-feature imports are FORBIDDEN.
-2. **Generated Route Tree**: NEVER manually edit `src/routeTree.gen.ts`. It is managed by TanStack Router plugin.
-3. **Type Import Isolation**: Client can ONLY import types from `@doxynix/shared` or `AppType` from `siem-server`. Deep runtime imports from server files are forbidden.
+Detail: `.agents/skills/architecture/SKILL.md`.
 
 ---
 
-## 📦 Scope 4: Shared Packages (`packages/*`)
+## Generated code — never hand-edit
 
-- **`packages/shared`**: Pure domain types, Zod schemas, and auth contracts. NO runtime server/client dependencies allowed.
-- **`packages/config`**: Base configuration files for TypeScript (`tsconfig.json`), Biome (`biome.json`), and Oxlint.
-- **`packages/cli`**: Doxynix Command Line Interface tool (`dxnx`).
+| Path | Source of truth |
+| --- | --- |
+| `apps/web/prisma/schema.prisma` | ZenStack compiler; edit `prisma/models/*.zmodel` + `schema.zmodel` |
+| `packages/shared/src/enums/index.ts` | `prisma/enum-generator.ts`, run by `db:generate` |
+| `apps/siem-client/src/routeTree.gen.ts` | TanStack Router plugin |
+| `apps/web/messages/en.d.json.ts` | next-intl type generation |
+| `apps/siem-client/dist`, `apps/siem-server/dist` | build output consumed via package `exports` |
+
+`packages/cli` and `apps/siem-client` type-check against `apps/siem-server`'s **built** `dist/`, so
+run through Turbo (`bun run type-check`) or build siem-server first.
+
+---
+
+## App-specific hard rules
+
+### `apps/web` (Next.js 16, React 19, tRPC, ZenStack 2 / Prisma 6, Trigger.dev 4)
+
+- Trigger tasks live in `src/server/modules/<slice>/tasks/*.task.ts` (discovered by
+  `dirs: ["./src/server/**/tasks"]` in `trigger.config.ts`) — not a top-level `tasks/` dir.
+- Server slices are wired into `src/server/modules/index.ts`, which exports `AppRouter`; that type is
+  the client/CLI contract.
+- Prisma keys: `id String @id @default(dbgenerated("uuidv7()")) @db.Uuid` — always `@db.Uuid`, never
+  `text`, never generated in application code. `@omit` belongs on secrets and `*Id` FK columns
+  only, never on `id` (it hides the field from the policy layer, making the row unreadable).
+  `uuidv7()` is `VOLATILE`, so order/filter on `createdAt`, not on the key. GitHub natural keys
+  (`GithubInstallation.id`, `Repo.githubId`, `PullRequestComment.githubCommentId`) stay integer.
+- `validate` also runs `lint:i18n` (eloqnt) and `lint:locales`
+  (`scripts/check-locales.ts`, which enforces the `en.json` key shape across all 12 locales in
+  `messages/`). New copy must be added to every locale.
+
+Workflow: `.agents/skills/zenstack-migration/SKILL.md`, `.agents/skills/analysis-engine/SKILL.md`.
+
+### `apps/siem-server` (Hono, Drizzle, UUIDv7)
+
+- Schema changes only in `src/core/db/schema.ts`; PKs must be
+  `uuid("id").primaryKey().default(sql\`uuidv7()\`)`. Never hand-edit generated migration SQL.
+- `AppType` / `hcWithType` are exported from `src/client.ts` and consumed as
+  `@doxynix/siem-server/client`.
+- Each slice owns `<slice>.schema.ts` / `<slice>.service.ts` / `<slice>.router.ts` (not all three
+  exist everywhere — e.g. `admin` has no service, `stream-logs` has no schema). Inbound payloads go
+  through `zValidator("json", Schema)`; protected routes use `requireAuth`. Routers must be chained
+  into `app` in `src/index.ts` or `AppType` inference breaks.
+
+Workflow: `.agents/skills/drizzle-migration/SKILL.md`, `.agents/skills/hono-rpc-endpoint/SKILL.md`.
+
+### `apps/siem-client` (Vite 8, React 19, TanStack Router)
+
+- FSD only: `routes → widgets → features → entities → shared`. Compose in a widget instead of
+  cross-importing features.
+- Consume the API through `hcWithType` from `@doxynix/siem-server/client` — never raw `fetch`, never
+  deep imports into server files.
+
+### `packages/cli` (`dxnx`)
+
+- VSA over `src/commands`; `src/core` + `src/ui` are shared and must not import command slices.
+
+### `packages/shared`
+
+- Pure types, Zod schemas, auth contracts. Its only runtime dependency is `zod`.
+
+---
+
+## Lint / format gotchas
+
+- Biome runs **assist** actions on write: `useSortedKeys`, `useSortedProperties`,
+  `useSortedPackageJson`, `useSortedAttributes`, `useSortedEnumMembers`, plus a custom
+  `organizeImports` group order (`bun/node` → react → next → hono → packages → `@doxynix/*` →
+  `@/shared` → `@/entities` → `@/features` → `@/widgets` → `@/app` → aliases → relative). Expect it
+  to rewrite your object literals and imports; run `bun run format` and re-read the result.
+- Oxlint runs **type-aware** (`oxlint-tsgolint`) with `correctness: error` plus a long `plugins`/
+  `rules` set. Frequent trip-ups: `no-console` (only `warn`/`error`/`info` allowed),
+  `typescript/no-non-null-assertion`, `typescript/no-floating-promises`, `no-param-reassign`,
+  `unicorn/filename-case` (kebab-case), `unicorn/error-message`, `no-underscore-dangle` (allowlist is
+  small). Tests get a relaxed override; `vitest/no-focused-tests` and `vitest/expect-expect` are
+  errors, so no `.only` and every test needs an `expect`-family call.
+- `cspell` runs on staged files in pre-commit — unusual product words need a `cspell.json` entry.
+
+---
+
+## Git workflow
+
+Full detail in `.agents/skills/linear-git-workflow/SKILL.md`. The essentials, all enforced by
+Lefthook:
+
+- Branch off `main`: `<type>/dxnx-<n>-<kebab-description>`. The hook only checks for a `dxnx`
+  prefix (`main`/`master`/`dev`/`development` bypass it).
+- Commit subject: `type(scope): description`, ≤ 72 chars, no trailing period. Allowed types
+  `feat fix docs style refactor perf test build ci chore revert`. Scope is optional but, if present,
+  must be one of `ci cli config db deps root security shared siem-client siem-server skills tooling
+  web` (`scripts/check-commit-name.ts`).
+- **Never put the ticket in the subject.** `prepare-commit-msg` reads `dxnx-<n>` off the branch and
+  appends `Closes DXNX-NNN` itself.
+- Pre-commit runs branch check, `bun install --frozen-lockfile`, Biome `--write` (re-staged),
+  Oxlint, `arch:check`, cspell, secretlint. Pre-push runs branch check + `bun run type-check`.
+- **Never `--no-verify`.** If a hook rejects you, fix the branch name or message.
+- Mergify squash-merges into `main`, so the PR title becomes the commit subject. Link the Linear
+  issue in the PR body. Release-please versions the workspaces from Conventional Commits — do not
+  hand-edit versions or changelogs.
+
+---
+
+## Skills
+
+`.agents/skills/` is registered via `opencode.jsonc` (`"skills": ["./.agents/skills"]`), so use the
+`skill` tool rather than reading files by hand. The repo-specific ones worth knowing:
+`architecture`, `zenstack-migration`, `drizzle-migration`, `hono-rpc-endpoint`, `analysis-engine`,
+`linear-git-workflow`, `verification-before-completion`, `systematic-debugging`, `ponytail`,
+`writing-plans`, `code-review`.
+
+`opencode.jsonc` also defines slash commands: `/git-linear` (ticket → branch → PR), `/review`,
+`/validate`.

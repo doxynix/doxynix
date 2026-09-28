@@ -38,7 +38,8 @@
         "nextjs/no-async-client-component": "error",
         "nextjs/no-head-element": "error",
         "nextjs/no-img-element": "error",
-        "nextjs/no-sync-scripts": "error"
+        "nextjs/no-sync-scripts": "error",
+        "typescript/no-deprecated": "error"
       }
     },
     {
@@ -78,7 +79,6 @@
       ],
       "rules": {
         "no-console": "off",
-        "typescript/no-floating-promises": "off",
         "typescript/no-non-null-assertion": "off",
         "typescript/no-unnecessary-condition": "off",
         "unicorn/no-process-exit": "off",
@@ -198,6 +198,7 @@
     "react/react-in-jsx-scope": "off",
     "react/rules-of-hooks": "error",
     "react/self-closing-comp": "error",
+    "typescript/await-thenable": "error",
     "typescript/ban-ts-comment": [
       "error",
       {
@@ -213,12 +214,15 @@
         "prefer": "type-imports"
       }
     ],
+    "typescript/no-array-delete": "error",
     "typescript/no-base-to-string": "off",
     "typescript/no-confusing-non-null-assertion": "error",
     "typescript/no-empty-object-type": "error",
     "typescript/no-explicit-any": "warn",
     "typescript/no-extra-non-null-assertion": "error",
     "typescript/no-extraneous-class": "off",
+    "typescript/no-floating-promises": "error",
+    "typescript/no-meaningless-void-operator": "error",
     "typescript/no-misused-promises": [
       "error",
       {
@@ -230,6 +234,7 @@
     "typescript/no-namespace": "error",
     "typescript/no-non-null-assertion": "error",
     "typescript/no-redundant-type-constituents": "off",
+    "typescript/no-this-alias": "error",
     "typescript/no-unnecessary-boolean-literal-compare": "error",
     "typescript/no-unnecessary-condition": [
       "error",
@@ -244,7 +249,10 @@
     "typescript/no-unnecessary-type-conversion": "off",
     "typescript/no-unnecessary-type-parameters": "off",
     "typescript/no-unsafe-declaration-merging": "error",
+    "typescript/no-unsafe-function-type": "error",
     "typescript/no-unsafe-type-assertion": "off",
+    "typescript/no-unsafe-unary-minus": "error",
+    "typescript/no-wrapper-object-types": "error",
     "typescript/only-throw-error": "error",
     "typescript/prefer-includes": "error",
     "typescript/prefer-nullish-coalescing": [
@@ -257,6 +265,7 @@
       }
     ],
     "typescript/prefer-optional-chain": "error",
+    "typescript/prefer-promise-reject-errors": "error",
     "typescript/restrict-template-expressions": "error",
     "typescript/return-await": ["error", "in-try-catch"],
     "typescript/switch-exhaustiveness-check": "error",
