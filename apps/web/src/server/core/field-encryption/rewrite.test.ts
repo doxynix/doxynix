@@ -12,6 +12,16 @@ vi.mock("@/shared/config/env.server", () => ({
 const KEY = `k1.aesgcm256.${Buffer.from("0123456789abcdef0123456789abcdef").toString("base64url")}`;
 const parsedKey = parseKey(KEY);
 
+/** Narrows a rewritten `args` tree to a plain record at the given key path. */
+const at = (root: unknown, ...keys: string[]): Record<string, unknown> => {
+  let cursor: unknown = root;
+  for (const key of keys) {
+    expect(cursor).toBeTypeOf("object");
+    cursor = (cursor as Record<string, unknown>)[key];
+  }
+  return cursor as Record<string, unknown>;
+};
+
 describe("encryptOnWrite", () => {
   it("encrypts a plaintext field on create", () => {
     const out = encryptOnWrite({ data: { email: "user@example.com" } }, "User", parsedKey);
@@ -88,11 +98,11 @@ describe("encryptOnWrite", () => {
       "User",
       parsedKey,
     );
-    const account = (out.data as Record<string, Record<string, Record<string, unknown>>>).accounts!;
+    const account = at(out, "data", "accounts", "create");
 
-    expect(parseEncryptedString(account.create!.accessToken as string)).not.toBe(false);
-    expect(parseEncryptedString(account.create!.email as string)).not.toBe(false);
-    expect(account.create!.emailHash).toBe(hashValue("acct@example.com", ["lowercase", "trim"]));
+    expect(parseEncryptedString(account.accessToken as string)).not.toBe(false);
+    expect(parseEncryptedString(account.email as string)).not.toBe(false);
+    expect(account.emailHash).toBe(hashValue("acct@example.com", ["lowercase", "trim"]));
   });
 
   it("follows a relation from a model with no encrypted fields of its own", () => {
@@ -103,10 +113,9 @@ describe("encryptOnWrite", () => {
       "Analysis",
       parsedKey,
     );
-    const document = (out.data as Record<string, Record<string, Record<string, unknown>>>)
-      .documents!;
+    const document = at(out, "data", "documents", "create");
 
-    expect(parseEncryptedString(document.create!.content as string)).not.toBe(false);
+    expect(parseEncryptedString(document.content as string)).not.toBe(false);
   });
 
   it("rewrites a where clause nested under a relation", () => {
@@ -115,8 +124,7 @@ describe("encryptOnWrite", () => {
       "User",
       parsedKey,
     );
-    const some = (out.where as Record<string, Record<string, Record<string, unknown>>>).accounts!
-      .some;
+    const some = at(out, "where", "accounts", "some");
 
     expect(some.email).toBeUndefined();
     expect(some.emailHash).toBe(hashValue("acct@example.com", ["lowercase", "trim"]));
@@ -175,8 +183,10 @@ describe("decryptOnRead", () => {
 
     decryptOnRead(result, "User", true, keychain, () => {});
 
+    const [firstAccount] = result.accounts;
+
     expect(result.email).toBe("me@example.com");
-    expect(result.accounts[0].accessToken).toBe("tok");
+    expect(firstAccount?.accessToken).toBe("tok");
   });
 
   it("resolves the rotation key from the message fingerprint", () => {

@@ -33,9 +33,10 @@ type DmmfField = {
   name: string;
   type: string;
 };
-type DmmfModel = { fields?: DmmfField[]; name: string };
+type DmmfModel = { fields?: readonly DmmfField[]; name: string };
 
-type Datamodel = { datamodel?: { models?: DmmfModel[] } };
+/** Structural, `readonly` view of the generator's DMMF (it hands over a `ReadonlyDeep`). */
+type Datamodel = { datamodel?: { models?: readonly DmmfModel[] } };
 
 /** Exported for unit tests; the generator itself only needs `onGenerate`. */
 export function buildSpec(dmmf: Datamodel): Spec {

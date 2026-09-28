@@ -3,8 +3,7 @@ import crypto from "node:crypto";
 import type { after as NextAfterFn } from "next/server";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { Prisma, PrismaClient } from "@prisma/client";
-import { fieldEncryptionExtension } from "prisma-field-encryption";
+import { type Prisma, PrismaClient } from "@prisma/client";
 
 import { IS_DEV, IS_TEST } from "@/shared/config/env.flags";
 import {
@@ -14,82 +13,12 @@ import {
 } from "@/shared/config/env.server";
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
-import { AUDIT_BUSINESS_MODELS, ENCRYPTED_METADATA_MAP } from "../utils/constants";
+import { AUDIT_BUSINESS_MODELS } from "../utils/constants";
 import { requestContext } from "../utils/request-context";
 import { maskSensitiveFields, sanitizePayload } from "../utils/sanitize-payload";
 import { appLogger } from "./app-logger";
+import { fieldEncryptionExtension } from "./field-encryption";
 import { realtimeService } from "./realtime";
-
-type DmmfField = {
-  documentation?: string;
-  isId?: boolean;
-  isList?: boolean;
-  isUnique?: boolean;
-  name: string;
-};
-
-type DmmfModel = {
-  fields?: DmmfField[];
-  name: string;
-};
-
-type DmmfDatamodel = {
-  datamodel?: {
-    models?: DmmfModel[];
-  };
-};
-
-/**
- * Immutably and surgically patches DMMF for encryption integration, completely ignoring
- * the giant auto-generated type structures in `schema` to avoid CPU regressions on cold starts.
- *
- * @param dmmf The original Prisma DMMF model
- * @returns A patched DMMF model without mutating the global context
- */
-function patchDmmfForEncryption(dmmf: DmmfDatamodel): DmmfDatamodel {
-  if (dmmf.datamodel?.models == null) {
-    return dmmf;
-  }
-
-  return {
-    ...dmmf,
-    datamodel: {
-      ...dmmf.datamodel,
-      models: dmmf.datamodel.models.map((model) => {
-        if (model.fields == null) {
-          return model;
-        }
-
-        const modelOverrides = ENCRYPTED_METADATA_MAP[model.name];
-
-        return {
-          ...model,
-          fields: model.fields.map((field) => {
-            const overrideDoc = modelOverrides?.[field.name];
-
-            return {
-              ...field,
-              isId: field.isId ?? field.name === "id",
-              isList: field.isList ?? false,
-              isUnique: field.isUnique ?? false,
-              ...(overrideDoc != null ? { documentation: overrideDoc } : {}),
-            };
-          }),
-        };
-      }),
-    },
-  };
-}
-
-function assertDmmfIsPopulated(dmmf: DmmfDatamodel): void {
-  const models = dmmf.datamodel?.models;
-  if (models == null || models.length === 0) {
-    throw new Error(
-      "[db] Prisma.dmmf is empty or stripped by the bundler. " +
-        "Field encryption cannot work without a valid DMMF — aborting startup to prevent unencrypted data leak.",
-    );
-  }
-}
 
 let cachedAfterFn: null | typeof NextAfterFn = null;
 let isAfterChecked = false;
@@ -187,23 +116,9 @@ function createPrismaInstance() {
       ? PRISMA_FIELD_ENCRYPTION_DECRYPTION_KEYS.split(",")
       : [];
 
-  const rawDmmf = (Prisma as any).dmmf as DmmfDatamodel | undefined;
-
-  if (rawDmmf == null) {
-    throw new Error(
-      "[db] Prisma.dmmf is undefined. " +
-        "Field encryption cannot initialize — aborting startup to prevent unencrypted data leak.",
-    );
-  }
-
-  assertDmmfIsPopulated(rawDmmf);
-
-  const patchedDmmf = patchDmmfForEncryption(rawDmmf);
-
   const encryptedClient = baseClient.$extends(
     fieldEncryptionExtension({
       decryptionKeys,
-      dmmf: patchedDmmf as any,
       encryptionKey: PRISMA_FIELD_ENCRYPTION_KEY,
     }),
   );

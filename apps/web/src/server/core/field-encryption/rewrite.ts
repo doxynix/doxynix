@@ -55,7 +55,11 @@ export function decryptOnRead(
     (state, node) => {
       const nodeSpec = getModelSpec(state.model);
 
-      if (node.key in nodeSpec.fields && node.type === "string" && looksEncrypted(node.value)) {
+      if (
+        Object.hasOwn(nodeSpec.fields, node.key) &&
+        node.type === "string" &&
+        looksEncrypted(node.value)
+      ) {
         const clearText = safeDecrypt(node.value, state.model, node.key, keychain, onError);
 
         if (clearText != null) {
@@ -85,10 +89,17 @@ function collectTargets(draft: Record<string, unknown>, model: string): Target[]
     (state, node) => {
       const nodeSpec = getModelSpec(state.model);
 
-      if (node.key in nodeSpec.fields) {
+      if (Object.hasOwn(nodeSpec.fields, node.key)) {
+        // `Object.hasOwn` rather than `in`: `noUncheckedIndexedAccess` makes the
+        // lookup `FieldSpec | undefined`, and `in` would also match inherited
+        // members such as `toString`.
         const fieldSpec = nodeSpec.fields[node.key];
 
-        if (node.type === "string") {
+        if (fieldSpec == null) {
+          return nextModel(state, node, nodeSpec);
+        }
+
+        if (node.type === "string" && typeof node.value === "string") {
           targets.push({
             field: node.key,
             fieldSpec,
