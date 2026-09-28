@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.0.0](https://github.com/doxynix/doxynix/compare/cli-v3.1.6...cli-v4.0.0) (2026-09-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* **web:** make a server-generated uuid the only primary key ([#2213](https://github.com/doxynix/doxynix/issues/2213))
+
+### Code Refactoring
+
+* **web:** make a server-generated uuid the only primary key ([#2213](https://github.com/doxynix/doxynix/issues/2213)) ([27f16ea](https://github.com/doxynix/doxynix/commit/27f16ea3de959c48f411f9564357b725ee4ac9e7))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 4.0.0
+
 ## [3.1.6](https://github.com/doxynix/doxynix/compare/cli-v3.1.5...cli-v3.1.6) (2026-09-27)
 
 
