@@ -54,7 +54,7 @@
   "devDependencies": {
     "@babel/core": "8.0.6",
     "@doxynix/config": "workspace:*",
-    "@feature-sliced/steiger-plugin": "0.7.0",
+    "@feature-sliced/steiger-plugin": "0.8.0",
     "@rolldown/plugin-babel": "0.2.4",
     "@tailwindcss/vite": "4.3.3",
     "@tanstack/router-plugin": "1.168.40",
@@ -65,7 +65,7 @@
     "dependency-cruiser": "18.4.0",
     "globals": "16.5.0",
     "rollup-plugin-visualizer": "7.1.1",
-    "steiger": "0.6.0",
+    "steiger": "0.7.0",
     "svgo": "4.1.0",
     "tailwindcss": "catalog:",
     "vite": "8.3.1",
