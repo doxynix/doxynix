@@ -8,12 +8,14 @@ import {
   TRPC_PREFIX,
 } from "./shared/config/env.client";
 import { IS_DEV, IS_PROD } from "./shared/config/env.flags";
+import { SENTRY_DATA_COLLECTION } from "./shared/config/sentry";
 
 function escapeRegExp(str: string) {
   return str.replaceAll(/[$()*+.?[\\\]^{|}]/g, String.raw`\$&`);
 }
 
 Sentry.init({
+  dataCollection: SENTRY_DATA_COLLECTION,
   dsn: SENTRY_DSN,
 
   enabled: IS_PROD,
@@ -41,8 +43,6 @@ Sentry.init({
   replaysOnErrorSampleRate: 1,
 
   replaysSessionSampleRate: 0.01,
-
-  sendDefaultPii: false,
 
   tracesSampleRate: 0.1,
 

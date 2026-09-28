@@ -1,16 +1,25 @@
 import type { InstallationTargetType, RepositorySelection } from "@doxynix/shared";
-import type { InstallationEvent } from "@octokit/webhooks-types";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
+import type { InstallationPayload } from "@/server/core/github/github-webhook.types";
 
-export async function handleInstallationEvent(payload: InstallationEvent): Promise<void> {
+export async function handleInstallationEvent(payload: InstallationPayload): Promise<void> {
   const action = payload.action;
   const installation = payload.installation;
   const instIdBigInt = BigInt(installation.id);
+  const account = installation.account;
 
-  const githubLogin = installation.account.login.slice(0, 39);
-  const githubAvatar = installation.account.avatar_url;
+  if (account == null || !("login" in account)) {
+    appLogger.info({
+      installationId: instIdBigInt.toString(),
+      msg: "GitHub installation skipped: no user or organization account",
+    });
+    return;
+  }
+
+  const githubLogin = account.login.slice(0, 39);
+  const githubAvatar = account.avatar_url;
   const githubRepoSelection =
     installation.repository_selection.toUpperCase() as RepositorySelection;
   const githubTargetType = installation.target_type.toUpperCase() as InstallationTargetType;

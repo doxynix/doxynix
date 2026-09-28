@@ -1,14 +1,14 @@
 import { Visibility } from "@doxynix/shared";
-import type { Repository } from "@octokit/webhooks-types";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
+import type { WebhookRepository } from "@/server/core/github/github-webhook.types";
 
 /**
  * Opportunistically updates repository data from any GitHub payload.
  * Called without `await` in the main handlers so the GitHub response is not blocked.
  */
-export async function syncRepoMetadata(repository: Repository): Promise<void> {
+export async function syncRepoMetadata(repository: WebhookRepository): Promise<void> {
   try {
     let repoVisibility = Visibility.PRIVATE as Visibility;
     if (repository.visibility === "public" || !repository.private) {

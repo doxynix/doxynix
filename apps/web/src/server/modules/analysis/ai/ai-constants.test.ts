@@ -24,7 +24,7 @@ const mocks = vi.hoisted(() => {
 });
 
 vi.mock("@ai-sdk/openai", () => ({ createOpenAI: mocks.createOpenAI }));
-vi.mock("@vercel/edge-config", () => ({ get: mocks.getEdgeConfig }));
+vi.mock("@vercel/global-config", () => ({ get: mocks.getEdgeConfig }));
 vi.mock("@/shared/config/env.server", () => ({ GROQ_API_KEY: "test-groq-key" }));
 vi.mock("@/server/core/app-logger", () => ({ appLogger: mocks.appLogger }));
 

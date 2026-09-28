@@ -16,16 +16,14 @@ beforeEach(() => {
   HTMLElement.prototype.releasePointerCapture = vi.fn();
   HTMLElement.prototype.hasPointerCapture = () => false;
 
-  window.matchMedia = (query: string) => ({
+  window.matchMedia = ((query: string) => ({
     addEventListener: vi.fn(),
-    addListener: vi.fn(),
     dispatchEvent: vi.fn(),
     matches: false,
     media: query,
     onchange: null,
     removeEventListener: vi.fn(),
-    removeListener: vi.fn(),
-  });
+  })) as unknown as typeof window.matchMedia;
 
   localStorage.clear();
   document.body.style.cursor = "";

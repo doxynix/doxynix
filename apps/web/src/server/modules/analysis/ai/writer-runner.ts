@@ -3,7 +3,7 @@ import { llmLimiter } from "@/server/utils/llm-limiter";
 
 import type { WriterName, WriterResult } from "./writer-tasks";
 
-export interface WriterInput {
+export type WriterInput = {
   allowedPaths: string;
   analysisId: string;
   branch: string;
@@ -14,7 +14,7 @@ export interface WriterInput {
   repoId: string;
   selectedTokens: number;
   userId: string;
-}
+};
 
 const WRITER_TIMEOUT_MS = 12 * 60 * 1000;
 

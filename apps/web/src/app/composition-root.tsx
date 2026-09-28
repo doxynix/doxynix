@@ -90,8 +90,8 @@ export function Providers({ children }: Readonly<Props>) {
 const InnerProviders = ({ children }: { children: ReactNode }) => (
   <TooltipProvider>
     <LucideProvider
-      absoluteStrokeWidth={true}
       className="shrink-0 select-none"
+      nonScalingStroke
       size={16}
       strokeWidth={1.5}
     >

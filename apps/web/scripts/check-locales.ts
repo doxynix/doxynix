@@ -1,23 +1,3 @@
-/**
- * check-locales.ts — enforces the locale-file key conventions for apps/web.
- *
- * Locked as hard errors (block CI):
- *   1. Top-level keys (sections) MUST be PascalCase: `^[A-Z][a-zA-Z0-9]*$` (e.g. `Dashboard`, `OG`).
- *   2. All non-top-level keys MUST be snake_case: `^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$`.
- *   3. Nesting depth MUST be <= 3 (sections -> groups -> leaves). The app currently uses 2.
- *   4. No `.` inside any key segment (a dot would collide with next-intl's key-path separator).
- *   5. Every leaf value MUST be a non-empty string.
- *   6. Values MUST NOT contain invisible Unicode (U+200B, U+200E, U+200F, U+FEFF).
- *
- * Reported as warnings (does not fail CI):
- *   - Unfinished-copy placeholders in the source locale (en.json): a value that equals the
- *     Title-Case form of its own key AND looks machine-generated (>= 4 words, or the key ends
- *     with `_desc` / `_title` / `_placeholder`). These are "TODO copy" strings users can see.
- *
- * Parity across locales (missing / extra keys) and ICU args are already covered by
- * `bun run lint:i18n` (eloqnt) — this script deliberately does not duplicate that.
- */
-
 import { readFileSync } from "node:fs";
 
 import fg from "fast-glob";
@@ -31,16 +11,16 @@ const SECTION_RE = /^[A-Z][a-zA-Z0-9]*$/;
 const LEAF_RE = /^[a-z0-9]+(?:_[a-z0-9]+)*$/;
 const INVISIBLE_RE = /[\u200b\u200e\u200f\ufeff]/;
 
-interface Leaf {
+type Leaf = {
   path: string;
   value: string;
   depth: number;
-}
+};
 
-interface Report {
+type Report = {
   errors: string[];
   placeholders: string[];
-}
+};
 
 function titleCaseOfKey(key: string): string {
   return key

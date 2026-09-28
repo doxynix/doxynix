@@ -3,7 +3,6 @@
   "dependencyDashboard": true,
   "extends": ["config:best-practices", "monorepo:react", "monorepo:nextjs", "group:monorepos"],
   "gitAuthor": "doxynix-deps-bot <273657142+doxynix-deps-bot[bot]@users.noreply.github.com>",
-  "ignoreDeps": ["zod-prisma-types"],
   "labels": ["dependencies"],
   "minimumReleaseAge": "3 days",
   "packageRules": [
@@ -107,7 +106,7 @@
         "/^@stryker-mutator//",
         "/^typedoc/",
         "/^@boneskull/typedoc-/",
-        "/^@to-skills/typedoc/",
+        "/^@skillit/typedoc/",
         "/^lefthook$/",
         "/^jscpd$/",
         "/^@jscpd//"

@@ -10,7 +10,7 @@ const callWithFallback = vi.hoisted(() => vi.fn());
 const edgeConfigGet = vi.hoisted(() => vi.fn());
 
 vi.mock("@/server/utils/call", () => ({ callWithFallback }));
-vi.mock("@vercel/edge-config", () => ({ get: edgeConfigGet }));
+vi.mock("@vercel/global-config", () => ({ get: edgeConfigGet }));
 
 const { runDocumentFilePreview } = await import("./document-file-preview");
 

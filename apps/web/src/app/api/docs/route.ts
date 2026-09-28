@@ -33,7 +33,6 @@ export const GET = ApiReference({
   darkMode: true,
   defaultOpenAllTags: true,
   documentDownloadType: "both",
-  hideDownloadButton: false,
   hideModels: false,
 
   hideSearch: false,

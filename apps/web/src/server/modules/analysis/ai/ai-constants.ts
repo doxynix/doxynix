@@ -1,6 +1,6 @@
 import type { GoogleLanguageModelOptions, google } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
-import { get } from "@vercel/edge-config";
+import { get } from "@vercel/global-config";
 import * as z from "zod";
 
 import { GROQ_API_KEY } from "@/shared/config/env.server";

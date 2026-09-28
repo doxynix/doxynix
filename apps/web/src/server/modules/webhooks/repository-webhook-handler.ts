@@ -1,11 +1,10 @@
-import type { RepositoryEvent } from "@octokit/webhooks-types";
-
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
+import type { RepositoryPayload } from "@/server/core/github/github-webhook.types";
 
 import { syncRepoMetadata } from "./sync-repo-metadata";
 
-export async function handleRepositoryEvent(payload: RepositoryEvent): Promise<void> {
+export async function handleRepositoryEvent(payload: RepositoryPayload): Promise<void> {
   const { action, repository } = payload;
 
   appLogger.info({
