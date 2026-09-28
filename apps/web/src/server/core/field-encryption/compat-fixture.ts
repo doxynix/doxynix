@@ -8,4 +8,5 @@ export const COMPAT_FIXTURE = {
   fingerprint: "99d40d80",
   KEY: "k1.aesgcm256.MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY",
   plaintext: "user@example.com",
+  rawKey: "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY",
 } as const;
