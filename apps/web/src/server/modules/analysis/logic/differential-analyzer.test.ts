@@ -8,11 +8,11 @@ vi.mock("@/server/core/app-logger", () => ({
 
 vi.mock("@/server/utils/call", () => ({ callWithFallback: vi.fn() }));
 
-vi.mock("../ai/ai-constants", () => ({
+vi.mock("@/server/core/ai/ai-constants", () => ({
   getActiveModels: vi.fn(async () => ({ FAST: ["fast-model"], POWERFUL: ["powerful-model"] })),
 }));
 
-vi.mock("../ai/ai-tools", () => ({ buildRepositoryToolProfile: vi.fn(() => ({})) }));
+vi.mock("@/server/core/ai/ai-tools", () => ({ buildRepositoryToolProfile: vi.fn(() => ({})) }));
 
 vi.mock("../ai/prompts-refactored", () => ({
   buildPrReviewSystemPrompt: vi.fn(() => "system-prompt"),

@@ -1,3 +1,5 @@
+import { getActiveModels, SAFETY_SETTINGS } from "@/server/core/ai/ai-constants";
+import { buildRepositoryToolProfile } from "@/server/core/ai/ai-tools";
 import { appLogger } from "@/server/core/app-logger";
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
 import { callWithFallback } from "@/server/utils/call";
@@ -13,8 +15,6 @@ import {
   collectArchitectPreferredPaths,
 } from "../logic/architect-digest";
 import { buildStageContextPack } from "../logic/context-manager";
-import { getActiveModels, SAFETY_SETTINGS } from "./ai-constants";
-import { buildRepositoryToolProfile } from "./ai-tools";
 import { buildAnalysisSystemPrompt, buildAnalysisUserPrompt } from "./prompts-refactored";
 
 export async function executeArchitectPhase(

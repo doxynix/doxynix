@@ -45,34 +45,6 @@
     }
   },
   {
-    "type": "dependency",
-    "from": "src/server/modules/agent/tasks/agent-github-reply.task.ts",
-    "to": "src/server/modules/analysis/ai/ai-constants.ts",
-    "unresolvedTo": "../../analysis/ai/ai-constants",
-    "dependencyTypes": [
-      "local",
-      "import"
-    ],
-    "rule": {
-      "severity": "error",
-      "name": "vsa-no-cross-slice-imports"
-    }
-  },
-  {
-    "type": "dependency",
-    "from": "src/server/modules/agent/tasks/agent-github-reply.task.ts",
-    "to": "src/server/modules/analysis/ai/ai-tools.ts",
-    "unresolvedTo": "../../analysis/ai/ai-tools",
-    "dependencyTypes": [
-      "local",
-      "import"
-    ],
-    "rule": {
-      "severity": "error",
-      "name": "vsa-no-cross-slice-imports"
-    }
-  },
-  {
     "type": "module",
     "from": "src/shared/api/repo.types.ts",
     "to": "src/shared/api/repo.types.ts",

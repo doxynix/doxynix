@@ -1,10 +1,10 @@
 import type * as z from "zod";
 
+import { getActiveModels } from "@/server/core/ai/ai-constants";
+import { buildRepositoryToolProfile } from "@/server/core/ai/ai-tools";
 import { callWithFallback } from "@/server/utils/call";
 import { CodeOptimizer } from "@/server/utils/optimizers";
 
-import { getActiveModels } from "../ai/ai-constants";
-import { buildRepositoryToolProfile } from "../ai/ai-tools";
 import { buildCodeDocSystemPrompt } from "../ai/prompts-refactored";
 import type { DocumentFilePreviewResult } from "../analysis.schemas";
 import { DocumentFilePreviewSchema } from "../analysis.schemas";

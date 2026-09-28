@@ -29,8 +29,8 @@ vi.mock("@/server/utils/call", () => ({ callWithFallback: vi.fn() }));
 vi.mock("@/server/utils/optimizers", () => ({
   CodeOptimizer: { cleanForTool: vi.fn(), optimize: vi.fn() },
 }));
-vi.mock("./ai/ai-constants", () => ({ getActiveModels: vi.fn() }));
-vi.mock("./ai/ai-tools", () => ({ buildRepositoryToolProfile: vi.fn() }));
+vi.mock("@/server/core/ai/ai-constants", () => ({ getActiveModels: vi.fn() }));
+vi.mock("@/server/core/ai/ai-tools", () => ({ buildRepositoryToolProfile: vi.fn() }));
 vi.mock("./ai/prompts-refactored", () => ({ buildSingleFileAnalysisPrompt: vi.fn() }));
 
 const MONTH_MS = 1000 * 60 * 60 * 24 * 30;

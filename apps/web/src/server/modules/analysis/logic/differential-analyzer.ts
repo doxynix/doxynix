@@ -3,12 +3,12 @@ import { normalize } from "pathe";
 import pm from "picomatch";
 import type * as z from "zod";
 
+import { getActiveModels } from "@/server/core/ai/ai-constants";
+import { buildRepositoryToolProfile } from "@/server/core/ai/ai-tools";
 import { appLogger } from "@/server/core/app-logger";
 import { callWithFallback } from "@/server/utils/call";
 import { extractAddedLinesFromPatch } from "@/server/utils/git-diff-parser";
 
-import { getActiveModels } from "../ai/ai-constants";
-import { buildRepositoryToolProfile } from "../ai/ai-tools";
 import { buildPrReviewSystemPrompt, buildPrReviewUserPrompt } from "../ai/prompts-refactored";
 import { PrAiReviewOutputSchema } from "../analysis.schemas";
 import { PROJECT_POLICY_RULES } from "../engine/core/project-policy-rules";
