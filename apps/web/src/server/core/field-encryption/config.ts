@@ -42,8 +42,10 @@ export function getSensitiveFieldNames(model: string): Set<string> {
 
 /**
  * Byte-compatible with `prisma-field-encryption`'s `hashString`: the library
- * streamed `update(normalized)` then `update(utf8(salt))`, which for SHA-256
- * is identical to hashing the concatenation.
+ * streamed `update(normalized)` then, **only when a salt was configured**,
+ * `update(utf8(salt))`. For SHA-256 that is the hash of the concatenation - but
+ * the guard matters, because appending an absent salt as the literal string
+ * `"undefined"` would produce a different digest than the stored rows.
  */
 export function hashValue(value: string, normalize: Array<"lowercase" | "trim">): string {
   let normalized = value;
@@ -56,10 +58,13 @@ export function hashValue(value: string, normalize: Array<"lowercase" | "trim">)
     normalized = normalized.trim();
   }
 
-  return crypto
-    .createHash("sha256")
-    .update(`${normalized}${PRISMA_FIELD_ENCRYPTION_HASH_SALT}`, "utf8")
-    .digest("hex");
+  const hash = crypto.createHash("sha256").update(normalized, "utf8");
+
+  if (PRISMA_FIELD_ENCRYPTION_HASH_SALT) {
+    hash.update(PRISMA_FIELD_ENCRYPTION_HASH_SALT, "utf8");
+  }
+
+  return hash.digest("hex");
 }
 
 export function getHashFieldName(field: string): string {
