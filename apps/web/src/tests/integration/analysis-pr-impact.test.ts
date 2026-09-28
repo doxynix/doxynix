@@ -3,19 +3,6 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { prImpactService } from "../../server/modules/analysis/services/pr-impact.service";
 import { cleanupDatabase, createTestUser, expectDenied } from "../helpers";
 
-/**
- * DXNX-238, step 2. Real Postgres, no mocks: `prImpactService` talks to the
- * database and to nothing else, so every assertion here runs against real rows
- * and the real ZenStack policies.
- *
- * Scope limit: the full impact-mapping path of `getByRepoAndPRNumber` is NOT
- * covered here. It reaches `analysisMapper.buildTopFindings`, which renders each
- * finding through Next's `unstable_cache` (analysis.mapper.ts). That throws
- * `Invariant: incrementalCache missing` outside a Next request scope, so the
- * happy path can only be exercised from a route handler or with a request scope
- * stubbed. The early returns below are all reachable without it.
- */
-
 type FixtureOwner = {
   db: Awaited<ReturnType<typeof createTestUser>>["db"];
   name: string;
@@ -186,8 +173,6 @@ describe("prImpactService.listByRepository", () => {
 
   it("does not leak analyses from another repository", async () => {
     const { db, fixture: mine, owner } = await createRepoFixture("OwnerScope");
-    // Same owner, so the policy allows writing to both; only the query scoping
-    // decides which analyses come back.
     const { fixture: other } = await createSecondRepo(owner, "other");
 
     await createPullRequestAnalysis(db, mine, { prNumber: 7 });
@@ -200,8 +185,6 @@ describe("prImpactService.listByRepository", () => {
   });
 
   it("denies a user who does not own the repository", async () => {
-    // The ZenStack policy is `repo.user == auth() || role == 'ADMIN'`, so a
-    // different user must not even be able to create the analysis.
     const { fixture } = await createRepoFixture("OwnerPolicy");
     const stranger = await createTestUser("Stranger");
 
@@ -241,7 +224,6 @@ describe("prImpactService.getByRepoAndPRNumber", () => {
     const { db, fixture } = await createRepoFixture("OwnerPicked");
     await createPullRequestAnalysis(db, fixture, { prNumber: 3 });
 
-    // No matching PR analysis -> a clean null, before the snapshot lookup.
     await expect(prImpactService.getByRepoAndPRNumber(db, fixture.repoId, 4)).resolves.toBeNull();
   });
 });

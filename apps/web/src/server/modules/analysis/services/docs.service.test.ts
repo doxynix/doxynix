@@ -115,8 +115,6 @@ describe("docsService.getWithGraphLinks", () => {
 
     const result = await docsService.getWithGraphLinks(db, INPUT);
 
-    // `id` is now the primary key and part of the declared contract. The foreign
-    // keys it replaced are not: the router output schema does not list them.
     expect(result.id).toBeDefined();
     for (const key of ["analysisId", "repoId"]) {
       expect(Object.hasOwn(result, key)).toBe(false);

@@ -4,10 +4,6 @@ import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 
 import { agentService } from "./agent.service";
 
-/**
- * The sidebar groups sessions by `repo.owner/repo.name`, so the repo name and
- * owner have to stay in the contract; `userId` and `repoId` do not.
- */
 const SessionListItemSchema = z.object({
   createdAt: z.date(),
   id: z.uuid(),

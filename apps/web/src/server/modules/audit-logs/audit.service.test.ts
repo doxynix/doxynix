@@ -36,16 +36,6 @@ describe("auditService.getActivityLogs pagination", () => {
     );
   });
 
-  // The cursor contract here is load-bearing on Prisma semantics, not on
-  // anything `audit.service.ts` states. `findMany` with `cursor` and no
-  // `skip` INCLUDES the cursor row in the result, and Prisma folds that into
-  // the `OFFSET` it emits. So the service pops the lookahead row off
-  // `take: limit + 1` and hands *that* row's id forward: page N+1 re-emits it
-  // as its first row, and the pages tile without overlap or gap.
-  //
-  // Rewriting nextCursor as `items[limit - 1].id` — the more common shape —
-  // without adding `skip: 1` would silently drop one row at every boundary,
-  // and the only symptom would be a short final page.
   it("should keep the id cursor and take limit + 1", async () => {
     const { db, findMany } = createAuditDbMock();
 

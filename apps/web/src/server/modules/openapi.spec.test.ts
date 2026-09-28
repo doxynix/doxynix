@@ -132,19 +132,6 @@ describe("openapi.json tracks the routers", () => {
   });
 });
 
-/**
- * Internal fields that must never appear in a documented response.
- *
- * The checks above walk outwards from the procedures that already declare an
- * `.output()`. That misses the procedure that declares none at all, which is
- * exactly where a raw Prisma row slips through. This walks inwards from the
- * forbidden names instead, so an undeclared procedure is visible here.
- *
- * `jobId` is deliberately absent: it is the Trigger.dev run id and the client
- * needs it to render progress. `resultJson` is also expected, and only in
- * `analysis.getById`, where the fix-detail view reads it to tell a running fix
- * from a finished one.
- */
 const FORBIDDEN_RESPONSE_KEYS = [
   "accessToken",
   "backupCodes",
@@ -218,8 +205,6 @@ describe("openapi.json exposes no internal field", () => {
     const spec = readSpec();
     const violations: string[] = [];
 
-    // Repo.githubId and PullRequestComment.githubCommentId are GitHub's own
-    // identifiers, not surrogates, and stay int4 by design.
     const ALLOWED = new Set(["githubId", "githubCommentId", "prNumber"]);
 
     const walk = (schema: unknown, path: string): void => {

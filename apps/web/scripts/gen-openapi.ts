@@ -1,19 +1,3 @@
-/**
- * Regenerates `public/openapi.json` from the live tRPC router.
- *
- * The document used to be produced by a ZenStack trpc plugin, but that plugin
- * is commented out in `prisma/models/base.zmodel` and the replacement would
- * need the OpenAPI generator to typecheck against TypeScript 7, which it does
- * not support yet. So this script reads the router's zod output schemas at
- * runtime and serializes them with zod's own `toJSONSchema`.
- *
- * The shape deliberately matches what the previous generator emitted: a
- * `result.data` envelope on the 200 response, which is what
- * `src/server/modules/openapi.spec.test.ts` unwraps.
- *
- * Run with:
- *   cd apps/web && bun run gen:openapi
- */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
@@ -147,7 +131,6 @@ for (const [label, procedure] of procedures) {
     const schema = toJsonSchema(input, "input");
 
     if (method === "post") {
-      // A mutation takes its input as a JSON request body, not a query string.
       operation.requestBody = {
         content: { "application/json": { schema } },
         required: true,

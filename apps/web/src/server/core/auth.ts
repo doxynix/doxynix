@@ -380,11 +380,6 @@ export const auth = betterAuth({
             where: { emailHash: getNormalizedHash(cleanEmail) },
           });
 
-          // No Next.js request scope here (better-auth plugin callback), so the
-          // translator is built explicitly with a static locale and messages.
-          // Non-literal specifier (as in src/shared/i18n/request.ts) keeps tsc in
-          // node contexts (the CLI compiles web sources via `@/server/*`) from
-          // statically resolving the JSON module.
           const authLocale: string = DEFAULT_LOCALE;
           const { default: authMessages } = await import(`../../../messages/${authLocale}.json`);
           const t = createTranslator({

@@ -23,11 +23,6 @@ export const GetWithGraphLinksInput = z.object({
   repoId: z.uuid(),
 });
 
-/**
- * Mirrors `DocumentSection` in logic/section-graph-linker.ts. `id` is the
- * `section-<type>-<title>` anchor built by `generateSectionId`, not a database
- * key, and `graphNodeIds` holds `file:<path>` node ids - both stay strings.
- */
 const DocumentSectionSchema = z.object({
   content: z.string(),
   endLine: z.number().optional(),

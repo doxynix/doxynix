@@ -418,8 +418,6 @@ export const analysisRepo = {
     db: DbClient,
     id: string,
     status: PRAnalysisStatus,
-    // `findingsJson` can be a validated JSON payload; keep it untyped here to allow
-    // passing different persisted shapes (validated via Zod where appropriate).
     data?: { error?: string; findingsJson?: unknown; riskScore?: number },
   ) {
     return db.pullRequestAnalysis.update({
@@ -433,10 +431,6 @@ export const analysisRepo = {
     });
   },
 
-  /**
-   * Update fix status. NO diff storage.
-   * Only githubPrUrl, githubPrNumber, estimatedImpact are persisted.
-   */
   async updateStatus(
     db: DbClient,
     id: string,
