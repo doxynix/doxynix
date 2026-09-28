@@ -8,13 +8,13 @@ export const analyticsRouter = createTRPCRouter({
     .input(AnalyticsInputSchema)
     .output(DashboardStatsSchema)
     .query(async ({ ctx, input }) => {
-      return analyticsService.getDashboardStats(ctx.db, input, Number(ctx.session.user.id));
+      return analyticsService.getDashboardStats(ctx.db, input, ctx.session.user.id);
     }),
 
   getTrends: protectedProcedure
     .input(AnalyticsInputSchema)
     .output(TrendsSchema)
     .query(async ({ ctx, input }) => {
-      return analyticsService.getTrends(ctx.db, input, Number(ctx.session.user.id));
+      return analyticsService.getTrends(ctx.db, input, ctx.session.user.id);
     }),
 });

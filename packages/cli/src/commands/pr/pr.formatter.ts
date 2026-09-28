@@ -92,7 +92,7 @@ export function renderPRAnalysisDetails(analysis: PRAnalysisDetails): string {
     ["Head Commit", brand.info(analysis.headSha ? analysis.headSha.slice(0, 7) : "—")],
     ["Base Commit", brand.muted(analysis.baseSha ? analysis.baseSha.slice(0, 7) : "—")],
     ["Created At", brand.muted(formatDateTime(analysis.createdAt))],
-    ["Analysis ID", brand.muted(analysis.publicId)],
+    ["Analysis ID", brand.muted(analysis.id)],
   );
 
   if (analysis.error) {

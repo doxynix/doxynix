@@ -38,7 +38,7 @@ export const analyticsService = {
   async getDashboardStats(
     db: DbClient,
     input: AnalyticsInput,
-    userId: number,
+    userId: string,
   ): Promise<DashboardStats> {
     const now = new Date();
 
@@ -133,7 +133,7 @@ export const analyticsService = {
     };
   },
 
-  async getTrends(db: DbClient, input: AnalyticsInput, userId: number): Promise<Trends> {
+  async getTrends(db: DbClient, input: AnalyticsInput, userId: string): Promise<Trends> {
     let startDate: Date;
     let endDate = input.to ?? new Date();
 

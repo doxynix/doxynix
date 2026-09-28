@@ -40,7 +40,7 @@ export async function runAiPipeline(
   instructions: string | undefined,
   analysisId: string,
   language: string,
-  userId: number,
+  userId: string,
   repoId: string,
   branch: string,
 ): Promise<AIResult> {
@@ -111,7 +111,7 @@ export async function generateDeepDocs(
   analysisId: string,
   requestedDocs: DocType[],
   repo: Repo,
-  userId: number,
+  userId: string,
   language: string,
 ): Promise<DeepDocsResult> {
   taskLogger.info(`Documentation: Launching writers for ${requestedDocs.length} assets...`);

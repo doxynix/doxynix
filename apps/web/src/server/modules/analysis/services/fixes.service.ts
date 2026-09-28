@@ -37,7 +37,7 @@ export const fixesService = {
     try {
       // Fetch repo metadata (owner, name, defaultBranch)
       const repo = await db.repo.findUnique({
-        where: { publicId: input.repoId },
+        where: { id: input.repoId },
       });
 
       if (repo == null) {
@@ -48,7 +48,7 @@ export const fixesService = {
       }
 
       // Resolve GitHub client context (installation or OAuth)
-      const clientContext = await getClientContext(db, Number(userId), repo.owner);
+      const clientContext = await getClientContext(db, userId, repo.owner);
 
       const fix = await analysisRepo.getById(db, input.fixId);
 
@@ -62,15 +62,15 @@ export const fixesService = {
         branch: input.branch,
         defaultBranch: repo.defaultBranch,
         fixedFiles: input.fixedFiles,
-        fixId: fix.publicId,
+        fixId: fix.id,
         owner: repo.owner,
-        repoId: repo.publicId,
+        repoId: repo.id,
         repoName: repo.name,
         title: input.title,
       });
 
       // Update fix status with PR metadata (no diffs stored)
-      await analysisRepo.updateStatus(db, fix.publicId, "PR_OPENED", {
+      await analysisRepo.updateStatus(db, fix.id, "PR_OPENED", {
         githubPrNumber: result.prNumber,
         githubPrUrl: result.prUrl,
       });
@@ -101,7 +101,7 @@ export const fixesService = {
   },
   async createFix(
     db: DbClient,
-    userId: number,
+    userId: string,
     input: {
       fileContents: Record<string, string>;
       findings: z.infer<typeof FindingForFixSchema>[];
@@ -121,18 +121,18 @@ export const fixesService = {
 
       if (input.prAnalysisId != null) {
         const prAnalysisRecord = await db.pullRequestAnalysis.findUnique({
-          select: { publicId: true },
-          where: { publicId: input.prAnalysisId },
+          select: { id: true },
+          where: { id: input.prAnalysisId },
         });
 
         if (prAnalysisRecord != null) {
-          validPrAnalysisId = prAnalysisRecord.publicId;
+          validPrAnalysisId = prAnalysisRecord.id;
         }
       }
 
       // Fetch repo metadata (to detect language)
       const repo = await db.repo.findUnique({
-        where: { publicId: input.repoId },
+        where: { id: input.repoId },
       });
 
       if (repo == null) {
@@ -146,7 +146,7 @@ export const fixesService = {
         branch: generateBranchName(),
         createdByUser: true,
         prAnalysisId: validPrAnalysisId,
-        repoId: repo.publicId,
+        repoId: repo.id,
         title: "AI Suggested Improvements",
       });
 
@@ -154,9 +154,9 @@ export const fixesService = {
         {
           fileContents: input.fileContents,
           findings: input.findings,
-          fixId: fix.publicId,
+          fixId: fix.id,
           prAnalysisId: validPrAnalysisId,
-          repoId: repo.publicId,
+          repoId: repo.id,
           userId,
         },
         {
@@ -167,7 +167,7 @@ export const fixesService = {
       );
 
       return {
-        fixId: fix.publicId,
+        fixId: fix.id,
         status: "PENDING",
         success: true,
       };
@@ -233,7 +233,7 @@ export const fixesService = {
     });
 
     const repo = await db.repo.findUnique({
-      where: { publicId: input.repoId },
+      where: { id: input.repoId },
     });
 
     if (repo == null) {
@@ -273,7 +273,7 @@ export const fixesService = {
       branch: input.branch,
       createdByUser: true,
       description: "Workspace staged changes opened through PR Draft.",
-      repoId: repo.publicId,
+      repoId: repo.id,
       title: input.title,
     });
 
@@ -287,14 +287,14 @@ export const fixesService = {
           filePath,
           newContent,
         })),
-        fixId: fix.publicId,
+        fixId: fix.id,
         owner: repo.owner,
-        repoId: repo.publicId,
+        repoId: repo.id,
         repoName: repo.name,
         title: input.title,
       });
 
-      await analysisRepo.updateStatus(db, fix.publicId, "PR_OPENED", {
+      await analysisRepo.updateStatus(db, fix.id, "PR_OPENED", {
         githubPrNumber: result.prNumber,
         githubPrUrl: result.prUrl,
       });
@@ -302,7 +302,7 @@ export const fixesService = {
       await redis.del(cacheKey);
 
       return {
-        fixId: fix.publicId,
+        fixId: fix.id,
         prNumber: result.prNumber,
         prUrl: result.prUrl,
         success: true,
@@ -310,12 +310,12 @@ export const fixesService = {
     } catch (error) {
       appLogger.error({
         error: error instanceof Error ? error.message : String(error),
-        fixId: fix.publicId,
+        fixId: fix.id,
         msg: "staged_pr_open_failed",
         repoId: input.repoId,
       });
 
-      await analysisRepo.updateStatus(db, fix.publicId, "FAILED");
+      await analysisRepo.updateStatus(db, fix.id, "FAILED");
 
       if (error instanceof TRPCError) {
         throw error;

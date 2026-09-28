@@ -15,12 +15,12 @@ export const prImpactService = {
         createdAt: true,
         error: true,
         headSha: true,
+        id: true,
         prNumber: true,
-        publicId: true,
         riskScore: true,
         status: true,
       },
-      where: { publicId: analysisId },
+      where: { id: analysisId },
     });
 
     if (analysis == null) {
@@ -89,7 +89,7 @@ export const prImpactService = {
         baseSha: analysis.baseSha,
         createdAt: analysis.createdAt,
         headSha: analysis.headSha,
-        id: analysis.publicId,
+        id: analysis.id,
         prNumber: analysis.prNumber,
         riskScore: analysis.riskScore,
         status: analysis.status,
@@ -98,7 +98,7 @@ export const prImpactService = {
       fixes: analysis.generatedFixes.map((fix) => ({
         githubPrNumber: fix.githubPrNumber,
         githubPrUrl: fix.githubPrUrl,
-        id: fix.publicId,
+        id: fix.id,
         status: fix.status,
         title: fix.title,
       })),
@@ -132,14 +132,14 @@ export const prImpactService = {
         },
         createdAt: true,
         headSha: true,
+        id: true,
         prNumber: true,
-        publicId: true,
         riskScore: true,
         status: true,
       },
       where: {
         repo: {
-          publicId: repoId,
+          id: repoId,
         },
       },
     });
@@ -148,7 +148,7 @@ export const prImpactService = {
       createdAt: item.createdAt,
       findingCount: item._count.comments,
       headSha: item.headSha,
-      id: item.publicId,
+      id: item.id,
       prNumber: item.prNumber,
       riskScore: item.riskScore,
       status: item.status,

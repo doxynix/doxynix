@@ -91,7 +91,7 @@ export const realtimeService = {
       safePublish(REALTIME_CONFIG.channels.system, event, data),
   },
 
-  user: (userId: null | number | string | undefined) => ({
+  user: (userId: null | string | undefined) => ({
     publish: <K extends keyof UserEventPayloads>(event: K, data: UserEventPayloads[K]) =>
       userId != null
         ? safePublish(REALTIME_CONFIG.channels.user(String(userId)), event, data, {

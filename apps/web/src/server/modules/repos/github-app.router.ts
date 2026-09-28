@@ -5,11 +5,11 @@ import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 
 export const githubAppRouter = createTRPCRouter({
   getGithubInstallUrl: protectedProcedure.input(z.object({}).optional()).query(async ({ ctx }) => {
-    return githubAppService.getInstallUrl(ctx.prisma, Number(ctx.session.user.id));
+    return githubAppService.getInstallUrl(ctx.prisma, ctx.session.user.id);
   }),
 
   getMyGithubRepos: protectedProcedure.input(z.object({}).optional()).query(async ({ ctx }) => {
-    return githubAppService.getMyRepos(ctx.db, ctx.prisma, Number(ctx.session.user.id));
+    return githubAppService.getMyRepos(ctx.db, ctx.prisma, ctx.session.user.id);
   }),
 
   saveInstallation: protectedProcedure
@@ -23,7 +23,7 @@ export const githubAppRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       return githubAppService.saveInstallation(
         ctx.prisma,
-        Number(ctx.session.user.id),
+        ctx.session.user.id,
         input.installationId,
         input.state,
       );

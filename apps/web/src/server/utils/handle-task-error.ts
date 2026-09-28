@@ -29,7 +29,7 @@ export async function handleError(
       message: "Analysis failed",
       status: Status.FAILED,
     },
-    where: { publicId: analysisId },
+    where: { id: analysisId },
   });
 
   await realtimeService.channel(channelName).publish(REALTIME_CONFIG.events.user.analysisProgress, {

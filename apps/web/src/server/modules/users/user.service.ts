@@ -32,7 +32,7 @@ async function deleteAvatarBlob(input: {
   key: string;
   logField: "imageKey" | "keyToDelete";
   msg: string;
-  userId: number;
+  userId: string;
 }): Promise<void> {
   try {
     await del(input.key);
@@ -93,7 +93,7 @@ async function runSerializableTransaction(
 }
 
 export const userService = {
-  async deleteAccount(db: DbClient, userId: number) {
+  async deleteAccount(db: DbClient, userId: string) {
     const user = await prisma.user.findUnique({
       select: { imageKey: true },
       where: { id: userId },
@@ -120,7 +120,7 @@ export const userService = {
     };
   },
 
-  async disconnectAccount(db: DbClient, userId: number, provider: "github" | "google" | "yandex") {
+  async disconnectAccount(db: DbClient, userId: string, provider: "github" | "google" | "yandex") {
     await runSerializableTransaction(asPolicyEnforcedDb(db), async (tx) => {
       const accountToDelete = await tx.account.findUnique({
         where: { userId_providerId: { providerId: provider, userId } },
@@ -163,7 +163,7 @@ export const userService = {
       .map((session) => userMapper.toSession(session));
   },
 
-  async getLinkedAccounts(db: DbClient, userId: number) {
+  async getLinkedAccounts(db: DbClient, userId: string) {
     const [accounts, user] = await Promise.all([
       db.account.findMany({
         orderBy: { providerId: "asc" },
@@ -186,7 +186,7 @@ export const userService = {
 
     return { accounts: mappedAccounts, user };
   },
-  async getMe(db: DbClient, userId: number) {
+  async getMe(db: DbClient, userId: string) {
     const user = await db.user.findUnique({ where: { id: userId } });
 
     if (user == null) {
@@ -196,7 +196,7 @@ export const userService = {
     return { message: "User found", user: userMapper.toPublic(user) };
   },
 
-  async removeAvatar(db: DbClient, userId: number) {
+  async removeAvatar(db: DbClient, userId: string) {
     // NOTE: uses plain Prisma
     const user = await prisma.user.findUnique({
       select: { imageKey: true },
@@ -234,7 +234,7 @@ export const userService = {
     return { success: true };
   },
 
-  async updateUser(db: DbClient, userId: number, input: { name: string }) {
+  async updateUser(db: DbClient, userId: string, input: { name: string }) {
     const updatedUser = await db.user.update({
       data: { name: input.name },
       where: { id: userId },

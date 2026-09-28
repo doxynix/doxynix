@@ -37,7 +37,7 @@ function scriptedDb(real: unknown, failures: Error[]) {
   return { attemptLog, db };
 }
 
-const providersOf = (userId: number) =>
+const providersOf = (userId: string) =>
   prisma.account.findMany({
     orderBy: { providerId: "asc" },
     select: { providerId: true },

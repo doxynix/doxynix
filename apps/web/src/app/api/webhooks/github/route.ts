@@ -91,7 +91,7 @@ webhooks.on("issue_comment.created", async ({ payload }) => {
   await realtimeService.user(repo.userId).publish(REALTIME_CONFIG.events.user.prCommentReceived, {
     author: payload.sender.login,
     authorAvatarUrl: payload.sender.avatar_url,
-    commentId: prComment.publicId,
+    commentId: prComment.id,
     prNumber: payload.issue.number,
     prTitle: payload.issue.title,
     repoName: payload.repository.name,
@@ -106,9 +106,9 @@ webhooks.on("issue_comment.created", async ({ payload }) => {
       commentType: "issue",
       owner: payload.repository.owner.login,
       prNumber: payload.issue.number,
-      repoId: repo.publicId,
+      repoId: repo.id,
       repoName: payload.repository.name,
-      userId: Number(repo.userId),
+      userId: repo.userId,
     });
   }
 });
@@ -139,9 +139,9 @@ webhooks.on("pull_request_review_comment", async ({ payload }) => {
       commentType: "review",
       owner: commentPayload.repository.owner.login,
       prNumber: commentPayload.pull_request.number,
-      repoId: repo.publicId,
+      repoId: repo.id,
       repoName: commentPayload.repository.name,
-      userId: Number(repo.userId),
+      userId: repo.userId,
     });
   }
 });

@@ -14,7 +14,7 @@ import { redisClient } from "../redis";
 import { createContext } from "./context";
 import { createCallerFactory } from "./init";
 
-export const apiForUser = cache(async (userId: number) => {
+export const apiForUser = cache(async (userId: string) => {
   const { appRouter } = await import("@/server/modules");
   const createCaller = createCallerFactory(appRouter);
 
@@ -26,7 +26,6 @@ export const apiForUser = cache(async (userId: number) => {
       emailVerified: true,
       image: true,
       name: true,
-      publicId: true,
       role: true,
       twoFactorEnabled: true,
       updatedAt: true,
@@ -50,7 +49,7 @@ export const apiForUser = cache(async (userId: number) => {
       path: "/task",
       requestId: `task-${crypto.randomUUID()}`,
       userAgent: "Doxynix-Task-Runner",
-      userId: Number(userId),
+      userId,
       userRole: user?.role,
     },
     session:
@@ -63,14 +62,14 @@ export const apiForUser = cache(async (userId: number) => {
               id: "task-session",
               token: "task-token",
               updatedAt: new Date(),
-              userId: String(userId),
+              userId,
             },
             user: {
               banned: user.banned,
               createdAt: user.createdAt,
               email: user.email ?? "",
               emailVerified: user.emailVerified,
-              id: String(userId),
+              id: userId,
               image: user.image,
               name: user.name ?? "User",
               role: user.role,

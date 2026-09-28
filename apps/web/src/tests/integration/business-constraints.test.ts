@@ -24,14 +24,14 @@ describe("Business Logic & Integrity Constraints", () => {
 
     const analysis1 = await alice.db.analysis.create({
       data: {
-        repo: { connect: { publicId: repo.publicId } },
+        repo: { connect: { id: repo.id } },
         status: "DONE",
       },
     });
 
     const analysis2 = await alice.db.analysis.create({
       data: {
-        repo: { connect: { publicId: repo.publicId } },
+        repo: { connect: { id: repo.id } },
         status: "DONE",
       },
     });
@@ -39,10 +39,10 @@ describe("Business Logic & Integrity Constraints", () => {
     // Same (repo, version, type) but different analysis - should succeed
     await alice.db.document.create({
       data: {
-        analysis: { connect: { publicId: analysis1.publicId } },
+        analysis: { connect: { id: analysis1.id } },
         content: "Original Content",
         path: "readme-1",
-        repo: { connect: { publicId: repo.publicId } },
+        repo: { connect: { id: repo.id } },
         type: "README",
         version: "v1",
       },
@@ -51,10 +51,10 @@ describe("Business Logic & Integrity Constraints", () => {
     await expect(
       alice.db.document.create({
         data: {
-          analysis: { connect: { publicId: analysis2.publicId } },
+          analysis: { connect: { id: analysis2.id } },
           content: "Different Analysis Content",
           path: "readme-2",
-          repo: { connect: { publicId: repo.publicId } },
+          repo: { connect: { id: repo.id } },
           type: "README",
           version: "v1",
         },
@@ -65,10 +65,10 @@ describe("Business Logic & Integrity Constraints", () => {
     await expectValidationFail(
       alice.db.document.create({
         data: {
-          analysis: { connect: { publicId: analysis1.publicId } },
+          analysis: { connect: { id: analysis1.id } },
           content: "Duplicate Content",
           path: "readme-1",
-          repo: { connect: { publicId: repo.publicId } },
+          repo: { connect: { id: repo.id } },
           type: "README",
           version: "v1",
         },
@@ -79,9 +79,9 @@ describe("Business Logic & Integrity Constraints", () => {
     await expect(
       alice.db.document.create({
         data: {
-          analysis: { connect: { publicId: analysis1.publicId } },
+          analysis: { connect: { id: analysis1.id } },
           content: "New Version",
-          repo: { connect: { publicId: repo.publicId } },
+          repo: { connect: { id: repo.id } },
           type: "README",
           version: "v2",
         },
@@ -91,9 +91,9 @@ describe("Business Logic & Integrity Constraints", () => {
     await expect(
       alice.db.document.create({
         data: {
-          analysis: { connect: { publicId: analysis1.publicId } },
+          analysis: { connect: { id: analysis1.id } },
           content: "API Docs",
-          repo: { connect: { publicId: repo.publicId } },
+          repo: { connect: { id: repo.id } },
           type: "API",
           version: "v1",
         },
@@ -121,13 +121,13 @@ describe("Business Logic & Integrity Constraints", () => {
       },
     });
 
-    await expectDenied(alice.db.account.delete({ where: { publicId: bobAccount.publicId } }));
+    await expectDenied(alice.db.account.delete({ where: { id: bobAccount.id } }));
 
     await expect(
-      alice.db.account.delete({ where: { publicId: aliceAccount.publicId } }),
+      alice.db.account.delete({ where: { id: aliceAccount.id } }),
     ).resolves.toBeDefined();
 
-    const checkBob = await bob.db.account.findUnique({ where: { publicId: bobAccount.publicId } });
+    const checkBob = await bob.db.account.findUnique({ where: { id: bobAccount.id } });
     expect(checkBob).toBeDefined();
   });
 
@@ -166,7 +166,7 @@ describe("Business Logic & Integrity Constraints", () => {
       },
     });
 
-    await expectDenied(bob.db.session.findUniqueOrThrow({ where: { publicId: session.publicId } }));
+    await expectDenied(bob.db.session.findUniqueOrThrow({ where: { id: session.id } }));
 
     const stolenSession = await bob.db.session.findUnique({
       where: { tokenHash: getRawHash("secret_token_123") },

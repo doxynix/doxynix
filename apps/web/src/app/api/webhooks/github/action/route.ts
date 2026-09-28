@@ -67,7 +67,7 @@ export async function POST(req: Request) {
       docTypes: ["README", "API", "ARCHITECTURE", "CONTRIBUTING", "CHANGELOG"],
       files: ["**/*"],
       language: "English",
-      repoId: dbRepo.publicId,
+      repoId: dbRepo.id,
     });
 
     return NextResponse.json({ jobId: analysisResponse.jobId });

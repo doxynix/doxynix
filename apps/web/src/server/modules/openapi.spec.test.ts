@@ -131,3 +131,115 @@ describe("openapi.json tracks the routers", () => {
     expect(mismatches).toEqual([]);
   });
 });
+
+const FORBIDDEN_RESPONSE_KEYS = [
+  "accessToken",
+  "backupCodes",
+  "changedFilesJson",
+  "credentialID",
+  "emailHash",
+  "findingsJson",
+  "hashedKey",
+  "idToken",
+  "impersonatedBy",
+  "logs",
+  "metricsJson",
+  "payload",
+  "publicId",
+  "publicKey",
+  "refreshToken",
+  "secret",
+  "token",
+  "tokenHash",
+] as const;
+
+/** `resultJson` is sanctioned for this one procedure only. */
+const RESULT_JSON_ALLOWLIST = new Set(["/analysis.getById"]);
+
+function collectPropertyNames(schema: unknown, out = new Set<string>()): Set<string> {
+  if (schema == null || typeof schema !== "object") {
+    return out;
+  }
+
+  const node = schema as JsonSchema;
+
+  for (const [key, nested] of Object.entries(node.properties ?? {})) {
+    out.add(key);
+    collectPropertyNames(nested, out);
+  }
+
+  return out;
+}
+
+describe("openapi.json exposes no internal field", () => {
+  it("documents no forbidden response key on any procedure, declared output or not", () => {
+    const spec = readSpec();
+    const violations: string[] = [];
+
+    for (const [path, methods] of Object.entries(spec.paths ?? {})) {
+      for (const [method, operation] of Object.entries(methods)) {
+        const response = (
+          operation as {
+            responses?: Record<string, { content?: Record<string, { schema?: unknown }> }>;
+          }
+        ).responses?.["200"];
+        const schema = response?.content?.["application/json"]?.schema;
+        const names = collectPropertyNames(schema);
+
+        for (const key of names) {
+          if (key === "resultJson" && RESULT_JSON_ALLOWLIST.has(path)) {
+            continue;
+          }
+
+          if ((FORBIDDEN_RESPONSE_KEYS as readonly string[]).includes(key)) {
+            violations.push(`${method.toUpperCase()} ${path} -> ${key}`);
+          }
+        }
+      }
+    }
+
+    expect(violations).toEqual([]);
+  });
+
+  it("documents no integer primary key, the external GitHub ids aside", () => {
+    const spec = readSpec();
+    const violations: string[] = [];
+
+    const ALLOWED = new Set(["githubId", "githubCommentId", "prNumber"]);
+
+    const walk = (schema: unknown, path: string): void => {
+      if (schema == null || typeof schema !== "object") {
+        return;
+      }
+
+      const node = schema as JsonSchema & { type?: unknown };
+
+      for (const [key, nested] of Object.entries(node.properties ?? {})) {
+        const type = (nested as { type?: unknown }).type;
+
+        if (
+          (type === "number" || type === "integer") &&
+          (key === "id" || key.endsWith("Id")) &&
+          !ALLOWED.has(key)
+        ) {
+          violations.push(`${path} -> ${key} (${String(type)})`);
+        }
+
+        walk(nested, path);
+      }
+    };
+
+    for (const [path, methods] of Object.entries(spec.paths ?? {})) {
+      for (const operation of Object.values(methods)) {
+        const response = (
+          operation as {
+            responses?: Record<string, { content?: Record<string, { schema?: unknown }> }>;
+          }
+        ).responses?.["200"];
+        walk(response?.content?.["application/json"]?.schema, path);
+      }
+    }
+
+    expect(violations).toEqual([]);
+  });
+});

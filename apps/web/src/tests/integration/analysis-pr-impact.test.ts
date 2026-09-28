@@ -3,23 +3,10 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { prImpactService } from "../../server/modules/analysis/services/pr-impact.service";
 import { cleanupDatabase, createTestUser, expectDenied } from "../helpers";
 
-/**
- * DXNX-238, step 2. Real Postgres, no mocks: `prImpactService` talks to the
- * database and to nothing else, so every assertion here runs against real rows
- * and the real ZenStack policies.
- *
- * Scope limit: the full impact-mapping path of `getByRepoAndPRNumber` is NOT
- * covered here. It reaches `analysisMapper.buildTopFindings`, which renders each
- * finding through Next's `unstable_cache` (analysis.mapper.ts). That throws
- * `Invariant: incrementalCache missing` outside a Next request scope, so the
- * happy path can only be exercised from a route handler or with a request scope
- * stubbed. The early returns below are all reachable without it.
- */
-
 type FixtureOwner = {
   db: Awaited<ReturnType<typeof createTestUser>>["db"];
   name: string;
-  user: { id: number };
+  user: { id: string };
 };
 
 async function createRepoFixture(name: string) {
@@ -38,7 +25,7 @@ async function createRepoFixture(name: string) {
 
   return {
     db: owner.db,
-    fixture: { owner: name.toLowerCase(), repoId: repo.publicId, repoName: repo.name },
+    fixture: { owner: name.toLowerCase(), repoId: repo.id, repoName: repo.name },
     owner: { db: owner.db, name, user: owner.user },
   };
 }
@@ -61,7 +48,7 @@ async function createSecondRepo(owner: FixtureOwner, suffix: string) {
   return {
     fixture: {
       owner: owner.name.toLowerCase(),
-      repoId: repo.publicId,
+      repoId: repo.id,
       repoName: repo.name,
     },
   };
@@ -93,7 +80,7 @@ function createPullRequestAnalysis(
       headSha: "head-sha-1",
       owner: fixture.owner,
       prNumber: overrides.prNumber ?? 42,
-      repo: { connect: { publicId: fixture.repoId } },
+      repo: { connect: { id: fixture.repoId } },
       repoName: fixture.repoName,
       riskScore: overrides.riskScore ?? 5,
       status: (overrides.status ?? "COMPLETED") as never,
@@ -108,9 +95,9 @@ describe("prImpactService.getAnalysis", () => {
     const { db, fixture } = await createRepoFixture("OwnerGet");
     const created = await createPullRequestAnalysis(db, fixture, { riskScore: 7 });
 
-    const found = await prImpactService.getAnalysis(db, created.publicId);
+    const found = await prImpactService.getAnalysis(db, created.id);
 
-    expect(found.publicId).toBe(created.publicId);
+    expect(found.id).toBe(created.id);
     expect(found.prNumber).toBe(42);
     expect(found.riskScore).toBe(7);
     expect(found.baseSha).toBe("base-sha-1");
@@ -141,7 +128,7 @@ describe("prImpactService.listByRepository", () => {
 
     await db.pullRequestComment.create({
       data: {
-        analysis: { connect: { publicId: analysis.publicId } },
+        analysis: { connect: { id: analysis.id } },
         body: "first",
         filePath: "src/index.ts",
         findingType: "COMPLEXITY",
@@ -151,7 +138,7 @@ describe("prImpactService.listByRepository", () => {
     });
     await db.pullRequestComment.create({
       data: {
-        analysis: { connect: { publicId: analysis.publicId } },
+        analysis: { connect: { id: analysis.id } },
         body: "second",
         filePath: "src/other.ts",
         findingType: "BUG",
@@ -165,7 +152,7 @@ describe("prImpactService.listByRepository", () => {
     expect(listed).toMatchObject({
       findingCount: 2,
       headSha: "head-sha-1",
-      id: analysis.publicId,
+      id: analysis.id,
       prNumber: 42,
       riskScore: 5,
       status: "COMPLETED",
@@ -186,8 +173,6 @@ describe("prImpactService.listByRepository", () => {
 
   it("does not leak analyses from another repository", async () => {
     const { db, fixture: mine, owner } = await createRepoFixture("OwnerScope");
-    // Same owner, so the policy allows writing to both; only the query scoping
-    // decides which analyses come back.
     const { fixture: other } = await createSecondRepo(owner, "other");
 
     await createPullRequestAnalysis(db, mine, { prNumber: 7 });
@@ -200,8 +185,6 @@ describe("prImpactService.listByRepository", () => {
   });
 
   it("denies a user who does not own the repository", async () => {
-    // The ZenStack policy is `repo.user == auth() || role == 'ADMIN'`, so a
-    // different user must not even be able to create the analysis.
     const { fixture } = await createRepoFixture("OwnerPolicy");
     const stranger = await createTestUser("Stranger");
 
@@ -212,7 +195,7 @@ describe("prImpactService.listByRepository", () => {
           headSha: "head-sha-1",
           owner: fixture.owner,
           prNumber: 99,
-          repo: { connect: { publicId: fixture.repoId } },
+          repo: { connect: { id: fixture.repoId } },
           repoName: fixture.repoName,
         },
       }),
@@ -241,7 +224,6 @@ describe("prImpactService.getByRepoAndPRNumber", () => {
     const { db, fixture } = await createRepoFixture("OwnerPicked");
     await createPullRequestAnalysis(db, fixture, { prNumber: 3 });
 
-    // No matching PR analysis -> a clean null, before the snapshot lookup.
     await expect(prImpactService.getByRepoAndPRNumber(db, fixture.repoId, 4)).resolves.toBeNull();
   });
 });

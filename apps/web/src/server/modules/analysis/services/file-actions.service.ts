@@ -55,7 +55,7 @@ export const fileActionsService = {
     });
   },
 
-  async documentFile(db: DbClient, userId: number, input: FileActionRequest) {
+  async documentFile(db: DbClient, userId: string, input: FileActionRequest) {
     return this.runFileAction(db, userId, "document-single-file", input);
   },
 
@@ -82,13 +82,13 @@ export const fileActionsService = {
     };
   },
 
-  async quickFileAudit(db: DbClient, userId: number, input: FileActionRequest) {
+  async quickFileAudit(db: DbClient, userId: string, input: FileActionRequest) {
     return this.runFileAction(db, userId, "analyze-single-file", input);
   },
 
   async runFileAction(
     db: DbClient,
-    userId: number,
+    userId: string,
     taskId: "analyze-single-file" | "document-single-file",
     input: FileActionRequest,
   ) {

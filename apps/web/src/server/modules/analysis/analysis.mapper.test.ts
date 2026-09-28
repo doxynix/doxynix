@@ -64,9 +64,9 @@ const makeAnalysis = (
     commitSha: "abc123",
     complexityScore: 50,
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
+    id: "an-1",
     metricsJson,
     onboardingScore: 20,
-    publicId: "an-1",
     resultJson,
     score: 70,
     securityScore: 60,
@@ -83,13 +83,13 @@ const makeRepoFact = (
     description: "A repo",
     documents: [],
     forks: 12,
+    id: "repo-1",
     language: "TypeScript",
     license: "MIT",
     name: "doxynix",
     openIssues: 4,
     owner: "ivan",
     ownerAvatarUrl: "https://avatars.ivan",
-    publicId: "repo-1",
     pushedAt: new Date("2024-01-01T00:00:00.000Z"),
     size: 1024,
     stars: 22,
@@ -101,10 +101,10 @@ const makeRepoFact = (
 
 const makeDoc = (overrides: Partial<StoredDocument>): StoredDocument =>
   ({
-    analysis: { publicId: "an-1" },
+    analysis: { id: "an-1" },
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
+    id: "doc-readme",
     path: "README.md",
-    publicId: "doc-readme",
     type: "README",
     updatedAt: new Date("2024-01-01T00:00:00.000Z"),
     version: "1",
@@ -196,8 +196,8 @@ const makeImpactAnalysis = (overrides: Record<string, unknown> = {}): ImpactAnal
     findingsJson: [],
     generatedFixes: [],
     headSha: "head",
+    id: "pa-1",
     prNumber: 1,
-    publicId: "pa-1",
     riskScore: null,
     status: "DONE",
     ...overrides,
@@ -363,8 +363,8 @@ describe("parseChangedFilesSnapshot", () => {
           body: "b",
           filePath: "src/legacy.ts",
           findingType: "BUG",
+          id: "c1",
           line: 1,
-          publicId: "c1",
           riskLevel: 7,
         },
       ],
@@ -410,8 +410,8 @@ describe("parsePersistedFindings", () => {
           body: "b",
           filePath: "src/c.ts",
           findingType: "BUG",
+          id: "c1",
           line: 1,
-          publicId: "c1",
           riskLevel: 7,
         },
       ],
@@ -487,7 +487,7 @@ describe("toAnalysisRef", () => {
     expect(analysisMapper.toAnalysisRef(undefined)).toBeNull();
   });
 
-  it("maps publicId/commitSha/createdAt", () => {
+  it("maps id/commitSha/createdAt", () => {
     const analysis = makeAnalysis(makeAiResult());
     expect(analysisMapper.toAnalysisRef(analysis)).toEqual({
       analysisId: "an-1",
@@ -705,8 +705,8 @@ describe("toAvailableDocs", () => {
     const repo = makeRepoFact({
       analyses: [makeAnalysis(aiResult)],
       documents: [
-        makeDoc({ path: "README.md", publicId: "d-readme", type: "README" }),
-        makeDoc({ path: "docs/api.md", publicId: "d-api", type: "API" }),
+        makeDoc({ id: "d-readme", path: "README.md", type: "README" }),
+        makeDoc({ id: "d-api", path: "docs/api.md", type: "API" }),
       ],
     });
 
@@ -795,7 +795,7 @@ describe("toOverview", () => {
     const metrics = makeMetrics({ totalSizeKb: 512 });
     const repo = makeRepoFact({
       analyses: [makeAnalysis(aiResult, metrics)],
-      documents: [makeDoc({ path: "README.md", publicId: "d-readme", type: "README" })],
+      documents: [makeDoc({ id: "d-readme", path: "README.md", type: "README" })],
     });
 
     const result = analysisMapper.toOverview(repo);

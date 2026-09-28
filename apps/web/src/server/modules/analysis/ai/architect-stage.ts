@@ -25,7 +25,7 @@ export async function executeArchitectPhase(
   sentinelStatus: "SAFE" | "UNSAFE",
   language: string,
   repoId: string,
-  userId: number,
+  userId: string,
   branch: string,
 ): Promise<AIResult> {
   taskLogger.info("Architect: Building final intelligence report...");

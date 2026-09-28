@@ -323,7 +323,7 @@ const StructureExplainSchema = z.object({
 const RelatedFixSummarySchema = z.object({
   githubPrNumber: z.number().nullable(),
   githubPrUrl: z.string().nullable(),
-  id: z.string(),
+  id: z.uuid(),
   status: z.string(),
   title: z.string(),
 });
@@ -332,7 +332,7 @@ export const NodeContextOutputSchema = z
   .object({
     analysisRef: z
       .object({
-        analysisId: z.string(),
+        analysisId: z.uuid(),
         commitSha: z.string().nullable(),
         createdAt: z.date(),
       })
@@ -353,7 +353,9 @@ export const NodeContextOutputSchema = z
     related: z.object({
       docs: z.array(
         z.object({
-          docId: z.string(),
+          // `docId` references a Document row; `id` is the markdown anchor of the
+          // matched section and is not a key, so it stays a string.
+          docId: z.uuid(),
           docType: z.string(),
           id: z.string(),
           title: z.string(),
@@ -365,9 +367,9 @@ export const NodeContextOutputSchema = z
           body: z.string(),
           filePath: z.string(),
           findingType: z.string(),
-          id: z.string(),
+          id: z.uuid(),
           line: z.number(),
-          prAnalysisId: z.string(),
+          prAnalysisId: z.uuid(),
           prNumber: z.number(),
           riskLevel: z.number(),
         }),

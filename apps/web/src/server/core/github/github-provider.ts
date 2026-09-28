@@ -115,7 +115,7 @@ type ClientContextOptions = {
  */
 export async function getClientContext(
   prisma: DbClient,
-  userId: number,
+  userId: string,
   owner?: string,
 ): Promise<GitHubClientContext> {
   // Try specific installation for owner
@@ -171,7 +171,7 @@ export async function getClientContext(
  */
 export async function resolveClientContext(
   prisma: DbClient,
-  userId: number,
+  userId: string,
   options?: ClientContextOptions,
 ): Promise<GitHubClientContext> {
   try {

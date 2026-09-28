@@ -14,7 +14,7 @@ function makeAuditLog(overrides: Partial<AuditLog> = {}): AuditLog {
     payload: { data: { firstName: "John", isPublic: false } },
     requestId: "req-1",
     userAgent: null,
-    userId: 1,
+    userId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d",
     ...overrides,
   };
 }

@@ -34,13 +34,13 @@ describe("Repositories & Data Visibility", () => {
 
     await expectDenied(
       bob.db.repo.findUniqueOrThrow({
-        where: { publicId: privateRepo.publicId },
+        where: { id: privateRepo.id },
       }),
     );
-    await expectDenied(bob.db.repo.findUniqueOrThrow({ where: { publicId: publicRepo.publicId } }));
+    await expectDenied(bob.db.repo.findUniqueOrThrow({ where: { id: publicRepo.id } }));
 
     await expect(
-      alice.db.repo.findUniqueOrThrow({ where: { publicId: publicRepo.publicId } }),
+      alice.db.repo.findUniqueOrThrow({ where: { id: publicRepo.id } }),
     ).resolves.toBeDefined();
   });
 
@@ -61,17 +61,15 @@ describe("Repositories & Data Visibility", () => {
     const analysis = await alice.db.analysis.create({
       data: {
         commitSha: "s",
-        repo: { connect: { publicId: repo.publicId } },
+        repo: { connect: { id: repo.id } },
         score: 100,
         status: "DONE",
       },
     });
 
-    await expectDenied(
-      bob.db.analysis.findUniqueOrThrow({ where: { publicId: analysis.publicId } }),
-    );
+    await expectDenied(bob.db.analysis.findUniqueOrThrow({ where: { id: analysis.id } }));
     await expect(
-      alice.db.analysis.findUniqueOrThrow({ where: { publicId: analysis.publicId } }),
+      alice.db.analysis.findUniqueOrThrow({ where: { id: analysis.id } }),
     ).resolves.toBeDefined();
   });
 
@@ -145,21 +143,21 @@ describe("Repositories & Data Visibility", () => {
 
     const analysis = await alice.db.analysis.create({
       data: {
-        repo: { connect: { publicId: repo.publicId } },
+        repo: { connect: { id: repo.id } },
         status: "DONE",
       },
     });
 
     const doc = await alice.db.document.create({
       data: {
-        analysis: { connect: { publicId: analysis.publicId } },
+        analysis: { connect: { id: analysis.id } },
         content: hugeContent,
-        repo: { connect: { publicId: repo.publicId } },
+        repo: { connect: { id: repo.id } },
         type: "README",
         version: "v1",
       },
     });
-    expect(doc.publicId).toBeDefined();
+    expect(doc.id).toBeDefined();
   });
   it("should handle Complex Filter + Sort combinations without leaking", async () => {
     const alice = await createTestUser("Alice");

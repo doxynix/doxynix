@@ -21,7 +21,7 @@ type GithubReplyPayload = {
   prNumber: number;
   repoId: string;
   repoName: string;
-  userId: number;
+  userId: string;
 };
 
 export const agentGithubReplyTask = task({

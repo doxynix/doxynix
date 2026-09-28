@@ -31,9 +31,11 @@ vi.mock("@/server/utils/optimizers", () => ({ CodeOptimizer: mocks.CodeOptimizer
 
 import { buildRepositoryToolProfile, type RepositoryToolProfile } from "./ai-tools";
 
+const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function buildTools(profile: RepositoryToolProfile) {
-  return buildRepositoryToolProfile(profile, 1, "repo-uuid", "main");
+  return buildRepositoryToolProfile(profile, USER_ID, "repo-uuid", "main");
 }
 
 type ToolValue = {

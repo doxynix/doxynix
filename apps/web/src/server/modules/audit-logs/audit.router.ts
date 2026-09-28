@@ -15,13 +15,13 @@ export const auditRouter = createTRPCRouter({
     )
     .output(ActivityLogsOutputSchema)
     .query(async ({ ctx, input }) => {
-      return auditService.getActivityLogs(ctx.db, Number(ctx.session.user.id), input);
+      return auditService.getActivityLogs(ctx.db, ctx.session.user.id, input);
     }),
 
   getLogPayloadHtml: protectedProcedure
     .input(z.object({ logId: z.string() }))
     .output(z.string())
     .query(async ({ ctx, input }) => {
-      return auditService.getLogPayloadHtml(ctx.db, Number(ctx.session.user.id), input.logId);
+      return auditService.getLogPayloadHtml(ctx.db, ctx.session.user.id, input.logId);
     }),
 });

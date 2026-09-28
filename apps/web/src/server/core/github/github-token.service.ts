@@ -9,7 +9,7 @@ import { prisma } from "../db";
 const REFRESH_THRESHOLD_MS = 5 * 60 * 1000; // TIME: 5 minutes
 
 export const githubTokenService = {
-  async getValidToken(userId: number): Promise<null | string> {
+  async getValidToken(userId: string): Promise<null | string> {
     const account = await prisma.account.findFirst({
       select: { accessToken: true, accessTokenExpiresAt: true, id: true, refreshToken: true },
       where: { providerId: "github", userId },

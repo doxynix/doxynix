@@ -100,7 +100,7 @@ async function cleanupFailsafeDatabaseState(taskName: string, payload: unknown, 
             select: { userId: true },
           },
         },
-        where: { publicId: analysisId },
+        where: { id: analysisId },
       });
 
       await realtimeService
@@ -114,7 +114,7 @@ async function cleanupFailsafeDatabaseState(taskName: string, payload: unknown, 
     }
 
     if (taskName === "analyze-pr" && safePayload?.analysisId != null) {
-      const prAnalysisId = Number(safePayload.analysisId);
+      const prAnalysisId = String(safePayload.prAnalysisId);
 
       await db.pullRequestAnalysis.update({
         data: {
@@ -132,7 +132,7 @@ async function cleanupFailsafeDatabaseState(taskName: string, payload: unknown, 
         data: {
           status: "FAILED" as FixStatus,
         },
-        where: { publicId: fixId },
+        where: { id: fixId },
       });
 
       appLogger.info({

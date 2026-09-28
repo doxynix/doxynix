@@ -7,7 +7,7 @@ import {
   NodeContextInputSchema,
   NodeContextOutputSchema,
 } from "./analysis.schemas";
-import { prCommentsService } from "./services/pr-comments.service";
+import { PostCommentToPROutput, prCommentsService } from "./services/pr-comments.service";
 import { prImpactService } from "./services/pr-impact.service";
 import { workspaceService } from "./services/workspace.service";
 import { workspaceSearchService } from "./services/workspace-search.service";
@@ -72,6 +72,7 @@ export const analysisRepoRouter = {
         repoId: z.uuid(),
       }),
     )
+    .output(PostCommentToPROutput)
     .mutation(async ({ ctx, input }) => {
       return prCommentsService.postCommentToPR(ctx.db, input);
     }),

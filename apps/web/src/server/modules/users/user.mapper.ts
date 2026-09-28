@@ -8,9 +8,9 @@ type UserRecord = {
   createdAt: Date;
   email: string | null;
   emailVerified: boolean;
+  id: string;
   image: string | null;
   name: string | null;
-  publicId: string;
   role: PublicUser["role"];
   updatedAt: Date;
 };
@@ -43,7 +43,7 @@ export const userMapper = {
       createdAt: user.createdAt,
       email: user.email,
       emailVerified: user.emailVerified,
-      id: user.publicId,
+      id: user.id,
       image: user.image,
       name: user.name,
       role: user.role,

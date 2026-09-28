@@ -54,14 +54,14 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
 
     await expectDenied(
       alice.db.user.update({
-        data: { publicId: "new-uuid" },
-        where: { publicId: alice.user.publicId },
+        data: { id: "new-uuid" },
+        where: { id: alice.user.id },
       }),
     );
     await expectDenied(
       alice.db.user.update({
         data: { createdAt: new Date("2000-01-01") },
-        where: { publicId: alice.user.publicId },
+        where: { id: alice.user.id },
       }),
     );
 
