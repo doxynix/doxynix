@@ -53,9 +53,9 @@
     "with-doppler": "bun ../../scripts/doppler.ts"
   },
   "dependencies": {
-    "@ai-sdk/google": "4.0.80",
-    "@ai-sdk/openai": "4.0.75",
-    "@ai-sdk/react": "4.0.117",
+    "@ai-sdk/google": "4.0.82",
+    "@ai-sdk/openai": "4.0.77",
+    "@ai-sdk/react": "4.0.119",
     "@better-auth/passkey": "catalog:",
     "@codemirror/autocomplete": "6.20.3",
     "@codemirror/commands": "6.11.1",
@@ -137,7 +137,7 @@
     "@xyflow/react": "12.12.0",
     "@zenstackhq/runtime": "2.22.3",
     "ably": "2.29.0",
-    "ai": "7.0.114",
+    "ai": "7.0.116",
     "better-auth": "catalog:",
     "class-variance-authority": "0.7.1",
     "clsx": "catalog:",
