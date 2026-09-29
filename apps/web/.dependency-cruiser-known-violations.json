@@ -64,6 +64,15 @@
   },
   {
     "type": "module",
+    "from": "src/shared/config/sentry-integrations.ts",
+    "to": "src/shared/config/sentry-integrations.ts",
+    "rule": {
+      "severity": "info",
+      "name": "no-unshared-in-shared"
+    }
+  },
+  {
+    "type": "module",
     "from": "src/shared/config/sentry.ts",
     "to": "src/shared/config/sentry.ts",
     "rule": {

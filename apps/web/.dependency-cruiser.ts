@@ -36,6 +36,9 @@ const config: IConfiguration = {
           // dependency scan:
           "^src/instrumentation[.]ts$",
           "^src/instrumentation-client[.]ts$",
+          // Structural test for the file above: vitest loads it, nothing imports
+          // it, and it deliberately does not import the module it asserts on.
+          "^src/instrumentation-client[.]test[.]ts$",
           "^src/app/\\[locale\\]/opengraph-image[.]tsx$",
           "^src/app/\\[locale\\]/\\(private\\)/dashboard/repo/\\[owner\\]/\\[name\\]/opengraph-image[.]tsx$",
           "^src/app/manifest[.]ts$",
