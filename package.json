@@ -44,6 +44,7 @@
     "cross-spawn": "7.0.6",
     "dompurify": "3.4.16",
     "effect": "3.22.2",
+    "elkjs": "0.12.0",
     "engine.io": "6.6.11",
     "esbuild": "0.28.2",
     "fast-xml-parser": "5.11.1",
