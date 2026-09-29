@@ -11,7 +11,11 @@
   },
   "scripts": {
     "analyze": "bun with-doppler \"cross-env ANALYZE=true next build --webpack\"",
+    "analyze:chunks": "bun scripts/bundle-report.ts chunks",
     "analyze:exp": "bun with-doppler \"next experimental-analyze\"",
+    "analyze:groups": "bun scripts/bundle-report.ts groups",
+    "analyze:report": "bun scripts/bundle-report.ts",
+    "analyze:routes": "bun scripts/bundle-report.ts routes",
     "arch:baseline": "depcruise src --config .dependency-cruiser.ts --baseline",
     "arch:check": "depcruise src --config .dependency-cruiser.ts --output-type err --ignore-known",
     "arch:graph": "depcruise src --collapse 2 --config .dependency-cruiser.ts --cache --output-type dot | dot -T svg > arch/architecture.svg",
