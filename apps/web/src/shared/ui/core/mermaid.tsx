@@ -1,6 +1,6 @@
 "use client";
 
-import { type MouseEvent, useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 
@@ -45,7 +45,13 @@ export interface MermaidProps {
   config?: MermaidConfig;
   debounceTime?: number;
   onError?: (error: string) => void;
-  onLinkClick?: (href: string, e: MouseEvent) => void;
+  /**
+   * The native DOM `MouseEvent`, because the handler is registered with
+   * `figure.addEventListener` — it is not a React synthetic event. The only
+   * consumer calls `preventDefault()` and reads the href, both of which the DOM
+   * type carries, so this needs no cast at the call site.
+   */
+  onLinkClick?: (href: string, e: globalThis.MouseEvent) => void;
   onSuccess?: (svg: string) => void;
 }
 
@@ -216,7 +222,7 @@ export function AppMermaid({
     if (figure == null) {
       return;
     }
-    const handleFigureClick = (event: Event) => {
+    const handleFigureClick = (event: globalThis.MouseEvent) => {
       const target = event.target as HTMLElement;
       const anchor = target.closest("a");
       if (!anchor) {
@@ -233,7 +239,7 @@ export function AppMermaid({
         lowerHref.startsWith("data:") ||
         lowerHref.startsWith("vbscript:");
       if (!isUnsafe) {
-        onLinkClick(href, event as unknown as MouseEvent<HTMLDivElement>);
+        onLinkClick(href, event);
       }
     };
     figure.addEventListener("click", handleFigureClick);

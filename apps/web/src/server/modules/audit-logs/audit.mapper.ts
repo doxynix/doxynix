@@ -1,5 +1,6 @@
 import type { AuditLog } from "@prisma/client";
 import { UAParser } from "ua-parser-js";
+import * as z from "zod";
 
 import { SKIP_FIELDS, sanitizeObject } from "@/server/utils/sanitize-payload";
 import { formatUserAgent } from "@/server/utils/ua-parser";
@@ -23,6 +24,18 @@ type AuditPayload = {
   where?: Record<string, unknown>;
 };
 
+/**
+ * `log.payload` is a Prisma `JsonValue` column, so it is `unknown` until proven.
+ * Both members are open records because the audit log records whatever
+ * `where`/`data` the calling mutation passed, which is unbounded.
+ */
+const AuditPayloadSchema = z
+  .looseObject({
+    data: z.record(z.string(), z.unknown()).optional(),
+    where: z.record(z.string(), z.unknown()).optional(),
+  })
+  .partial();
+
 const OP_MAP: Record<string, { severity: AuditSeverityType; title: string }> = {
   create: { severity: "success", title: "Created" },
   delete: { severity: "error", title: "Deleted" },
@@ -35,7 +48,8 @@ const getStr = (val: unknown): string | undefined => (typeof val === "string" ? 
 
 export const auditMapper = {
   toDto(log: AuditLog): AuditLogType {
-    const rawPayload = log.payload as unknown as AuditPayload;
+    const parsedPayload = AuditPayloadSchema.safeParse(log.payload);
+    const rawPayload: AuditPayload = parsedPayload.success ? parsedPayload.data : {};
     const data = rawPayload.data ?? {};
     const where = rawPayload.where ?? {};
 
