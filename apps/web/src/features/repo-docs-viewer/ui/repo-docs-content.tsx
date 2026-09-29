@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  type JSX,
-  type SyntheticEvent,
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { type JSX, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import parse, {
   type DOMNode,
   domToReact,
@@ -42,7 +35,7 @@ const isElement = (node: DOMNode): node is Element => {
 };
 
 const isTextNode = (node: DOMNode): node is DOMNode & { data: string } => {
-  return "data" in node && typeof (node as any).data === "string";
+  return "data" in node && typeof node.data === "string";
 };
 
 const EMPTY_SUBSCRIBE = () => () => {};
@@ -50,10 +43,15 @@ const EMPTY_SUBSCRIBE = () => () => {};
 const cleanTextNodes = (nodes: DOMNode[]): DOMNode[] => {
   return nodes.map((node) => {
     if (isTextNode(node)) {
-      const textObj = node as unknown as { data: string };
+      // Irreducible: `Text`/`Comment` are classes, and spreading one yields a plain
+      // object that no longer satisfies `DOMNode`'s class members. The replacement
+      // is built by object spread on purpose — `html-react-parser` reads `type`,
+      // `data` and `children` off it, which a spread preserves. One cast here
+      // replaces the two the original code needed.
       return {
-        ...textObj,
-        data: textObj.data.replaceAll(/\s+/gu, " "),
+        // oxlint-disable-next-line typescript/no-misused-spread -- see above
+        ...node,
+        data: node.data.replaceAll(/\s+/gu, " "),
       } as unknown as DOMNode;
     }
     return node;
@@ -77,7 +75,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
 
   const contentRef = useRef<HTMLElement>(null);
 
-  const handleHoverOrFocus = (e: SyntheticEvent) => {
+  const handleHoverOrFocus = (e: FocusEvent | MouseEvent) => {
     const target = e.target as HTMLElement;
     const wikiLink = target.closest("a");
 
@@ -101,11 +99,11 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
     }
   };
 
-  const handleHoverOrBlur = (e: SyntheticEvent) => {
-    const target = e.target as HTMLElement;
-    const relatedTarget = (e as any).relatedTarget as HTMLElement | null;
+  const handleHoverOrBlur = (e: FocusEvent | MouseEvent) => {
+    const target = e.target as HTMLElement | null;
+    const relatedTarget = e.relatedTarget as HTMLElement | null;
 
-    const currentLink = target.closest("a");
+    const currentLink = target?.closest("a");
     const nextLink = relatedTarget?.closest("a");
 
     if (currentLink === nextLink) {
@@ -121,8 +119,8 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
     if (content == null) {
       return;
     }
-    const trackHover = (e: Event) => handleHoverOrFocus(e as unknown as SyntheticEvent);
-    const trackHoverEnd = (e: Event) => handleHoverOrBlur(e as unknown as SyntheticEvent);
+    const trackHover = (e: Event) => handleHoverOrFocus(e as FocusEvent | MouseEvent);
+    const trackHoverEnd = (e: Event) => handleHoverOrBlur(e as FocusEvent | MouseEvent);
     content.addEventListener("mouseover", trackHover);
     content.addEventListener("mouseout", trackHoverEnd);
     content.addEventListener("focusin", trackHover);
@@ -233,9 +231,10 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
 
             const IconComponent = alertConfig.icon;
 
-            const textObj = firstTextNode as unknown as { data: string };
+            // Same single spread-and-cast as `cleanTextNodes`.
             const cleanedFirstTextNode = {
-              ...textObj,
+              // oxlint-disable-next-line typescript/no-misused-spread -- see above
+              ...firstTextNode,
               data: remainingText,
             } as unknown as DOMNode;
 

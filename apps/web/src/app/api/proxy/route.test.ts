@@ -76,6 +76,34 @@ describe("Proxy API Route — SSRF Prevention Suite", () => {
   });
 
   describe("3. POST handler protocol and header sanitization", () => {
+    it("rejects a body that is not an object before touching the network", async () => {
+      const req = new Request("http://localhost/api/proxy", {
+        body: JSON.stringify("not-an-object"),
+        method: "POST",
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(400);
+      expect(globalFetchMock).not.toHaveBeenCalled();
+    });
+
+    it("rejects a non-string header value that undici could not send", async () => {
+      // This is the case the previous blind `as ProxyRequestBody` let through
+      // to a runtime failure inside undici.
+      const req = new Request("http://localhost/api/proxy", {
+        body: JSON.stringify({
+          headers: { "x-trace": { nested: true } },
+          method: "GET",
+          url: "https://example.com/api",
+        }),
+        method: "POST",
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(400);
+      expect(globalFetchMock).not.toHaveBeenCalled();
+    });
+
     it("strictly forbids non-http protocols (file://, gopher://)", async () => {
       const req = new Request("http://localhost/api/proxy", {
         body: JSON.stringify({ method: "GET", url: "file:///etc/passwd" }),

@@ -8,6 +8,7 @@ import {
   type ProjectMap,
   projectMapSchema,
 } from "./analysis-result.schemas";
+import { REPOSITORY_FINDING_CATEGORIES } from "./discovery.types";
 import {
   normalizeProjectMapKeyDecisions,
   normalizeProjectMapLanguageBreakdown,
@@ -28,15 +29,9 @@ const FACT_CATEGORIES = [
   "security",
   "infrastructure",
 ] as const;
-const FINDING_CATEGORIES = [
-  "architecture",
-  "change-risk",
-  "hotspot",
-  "maintainability",
-  "onboarding",
-  "security",
-  "performance",
-] as const;
+// Derived from the same tuple the Zod enum and `RepositoryFinding` use, so the
+// normalizer can never emit a category the schema or the consumer type denies.
+const FINDING_CATEGORIES = REPOSITORY_FINDING_CATEGORIES;
 
 function coerceEnum<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
   if (typeof value !== "string") {
@@ -79,15 +74,24 @@ function asStringArray(value: unknown): string[] {
   return value.map((item) => asString(item)).filter((item) => item.length > 0);
 }
 
+/**
+ * Spreads the value rather than asserting it, so the result is a real
+ * `Record<string, unknown>` instead of a view over the original `any`. Callers
+ * in this file receive loose AI-SDK output, where `typeof value === "object"`
+ * does not narrow `any`, which is why every site needed an assertion.
+ */
 function asRecord(value: unknown): Record<string, unknown> {
-  return typeof value === "object" && value != null ? (value as Record<string, unknown>) : {};
+  if (typeof value !== "object" || value == null) {
+    return {};
+  }
+  return { ...value };
 }
 
 function normalizeDomainAnalysis(value: unknown) {
   if (typeof value !== "object" || value == null) {
     return;
   }
-  const record = value as Record<string, unknown>;
+  const record = asRecord(value);
   const business_rules = asStringArray(record.business_rules);
 
   const rawEntities = record.core_entities;
@@ -209,7 +213,7 @@ function normalizeEvidenceRefs(value: unknown) {
       if (typeof item !== "object" || item == null) {
         return null;
       }
-      const record = item as Record<string, unknown>;
+      const record = asRecord(item);
       const path = asString(record.path);
       if (path.length === 0) {
         return null;
@@ -235,7 +239,7 @@ function normalizeFindings(value: unknown) {
       if (typeof item !== "object" || item == null) {
         return null;
       }
-      const record = item as Record<string, unknown>;
+      const record = asRecord(item);
       const title = asString(record.title, `Finding ${index + 1}`);
       return {
         category: coerceEnum(record.category, FINDING_CATEGORIES, "maintainability"),
@@ -249,7 +253,6 @@ function normalizeFindings(value: unknown) {
         remediation_plan: asStringArray(record.remediation_plan),
         risk_of_regression: record.risk_of_regression,
         score: typeof record.score === "number" ? Math.min(100, Math.max(0, record.score)) : 50,
-        semibold: coerceRiskLevel(record.severity),
         severity: coerceRiskLevel(record.severity),
         suggestedNextChange: asString(record.suggestedNextChange, "Review and refactor"),
         summary: asString(record.summary, title),
@@ -269,7 +272,7 @@ function normalizeFacts(value: unknown) {
       if (typeof item !== "object" || item == null) {
         return null;
       }
-      const record = item as Record<string, unknown>;
+      const record = asRecord(item);
       const title = asString(record.title, `Fact ${index + 1}`);
       return {
         category: coerceEnum(record.category, FACT_CATEGORIES, "architecture"),
@@ -348,28 +351,28 @@ function normalizeVulnerabilities(value: unknown) {
 }
 
 export function normalizeAiGenerationOutput(raw: unknown): AIResult {
-  const rawRecord = typeof raw === "object" && raw != null ? (raw as Record<string, unknown>) : {};
+  const rawRecord = asRecord(raw);
 
   const rawExecSummary =
     typeof rawRecord.executive_summary === "object" && rawRecord.executive_summary != null
-      ? (rawRecord.executive_summary as Record<string, unknown>)
+      ? asRecord(rawRecord.executive_summary)
       : null;
 
   const rawOnboarding =
     typeof rawRecord.onboarding_guide === "object" && rawRecord.onboarding_guide != null
-      ? (rawRecord.onboarding_guide as Record<string, unknown>)
+      ? asRecord(rawRecord.onboarding_guide)
       : null;
 
   const rawSections =
     typeof rawRecord.sections === "object" && rawRecord.sections != null
-      ? (rawRecord.sections as Record<string, unknown>)
+      ? asRecord(rawRecord.sections)
       : null;
 
   const rawSecurity =
     rawSections != null &&
     typeof rawSections.security_audit === "object" &&
     rawSections.security_audit != null
-      ? (rawSections.security_audit as Record<string, unknown>)
+      ? asRecord(rawSections.security_audit)
       : null;
 
   const candidate = {
@@ -442,7 +445,7 @@ export function normalizeAiGenerationOutput(raw: unknown): AIResult {
 }
 
 export function normalizeProjectMapOutput(raw: unknown): ProjectMap {
-  const baseRecord = typeof raw === "object" && raw != null ? (raw as Record<string, unknown>) : {};
+  const baseRecord = asRecord(raw);
   const embeddedRecord = parseEmbeddedProjectMap(baseRecord.overview);
   const record = embeddedRecord == null ? baseRecord : { ...baseRecord, ...embeddedRecord };
   const modules = Array.isArray(record.modules)
@@ -452,7 +455,7 @@ export function normalizeProjectMapOutput(raw: unknown): ProjectMap {
             return null;
           }
 
-          const mod = item as Record<string, unknown>;
+          const mod = asRecord(item);
           const path = asString(mod.path);
           if (path.length === 0) {
             return null;

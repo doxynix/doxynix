@@ -1,5 +1,6 @@
 import * as z from "zod";
 
+import { REPOSITORY_FINDING_CATEGORIES } from "./discovery.types";
 import { SCHEMA_LIMITS } from "./scoring-constants";
 
 const RiskLevel = z.enum(["LOW", "MODERATE", "HIGH", "CRITICAL"]);
@@ -45,15 +46,7 @@ const repositoryFactSchema = z.object({
 
 const repositoryFindingSchema = z
   .object({
-    category: z.enum([
-      "architecture",
-      "change-risk",
-      "hotspot",
-      "maintainability",
-      "onboarding",
-      "security",
-      "performance",
-    ]),
+    category: z.enum(REPOSITORY_FINDING_CATEGORIES),
     confidence: z.number().min(0).max(100),
     effort_to_fix: z.enum(["LOW", "MEDIUM", "HIGH"]).optional(),
     evidence: z.array(evidenceRefSchema).max(SCHEMA_LIMITS.maxEvidencePerFact),

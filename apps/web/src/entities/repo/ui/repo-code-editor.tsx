@@ -103,6 +103,9 @@ export function RepoCodeEditor({
   ];
   const mergeExtensionsEditable = readOnly ? mergeExtensionsReadOnly : ext;
 
+  // Irreducible: `react-codemirror-merge@4.25.12` ships no type declarations at
+  // all, so the module's shape has to be stated here. The two members read below
+  // are the only ones the package exposes.
   const Merge = CodeMirrorMerge as unknown as {
     Modified?: ComponentType<Record<string, unknown>>;
     Original?: ComponentType<Record<string, unknown>>;

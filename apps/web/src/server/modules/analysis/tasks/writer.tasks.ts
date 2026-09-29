@@ -1,3 +1,4 @@
+import type { Repo } from "@prisma/client";
 import { task } from "@trigger.dev/sdk";
 
 import { TASK_CONFIGS } from "@/server/utils/task-config";
@@ -10,6 +11,7 @@ import {
   executeContributingWriter,
   executeReadmeWriter,
 } from "../ai/writer-tasks";
+import type { AIResult } from "../engine/core/analysis-result.schemas";
 
 export const readmeTask = task({
   id: "write-readme",
@@ -97,9 +99,9 @@ export const changelogTask = task({
   ...TASK_CONFIGS.writers,
   run: async (i: {
     analysisId: string;
-    analysisResult: any;
+    analysisResult: AIResult;
     language: string;
-    repo: any;
+    repo: Repo;
     userId: string;
   }) => {
     return runWriterWithLimiter(

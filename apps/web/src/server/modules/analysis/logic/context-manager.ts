@@ -230,6 +230,14 @@ function buildSelectionReason(stage: AiContextStage, filePath: string, preferred
   return "secondary-support";
 }
 
+/** One scored candidate file, as produced by the ranking pass inside `buildStageContextPack`. */
+type StageCandidate = {
+  file: RepositoryModuleFile;
+  path: string;
+  preferred: boolean;
+  score: number;
+};
+
 export async function buildStageContextPack({
   files,
   maxTokens,
@@ -313,7 +321,7 @@ export async function buildStageContextPack({
     addFileToContext(item, xml, totalWithXmlTokens, isTruncated);
   }
 
-  function addFileToContext(item: any, xml: string, tokens: number, truncated: boolean) {
+  function addFileToContext(item: StageCandidate, xml: string, tokens: number, truncated: boolean) {
     selected.push({
       path: item.path,
       reason: buildSelectionReason(stage, item.path.toLowerCase(), item.preferred),

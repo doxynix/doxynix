@@ -53,9 +53,11 @@ const withZenStack = t.middleware(async ({ ctx, next }) => {
   const userId = sessionUser?.id;
   const userRole = sessionUser?.role == null ? undefined : (sessionUser.role as UserRole);
 
+  // `enhance`'s declared return type is already assignable to `DbClient`; a
+  // `satisfies` keeps it honest without widening to the union by assertion.
   const protectedDb = enhance(ctx.prisma, {
     user: userId == null ? undefined : { id: userId, role: userRole },
-  }) as unknown as DbClient;
+  }) satisfies DbClient;
 
   return next({
     ctx: {

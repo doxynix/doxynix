@@ -13,7 +13,18 @@ import { prisma } from "@/server/core/db";
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 export async function POST(request: Request): Promise<NextResponse> {
-  const body = (await request.json()) as HandleUploadBody;
+  // `request.json()` is typed `any`. The body is a Vercel SDK contract
+  // (`GenerateClientTokenEvent | UploadCompletedEvent`) that `handleUpload`
+  // validates and answers with a 400 itself, so reproducing that union here
+  // would only duplicate the SDK. What is worth checking locally is that a
+  // non-object body is rejected before it reaches the SDK.
+  const rawBody: unknown = await request.json();
+
+  if (typeof rawBody !== "object" || rawBody == null) {
+    return NextResponse.json({ error: "Invalid upload request" }, { status: 400 });
+  }
+
+  const body = rawBody as HandleUploadBody;
 
   try {
     const jsonResponse = await handleUpload({

@@ -76,13 +76,15 @@ export function createAnon() {
   return { db: enhance(prisma, { user: undefined }) };
 }
 
-export async function expectDenied(promise: Promise<any>) {
+// `Promise<unknown>` rather than `Promise<any>`: the value is only ever awaited
+// for its rejection, never inspected, so `unknown` is the honest type.
+export async function expectDenied(promise: Promise<unknown>) {
   await expect(promise).rejects.toThrow(
     /denied|p2004|p2025|not found|unique constraint|result is not allowed to be read back/i,
   );
 }
 
-export async function expectValidationFail(promise: Promise<any>) {
+export async function expectValidationFail(promise: Promise<unknown>) {
   await expect(promise).rejects.toThrow(
     /validation|p2002|argument|value out of range|invalid url|unique constraint failed/i,
   );

@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import * as z from "zod/mini";
 
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
@@ -10,17 +11,21 @@ import { ExternalLink } from "@/shared/ui/kit/external-link";
 
 type StatusType = "down" | "maintenance" | "unknown" | "up";
 
-type StatusResponse = {
-  status: StatusType;
-};
+/**
+ * Parsed rather than asserted. A status page that is behind a proxy, a
+ * captive portal, or an error handler can return any shape, and the previous
+ * cast would have rendered `undefined` into the footer.
+ */
+const StatusResponse = z.object({
+  status: z.enum(["down", "maintenance", "unknown", "up"]),
+});
 
 const fetchSystemStatus = async (): Promise<StatusType> => {
   const res = await fetch("/api/status");
   if (!res.ok) {
     throw new Error("Network error");
   }
-  const data = (await res.json()) as StatusResponse;
-  return data.status;
+  return StatusResponse.parse(await res.json()).status;
 };
 
 const STALE_TIME = 4 * 60 * 1000; // TIME: 4 minutes

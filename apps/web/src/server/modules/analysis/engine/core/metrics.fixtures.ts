@@ -1,0 +1,48 @@
+import { RepoMetricsSchema } from "./metrics.schemas";
+
+/**
+ * The minimal payload that satisfies `RepoMetricsSchema`'s 34 required fields —
+ * i.e. every field that is not declared `.optional()`. Lifted out of
+ * `metrics.schemas.test.ts` so the schema suite and the read-path suite prove
+ * against one object and cannot disagree about what "valid" means.
+ */
+export const VALID_REPO_METRICS = RepoMetricsSchema.parse({
+  analysisCoverage: {
+    heuristicFiles: 1,
+    languagesByMode: { heuristic: ["ts"], treeSitter: ["ts"], typeScriptAst: ["ts"] },
+    parserCoveragePercent: 100,
+    totalFiles: 1,
+    treeSitterFiles: 1,
+    typeScriptAstFiles: 1,
+  },
+  apiSurface: 0,
+  busFactor: 1,
+  complexityScore: 10,
+  configFiles: 0,
+  configInventory: [],
+  dependencyCycles: [],
+  dependencyHotspots: [],
+  docDensity: 0,
+  duplicationReport: { clones: [], duplicationPercentage: 0, totalDuplicatedLines: 0 },
+  entrypoints: [],
+  factCount: 0,
+  fileCount: 1,
+  findingCount: 0,
+  healthScore: 80,
+  hotspotFiles: [],
+  languages: [{ color: "#fff", lines: 1, name: "TypeScript" }],
+  maintenanceStatus: "active",
+  modularityIndex: 0.5,
+  mostComplexFiles: [],
+  onboardingScore: 70,
+  orphanModules: [],
+  publicExports: 0,
+  securityFindings: [],
+  securityScanStatus: "ok",
+  securityScore: 90,
+  teamRoles: [],
+  techDebtScore: 20,
+  techStack: ["TypeScript"],
+  totalLoc: 1,
+  totalSizeKb: 1,
+});

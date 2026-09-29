@@ -30,21 +30,35 @@ export async function createContext({ req }: Props) {
       const keyRecord = await verifyAndUseApiKey(token);
 
       if (keyRecord != null) {
+        const now = new Date();
         sessionContext = {
           session: {
+            createdAt: now,
             expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
             id: "api-key",
+            // better-auth requires `token` and both timestamps; an API key has no
+            // real session row, so these are synthetic but well-formed.
             token: "api-key",
+            updatedAt: now,
             userId: keyRecord.user.id,
           },
           user: {
-            email: keyRecord.user.email,
+            banned: keyRecord.user.banned,
+            createdAt: keyRecord.user.createdAt,
+            // `User.email`, `User.name` and `User.image` are nullable columns while
+            // better-auth's session shape types all three as plain `string`. Same
+            // fallbacks the task runner's synthetic session uses in
+            // `core/trpc/server.ts`, so both impersonations behave alike.
+            email: keyRecord.user.email ?? "",
+            emailVerified: keyRecord.user.emailVerified,
             id: keyRecord.user.id,
-            image: keyRecord.user.image,
-            name: keyRecord.user.name,
+            image: keyRecord.user.image ?? "",
+            name: keyRecord.user.name ?? "User",
             role: keyRecord.user.role,
+            twoFactorEnabled: keyRecord.user.twoFactorEnabled,
+            updatedAt: keyRecord.user.updatedAt,
           },
-        } as any;
+        };
       }
     }
   }

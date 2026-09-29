@@ -11,7 +11,9 @@ import {
   useId,
 } from "react";
 import { useLocale } from "next-intl";
+import type { LegendPayload, TooltipPayloadEntry, TooltipValueType } from "recharts";
 import * as RechartsPrimitive from "recharts";
+import type { NameType } from "recharts/types/component/DefaultTooltipContent";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -115,32 +117,36 @@ const ChartStyle = ({ config, id }: { config: ChartConfig; id: string }) => {
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
-export type ChartTooltipPayloadItem = {
-  color?: string;
-  dataKey?: number | string;
-  fill?: string;
-  name?: number | string;
-  payload?: any;
-  type?: string;
-  value?: any;
-};
+export type ChartTooltipPayloadItem = TooltipPayloadEntry;
+
+/**
+ * Recharts types `dataKey` as a literal *or* an accessor function. A React key
+ * must be a string, so only the literal forms are usable; an accessor falls
+ * through to the surrounding `"value"` default, as the `||` chain did before.
+ */
+const asKeyPart = (dataKey: ChartTooltipPayloadItem["dataKey"]): NameType | "" =>
+  typeof dataKey === "function" ? "" : (dataKey ?? "");
 
 export type ChartTooltipContentProps = ComponentProps<"div"> & {
   active?: boolean;
   color?: string;
+  /**
+   * Mirrors recharts' own `Formatter<TValue, TName>`: the first two are `| undefined`
+   * and the fifth is the whole payload array, not a single value.
+   */
   formatter?: (
-    value: any,
-    name: any,
+    value: TooltipValueType | undefined,
+    name: NameType | undefined,
     item: ChartTooltipPayloadItem,
     index: number,
-    payload: any,
-  ) => ReactNode;
+    payload: readonly ChartTooltipPayloadItem[],
+  ) => [ReactNode, NameType] | ReactNode;
   hideIndicator?: boolean;
   hideLabel?: boolean;
   indicator?: "dashed" | "dot" | "line";
   label?: ReactNode;
   labelClassName?: string;
-  labelFormatter?: (value: any, payload: ChartTooltipPayloadItem[]) => ReactNode;
+  labelFormatter?: (value: TooltipValueType, payload: ChartTooltipPayloadItem[]) => ReactNode;
   labelKey?: string;
   nameKey?: string;
   payload?: ChartTooltipPayloadItem[];
@@ -177,7 +183,7 @@ const ChartTooltipContent = forwardRef<HTMLDivElement, ChartTooltipContentProps>
       if (item == null) {
         return null;
       }
-      const key = `${labelKey || item.dataKey || item.name || "value"}`;
+      const key = `${labelKey || asKeyPart(item.dataKey) || item.name || "value"}`;
       const itemConfig = getPayloadConfigFromPayload(config, item, key);
       const rawConfig = label as keyof typeof config;
       const value =
@@ -186,8 +192,16 @@ const ChartTooltipContent = forwardRef<HTMLDivElement, ChartTooltipContentProps>
           : itemConfig?.label;
 
       if (labelFormatter) {
+        // `value` is a `ReactNode`, which recharts' `ValueType` excludes (it admits
+        // no `bigint` and no `Promise`). The label of a chart tooltip is a string or
+        // a number in practice; anything else stringifies rather than crashing.
+        const labelValue: TooltipValueType =
+          typeof value === "string" || typeof value === "number" ? value : "";
+
         return (
-          <div className={cn("font-medium", labelClassName)}>{labelFormatter(value, payload)}</div>
+          <div className={cn("font-medium", labelClassName)}>
+            {labelFormatter(labelValue, payload)}
+          </div>
         );
       }
 
@@ -217,7 +231,7 @@ const ChartTooltipContent = forwardRef<HTMLDivElement, ChartTooltipContentProps>
           {payload
             .filter((item) => item.type !== "none")
             .map((item, index) => {
-              const key = `${nameKey || item.name || item.dataKey || "value"}`;
+              const key = `${nameKey || item.name || asKeyPart(item.dataKey) || "value"}`;
               const itemConfig = getPayloadConfigFromPayload(config, item, key);
               const indicatorColor = color || item.payload?.fill || item.color;
 
@@ -227,7 +241,7 @@ const ChartTooltipContent = forwardRef<HTMLDivElement, ChartTooltipContentProps>
                     "flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground",
                     indicator === "dot" && "items-center",
                   )}
-                  key={item.dataKey ?? index}
+                  key={typeof item.dataKey === "function" ? index : (item.dataKey ?? index)}
                 >
                   {formatter && item.value != null && item.name != null ? (
                     formatter(item.value, item.name, item, index, item.payload)
@@ -291,14 +305,7 @@ ChartTooltipContent.displayName = "ChartTooltip";
 
 const ChartLegend = RechartsPrimitive.Legend;
 
-export type ChartLegendPayloadItem = {
-  color?: string;
-  dataKey?: number | string;
-  inactive?: boolean;
-  payload?: any;
-  type?: string;
-  value?: any;
-};
+export type ChartLegendPayloadItem = LegendPayload;
 
 export type ChartLegendContentProps = ComponentProps<"div"> & {
   hideIcon?: boolean;
@@ -327,7 +334,7 @@ const ChartLegendContent = forwardRef<HTMLDivElement, ChartLegendContentProps>(
         {payload
           .filter((item) => item.type !== "none")
           .map((item, index) => {
-            const key = `${nameKey || item.dataKey || "value"}`;
+            const key = `${nameKey || asKeyPart(item.dataKey) || "value"}`;
             const itemConfig = getPayloadConfigFromPayload(config, item, key);
 
             return (

@@ -1,6 +1,13 @@
 "use client";
 
-import { type ChangeEvent, type JSX, type SyntheticEvent, useRef } from "react";
+import {
+  type ChangeEvent,
+  type Dispatch,
+  type JSX,
+  type SetStateAction,
+  type SyntheticEvent,
+  useRef,
+} from "react";
 import { Paperclip, Send, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -8,13 +15,15 @@ import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { AutosizeTextarea } from "@/shared/ui/kit/autosize-textrea";
 
+import type { LocalFileAttachment } from "../model/agent-types";
+
 type InputProps = {
-  attachments: any[];
+  attachments: LocalFileAttachment[];
   handleFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
   input: string;
   isLoading: boolean;
   onSubmit: (e?: SyntheticEvent) => void;
-  setAttachments: (v: any) => void;
+  setAttachments: Dispatch<SetStateAction<LocalFileAttachment[]>>;
   setInput: (v: string) => void;
 };
 
@@ -40,14 +49,14 @@ export function AgentForm({
           {attachments.map((file, i) => (
             <AppBadge
               className="flex items-center gap-1.5 py-1 text-xs"
-              key={`${file.name}-${file.size}-${file.lastModified}`}
+              key={file.url}
               variant="secondary"
             >
               <span className="max-w-30 truncate">{file.name}</span>
               <AppButton
                 aria-label={t("delete_attachment", { name: file.name })}
                 className="size-4 p-0 text-muted-foreground hover:text-destructive"
-                onClick={() => setAttachments((prev: any[]) => prev.filter((_, idx) => idx !== i))}
+                onClick={() => setAttachments((prev) => prev.filter((_, idx) => idx !== i))}
                 size="icon"
                 type="button"
                 variant="ghost"

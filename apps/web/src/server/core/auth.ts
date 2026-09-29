@@ -43,6 +43,11 @@ const MAGIC_LINK_MAX_AGE = 10 * 60; // TIME: 10 minutes
 
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
+/** Unauthenticated sign-in bodies: only `email` is read, and it must be a string. */
+const EmailRequestBody = z.object({
+  email: z.string().optional(),
+});
+
 const yandexProfileSchema = z.object({
   default_avatar_id: z.string().nullish(),
   default_email: z.string().nullish(),
@@ -310,12 +315,16 @@ export const auth = betterAuth({
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
       if (ctx.path.startsWith("/sign-in/email") || ctx.path.startsWith("/magic-link/send")) {
-        const body = ctx.body as undefined | { email?: string };
-        if (body?.email == null) {
+        // Validated rather than asserted: this is an unauthenticated request
+        // body, and the previous cast trusted whatever shape arrived. A
+        // non-string `email` previously reached `normalizeEmail` unchecked.
+        const body = EmailRequestBody.safeParse(ctx.body);
+
+        if (!body.success || body.data.email == null) {
           throw new APIError("BAD_REQUEST", { message: "Email is required" });
         }
 
-        const normalizedEmail = normalizeEmail(body.email);
+        const normalizedEmail = normalizeEmail(body.data.email);
 
         const isBanned = await prisma.bannedEmail.findUnique({
           where: { emailHash: getNormalizedHash(normalizedEmail) },

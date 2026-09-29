@@ -23,11 +23,13 @@ const GRAPH = { nodes: [{ id: "file:src/app.ts", label: "app.ts" }] };
 type RowBuilder = (keys: string[]) => Record<string, unknown>;
 
 function makeDb(rowByKey: RowBuilder) {
-  const captured: { documentSelect?: unknown; analysisSelect?: unknown } = {};
+  const captured: { analysisQueried: boolean; analysisSelect?: unknown; documentSelect?: unknown } =
+    { analysisQueried: false };
 
   const db = {
     analysis: {
       findUnique: (args: { select?: unknown }) => {
+        captured.analysisQueried = true;
         captured.analysisSelect = args.select;
         return {
           metricsJson: null,
@@ -70,10 +72,22 @@ describe("docsService.getWithGraphLinks", () => {
     expect(Object.keys(captured.documentSelect as Record<string, unknown>)).toStrictEqual(
       EXPECTED_SELECT,
     );
-    expect(Object.keys(captured.analysisSelect as Record<string, unknown>)).toStrictEqual([
-      "metricsJson",
-      "resultJson",
-    ]);
+  });
+
+  it("does not query the analysis row, because no column ever held a dependency graph", async () => {
+    const { captured, db } = makeDb(makeRow);
+
+    await docsService.getWithGraphLinks(db, INPUT);
+
+    // `RepositoryEvidence.dependencyGraph` is computed per analysis but never
+    // written to `resultJson` or `metricsJson`, so reading it back could only
+    // ever yield `undefined`. This test used to inject a graph through the
+    // `analysis.findUnique` mock, which proved nothing: the row it fabricated is
+    // a shape no code in the repo produces. Asserting the query is not made is
+    // the honest contract, and it fails loudly if someone re-adds it expecting
+    // it to matter.
+    expect(captured.analysisSelect).toBeUndefined();
+    expect(captured.analysisQueried).toBe(false);
   });
 
   it("hands the formatter a complete content string and version", async () => {
@@ -84,7 +98,7 @@ describe("docsService.getWithGraphLinks", () => {
     expect(result.content).toBe(CONTENT);
     expect(result.version).toBe("abc123");
     expect(result.sections).toStrictEqual(
-      DocumentFormatter.withGraphLinks(CONTENT, GRAPH, INPUT.docType, "abc123").sections,
+      DocumentFormatter.withGraphLinks(CONTENT, null, INPUT.docType, "abc123").sections,
     );
     expect(result.sections.length).toBeGreaterThan(0);
   });
@@ -100,14 +114,19 @@ describe("docsService.getWithGraphLinks", () => {
     }
   });
 
-  it("links sections to the graph, proving the document column reached the formatter", async () => {
+  it("produces no graph links, because this endpoint has no graph to link against", async () => {
     const { db } = makeDb(makeRow);
 
     const result = await docsService.getWithGraphLinks(db, INPUT);
 
-    expect(
-      result.sections.some((section) => section.graphNodeIds.includes("file:src/app.ts")),
-    ).toBe(true);
+    // `withGraphLinks` accepts `null` and guards on `graph?.nodes`, so every
+    // section comes back with an empty `graphNodeIds`. The two endpoints that
+    // DO link are `workspace-search.service` (reads `structure.graph`) and
+    // `doc-section-matcher` (receives one); both are covered by
+    // `section-graph-linker.test.ts`.
+    for (const section of result.sections) {
+      expect(section.graphNodeIds).toStrictEqual([]);
+    }
   });
 
   it("returns the document id but no longer leaks repoId / analysisId", async () => {
@@ -128,5 +147,84 @@ describe("docsService.getWithGraphLinks", () => {
 
     expect(result.path).toBeNull();
     expect(Object.hasOwn(result, "path")).toBe(true);
+  });
+});
+
+describe("docsService.pinAuditToDocs", () => {
+  const COMMIT_SHA = "deadbeef";
+  const AUDIT_PATH = "src/app.ts";
+
+  /** The blob `analyze-file.task.ts` writes: the preview plus top-level ref keys. */
+  function makeRedis(overrides: Record<string, unknown> = {}) {
+    return {
+      get: async () => ({
+        action: "quick-file-audit",
+        analysisId: ANALYSIS_ID,
+        analysisRef: null,
+        commitSha: COMMIT_SHA,
+        confidence: "high",
+        consistency: "matched",
+        consistencyNote: null,
+        content: "# app.ts\n\nExports the router.\n",
+        contextDiagnostics: {},
+        contextMeta: {},
+        path: AUDIT_PATH,
+        summary: "s",
+        title: "t",
+        ...overrides,
+      }),
+    } as unknown as Parameters<typeof docsService.pinAuditToDocs>[1];
+  }
+
+  function makePinDb(created: { analysis?: unknown } = {}) {
+    const captured: { createData?: Record<string, unknown> } = {};
+    const db = {
+      analysis: { findUnique: async () => ({ id: ANALYSIS_ID }) },
+      document: {
+        create: async (args: { data: Record<string, unknown> }) => {
+          captured.createData = args.data;
+          return { id: "0195f000-0000-7000-8000-000000000004" };
+        },
+      },
+    } as unknown as DbClient;
+    return { captured, created, db };
+  }
+
+  it("records the commit sha as the version and links the document to its analysis", async () => {
+    const { captured, db } = makePinDb();
+
+    await docsService.pinAuditToDocs(db, makeRedis(), "user-1", {
+      path: AUDIT_PATH,
+      repoId: REPO_ID,
+    });
+
+    expect(captured.createData?.version).toBe(COMMIT_SHA);
+    expect(captured.createData?.analysis).toStrictEqual({ connect: { id: ANALYSIS_ID } });
+  });
+
+  it("falls back to a manual version when the cached audit carries no analysis ref", async () => {
+    const { captured, db } = makePinDb();
+
+    await docsService.pinAuditToDocs(
+      db,
+      makeRedis({ analysisId: undefined, commitSha: undefined }),
+      "user-1",
+      { path: AUDIT_PATH, repoId: REPO_ID },
+    );
+
+    expect(captured.createData?.version).toBe("manual");
+    expect(captured.createData?.analysis).toBeUndefined();
+  });
+
+  it("still links the analysis when only the commit sha is missing", async () => {
+    const { captured, db } = makePinDb();
+
+    await docsService.pinAuditToDocs(db, makeRedis({ commitSha: undefined }), "user-1", {
+      path: AUDIT_PATH,
+      repoId: REPO_ID,
+    });
+
+    expect(captured.createData?.version).toBe("manual");
+    expect(captured.createData?.analysis).toStrictEqual({ connect: { id: ANALYSIS_ID } });
   });
 });

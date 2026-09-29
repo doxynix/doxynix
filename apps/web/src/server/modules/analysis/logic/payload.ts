@@ -6,13 +6,17 @@ import { appLogger } from "@/server/core/app-logger";
 
 import type { LatestCompletedAnalysis } from "../analysis.repository";
 import { type AIResult, aiSchema } from "../engine/core/analysis-result.schemas";
-import type { RepoMetrics } from "../engine/core/metrics.types";
+import {
+  EMPTY_REPO_METRICS,
+  type ParsedRepoMetrics,
+  safeParseRepoMetrics,
+} from "../engine/core/metrics.schemas";
 import type { StoredDocument, WriterStatus } from "./structure-shared";
 
-type AnalysisPayload = {
+export type AnalysisPayload = {
   aiResult: AIResult;
   analysis: LatestCompletedAnalysis;
-  metrics: RepoMetrics;
+  metrics: ParsedRepoMetrics;
 };
 
 export function coerceAnalysisPayload(
@@ -20,6 +24,19 @@ export function coerceAnalysisPayload(
 ): AnalysisPayload | null {
   if (analysis?.metricsJson == null || analysis.resultJson == null) {
     return null;
+  }
+
+  // `metricsJson` is a `Prisma.JsonValue` column, so it is `unknown` until proven
+  // otherwise. Previously it was double-cast straight to `RepoMetrics`, which meant
+  // a malformed field reached every consumer as a string. Validate here instead.
+  const metricsResult = safeParseRepoMetrics(analysis.metricsJson);
+  const metrics = metricsResult.success ? metricsResult.data : EMPTY_REPO_METRICS;
+  if (!metricsResult.success) {
+    appLogger.warn({
+      error: z.treeifyError(metricsResult.error),
+      id: analysis.id,
+      msg: "metricsJson failed validation; falling back to empty metrics",
+    });
   }
 
   const parsed = aiSchema.safeParse(analysis.resultJson);
@@ -32,14 +49,14 @@ export function coerceAnalysisPayload(
     return {
       aiResult: analysis.resultJson as AIResult,
       analysis,
-      metrics: analysis.metricsJson as unknown as RepoMetrics,
+      metrics,
     };
   }
 
   return {
     aiResult: parsed.data,
     analysis,
-    metrics: analysis.metricsJson as unknown as RepoMetrics,
+    metrics,
   };
 }
 

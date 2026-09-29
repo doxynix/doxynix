@@ -333,14 +333,27 @@ export type RepositoryFact = {
   title: string;
 };
 
+/**
+ * The single source of the finding-category union.
+ *
+ * Lives here because this file imports nothing: `analysis-result.schemas.ts` can
+ * derive its Zod enum from this tuple without creating a cycle, which is the only
+ * safe direction for a value both sides depend on. It previously included only six
+ * members while the Zod enum listed seven, so the normalizer could emit
+ * `"performance"` to a consumer type that denied it.
+ */
+export const REPOSITORY_FINDING_CATEGORIES = [
+  "architecture",
+  "change-risk",
+  "hotspot",
+  "maintainability",
+  "onboarding",
+  "security",
+  "performance",
+] as const;
+
 export type RepositoryFinding = {
-  category:
-    | "architecture"
-    | "change-risk"
-    | "hotspot"
-    | "maintainability"
-    | "onboarding"
-    | "security";
+  category: (typeof REPOSITORY_FINDING_CATEGORIES)[number];
   confidence: number;
   evidence: EvidenceRef[];
   id: string;

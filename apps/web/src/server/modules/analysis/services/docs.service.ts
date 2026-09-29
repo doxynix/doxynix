@@ -8,13 +8,13 @@ import * as z from "zod";
 import { highlightCode } from "@/shared/lib/shiki";
 
 import type { DbClient } from "@/server/core/db";
+import type { FileActionPreviewResult } from "@/server/core/redis.types";
 import { resolveDocumentMaterializedPath } from "@/server/utils/document-materialization";
 import { markdownToHtml } from "@/server/utils/markdown-to-html";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 
 import { analysisMapper } from "../analysis.mapper";
 import { analysisRepo } from "../analysis.repository";
-import type { AIResult } from "../engine/core/analysis-result.schemas";
 import { DocumentFormatter } from "../logic/section-graph-linker";
 
 export const GetWithGraphLinksInput = z.object({
@@ -144,17 +144,20 @@ export const docsService = {
       throw new Error("Document not found");
     }
 
-    const analysis = await db.analysis.findUnique({
-      select: { metricsJson: true, resultJson: true },
-      where: { id: input.analysisId },
-    });
-
-    const aiResult = analysis?.resultJson as AIResult | null;
-    const graph =
-      (aiResult as any)?.dependencyGraph ?? (analysis?.metricsJson as any)?.dependencyGraph ?? {};
+    // Graph links are not built here. `RepositoryEvidence.dependencyGraph` is
+    // computed per analysis but never persisted to `resultJson` or
+    // `metricsJson`, so reading it back from either column has always yielded
+    // `undefined` and the caller's `graph?.nodes` guard has always short-circuited.
+    // `withGraphLinks` accepts `null` for exactly this case.
+    //
+    // The two live callers of the linker do pass a real graph and are unaffected:
+    // `workspace-search.service` reads `structure.graph` from the analyze
+    // context, and `doc-section-matcher` receives one. This service has no access
+    // to the analyze context, so it passes `null`. Persisting the graph to enable
+    // links here is tracked separately.
     const formatted = DocumentFormatter.withGraphLinks(
       document.content,
-      graph,
+      null,
       input.docType,
       document.version,
     );
@@ -178,7 +181,7 @@ export const docsService = {
     input: { path: string; repoId: string },
   ) {
     const cacheKey = REDIS_CONFIG.keys.fileAction(userId, input.path, "quick-file-audit");
-    const cachedData = await redis.get<any>(cacheKey);
+    const cachedData = await redis.get<FileActionPreviewResult>(cacheKey);
 
     if (cachedData == null) {
       throw new TRPCError({
@@ -187,7 +190,7 @@ export const docsService = {
       });
     }
 
-    const { analysisId, commitSha } = cachedData.contentRef ?? {};
+    const { analysisId, commitSha } = cachedData;
 
     let internalAnalysisId: string | undefined;
     if (analysisId != null) {

@@ -12,9 +12,52 @@ import { getDynamicToolContext, getToolBaseLabel, prettifyToolName } from "../mo
 
 type Props = {
   addToolApprovalResponse: (options: { approved: boolean; id: string; reason?: string }) => void;
-  part: any;
+  part: ToolIndicatorPart;
   toolLabelKeys: Record<string, AgentToolLabelKey>;
 };
+
+/**
+ * Structural view of an AI SDK tool part, kept local on purpose.
+ *
+ * `ToolUIPart` / `DynamicToolUIPart` from `ai@7.0.116` are the correct nominal
+ * types, but neither is usable here:
+ *
+ * - `ToolUIPart<TOOLS extends UITools = UITools>` is a `ValueOf` over tool names.
+ *   Without the exact tool set it collapses to the untyped default, and this
+ *   component is consumed from a `useChat` that declares no tool set.
+ * - `DynamicToolUIPart` is discriminated by `type: "dynamic-tool"` (12 chars),
+ *   while this component strips a 5-character `"tool-"` prefix, so it can never
+ *   be the runtime shape here.
+ *
+ * The `state` values are enumerated from `UIToolInvocation` so that
+ * `part.state === "approval-requested"` genuinely narrows `approval` to
+ * required. `agent.tsx` carries the compile-time assertion that the SDK's
+ * `ToolUIPart` union stays assignable to this type, so the two cannot drift.
+ *
+ * `args` is optional and, as of `ai@7.0.116`, is never actually present at
+ * runtime — the SDK emits the tool input as `part.input`. Reading `input`
+ * instead is a behaviour change (it would start rendering the args preview and
+ * the dynamic tool context) and is deliberately NOT folded into this typing-only
+ * change; it needs its own ticket and test.
+ */
+export type ToolIndicatorPart = { args?: unknown } & (
+  | { approval: { id: string }; state: "approval-requested"; type: `tool-${string}` }
+  | {
+      approval: { approved: boolean; id: string };
+      state: "approval-responded";
+      type: `tool-${string}`;
+    }
+  | {
+      approval?: { approved?: boolean; id: string };
+      state:
+        | "input-available"
+        | "input-streaming"
+        | "output-available"
+        | "output-denied"
+        | "output-error";
+      type: `tool-${string}`;
+    }
+);
 
 export function ToolCallIndicator({
   addToolApprovalResponse,
@@ -87,14 +130,14 @@ export function ToolCallIndicator({
   }
 
   if (isResponded) {
-    const wasApproved = part.approval?.approved;
+    const wasApproved = part.approval.approved;
     return (
       <div className="fade-in my-1 w-full animate-in text-left duration-200">
         <AppBadge
           className="flex items-center gap-2 text-muted-foreground text-xs"
           variant="outline"
         >
-          {wasApproved === true ? (
+          {wasApproved ? (
             <>
               <span className="font-bold text-success text-xs">
                 <Check className="text-success" />

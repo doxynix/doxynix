@@ -8,6 +8,7 @@ import { REALTIME_CONFIG } from "@/shared/config/realtime";
 import { appLogger } from "@/server/core/app-logger";
 import { type DbClient, prisma } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
+import { safeJsonClone } from "@/server/utils/safe-json";
 
 import { analysisLatestSelect } from "../analysis-latest.schemas";
 import type { AIResult } from "../engine/core/analysis-result.schemas";
@@ -255,6 +256,11 @@ export const analysisLifecycleService = {
       teamRoles,
     });
 
+    // Write-side guard, deliberately still `parseRepoMetrics` and not the
+    // `safeParseRepoMetrics` variant the read path uses: this one reports *whether*
+    // the blob is valid, which is the question being asked here. The read path
+    // only needs the parsed value. Not dead — `parseRepoMetrics` is unchanged and
+    // still rejects a malformed overlay.
     if (parseRepoMetrics(finalMetrics) == null) {
       appLogger.error({
         analysisId,
@@ -281,10 +287,14 @@ export const analysisLifecycleService = {
           commitSha: currentSha,
           complexityScore: hardMetrics.complexityScore,
           message: "Completed successfully",
-          metricsJson: finalMetrics as unknown as Prisma.InputJsonValue,
+          // `safeJsonClone` round-trips through `JSON.stringify`/`parse`, which
+          // both proves the blob is JSON-safe (no `Date`, `bigint`, `undefined`
+          // or cycle reaches the driver) and narrows the result to a plain JSON
+          // value — so the assertion is now doing work rather than papering over.
+          metricsJson: safeJsonClone<Prisma.InputJsonValue>(finalMetrics),
           onboardingScore: onboardingScore,
           progress: 100,
-          resultJson: resultToStore as unknown as Prisma.InputJsonValue,
+          resultJson: safeJsonClone<Prisma.InputJsonValue>(resultToStore),
           score: finalHealthScore,
           securityScore: hardMetrics.securityScore,
           status: Status.DONE,

@@ -223,6 +223,8 @@ export type TransactionClient = Parameters<Parameters<PrismaClientExtended["$tra
 
 export type DbClient = PrismaClientExtended | TransactionClient;
 
+// Irreducible: `globalThis` has no `prisma`; this is the Next.js dev-HMR singleton
+// idiom, so one client is reused across hot reloads instead of leaking pools.
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClientExtended };
 
 export const prisma = globalForPrisma.prisma ?? createPrismaInstance();

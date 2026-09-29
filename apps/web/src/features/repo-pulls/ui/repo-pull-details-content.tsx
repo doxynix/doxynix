@@ -98,7 +98,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
   const topFindings = impact?.topFindings ?? [];
   const fixes = impact?.fixes ?? [];
 
-  const handleFixSingle = (comment: any) => {
+  /** One row of `trpc.analysis.getComments`, as `handleFixAll` already reads it. */
+  type RenderedComment = NonNullable<typeof comments>["renderedComments"][number];
+
+  const handleFixSingle = (comment: RenderedComment) => {
     createFixMutation.mutate({
       findings: [
         {

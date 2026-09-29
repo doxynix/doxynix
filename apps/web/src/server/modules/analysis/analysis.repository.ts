@@ -2,9 +2,11 @@ import { type FixStatus, PRAnalysisStatus } from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { uniq } from "es-toolkit";
+import type { z } from "zod";
 
 import type { DbClient } from "@/server/core/db";
 
+import type { persistedFindingSchema } from "./analysis.schemas";
 import { pickLatestDocsByType } from "./analysis.utils";
 import { fixesMapper } from "./fixes.mapper";
 import type { PRChangedFileSnapshot } from "./logic/pr.types";
@@ -418,14 +420,21 @@ export const analysisRepo = {
     db: DbClient,
     id: string,
     status: PRAnalysisStatus,
-    data?: { error?: string; findingsJson?: unknown; riskScore?: number },
+    data?: {
+      error?: string;
+      findingsJson?: z.output<typeof persistedFindingSchema>[];
+      riskScore?: number;
+    },
   ) {
     return db.pullRequestAnalysis.update({
       data: {
         error: data?.error,
-        findingsJson: data?.findingsJson as Prisma.InputJsonValue,
         riskScore: data?.riskScore,
         status,
+        // `Prisma.InputJsonValue` excludes `undefined`, which is what
+        // `data?.findingsJson` evaluates to whenever `data` is omitted. Spread
+        // the key in only when there is something to write.
+        ...(data?.findingsJson != null && { findingsJson: data.findingsJson }),
       },
       where: { id },
     });

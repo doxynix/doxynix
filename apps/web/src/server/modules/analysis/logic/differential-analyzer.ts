@@ -143,7 +143,10 @@ export class DifferentialAnalyzer {
       return findings;
     }
 
-    return findings.filter((f) => this.config.focusAreas.includes(f.type as any));
+    // `PRFinding["type"]` and `PRFocusArea` are deliberately different unions —
+    // a finding type that is not a focus area is simply not a match, so widen
+    // rather than erase the check.
+    return findings.filter((f) => (this.config.focusAreas as string[]).includes(f.type));
   }
 
   private calculateRiskScore(findings: PRFinding[]): number {

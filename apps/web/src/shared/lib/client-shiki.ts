@@ -45,6 +45,8 @@ const EXTRA_ALIASES: Record<string, string> = {
 const LANG_GETTERS = bundledLanguages as Record<string, DynamicImportLanguageRegistration>;
 const ALIAS_GETTERS = bundledLanguagesAlias as Record<string, DynamicImportLanguageRegistration>;
 
+// Irreducible: `globalThis` has no `doxynixClientShiki`; this is the Next.js
+// dev-HMR singleton idiom, so the in-flight highlighter promise survives reloads.
 const globalForShiki = globalThis as unknown as {
   doxynixClientShiki?: Promise<HighlighterCore>;
 };

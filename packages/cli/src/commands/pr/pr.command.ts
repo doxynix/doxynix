@@ -176,7 +176,7 @@ export function registerPrCommand(program: Command) {
         const data = fix.resultJson;
         const fixedFiles: StagedFixedFile[] =
           data != null && "fixedFiles" in data && Array.isArray(data.fixedFiles)
-            ? (data.fixedFiles as StagedFixedFile[])
+            ? data.fixedFiles
             : [];
 
         if (fixedFiles.length === 0) {

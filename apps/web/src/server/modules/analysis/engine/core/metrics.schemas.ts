@@ -1,5 +1,17 @@
 import * as z from "zod";
 
+import {
+  ChangeCouplingSchema,
+  ChurnHotspotSchema,
+  DocumentationInputSchema,
+  EntrypointRefSchema,
+  FileCategoryBreakdownItemSchema,
+  FrameworkFactSchema,
+  GraphPreviewEdgeSchema,
+  OpenApiInventorySchema,
+  TsStaticHintSchema,
+} from "./metrics.field-schemas";
+
 const FileCategorySchema = z.enum([
   "asset",
   "benchmark",
@@ -77,8 +89,11 @@ const HotspotSignalSchema = z.looseObject({
   lines: z.number().optional(),
   outbound: z.number(),
   path: z.string(),
-  score: z.number().optional(),
-  source: z.enum(["analysis", "extraction", "risk-model"]),
+  score: z.number(),
+  // `HotspotSignal` narrows `source` to the risk model; only the risk-model
+  // producer writes a row with `churnScore`/`score`, so accepting the other two
+  // would let a shape through that the type then denies.
+  source: z.literal("risk-model"),
 });
 
 const LanguageMetricSchema = z.looseObject({
@@ -104,24 +119,24 @@ export const RepoMetricsSchema = z.looseObject({
   analysisCoverage: AnalysisCoverageSchema,
   apiSurface: z.number(),
   busFactor: z.number(),
-  changeCoupling: z.unknown().optional(),
-  churnHotspots: z.unknown().optional(),
+  changeCoupling: z.array(ChangeCouplingSchema).optional(),
+  churnHotspots: z.array(ChurnHotspotSchema).optional(),
   complexityScore: z.number(),
   configFiles: z.number(),
   configInventory: z.array(z.string()),
   dependencyCycles: z.array(z.array(z.string())),
   dependencyHotspots: z.array(DependencyNodeMetricSchema),
   docDensity: z.number(),
-  documentationInput: z.unknown().optional(),
+  documentationInput: DocumentationInputSchema.optional(),
   duplicationReport: DuplicationReportSchema,
-  entrypointDetails: z.unknown().optional(),
+  entrypointDetails: z.array(EntrypointRefSchema).optional(),
   entrypoints: z.array(z.string()),
-  factCount: z.number().optional(),
-  fileCategoryBreakdown: z.unknown().optional(),
+  factCount: z.number(),
+  fileCategoryBreakdown: z.array(FileCategoryBreakdownItemSchema).optional(),
   fileCount: z.number(),
-  findingCount: z.number().optional(),
-  frameworkFacts: z.unknown().optional(),
-  graphPreviewEdges: z.unknown().optional(),
+  findingCount: z.number(),
+  frameworkFacts: z.array(FrameworkFactSchema).optional(),
+  graphPreviewEdges: z.array(GraphPreviewEdgeSchema).optional(),
   graphReliability: GraphReliabilitySchema.optional(),
   healthScore: z.number(),
   hotspotFiles: z.array(z.string()),
@@ -131,9 +146,9 @@ export const RepoMetricsSchema = z.looseObject({
   modularityIndex: z.number(),
   mostComplexFiles: z.array(z.string()),
   onboardingScore: z.number(),
-  openapiInventory: z.unknown().optional(),
+  openapiInventory: OpenApiInventorySchema.optional(),
   orphanModules: z.array(z.string()),
-  publicExports: z.number().optional(),
+  publicExports: z.number(),
   routeInventory: RouteInventorySchema.optional(),
   securityFindings: z.array(SecurityFindingMetricSchema),
   securityScanStatus: z.enum(["ok", "partial"]),
@@ -143,7 +158,7 @@ export const RepoMetricsSchema = z.looseObject({
   techStack: z.array(z.string()),
   totalLoc: z.number(),
   totalSizeKb: z.number(),
-  tsStaticHints: z.unknown().optional(),
+  tsStaticHints: z.array(TsStaticHintSchema).optional(),
 });
 
 export type ParsedRepoMetrics = z.infer<typeof RepoMetricsSchema>;
@@ -152,3 +167,57 @@ export function parseRepoMetrics(value: unknown): ParsedRepoMetrics | null {
   const parsed = RepoMetricsSchema.safeParse(value);
   return parsed.success ? parsed.data : null;
 }
+
+/**
+ * The `safeParse` form of {@link parseRepoMetrics}, for callers that need to know
+ * *why* a blob was rejected. Kept separate so `parseRepoMetrics`' 11 existing
+ * assertions and its `T | null` signature are untouched.
+ */
+export const safeParseRepoMetrics = (value: unknown): z.ZodSafeParseResult<ParsedRepoMetrics> =>
+  RepoMetricsSchema.safeParse(value);
+
+/**
+ * The zero-valued metrics handed to callers whose stored blob failed validation.
+ * `RepoMetrics` has 34 required fields, so a hand-written literal would drift from
+ * the schema; parsing a canonical blank keeps the two in step by construction.
+ */
+export const EMPTY_REPO_METRICS: ParsedRepoMetrics = RepoMetricsSchema.parse({
+  analysisCoverage: {
+    heuristicFiles: 0,
+    languagesByMode: { heuristic: [], treeSitter: [], typeScriptAst: [] },
+    parserCoveragePercent: 0,
+    totalFiles: 0,
+    treeSitterFiles: 0,
+    typeScriptAstFiles: 0,
+  },
+  apiSurface: 0,
+  busFactor: 0,
+  complexityScore: 0,
+  configFiles: 0,
+  configInventory: [],
+  dependencyCycles: [],
+  dependencyHotspots: [],
+  docDensity: 0,
+  duplicationReport: { clones: [], duplicationPercentage: 0, totalDuplicatedLines: 0 },
+  entrypoints: [],
+  factCount: 0,
+  fileCount: 0,
+  findingCount: 0,
+  healthScore: 0,
+  hotspotFiles: [],
+  languages: [],
+  maintenanceStatus: "active",
+  modularityIndex: 0,
+  mostComplexFiles: [],
+  onboardingScore: 0,
+  orphanModules: [],
+  publicExports: 0,
+  securityFindings: [],
+  securityScanStatus: "ok",
+  securityScore: 0,
+  teamRoles: [],
+  techDebtScore: 0,
+  techStack: [],
+  totalLoc: 0,
+  totalSizeKb: 0,
+});

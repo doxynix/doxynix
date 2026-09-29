@@ -3,7 +3,6 @@ import { sumBy } from "es-toolkit";
 import { normalize } from "pathe";
 import * as z from "zod";
 
-import { appLogger } from "@/server/core/app-logger";
 import { getLanguageColor } from "@/server/utils/language-metadata";
 import { markdownToHtml } from "@/server/utils/markdown-to-html";
 import { hasText } from "@/server/utils/string-utils";
@@ -18,10 +17,13 @@ import {
   type ParsedFinding,
   persistedFindingSchema,
 } from "./analysis.schemas";
-import { type AIResult, aiSchema } from "./engine/core/analysis-result.schemas";
-import type { RepoMetrics } from "./engine/core/metrics.types";
 import type { AnalyzeContext } from "./logic/analyze-context.types";
-import { dedupeLatestDocsByType, normalizeWriterStatuses, toDocSummary } from "./logic/payload";
+import {
+  coerceAnalysisPayload,
+  dedupeLatestDocsByType,
+  normalizeWriterStatuses,
+  toDocSummary,
+} from "./logic/payload";
 import type { PRChangedFileSnapshot, PRImpactPayload } from "./logic/pr.types";
 import {
   isPathInsideScope,
@@ -45,12 +47,6 @@ export type TopLevelImpactNode = {
   label: string;
   nodeType: "file" | "group";
   path: string;
-};
-
-type AnalysisPayload = {
-  aiResult: AIResult;
-  analysis: LatestCompletedAnalysis;
-  metrics: RepoMetrics;
 };
 
 export const analysisMapper = {
@@ -221,34 +217,6 @@ export const analysisMapper = {
     );
   },
 
-  coerceAnalysisPayload(
-    analysis: LatestCompletedAnalysis | null | undefined,
-  ): AnalysisPayload | null {
-    if (analysis?.metricsJson == null || analysis.resultJson == null) {
-      return null;
-    }
-
-    const parsed = aiSchema.safeParse(analysis.resultJson);
-    if (!parsed.success) {
-      appLogger.warn({
-        error: z.treeifyError(parsed.error),
-        id: analysis.id,
-        msg: "Zod mismatch",
-      });
-      return {
-        aiResult: analysis.resultJson as AIResult,
-        analysis,
-        metrics: analysis.metricsJson as unknown as RepoMetrics,
-      };
-    }
-
-    return {
-      aiResult: parsed.data,
-      analysis,
-      metrics: analysis.metricsJson as unknown as RepoMetrics,
-    };
-  },
-
   computeImpactScore(
     files: Array<Pick<PRChangedFileSnapshot, "additions" | "deletions">>,
     findingCount: number,
@@ -411,7 +379,7 @@ export const analysisMapper = {
   },
 
   toAvailableDocs(repo: Pick<RepoWithLatestAnalysisAndDocs, "analyses" | "documents">) {
-    const latestAnalysis = this.coerceAnalysisPayload(repo.analyses[0]);
+    const latestAnalysis = coerceAnalysisPayload(repo.analyses[0]);
     return dedupeLatestDocsByType(repo.documents).map((doc) =>
       toDocSummary(doc, latestAnalysis?.aiResult ?? null),
     );
@@ -425,7 +393,7 @@ export const analysisMapper = {
   },
 
   toDetailedMetrics(analysis: LatestCompletedAnalysis | null) {
-    const payload = this.coerceAnalysisPayload(analysis);
+    const payload = coerceAnalysisPayload(analysis);
     if (payload == null) {
       return null;
     }
@@ -524,7 +492,7 @@ export const analysisMapper = {
   },
 
   toOverview(repo: RepoWithLatestAnalysisAndDocs) {
-    const payload = this.coerceAnalysisPayload(repo.analyses[0]);
+    const payload = coerceAnalysisPayload(repo.analyses[0]);
     if (payload == null) {
       return null;
     }

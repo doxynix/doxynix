@@ -10,12 +10,17 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 
+import type { AgentSession } from "../model/agent-types";
+
 type Props = {
   onNewChat: () => void;
   sessionId: null | string;
-  sessions?: any[];
+  sessions?: AgentSession[];
   setSessionId: (id: null | string) => void;
 };
+
+/** A session that is guaranteed to carry a repo, so grouping can read its fields. */
+type SessionWithRepo = AgentSession & { repo: NonNullable<AgentSession["repo"]> };
 
 export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: Readonly<Props>) {
   const t = useTranslations("Agent");
@@ -34,7 +39,9 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
   }
 
   const globalSessions = sessions.filter((session) => session.repo == null);
-  const repoSessionsOnly = sessions.filter((session) => session.repo != null);
+  const repoSessionsOnly = sessions.filter(
+    (session): session is SessionWithRepo => session.repo != null,
+  );
 
   const repos = groupBy(
     repoSessionsOnly,
@@ -59,7 +66,7 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
       <ScrollArea className="flex-1 px-3 py-3">
         <div className="flex flex-col gap-2">
           {Object.entries(repos).map(([repoKey, repoSessions]) => {
-            const hasActiveSession = repoSessions.some((s: any) => s.id === sessionId);
+            const hasActiveSession = repoSessions.some((s) => s.id === sessionId);
 
             return (
               <Collapsible
@@ -81,7 +88,7 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
                 </CollapsibleTrigger>
 
                 <CollapsibleContent className="ml-4 flex flex-col gap-1 border-l pl-2">
-                  {repoSessions.map((session: any) => (
+                  {repoSessions.map((session) => (
                     <AppButton
                       className={cn(
                         "w-full min-w-0 max-w-full justify-start gap-1 text-left text-xs",
@@ -103,7 +110,7 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
           {globalSessions.length > 0 && (
             <div className="mt-4 flex flex-col gap-1">
               <h3 className="mb-1 px-2 text-xs">{t("global_chats")}</h3>
-              {globalSessions.map((session: any) => (
+              {globalSessions.map((session) => (
                 <AppButton
                   className={cn(
                     "w-full min-w-0 max-w-full justify-start gap-1 text-left text-xs",
