@@ -1,6 +1,7 @@
 import { execSync } from "node:child_process";
 import fs from "node:fs";
-import path from "node:path";
+
+import { dirname } from "pathe";
 
 const capitalize = (str: string) => {
   if (!str) {
@@ -412,7 +413,7 @@ try {
 
   const outputPath = "./src/features/high-five/model/licenses.json";
 
-  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  fs.mkdirSync(dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, JSON.stringify(finalData, null, 2));
 
   console.log(`Done! Processed ${finalData.length} unique authors.`);

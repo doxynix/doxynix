@@ -1,5 +1,3 @@
-import path from "node:path";
-
 import type { NextConfig } from "next";
 import filterWebpackStats from "@bundle-stats/plugin-webpack-filter";
 import withBundleAnalyzer from "@next/bundle-analyzer";
@@ -7,6 +5,7 @@ import { type SentryBuildOptions, withSentryConfig } from "@sentry/nextjs/config
 import createWithVercelToolbar from "@vercel/toolbar/plugins/next";
 import { withAxiom } from "next-axiom";
 import createNextIntlPlugin from "next-intl/plugin";
+import { join, relative } from "pathe";
 import { StatsWriterPlugin } from "webpack-stats-plugin";
 
 import { API_PREFIX } from "@/shared/config/env.client";
@@ -397,11 +396,11 @@ const nextConfig: NextConfig = {
     // STATS=true bun run build
     // ---------------------------------------------------------------------------------
     if (IS_STATS_ENABLED && !dev && !isServer) {
-      const outputPath = config.output?.path ?? path.join(process.cwd(), ".next");
+      const outputPath = config.output?.path ?? join(process.cwd(), ".next");
 
-      const targetPath = path.join(process.cwd(), ".next", "webpack-stats.json");
+      const targetPath = join(process.cwd(), ".next", "webpack-stats.json");
 
-      const relativeStatsPath = path.relative(outputPath, targetPath);
+      const relativeStatsPath = relative(outputPath, targetPath);
 
       config.plugins.push(
         new StatsWriterPlugin({

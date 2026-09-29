@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+
+import { join } from "pathe";
 
 export function getCurrentGitBranch(): string {
   const ciBranch =

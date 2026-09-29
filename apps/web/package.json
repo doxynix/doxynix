@@ -174,7 +174,7 @@
     "nextjs-toploader": "3.9.17",
     "nuqs": "2.10.1",
     "octokit-plugin-create-pull-request": "6.0.1",
-    "pathe": "2.0.3",
+    "pathe": "catalog:",
     "picomatch": "4.0.7",
     "pino": "10.3.1",
     "posthog-js": "1.434.14",

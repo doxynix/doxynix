@@ -1,7 +1,7 @@
 import fs from "node:fs";
-import path from "node:path";
 
 import * as p from "@clack/prompts";
+import { dirname, resolve } from "pathe";
 
 import { brand } from "@/ui/colors";
 
@@ -12,7 +12,7 @@ export type ReadFileOrPromptOptions = {
 };
 
 export async function readFileOrPrompt(filePath: string): Promise<string | null> {
-  const localPath = path.resolve(process.cwd(), filePath);
+  const localPath = resolve(process.cwd(), filePath);
 
   if (!fs.existsSync(localPath)) {
     p.outro(brand.error(`File not found: '${filePath}'`));
@@ -28,7 +28,7 @@ export async function readFileOrPrompt(filePath: string): Promise<string | null>
 }
 
 export function readLocalFileIfExists(filePath: string): string | null {
-  const localPath = path.resolve(process.cwd(), filePath);
+  const localPath = resolve(process.cwd(), filePath);
   if (fs.existsSync(localPath) && fs.statSync(localPath).isFile()) {
     return fs.readFileSync(localPath, "utf-8");
   }
@@ -36,8 +36,8 @@ export function readLocalFileIfExists(filePath: string): string | null {
 }
 
 export function writeLocalFile(filePath: string, content: string): string {
-  const targetPath = path.resolve(process.cwd(), filePath);
-  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+  const targetPath = resolve(process.cwd(), filePath);
+  fs.mkdirSync(dirname(targetPath), { recursive: true });
   fs.writeFileSync(targetPath, content, "utf-8");
   return targetPath;
 }

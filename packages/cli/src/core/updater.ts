@@ -1,5 +1,6 @@
 import fs from "node:fs";
-import path from "node:path";
+
+import { dirname, join } from "pathe";
 
 import { brand, pc } from "@/ui/colors";
 import { renderNoticeBox } from "@/ui/notify";
@@ -12,7 +13,7 @@ type UpdateCache = {
 };
 
 function getCachePath(): string {
-  return path.join(getConfigDir(), "update-check.json");
+  return join(getConfigDir(), "update-check.json");
 }
 
 function isNewerVersion(current: string, latest: string): boolean {
@@ -63,7 +64,7 @@ export function checkCliUpdate(currentVersion: string): void {
       if (res.ok) {
         const data = (await res.json()) as { version?: string };
         if (data.version) {
-          fs.mkdirSync(path.dirname(cachePath), { recursive: true });
+          fs.mkdirSync(dirname(cachePath), { recursive: true });
           fs.writeFileSync(
             cachePath,
             JSON.stringify({ lastChecked: now, latestVersion: data.version }),

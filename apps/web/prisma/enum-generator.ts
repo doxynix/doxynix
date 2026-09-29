@@ -1,8 +1,8 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs/promises";
-import path from "node:path";
 
 import { generatorHandler } from "@prisma/generator-helper";
+import { dirname, resolve } from "pathe";
 
 const header = `// This file was automatically generated via Prisma DMMF. DO NOT EDIT MANUALLY.
 import * as z from "zod/mini";\n\n`;
@@ -34,8 +34,8 @@ generatorHandler({
       throw new Error("No output file specified");
     }
 
-    const outputPath = path.resolve(outputFile.value);
-    await fs.mkdir(path.dirname(outputPath), { recursive: true });
+    const outputPath = resolve(outputFile.value);
+    await fs.mkdir(dirname(outputPath), { recursive: true });
     await fs.writeFile(outputPath, header + output.join("\n"), "utf-8");
 
     // Immediately bring the generated file into repo format (wrapping of long

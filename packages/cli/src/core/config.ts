@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
-import path from "node:path";
+
+import { dirname, join } from "pathe";
 
 type DxnxConfig = {
   token?: string;
@@ -13,16 +14,16 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 export function getConfigDir(): string {
   if (process.env.XDG_CONFIG_HOME) {
-    return path.join(process.env.XDG_CONFIG_HOME, "dxnx");
+    return join(process.env.XDG_CONFIG_HOME, "dxnx");
   }
   if (process.platform === "win32") {
-    return path.join(process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"), "dxnx");
+    return join(process.env.APPDATA || join(os.homedir(), "AppData", "Roaming"), "dxnx");
   }
-  return path.join(os.homedir(), ".config", "dxnx");
+  return join(os.homedir(), ".config", "dxnx");
 }
 
 function getConfigFilePath(): string {
-  return path.join(getConfigDir(), "config.json");
+  return join(getConfigDir(), "config.json");
 }
 
 function ensureConfigDirExists(dir: string): void {
@@ -57,7 +58,7 @@ export function saveToken(token: string): void {
   const next: DxnxConfig = { ...current, token };
   const targetFile = getConfigFilePath();
 
-  ensureConfigDirExists(path.dirname(targetFile));
+  ensureConfigDirExists(dirname(targetFile));
   fs.writeFileSync(targetFile, JSON.stringify(next, null, 2), {
     encoding: "utf-8",
     mode: 0o600,
@@ -85,7 +86,7 @@ export function removeToken(): void {
     }
   } else {
     const cleanConfig = Object.fromEntries(remainingKeys);
-    ensureConfigDirExists(path.dirname(targetFile));
+    ensureConfigDirExists(dirname(targetFile));
     fs.writeFileSync(targetFile, JSON.stringify(cleanConfig, null, 2), {
       encoding: "utf-8",
       mode: 0o600,
