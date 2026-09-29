@@ -111,6 +111,16 @@ describe("normalizeAiGenerationOutput", () => {
     expect(result.sections.security_audit.score).toBe(10);
   });
 
+  it("does not emit a semibold key on normalized findings", () => {
+    const result = normalizeAiGenerationOutput({
+      findings: [{ confidence: 50, id: "f1", severity: "HIGH" }],
+    });
+
+    expect(result.findings).toBeDefined();
+    expect(result.findings?.[0]).not.toHaveProperty("semibold");
+    expect(result.findings?.[0]).toHaveProperty("severity");
+  });
+
   it("falls back to an empty partial result when the payload cannot be validated", () => {
     const result = normalizeAiGenerationOutput({
       executive_summary: { purpose: "kept" },

@@ -249,7 +249,6 @@ function normalizeFindings(value: unknown) {
         remediation_plan: asStringArray(record.remediation_plan),
         risk_of_regression: record.risk_of_regression,
         score: typeof record.score === "number" ? Math.min(100, Math.max(0, record.score)) : 50,
-        semibold: coerceRiskLevel(record.severity),
         severity: coerceRiskLevel(record.severity),
         suggestedNextChange: asString(record.suggestedNextChange, "Review and refactor"),
         summary: asString(record.summary, title),
