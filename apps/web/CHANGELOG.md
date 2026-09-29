@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.3](https://github.com/doxynix/doxynix/compare/web-v4.0.2...web-v4.0.3) (2026-09-29)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2228](https://github.com/doxynix/doxynix/issues/2228)) ([a21d80f](https://github.com/doxynix/doxynix/commit/a21d80f769f2b0d892da0fb3e7585621ffb1394e))
+
 ## [4.0.2](https://github.com/doxynix/doxynix/compare/web-v4.0.1...web-v4.0.2) (2026-09-28)
 
 
