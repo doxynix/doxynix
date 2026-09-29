@@ -1,14 +1,10 @@
 import { createAppAuth } from "@octokit/auth-app";
 import { paginateRest } from "@octokit/plugin-paginate-rest";
 import { retry } from "@octokit/plugin-retry";
+import type { ThrottlingOptions } from "@octokit/plugin-throttling";
 import { throttling } from "@octokit/plugin-throttling";
 import { Octokit } from "@octokit/rest";
 import { createPullRequest } from "octokit-plugin-create-pull-request";
-
-type RequestOptions = {
-  method?: string;
-  url?: string;
-};
 
 import {
   APP_VERSION,
@@ -26,6 +22,36 @@ import { githubTokenService } from "./github-token.service";
 const AppOctokit = Octokit.plugin(retry, throttling, paginateRest, createPullRequest);
 export type OctokitInstance = InstanceType<typeof AppOctokit>;
 
+/**
+ * The throttle callbacks, typed from the plugin's own declarations so every
+ * parameter — `options` and `octokit` included — is inferred rather than `any`.
+ * The `boolean` return is load-bearing: the plugin reads it to decide whether to
+ * retry, even though the published handler signature declares `void`.
+ *
+ * `ThrottlingOptions` is a union whose second member marks both handlers optional,
+ * hence the `NonNullable`.
+ */
+type ThrottleHandler = NonNullable<ThrottlingOptions["onRateLimit"]>;
+
+const onRateLimit: ThrottleHandler = (retryAfter, options, octokit, retryCount) => {
+  octokit.log.warn(
+    `Rate limit hit: ${options.method} ${options.url}. Retrying after ${retryAfter}s. (Attempt ${retryCount})`,
+  );
+  return retryCount < 2;
+};
+
+const onSecondaryRateLimit: NonNullable<ThrottlingOptions["onSecondaryRateLimit"]> = (
+  retryAfter,
+  options,
+  octokit,
+  retryCount,
+) => {
+  octokit.log.warn(
+    `Secondary rate limit hit: ${options.method} ${options.url}. Retrying after ${retryAfter}s. (Attempt ${retryCount})`,
+  );
+  return retryCount < 2;
+};
+
 const getCommonConfig = () => ({
   log: {
     debug: (msg: string) => appLogger.debug({ msg }),
@@ -37,29 +63,8 @@ const getCommonConfig = () => ({
     doNotRetry: [400, 401, 403, 429, 409, 422, 451, 404],
   },
   throttle: {
-    onRateLimit: (
-      retryAfter: number,
-      options: RequestOptions,
-      octokit: any,
-      retryCount: number,
-    ) => {
-      octokit.log.warn(
-        `Rate limit hit: ${options.method} ${options.url}. Retrying after ${retryAfter}s. (Attempt ${retryCount})`,
-      );
-      return retryCount < 2;
-    },
-
-    onSecondaryRateLimit: (
-      retryAfter: number,
-      options: RequestOptions,
-      octokit: any,
-      retryCount = 0,
-    ) => {
-      octokit.log.warn(
-        `Secondary rate limit hit: ${options.method} ${options.url}. Retrying after ${retryAfter}s. (Attempt ${retryCount})`,
-      );
-      return retryCount < 2;
-    },
+    onRateLimit,
+    onSecondaryRateLimit,
   },
   userAgent: `Doxynix/${APP_VERSION}`,
 });

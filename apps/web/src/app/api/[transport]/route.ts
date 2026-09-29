@@ -17,7 +17,7 @@ type GenericExecuteFn = (
 
 const handler = createMcpHandler(
   (server) => {
-    const preparedTools = filterAndPrepareTools(getAgentTools() as any);
+    const preparedTools = filterAndPrepareTools(getAgentTools());
 
     for (const tool of preparedTools) {
       server.registerTool(
@@ -31,10 +31,10 @@ const handler = createMcpHandler(
               messages: [],
               toolCallId: `mcp-${tool.name}-${Date.now()}`,
             };
-            const result = await (tool.execute as unknown as GenericExecuteFn)(
-              parsedArgs,
-              dummyContext,
-            );
+            // `execute` is narrowed to `(...args: unknown[]) => unknown` by
+            // `filterAndPrepareTools`, so `Parameters<>` is enough — no cast.
+            const execute = tool.execute as GenericExecuteFn;
+            const result = await execute(parsedArgs, dummyContext);
 
             return {
               content: [

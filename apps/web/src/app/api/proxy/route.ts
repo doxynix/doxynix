@@ -71,10 +71,14 @@ export function ssrfSafeLookup(
   });
 }
 
+// `globalThis.fetch` in Node is undici's, so `dispatcher` really is honoured — the
+// DOM `RequestInit` type is simply what does not know about it.
+type ProxiedRequestInit = RequestInit & { dispatcher?: Agent };
+
 export const ssrfSafeAgent = new Agent({
   connect: {
     lookup: ssrfSafeLookup,
-  } as any,
+  } as never,
 });
 
 export async function POST(req: Request) {
@@ -122,12 +126,14 @@ export async function POST(req: Request) {
           : JSON.stringify(body)
         : undefined;
 
-    const response = await fetch(validatedUrl, {
+    const proxiedInit: ProxiedRequestInit = {
       body: requestBody,
+      dispatcher: ssrfSafeAgent,
       headers: filteredHeaders,
       method,
-      ...({ dispatcher: ssrfSafeAgent } as any),
-    });
+    };
+
+    const response = await fetch(validatedUrl, proxiedInit);
 
     const responseData = await response.text();
 
