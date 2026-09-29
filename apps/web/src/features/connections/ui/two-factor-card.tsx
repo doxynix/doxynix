@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
-import QRCode from "react-qr-code";
+import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 
 import { authClient } from "@/shared/lib/auth-client";
@@ -214,8 +214,11 @@ export function TwoFactorCard() {
               ) : (
                 totpUri && (
                   <div className="rounded-xl bg-white p-2">
-                    <QRCode
+                    <QRCodeSVG
+                      level="M"
+                      marginSize={4}
                       size={180}
+                      title={t("settings_2fa_title")}
                       value={totpUri}
                     />
                   </div>
