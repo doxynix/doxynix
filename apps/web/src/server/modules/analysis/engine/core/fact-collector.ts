@@ -252,15 +252,19 @@ export class FactCollector {
 
   private parseManifestDotNet(content: string, filePath: string) {
     try {
-      const jsonObj = xmlParser.parse(content);
-      const itemGroups = jsonObj?.Project?.ItemGroup;
+      const jsonObj: unknown = xmlParser.parse(content);
+      const project =
+        typeof jsonObj === "object" && jsonObj != null
+          ? (jsonObj as { Project?: { ItemGroup?: unknown } })
+          : undefined;
+      const itemGroups = project?.Project?.ItemGroup;
       const groupArray = Array.isArray(itemGroups) ? itemGroups : [itemGroups];
       const pkgArray = groupArray.flatMap((group: unknown) => {
         const refs = (group as { PackageReference?: unknown }).PackageReference;
         return Array.isArray(refs) ? refs : [refs];
       });
       const tokens = pkgArray
-        .map((pkg: any) => pkg?.["@_Include"])
+        .map((pkg: unknown) => (pkg as { "@_Include"?: unknown } | null)?.["@_Include"])
         .filter((value: unknown): value is string => typeof value === "string");
       this.collectFrameworkFactsFromTokens(tokens, filePath, 92);
     } catch {
@@ -285,11 +289,18 @@ export class FactCollector {
 
   private parseManifestMaven(content: string, filePath: string) {
     try {
-      const jsonObj = xmlParser.parse(content);
-      const deps = jsonObj?.project?.dependencies?.dependency;
+      const jsonObj: unknown = xmlParser.parse(content);
+      const project =
+        typeof jsonObj === "object" && jsonObj != null
+          ? (jsonObj as { project?: { dependencies?: { dependency?: unknown } } })
+          : undefined;
+      const deps = project?.project?.dependencies?.dependency;
       const depArray = Array.isArray(deps) ? deps : [deps];
       const tokens = depArray
-        .flatMap((item: any) => [item?.artifactId, item?.groupId])
+        .flatMap((item: unknown) => [
+          (item as { artifactId?: unknown } | null)?.artifactId,
+          (item as { groupId?: unknown } | null)?.groupId,
+        ])
         .filter((value: unknown): value is string => typeof value === "string");
       this.collectFrameworkFactsFromTokens(tokens, filePath, 92);
     } catch {
@@ -305,12 +316,13 @@ export class FactCollector {
     );
 
     try {
-      const data = JSON.parse(content);
+      const data: unknown = JSON.parse(content);
+      const pkg = typeof data === "object" && data != null ? (data as Record<string, unknown>) : {};
       const frameworkTokens = [
-        data.name,
-        ...Object.keys(data.scripts ?? {}),
-        ...Object.keys(data.dependencies ?? {}),
-        ...Object.keys(data.devDependencies ?? {}),
+        pkg.name,
+        ...Object.keys((pkg.scripts as Record<string, unknown> | undefined) ?? {}),
+        ...Object.keys((pkg.dependencies as Record<string, unknown> | undefined) ?? {}),
+        ...Object.keys((pkg.devDependencies as Record<string, unknown> | undefined) ?? {}),
       ].filter((value): value is string => typeof value === "string");
       this.collectFrameworkFactsFromTokens(frameworkTokens, filePath, 95);
     } catch {
@@ -320,12 +332,14 @@ export class FactCollector {
 
   private parseManifestPubspec(content: string, filePath: string) {
     try {
-      const data = YAML.parse(content);
-      const deps = data?.dependencies;
+      const data: unknown = YAML.parse(content);
+      const deps =
+        typeof data === "object" && data != null
+          ? (data as { dependencies?: unknown }).dependencies
+          : undefined;
 
       if (deps != null && typeof deps === "object" && !Array.isArray(deps)) {
-        const depKeys = Object.keys(deps);
-        this.collectFrameworkFactsFromTokens(depKeys, filePath, 88);
+        this.collectFrameworkFactsFromTokens(Object.keys(deps), filePath, 88);
       }
     } catch {
       // Optional signal only.

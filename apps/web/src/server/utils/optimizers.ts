@@ -16,27 +16,30 @@ type AiTextLike = {
 };
 
 /**
- * Minimal structural view of the tree-sitter API surface used by the skeletonizer
- * (the tree-sitter runtime is typed as `any` upstream in tree-sitter-signals).
+ * Minimal structural view of the tree-sitter API surface used by the skeletonizer.
+ *
+ * These must stay assignable from `web-tree-sitter`'s own declarations, which the
+ * real runtime now returns (see `getRuntime`). Two deliberate differences:
+ * `SyntaxNode` has no `delete` (only `Tree` and `Parser` do), and the members use
+ * method syntax so their parameters stay bivariant under `strictFunctionTypes`.
  */
 type TreeSitterNode = {
-  child: (index: number) => null | TreeSitterNode;
+  child(index: number): null | TreeSitterNode;
   childCount: number;
-  delete: () => void;
   endIndex: number;
   startIndex: number;
   type: string;
 };
 
 type TreeSitterTree = {
-  delete: () => void;
+  delete(): void;
   rootNode: TreeSitterNode;
 };
 
 type TreeSitterParser = {
-  delete: () => void;
-  parse: (code: string) => TreeSitterTree;
-  setLanguage: (language: unknown) => void;
+  delete(): void;
+  parse(code: string): TreeSitterTree;
+  setLanguage(language?: unknown): void;
 };
 
 function isAiTextLike(v: unknown): v is AiTextLike {

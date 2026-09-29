@@ -2,6 +2,7 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 
 import { join, resolve } from "pathe";
+import type Parser from "web-tree-sitter";
 
 import { appLogger } from "@/server/core/app-logger";
 import { getFileExtension } from "@/server/utils/path-operations";
@@ -354,8 +355,27 @@ const SPECS: Record<string, LanguageSpec> = {
 
 export const TREE_SITTER_SUPPORTED_EXTENSIONS = Object.keys(SPECS);
 
-let runtimeInitPromise: null | Promise<{ mod: any; Parser: any }> = null;
-const languageCache = new Map<string, Promise<any>>();
+/**
+ * The shape `web-tree-sitter` is actually loaded as at runtime. `createRequire` is
+ * untyped, so this is the one unavoidable hop; everything below it is typed from
+ * the package's own shipped declarations.
+ *
+ * The package is CJS with `export = Parser`, so the module object can itself *be*
+ * the `Parser` class — hence the intersection with `typeof Parser`, which is what
+ * makes the `Parser = mod` fallback below legal.
+ *
+ * The `import type` above is fully erased at compile time, so it creates no runtime
+ * edge and does not defeat the `createRequire` / Turbopack-NFT avoidance below.
+ */
+type WebTreeSitterModule = typeof Parser & {
+  default?: typeof Parser;
+  init?: (moduleOptions?: object) => Promise<void>;
+  Language?: typeof Parser.Language;
+  Parser?: typeof Parser;
+};
+
+let runtimeInitPromise: null | Promise<{ mod: WebTreeSitterModule; Parser: typeof Parser }> = null;
+const languageCache = new Map<string, Promise<Parser.Language>>();
 
 async function initRuntime() {
   if (runtimeInitPromise) {
@@ -363,7 +383,7 @@ async function initRuntime() {
   }
 
   runtimeInitPromise = (async () => {
-    const mod = nodeRequire("web-tree-sitter");
+    const mod = nodeRequire("web-tree-sitter") as WebTreeSitterModule;
 
     let Parser = mod.Parser;
 
@@ -375,6 +395,11 @@ async function initRuntime() {
       Parser = mod;
     }
 
+    // `WebTreeSitterModule` is a *declared* shape for a module we load through an
+    // untyped `createRequire`, so these three fallbacks genuinely can fail at
+    // runtime depending on whether the package resolves to CJS, an ESM default,
+    // or the class itself. The type-level "always truthy" verdict is wrong here.
+    /* oxlint-disable-next-line typescript/no-unnecessary-condition */
     if (!Parser || typeof Parser.init !== "function") {
       throw new Error(
         `[TreeSitter] Could not find Parser.init. Module keys: ${Object.keys(mod).join(", ")}`,
@@ -420,8 +445,12 @@ export async function loadLanguage(ext: string, spec: LanguageSpec) {
       (async () => {
         const wasmPath = resolveGrammarWasmPath(spec);
 
+        // Same runtime-vs-type mismatch as in `initRuntime`: the declared module
+        // shape is not proof that `Language` is attached to one of these three.
+        /* oxlint-disable-next-line typescript/no-unnecessary-condition */
         const Language = Parser.Language || mod.Language || mod.default?.Language;
 
+        /* oxlint-disable-next-line typescript/no-unnecessary-condition */
         if (!Language || typeof Language.load !== "function") {
           throw new Error(`[TreeSitter] Language.load is missing!`);
         }
@@ -429,7 +458,7 @@ export async function loadLanguage(ext: string, spec: LanguageSpec) {
         // Turbopack ignore comment prevents aggressive whole-project NFT tracing
         const wasmBytes = fs.readFileSync(/* turbopackIgnore: true */ wasmPath);
 
-        return await Language.load(wasmBytes);
+        return Language.load(wasmBytes);
       })().catch((error) => {
         languageCache.delete(ext);
         appLogger.error({ error, ext, msg: "Failed to load language grammar" });
@@ -556,7 +585,7 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
     const lang = await loadLanguage(ext, spec);
 
     const parser = new Parser();
-    let tree: any;
+    let tree: Parser.Tree | undefined;
 
     try {
       parser.setLanguage(lang);
@@ -674,8 +703,9 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
         symbols,
       };
     } finally {
-      tree?.delete?.();
-      parser?.delete?.();
+      // `tree` is undefined when `parser.parse` threw; `parser` always exists.
+      tree?.delete();
+      parser.delete();
     }
   } catch (error) {
     appLogger.error({

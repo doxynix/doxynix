@@ -2,6 +2,7 @@ import { analyzeGraph, type Edge } from "graph-cycles";
 import { DirectedGraph } from "graphology";
 import { hasCycle } from "graphology-dag";
 import { basename, dirname, join, normalize } from "pathe";
+import * as z from "zod";
 
 import { getKnownLanguageExtensions } from "@/server/utils/language-metadata";
 
@@ -147,14 +148,27 @@ export function resolveModuleImport(
   return null;
 }
 
-function parseJsonWithComments(text: string): Record<string, any> | null {
+/**
+ * The only parts of a JSONC `tsconfig.json` this module reads. `looseObject`
+ * keeps every other compiler option, so an unknown key is ignored rather
+ * than rejected.
+ */
+const TsconfigPathsSchema = z.looseObject({
+  compilerOptions: z.looseObject({
+    baseUrl: z.string().optional(),
+    paths: z.record(z.string(), z.array(z.string())).optional(),
+  }),
+});
+
+function parseJsonWithComments(text: string): z.infer<typeof TsconfigPathsSchema> | null {
   try {
     const clean = text
       .replaceAll(/\/\*[\s\S]*?\*\//g, "")
       .replaceAll(/(^|[^\\:])\/\/.*$/gm, "$1")
       .replaceAll(/,\s*([\]}])/g, "$1");
-    const parsed = JSON.parse(clean);
-    return typeof parsed === "object" && parsed !== null ? parsed : null;
+    const parsed: unknown = JSON.parse(clean);
+    const result = TsconfigPathsSchema.safeParse(parsed);
+    return result.success ? result.data : null;
   } catch {
     return null;
   }
@@ -175,19 +189,13 @@ export function collectAliasRules(files: Array<{ content: string; path: string }
         continue;
       }
 
-      const compilerOptions = parsed.compilerOptions;
-      if (compilerOptions == null || typeof compilerOptions !== "object") {
-        continue;
-      }
-
-      const baseUrl = typeof compilerOptions.baseUrl === "string" ? compilerOptions.baseUrl : ".";
-      const paths = compilerOptions.paths as Record<string, string[] | undefined> | undefined;
+      const { baseUrl = ".", paths } = parsed.compilerOptions;
       if (paths == null) {
         continue;
       }
 
       for (const [rawAlias, rawTargets] of Object.entries(paths)) {
-        if (!Array.isArray(rawTargets) || rawTargets.length === 0) {
+        if (rawTargets.length === 0) {
           continue;
         }
 
