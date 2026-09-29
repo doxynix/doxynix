@@ -1,5 +1,32 @@
 # Changelog
 
+## [4.0.3](https://github.com/doxynix/doxynix/compare/cli-v4.0.2...cli-v4.0.3) (2026-09-29)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 4.0.3
+
+## [4.0.2](https://github.com/doxynix/doxynix/compare/cli-v4.0.1...cli-v4.0.2) (2026-09-28)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 4.0.2
+
+## [4.0.1](https://github.com/doxynix/doxynix/compare/cli-v4.0.0...cli-v4.0.1) (2026-09-28)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 4.0.1
+
 ## [4.0.0](https://github.com/doxynix/doxynix/compare/cli-v3.1.6...cli-v4.0.0) (2026-09-28)
 
 
