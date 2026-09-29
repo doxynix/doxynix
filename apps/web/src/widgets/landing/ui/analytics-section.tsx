@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 
-import { AnalyticsChart } from "./analytics-chart";
+import { LazyAnalyticsChart } from "./analytics-chart-lazy";
 import { AnalyticsChartSkeleton } from "./analytics-chart-skeleton";
 
 export async function AnalyticsSection() {
@@ -27,7 +27,7 @@ export async function AnalyticsSection() {
           </CardHeader>
           <CardContent>
             <Suspense fallback={<AnalyticsChartSkeleton />}>
-              <AnalyticsChart />
+              <LazyAnalyticsChart />
             </Suspense>
           </CardContent>
         </Card>
