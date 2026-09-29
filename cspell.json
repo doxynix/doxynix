@@ -561,6 +561,7 @@
     "pyproject",
     "pytest",
     "quarkus",
+    "qrcode",
     "qwik",
     "ratelimit",
     "reactflow",
