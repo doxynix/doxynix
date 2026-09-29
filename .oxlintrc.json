@@ -33,7 +33,9 @@
   },
   "overrides": [
     {
-      "files": ["apps/web/**/*.{ts,tsx}"],
+      "files": [
+        "apps/web/**/*.{ts,tsx}"
+      ],
       "rules": {
         "nextjs/no-async-client-component": "error",
         "nextjs/no-head-element": "error",
@@ -63,7 +65,10 @@
       }
     },
     {
-      "files": ["**/src/shared/ui/core/**/*.{ts,tsx}", "**/shared/ui/core/**/*.{ts,tsx}"],
+      "files": [
+        "**/src/shared/ui/core/**/*.{ts,tsx}",
+        "**/shared/ui/core/**/*.{ts,tsx}"
+      ],
       "rules": {
         "no-param-reassign": "off",
         "no-shadow": "off",
@@ -107,7 +112,12 @@
         "vitest/expect-expect": [
           "error",
           {
-            "assertFunctionNames": ["expect", "expectDenied", "expectValidationFail", "fc.assert"]
+            "assertFunctionNames": [
+              "expect",
+              "expectDenied",
+              "expectValidationFail",
+              "fc.assert"
+            ]
           }
         ],
         "vitest/no-focused-tests": "error",
@@ -130,17 +140,47 @@
     "node"
   ],
   "rules": {
-    "array-callback-return": ["error", { "checkForEach": false }],
-    "curly": ["error", "all"],
-    "eqeqeq": ["error", "always", { "null": "ignore" }],
+    "array-callback-return": [
+      "error",
+      {
+        "checkForEach": false
+      }
+    ],
+    "curly": [
+      "error",
+      "all"
+    ],
+    "eqeqeq": [
+      "error",
+      "always",
+      {
+        "null": "ignore"
+      }
+    ],
     "import/default": "off",
     "import/namespace": "off",
     "import/no-cycle": "warn",
     "import/no-named-as-default": "off",
     "import/no-named-as-default-member": "off",
     "import/no-unassigned-import": "off",
-    "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
-    "no-implicit-coercion": ["error", { "allow": ["!!"] }],
+    "no-console": [
+      "warn",
+      {
+        "allow": [
+          "warn",
+          "error",
+          "info"
+        ]
+      }
+    ],
+    "no-implicit-coercion": [
+      "error",
+      {
+        "allow": [
+          "!!"
+        ]
+      }
+    ],
     "no-new": "error",
     "no-param-reassign": "error",
     "no-shadow": "off",
@@ -190,14 +230,22 @@
     "react/iframe-missing-sandbox": "error",
     "react/jsx-key": [
       "error",
-      { "checkFragmentShorthand": true, "checkKeyMustBeforeSpread": true }
+      {
+        "checkFragmentShorthand": true,
+        "checkKeyMustBeforeSpread": true
+      }
     ],
     "react/jsx-no-constructed-context-values": "error",
     "react/jsx-no-script-url": "error",
     "react/jsx-no-target-blank": "error",
     "react/jsx-no-useless-fragment": "off",
     "react/no-array-index-key": "off",
-    "react/no-unstable-nested-components": ["error", { "allowAsProps": true }],
+    "react/no-unstable-nested-components": [
+      "error",
+      {
+        "allowAsProps": true
+      }
+    ],
     "react/react-in-jsx-scope": "off",
     "react/rules-of-hooks": "error",
     "react/self-closing-comp": "error",
@@ -270,7 +318,10 @@
     "typescript/prefer-optional-chain": "error",
     "typescript/prefer-promise-reject-errors": "error",
     "typescript/restrict-template-expressions": "error",
-    "typescript/return-await": ["error", "in-try-catch"],
+    "typescript/return-await": [
+      "error",
+      "in-try-catch"
+    ],
     "typescript/switch-exhaustiveness-check": "error",
     "typescript/unbound-method": "error",
     "unicorn/catch-error-name": "error",
@@ -319,7 +370,10 @@
     "unicorn/prefer-string-slice": "error",
     "unicorn/prefer-top-level-await": "off",
     "unicorn/require-post-message-target-origin": "error",
-    "unicorn/switch-case-braces": ["error", "always"],
+    "unicorn/switch-case-braces": [
+      "error",
+      "always"
+    ],
     "unicorn/throw-new-error": "error"
   },
   "settings": {

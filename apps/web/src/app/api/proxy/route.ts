@@ -8,12 +8,7 @@ import { Agent } from "undici";
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
 
-type ProxyRequestBody = {
-  body?: unknown;
-  headers?: Record<string, unknown>;
-  method?: string;
-  url?: string;
-};
+import { ProxyRequestBody } from "./proxy-request.schema";
 
 type DnsLookupCallback = (err: Error | null, address: null | string, family: null | number) => void;
 
@@ -91,8 +86,13 @@ export async function POST(req: Request) {
   }
 
   try {
-    const payload = (await req.json()) as ProxyRequestBody;
-    const { body, headers, method, url } = payload;
+    const parsed = ProxyRequestBody.safeParse(await req.json());
+
+    if (!parsed.success) {
+      return new NextResponse("Invalid request body", { status: 400 });
+    }
+
+    const { body, headers, method, url } = parsed.data;
 
     if (url == null || method == null) {
       return new NextResponse("Missing url or method parameters", { status: 400 });

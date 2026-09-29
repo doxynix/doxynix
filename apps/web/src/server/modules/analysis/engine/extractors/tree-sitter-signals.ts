@@ -19,6 +19,13 @@ import { CONFIDENCE_LEVELS } from "../core/scoring-constants";
 
 const nodeRequire = createRequire(import.meta.url);
 
+/**
+ * `createRequire` is typed to return `any`. Routing through `unknown` keeps the
+ * `any` at the CJS boundary and forces the interop to be asserted deliberately
+ * at the call site, where `initRuntime` immediately validates the shape anyway.
+ */
+const requireModule = (id: string): unknown => nodeRequire(id);
+
 type LanguageSpec = {
   api?: RegExp[];
   declarations: Array<{ kind: SymbolKind; types: string[] }>;
@@ -383,7 +390,7 @@ async function initRuntime() {
   }
 
   runtimeInitPromise = (async () => {
-    const mod = nodeRequire("web-tree-sitter") as WebTreeSitterModule;
+    const mod = requireModule("web-tree-sitter") as WebTreeSitterModule;
 
     let Parser = mod.Parser;
 

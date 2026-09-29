@@ -74,13 +74,13 @@ function useMermaid({
   const [error, setError] = useState<null | string>(null);
   const [status, setStatus] = useState<"error" | "idle" | "loading" | "success">("idle");
 
-  const rawConfigString = JSON.stringify(config ?? {});
-  const parsedRaw = JSON.parse(rawConfigString) as MermaidConfig;
-
   const configString = JSON.stringify({
     darkMode: isDark,
     theme: isDark ? ("charcoal" as const) : ("default" as const),
-    ...parsedRaw,
+    // `config` is already a `MermaidConfig`. The previous
+    // `JSON.parse(JSON.stringify(config))` round-trip existed only to launder
+    // the `any` that `JSON.parse` returns, and its result was only ever spread.
+    ...config,
   });
 
   const id = useId().replaceAll(":", "");

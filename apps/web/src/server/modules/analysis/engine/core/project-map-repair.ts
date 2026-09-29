@@ -1,12 +1,18 @@
 const PROJECT_MAP_FIELD_PATTERN =
   /,\s*"(key_decisions|language_breakdown|mermaid_graph|modules)"\s*:/u;
 
+/** Spreads the value so the result is a real `Record`, not a view over `any`. */
+function asRecord(value: unknown): Record<string, unknown> {
+  if (typeof value !== "object" || value == null) {
+    return {};
+  }
+  return { ...value };
+}
+
 function parseJsonObject(value: string): null | Record<string, unknown> {
   try {
-    const parsed = JSON.parse(value);
-    return typeof parsed === "object" && parsed != null
-      ? (parsed as Record<string, unknown>)
-      : null;
+    const parsed: unknown = JSON.parse(value);
+    return typeof parsed === "object" && parsed != null ? asRecord(parsed) : null;
   } catch {
     return null;
   }
@@ -62,8 +68,7 @@ export function normalizeProjectMapKeyDecisions(value: unknown) {
       };
     }
 
-    const record =
-      typeof item === "object" && item != null ? (item as Record<string, unknown>) : {};
+    const record = asRecord(item);
     return {
       consequences: stringValue(record.consequences, "Impacts maintainability."),
       decision: stringValue(record.decision ?? record.title, `Decision ${index + 1}`),

@@ -18,6 +18,14 @@ import { CONFIDENCE_LEVELS } from "./scoring-constants";
 
 const xmlParser = new XMLParser({ ignoreAttributes: false });
 
+/** Spreads the value so the result is a real `Record`, not a view over `any`. */
+function asRecord(value: unknown): Record<string, unknown> {
+  if (typeof value !== "object" || value == null) {
+    return {};
+  }
+  return { ...value };
+}
+
 type AnalyzedFile = { content: string; path: string };
 type ManifestHandler = {
   matches: (fileName: string) => boolean;
@@ -274,7 +282,7 @@ export class FactCollector {
 
   private parseManifestJsonDependencies(content: string, keys: string[], filePath: string) {
     try {
-      const data = JSON.parse(content) as Record<string, unknown>;
+      const data = asRecord(JSON.parse(content) as unknown);
       for (const key of keys) {
         const section = data[key];
         if (section != null && typeof section === "object" && !Array.isArray(section)) {
@@ -317,12 +325,12 @@ export class FactCollector {
 
     try {
       const data: unknown = JSON.parse(content);
-      const pkg = typeof data === "object" && data != null ? (data as Record<string, unknown>) : {};
+      const pkg = asRecord(data);
       const frameworkTokens = [
         pkg.name,
-        ...Object.keys((pkg.scripts as Record<string, unknown> | undefined) ?? {}),
-        ...Object.keys((pkg.dependencies as Record<string, unknown> | undefined) ?? {}),
-        ...Object.keys((pkg.devDependencies as Record<string, unknown> | undefined) ?? {}),
+        ...Object.keys(asRecord(pkg.scripts)),
+        ...Object.keys(asRecord(pkg.dependencies)),
+        ...Object.keys(asRecord(pkg.devDependencies)),
       ].filter((value): value is string => typeof value === "string");
       this.collectFrameworkFactsFromTokens(frameworkTokens, filePath, 95);
     } catch {

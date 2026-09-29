@@ -13,10 +13,11 @@ import { REALTIME_CONFIG } from "@/shared/config/realtime";
 import { useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
 
-import type { RepoStatus } from "@/entities/repo/model/repo.types";
 import { useRepoActions } from "@/entities/repo/model/use-repo-actions";
 
 import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";
+
+import { parseRealtimePayload, RealtimeUserPayloads } from "./realtime-payloads";
 
 type Props = { children: ReactNode };
 
@@ -80,17 +81,19 @@ export const RealtimeProvider = ({ children }: Props) => {
 
     const handleUserMsg = (msg: Ably.InboundMessage) => {
       if (msg.name === REALTIME_CONFIG.events.user.notification) {
-        const data = msg.data as { body: string; title: string };
+        const data = parseRealtimePayload(RealtimeUserPayloads.notification, msg.data);
+        if (data == null) {
+          return;
+        }
         toast.success(data.title, { description: data.body });
         void invalidateAll();
       }
 
       if (msg.name === REALTIME_CONFIG.events.user.fileActionCompleted) {
-        const payload = msg.data as {
-          fixId?: string;
-          path?: string;
-          type: "AUDIT" | "DOCUMENTATION" | "FIX_GENERATED";
-        };
+        const payload = parseRealtimePayload(RealtimeUserPayloads.fileActionCompleted, msg.data);
+        if (payload == null) {
+          return;
+        }
 
         if (payload.type === "FIX_GENERATED" && payload.fixId != null) {
           void utils.analysis.getById.invalidate({ fixId: payload.fixId });
@@ -107,15 +110,13 @@ export const RealtimeProvider = ({ children }: Props) => {
       }
 
       if (msg.name === REALTIME_CONFIG.events.user.prCommentReceived) {
-        const payload = msg.data as {
-          author: string;
-          authorAvatarUrl: string;
-          commentId: string;
-          prNumber: number;
-          prTitle: string;
-          repoName: string;
-          repoOwner: string;
-        };
+        const payload = parseRealtimePayload(
+          RealtimeUserPayloads[REALTIME_CONFIG.events.user.prCommentReceived],
+          msg.data,
+        );
+        if (payload == null) {
+          return;
+        }
 
         void utils.analysis.getComments.invalidate();
 
@@ -145,12 +146,13 @@ export const RealtimeProvider = ({ children }: Props) => {
       }
 
       if (msg.name === REALTIME_CONFIG.events.user.analysisProgress) {
-        const payload = msg.data as {
-          analysisId: string;
-          message: string;
-          progress: number;
-          status: RepoStatus;
-        };
+        const payload = parseRealtimePayload(
+          RealtimeUserPayloads[REALTIME_CONFIG.events.user.analysisProgress],
+          msg.data,
+        );
+        if (payload == null) {
+          return;
+        }
 
         utils.analytics.getDashboardStats.setData({}, (oldData) => {
           if (oldData == null) {

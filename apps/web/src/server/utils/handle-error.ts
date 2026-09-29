@@ -86,9 +86,11 @@ export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
       const mapValue = map?.[meta.mapKey];
 
       if (meta.mapKey === "uniqueConstraint") {
-        const targetRaw = error.meta?.target;
+        const targetRaw: unknown = error.meta?.target;
+        // `Array.isArray` narrows the `any`, and the filter proves the elements
+        // are strings rather than asserting it.
         const target: string[] = Array.isArray(targetRaw)
-          ? (targetRaw as string[])
+          ? targetRaw.filter((f): f is string => typeof f === "string")
           : typeof targetRaw === "string"
             ? [targetRaw]
             : [];
