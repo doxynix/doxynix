@@ -137,6 +137,12 @@ export const FixApplicationPayloadSchema = z.object({
   title: z.string().min(1),
 });
 
+export const FixResultSchema = z.object({
+  fixedFiles: z.array(StagedFixedFileSchema),
+});
+
+export type FixResult = z.infer<typeof FixResultSchema>;
+
 export const GeneratedFixDTO = z.object({
   branch: z.string(),
   createdAt: z.date(),
@@ -151,17 +157,18 @@ export const GeneratedFixDTO = z.object({
 
 export type GeneratedFixView = z.infer<typeof GeneratedFixDTO>;
 
+/**
+ * `resultJson` is not a `GeneratedFix` column — it is the cached
+ * `fix-result:{fixId}` payload, read and already validated with
+ * `FixResultSchema.safeParse` in `services/fixes.service.ts`, whose single
+ * producer `fixesMapper.toDetailed` already declares `FixResult | null`.
+ * The failure path writes `{ error }`, which that safeParse rejects to `null`.
+ */
 export const GeneratedFixDetailedDTO = GeneratedFixDTO.extend({
-  resultJson: z.any().nullable(),
+  resultJson: FixResultSchema.nullable(),
 });
 
 export type GeneratedFixDetailedView = z.infer<typeof GeneratedFixDetailedDTO>;
-
-export const FixResultSchema = z.object({
-  fixedFiles: z.array(StagedFixedFileSchema),
-});
-
-export type FixResult = z.infer<typeof FixResultSchema>;
 
 export const PrAiReviewFindingSchema = z.object({
   codeSnippet: z
