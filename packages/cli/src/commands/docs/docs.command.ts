@@ -1,7 +1,6 @@
-import path from "node:path";
-
 import * as p from "@clack/prompts";
 import type { Command } from "commander";
+import { join, resolve } from "pathe";
 
 import { readFileOrPrompt, writeLocalFile } from "@/core/fs";
 import { getCurrentGitBranch } from "@/core/git";
@@ -283,7 +282,7 @@ export function registerDocsCommand(program: Command) {
         return;
       }
 
-      const baseDir = path.resolve(process.cwd(), options?.dir ?? "./docs/doxynix");
+      const baseDir = resolve(process.cwd(), options?.dir ?? "./docs/doxynix");
 
       let exportedCount = 0;
       const failed: string[] = [];
@@ -311,7 +310,7 @@ export function registerDocsCommand(program: Command) {
               const content = result.raw;
 
               if (content) {
-                const fullFilePath = path.join(baseDir, filename);
+                const fullFilePath = join(baseDir, filename);
                 writeLocalFile(fullFilePath, content);
                 exportedCount++;
               } else {

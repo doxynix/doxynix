@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
 
+import { dirname, join } from "pathe";
 import * as z from "zod";
 
 import { appRouter } from "../src/server/modules/index";

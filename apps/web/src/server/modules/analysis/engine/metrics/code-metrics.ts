@@ -1,7 +1,6 @@
 import { lintSource } from "@secretlint/core";
 import { creator as canaryPreset } from "@secretlint/secretlint-rule-preset-canary";
 import { clamp, uniq } from "es-toolkit";
-import { isExtensionSupported, parse } from "leasot";
 import { normalize } from "pathe";
 
 import { appLogger } from "@/server/core/app-logger";
@@ -85,34 +84,13 @@ async function collectSecuritySignals(normalizedPath: string, content: string) {
   }
 }
 
-async function collectTodoCount(content: string, extensionWithDot: string, normalizedPath: string) {
-  if (extensionWithDot === "" || !isExtensionSupported(extensionWithDot)) {
-    return 0;
-  }
-
-  try {
-    const todos = await parse(content, {
-      extension: extensionWithDot,
-      filename: normalizedPath,
-    });
-    return todos.length;
-  } catch (error) {
-    appLogger.debug({
-      error,
-      extension: extensionWithDot,
-      msg: "TODO parsing skipped after analyzer failure",
-      path: normalizedPath,
-    });
-    return 0;
-  }
-}
-
 function collectSourceStats(content: string, extension: string) {
   try {
     const stats = countSourceStats(content, extension);
     return {
       comments: stats.comments,
       source: stats.source,
+      todos: stats.todos,
     };
   } catch (error) {
     appLogger.debug({
@@ -126,6 +104,7 @@ function collectSourceStats(content: string, extension: string) {
   return {
     comments: 0,
     source: lines,
+    todos: 0,
   };
 }
 
@@ -135,10 +114,8 @@ async function scanRepositoryFile(file: {
 }): Promise<FileScanResult> {
   const extension = getFileExtension(file.path).replace(".", "");
   const prettyName = linguistStyleLabel(file.path, normalizeLanguageName(extension));
-  const extWithDot = extension === "" ? "" : `.${extension}`;
   const signal = await collectPolyglotSignals(file);
   const security = await collectSecuritySignals(file.path, file.content);
-  const todos = await collectTodoCount(file.content, extWithDot, file.path);
   const sourceStats = collectSourceStats(file.content, extension);
 
   let complexity = 0;
@@ -159,7 +136,7 @@ async function scanRepositoryFile(file: {
     signal,
     size: file.content.length,
     source: sourceStats.source,
-    todos,
+    todos: sourceStats.todos,
   };
 }
 

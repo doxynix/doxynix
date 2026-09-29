@@ -1,13 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
-  "dictionaries": [
-    "typescript",
-    "node",
-    "html",
-    "css",
-    "bash",
-    "misc"
-  ],
+  "dictionaries": ["typescript", "node", "html", "css", "bash", "misc"],
   "ignorePaths": [
     "**/.git/**",
     "**/.turbo/**",
@@ -90,6 +83,7 @@
     "Fapi",
     "Fapp",
     "Ferdi",
+    "FIXMES",
     "Flib",
     "Forki",
     "Framework'leri",
