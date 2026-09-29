@@ -2,6 +2,7 @@ export type CodeStats = {
   comments: number;
   empty: number;
   source: number;
+  todos: number;
   total: number;
 };
 
@@ -102,11 +103,41 @@ const SYNTAX_MAP: Record<string, CommentSyntax> = {
 };
 
 /**
- * Counts lines of code and comments without third-party libraries.
+ * TODO/FIXME markers inside a comment body.
+ *
+ * The boundaries are deliberately stricter than a bare word match: a leading
+ * `-`/`_` is excluded so snake_case identifiers (`todo_list`) never count, and
+ * a trailing `-` is excluded so URLs inside a string ("https://x/todo-list")
+ * are not mistaken for a marker on a line whose only `#` or `//` came from the
+ * scheme. `@` is accepted because `@todo` is a common convention.
+ */
+const TODO_MARKER_REGEX = /(?:^|[^\w-])@?(?:TODO|FIXME)(?![-\w])/giu;
+
+/**
+ * Cheap pre-check so the common case (no marker on the line) skips the
+ * `matchAll` allocation. Must be case-insensitive to agree with the matcher
+ * above, otherwise `// @todo` and `// Todo:` would be filtered out here and
+ * never counted.
+ */
+const TODO_HINT_REGEX = /todo|fixme/i;
+
+/** Number of TODO/FIXME markers in a single comment body. */
+function countTodoMarkers(commentBody: string): number {
+  if (!TODO_HINT_REGEX.test(commentBody)) {
+    return 0;
+  }
+
+  // `matchAll` needs a global regex and never mutates the caller's lastIndex.
+  return [...commentBody.matchAll(TODO_MARKER_REGEX)].length;
+}
+
+/**
+ * Counts lines of code, comments, and TODO/FIXME markers without third-party
+ * libraries.
  */
 export function countSourceStats(content: string, rawExtension: string): CodeStats {
   if (typeof content !== "string" || content.length === 0) {
-    return { comments: 0, empty: 0, source: 0, total: 0 };
+    return { comments: 0, empty: 0, source: 0, todos: 0, total: 0 };
   }
 
   const ext = rawExtension.toLowerCase().replace(/^\./u, "");
@@ -118,6 +149,7 @@ export function countSourceStats(content: string, rawExtension: string): CodeSta
   let comments = 0;
   let source = 0;
   let empty = 0;
+  let todos = 0;
 
   let inBlockComment = false;
 
@@ -134,7 +166,11 @@ export function countSourceStats(content: string, rawExtension: string): CodeSta
 
     if (inBlockComment) {
       comments++;
+
       if (syntax.blockEnd && line.includes(syntax.blockEnd)) {
+        // Only the part before the closer is comment; the tail is code again.
+        todos += countTodoMarkers(line.slice(0, line.indexOf(syntax.blockEnd)));
+
         const afterBlock = line
           .slice(line.indexOf(syntax.blockEnd) + syntax.blockEnd.length)
           .trim();
@@ -142,7 +178,10 @@ export function countSourceStats(content: string, rawExtension: string): CodeSta
           source++;
         }
         inBlockComment = false;
+      } else {
+        todos += countTodoMarkers(line);
       }
+
       continue;
     }
 
@@ -159,9 +198,10 @@ export function countSourceStats(content: string, rawExtension: string): CodeSta
         const remainder = line.slice(afterStartIdx);
 
         if (remainder.includes(syntax.blockEnd)) {
-          const afterEnd = remainder
-            .slice(remainder.indexOf(syntax.blockEnd) + syntax.blockEnd.length)
-            .trim();
+          const endIdx = remainder.indexOf(syntax.blockEnd);
+          todos += countTodoMarkers(remainder.slice(0, endIdx));
+
+          const afterEnd = remainder.slice(endIdx + syntax.blockEnd.length).trim();
           if (afterEnd.length > 0) {
             source++;
           }
@@ -176,18 +216,22 @@ export function countSourceStats(content: string, rawExtension: string): CodeSta
 
     if (syntax.single && line.startsWith(syntax.single)) {
       comments++;
+      todos += countTodoMarkers(line.slice(syntax.single.length));
       continue;
     }
 
     if (syntax.single && line.includes(syntax.single)) {
-      // Mixed line: code + trailing single-line comment
+      // Mixed line: code + trailing single-line comment. This is the branch
+      // that leasot could never reach, because every one of its parsers anchors
+      // the comment marker at the start of the line.
       source++;
       comments++;
+      todos += countTodoMarkers(line.slice(line.indexOf(syntax.single) + syntax.single.length));
       continue;
     }
 
     source++;
   }
 
-  return { comments, empty, source, total };
+  return { comments, empty, source, todos, total };
 }

@@ -1932,17 +1932,6 @@
     ]
   },
   {
-    "author": "Pgilad",
-    "authorLink": "https://github.com/pgilad",
-    "avatar": "https://github.com/pgilad.png?size=96",
-    "packages": [
-      {
-        "license": "MIT",
-        "name": "leasot"
-      }
-    ]
-  },
-  {
     "author": "Poimandres",
     "authorLink": "https://github.com/pmndrs",
     "avatar": "https://github.com/pmndrs.png?size=96",
