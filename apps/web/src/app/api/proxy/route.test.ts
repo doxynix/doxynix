@@ -1,38 +1,144 @@
-import { describe, expect, it } from "vitest";
+import dns from "node:dns";
 
-import { isSafeIp } from "./route";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-/**
- * The proxy route forwards an attacker-supplied URL to the server, so the
- * request body is the untrusted boundary. Before this was validated it was read
- * with a blind `as ProxyRequestBody`, which let a non-string header value reach
- * undici. The schema itself lives in the route module (it imports
- * `next/server`); these cases pin the SSRF guard that the schema feeds.
- */
-describe("proxy route SSRF guard", () => {
-  it("rejects loopback", () => {
-    expect(isSafeIp("127.0.0.1")).toBe(false);
+import { auth } from "@/server/core/auth";
+
+import { isSafeIp, POST, ssrfSafeLookup } from "./route";
+
+const mocks = vi.hoisted(() => ({
+  appLogger: { error: vi.fn(), warn: vi.fn() },
+}));
+
+vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
+vi.mock("@/server/core/auth", () => ({
+  auth: { api: { getSession: vi.fn() } },
+}));
+vi.mock("@/server/core/app-logger", () => ({ appLogger: mocks.appLogger }));
+
+const globalFetchMock = vi.fn();
+vi.stubGlobal("fetch", globalFetchMock);
+
+describe("Proxy API Route — SSRF Prevention Suite", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(auth.api.getSession).mockResolvedValue({
+      user: { id: "usr-1" },
+    } as any);
   });
 
-  it("rejects the unspecified address", () => {
-    expect(isSafeIp("0.0.0.0")).toBe(false);
+  describe("1. isSafeIp (SSRF IP blacklist validation)", () => {
+    it("permits safe public IPs", () => {
+      expect(isSafeIp("8.8.8.8")).toBe(true);
+      expect(isSafeIp("1.1.1.1")).toBe(true);
+      expect(isSafeIp("140.82.121.4")).toBe(true);
+    });
+
+    it.each([
+      ["127.0.0.1", "loopback"],
+      ["::1", "loopback"],
+      ["169.254.169.254", "cloud metadata (AWS/GCP)"],
+      ["192.168.1.1", "private subnet"],
+      ["10.0.0.1", "private subnet"],
+      ["172.16.0.1", "private subnet"],
+      ["fc00::", "unique local IPv6"],
+      ["fe80::1", "link local IPv6"],
+      ["0.0.0.0", "unspecified"],
+      ["255.255.255.255", "broadcast"],
+    ])("blocks unsafe IP %s (%s)", (ip) => {
+      expect(isSafeIp(ip)).toBe(false);
+    });
   });
 
-  it("rejects a link-local address", () => {
-    expect(isSafeIp("169.254.169.254")).toBe(false);
+  describe("2. ssrfSafeLookup (DNS hook for Undici Agent)", () => {
+    it("allows safe resolved addresses through", () => {
+      const cb = vi.fn();
+      vi.spyOn(dns, "lookup").mockImplementation(((_h: any, _o: any, callback?: any) => {
+        const cbFn = typeof _o === "function" ? _o : callback;
+        cbFn(null, "8.8.8.8", 4);
+      }) as any);
+
+      ssrfSafeLookup("google.com", {}, cb);
+      expect(cb).toHaveBeenCalledWith(null, "8.8.8.8", 4);
+    });
+
+    it("rejects loopback address and throws Unsafe target IP error", () => {
+      const cb = vi.fn();
+      vi.spyOn(dns, "lookup").mockImplementation(((_h: any, _o: any, callback?: any) => {
+        const cbFn = typeof _o === "function" ? _o : callback;
+        cbFn(null, "127.0.0.1", 4);
+      }) as any);
+
+      ssrfSafeLookup("localhost", {}, cb);
+      expect(cb).toHaveBeenCalledWith(expect.any(Error), null, null);
+      expect(cb.mock.calls[0]![0].message).toBe("Forbidden: Unsafe target IP detected");
+    });
   });
 
-  it("rejects private ranges", () => {
-    expect(isSafeIp("10.0.0.1")).toBe(false);
-    expect(isSafeIp("192.168.1.1")).toBe(false);
-    expect(isSafeIp("172.16.0.1")).toBe(false);
-  });
+  describe("3. POST handler protocol and header sanitization", () => {
+    it("rejects a body that is not an object before touching the network", async () => {
+      const req = new Request("http://localhost/api/proxy", {
+        body: JSON.stringify("not-an-object"),
+        method: "POST",
+      });
 
-  it("accepts a public address", () => {
-    expect(isSafeIp("8.8.8.8")).toBe(true);
-  });
+      const res = await POST(req);
+      expect(res.status).toBe(400);
+      expect(globalFetchMock).not.toHaveBeenCalled();
+    });
 
-  it("rejects a non-address", () => {
-    expect(isSafeIp("not-an-ip")).toBe(false);
+    it("rejects a non-string header value that undici could not send", async () => {
+      // This is the case the previous blind `as ProxyRequestBody` let through
+      // to a runtime failure inside undici.
+      const req = new Request("http://localhost/api/proxy", {
+        body: JSON.stringify({
+          headers: { "x-trace": { nested: true } },
+          method: "GET",
+          url: "https://example.com/api",
+        }),
+        method: "POST",
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(400);
+      expect(globalFetchMock).not.toHaveBeenCalled();
+    });
+
+    it("strictly forbids non-http protocols (file://, gopher://)", async () => {
+      const req = new Request("http://localhost/api/proxy", {
+        body: JSON.stringify({ method: "GET", url: "file:///etc/passwd" }),
+        method: "POST",
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(403);
+      await expect(res.text()).resolves.toBe("Forbidden: Unsafe protocol");
+    });
+
+    it("strips sensitive headers (cookie, host, connection) before sending request", async () => {
+      globalFetchMock.mockResolvedValueOnce({
+        headers: new Headers(),
+        status: 200,
+        text: async () => "ok",
+      });
+
+      const req = new Request("http://localhost/api/proxy", {
+        body: JSON.stringify({
+          headers: { connection: "close", cookie: "secret=1", host: "evil.com", "x-custom": "ok" },
+          method: "GET",
+          url: "https://example.com/api",
+        }),
+        method: "POST",
+      });
+
+      await POST(req);
+
+      expect(globalFetchMock).toHaveBeenCalledWith(
+        "https://example.com/api",
+        expect.objectContaining({
+          headers: { "x-custom": "ok" },
+        }),
+      );
+    });
   });
 });
