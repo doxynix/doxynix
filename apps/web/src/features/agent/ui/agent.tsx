@@ -220,7 +220,7 @@ export function Agent() {
       createdAt: new Date(),
       parts: messageParts,
       role: "user",
-    } as any);
+    });
   };
 
   const handleNewChat = () => {
