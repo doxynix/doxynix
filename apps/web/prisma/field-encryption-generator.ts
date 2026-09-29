@@ -104,7 +104,7 @@ function parseEncrypted(documentation?: null | string): boolean {
     return false;
   }
   const match = ENCRYPTED_RE.exec(documentation);
-  return match != null && (match.groups?.query == null || !match.groups.query.includes("readonly"));
+  return match != null && match.groups?.query?.includes("readonly") !== true;
 }
 
 function parseHash(
@@ -128,17 +128,20 @@ function parseHash(
   return { fieldName: match.groups.fieldName, normalize };
 }
 
+/** Stable alphabetical order. Explicit so the generated file is reproducible. */
+const byName = (a: string, b: string): number => a.localeCompare(b);
+
 function render(dmmf: Datamodel): string {
   const spec = buildSpec(dmmf);
   const models = Object.keys(spec)
-    .sort()
+    .sort(byName)
     .map((name) => {
       const model = spec[name];
       if (model == null) {
         return "";
       }
       const lines: string[] = [];
-      for (const field of Object.keys(model.fields).sort()) {
+      for (const field of Object.keys(model.fields).sort(byName)) {
         const entry = model.fields[field];
         if (entry?.hash == null) {
           lines.push(`    ${JSON.stringify(field)}: {},`);
@@ -151,7 +154,7 @@ function render(dmmf: Datamodel): string {
         }
       }
       const connections = Object.keys(model.connections)
-        .sort()
+        .sort(byName)
         .map(
           (field) => `    ${JSON.stringify(field)}: ${JSON.stringify(model.connections[field])},`,
         );
@@ -194,7 +197,9 @@ generatorHandler({
     // Biome pass doesn't rewrite it on every `db:generate`. A formatting error
     // must not fail generation. Mirrors `enum-generator.ts`.
     try {
-      execFileSync("bun", ["x", "biome", "format", "--write", outputPath], {
+      // `process.execPath` is the bun running this generator. Looking `bun` up on
+      // PATH would make the result depend on the caller's environment.
+      execFileSync(process.execPath, ["x", "biome", "format", "--write", outputPath], {
         stdio: "ignore",
       });
     } catch {

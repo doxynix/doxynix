@@ -1,7 +1,7 @@
-import { fingerprintOf, type ParsedKey, parseKey } from "./key-internal";
+import { type ParsedKey, parseKey } from "./key-internal";
 
-export type { ParsedKey };
-export { fingerprintOf, parseKey };
+export type { ParsedKey } from "./key-internal";
+export { fingerprintOf, parseKey } from "./key-internal";
 
 export type Keychain = Record<string, ParsedKey>;
 
