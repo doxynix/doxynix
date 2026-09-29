@@ -148,7 +148,7 @@ export function Agent() {
         const toolPart = part as { state?: string; type: string };
         if (toolPart.state === "output-available") {
           const toolName = part.type.slice(5);
-          TOOL_INVALIDATIONS[toolName]?.(utils);
+          void TOOL_INVALIDATIONS[toolName]?.(utils);
         }
       }
     });

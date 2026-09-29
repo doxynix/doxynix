@@ -1,3 +1,4 @@
+import type { trpc } from "@/shared/api/trpc";
 import { authClient } from "@/shared/lib/auth-client";
 
 export type AgentToolLabelKey =
@@ -73,32 +74,47 @@ export const toolLabelKeys: Record<string, AgentToolLabelKey> = {
   updateUserProfile: "tool_update_user_profile",
 };
 
-export const TOOL_INVALIDATIONS: Record<string, (utils: any) => void> = {
+/** The tRPC react-query utils proxy, as `useUtils()` returns it. */
+type TrpcUtils = ReturnType<typeof trpc.useUtils>;
+
+/**
+ * Declared as returning a promise because every entry awaits one or more
+ * `invalidate()` calls. The `void` return (and the `any` parameter) it used to
+ * declare is why a dozen of these floated un-awaited — the linter could not see
+ * a floating promise through an `any`.
+ */
+export const TOOL_INVALIDATIONS: Record<string, (utils: TrpcUtils) => Promise<void>> = {
   applyFix: (utils) => utils.analysis.listByRepository.invalidate(),
-  clearReadNotifications: (utils) => {
-    utils.notification.getAll.invalidate();
-    utils.notification.getStats.invalidate();
-  },
+  clearReadNotifications: (utils) =>
+    Promise.all([
+      utils.notification.getAll.invalidate(),
+      utils.notification.getStats.invalidate(),
+    ]).then(() => undefined),
   clearStaging: (utils) => utils.analysis.getStagedFiles.invalidate(),
   createApiKey: (utils) => utils.apikey.list.invalidate(),
-  deleteRepository: (utils) => {
-    utils.repo.getAll.invalidate();
-    utils.repo.getSlim.invalidate();
-    utils.agentChat.listSessions.invalidate();
-  },
-  markAllNotificationsAsRead: (utils) => {
-    utils.notification.getAll.invalidate();
-    utils.notification.getStats.invalidate();
-  },
-  markNotificationAsRead: (utils) => {
-    utils.notification.getAll.invalidate();
-    utils.notification.getStats.invalidate();
-  },
+  deleteRepository: (utils) =>
+    Promise.all([
+      utils.repo.getAll.invalidate(),
+      utils.repo.getSlim.invalidate(),
+      // The router key is `agent`, not `agentChat` — the old call silently did
+      // nothing, leaving the sidebar listing a deleted repository's chats.
+      utils.agent.listSessions.invalidate(),
+    ]).then(() => undefined),
+  markAllNotificationsAsRead: (utils) =>
+    Promise.all([
+      utils.notification.getAll.invalidate(),
+      utils.notification.getStats.invalidate(),
+    ]).then(() => undefined),
+  markNotificationAsRead: (utils) =>
+    Promise.all([
+      utils.notification.getAll.invalidate(),
+      utils.notification.getStats.invalidate(),
+    ]).then(() => undefined),
   openPullRequest: (utils) => utils.analysis.listByRepository.invalidate(),
-  registerRepository: (utils) => {
-    utils.repo.getAll.invalidate();
-    utils.repo.getSlim.invalidate();
-  },
+  registerRepository: (utils) =>
+    Promise.all([utils.repo.getAll.invalidate(), utils.repo.getSlim.invalidate()]).then(
+      () => undefined,
+    ),
   revokeApiKey: (utils) => utils.apikey.list.invalidate(),
   stageFile: (utils) => utils.analysis.getStagedFiles.invalidate(),
   stageGeneratedFix: (utils) => utils.analysis.getStagedFiles.invalidate(),
@@ -106,10 +122,10 @@ export const TOOL_INVALIDATIONS: Record<string, (utils: any) => void> = {
   unstageFile: (utils) => utils.analysis.getStagedFiles.invalidate(),
   updateApiKey: (utils) => utils.apikey.list.invalidate(),
 
-  updateUserProfile: (utils) => {
-    void utils.user.me.invalidate();
+  updateUserProfile: async (utils) => {
+    await utils.user.me.invalidate();
     if (typeof window !== "undefined") {
-      void authClient.getSession({
+      await authClient.getSession({
         query: {
           disableCookieCache: true,
         },
