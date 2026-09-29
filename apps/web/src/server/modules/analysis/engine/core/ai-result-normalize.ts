@@ -8,6 +8,7 @@ import {
   type ProjectMap,
   projectMapSchema,
 } from "./analysis-result.schemas";
+import { REPOSITORY_FINDING_CATEGORIES } from "./discovery.types";
 import {
   normalizeProjectMapKeyDecisions,
   normalizeProjectMapLanguageBreakdown,
@@ -28,15 +29,9 @@ const FACT_CATEGORIES = [
   "security",
   "infrastructure",
 ] as const;
-const FINDING_CATEGORIES = [
-  "architecture",
-  "change-risk",
-  "hotspot",
-  "maintainability",
-  "onboarding",
-  "security",
-  "performance",
-] as const;
+// Derived from the same tuple the Zod enum and `RepositoryFinding` use, so the
+// normalizer can never emit a category the schema or the consumer type denies.
+const FINDING_CATEGORIES = REPOSITORY_FINDING_CATEGORIES;
 
 function coerceEnum<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
   if (typeof value !== "string") {
