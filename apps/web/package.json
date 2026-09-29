@@ -54,7 +54,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "4.0.82",
-    "@ai-sdk/openai": "4.0.77",
+    "@ai-sdk/openai": "4.0.78",
     "@ai-sdk/react": "4.0.119",
     "@better-auth/passkey": "catalog:",
     "@codemirror/autocomplete": "6.20.3",
@@ -247,7 +247,7 @@
     "@stryker-mutator/vitest-runner": "10.0.0",
     "@tailwindcss/postcss": "4.3.3",
     "@tailwindcss/typography": "0.5.20",
-    "@tanstack/react-query-devtools": "5.103.2",
+    "@tanstack/react-query-devtools": "5.104.0",
     "@testing-library/dom": "10.4.2",
     "@testing-library/react": "16.3.3",
     "@trigger.dev/build": "4.6.4",
