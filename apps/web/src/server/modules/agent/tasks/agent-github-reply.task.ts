@@ -1,3 +1,4 @@
+import type { NextRequest } from "next/server";
 import { task } from "@trigger.dev/sdk";
 import { dedent } from "es-toolkit";
 
@@ -118,10 +119,16 @@ export const agentGithubReplyTask = task({
       appLogger.error({ err: error, msg: "Failed to assemble rich GitHub conversation context" });
     }
 
+    // The task runs with no HTTP context, but `buildRequestStore` only ever reads
+    // headers (plus the optional Vercel `ip`/`geo` fields, absent here). Irreducible:
+    // a `NextRequest` cannot be constructed without a real origin, and a synthetic
+    // one would be a fabricated host.
+    const taskRequest = { headers: new Headers() } as unknown as NextRequest;
+
     const store = buildRequestStore({
       method: "task",
       path: "/task/agent-github-reply",
-      req: { headers: new Headers() } as any,
+      req: taskRequest,
       requestId: `reply-${payload.commentId}`,
       userId: payload.userId,
     });

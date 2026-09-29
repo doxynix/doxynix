@@ -1,7 +1,28 @@
+import type { inferRouterInputs } from "@trpc/server";
 import { tool } from "ai";
 import * as z from "zod";
 
 import { api } from "@/server/core/trpc/server";
+import type { AppRouter } from "@/server/modules";
+
+/** The `findings` input the `createFix` tool actually sends to `analysis.createFix`. */
+type CreateFixFindings = inferRouterInputs<AppRouter>["analysis"]["createFix"]["findings"];
+
+/**
+ * One finding the `createFix` tool accepts.
+ *
+ * Declared here rather than imported from `@/server/modules/analysis` because VSA
+ * forbids cross-slice imports and the agent slice only reaches `analysis` through
+ * the tRPC client. The `z.ZodType<CreateFixFindings[number]>` annotation below is
+ * the drift guard: it stops compiling the moment this shape and the router's input
+ * disagree, so the two cannot silently part ways.
+ */
+export const AgentFixFindingSchema: z.ZodType<CreateFixFindings[number]> = z.object({
+  file: z.string(),
+  line: z.number(),
+  suggestion: z.string().optional(),
+  type: z.string(),
+});
 
 export const MUTATION_TOOLS = [
   "applyFix",
@@ -102,7 +123,7 @@ export const getAgentTools = (currentRepoId?: string) => ({
       fileContents: z
         .record(z.string(), z.string())
         .describe("Map of file path to original content"),
-      findings: z.array(z.any()).min(1).describe("The findings list to fix"),
+      findings: z.array(AgentFixFindingSchema).min(1).describe("The findings list to fix"),
       prAnalysisId: z.uuid().optional(),
       repoId: z.uuid().describe("The public UUID of the repository").optional(),
     }),
