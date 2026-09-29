@@ -40,6 +40,19 @@ type ModuleDependencyContext = {
 
 type DocumentationInputSnapshot = NonNullable<RepoMetrics["documentationInput"]>;
 
+/**
+ * Maps each writer task id to the `WriterName` it corresponds to. Checked against
+ * both key and value types, so adding a writer task without its name (or renaming
+ * a `WriterName`) fails to compile here rather than at runtime.
+ */
+const WRITER_NAME_BY_TASK_ID = {
+  "write-api": "api",
+  "write-architecture": "architecture",
+  "write-changelog": "changelog",
+  "write-contributing": "contributing",
+  "write-readme": "readme",
+} as const satisfies Record<string, WriterName>;
+
 type EngineeringDossier = {
   changeCoupling: NonNullable<RepoMetrics["changeCoupling"]>;
   churnHotspots: NonNullable<RepoMetrics["churnHotspots"]>;
@@ -178,38 +191,28 @@ export async function orchestrateWriterTasks(
 
   const engineeringDossierPaths = getEngineeringDossierPaths(engineeringDossier);
 
-  const strippedDossier = structuredClone(engineeringDossier) as unknown as Record<string, unknown>;
+  // `structuredClone<T>` already returns a deep copy of the dossier, so no cast is
+  // needed. The three `edges` fields below are real: `graphReliability` and
+  // `documentationInput.architecture.graphReliability` both exist on the snapshot.
+  const strippedDossier = structuredClone(engineeringDossier);
 
-  if (
-    strippedDossier.graphReliability != null &&
-    typeof strippedDossier.graphReliability === "object"
-  ) {
-    (strippedDossier.graphReliability as Record<string, unknown>).edges = [];
-  }
+  strippedDossier.graphReliability.edges = [];
+  strippedDossier.documentationInput.architecture.graphReliability.edges = [];
 
-  if (
-    strippedDossier.documentationInput != null &&
-    typeof strippedDossier.documentationInput === "object"
-  ) {
-    const docInput = strippedDossier.documentationInput as Record<string, unknown>;
-    docInput.sections = undefined;
+  // `documentationInput.sections` is required on the snapshot, and every read of it
+  // happens above, before the strip. The strip therefore produces a genuinely
+  // smaller object, described by its own type rather than by lying about
+  // `EngineeringDossier` with `as unknown as Record<string, unknown>`.
+  const { sections: _sections, ...documentationInputWithoutSections } =
+    strippedDossier.documentationInput;
+  const dossierForPrompt: Omit<EngineeringDossier, "documentationInput"> & {
+    documentationInput: Omit<DocumentationInputSnapshot, "sections">;
+  } = {
+    ...strippedDossier,
+    documentationInput: documentationInputWithoutSections,
+  };
 
-    if (docInput.architecture != null && typeof docInput.architecture === "object") {
-      const arch = docInput.architecture as Record<string, unknown>;
-      if (arch.graphReliability != null && typeof arch.graphReliability === "object") {
-        (arch.graphReliability as Record<string, unknown>).edges = [];
-      }
-    }
-
-    if (docInput.risks != null && typeof docInput.risks === "object") {
-      const risks = docInput.risks as Record<string, unknown>;
-      if (risks.graphReliability != null && typeof risks.graphReliability === "object") {
-        (risks.graphReliability as Record<string, unknown>).edges = [];
-      }
-    }
-  }
-
-  const compressedDossier = compactPayload(strippedDossier);
+  const compressedDossier = compactPayload(dossierForPrompt);
   const engineeringDossierPayload = JSON.stringify(compressedDossier);
 
   const allowedPathsByWriter = {
@@ -379,7 +382,7 @@ export async function orchestrateWriterTasks(
       | typeof changelogTask
       | typeof contributingTask
       | typeof readmeTask,
-  ) => {
+  ): WriterResult | undefined => {
     const run = runs.find((r) => r.taskIdentifier === taskInstance.id);
     if (run == null) {
       return;
@@ -390,10 +393,15 @@ export async function orchestrateWriterTasks(
     }
 
     return {
-      error: run.error instanceof Error ? run.error.message : null,
-      name: taskInstance.id.replace("write-", "") as WriterName,
+      // `WriterResult["error"]` is `string | undefined`, so a non-`Error` rejection
+      // reason is normalized to `undefined` rather than `null`.
+      error: run.error instanceof Error ? run.error.message : undefined,
+      // The map is exhaustive over the five task ids, so the index is total —
+      // `noUncheckedIndexedAccess` widens it to `| undefined` but the lookup
+      // cannot actually miss.
+      name: WRITER_NAME_BY_TASK_ID[taskInstance.id],
       status: "failed" as const,
-    } as WriterResult;
+    };
   };
 
   const readmeRes = getOutput(readmeTask);
