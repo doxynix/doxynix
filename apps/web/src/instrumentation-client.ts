@@ -1,7 +1,13 @@
 import * as Sentry from "@sentry/nextjs";
+import posthog from "posthog-js";
 
-import { API_PREFIX, SENTRY_DSN, TRPC_PREFIX } from "./shared/config/env.client";
-import { IS_PROD } from "./shared/config/env.flags";
+import {
+  API_PREFIX,
+  NEXT_PUBLIC_POSTHOG_KEY,
+  SENTRY_DSN,
+  TRPC_PREFIX,
+} from "./shared/config/env.client";
+import { IS_DEV, IS_PROD } from "./shared/config/env.flags";
 import { SENTRY_DATA_COLLECTION } from "./shared/config/sentry";
 
 function escapeRegExp(str: string) {
@@ -70,5 +76,23 @@ if (IS_PROD) {
       );
       Sentry.addIntegration(browserTracingIntegration());
     })();
+  });
+}
+
+// PostHog stays eager on purpose. `instrumentation-client` runs before React
+// hydration (Next.js order: instrumentationClientInject -> this file -> hydration),
+// and PostHog records route views and DOM interactions from the moment it boots, so
+// deferring init here would silently drop the first view and the opening interaction
+// window. The SDK is ~300 KB, but losing landing-page analytics is not worth 96 KB
+// gzip. Only the Sentry integrations above are deferred: they have no first-paint
+// semantics, and `replaysOnErrorSampleRate` still covers the gap because `init` ran.
+if (IS_PROD) {
+  posthog.init(NEXT_PUBLIC_POSTHOG_KEY, {
+    api_host: `${API_PREFIX}/dxnx/p`,
+    capture_exceptions: false,
+    debug: IS_DEV,
+    defaults: "2026-01-30",
+    disable_session_recording: true,
+    ui_host: "https://us.posthog.com",
   });
 }
