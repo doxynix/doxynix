@@ -81,7 +81,7 @@
     "@cspell/dict-ru_ru": "2.3.2",
     "@cspell/dict-tr-tr": "3.0.6",
     "@secretlint/secretlint-rule-preset-recommend": "13.0.6",
-    "@types/node": "26.6.2",
+    "@types/node": "26.6.3",
     "@types/react-dom": "19.3.0",
     "cspell": "10.3.4",
     "jscpd": "5.3.2",
