@@ -8,6 +8,7 @@ import * as z from "zod";
 import { highlightCode } from "@/shared/lib/shiki";
 
 import type { DbClient } from "@/server/core/db";
+import type { FileActionPreviewResult } from "@/server/core/redis.types";
 import { resolveDocumentMaterializedPath } from "@/server/utils/document-materialization";
 import { markdownToHtml } from "@/server/utils/markdown-to-html";
 import { REDIS_CONFIG } from "@/server/utils/redis";
@@ -178,7 +179,7 @@ export const docsService = {
     input: { path: string; repoId: string },
   ) {
     const cacheKey = REDIS_CONFIG.keys.fileAction(userId, input.path, "quick-file-audit");
-    const cachedData = await redis.get<any>(cacheKey);
+    const cachedData = await redis.get<FileActionPreviewResult>(cacheKey);
 
     if (cachedData == null) {
       throw new TRPCError({
@@ -187,7 +188,7 @@ export const docsService = {
       });
     }
 
-    const { analysisId, commitSha } = cachedData.contentRef ?? {};
+    const { analysisId, commitSha } = cachedData;
 
     let internalAnalysisId: string | undefined;
     if (analysisId != null) {

@@ -130,3 +130,82 @@ describe("docsService.getWithGraphLinks", () => {
     expect(Object.hasOwn(result, "path")).toBe(true);
   });
 });
+
+describe("docsService.pinAuditToDocs", () => {
+  const COMMIT_SHA = "deadbeef";
+  const AUDIT_PATH = "src/app.ts";
+
+  /** The blob `analyze-file.task.ts` writes: the preview plus top-level ref keys. */
+  function makeRedis(overrides: Record<string, unknown> = {}) {
+    return {
+      get: async () => ({
+        action: "quick-file-audit",
+        analysisId: ANALYSIS_ID,
+        analysisRef: null,
+        commitSha: COMMIT_SHA,
+        confidence: "high",
+        consistency: "matched",
+        consistencyNote: null,
+        content: "# app.ts\n\nExports the router.\n",
+        contextDiagnostics: {},
+        contextMeta: {},
+        path: AUDIT_PATH,
+        summary: "s",
+        title: "t",
+        ...overrides,
+      }),
+    } as unknown as Parameters<typeof docsService.pinAuditToDocs>[1];
+  }
+
+  function makePinDb(created: { analysis?: unknown } = {}) {
+    const captured: { createData?: Record<string, unknown> } = {};
+    const db = {
+      analysis: { findUnique: async () => ({ id: ANALYSIS_ID }) },
+      document: {
+        create: async (args: { data: Record<string, unknown> }) => {
+          captured.createData = args.data;
+          return { id: "0195f000-0000-7000-8000-000000000004" };
+        },
+      },
+    } as unknown as DbClient;
+    return { captured, created, db };
+  }
+
+  it("records the commit sha as the version and links the document to its analysis", async () => {
+    const { captured, db } = makePinDb();
+
+    await docsService.pinAuditToDocs(db, makeRedis(), "user-1", {
+      path: AUDIT_PATH,
+      repoId: REPO_ID,
+    });
+
+    expect(captured.createData?.version).toBe(COMMIT_SHA);
+    expect(captured.createData?.analysis).toStrictEqual({ connect: { id: ANALYSIS_ID } });
+  });
+
+  it("falls back to a manual version when the cached audit carries no analysis ref", async () => {
+    const { captured, db } = makePinDb();
+
+    await docsService.pinAuditToDocs(
+      db,
+      makeRedis({ analysisId: undefined, commitSha: undefined }),
+      "user-1",
+      { path: AUDIT_PATH, repoId: REPO_ID },
+    );
+
+    expect(captured.createData?.version).toBe("manual");
+    expect(captured.createData?.analysis).toBeUndefined();
+  });
+
+  it("still links the analysis when only the commit sha is missing", async () => {
+    const { captured, db } = makePinDb();
+
+    await docsService.pinAuditToDocs(db, makeRedis({ commitSha: undefined }), "user-1", {
+      path: AUDIT_PATH,
+      repoId: REPO_ID,
+    });
+
+    expect(captured.createData?.version).toBe("manual");
+    expect(captured.createData?.analysis).toStrictEqual({ connect: { id: ANALYSIS_ID } });
+  });
+});
