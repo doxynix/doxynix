@@ -14,6 +14,7 @@ import { appLogger } from "@/server/core/app-logger";
 
 import type { LatestCompletedAnalysis } from "../analysis.repository";
 import type { AIResult } from "../engine/core/analysis-result.schemas";
+import { VALID_REPO_METRICS } from "../engine/core/metrics.fixtures";
 import {
   coerceAnalysisPayload,
   dedupeLatestDocsByType,
@@ -87,14 +88,38 @@ describe("coerceAnalysisPayload", () => {
   });
 
   it("valid resultJson parses through aiSchema without warn", () => {
-    const analysis = makeAnalysis(aiResult);
+    const analysis = makeAnalysis(aiResult, VALID_REPO_METRICS);
 
     const result = coerceAnalysisPayload(analysis);
 
     expect(result?.aiResult).toEqual(aiResult);
     expect(result?.analysis).toBe(analysis);
-    expect(result?.metrics).toEqual({ totalFiles: 3 });
+    expect(result?.metrics).toEqual(VALID_REPO_METRICS);
     expect(appLogger.warn).not.toHaveBeenCalled();
+  });
+
+  it("drops a malformed changeCoupling instead of passing the raw JSON through", () => {
+    const result = coerceAnalysisPayload(
+      makeAnalysis(aiResult, { ...VALID_REPO_METRICS, changeCoupling: "nope" }),
+    );
+
+    expect(result).not.toBeNull();
+    expect(result?.metrics).toBeDefined();
+    expect(result?.metrics.changeCoupling).toBeUndefined();
+  });
+
+  it("keeps the rest of a metrics blob whose one bad field is rejected", () => {
+    const result = coerceAnalysisPayload(
+      makeAnalysis(aiResult, { ...VALID_REPO_METRICS, healthScore: "eighty" }),
+    );
+
+    expect(result).not.toBeNull();
+    // The whole-object parse failed, so the caller gets the zero-valued fallback
+    // and a warning rather than a partially-validated blob.
+    expect(result?.metrics.totalLoc).toBe(0);
+    expect(appLogger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "an-1", msg: expect.stringContaining("metricsJson") }),
+    );
   });
 
   it("invalid resultJson logs warn and returns raw data as-is", () => {

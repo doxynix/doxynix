@@ -255,6 +255,11 @@ export const analysisLifecycleService = {
       teamRoles,
     });
 
+    // Write-side guard, deliberately still `parseRepoMetrics` and not the
+    // `safeParseRepoMetrics` variant the read path uses: this one reports *whether*
+    // the blob is valid, which is the question being asked here. The read path
+    // only needs the parsed value. Not dead — `parseRepoMetrics` is unchanged and
+    // still rejects a malformed overlay.
     if (parseRepoMetrics(finalMetrics) == null) {
       appLogger.error({
         analysisId,
