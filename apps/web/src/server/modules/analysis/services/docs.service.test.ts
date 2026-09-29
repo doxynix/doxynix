@@ -23,11 +23,13 @@ const GRAPH = { nodes: [{ id: "file:src/app.ts", label: "app.ts" }] };
 type RowBuilder = (keys: string[]) => Record<string, unknown>;
 
 function makeDb(rowByKey: RowBuilder) {
-  const captured: { documentSelect?: unknown; analysisSelect?: unknown } = {};
+  const captured: { analysisQueried: boolean; analysisSelect?: unknown; documentSelect?: unknown } =
+    { analysisQueried: false };
 
   const db = {
     analysis: {
       findUnique: (args: { select?: unknown }) => {
+        captured.analysisQueried = true;
         captured.analysisSelect = args.select;
         return {
           metricsJson: null,
@@ -70,10 +72,22 @@ describe("docsService.getWithGraphLinks", () => {
     expect(Object.keys(captured.documentSelect as Record<string, unknown>)).toStrictEqual(
       EXPECTED_SELECT,
     );
-    expect(Object.keys(captured.analysisSelect as Record<string, unknown>)).toStrictEqual([
-      "metricsJson",
-      "resultJson",
-    ]);
+  });
+
+  it("does not query the analysis row, because no column ever held a dependency graph", async () => {
+    const { captured, db } = makeDb(makeRow);
+
+    await docsService.getWithGraphLinks(db, INPUT);
+
+    // `RepositoryEvidence.dependencyGraph` is computed per analysis but never
+    // written to `resultJson` or `metricsJson`, so reading it back could only
+    // ever yield `undefined`. This test used to inject a graph through the
+    // `analysis.findUnique` mock, which proved nothing: the row it fabricated is
+    // a shape no code in the repo produces. Asserting the query is not made is
+    // the honest contract, and it fails loudly if someone re-adds it expecting
+    // it to matter.
+    expect(captured.analysisSelect).toBeUndefined();
+    expect(captured.analysisQueried).toBe(false);
   });
 
   it("hands the formatter a complete content string and version", async () => {
@@ -84,7 +98,7 @@ describe("docsService.getWithGraphLinks", () => {
     expect(result.content).toBe(CONTENT);
     expect(result.version).toBe("abc123");
     expect(result.sections).toStrictEqual(
-      DocumentFormatter.withGraphLinks(CONTENT, GRAPH, INPUT.docType, "abc123").sections,
+      DocumentFormatter.withGraphLinks(CONTENT, null, INPUT.docType, "abc123").sections,
     );
     expect(result.sections.length).toBeGreaterThan(0);
   });
@@ -100,14 +114,19 @@ describe("docsService.getWithGraphLinks", () => {
     }
   });
 
-  it("links sections to the graph, proving the document column reached the formatter", async () => {
+  it("produces no graph links, because this endpoint has no graph to link against", async () => {
     const { db } = makeDb(makeRow);
 
     const result = await docsService.getWithGraphLinks(db, INPUT);
 
-    expect(
-      result.sections.some((section) => section.graphNodeIds.includes("file:src/app.ts")),
-    ).toBe(true);
+    // `withGraphLinks` accepts `null` and guards on `graph?.nodes`, so every
+    // section comes back with an empty `graphNodeIds`. The two endpoints that
+    // DO link are `workspace-search.service` (reads `structure.graph`) and
+    // `doc-section-matcher` (receives one); both are covered by
+    // `section-graph-linker.test.ts`.
+    for (const section of result.sections) {
+      expect(section.graphNodeIds).toStrictEqual([]);
+    }
   });
 
   it("returns the document id but no longer leaks repoId / analysisId", async () => {
