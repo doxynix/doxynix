@@ -51,6 +51,7 @@ model Document {
   id         String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   version    String
   type       DocType
+  /// @encrypted
   /// @zod.string.min(1, { message: "Content cannot be empty" })
   content    String    @db.Text
   path       String?

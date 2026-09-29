@@ -22,6 +22,11 @@ generator enums {
   output   = "../../../packages/shared/src/enums/index.ts"
 }
 
+generator fieldEncryption {
+  provider = "bun run prisma/field-encryption-generator.ts"
+  output   = "../src/server/core/field-encryption/config.generated.ts"
+}
+
 // plugin zod {
 //   provider = "@core/zod"
 //   output   = "../src/shared/api-contracts"

@@ -1,4 +1,4 @@
-import { ENCRYPTED_METADATA_MAP } from "./constants";
+import { getSensitiveFieldNames } from "../core/field-encryption/config";
 import { safeJsonClone } from "./safe-json";
 
 const SENSITIVE_KEYS = new Set([
@@ -150,33 +150,39 @@ export function maskSensitiveFields(modelName: string, data: unknown): unknown {
   if (data == null || typeof data !== "object") {
     return data;
   }
-  const sensitiveFields = ENCRYPTED_METADATA_MAP[modelName];
-  if (!sensitiveFields) {
+  const sensitiveFields = getSensitiveFieldNames(modelName);
+  if (sensitiveFields.size === 0) {
     return data;
   }
 
   const cloned = Array.isArray(data) ? [...data] : { ...(data as Record<string, unknown>) };
 
-  const traverse = (obj: any) => {
+  const traverse = (obj: unknown) => {
     if (obj == null || typeof obj !== "object") {
       return;
     }
 
-    if (obj.data != null && typeof obj.data === "object") {
-      for (const key of Object.keys(obj.data)) {
-        if (sensitiveFields[key] !== undefined) {
-          obj.data[key] = mask(obj.data[key]);
-        } else if (typeof obj.data[key] === "object") {
-          traverse(obj.data[key]);
+    const record = obj as Record<string, unknown>;
+    const nested = record.data;
+
+    if (nested != null && typeof nested === "object") {
+      // `typeof` narrows to `object`, which has no string index signature.
+      const payload = nested as Record<string, unknown>;
+
+      for (const key of Object.keys(payload)) {
+        if (sensitiveFields.has(key)) {
+          payload[key] = mask(payload[key]);
+        } else if (typeof payload[key] === "object") {
+          traverse(payload[key]);
         }
       }
     }
 
-    for (const key of Object.keys(obj)) {
-      if (sensitiveFields[key] !== undefined) {
-        obj[key] = mask(obj[key]);
-      } else if (typeof obj[key] === "object") {
-        traverse(obj[key]);
+    for (const key of Object.keys(record)) {
+      if (sensitiveFields.has(key)) {
+        record[key] = mask(record[key]);
+      } else if (typeof record[key] === "object") {
+        traverse(record[key]);
       }
     }
   };

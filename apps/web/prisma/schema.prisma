@@ -21,6 +21,11 @@ generator enums {
   output   = "../../../packages/shared/src/enums/index.ts"
 }
 
+generator fieldEncryption {
+  provider = "bun run prisma/field-encryption-generator.ts"
+  output   = "../src/server/core/field-encryption/config.generated.ts"
+}
+
 generator fakeData {
   provider = "prisma-generator-fake-data"
   output   = "../prisma/generated/fake-data.ts"
@@ -129,6 +134,7 @@ model User {
   /// @encryption:hash(email)?normalize=lowercase&normalize=trim
   /// @zod.custom.omit(["model"])
   emailHash           String?              @unique() @map("email_hash")
+  /// @encrypted
   /// @zod.string.trim().min(1, { message: "Name required" }).max(50, { message: "Name cannot exceed 50 characters" })
   name                String?
   emailVerified       Boolean              @default(false) @map("email_verified")
@@ -415,6 +421,7 @@ model Document {
   id         String    @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   version    String
   type       DocType
+  /// @encrypted
   /// @zod.string.min(1, { message: "Content cannot be empty" })
   content    String    @db.Text()
   path       String?
