@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.0.5](https://github.com/doxynix/doxynix/compare/doxynix-v5.0.4...doxynix-v5.0.5) (2026-09-29)
+
+
+### Bug Fixes
+
+* **deps:** pin elkjs to a single version via overrides ([#2236](https://github.com/doxynix/doxynix/issues/2236)) ([6816150](https://github.com/doxynix/doxynix/commit/68161504f4b14da8e0b9eaca7dea16291f102f30))
+
+
+### Performance Improvements
+
+* **web:** defer sentry replay and tracing behind first paint ([#2237](https://github.com/doxynix/doxynix/issues/2237)) ([fcac7e0](https://github.com/doxynix/doxynix/commit/fcac7e033027367afcfc263b64afe61c3a62c963))
+* **web:** load the landing analytics chart on demand ([#2238](https://github.com/doxynix/doxynix/issues/2238)) ([4b6b544](https://github.com/doxynix/doxynix/commit/4b6b54499a3c4a075ff539a4eeee084c49b351f1))
+
 ## [5.0.4](https://github.com/doxynix/doxynix/compare/doxynix-v5.0.3...doxynix-v5.0.4) (2026-09-29)
 
 

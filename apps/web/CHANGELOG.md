@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.5](https://github.com/doxynix/doxynix/compare/web-v4.0.4...web-v4.0.5) (2026-09-29)
+
+
+### Performance Improvements
+
+* **web:** defer sentry replay and tracing behind first paint ([#2237](https://github.com/doxynix/doxynix/issues/2237)) ([fcac7e0](https://github.com/doxynix/doxynix/commit/fcac7e033027367afcfc263b64afe61c3a62c963))
+* **web:** load the landing analytics chart on demand ([#2238](https://github.com/doxynix/doxynix/issues/2238)) ([4b6b544](https://github.com/doxynix/doxynix/commit/4b6b54499a3c4a075ff539a4eeee084c49b351f1))
+
 ## [4.0.4](https://github.com/doxynix/doxynix/compare/web-v4.0.3...web-v4.0.4) (2026-09-29)
 
 
