@@ -97,8 +97,10 @@
         "no-shadow": "off",
         "react/no-array-index-key": "off",
         "require-yield": "off",
+        "typescript/no-explicit-any": "off",
         "typescript/no-non-null-assertion": "off",
         "typescript/no-unnecessary-type-assertion": "warn",
+        "typescript/no-unsafe-type-assertion": "off",
         "typescript/only-throw-error": "off",
         "typescript/unbound-method": "off",
         "vitest/expect-expect": [
