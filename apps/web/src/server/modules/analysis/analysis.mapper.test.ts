@@ -33,6 +33,7 @@ import defaultAiResult from "./fixtures/default-ai-result.json";
 import defaultMetrics from "./fixtures/default-metrics.json";
 import type { StructureNodePayload } from "./logic/graph-navigator";
 import type { NodeExplainPayload } from "./logic/node-explainer";
+import { coerceAnalysisPayload } from "./logic/payload";
 import type { PRImpactPayload } from "./logic/pr.types";
 import type { StoredDocument } from "./logic/structure-shared";
 
@@ -226,17 +227,17 @@ beforeEach(() => {
 
 describe("coerceAnalysisPayload", () => {
   it("null/undefined and empty JSON → null", () => {
-    expect(analysisMapper.coerceAnalysisPayload(null)).toBeNull();
-    expect(analysisMapper.coerceAnalysisPayload(undefined)).toBeNull();
-    expect(analysisMapper.coerceAnalysisPayload(makeAnalysis(null))).toBeNull();
-    expect(analysisMapper.coerceAnalysisPayload(makeAnalysis({}, null))).toBeNull();
+    expect(coerceAnalysisPayload(null)).toBeNull();
+    expect(coerceAnalysisPayload(undefined)).toBeNull();
+    expect(coerceAnalysisPayload(makeAnalysis(null))).toBeNull();
+    expect(coerceAnalysisPayload(makeAnalysis({}, null))).toBeNull();
   });
 
   it("parses a valid resultJson without warn", () => {
     const aiResult = makeAiResult();
     const analysis = makeAnalysis(aiResult);
 
-    const result = analysisMapper.coerceAnalysisPayload(analysis);
+    const result = coerceAnalysisPayload(analysis);
 
     expect(result?.aiResult).toEqual(aiResult);
     expect(result?.analysis).toBe(analysis);
@@ -247,7 +248,7 @@ describe("coerceAnalysisPayload", () => {
     const invalid = { ...makeAiResult(), refactoring_targets: "oops" } as unknown as AIResult;
     const analysis = makeAnalysis(invalid);
 
-    const result = analysisMapper.coerceAnalysisPayload(analysis);
+    const result = coerceAnalysisPayload(analysis);
 
     expect(result?.aiResult).toBe(invalid);
     expect(mocks.appLogger.warn).toHaveBeenCalledWith(
