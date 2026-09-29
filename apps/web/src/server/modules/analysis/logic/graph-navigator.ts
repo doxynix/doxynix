@@ -73,9 +73,16 @@ export function buildStructureMapPayloadFromContext(
     target: makeStructureNodeId("group", edge.target),
   }));
 
+  // `buildTopLevelNodes` reads its nodes straight out of `context.groupMap`, so
+  // the lookup below always hits. Guard rather than assert it anyway: a fabricated
+  // fallback would silently render an all-zero inspect card.
   const inspectByNodeId = Object.fromEntries(
-    nodes.map((node) => {
-      const entry = context.groupMap.get(node.path)!;
+    nodes.flatMap((node) => {
+      const entry = context.groupMap.get(node.path);
+      if (entry == null) {
+        return [];
+      }
+
       const outgoing = context.rawTopLevelEdges
         .filter((edge) => edge.source === node.path)
         .sort((left, right) => right.weight - left.weight)
@@ -95,15 +102,17 @@ export function buildStructureMapPayloadFromContext(
         .slice(0, 5);
 
       return [
-        node.id,
-        buildInspectPayload({
-          entry,
-          incoming,
-          node,
-          outgoing,
-          semanticLabel: SEMANTIC_META[node.kind].label,
-          summarizeImportance,
-        }),
+        [
+          node.id,
+          buildInspectPayload({
+            entry,
+            incoming,
+            node,
+            outgoing,
+            semanticLabel: SEMANTIC_META[node.kind].label,
+            summarizeImportance,
+          }),
+        ] as const,
       ];
     }),
   );

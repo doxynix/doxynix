@@ -13,6 +13,13 @@ type DocumentWithSections = {
   version: string;
 };
 
+/**
+ * A section mid-accumulation. Only the fields known at heading time are declared
+ * here; `content` and `endLine` are supplied at push time, so a spread of this
+ * type plus those two is a complete `DocumentSection` with no cast.
+ */
+type OpenSection = Pick<DocumentSection, "graphNodeIds" | "id" | "startLine" | "title">;
+
 type GraphNode = {
   id: string;
   label?: string;
@@ -50,7 +57,7 @@ class DocumentGraphLinker {
 
     // Split document into sections (by headings)
     const lines = document.split("\n");
-    let currentSection: null | Partial<DocumentSection> = null;
+    let currentSection: null | OpenSection = null;
     let contentBuffer: string[] = [];
 
     for (let i = 0; i < lines.length; i++) {
@@ -58,11 +65,14 @@ class DocumentGraphLinker {
 
       // Detect heading (markdown # style)
       if (HEADING_REGEX.test(line)) {
-        // Save previous section
+        // Save previous section. `content` and `endLine` are supplied at push
+        // time instead of being assigned onto the partial, so no cast is needed.
         if (currentSection) {
-          currentSection.content = contentBuffer.join("\n").trim();
-          currentSection.endLine = i - 1;
-          sections.push(currentSection as DocumentSection);
+          sections.push({
+            ...currentSection,
+            content: contentBuffer.join("\n").trim(),
+            endLine: i - 1,
+          });
         } else if (contentBuffer.join("").trim().length > 0) {
           sections.push({
             content: contentBuffer.join("\n").trim(),
@@ -92,9 +102,11 @@ class DocumentGraphLinker {
 
     // Save last section
     if (currentSection) {
-      currentSection.content = contentBuffer.join("\n").trim();
-      currentSection.endLine = lines.length - 1;
-      sections.push(currentSection as DocumentSection);
+      sections.push({
+        ...currentSection,
+        content: contentBuffer.join("\n").trim(),
+        endLine: lines.length - 1,
+      });
     } else if (document.trim().length > 0) {
       // Fallback: create single section if no headings found
       sections.push({
