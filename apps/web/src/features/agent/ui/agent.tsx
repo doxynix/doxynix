@@ -4,6 +4,7 @@ import { type ChangeEvent, type SyntheticEvent, useEffect, useRef, useState } fr
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useChat } from "@ai-sdk/react";
+import type { ToolUIPart, UIDataTypes, UIMessagePart, UITools } from "ai";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
 import { ArrowDown, Bot, ChevronDown, FileText, Pencil, RotateCw, UserRound } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -28,23 +29,27 @@ import { AnimatedShinyText } from "@/shared/ui/visuals/animated-shiny-text";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { TOOL_INVALIDATIONS, toolLabelKeys } from "../model/agent-config";
+import type { AgentMessagePart, LocalFileAttachment } from "../model/agent-types";
 import { useAgentIsOpen } from "../model/use-agent.store";
 import { AgentForm } from "./agent-form";
 import { AgentHeader } from "./agent-header";
 import { AgentSidebar } from "./agent-sidebar";
-import { ToolCallIndicator } from "./tool-call-indicator";
+import { ToolCallIndicator, type ToolIndicatorPart } from "./tool-call-indicator";
 
-type MessagePart =
-  | { [key: string]: unknown; state: string; type: string }
-  | { filename?: string; mediaType: string; type: "file"; url: string }
-  | { text: string; type: "reasoning" }
-  | { text: string; type: "text" };
+/** The `parts` element type `useChat` hands us, via the session-history query. */
+type SessionMessagePart = UIMessagePart<UIDataTypes, UITools>;
 
-type LocalFileAttachment = {
-  contentType: string;
-  name: string;
-  url: string;
-};
+/**
+ * A `tool-${string}` part as `ToolCallIndicator` reads it. `ToolUIPart<UITools>`
+ * is `Record<string, UITool>` with no concrete tool names, so its default form
+ * is assignable to `ToolIndicatorPart` — that assignability is the drift guard:
+ * if the SDK ever renames a `state` or drops a field, this line stops compiling.
+ */
+type RenderedToolPart = ToolUIPart & ToolIndicatorPart;
+
+function isToolPart(part: SessionMessagePart): part is RenderedToolPart {
+  return part.type.startsWith("tool-");
+}
 
 function MarkdownLoading() {
   const t = useTranslations("Agent");
@@ -199,7 +204,7 @@ export function Agent() {
     setInput("");
     setAttachments([]);
 
-    const messageParts: MessagePart[] = [];
+    const messageParts: AgentMessagePart[] = [];
     if (userMessage.trim() !== "") {
       messageParts.push({ text: userMessage, type: "text" });
     }
@@ -326,10 +331,8 @@ export function Agent() {
                         {messages.map((message) => {
                           const fullMessageText =
                             message.parts
-                              .filter(
-                                (p: any): p is { text: string; type: "text" } => p?.type === "text",
-                              )
-                              .map((p: any) => p.text)
+                              .filter((part) => part.type === "text")
+                              .map((part) => part.text)
                               .join("\n") || "";
 
                           const isAssistant = message.role === "assistant";
@@ -395,14 +398,8 @@ export function Agent() {
                                     isAssistant ? "mr-auto text-left" : "ml-auto text-right",
                                   )}
                                 >
-                                  {message.parts.map((rawPart, index) => {
-                                    const part = rawPart as MessagePart;
-
+                                  {message.parts.map((part, index) => {
                                     if (part.type === "reasoning") {
-                                      const reasoningPart = part as {
-                                        text: string;
-                                        type: "reasoning";
-                                      };
                                       const partKey = `${message.id}-reasoning-${index}`;
                                       return (
                                         <Collapsible
@@ -428,7 +425,7 @@ export function Agent() {
                                           </div>
                                           <CollapsibleContent>
                                             <MarkdownRenderer
-                                              content={reasoningPart.text}
+                                              content={part.text}
                                               id={partKey}
                                               isStreaming={isStreamingThis}
                                               key={`${partKey}-md`}
@@ -438,7 +435,7 @@ export function Agent() {
                                       );
                                     }
 
-                                    if (part.type.startsWith("tool-")) {
+                                    if (isToolPart(part)) {
                                       return (
                                         <ToolCallIndicator
                                           addToolApprovalResponse={(e) =>
@@ -452,10 +449,9 @@ export function Agent() {
                                     }
 
                                     if (part.type === "text") {
-                                      const textPart = part as { text: string; type: "text" };
                                       return (
                                         <MarkdownRenderer
-                                          content={textPart.text}
+                                          content={part.text}
                                           id={`${message.id}-text-${index}`}
                                           isStreaming={isStreamingThis}
                                           key={`${message.id}-text-${index}`}
@@ -464,13 +460,7 @@ export function Agent() {
                                     }
 
                                     if (part.type === "file") {
-                                      const filePart = part as {
-                                        filename?: string;
-                                        mediaType: string;
-                                        type: "file";
-                                        url: string;
-                                      };
-                                      const isImage = filePart.mediaType.startsWith("image/");
+                                      const isImage = part.mediaType.startsWith("image/");
 
                                       return (
                                         <div
@@ -482,17 +472,17 @@ export function Agent() {
                                         >
                                           {isImage ? (
                                             <Image
-                                              alt={filePart.filename ?? t("attachment_fallback")}
+                                              alt={part.filename ?? t("attachment_fallback")}
                                               className="h-auto max-h-38 w-full object-cover"
                                               height={200}
-                                              src={filePart.url}
+                                              src={part.url}
                                               width={200}
                                             />
                                           ) : (
                                             <div className="flex items-center gap-2 p-3 text-foreground text-xs">
                                               <FileText />
                                               <span className="truncate font-medium">
-                                                {filePart.filename ?? t("document_fallback")}
+                                                {part.filename ?? t("document_fallback")}
                                               </span>
                                             </div>
                                           )}
