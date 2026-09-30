@@ -46,7 +46,7 @@ export const apiKeyService = {
       });
     }
 
-    return { key: fullKey, message: "API Key created" };
+    return { key: fullKey };
   },
 
   async list(db: DbClient) {
@@ -74,7 +74,7 @@ export const apiKeyService = {
     try {
       await db.apiKey.update({ data: { revoked: true }, where: { id } });
 
-      return { message: "API Key revoked", success: true };
+      return { success: true };
     } catch (error) {
       handlePrismaError(error, { notFound: "Key not found" });
     }
@@ -118,6 +118,6 @@ export const apiKeyService = {
       });
     }
 
-    return { message: "API Key data updated", success: true };
+    return { success: true };
   },
 };

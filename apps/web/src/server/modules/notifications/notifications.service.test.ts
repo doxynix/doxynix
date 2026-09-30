@@ -215,11 +215,7 @@ describe("notificationsService.deleteRead", () => {
     const result = await notificationsService.deleteRead(db, {});
 
     expect(deleteMany).toHaveBeenCalledWith({ where: { isRead: true } });
-    expect(result).toEqual({
-      deletedCount: 2,
-      message: "Deleted 2 read notifications",
-      success: true,
-    });
+    expect(result).toEqual({ deletedCount: 2, success: true });
   });
 
   it("should keep the filter alongside the isRead guard", async () => {
@@ -242,11 +238,7 @@ describe("notificationsService.markAllAsRead", () => {
       data: { isRead: true },
       where: { isRead: false },
     });
-    expect(result).toEqual({
-      message: "Marked 5 notifications as read",
-      success: true,
-      updatedCount: 5,
-    });
+    expect(result).toEqual({ success: true, updatedCount: 5 });
   });
 
   it("should keep the filter alongside the isRead guard", async () => {

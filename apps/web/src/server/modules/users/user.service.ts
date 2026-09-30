@@ -114,10 +114,7 @@ export const userService = {
       });
     }
 
-    return {
-      message: "Your account and all associated data have been permanently deleted",
-      success: true,
-    };
+    return { success: true };
   },
 
   async disconnectAccount(db: DbClient, userId: string, provider: "github" | "google" | "yandex") {
@@ -193,7 +190,7 @@ export const userService = {
       throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
     }
 
-    return { message: "User found", user: userMapper.toPublic(user) };
+    return { user: userMapper.toPublic(user) };
   },
 
   async removeAvatar(db: DbClient, userId: string) {
@@ -219,7 +216,7 @@ export const userService = {
       });
     }
 
-    return { message: "Profile Picture removed", success: true };
+    return { success: true };
   },
   async revokeSession(headers: Headers, sessionId: string) {
     const sessions = await auth.api.listSessions({ headers });
@@ -240,6 +237,6 @@ export const userService = {
       where: { id: userId },
     });
 
-    return { message: "Credentials updated", user: userMapper.toPublic(updatedUser) };
+    return { user: userMapper.toPublic(updatedUser) };
   },
 };

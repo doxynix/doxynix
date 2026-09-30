@@ -9,6 +9,7 @@ import { validateField } from "@/core/validation";
 import { brand } from "@/ui/colors";
 import { formatDate } from "@/ui/formatters";
 import { renderCard, renderSection } from "@/ui/layout";
+import { MESSAGES } from "@/ui/messages";
 import { output } from "@/ui/output";
 import { withTaskSpinner } from "@/ui/spinner";
 
@@ -168,11 +169,10 @@ export function registerProfileCommand(program: Command) {
     .command("remove-avatar")
     .description("Remove custom profile picture and reset to default avatar")
     .action(async () => {
-      const result = await withTaskSpinner(
-        { start: "Deleting profile avatar...", stop: "Avatar removed!" },
-        () => profileService.removeAvatar(),
+      await withTaskSpinner({ start: "Deleting profile avatar...", stop: "Avatar removed!" }, () =>
+        profileService.removeAvatar(),
       );
-      p.outro(brand.success(` ${result.message}`));
+      p.outro(brand.success(MESSAGES.profile.avatarRemoved));
     });
 
   profile
@@ -193,12 +193,11 @@ export function registerProfileCommand(program: Command) {
         return;
       }
 
-      const result = await withTaskSpinner(
-        { start: "Deleting account...", stop: "Account deleted." },
-        () => profileService.deleteAccount(),
+      await withTaskSpinner({ start: "Deleting account...", stop: "Account deleted." }, () =>
+        profileService.deleteAccount(),
       );
 
       removeToken();
-      p.outro(brand.error(` ${result.message}`));
+      p.outro(brand.success(MESSAGES.profile.accountDeleted));
     });
 }

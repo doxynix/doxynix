@@ -6,6 +6,7 @@ import { confirmOrAbort, resolveEntityOrPick } from "@/core/prompts";
 import { brand } from "@/ui/colors";
 import { formatRelativeTime } from "@/ui/formatters";
 import { renderSection } from "@/ui/layout";
+import { MESSAGES } from "@/ui/messages";
 import { output } from "@/ui/output";
 import { withTaskSpinner } from "@/ui/spinner";
 
@@ -134,7 +135,7 @@ export function registerNotificationsCommand(program: Command) {
         { start: "Updating notification statuses...", stop: "Done!" },
         () => notificationsService.markAllAsRead(),
       );
-      p.outro(brand.success(result.message));
+      p.outro(brand.success(MESSAGES.notificationBulk.markedAll(result.updatedCount)));
     });
 
   notification
@@ -173,11 +174,11 @@ export function registerNotificationsCommand(program: Command) {
         return;
       }
 
-      const result = await withTaskSpinner(
+      await withTaskSpinner(
         { start: `Marking notification ${targetId.slice(0, 8)} as read...`, stop: "Updated!" },
         () => notificationsService.markAs(targetId, true),
       );
-      p.outro(brand.success(result.message));
+      p.outro(brand.success(MESSAGES.notification.markedAsRead));
     });
 
   notification
@@ -189,11 +190,11 @@ export function registerNotificationsCommand(program: Command) {
         return;
       }
 
-      const result = await withTaskSpinner(
+      await withTaskSpinner(
         { start: `Marking notification ${targetId.slice(0, 8)} as unread...`, stop: "Updated!" },
         () => notificationsService.markAs(targetId, false),
       );
-      p.outro(brand.success(result.message));
+      p.outro(brand.success(MESSAGES.notification.markedAsUnread));
     });
 
   notification
@@ -214,11 +215,11 @@ export function registerNotificationsCommand(program: Command) {
         return;
       }
 
-      const result = await withTaskSpinner(
+      await withTaskSpinner(
         { start: `Deleting notification ${targetId.slice(0, 8)}...`, stop: "Deleted!" },
         () => notificationsService.deleteOne(targetId),
       );
-      p.outro(brand.success(result.message));
+      p.outro(brand.success(MESSAGES.notification.deleted));
     });
 
   notification
@@ -241,6 +242,6 @@ export function registerNotificationsCommand(program: Command) {
         () => notificationsService.deleteRead(),
       );
 
-      p.outro(brand.success(`${result.message} (${result.deletedCount} items removed)`));
+      p.outro(brand.success(MESSAGES.notificationBulk.deletedRead(result.deletedCount)));
     });
 }

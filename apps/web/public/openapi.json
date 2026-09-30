@@ -1344,7 +1344,34 @@
                             },
                             "resultJson": {
                               "anyOf": [
-                                {},
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "fixedFiles": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object",
+                                        "properties": {
+                                          "filePath": {
+                                            "type": "string"
+                                          },
+                                          "newContent": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "filePath",
+                                          "newContent"
+                                        ],
+                                        "additionalProperties": false
+                                      }
+                                    }
+                                  },
+                                  "required": [
+                                    "fixedFiles"
+                                  ],
+                                  "additionalProperties": false
+                                },
                                 {
                                   "type": "null"
                                 }
@@ -3685,14 +3712,10 @@
                           "properties": {
                             "key": {
                               "type": "string"
-                            },
-                            "message": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "key",
-                            "message"
+                            "key"
                           ],
                           "additionalProperties": false
                         }
@@ -3896,15 +3919,11 @@
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "type": "object",
                           "properties": {
-                            "message": {
-                              "type": "string"
-                            },
                             "success": {
                               "type": "boolean"
                             }
                           },
                           "required": [
-                            "message",
                             "success"
                           ],
                           "additionalProperties": false
@@ -4008,15 +4027,11 @@
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "type": "object",
                           "properties": {
-                            "message": {
-                              "type": "string"
-                            },
                             "success": {
                               "type": "boolean"
                             }
                           },
                           "required": [
-                            "message",
                             "success"
                           ],
                           "additionalProperties": false
@@ -4676,15 +4691,11 @@
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "type": "object",
                           "properties": {
-                            "message": {
-                              "type": "string"
-                            },
                             "success": {
                               "type": "boolean"
                             }
                           },
                           "required": [
-                            "message",
                             "success"
                           ],
                           "additionalProperties": false
@@ -4739,16 +4750,12 @@
                               "minimum": 0,
                               "maximum": 9007199254740991
                             },
-                            "message": {
-                              "type": "string"
-                            },
                             "success": {
                               "type": "boolean"
                             }
                           },
                           "required": [
                             "deletedCount",
-                            "message",
                             "success"
                           ],
                           "additionalProperties": false
@@ -5041,9 +5048,6 @@
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "type": "object",
                           "properties": {
-                            "message": {
-                              "type": "string"
-                            },
                             "success": {
                               "type": "boolean"
                             },
@@ -5054,7 +5058,6 @@
                             }
                           },
                           "required": [
-                            "message",
                             "success",
                             "updatedCount"
                           ],
@@ -5105,15 +5108,11 @@
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "type": "object",
                           "properties": {
-                            "message": {
-                              "type": "string"
-                            },
                             "success": {
                               "type": "boolean"
                             }
                           },
                           "required": [
-                            "message",
                             "success"
                           ],
                           "additionalProperties": false
@@ -5163,9 +5162,6 @@
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "type": "object",
                           "properties": {
-                            "message": {
-                              "type": "string"
-                            },
                             "repo": {
                               "type": "object",
                               "properties": {
@@ -5308,7 +5304,6 @@
                             }
                           },
                           "required": [
-                            "message",
                             "repo",
                             "success"
                           ],
@@ -5359,15 +5354,11 @@
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "type": "object",
                           "properties": {
-                            "message": {
-                              "type": "string"
-                            },
                             "success": {
                               "type": "boolean"
                             }
                           },
                           "required": [
-                            "message",
                             "success"
                           ],
                           "additionalProperties": false
@@ -5417,15 +5408,11 @@
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "type": "object",
                           "properties": {
-                            "message": {
-                              "type": "string"
-                            },
                             "success": {
                               "type": "boolean"
                             }
                           },
                           "required": [
-                            "message",
                             "success"
                           ],
                           "additionalProperties": false
@@ -5478,16 +5465,12 @@
                             "count": {
                               "type": "number"
                             },
-                            "message": {
-                              "type": "string"
-                            },
                             "success": {
                               "type": "boolean"
                             }
                           },
                           "required": [
                             "count",
-                            "message",
                             "success"
                           ],
                           "additionalProperties": false
@@ -6311,15 +6294,11 @@
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "type": "object",
                           "properties": {
-                            "message": {
-                              "type": "string"
-                            },
                             "success": {
                               "type": "boolean"
                             }
                           },
                           "required": [
-                            "message",
                             "success"
                           ],
                           "additionalProperties": false
@@ -6505,9 +6484,6 @@
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "type": "object",
                           "properties": {
-                            "message": {
-                              "type": "string"
-                            },
                             "user": {
                               "type": "object",
                               "properties": {
@@ -6567,7 +6543,6 @@
                             }
                           },
                           "required": [
-                            "message",
                             "user"
                           ],
                           "additionalProperties": false
@@ -6622,15 +6597,11 @@
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "type": "object",
                           "properties": {
-                            "message": {
-                              "type": "string"
-                            },
                             "success": {
                               "type": "boolean"
                             }
                           },
                           "required": [
-                            "message",
                             "success"
                           ],
                           "additionalProperties": false
@@ -6734,9 +6705,6 @@
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "type": "object",
                           "properties": {
-                            "message": {
-                              "type": "string"
-                            },
                             "user": {
                               "type": "object",
                               "properties": {
@@ -6796,7 +6764,6 @@
                             }
                           },
                           "required": [
-                            "message",
                             "user"
                           ],
                           "additionalProperties": false

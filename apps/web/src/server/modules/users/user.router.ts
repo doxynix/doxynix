@@ -8,7 +8,7 @@ import { userService } from "./user.service";
 export const userRouter = createTRPCRouter({
   deleteAccount: protectedProcedure
     .input(z.object({}).optional())
-    .output(z.object({ message: z.string(), success: z.boolean() }))
+    .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx }) => {
       return userService.deleteAccount(ctx.db, ctx.session.user.id);
     }),
@@ -29,14 +29,14 @@ export const userRouter = createTRPCRouter({
 
   me: protectedProcedure
     .input(z.object({}).optional())
-    .output(z.object({ message: z.string(), user: PublicUserSchema }))
+    .output(z.object({ user: PublicUserSchema }))
     .query(async ({ ctx }) => {
       return userService.getMe(ctx.db, ctx.session.user.id);
     }),
 
   removeAvatar: protectedProcedure
     .input(z.object({}).optional())
-    .output(z.object({ message: z.string(), success: z.boolean() }))
+    .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx }) => {
       return userService.removeAvatar(ctx.db, ctx.session.user.id);
     }),
@@ -50,7 +50,7 @@ export const userRouter = createTRPCRouter({
 
   updateUser: protectedProcedure
     .input(UpdateProfileSchema)
-    .output(z.object({ message: z.string(), user: PublicUserSchema }))
+    .output(z.object({ user: PublicUserSchema }))
     .mutation(async ({ ctx, input }) => {
       return userService.updateUser(ctx.db, ctx.session.user.id, input);
     }),

@@ -79,7 +79,7 @@ export const notificationsService = {
     try {
       await db.notification.delete({ where: { id: id } });
 
-      return { message: "Notification deleted", success: true };
+      return { success: true };
     } catch (error) {
       handlePrismaError(error, { notFound: "Notification not found" });
     }
@@ -91,11 +91,7 @@ export const notificationsService = {
     try {
       const result = await db.notification.deleteMany({ where: { ...where, isRead: true } });
 
-      return {
-        deletedCount: result.count,
-        message: `Deleted ${result.count} read notifications`,
-        success: true,
-      };
+      return { deletedCount: result.count, success: true };
     } catch (error) {
       handlePrismaError(error, { notFound: "Notification not found" });
     }
@@ -160,11 +156,7 @@ export const notificationsService = {
 
       const updatedCount = result.count;
 
-      return {
-        message: `Marked ${updatedCount} notifications as read`,
-        success: true,
-        updatedCount,
-      };
+      return { success: true, updatedCount };
     } catch (error) {
       handlePrismaError(error);
     }
@@ -174,7 +166,7 @@ export const notificationsService = {
     try {
       await db.notification.update({ data: { isRead }, where: { id: id } });
 
-      return { message: isRead ? "Marked as read" : "Marked as unread", success: true };
+      return { success: true };
     } catch (error) {
       handlePrismaError(error, { notFound: "Notification not found" });
     }
