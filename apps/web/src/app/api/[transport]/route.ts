@@ -4,9 +4,9 @@ import { createMcpHandler, withMcpAuth } from "mcp-handler";
 import { APP_VERSION } from "@/shared/config/env.server";
 
 import { appLogger } from "@/server/core/app-logger";
+import { verifyAndUseApiKey } from "@/server/core/verify-and-use-api-key";
 import { AGENT_SYSTEM_PROMPT } from "@/server/modules/agent/agent.prompts";
 import { getAgentTools } from "@/server/modules/agent/agent.tools";
-import { verifyAndUseApiKey } from "@/server/utils/verify-and-use-api-key";
 
 import { filterAndPrepareTools } from "./mcp-utils";
 

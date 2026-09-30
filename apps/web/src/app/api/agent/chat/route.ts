@@ -14,6 +14,7 @@ import { TOOL_APPROVAL_SECRET } from "@/shared/config/env.server";
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { getActiveModels } from "@/server/core/ai/ai-constants";
+import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
 import { prisma } from "@/server/core/db";
@@ -25,7 +26,6 @@ import {
 } from "@/server/modules/agent/agent.prompts";
 import { getAgentTools, MUTATION_TOOLS } from "@/server/modules/agent/agent.tools";
 import { processMessageParts } from "@/server/modules/agent/agent-storage";
-import { AppError } from "@/server/utils/api-error";
 import { withApiHandler } from "@/server/utils/with-api-handler";
 
 export const maxDuration = 60;

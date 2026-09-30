@@ -29,11 +29,11 @@ import { resolveRequestLocale } from "@/shared/i18n/resolve-request-locale";
 
 import { AuthEmail } from "@/server/core/auth-email";
 
-import { maskEmail, normalizeEmail, validateEmailSafety } from "../utils/email-guard";
 import { getNormalizedHash } from "../utils/hash";
 import { appLogger } from "./app-logger";
 import { customAuthAdapter } from "./auth/auth-adapter";
 import { prisma } from "./db";
+import { maskEmail, normalizeEmail, validateEmailSafety } from "./email-guard";
 import { emailSignInLimiter } from "./ratelimit";
 import { redisService } from "./redis";
 

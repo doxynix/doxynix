@@ -5,9 +5,9 @@ import { NextResponse } from "next/server";
 import ipaddr from "ipaddr.js";
 import { Agent } from "undici";
 
+import { AppError, findAppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
-import { AppError, findAppError } from "@/server/utils/api-error";
 import { withApiHandler } from "@/server/utils/with-api-handler";
 
 import { ProxyRequestBody } from "./proxy-request.schema";

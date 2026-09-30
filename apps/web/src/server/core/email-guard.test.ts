@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { maskEmail, normalizeEmail } from "@/server/utils/email-guard";
+import { maskEmail, normalizeEmail } from "@/server/core/email-guard";
 import { hasText, isEmpty } from "@/server/utils/string-utils";
 
 describe("String Utils (replacement validation)", () => {

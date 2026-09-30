@@ -5,7 +5,7 @@ import { getHTTPStatusCodeFromError } from "@trpc/server/http";
 
 import { IS_PROD } from "@/shared/config/env.flags";
 
-import { requestContext } from "./request-context";
+import { requestContext } from "@/server/utils/request-context";
 
 // Reuses tRPC's union so the HTTP and tRPC adapters are two serializers over one normalizer, not two taxonomies.
 export type ErrorCode = TRPCError["code"];

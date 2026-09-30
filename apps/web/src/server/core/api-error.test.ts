@@ -8,7 +8,7 @@ import {
   isNextControlFlowError,
   normalizeError,
   statusForCode,
-} from "@/server/utils/api-error";
+} from "@/server/core/api-error";
 
 type KnownErrorOptions = {
   clientVersion: string;

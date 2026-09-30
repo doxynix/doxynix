@@ -1,8 +1,8 @@
 import type { NextRequest } from "next/server";
 
 import { auth } from "@/server/core/auth";
+import { verifyAndUseApiKey } from "@/server/core/verify-and-use-api-key";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";
-import { verifyAndUseApiKey } from "@/server/utils/verify-and-use-api-key";
 
 import { prisma } from "../db";
 import { redisClient } from "../redis";

@@ -14,7 +14,7 @@ import {
   GITHUB_SYSTEM_PAT,
 } from "@/shared/config/env.server";
 
-import { AppError } from "../../utils/api-error";
+import { AppError } from "../api-error";
 import { appLogger } from "../app-logger";
 import type { DbClient } from "../db";
 import { parseGitUrl } from "./git-url";
