@@ -27,7 +27,7 @@ function severityForScore(score: number): RiskFindingRef["severity"] {
   return "LOW";
 }
 
-function buildGraphReliability(
+export function buildGraphReliability(
   evidence: RepositoryEvidence,
   metrics: Pick<RepoMetrics, "graphReliability">,
 ): DependencyGraphEvidence {
