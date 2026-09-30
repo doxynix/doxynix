@@ -13,7 +13,7 @@ import {
   magicLink,
   twoFactor,
 } from "better-auth/plugins";
-import { createTranslator } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Resend } from "resend";
 import * as z from "zod";
 
@@ -25,7 +25,7 @@ import {
   RESEND_API_KEY,
   TURNSTILE_SECRET_KEY,
 } from "@/shared/config/env.server";
-import { DEFAULT_LOCALE } from "@/shared/config/locales";
+import { resolveRequestLocale } from "@/shared/i18n/resolve-request-locale";
 
 import { AuthEmail } from "@/server/core/auth-email";
 
@@ -399,13 +399,8 @@ export const auth = betterAuth({
             where: { emailHash: getNormalizedHash(cleanEmail) },
           });
 
-          const authLocale: string = DEFAULT_LOCALE;
-          const { default: authMessages } = await import(`../../../messages/${authLocale}.json`);
-          const t = createTranslator({
-            locale: authLocale,
-            messages: authMessages,
-            namespace: "Auth",
-          });
+          const authLocale = await resolveRequestLocale();
+          const t = await getTranslations({ locale: authLocale, namespace: "Auth" });
           const html = await render(createElement(AuthEmail, { host, t, url }));
 
           await resend.emails.send({
@@ -413,7 +408,9 @@ export const auth = betterAuth({
             html,
             replyTo: "support@doxynix.space",
             subject:
-              user?.emailVerified === true ? "Doxynix | Login" : "Doxynix | Account Activation",
+              user?.emailVerified === true
+                ? t("email_subject_login")
+                : t("email_subject_activation"),
             tags: [{ name: "category", value: "authentication" }],
             to: cleanEmail,
           });
