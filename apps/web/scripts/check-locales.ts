@@ -77,11 +77,11 @@ function walk(data: unknown, prefix: string, depth: number, report: Report, leav
   leaves.push({ depth, path, value: data });
 }
 
-function checkLocale(filePath: string, fileStem: string, report: Report): number {
+function checkLocale(filePath: string, fileStem: string, report: Report): Set<string> {
   const data: unknown = JSON.parse(readFileSync(filePath, "utf-8")) as unknown;
   if (typeof data !== "object" || data === null || Array.isArray(data)) {
     report.errors.push(`${fileStem}.json: top level must be a JSON object`);
-    return 0;
+    return new Set<string>();
   }
 
   const leaves: Leaf[] = [];
@@ -104,7 +104,7 @@ function checkLocale(filePath: string, fileStem: string, report: Report): number
       report.placeholders.push(`${leaf.path}: ${JSON.stringify(leaf.value)}`);
     }
   }
-  return leaves.length;
+  return new Set(leaves.map((leaf) => leaf.path));
 }
 
 async function main(): Promise<number> {
@@ -117,10 +117,29 @@ async function main(): Promise<number> {
     return 1;
   }
 
+  const keySets = new Map<string, Set<string>>();
   let totalKeys = 0;
   for (const file of files) {
     const stem = file.endsWith(".json") ? file.slice(0, -".json".length) : file;
-    totalKeys += checkLocale(join(MESSAGES_DIR, file), stem, report);
+    const keys = checkLocale(join(MESSAGES_DIR, file), stem, report);
+    keySets.set(stem, keys);
+    totalKeys += keys.size;
+  }
+
+  const sourceKeys = keySets.get(SOURCE_LOCALE);
+  if (sourceKeys == null) {
+    console.error(`check-locales: SOURCE_LOCALE ${SOURCE_LOCALE}.json is missing`);
+    return 1;
+  }
+  for (const [stem, keys] of keySets) {
+    if (stem === SOURCE_LOCALE) {
+      continue;
+    }
+    for (const key of sourceKeys) {
+      if (!keys.has(key)) {
+        report.errors.push(`${stem}.json: missing key "${key}" (present in ${SOURCE_LOCALE}.json)`);
+      }
+    }
   }
 
   console.log(`check-locales: scanned ${files.length} locale files, ${totalKeys} leaf values`);

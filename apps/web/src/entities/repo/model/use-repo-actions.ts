@@ -41,8 +41,13 @@ export function useRepoActions() {
 
   const deleteByOwner = trpc.repo.deleteByOwner.useMutation({
     onError: (error) => toast.error(error.message),
-    onSuccess: (data) => {
-      toast.success(data.message);
+    onSuccess: (data, variables) => {
+      toast.success(
+        t("settings_danger_delete_repos_by_owner_toast_success", {
+          count: data.count,
+          owner: variables.owner,
+        }),
+      );
       invalidate();
       posthog.capture("repos_by_owner_deleted");
     },
@@ -50,8 +55,8 @@ export function useRepoActions() {
 
   const deleteRepo = trpc.repo.delete.useMutation({
     onError: (error) => toast.error(error.message),
-    onSuccess: (data) => {
-      toast.success(data.message);
+    onSuccess: () => {
+      toast.success(t("settings_danger_delete_repo_toast_success"));
       invalidate();
       posthog.capture("repo_deleted");
     },
