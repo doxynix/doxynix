@@ -19,7 +19,7 @@ import {
   getPublicClient,
   type OctokitInstance,
   resolveClientContext,
-} from "./github-provider";
+} from "./github-client";
 
 type SearchRepoItem =
   RestEndpointMethodTypes["search"]["repos"]["response"]["data"]["items"][number];

@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server";
 import * as z from "zod";
 
 import type { DbClient } from "@/server/core/db";
-import { getInstallationClient } from "@/server/core/github/github-provider";
+import { getInstallationClient } from "@/server/core/github/github-client";
 import { markdownToHtml } from "@/server/modules/analysis/services/markdown-to-html";
 
 export const prCommentsService = {

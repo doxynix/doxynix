@@ -14,11 +14,11 @@ import { TOOL_APPROVAL_SECRET } from "@/shared/config/env.server";
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { getActiveModels } from "@/server/core/ai/ai-constants";
+import { google } from "@/server/core/ai/google";
 import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
 import { prisma } from "@/server/core/db";
-import { google } from "@/server/core/google";
 import { realtimeService } from "@/server/core/realtime";
 import {
   AGENT_SYSTEM_PROMPT,

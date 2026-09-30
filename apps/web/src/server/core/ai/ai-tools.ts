@@ -3,7 +3,7 @@ import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import { githubBrowseService } from "@/server/core/github/github-browse.service";
+import { githubBrowseService } from "@/server/core/github/github-content";
 import { apiForUser } from "@/server/core/trpc/server";
 import { CodeOptimizer } from "@/server/utils/optimizers";
 

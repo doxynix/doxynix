@@ -15,7 +15,7 @@
   },
   {
     "type": "dependency",
-    "from": "src/server/core/github/github-browse.service.ts",
+    "from": "src/server/core/github/github-content.ts",
     "to": "src/server/modules/analysis/engine/core/file-classifier.ts",
     "unresolvedTo": "@/server/modules/analysis/engine/core/file-classifier",
     "dependencyTypes": [

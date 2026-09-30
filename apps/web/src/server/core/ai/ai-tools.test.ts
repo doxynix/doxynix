@@ -22,7 +22,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("ai", () => ({ tool: mocks.tool }));
 vi.mock("@/server/core/app-logger", () => ({ appLogger: mocks.appLogger }));
 vi.mock("@/server/core/db", () => ({ prisma: mocks.prisma }));
-vi.mock("@/server/core/github/github-browse.service", () => ({
+vi.mock("@/server/core/github/github-content", () => ({
   githubBrowseService: mocks.githubBrowseService,
 }));
 vi.mock("@/server/core/trpc/server", () => ({ apiForUser: mocks.apiForUser }));

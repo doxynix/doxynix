@@ -6,29 +6,18 @@ import { getActiveModels } from "@/server/core/ai/ai-constants";
 import { buildRepositoryToolProfile } from "@/server/core/ai/ai-tools";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import { getInstallationClient } from "@/server/core/github/github-provider";
+import { getInstallationClient } from "@/server/core/github/github-client";
+import type { GithubMentionReply } from "@/server/domain/github-mention-reply";
 import { callWithFallback } from "@/server/utils/call";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
 
 import { GITHUB_AGENT_SYSTEM_PROMPT } from "../agent.prompts";
 
-type GithubReplyPayload = {
-  branch: string;
-  commentBody: string;
-  commentId: number;
-  commentType: "issue" | "review";
-  owner: string;
-  prNumber: number;
-  repoId: string;
-  repoName: string;
-  userId: string;
-};
-
 export const agentGithubReplyTask = task({
   id: "agent-github-reply",
   ...TASK_CONFIGS.agentGithubReply,
-  run: async (payload: GithubReplyPayload) => {
+  run: async (payload: GithubMentionReply) => {
     appLogger.info({
       commentId: payload.commentId,
       msg: "github_agent_reply_task_started",

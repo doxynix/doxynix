@@ -7,9 +7,9 @@ import { GITHUB_APP_ID } from "@/shared/config/env.server";
 
 import { appLogger } from "@/server/core/app-logger";
 import type { DbClient, PrismaClientExtended } from "@/server/core/db";
+import { githubTokenService } from "@/server/core/github/github-access-token";
 import { getMyRepos } from "@/server/core/github/github-api";
-import { getInstallationInfo, getPublicClient } from "@/server/core/github/github-provider";
-import { githubTokenService } from "@/server/core/github/github-token.service";
+import { getInstallationInfo, getPublicClient } from "@/server/core/github/github-client";
 import { isOctokitError } from "@/server/utils/handle-error";
 import { getNormalizedHash, getRawHash } from "@/server/utils/hash";
 

@@ -4,7 +4,7 @@ import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import { getClientContext } from "@/server/core/github/github-provider";
+import { getClientContext } from "@/server/core/github/github-client";
 import { prAnalysisLogger } from "@/server/modules/analysis/tasks/pr-analysis-logger";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
 import { taskLogger } from "@/server/utils/task-logger";

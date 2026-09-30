@@ -6,7 +6,7 @@ import { isOctokitError } from "@/server/utils/handle-error";
 import { appLogger } from "../app-logger";
 import type { DbClient, PrismaClientExtended } from "../db";
 import { getFileContent, getRepoBranches, getRepoTree, searchRepos } from "./github-api";
-import { GitHubAuthRequiredError } from "./github-provider";
+import { GitHubAuthRequiredError } from "./github-client";
 
 function throwBrowseAccessError(params: {
   authMessage: string;

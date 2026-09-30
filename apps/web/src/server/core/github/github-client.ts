@@ -19,7 +19,7 @@ import { parseGitUrl } from "@/server/core/git/parse-url";
 import { AppError } from "../api-error";
 import { appLogger } from "../app-logger";
 import type { DbClient } from "../db";
-import { githubTokenService } from "./github-token.service";
+import { githubTokenService } from "./github-access-token";
 
 const AppOctokit = Octokit.plugin(retry, throttling, paginateRest, createPullRequest);
 export type OctokitInstance = InstanceType<typeof AppOctokit>;

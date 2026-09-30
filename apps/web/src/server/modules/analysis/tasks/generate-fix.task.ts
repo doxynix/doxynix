@@ -4,7 +4,7 @@ import { uniq } from "es-toolkit";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import { githubBrowseService } from "@/server/core/github/github-browse.service";
+import { githubBrowseService } from "@/server/core/github/github-content";
 import { redisClient, redisService } from "@/server/core/redis";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 import { TASK_CONFIGS } from "@/server/utils/task-config";

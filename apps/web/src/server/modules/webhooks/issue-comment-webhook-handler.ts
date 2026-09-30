@@ -2,11 +2,9 @@ import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import type {
-  GithubMentionReply,
-  IssueCommentCreatedPayload,
-} from "@/server/core/github/github-webhook.types";
+import type { IssueCommentCreatedPayload } from "@/server/core/github/github-webhook.types";
 import { realtimeService } from "@/server/core/realtime";
+import type { GithubMentionReply } from "@/server/domain/github-mention-reply";
 
 export async function handleIssueCommentEvent(
   payload: IssueCommentCreatedPayload,
