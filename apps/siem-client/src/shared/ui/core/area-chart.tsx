@@ -943,7 +943,6 @@ const AreaChart = forwardRef<HTMLDivElement, AreaChartProps>((props, ref) => {
               </Fragment>
             );
           })}
-          {/* hidden lines to increase clickable target area */}
           {onValueChange
             ? categories.map((category) => (
                 <Line

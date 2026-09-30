@@ -1,18 +1,3 @@
-// dependency-cruiser config for packages/cli (command-slice boundaries + dep health gate).
-// Shared "dependency health" rules + options live in the base config
-// `@doxynix/config/depcruise-base.json` (see `extends` below); only the
-// app-specific rules (orphan exceptions, command slices, cli not-to-dev-dep
-// override) stay here.
-// - This package declares "type": "module", so the config is ESM (`export
-//   default`). Requires Node >= 22.18 (type stripping) or any Bun runtime.
-// - The "missing-typescript-transpiler" warning you may see on runs is benign:
-//   dep-cruiser 18 resolves the monorepo root typescript@7 (outside its
-//   supported <7.0.0 range), but .ts parsing still happens via @swc/core,
-//   including type-only imports (verified). Results are identical to 17.4.3.
-// - not-to-dev-dep exempts workspace packages (@doxynix/*) because tsup
-//   deliberately bundles devDependencies — standard CLI publishing pattern.
-// - Cross-command imports (e.g. github→repos, staging→pr) are real coupling
-//   that lives in the baseline; new ones will fail the gate.
 import type { IConfiguration } from "dependency-cruiser";
 
 const config: IConfiguration = {
@@ -28,11 +13,10 @@ const config: IConfiguration = {
       from: {
         orphan: true,
         pathNot: [
-          "(^|/)[.][^/]+[.](?:js|cjs|mjs|ts|cts|mts|json)$", // dot files
-          "[.]d[.]ts$", // TypeScript declaration files
-          "(^|/)tsconfig[.]json$", // TypeScript config
-          "(^|/)(?:babel|webpack)[.]config[.](?:js|cjs|mjs|ts|cts|mts|json)$", // other configs
-          // CLI entry point - started by the runner, never imported:
+          "(^|/)[.][^/]+[.](?:js|cjs|mjs|ts|cts|mts|json)$",
+          "[.]d[.]ts$",
+          "(^|/)tsconfig[.]json$",
+          "(^|/)(?:babel|webpack)[.]config[.](?:js|cjs|mjs|ts|cts|mts|json)$",
           "^src/index[.]ts$",
         ],
       },
@@ -40,8 +24,6 @@ const config: IConfiguration = {
       severity: "error",
       to: {},
     },
-    // Command slice boundary: a command slice must not import from another
-    // command slice's internals. Group matching ($1) exempts its own folder.
     {
       comment: "Command slices: no imports between slices.",
       from: {
@@ -55,8 +37,6 @@ const config: IConfiguration = {
         pathNot: "^src/commands/$1/",
       },
     },
-    // Layering: core/ and ui/ are shared infrastructure below commands.
-    // Commands MAY import core/ui, but core/ui MUST NOT import commands.
     {
       comment: "Command slices: core and ui must not import from command slices.",
       from: {
@@ -69,7 +49,6 @@ const config: IConfiguration = {
         path: "^src/commands/",
       },
     },
-    // Dead-code gate: every src module must be reachable from the CLI entry.
     {
       comment: "Command slices: module unreachable from src/index.ts — dead code.",
       from: {
@@ -83,9 +62,6 @@ const config: IConfiguration = {
         reachable: false,
       },
     },
-    // Override base not-to-dev-dep to add @doxynix workspace packages to the
-    // exclusion list — tsup bundles devDependencies into the CLI dist, which
-    // is the intended monorepo publishing pattern.
     {
       comment:
         "This module depends on an npm package from the 'devDependencies' section of your " +
@@ -102,20 +78,12 @@ const config: IConfiguration = {
       to: {
         dependencyTypes: ["npm-dev"],
         dependencyTypesNot: ["type-only"],
-        pathNot: [
-          "node_modules/@types/",
-          // Workspace packages are bundled by tsup into dist — intentional
-          // devDependency pattern for monorepo CLI publishing:
-          "node_modules/@doxynix/",
-        ],
+        pathNot: ["node_modules/@types/", "node_modules/@doxynix/"],
       },
     },
   ],
   options: {
     doNotFollow: {
-      // @doxynix/web/trpc resolves through the "types" export straight into
-      // web's raw src (outside node_modules); without this exclusion the whole
-      // web graph gets pulled into the CLI scan.
       dependencyTypes: ["type-only"],
       path: ["node_modules", "apps/web"],
     },
