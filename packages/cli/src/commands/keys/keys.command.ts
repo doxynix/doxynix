@@ -7,6 +7,7 @@ import { validateField } from "@/core/validation";
 
 import { brand } from "@/ui/colors";
 import { renderSection } from "@/ui/layout";
+import { MESSAGES } from "@/ui/messages";
 import { output } from "@/ui/output";
 import { withTaskSpinner } from "@/ui/spinner";
 
@@ -142,7 +143,7 @@ export function registerKeysCommand(program: Command) {
         return;
       }
 
-      const result = await withTaskSpinner(
+      await withTaskSpinner(
         {
           start: "Revoking key...",
           stop: "Key revoked successfully!",
@@ -150,7 +151,7 @@ export function registerKeysCommand(program: Command) {
         () => keysService.revoke(keyId),
       );
 
-      p.outro(brand.success(result.message));
+      p.outro(brand.success(MESSAGES.apiKey.revoked));
     });
 
   keys
@@ -201,7 +202,7 @@ export function registerKeysCommand(program: Command) {
         newDesc = descInput.length > 0 ? descInput : "";
       }
 
-      const result = await withTaskSpinner(
+      await withTaskSpinner(
         {
           start: "Updating API key...",
           stop: "API key updated successfully!",
@@ -214,6 +215,6 @@ export function registerKeysCommand(program: Command) {
           }),
       );
 
-      p.outro(brand.success(` ${result.message}`));
+      p.outro(brand.success(MESSAGES.apiKey.updated));
     });
 }

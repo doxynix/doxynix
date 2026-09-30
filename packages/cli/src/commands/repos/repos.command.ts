@@ -7,6 +7,7 @@ import type { RepoListItem } from "@/core/repo.types";
 
 import { brand } from "@/ui/colors";
 import { renderSection } from "@/ui/layout";
+import { MESSAGES } from "@/ui/messages";
 import { output } from "@/ui/output";
 import { withTaskSpinner } from "@/ui/spinner";
 
@@ -189,7 +190,7 @@ export function registerReposCommand(program: Command) {
         return;
       }
 
-      const result = await withTaskSpinner(
+      await withTaskSpinner(
         {
           start: "Removing repository...",
           stop: "Repository removed successfully",
@@ -197,7 +198,7 @@ export function registerReposCommand(program: Command) {
         () => repoApi.delete(targetId),
       );
 
-      p.outro(brand.success(result.message));
+      p.outro(brand.success(MESSAGES.repo.deleted));
     });
 
   repos
@@ -226,7 +227,7 @@ export function registerReposCommand(program: Command) {
         () => repoApi.deleteByOwner(owner),
       );
 
-      p.outro(brand.success(`${result.message} (${result.count} repositories removed)`));
+      p.outro(brand.success(MESSAGES.repoBulk.deletedForOwner(result.count, owner)));
     });
 
   repos
@@ -274,7 +275,7 @@ export function registerReposCommand(program: Command) {
         return;
       }
 
-      const result = await withTaskSpinner(
+      await withTaskSpinner(
         {
           start: "Removing all repositories...",
           stop: "Repositories cleared",
@@ -282,7 +283,7 @@ export function registerReposCommand(program: Command) {
         () => repoApi.deleteAll(),
       );
 
-      p.outro(brand.success(result.message));
+      p.outro(brand.success(MESSAGES.repo.deletedAll));
     });
 
   repos
