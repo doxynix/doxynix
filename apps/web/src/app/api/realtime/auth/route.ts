@@ -3,13 +3,13 @@ import { NextResponse } from "next/server";
 
 import { type AblyCapability, REALTIME_CONFIG } from "@/shared/config/realtime";
 
-import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
 import { realtimeServer } from "@/server/core/realtime";
+import { withApiHandler } from "@/server/utils/with-api-handler";
 
 const ONE_HOUR = 3_600_000;
 
-export async function GET() {
+async function handler() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -25,16 +25,13 @@ export async function GET() {
     capability[REALTIME_CONFIG.channels.system] = ["subscribe"];
   }
 
-  try {
-    const tokenRequest = await realtimeServer.auth.createTokenRequest({
-      capability: JSON.stringify(capability),
-      clientId,
-      ttl: ONE_HOUR,
-    });
+  const tokenRequest = await realtimeServer.auth.createTokenRequest({
+    capability: JSON.stringify(capability),
+    clientId,
+    ttl: ONE_HOUR,
+  });
 
-    return NextResponse.json(tokenRequest);
-  } catch (error) {
-    appLogger.error({ error, msg: "Realtime auth error" });
-    return NextResponse.json({ error: "Error requesting token" }, { status: 500 });
-  }
+  return NextResponse.json(tokenRequest);
 }
+
+export const GET = withApiHandler(handler, { scope: "realtime/auth" });

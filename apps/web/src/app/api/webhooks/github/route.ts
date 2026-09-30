@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { type EmitterWebhookEvent, Webhooks } from "@octokit/webhooks";
 import type { WebhookEventName } from "@octokit/webhooks/types";
 import { Prisma } from "@prisma/client";
@@ -14,7 +14,9 @@ import { handlePullRequestEvent } from "@/server/modules/analysis/logic/pr-webho
 import { handleInstallationEvent } from "@/server/modules/webhooks/installation-webhook-handler";
 import { handlePushEvent } from "@/server/modules/webhooks/push-webhook-handler";
 import { handleRepositoryEvent } from "@/server/modules/webhooks/repository-webhook-handler";
+import { AppError } from "@/server/utils/api-error";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";
+import { withApiHandler } from "@/server/utils/with-api-handler";
 
 const webhooks = new Webhooks({
   secret: GITHUB_WEBHOOK_SECRET,
@@ -138,29 +140,29 @@ webhooks.on("pull_request_review_comment", async ({ payload }) => {
   }
 });
 
-export async function POST(req: Request) {
+async function handler(req: Request) {
   const payload = await req.text();
   const signature = req.headers.get("x-hub-signature-256") ?? "";
   const deliveryId = req.headers.get("x-github-delivery") ?? "";
   const githubEventHeader = req.headers.get("x-github-event");
   if (githubEventHeader == null) {
-    return new NextResponse("Bad Request: Missing x-github-event", { status: 400 });
+    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Missing x-github-event" });
   }
 
   const githubEvent = githubEventHeader as WebhookEventName;
 
   if (deliveryId.length === 0) {
-    return new NextResponse("Bad Request", { status: 400 });
+    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Bad Request" });
   }
 
   if (!(await webhooks.verify(payload, signature))) {
-    return new NextResponse("Invalid signature", { status: 401 });
+    throw new AppError({ code: "UNAUTHORIZED", publicMessage: "Invalid signature" });
   }
 
   const store = buildRequestStore({
     method: "webhook",
     path: "/api/webhooks/github",
-    req: req as NextRequest,
+    req,
     requestId: deliveryId,
   });
 
@@ -183,7 +185,10 @@ export async function POST(req: Request) {
         });
 
         if (existing == null) {
-          return new NextResponse("Conflict error", { status: 409 });
+          return NextResponse.json(
+            { error: { code: "CONFLICT", message: "Conflict error", requestId: deliveryId } },
+            { status: 409 },
+          );
         }
 
         if (existing.status === "SUCCESS") {
@@ -193,7 +198,12 @@ export async function POST(req: Request) {
         const isStale = Date.now() - existing.createdAt.getTime() > 5 * 60 * 1000;
 
         if (existing.status === "PROCESSING" && !isStale) {
-          return new NextResponse("Processing in progress", { status: 202 });
+          return NextResponse.json(
+            {
+              error: { code: "CONFLICT", message: "Processing in progress", requestId: deliveryId },
+            },
+            { status: 202 },
+          );
         }
 
         delivery = await prisma.webhookDelivery.update({
@@ -201,8 +211,12 @@ export async function POST(req: Request) {
           where: { id: existing.id },
         });
       } else {
-        appLogger.error({ error, msg: "Webhook dedupe database error" });
-        return new NextResponse("DB Error", { status: 500 });
+        throw new AppError({
+          cause: error,
+          code: "INTERNAL_SERVER_ERROR",
+          publicMessage: "DB Error",
+          unexpected: true,
+        });
       }
     }
 
@@ -232,7 +246,19 @@ export async function POST(req: Request) {
         where: { id: delivery.id },
       });
 
-      return new NextResponse("Internal Error", { status: 500 });
+      throw new AppError({
+        cause: error,
+        code: "INTERNAL_SERVER_ERROR",
+        publicMessage: "Internal Error",
+        unexpected: true,
+      });
     }
   });
 }
+
+/**
+ * The `requestContext` store built above is keyed on the GitHub delivery id, so
+ * the wrapper reuses it instead of minting a fresh UUID — every log line and
+ * the `requestId` in the response point at the same delivery.
+ */
+export const POST = withApiHandler(handler, { scope: "webhooks/github" });

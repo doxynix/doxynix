@@ -5,6 +5,7 @@ import superjson from "superjson";
 
 import { IS_PROD } from "@/shared/config/env.flags";
 
+import { normalizeError } from "@/server/utils/api-error";
 import {
   buildRequestStore,
   requestContext,
@@ -16,33 +17,42 @@ import type { DbClient } from "../db";
 import type { Context } from "./context";
 
 const t = initTRPC.context<Context>().create({
+  /**
+   * Single normalization point for every procedure in the app.
+   *
+   * tRPC wraps any non-`TRPCError` throw via `getTRPCErrorFromUnknown`, which
+   * hardcodes `code: "INTERNAL_SERVER_ERROR"` and parks the original on
+   * `cause` (identity-preserved for every `Error` subclass, so Prisma, Zod and
+   * `AppError` all survive). A service that calls Prisma without wrapping it in
+   * `handlePrismaError` therefore still lands here with the real error
+   * attached, so re-normalizing `cause` maps all 62 previously-unprotected
+   * Prisma call sites in the service layer with no per-service try/catch.
+   *
+   * Writing `data.httpStatus` is what makes the re-mapped code reach the wire:
+   * tRPC's `getHTTPStatusCode` prefers `error.data.httpStatus` over deriving a
+   * status from the code, and `getErrorShape` seeds that field from the
+   * pre-normalization error.
+   *
+   * For a `TRPCError` thrown deliberately, `cause` is usually undefined, so the
+   * code and message pass through unchanged.
+   */
   errorFormatter({ ctx, error, shape }) {
-    const publicErrors = [
-      "BAD_REQUEST",
-      "CONFLICT",
-      "UNAUTHORIZED",
-      "FORBIDDEN",
-      "TOO_MANY_REQUESTS",
-      "NOT_FOUND",
-    ];
-
-    const isPublicError = publicErrors.includes(error.code);
-
     const requestId =
       requestContext.getStore()?.requestId ?? resolveRequestId(ctx?.req) ?? "unknown";
+
+    const normalized = normalizeError(error.cause ?? error);
 
     return {
       ...shape,
       data: {
         ...shape.data,
+        code: normalized.code,
+        httpStatus: normalized.status,
         requestId,
         stack: IS_PROD ? undefined : error.stack,
-        zodError: error.code === "BAD_REQUEST" ? error.cause : null,
+        zodError: normalized.code === "BAD_REQUEST" ? (normalized.zodIssues ?? null) : null,
       },
-      message:
-        IS_PROD && !isPublicError
-          ? "An unexpected error occurred, please try again later."
-          : error.message,
+      message: normalized.clientMessage(),
     };
   },
   transformer: superjson,
@@ -103,18 +113,41 @@ const loggerMiddleware = t.middleware(async ({ next, path, type }) => {
 
   if (result.ok) {
     appLogger.info({ ...meta, msg: `tRPC [${type}] ok: ${path}` });
-  } else {
+    return result;
+  }
+
+  // Normalized the same way `errorFormatter` normalizes, so a log line and the
+  // response the client receives always report the same code. Previously a
+  // service that let a Prisma error bubble was logged here as
+  // INTERNAL_SERVER_ERROR while the formatter had no way to say otherwise.
+  const normalized = normalizeError(result.error.cause ?? result.error);
+  const logMeta = {
+    ...meta,
+    code: normalized.code,
+    kind: normalized.kind,
+    message: result.error.message,
+    source: normalized.source,
+  };
+
+  if (normalized.isUnexpected) {
     appLogger.error({
-      ...meta,
-      code: result.error.code,
-      message: result.error.message,
+      ...logMeta,
+      error: result.error,
       msg: `tRPC [${type}] error: ${path}`,
-      stack: result.error.code === "INTERNAL_SERVER_ERROR" ? result.error.stack : undefined,
+      stack: normalized.code === "INTERNAL_SERVER_ERROR" ? result.error.stack : undefined,
     });
+
     if (IS_PROD) {
       await appLogger.flush();
     }
+
+    return result;
   }
+
+  // An expected 4xx is not an incident; logging it at `error` trained everyone
+  // to ignore the channel. `withApiHandler` splits the same way.
+  appLogger.warn({ ...logMeta, msg: `tRPC [${type}] rejected: ${path}` });
+
   return result;
 });
 

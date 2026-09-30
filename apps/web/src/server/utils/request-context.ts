@@ -63,7 +63,7 @@ export function anonymizeIp(ip: null | string | undefined): null | string {
   }
 }
 
-type VercelNextRequest = NextRequest & {
+type VercelRequest = Request & {
   geo?: {
     city?: string;
     country?: string;
@@ -72,20 +72,28 @@ type VercelNextRequest = NextRequest & {
   ip?: string;
 };
 
-export function getIp(request: NextRequest): string {
+/**
+ * These read only `headers` plus Vercel's optional `ip`/`geo` extensions, none
+ * of which are `NextRequest`-specific — `nextUrl` and `cookies` are never
+ * touched. Accepting the base `Request` therefore widens the contract without
+ * changing behaviour, and lets route handlers that declare `req: Request`
+ * populate the store without a cast. `NextRequest extends Request`, so every
+ * existing caller is unaffected.
+ */
+export function getIp(request: Request): string {
   return (
-    (request as VercelNextRequest).ip ??
+    (request as VercelRequest).ip ??
     request.headers.get("x-forwarded-for")?.split(",")[0] ??
     "127.0.0.1"
   );
 }
 
-export function getUa(request: NextRequest): string {
+export function getUa(request: Request): string {
   return request.headers.get("user-agent") ?? "unknown";
 }
 
-export function getCountry(request: NextRequest): string {
-  const geoCountry = (request as VercelNextRequest).geo?.country;
+export function getCountry(request: Request): string {
+  const geoCountry = (request as VercelRequest).geo?.country;
   if (geoCountry != null) {
     return geoCountry;
   }
@@ -105,13 +113,13 @@ export function getCountry(request: NextRequest): string {
 type RequestContextInput = {
   method: string;
   path: string;
-  req: NextRequest;
+  req: Request;
   requestId?: string;
   userId?: string;
   userRole?: string;
 };
 
-function getRequestIdFromHeaders(request: NextRequest): string | undefined {
+function getRequestIdFromHeaders(request: Request): string | undefined {
   return sanitizeRequestId(request.headers.get("x-request-id"));
 }
 
@@ -146,7 +154,7 @@ export function resolveRequestId(request?: NextRequest, existing?: string): stri
   return getRequestIdFromHeaders(request);
 }
 
-function ensureRequestId(request: NextRequest, existing?: string): string {
+function ensureRequestId(request: Request, existing?: string): string {
   return sanitizeRequestId(existing) ?? getRequestIdFromHeaders(request) ?? generateRequestId();
 }
 

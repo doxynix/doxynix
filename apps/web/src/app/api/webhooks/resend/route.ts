@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { BannedEmailReason } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
 import { Webhook } from "svix";
@@ -9,9 +9,11 @@ import { RESEND_WEBHOOK_SECRET } from "@/shared/config/env.server";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
+import { AppError } from "@/server/utils/api-error";
 import { maskEmail, normalizeEmail } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";
+import { withApiHandler } from "@/server/utils/with-api-handler";
 
 const resendWebhookSchema = z
   .object({
@@ -45,7 +47,7 @@ const resendWebhookSchema = z
   })
   .loose();
 
-export async function POST(req: Request) {
+async function handler(req: Request) {
   const payload = await req.text();
   const headerPayload = await headers();
 
@@ -54,7 +56,7 @@ export async function POST(req: Request) {
   const svix_signature = headerPayload.get("svix-signature");
 
   if (svix_id == null || svix_timestamp == null || svix_signature == null) {
-    return new NextResponse("Missing svix headers", { status: 400 });
+    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Missing svix headers" });
   }
 
   const wh = new Webhook(RESEND_WEBHOOK_SECRET);
@@ -67,20 +69,20 @@ export async function POST(req: Request) {
       "svix-timestamp": svix_timestamp,
     });
   } catch {
-    return new NextResponse("Verify failed", { status: 400 });
+    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Verify failed" });
   }
 
   const parseResult = resendWebhookSchema.safeParse(rawEvt);
   if (!parseResult.success) {
     appLogger.error({ error: parseResult.error.issues, msg: "Invalid Resend webhook schema" });
-    return new NextResponse("Invalid payload structure", { status: 400 });
+    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Invalid payload structure" });
   }
   const evt = parseResult.data;
 
   const store = buildRequestStore({
     method: "webhook",
     path: "/api/webhooks/resend",
-    req: req as NextRequest,
+    req,
     requestId: svix_id,
   });
 
@@ -113,15 +115,28 @@ export async function POST(req: Request) {
             where: { id: existing.id },
           });
         } else if (existing?.status === "PROCESSING") {
-          return new NextResponse("Processing in progress", { status: 202 });
+          return NextResponse.json(
+            { error: { code: "CONFLICT", message: "Processing in progress", requestId: svix_id } },
+            { status: 202 },
+          );
         }
       } else {
-        return new NextResponse("DB Error", { status: 500 });
+        // Previously answered 500 with no log line at all.
+        throw new AppError({
+          cause: error,
+          code: "INTERNAL_SERVER_ERROR",
+          publicMessage: "DB Error",
+          unexpected: true,
+        });
       }
     }
 
     if (delivery == null) {
-      return new NextResponse("Internal Error: Delivery not initialized", { status: 500 });
+      throw new AppError({
+        code: "INTERNAL_SERVER_ERROR",
+        publicMessage: "Internal Error: Delivery not initialized",
+        unexpected: true,
+      });
     }
 
     const { data, type } = evt;
@@ -146,7 +161,7 @@ export async function POST(req: Request) {
           where: { id: delivery.id },
         });
 
-        return new NextResponse("Invalid payload", { status: 400 });
+        throw new AppError({ code: "BAD_REQUEST", publicMessage: "Invalid payload" });
       }
 
       const email = normalizeEmail(rawEmail);
@@ -181,7 +196,12 @@ export async function POST(req: Request) {
           where: { id: delivery.id },
         });
 
-        return new NextResponse("Internal Error", { status: 500 });
+        throw new AppError({
+          cause: error,
+          code: "INTERNAL_SERVER_ERROR",
+          publicMessage: "Internal Error",
+          unexpected: true,
+        });
       }
     } else {
       await prisma.webhookDelivery.update({
@@ -193,3 +213,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   });
 }
+
+/**
+ * Reuses the delivery-scoped `requestContext` store built above, so the
+ * `requestId` in any error body is the `svix-id` and matches the log lines.
+ */
+export const POST = withApiHandler(handler, { scope: "webhooks/resend" });

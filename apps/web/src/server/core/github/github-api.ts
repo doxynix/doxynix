@@ -7,6 +7,7 @@ import type { RepoItemFields } from "@/shared/api/repo.types";
 
 import { ProjectPolicy } from "@/server/modules/analysis/engine/core/project-policy";
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
+import { AppError } from "@/server/utils/api-error";
 import { isOctokitError } from "@/server/utils/handle-error";
 import { getLanguageColor } from "@/server/utils/language-metadata";
 
@@ -333,7 +334,10 @@ export async function getFileContent(
     });
 
     if (Array.isArray(data) || data.type !== "file") {
-      throw new Error("Target path is not a file");
+      // Typed so the caller gets a 400 with an explanation instead of a masked
+      // 500. Reachable from `githubBrowse.getFileContent` and from the agent
+      // file tools, so it crosses both transports.
+      throw new AppError({ code: "BAD_REQUEST", publicMessage: "Target path is not a file" });
     }
 
     return {

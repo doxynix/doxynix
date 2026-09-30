@@ -23,7 +23,7 @@
 
 ### Key Capabilities
 
-* **Vertical Slice Architecture:** Domain slices (`admin`, `analytics`, `audit`, `incidents`, `rules`, `scan`, `stream-logs`) are completely self-contained with zero cross-slice dependencies.
+* **Self-Contained Domain Slices:** Domain slices (`admin`, `analytics`, `audit`, `incidents`, `rules`, `scan`, `stream-logs`) are completely self-contained with zero cross-slice dependencies, and imports flow downward only (`src/modules` → `src/core`).
 * **End-to-End Type Safety:** Exports `AppType` to provide a zero-cost, fully typed RPC client (`hcWithType`) for `@doxynix/siem-client`.
 * **UUIDv7 Indexed Primary Keys:** Native time-sorted UUIDv7 identifiers optimized for high-volume PostgreSQL B-tree chronological indexing.
 * **Axiom Batch Ingestion Worker:** Asynchronous, non-blocking telemetry forwarder that buffers and flushes security events directly into Axiom Datasets.
@@ -31,13 +31,13 @@
 
 ---
 
-## 🏛️ Vertical Slice Architecture
+## 🏛️ Domain Slices (modular monolith)
 
 ```mermaid
 flowchart LR
     subgraph Ingestion [" Ingestion & Auth Layer "]
         REQ[Inbound Event / RPC Request] --> MW[Auth Middleware & Rate Limiter]
-        MW --> ROUTER{Vertical Slice Router}
+        MW --> ROUTER{Domain Slice Router}
     end
 
     subgraph Slices [" Self-Contained Slices "]

@@ -1,7 +1,23 @@
-// dependency-cruiser config for apps/web (VSA + dependency health gate).
+// dependency-cruiser config for apps/web (server module boundaries + dependency
+// health gate).
+//
+// The server is a MODULAR MONOLITH: `src/server/modules/<slice>/` holds one
+// folder per feature, and imports flow down only —
+//     app/api  ->  modules  ->  core / utils
+// Two rules enforce that, plus the layering rule below it:
+//
+//   1. no-cross-slice-imports      a slice must not import another slice
+//   2. no-lower-layer-to-module-  core/ and utils/ must not import up into a
+//      imports                   feature module
+//
+// It was previously labelled "VSA" (Vertical Slice Architecture). That was
+// dropped on purpose: VSA is a .NET/MediatR pattern whose premise is that the
+// service/repository layers melt away, and this server does have them. Naming it
+// VSA promised a structure the code does not follow.
+//
 // Shared "dependency health" rules + options live in the base config
 // `@doxynix/config/depcruise-base.json` (see `extends` below); only the
-// app-specific rules (orphan exceptions, VSA) stay here.
+// app-specific rules (orphan exceptions, module boundaries) stay here.
 // - `import type` + `module.exports` (NOT `export default`): keeps Node from
 //   double-parsing this file (the package has no "type": "module"), so no
 //   MODULE_TYPELESS_PACKAGE_JSON warning. Requires Node >= 22.18 (type
@@ -51,23 +67,52 @@ const config: IConfiguration = {
       severity: "error",
       to: {},
     },
-    // Vertical Slice Architecture (VSA): a module inside a server slice MUST NOT
-    // import from another slice's internals. Group matching ($1) exempts the
-    // slice's own folder. Imports to `src/server/core`, `src/server/utils`,
-    // node_modules, @/shared and @doxynix/* are unaffected (they don't match
-    // `to.path`). Test files may cross slices - that's test-only coupling and
-    // doesn't leak into the runtime graph.
+    // Server module boundary: a slice MUST NOT import from another slice's
+    // internals. Group matching ($1) exempts the slice's own folder. Imports to
+    // `src/server/core`, `src/server/utils`, node_modules, @/shared and
+    // @doxynix/* are unaffected (they don't match `to.path`). Test files may
+    // cross slices - that's test-only coupling and doesn't leak into the
+    // runtime graph.
     {
-      comment: "VSA (web): no imports between server slices.",
+      comment: "Server modules: no imports between slices.",
       from: {
         path: "^src/server/modules/([^/]+)/",
         pathNot: ["[.](?:spec|test)[.](?:ts|tsx)$"],
       },
-      name: "vsa-no-cross-slice-imports",
+      name: "no-cross-slice-imports",
       severity: "error",
       to: {
         path: "^src/server/modules/[^/]+/",
         pathNot: "^src/server/modules/$1/",
+      },
+    },
+    // Server layering: `core/` and `utils/` are the LOWER layers. Imports flow
+    // down only — `app/api` -> `modules` -> `core`. A lower layer reaching back
+    // up into a feature module inverts that, and it is how `utils/` ended up
+    // importing `modules/analysis/*` and how three `repos` routers reached
+    // `analysis/engine/` transitively through `core/github/`.
+    //
+    // The one sanctioned exception is `core/trpc/server.ts`: it is the
+    // composition root that assembles the routers to build a caller, so
+    // importing `modules` is its whole purpose.
+    //
+    // NOTE: this rule is deliberately NOT named "VSA" — see the header comment
+    // explaining why the term was dropped.
+    {
+      comment:
+        "Server layering: core/ and utils/ must not import from feature modules (imports flow down only).",
+      from: {
+        path: "^src/server/(?:core|utils)/",
+        pathNot: [
+          "[.](?:spec|test)[.](?:ts|tsx)$",
+          // Composition root: builds a tRPC caller from the assembled routers.
+          "^src/server/core/trpc/server[.]ts$",
+        ],
+      },
+      name: "no-lower-layer-to-module-imports",
+      severity: "error",
+      to: {
+        path: "^src/server/modules/",
       },
     },
     // FSD: a shared module used by fewer than 2 files in the layers above is

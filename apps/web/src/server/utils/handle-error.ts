@@ -1,158 +1,73 @@
-import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
 import { appLogger } from "@/server/core/app-logger";
 
-type ErrorMapping = {
-  [key: string]: Record<string, string> | string | undefined;
-  defaultConflict?: string;
-  notFound?: string;
-  notNull?: string;
-  uniqueConstraint?: Record<string, string>;
-};
+import { type AppError, type ErrorMapping, normalizeError } from "./api-error";
 
-type PrismaErrorMeta = {
-  code: TRPCError["code"];
-  defaultMessage: string;
-  mapKey?: keyof ErrorMapping;
-};
+/**
+ * tRPC adapter over the shared normalizer in `./api-error`.
+ *
+ * Both transports fold an arbitrary throw into one `AppError`; this file only
+ * decides how that travels to a tRPC client. The Prisma and Octokit mapping
+ * tables live in `./api-error` precisely so the HTTP route handlers and the
+ * tRPC procedures cannot drift apart — the previous version of this file owned
+ * them alone, which is why ten of the sixteen route handlers had to invent
+ * their own ad-hoc equivalents.
+ */
+function toTrpcError(error: AppError): TRPCError {
+  return new TRPCError({
+    cause: error.zodIssues,
+    code: error.code,
+    message: error.publicMessage,
+  });
+}
 
-const prismaErrorMap: Record<string, PrismaErrorMeta | undefined> = {
-  P2000: {
-    code: "BAD_REQUEST",
-    defaultMessage: "Field value too long for database",
-    mapKey: "custom",
-  },
-  P2002: {
-    code: "CONFLICT",
-    defaultMessage: "Record with this data already exists",
-    mapKey: "uniqueConstraint",
-  },
-  P2003: {
-    code: "BAD_REQUEST",
-    defaultMessage: "Related record not found (invalid ID)",
-    mapKey: "custom",
-  },
-  P2004: {
-    code: "FORBIDDEN",
-    defaultMessage: "Access denied by security policy",
-    mapKey: "custom",
-  },
-  P2006: {
-    code: "CONFLICT",
-    defaultMessage: "Data was modified by another user",
-    mapKey: "custom",
-  },
-  P2007: {
-    code: "BAD_REQUEST",
-    defaultMessage: "Required field is missing",
-    mapKey: "notNull",
-  },
-  P2010: {
-    code: "INTERNAL_SERVER_ERROR",
-    defaultMessage: "Database query failed",
-    mapKey: "custom",
-  },
-  P2016: { code: "NOT_FOUND", defaultMessage: "Record not found", mapKey: "notFound" },
-  P2025: { code: "NOT_FOUND", defaultMessage: "Record not found", mapKey: "notFound" },
-  P2030: {
-    code: "BAD_REQUEST",
-    defaultMessage: "Foreign key constraint failed",
-    mapKey: "custom",
-  },
-  P2034: {
-    code: "BAD_REQUEST",
-    defaultMessage: "Conflicting concurrent update, please retry",
-    mapKey: "custom",
-  },
-};
-
+/**
+ * Translates a caught error into a `TRPCError` and throws it. Call this at the
+ * end of a `catch` block that wraps a Prisma call; the domain-specific `map`
+ * refines the message for the codes it names.
+ *
+ * This is the tRPC-side counterpart of `withApiHandler`. It deliberately logs
+ * only the *unrecognized* failures — a mapped `P2025` is an expected
+ * `NOT_FOUND` and `core/trpc/init.ts`'s `loggerMiddleware` already records it.
+ */
 export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
   if (error instanceof TRPCError) {
     throw error;
   }
 
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    const meta = prismaErrorMap[error.code];
+  const normalized = normalizeError(error, map);
 
-    if (meta == null) {
-      appLogger.error({ error, msg: `Unhandled Prisma Error Code:${error.code}` });
-      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database error" });
-    }
-
-    let message: string = meta.defaultMessage;
-
-    if (meta.mapKey != null) {
-      const mapValue = map?.[meta.mapKey];
-
-      if (meta.mapKey === "uniqueConstraint") {
-        const targetRaw: unknown = error.meta?.target;
-        // `Array.isArray` narrows the `any`, and the filter proves the elements
-        // are strings rather than asserting it.
-        const target: string[] = Array.isArray(targetRaw)
-          ? targetRaw.filter((f): f is string => typeof f === "string")
-          : typeof targetRaw === "string"
-            ? [targetRaw]
-            : [];
-
-        const field = target.find((f): f is string => map?.uniqueConstraint?.[f] != null);
-
-        if (field != null && map?.uniqueConstraint?.[field] != null) {
-          message = map.uniqueConstraint[field];
-        } else if (map?.defaultConflict != null) {
-          message = map.defaultConflict;
-        }
-      } else if (typeof mapValue === "string" && mapValue.length > 0) {
-        message = mapValue;
-      }
-    }
-
-    throw new TRPCError({ code: meta.code, message });
+  if (normalized.kind === "unknown") {
+    // Not a Prisma failure at all, so its message may embed an upstream payload.
+    // Collapse it to a fixed string and keep the detail in the log.
+    appLogger.error({ error, msg: "Unknown Prisma Error:" });
+    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Internal database error" });
   }
 
-  appLogger.error({ error, msg: "Unknown Prisma Error:" });
-  throw new TRPCError({
-    code: "INTERNAL_SERVER_ERROR",
-    message: "Internal database error",
-  });
+  if (normalized.kind === "prisma" && normalized.isUnexpected) {
+    appLogger.error({
+      error,
+      msg: `Unhandled Prisma Error Code:${normalized.source ?? "unknown"}`,
+    });
+  }
+
+  throw toTrpcError(normalized);
 }
 
-type OctokitError = {
-  message: string;
-  status: number;
-};
+export { isOctokitError } from "./api-error";
 
-export function isOctokitError(error: unknown): error is OctokitError {
-  return (
-    typeof error === "object" &&
-    error != null &&
-    "status" in error &&
-    typeof (error as Record<string, unknown>).status === "number" &&
-    "message" in error &&
-    typeof (error as Record<string, unknown>).message === "string"
-  );
-}
-
-type OctokitStatusMapping = {
-  code: TRPCError["code"];
-  message: string;
-};
-
-const octokitStatusMap: Record<number, OctokitStatusMapping> = {
-  401: { code: "UNAUTHORIZED", message: "GitHub token expired" },
-  403: { code: "FORBIDDEN", message: "GitHub denied access to this repository" },
-  404: { code: "NOT_FOUND", message: "Repository not found on GitHub" },
-  429: { code: "TOO_MANY_REQUESTS", message: "GitHub API limit exceeded" },
-};
-
+/**
+ * Maps an Octokit HTTP failure to a `TRPCError`, or returns `undefined` when
+ * the status is not one this app has copy for so the caller can rethrow the
+ * original error untouched.
+ */
 export function toOctokitTrpcError(error: unknown): TRPCError | undefined {
-  if (!isOctokitError(error)) {
+  const normalized = normalizeError(error);
+
+  if (normalized.kind !== "octokit" || normalized.isUnexpected) {
     return undefined;
   }
 
-  const mapping = octokitStatusMap[error.status];
-
-  return mapping == null
-    ? undefined
-    : new TRPCError({ code: mapping.code, message: mapping.message });
+  return toTrpcError(normalized);
 }

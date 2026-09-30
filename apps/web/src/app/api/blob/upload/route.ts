@@ -9,19 +9,27 @@ import { VERCEL_BLOB_CALLBACK_URL } from "@/shared/config/env.server";
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
 import { prisma } from "@/server/core/db";
+import { AppError, findAppError } from "@/server/utils/api-error";
+import { withApiHandler } from "@/server/utils/with-api-handler";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
-export async function POST(request: Request): Promise<NextResponse> {
+async function handler(request: Request) {
   // `request.json()` is typed `any`. The body is a Vercel SDK contract
   // (`GenerateClientTokenEvent | UploadCompletedEvent`) that `handleUpload`
   // validates and answers with a 400 itself, so reproducing that union here
   // would only duplicate the SDK. What is worth checking locally is that a
   // non-object body is rejected before it reaches the SDK.
-  const rawBody: unknown = await request.json();
+  let rawBody: unknown;
+
+  try {
+    rawBody = await request.json();
+  } catch {
+    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Invalid upload request" });
+  }
 
   if (typeof rawBody !== "object" || rawBody == null) {
-    return NextResponse.json({ error: "Invalid upload request" }, { status: 400 });
+    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Invalid upload request" });
   }
 
   const body = rawBody as HandleUploadBody;
@@ -36,7 +44,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
         if (session?.user == null) {
           appLogger.warn({ msg: "Blob upload rejected: Unauthorized" });
-          throw new Error("Unauthorized");
+          throw new AppError({ code: "UNAUTHORIZED", publicMessage: "Unauthorized" });
         }
 
         const callbackUrl = `${VERCEL_BLOB_CALLBACK_URL}/api/blob/upload`;
@@ -109,14 +117,28 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     return NextResponse.json(jsonResponse);
   } catch (error) {
-    appLogger.error({
-      error: error instanceof Error ? error.message : String(error),
-      msg: "Blob upload authorization failed",
-    });
+    // The UNAUTHORIZED thrown by `onBeforeGenerateToken` is an expected,
+    // caller-facing rejection, so it must stay a 401 rather than be flattened
+    // into the SDK's generic validation failure. The SDK wraps what it catches,
+    // hence the cause-chain lookup.
+    const appError = findAppError(error);
 
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Upload authorization failed" },
-      { status: 400 },
-    );
+    if (appError != null) {
+      throw appError;
+    }
+
+    // `handleUpload` throws a plain `Error` for its own validation failures
+    // (unsupported content type, oversized body). Those are 400s carrying copy
+    // the SDK wrote for humans, so the message is safe to echo.
+    throw new AppError({
+      cause: error,
+      code: "BAD_REQUEST",
+      publicMessage:
+        error instanceof Error && error.message.length > 0
+          ? error.message
+          : "Upload authorization failed",
+    });
   }
 }
+
+export const POST = withApiHandler(handler, { scope: "blob/upload" });
