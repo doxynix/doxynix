@@ -1,8 +1,7 @@
 import { fromPreTrained } from "@lenml/tokenizer-gemma2";
 
 import { appLogger } from "@/server/core/app-logger";
-
-import { hasText } from "./string-utils";
+import { hasText } from "@/server/utils/string-utils";
 
 let tokenizer: null | ReturnType<typeof fromPreTrained> = null;
 

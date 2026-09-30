@@ -1,8 +1,8 @@
 import { escape } from "es-toolkit";
 import { dirname, normalize } from "pathe";
 
+import { countTokens } from "@/server/modules/analysis/ai/tokenizer";
 import { CodeOptimizer, skeletonizeCode } from "@/server/utils/optimizers";
-import { countTokens } from "@/server/utils/tokenizer";
 
 import { getFileScore } from "../engine/core/file-classifier";
 import { ProjectPolicy } from "../engine/core/project-policy";

@@ -1,4 +1,4 @@
-import { appLogger } from "../core/app-logger";
+import { appLogger } from "@/server/core/app-logger";
 
 type SafetyLevel = "moderate" | "permissive" | "strict";
 type DataHandlingStrategy = "escape-json" | "escape-xml" | "no-escape" | "sanitize-html";

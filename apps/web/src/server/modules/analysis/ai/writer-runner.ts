@@ -1,5 +1,5 @@
 import { appLogger } from "@/server/core/app-logger";
-import { llmLimiter } from "@/server/utils/llm-limiter";
+import { llmLimiter } from "@/server/modules/analysis/ai/llm-limiter";
 
 import type { WriterName, WriterResult } from "./writer-tasks";
 

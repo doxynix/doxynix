@@ -32,7 +32,7 @@ import { appLogger } from "@/server/core/app-logger";
 
 import { llmLimiter } from "./llm-limiter";
 
-describe("server/utils/llm-limiter", () => {
+describe("llm-limiter", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.clearAllMocks();
