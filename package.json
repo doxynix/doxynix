@@ -58,7 +58,7 @@
     "minimatch": "9.0.9",
     "nanoid": "3.3.19",
     "next": "16.3.6",
-    "nodemailer": "10.0.10",
+    "nodemailer": "10.0.11",
     "postcss": "8.5.28",
     "qs": "6.16.0",
     "systeminformation": "5.33.13",
