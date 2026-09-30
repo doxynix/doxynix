@@ -4,6 +4,7 @@ import pm from "picomatch";
 import type * as z from "zod";
 
 import { getActiveModels } from "@/server/core/ai/ai-constants";
+import { AI_POLICY_CONSTANTS } from "@/server/core/ai/llm-temperature";
 import { appLogger } from "@/server/core/app-logger";
 import { buildRepositoryToolProfile } from "@/server/domain/ai/ai-tools";
 import { extractAddedLinesFromPatch } from "@/server/modules/analysis/logic/git-diff-parser";
@@ -12,7 +13,6 @@ import { callWithFallback } from "@/server/utils/call";
 import { buildPrReviewSystemPrompt, buildPrReviewUserPrompt } from "../ai/prompts-refactored";
 import { PrAiReviewOutputSchema } from "../analysis.schemas";
 import { PROJECT_POLICY_RULES } from "../engine/core/project-policy-rules";
-import { AI_POLICY_CONSTANTS } from "../engine/core/scoring-constants";
 import type { DifferentialAnalysisResult, PRAnalysisConfig, PRFinding } from "./pr.types";
 
 type PRDiffInfo = {

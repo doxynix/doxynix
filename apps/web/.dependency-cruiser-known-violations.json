@@ -1,51 +1,9 @@
 [
   {
     "type": "dependency",
-    "from": "src/server/core/github/github-api.ts",
-    "to": "src/server/modules/analysis/engine/core/project-policy.ts",
-    "unresolvedTo": "@/server/modules/analysis/engine/core/project-policy",
-    "dependencyTypes": [
-      "undetermined",
-      "import"
-    ],
-    "rule": {
-      "severity": "error",
-      "name": "no-lower-layer-to-module-imports"
-    }
-  },
-  {
-    "type": "dependency",
     "from": "src/server/core/github/github-content.ts",
     "to": "src/server/modules/analysis/engine/core/file-classifier.ts",
     "unresolvedTo": "@/server/modules/analysis/engine/core/file-classifier",
-    "dependencyTypes": [
-      "undetermined",
-      "import"
-    ],
-    "rule": {
-      "severity": "error",
-      "name": "no-lower-layer-to-module-imports"
-    }
-  },
-  {
-    "type": "dependency",
-    "from": "src/server/utils/call.ts",
-    "to": "src/server/modules/analysis/engine/core/ai-result-normalize.ts",
-    "unresolvedTo": "@/server/modules/analysis/engine/core/ai-result-normalize",
-    "dependencyTypes": [
-      "undetermined",
-      "import"
-    ],
-    "rule": {
-      "severity": "error",
-      "name": "no-lower-layer-to-module-imports"
-    }
-  },
-  {
-    "type": "dependency",
-    "from": "src/server/utils/call.ts",
-    "to": "src/server/modules/analysis/engine/core/scoring-constants.ts",
-    "unresolvedTo": "@/server/modules/analysis/engine/core/scoring-constants",
     "dependencyTypes": [
       "undetermined",
       "import"

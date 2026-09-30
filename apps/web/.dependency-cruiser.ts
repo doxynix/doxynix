@@ -48,20 +48,13 @@ const config: IConfiguration = {
     },
     {
       comment:
-        "Server layering: composition/ is the only layer allowed to import feature modules, because it is where routers and callers get assembled.",
-      from: {
-        path: "^src/server/composition/",
-        pathNot: ["[.](?:spec|test)[.](?:ts|tsx)$"],
-      },
-      name: "composition-may-reach-slices",
-      severity: "error",
-      to: {
-        path: "^src/server/modules/",
-      },
-    },
-    {
-      comment:
-        "Server layering: only composition/ may import feature modules. core/, domain/ and utils/ flow downward only.",
+        "Server layering matrix. Rows may import columns. core/ and utils/ are peers on the infrastructure layer, domain/ sits above them holding concepts shared by several slices, and modules/ are the slices.\n" +
+        "\n" +
+        "               to:  core   utils  domain  modules\n" +
+        "  from core/         -     yes      no      no\n" +
+        "  from utils/       yes      -       no      no\n" +
+        "  from domain/     yes     yes       -      no\n" +
+        "  from modules/    yes     yes      yes    own slice only",
       from: {
         path: "^src/server/(?:core|domain|utils)/",
         pathNot: ["[.](?:spec|test)[.](?:ts|tsx)$", "^src/server/core/trpc/server[.]ts$"],
@@ -74,7 +67,7 @@ const config: IConfiguration = {
     },
     {
       comment:
-        "Server layering: core/ and utils/ are peers on the infrastructure layer, and neither may import domain/ or composition/.",
+        "Server layering: core/ and utils/ are peers on the infrastructure layer, and neither may import domain/.",
       from: {
         path: "^src/server/(?:core|utils)/",
         pathNot: ["[.](?:spec|test)[.](?:ts|tsx)$", "^src/server/core/trpc/server[.]ts$"],
@@ -82,12 +75,12 @@ const config: IConfiguration = {
       name: "infra-must-not-import-domain",
       severity: "error",
       to: {
-        path: "^src/server/(?:domain|composition)/",
+        path: "^src/server/domain/",
       },
     },
     {
       comment:
-        "Server layering: domain/ holds business concepts shared by several slices. It must not import feature modules or composition/.",
+        "Server layering: domain/ holds business concepts shared by several slices, so it must not import feature modules.",
       from: {
         path: "^src/server/domain/",
         pathNot: ["[.](?:spec|test)[.](?:ts|tsx)$"],
@@ -95,7 +88,7 @@ const config: IConfiguration = {
       name: "domain-must-not-reach-slices",
       severity: "error",
       to: {
-        path: "^src/server/(?:modules|composition)/",
+        path: "^src/server/modules/",
       },
     },
     {

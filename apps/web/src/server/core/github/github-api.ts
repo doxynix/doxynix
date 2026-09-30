@@ -6,7 +6,7 @@ import { sumBy } from "es-toolkit";
 import type { RepoItemFields } from "@/shared/api/repo.types";
 
 import { AppError } from "@/server/core/api-error";
-import { ProjectPolicy } from "@/server/modules/analysis/engine/core/project-policy";
+import { isIgnored } from "@/server/core/git/ignore-rules";
 import { isOctokitError } from "@/server/utils/handle-error";
 import { getLanguageColor } from "@/server/utils/language-metadata";
 import { taskLogger } from "@/server/utils/task-logger";
@@ -243,7 +243,7 @@ export async function getRepoTree(
             if (item.type !== "blob") {
               return false;
             }
-            return !ProjectPolicy.isIgnored(item.path);
+            return !isIgnored(item.path);
           })
           .map((item) => ({ path: item.path, sha: item.sha, type: item.type }));
       },

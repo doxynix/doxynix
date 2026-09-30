@@ -1,3 +1,5 @@
+import { IGNORE_PATTERNS } from "@/server/core/git/ignore-rules";
+
 import type { FileCategory, FrameworkCategory } from "./discovery.types";
 
 export type ProjectPolicySemanticKind =
@@ -115,11 +117,7 @@ export const PATH_PATTERNS = {
     "**/{generated,.generated,dist,build,out,target,bin,obj,vendor,node_modules,.next,.nuxt,.svelte-kit,.astro,.nitro,.wrangler,.output,.turbo,.cache,.parcel-cache}/**",
     "**/__generated__/**",
   ],
-  IGNORE: [
-    "**/{.git,node_modules,dist,build,out,public,static,target,.next,.nuxt,.svelte-kit,.astro,.nitro,.wrangler,.output,vendor,bower_components,coverage,.pnpm-store,.yarn,.turbo,.parcel-cache,.cache,.serverless,.terraform,.gradle,.mvn,.dart_tool,__pycache__,.pytest_cache,.mypy_cache,.ruff_cache,.tox,.nox,.venv,venv,obj,Debug,Release}/**",
-    "**/{.ds_store,thumbs.db,.idea,.vscode}/**",
-    "**/*.{pdf,doc,docx,xls,xlsx,ppt,pptx,zip,tar,gz,7z,rar,mp3,mp4,wav,exe,dll,so,pyc, png, jpg, jpeg}",
-  ],
+  IGNORE: IGNORE_PATTERNS,
   INFRA: [
     "**/.github/workflows/**",
     "**/{deploy,deployment,helm,k8s,terraform,infra,infrastructure}/**",
