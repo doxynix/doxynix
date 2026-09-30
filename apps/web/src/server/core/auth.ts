@@ -57,6 +57,30 @@ const yandexProfileSchema = z.object({
   real_name: z.string().nullish(),
 });
 
+async function assertEmailNotBanned(
+  dbUser: { email: null | string; emailHash: null | string; id: string },
+  action: string,
+): Promise<void> {
+  if (dbUser.emailHash == null) {
+    return;
+  }
+
+  const isBanned = await prisma.bannedEmail.findUnique({
+    where: { emailHash: dbUser.emailHash },
+  });
+
+  if (isBanned == null) {
+    return;
+  }
+
+  appLogger.warn({
+    email: maskEmail(dbUser.email),
+    msg: `Banned user tried to ${action}`,
+    userId: String(dbUser.id),
+  });
+  throw new APIError("FORBIDDEN", { message: "EmailBanned" });
+}
+
 export const auth = betterAuth({
   account: {
     accountLinking: {
@@ -181,18 +205,7 @@ export const auth = betterAuth({
           });
 
           if (dbUser?.emailHash != null) {
-            const isBanned = await prisma.bannedEmail.findUnique({
-              where: { emailHash: dbUser.emailHash },
-            });
-
-            if (isBanned != null) {
-              appLogger.warn({
-                email: maskEmail(dbUser.email),
-                msg: "Banned user tried to initiate a session (OAuth sign-in blocked)",
-                userId: String(dbUser.id),
-              });
-              throw new APIError("FORBIDDEN", { message: "EmailBanned" });
-            }
+            await assertEmailNotBanned(dbUser, "initiate a session (OAuth sign-in blocked)");
 
             const latestAccount = await prisma.account.findFirst({
               orderBy: { updatedAt: "desc" },
@@ -246,19 +259,8 @@ export const auth = betterAuth({
               where: { id: dbSession.userId },
             });
 
-            if (dbUser?.emailHash != null) {
-              const isBanned = await prisma.bannedEmail.findUnique({
-                where: { emailHash: dbUser.emailHash },
-              });
-
-              if (isBanned != null) {
-                appLogger.warn({
-                  email: maskEmail(dbUser.email),
-                  msg: "Banned user tried to refresh session",
-                  userId: String(dbUser.id),
-                });
-                throw new APIError("FORBIDDEN", { message: "EmailBanned" });
-              }
+            if (dbUser != null) {
+              await assertEmailNotBanned(dbUser, "refresh session");
             }
           }
 
