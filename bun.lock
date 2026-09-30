@@ -117,7 +117,7 @@
     },
     "apps/web": {
       "name": "@doxynix/web",
-      "version": "4.0.3",
+      "version": "4.0.5",
       "dependencies": {
         "@ai-sdk/google": "4.0.82",
         "@ai-sdk/openai": "4.0.78",
@@ -250,7 +250,7 @@
         "react-hook-form": "catalog:",
         "react-hotkeys-hook": "5.3.3",
         "react-markdown": "10.1.0",
-        "react-resizable-panels": "4.13.3",
+        "react-resizable-panels": "4.14.0",
         "recharts": "catalog:",
         "rehype-autolink-headings": "7.1.0",
         "rehype-external-links": "3.0.0",
@@ -366,7 +366,7 @@
     },
     "packages/cli": {
       "name": "@doxynix/cli",
-      "version": "4.0.3",
+      "version": "4.0.5",
       "bin": {
         "doxynix": "./dist/index.js",
         "dxnx": "./dist/index.js",
@@ -4584,7 +4584,7 @@
 
     "react-remove-scroll-bar": ["react-remove-scroll-bar@2.3.8", "", { "dependencies": { "react-style-singleton": "^2.2.2", "tslib": "^2.0.0" }, "peerDependencies": { "@types/react": "*", "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0" }, "optionalPeers": ["@types/react"] }, "sha512-9r+yi9+mgU33AKcj6IbT9oRCO78WriSj6t/cF8DWBZJ9aOGPOTEDvdUDz1FwKim7QXWwmHqtdHnRJfhAxEG46Q=="],
 
-    "react-resizable-panels": ["react-resizable-panels@4.13.3", "", { "peerDependencies": { "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" } }, "sha512-k41s4nP8IXiGjnso8TsZLzoRbuxBb6buTJUOrFWrYpmbV4PGH5GHYM2RvNWWBRIJ6e+Zxlf3m9Tubk8VoPU9Ww=="],
+    "react-resizable-panels": ["react-resizable-panels@4.14.0", "", { "peerDependencies": { "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" } }, "sha512-X04Rn7N6TCByS3JMdQoNM2Omevzxs0Nk15ibqIqhQrsmTg6qbDA69W8BCD5yLf4XnC45t2JBu3JkJzxI3MXBVQ=="],
 
     "react-stately": ["react-stately@3.50.0", "", { "dependencies": { "@internationalized/date": "^3.12.4", "@internationalized/number": "^3.6.8", "@internationalized/string": "^3.2.10", "@react-types/shared": "^3.36.1", "@swc/helpers": "^0.5.0", "use-sync-external-store": "^1.6.0" }, "peerDependencies": { "react": "^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1" } }, "sha512-TnckvpDQGU0672wEaLZqdzvhuSeXWjgW6vijMWxiKOxc8CosQUfPGISdcZyfHqjX3XMjEtRxj4w9HumvX4h4mw=="],
 
