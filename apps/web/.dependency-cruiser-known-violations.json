@@ -464,8 +464,26 @@
   },
   {
     "type": "module",
+    "from": "src/shared/ui/core/kbd.tsx",
+    "to": "src/shared/ui/core/kbd.tsx",
+    "rule": {
+      "severity": "info",
+      "name": "no-unshared-in-shared"
+    }
+  },
+  {
+    "type": "module",
     "from": "src/shared/ui/core/mermaid.tsx",
     "to": "src/shared/ui/core/mermaid.tsx",
+    "rule": {
+      "severity": "info",
+      "name": "no-unshared-in-shared"
+    }
+  },
+  {
+    "type": "module",
+    "from": "src/shared/ui/core/navigation-menu.tsx",
+    "to": "src/shared/ui/core/navigation-menu.tsx",
     "rule": {
       "severity": "info",
       "name": "no-unshared-in-shared"
