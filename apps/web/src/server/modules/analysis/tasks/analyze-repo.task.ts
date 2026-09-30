@@ -10,10 +10,10 @@ import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { cloneRepository, getAnalysisContext } from "@/server/core/github/git";
 import { calculateBusFactor } from "@/server/core/github/github-api";
+import { cleanup, readAndFilterFiles } from "@/server/modules/analysis/logic/repo-file-scanner";
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
-import { handleError } from "@/server/utils/handle-task-error";
+import { handleError } from "@/server/modules/analysis/tasks/handle-task-error";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
-import { cleanup, readAndFilterFiles } from "@/server/utils/utils";
 
 import { generateDeepDocs, runAiPipeline } from "../ai/ai-pipeline";
 import type { RepoMetrics } from "../engine/core/metrics.types";

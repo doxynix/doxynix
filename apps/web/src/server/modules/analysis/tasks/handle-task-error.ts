@@ -6,7 +6,7 @@ import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
 
-import { cleanup } from "./utils";
+import { cleanup } from "../logic/repo-file-scanner";
 
 export async function handleError(
   error: unknown,

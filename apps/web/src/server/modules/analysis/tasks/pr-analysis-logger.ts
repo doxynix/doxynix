@@ -1,6 +1,5 @@
+import { appLogger as baseLogger } from "@/server/core/app-logger";
 import type { PRAnalysisConfig } from "@/server/modules/analysis/logic/pr.types";
-
-import { appLogger as baseLogger } from "../core/app-logger";
 
 export const prAnalysisLogger = {
   analyzeCompleted: (

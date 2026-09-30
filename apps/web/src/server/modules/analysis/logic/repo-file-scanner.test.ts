@@ -4,9 +4,9 @@ import { tmpdir } from "node:os";
 import { join } from "pathe";
 import { describe, expect, it } from "vitest";
 
-import { cleanup, isBinaryBuffer, readAndFilterFiles } from "./utils";
+import { cleanup, isBinaryBuffer, readAndFilterFiles } from "./repo-file-scanner";
 
-describe("utils", () => {
+describe("repo-file-scanner", () => {
   it("detects non-binary and binary buffers accurately", () => {
     expect(isBinaryBuffer(new Uint8Array())).toBe(false);
     expect(isBinaryBuffer(new TextEncoder().encode("hello world"))).toBe(false);
