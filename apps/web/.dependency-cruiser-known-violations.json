@@ -1,37 +1,9 @@
 [
   {
     "type": "dependency",
-    "from": "src/server/core/github/git.ts",
-    "to": "src/server/modules/analysis/logic/task-logger.ts",
-    "unresolvedTo": "@/server/modules/analysis/logic/task-logger",
-    "dependencyTypes": [
-      "undetermined",
-      "import"
-    ],
-    "rule": {
-      "severity": "error",
-      "name": "no-lower-layer-to-module-imports"
-    }
-  },
-  {
-    "type": "dependency",
     "from": "src/server/core/github/github-api.ts",
     "to": "src/server/modules/analysis/engine/core/project-policy.ts",
     "unresolvedTo": "@/server/modules/analysis/engine/core/project-policy",
-    "dependencyTypes": [
-      "undetermined",
-      "import"
-    ],
-    "rule": {
-      "severity": "error",
-      "name": "no-lower-layer-to-module-imports"
-    }
-  },
-  {
-    "type": "dependency",
-    "from": "src/server/core/github/github-api.ts",
-    "to": "src/server/modules/analysis/logic/task-logger.ts",
-    "unresolvedTo": "@/server/modules/analysis/logic/task-logger",
     "dependencyTypes": [
       "undetermined",
       "import"
@@ -76,20 +48,6 @@
     "unresolvedTo": "@/server/modules/analysis/engine/core/scoring-constants",
     "dependencyTypes": [
       "undetermined",
-      "import"
-    ],
-    "rule": {
-      "severity": "error",
-      "name": "no-lower-layer-to-module-imports"
-    }
-  },
-  {
-    "type": "dependency",
-    "from": "src/server/utils/call.ts",
-    "to": "src/server/modules/analysis/logic/task-logger.ts",
-    "unresolvedTo": "../modules/analysis/logic/task-logger",
-    "dependencyTypes": [
-      "local",
       "import"
     ],
     "rule": {

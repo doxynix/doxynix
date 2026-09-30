@@ -6,8 +6,7 @@ import { join, normalize } from "pathe";
 
 import { appLogger } from "@/server/core/app-logger";
 import { ProjectPolicy } from "@/server/modules/analysis/engine/core/project-policy";
-
-import { taskLogger } from "./task-logger";
+import { taskLogger } from "@/server/utils/task-logger";
 
 const MAX_TEXT_FILE_SIZE = 10 * 1024 * 1024;
 const CHUNK_SIZE = 1024;

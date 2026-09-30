@@ -14,10 +14,11 @@ import {
   GITHUB_SYSTEM_PAT,
 } from "@/shared/config/env.server";
 
+import { parseGitUrl } from "@/server/core/git/parse-url";
+
 import { AppError } from "../api-error";
 import { appLogger } from "../app-logger";
 import type { DbClient } from "../db";
-import { parseGitUrl } from "./git-url";
 import { githubTokenService } from "./github-token.service";
 
 const AppOctokit = Octokit.plugin(retry, throttling, paginateRest, createPullRequest);

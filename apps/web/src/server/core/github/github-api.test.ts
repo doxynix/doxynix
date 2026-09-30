@@ -24,7 +24,7 @@ vi.mock("@/server/utils/language-metadata", () => ({
 
 vi.mock("../app-logger", () => ({ appLogger: mocks.appLogger }));
 
-vi.mock("@/server/modules/analysis/logic/task-logger", () => ({
+vi.mock("@/server/utils/task-logger", () => ({
   taskLogger: mocks.taskLogger,
 }));
 

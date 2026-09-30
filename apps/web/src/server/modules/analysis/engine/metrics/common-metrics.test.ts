@@ -13,7 +13,7 @@ vi.mock("simple-git", () => ({ default: vi.fn() }));
 vi.mock("./code-metrics", () => ({ calculateCodeMetrics: vi.fn() }));
 
 vi.mock("@/server/core/app-logger", () => ({ appLogger: { debug: vi.fn(), error: vi.fn() } }));
-vi.mock("@/server/modules/analysis/logic/task-logger", () => ({
+vi.mock("@/server/utils/task-logger", () => ({
   taskLogger: { error: vi.fn(), info: vi.fn(), success: vi.fn(), warn: vi.fn() },
 }));
 

@@ -13,8 +13,7 @@ import {
   LLM_TEMPERATURE_STRATEGY,
   type LLMTaskType,
 } from "@/server/modules/analysis/engine/core/scoring-constants";
-
-import { taskLogger } from "../modules/analysis/logic/task-logger";
+import { taskLogger } from "@/server/utils/task-logger";
 
 const tracedAi = wrapAISDK(ai);
 

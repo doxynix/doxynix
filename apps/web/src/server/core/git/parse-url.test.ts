@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseGitUrl } from "./git-url";
+import { parseGitUrl } from "./parse-url";
 
 describe("parseGitUrl", () => {
   describe("shorthand format", () => {

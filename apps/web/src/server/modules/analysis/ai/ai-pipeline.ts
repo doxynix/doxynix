@@ -2,7 +2,7 @@ import type { DocType } from "@doxynix/shared";
 import type { Repo } from "@prisma/client";
 
 import { llmLimiter } from "@/server/modules/analysis/ai/llm-limiter";
-import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
+import { taskLogger } from "@/server/utils/task-logger";
 
 import type { AIResult } from "../engine/core/analysis-result.schemas";
 import type {

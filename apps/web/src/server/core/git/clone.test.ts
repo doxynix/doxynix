@@ -12,15 +12,15 @@ vi.mock("node:fs/promises", () => ({
 
 vi.mock("simple-git", () => ({ default: () => mockGit }));
 
-vi.mock("@/server/modules/analysis/logic/task-logger", () => ({
+vi.mock("@/server/utils/task-logger", () => ({
   taskLogger: { error: vi.fn(), info: vi.fn(), success: vi.fn() },
 }));
 
-vi.mock("./git-url", () => ({
+vi.mock("./parse-url", () => ({
   parseGitUrl: () => ({ full_name: "doxynix/app", resource: "github.com" }),
 }));
 
-import { cloneRepository, shouldUseCache } from "./git";
+import { cloneRepository, shouldUseCache } from "./clone";
 
 describe("git utilities — Security & Performance", () => {
   beforeEach(() => {

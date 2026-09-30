@@ -1,13 +1,13 @@
 import type { Repo } from "@prisma/client";
 
 import { prisma } from "@/server/core/db";
-import { shouldUseCache } from "@/server/core/github/git";
+import { shouldUseCache } from "@/server/core/git/clone";
 import { executeWithFallback } from "@/server/core/github/github-api";
 import {
   GitHubAuthRequiredError,
   resolveClientContext,
 } from "@/server/core/github/github-provider";
-import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
+import { taskLogger } from "@/server/utils/task-logger";
 
 const PRIVATE_REPO_AUTH_MESSAGE =
   "This is a private repository. Please install Doxynix App or connect GitHub.";

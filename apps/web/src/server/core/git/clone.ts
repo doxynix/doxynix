@@ -3,9 +3,9 @@ import fs from "node:fs/promises";
 import type { Repo } from "@prisma/client";
 import simpleGit from "simple-git";
 
-import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
+import { taskLogger } from "@/server/utils/task-logger";
 
-import { parseGitUrl } from "./git-url";
+import { parseGitUrl } from "./parse-url";
 
 export async function cloneRepository(
   repo: Repo,
