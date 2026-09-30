@@ -1,6 +1,6 @@
 import { clamp } from "es-toolkit";
 
-import { uniquePaths } from "@/server/utils/array-utils";
+import { uniquePaths } from "@/server/modules/analysis/engine/core/array-utils";
 
 import type { EntrypointRef, ModuleRef, RouteInventory } from "../core/discovery.types";
 import type {

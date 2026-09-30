@@ -9,8 +9,8 @@ import { highlightCode } from "@/shared/lib/shiki";
 
 import type { DbClient } from "@/server/core/db";
 import type { FileActionPreviewResult } from "@/server/core/redis.types";
-import { resolveDocumentMaterializedPath } from "@/server/utils/document-materialization";
-import { markdownToHtml } from "@/server/utils/markdown-to-html";
+import { resolveDocumentMaterializedPath } from "@/server/modules/analysis/services/document-materialization";
+import { markdownToHtml } from "@/server/modules/analysis/services/markdown-to-html";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 
 import { analysisMapper } from "../analysis.mapper";
