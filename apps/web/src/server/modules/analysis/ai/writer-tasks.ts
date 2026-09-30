@@ -104,7 +104,7 @@ async function runWriterPrompt(params: RunWriterPromptParams) {
   );
 }
 
-export async function executeReadmeWriter(
+type SimpleWriterArgs = [
   analysisId: string,
   payload: string,
   engineeringDossierPayload: string,
@@ -114,38 +114,59 @@ export async function executeReadmeWriter(
   repoId: string,
   userId: string,
   branch: string,
-): Promise<WriterResult> {
+];
+
+const SIMPLE_WRITERS = {
+  api: {
+    buildSystemPrompt: buildApiWriterSystemPrompt,
+    buildUserPrompt: buildApiWriterUserPrompt,
+    phase: "writer_api",
+  },
+  contributing: {
+    buildSystemPrompt: buildContributingWriterSystemPrompt,
+    buildUserPrompt: buildContributingWriterUserPrompt,
+    phase: "writer_contributing",
+  },
+  readme: {
+    buildSystemPrompt: buildReadmeWriterSystemPrompt,
+    buildUserPrompt: buildReadmeWriterUserPrompt,
+    phase: "writer_readme",
+  },
+} as const;
+
+type SimpleWriterName = keyof typeof SIMPLE_WRITERS;
+
+function runSimpleWriter(name: SimpleWriterName, args: SimpleWriterArgs): Promise<WriterResult> {
+  const [
+    analysisId,
+    payload,
+    engineeringDossierPayload,
+    context,
+    allowedPaths,
+    language,
+    repoId,
+    userId,
+    branch,
+  ] = args;
+  const { buildSystemPrompt, buildUserPrompt, phase } = SIMPLE_WRITERS[name];
+
   return runWriterPrompt({
     analysisId,
-    name: "readme",
-    phase: "writer_readme",
-    prompt: buildReadmeWriterUserPrompt(payload, engineeringDossierPayload, context, allowedPaths),
+    name,
+    phase,
+    prompt: buildUserPrompt(payload, engineeringDossierPayload, context, allowedPaths),
     promptChars: payload.length + engineeringDossierPayload.length + context.length,
-    system: buildReadmeWriterSystemPrompt(language),
-    tools: buildRepositoryToolProfile("writer_readme", userId, repoId, branch),
+    system: buildSystemPrompt(language),
+    tools: buildRepositoryToolProfile(phase, userId, repoId, branch),
   });
 }
 
-export async function executeApiWriter(
-  analysisId: string,
-  payload: string,
-  engineeringDossierPayload: string,
-  context: string,
-  allowedPaths: string,
-  language: string,
-  repoId: string,
-  userId: string,
-  branch: string,
-): Promise<WriterResult> {
-  return runWriterPrompt({
-    analysisId,
-    name: "api",
-    phase: "writer_api",
-    prompt: buildApiWriterUserPrompt(payload, engineeringDossierPayload, context, allowedPaths),
-    promptChars: payload.length + engineeringDossierPayload.length + context.length,
-    system: buildApiWriterSystemPrompt(language),
-    tools: buildRepositoryToolProfile("writer_api", userId, repoId, branch),
-  });
+export async function executeReadmeWriter(...args: SimpleWriterArgs): Promise<WriterResult> {
+  return runSimpleWriter("readme", args);
+}
+
+export async function executeApiWriter(...args: SimpleWriterArgs): Promise<WriterResult> {
+  return runSimpleWriter("api", args);
 }
 
 export async function executeArchitectureWriter(
@@ -185,31 +206,8 @@ export async function executeArchitectureWriter(
   });
 }
 
-export async function executeContributingWriter(
-  analysisId: string,
-  payload: string,
-  engineeringDossierPayload: string,
-  context: string,
-  allowedPaths: string,
-  language: string,
-  repoId: string,
-  userId: string,
-  branch: string,
-): Promise<WriterResult> {
-  return runWriterPrompt({
-    analysisId,
-    name: "contributing",
-    phase: "writer_contributing",
-    prompt: buildContributingWriterUserPrompt(
-      payload,
-      engineeringDossierPayload,
-      context,
-      allowedPaths,
-    ),
-    promptChars: payload.length + engineeringDossierPayload.length + context.length,
-    system: buildContributingWriterSystemPrompt(language),
-    tools: buildRepositoryToolProfile("writer_contributing", userId, repoId, branch),
-  });
+export async function executeContributingWriter(...args: SimpleWriterArgs): Promise<WriterResult> {
+  return runSimpleWriter("contributing", args);
 }
 
 type ChangelogCommit = {

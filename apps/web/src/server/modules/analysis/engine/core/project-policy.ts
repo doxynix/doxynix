@@ -391,6 +391,19 @@ export const ProjectPolicy = {
     return matchers.docs(normalize(path).toLowerCase());
   },
 
+  isExcludedByFilePolicy(path: string) {
+    return (
+      this.isSensitive(path) ||
+      this.isIgnored(path) ||
+      this.isDocsFile(path) ||
+      this.isGeneratedFile(path) ||
+      this.isTestFile(path) ||
+      this.isAssetFile(path) ||
+      this.isToolingFile(path) ||
+      this.isLowSignalConfig(path)
+    );
+  },
+
   isFrameworkFactSource(path: string) {
     const normalized = normalize(path);
     if (this.isPrimaryContourExcluded(normalized)) {
@@ -419,28 +432,7 @@ export const ProjectPolicy = {
 
   isGraphPreviewCandidate(path: string) {
     const normalized = normalize(path);
-    if (this.isSensitive(normalized)) {
-      return false;
-    }
-    if (this.isIgnored(normalized)) {
-      return false;
-    }
-    if (this.isDocsFile(normalized)) {
-      return false;
-    }
-    if (this.isGeneratedFile(normalized)) {
-      return false;
-    }
-    if (this.isTestFile(normalized)) {
-      return false;
-    }
-    if (this.isAssetFile(normalized)) {
-      return false;
-    }
-    if (this.isToolingFile(normalized)) {
-      return false;
-    }
-    if (this.isLowSignalConfig(normalized)) {
+    if (this.isExcludedByFilePolicy(normalized)) {
       return false;
     }
 
@@ -583,31 +575,7 @@ export const ProjectPolicy = {
 
   isStructureCandidate(path: string) {
     const normalized = normalize(path);
-    if (this.isSensitive(normalized)) {
-      return false;
-    }
-    if (this.isIgnored(normalized)) {
-      return false;
-    }
-    if (this.isLikelyBarrelFile(normalized)) {
-      return false;
-    }
-    if (this.isDocsFile(normalized)) {
-      return false;
-    }
-    if (this.isGeneratedFile(normalized)) {
-      return false;
-    }
-    if (this.isTestFile(normalized)) {
-      return false;
-    }
-    if (this.isAssetFile(normalized)) {
-      return false;
-    }
-    if (this.isToolingFile(normalized)) {
-      return false;
-    }
-    if (this.isLowSignalConfig(normalized)) {
+    if (this.isExcludedByFilePolicy(normalized) || this.isLikelyBarrelFile(normalized)) {
       return false;
     }
     return (
