@@ -1,5 +1,15 @@
 import type { IConfiguration } from "dependency-cruiser";
 
+/**
+ * The one place in the server that is allowed to reach every slice: it builds the
+ * tRPC caller out of the assembled routers, so importing modules is its purpose.
+ * Kept as a named constant because two rules below must exempt the same file, and
+ * an inline `pathNot` copy in each of them would silently rot on a rename.
+ */
+const CALLER_FACTORY = "^src/server/core/trpc/server[.]ts$";
+
+const SERVER_SOURCE_ONLY = ["[.](?:spec|test)[.](?:ts|tsx)$"];
+
 const config: IConfiguration = {
   extends: "@doxynix/config/depcruise-base.json",
   forbidden: [
@@ -37,7 +47,7 @@ const config: IConfiguration = {
       comment: "Server modules: no imports between slices.",
       from: {
         path: "^src/server/modules/([^/]+)/",
-        pathNot: ["[.](?:spec|test)[.](?:ts|tsx)$"],
+        pathNot: SERVER_SOURCE_ONLY,
       },
       name: "no-cross-slice-imports",
       severity: "error",
@@ -57,7 +67,7 @@ const config: IConfiguration = {
         "  from modules/    yes     yes      yes    own slice only",
       from: {
         path: "^src/server/(?:core|domain|utils)/",
-        pathNot: ["[.](?:spec|test)[.](?:ts|tsx)$", "^src/server/core/trpc/server[.]ts$"],
+        pathNot: [...SERVER_SOURCE_ONLY, CALLER_FACTORY],
       },
       name: "no-lower-layer-to-module-imports",
       severity: "error",
@@ -70,7 +80,7 @@ const config: IConfiguration = {
         "Server layering: core/ and utils/ are peers on the infrastructure layer, and neither may import domain/.",
       from: {
         path: "^src/server/(?:core|utils)/",
-        pathNot: ["[.](?:spec|test)[.](?:ts|tsx)$", "^src/server/core/trpc/server[.]ts$"],
+        pathNot: [...SERVER_SOURCE_ONLY, CALLER_FACTORY],
       },
       name: "infra-must-not-import-domain",
       severity: "error",
@@ -83,26 +93,13 @@ const config: IConfiguration = {
         "Server layering: domain/ holds business concepts shared by several slices, so it must not import feature modules.",
       from: {
         path: "^src/server/domain/",
-        pathNot: ["[.](?:spec|test)[.](?:ts|tsx)$"],
+        pathNot: SERVER_SOURCE_ONLY,
       },
       name: "domain-must-not-reach-slices",
       severity: "error",
       to: {
         path: "^src/server/modules/",
       },
-    },
-    {
-      comment: "FSD (web): shared module used once or never — move closer to the consumer.",
-      from: {
-        path: "^src/(?:app|widgets|features|entities)/",
-      },
-      module: {
-        numberOfDependentsLessThan: 2,
-        path: "^src/shared/",
-        pathNot: ["[.](?:spec|test)[.](?:ts|tsx)$"],
-      },
-      name: "no-unshared-in-shared",
-      severity: "info",
     },
   ],
   options: {

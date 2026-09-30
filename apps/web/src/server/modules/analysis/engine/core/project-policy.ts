@@ -2,12 +2,11 @@ import { orderBy, uniq } from "es-toolkit";
 import { normalize } from "pathe";
 import pm from "picomatch";
 
+import * as pathClassify from "@/server/core/path-classify";
+import { PATH_PATTERNS } from "@/server/core/path-classify/patterns";
+
 import type { FileCategory } from "./discovery.types";
-import {
-  PATH_PATTERNS,
-  PROJECT_POLICY_RULES,
-  type ProjectPolicySemanticKind,
-} from "./project-policy-rules";
+import { PROJECT_POLICY_RULES, type ProjectPolicySemanticKind } from "./project-policy-rules";
 
 type PathExplanation = {
   categories: FileCategory[];
@@ -23,8 +22,6 @@ type PathExplanation = {
   semanticKinds: ProjectPolicySemanticKind[];
   sensitive: boolean;
 };
-
-const FRONTEND_DIRS_SET = new Set<string>(PROJECT_POLICY_RULES.semantics.frontendDirectories);
 
 function compileMatcher(patterns: readonly string[] | string) {
   const values = Array.isArray(patterns) ? patterns : [patterns];
@@ -318,11 +315,7 @@ export const ProjectPolicy = {
   },
 
   isApiPath(path: string) {
-    const lower = normalize(path).toLowerCase();
-    if (this.isTestFile(lower)) {
-      return false;
-    }
-    return matchers.api(lower);
+    return pathClassify.isApiPath(path);
   },
 
   isArchitectureRelevant(path: string) {
@@ -339,11 +332,11 @@ export const ProjectPolicy = {
   },
 
   isAssetFile(path: string) {
-    return matchers.asset(normalize(path).toLowerCase());
+    return pathClassify.isAssetFile(path);
   },
 
   isBenchmarkFile(path: string) {
-    return matchers.benchmark(normalize(path).toLowerCase());
+    return pathClassify.isBenchmarkFile(path);
   },
 
   isBroadGenericGroupPath(groupPath: string) {
@@ -377,18 +370,15 @@ export const ProjectPolicy = {
   },
 
   isConfigFile(path: string) {
-    return matchers.config(normalize(path).toLowerCase());
+    return pathClassify.isConfigFile(path);
   },
 
   isDependencyLockfile(path: string) {
-    const lower = normalize(path).toLowerCase();
-    return PROJECT_POLICY_RULES.fileHints.dependencyLockfiles.some(
-      (fileName) => lower === fileName || lower.endsWith(`/${fileName}`),
-    );
+    return pathClassify.isDependencyLockfile(path);
   },
 
   isDocsFile(path: string) {
-    return matchers.docs(normalize(path).toLowerCase());
+    return pathClassify.isDocsFile(path);
   },
 
   isExcludedByFilePolicy(path: string) {
@@ -422,12 +412,11 @@ export const ProjectPolicy = {
   },
 
   isFrontendComponent(filePath: string): boolean {
-    const parts = normalize(filePath).toLowerCase().split("/").filter(Boolean);
-    return parts.some((part) => FRONTEND_DIRS_SET.has(part));
+    return pathClassify.isFrontendComponent(filePath);
   },
 
   isGeneratedFile(path: string) {
-    return matchers.generated(normalize(path).toLowerCase());
+    return pathClassify.isGeneratedFile(path);
   },
 
   isGraphPreviewCandidate(path: string) {
@@ -448,7 +437,7 @@ export const ProjectPolicy = {
   },
 
   isInfraFile(path: string) {
-    return matchers.infra(normalize(path).toLowerCase());
+    return pathClassify.isInfraFile(path);
   },
 
   isLikelyBarrelFile(path: string) {
@@ -471,21 +460,7 @@ export const ProjectPolicy = {
   },
 
   isLowSignalConfig(path: string) {
-    const lower = normalize(path).toLowerCase();
-    if (this.isDependencyLockfile(lower)) {
-      return true;
-    }
-    if (/^prisma\/migrations\/[^/]+\/migration\.sql$/u.test(lower)) {
-      return true;
-    }
-    if (
-      PROJECT_POLICY_RULES.fileHints.lowSignalConfigNames.some(
-        (fileName) => lower === fileName || lower.endsWith(`/${fileName}`),
-      )
-    ) {
-      return true;
-    }
-    return /[.-](min)\.(js|cjs|mjs|css)$/iu.test(lower);
+    return pathClassify.isLowSignalConfig(path);
   },
 
   isPrimaryApiSurface(path: string) {
@@ -586,11 +561,11 @@ export const ProjectPolicy = {
   },
 
   isTestFile(path: string) {
-    return matchers.test(normalize(path).toLowerCase());
+    return pathClassify.isTestFile(path);
   },
 
   isToolingFile(path: string) {
-    return matchers.tooling(normalize(path).toLowerCase());
+    return pathClassify.isToolingFile(path);
   },
 
   isUsefulComplexityCandidate(path: string) {

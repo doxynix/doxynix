@@ -75,26 +75,6 @@ export const STRUCTURAL_MODULARITY_SCORING = {
 } as const;
 
 // Base relevance per category; capped at 90 to leave room for the context modifiers above.
-export const FILE_CATEGORY_SCORING = {
-  api: 90, // route handlers, API endpoints
-
-  assets: 5,
-  benchmarks: 15,
-  config: 85,
-  defaultBase: 50,
-  depthBonus: 10,
-
-  docs: 10,
-  generated: 5,
-
-  infrastructure: 30, // Dockerfiles, CI/CD configs
-  lowSignalConfig: 15, // Lockfiles, migrations, gradle wrappers
-  runtimeSource: 80, // main application logic
-  sensitive: 0, // excluded from analysis: secrets, env files
-
-  tests: 20, // useful but not primary
-  tooling: 40, // Build configs, linters, formatters
-} as const;
 
 // Applied to the base FileClassifier score by context-manager.ts:scoreFile() to tune per-stage priority.
 export const FILE_CONTEXT_MODIFIERS = {

@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 
-import { getFileScore } from "@/server/modules/analysis/engine/core/file-classifier";
+import { getFileScore } from "@/server/core/path-classify/score";
 import { isOctokitError } from "@/server/utils/handle-error";
 
 import { appLogger } from "../app-logger";

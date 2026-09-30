@@ -1,12 +1,13 @@
 import { compact, isString } from "es-toolkit";
 
-import { appLogger } from "../core/app-logger";
 import {
   getRuntime,
   getSpecByExt,
   loadLanguage,
   TREE_SITTER_SUPPORTED_EXTENSIONS,
-} from "../modules/analysis/engine/extractors/tree-sitter-signals";
+} from "@/server/core/tree-sitter";
+
+import { appLogger } from "../core/app-logger";
 import { getFileExtension } from "./path-operations";
 
 type AiTextLike = {

@@ -85,19 +85,6 @@ const config: IConfiguration = {
         path: "^src/routes/",
       },
     },
-    {
-      comment: "FSD (siem-client): shared module used once or never — move closer to the consumer.",
-      from: {
-        path: "^src/(?:routes|widgets|features|entities)/",
-      },
-      module: {
-        numberOfDependentsLessThan: 2,
-        path: "^src/shared/",
-        pathNot: ["[.](?:spec|test)[.](?:ts|tsx)$"],
-      },
-      name: "no-unshared-in-shared",
-      severity: "info",
-    },
   ],
   options: {
     tsConfig: {
