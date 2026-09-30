@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 
 import { auth } from "@/server/core/auth";
-import { verifyAndUseApiKey } from "@/server/core/verify-and-use-api-key";
+import { verifyAndUseApiKey } from "@/server/core/auth/verify-api-key";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";
 
 import { prisma } from "../db";

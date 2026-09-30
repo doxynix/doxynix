@@ -3,9 +3,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { type AbstractIntlMessages, createTranslator } from "next-intl";
 import { describe, expect, it } from "vitest";
 
-import enMessages from "../../../messages/en.json";
-import ruMessages from "../../../messages/ru.json";
-import { AUTH_EMAIL_KEYS, AuthEmail } from "./auth-email";
+import enMessages from "../../../../messages/en.json";
+import ruMessages from "../../../../messages/ru.json";
+import { AUTH_EMAIL_KEYS, AuthEmail } from "./email";
 
 // `AbstractIntlMessages` rather than `typeof enMessages`: the en JSON import infers *literal* string types, which would reject `ru` (key parity is enforced by check-locales.ts).
 function translatorFor(locale: "en" | "ru", messages: AbstractIntlMessages) {

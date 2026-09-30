@@ -27,15 +27,14 @@ import {
 } from "@/shared/config/env.server";
 import { resolveRequestLocale } from "@/shared/i18n/resolve-request-locale";
 
-import { AuthEmail } from "@/server/core/auth-email";
-
-import { getNormalizedHash } from "../utils/hash";
-import { appLogger } from "./app-logger";
-import { customAuthAdapter } from "./auth/auth-adapter";
-import { prisma } from "./db";
-import { maskEmail, normalizeEmail, validateEmailSafety } from "./email-guard";
-import { emailSignInLimiter } from "./ratelimit";
-import { redisService } from "./redis";
+import { appLogger } from "@/server/core/app-logger";
+import { customAuthAdapter } from "@/server/core/auth/auth-adapter";
+import { AuthEmail } from "@/server/core/auth/email";
+import { prisma } from "@/server/core/db";
+import { emailSignInLimiter } from "@/server/core/ratelimit";
+import { redisService } from "@/server/core/redis";
+import { maskEmail, normalizeEmail, validateEmailSafety } from "@/server/utils/email-guard";
+import { getNormalizedHash } from "@/server/utils/hash";
 
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // TIME: 30 days
 const SESSION_UPDATE_AGE = 24 * 60 * 60; // TIME: 24 hours

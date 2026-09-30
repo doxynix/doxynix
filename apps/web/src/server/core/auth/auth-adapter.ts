@@ -1,6 +1,6 @@
 import type { DBAdapter, Where } from "better-auth";
 
-import { normalizeEmail } from "@/server/core/email-guard";
+import { normalizeEmail } from "@/server/utils/email-guard";
 import { getNormalizedHash, getRawHash } from "@/server/utils/hash";
 
 import { type DbClient, prisma } from "../db";

@@ -1,7 +1,6 @@
+import { appLogger } from "@/server/core/app-logger";
+import { prisma } from "@/server/core/db";
 import { extractPayloadFromKey, getApiKeyHash, validateApiKeyChecksum } from "@/server/utils/hash";
-
-import { appLogger } from "./app-logger";
-import { prisma } from "./db";
 
 // Checksum is checked on the CPU first so only the payload is hashed and looked up in the DB.
 export async function verifyAndUseApiKey(token: string) {

@@ -3,10 +3,10 @@ import type { Repo } from "@prisma/client";
 import type { ToolSet } from "ai";
 
 import { getActiveModels, SAFETY_SETTINGS } from "@/server/core/ai/ai-constants";
-import { buildRepositoryToolProfile } from "@/server/core/ai/ai-tools";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { getClientContext } from "@/server/core/github/github-client";
+import { buildRepositoryToolProfile } from "@/server/domain/ai/ai-tools";
 import { callWithFallback } from "@/server/utils/call";
 import { unwrapAiText } from "@/server/utils/optimizers";
 

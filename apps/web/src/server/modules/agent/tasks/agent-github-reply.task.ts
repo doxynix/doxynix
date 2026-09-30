@@ -3,10 +3,10 @@ import { task } from "@trigger.dev/sdk";
 import { dedent } from "es-toolkit";
 
 import { getActiveModels } from "@/server/core/ai/ai-constants";
-import { buildRepositoryToolProfile } from "@/server/core/ai/ai-tools";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { getInstallationClient } from "@/server/core/github/github-client";
+import { buildRepositoryToolProfile } from "@/server/domain/ai/ai-tools";
 import type { GithubMentionReply } from "@/server/domain/github-mention-reply";
 import { callWithFallback } from "@/server/utils/call";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";

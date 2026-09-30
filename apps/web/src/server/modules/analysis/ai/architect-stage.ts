@@ -1,6 +1,6 @@
 import { getActiveModels, SAFETY_SETTINGS } from "@/server/core/ai/ai-constants";
-import { buildRepositoryToolProfile } from "@/server/core/ai/ai-tools";
 import { appLogger } from "@/server/core/app-logger";
+import { buildRepositoryToolProfile } from "@/server/domain/ai/ai-tools";
 import { callWithFallback } from "@/server/utils/call";
 import { taskLogger } from "@/server/utils/task-logger";
 

@@ -10,7 +10,7 @@ import { RESEND_WEBHOOK_SECRET } from "@/shared/config/env.server";
 import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import { maskEmail, normalizeEmail } from "@/server/core/email-guard";
+import { maskEmail, normalizeEmail } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";
 import { withApiHandler } from "@/server/utils/with-api-handler";

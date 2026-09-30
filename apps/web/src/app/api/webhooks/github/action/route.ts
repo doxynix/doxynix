@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import * as z from "zod";
 
 import { AppError } from "@/server/core/api-error";
+import { verifyAndUseApiKey } from "@/server/core/auth/verify-api-key";
 import { prisma } from "@/server/core/db";
-import { verifyAndUseApiKey } from "@/server/core/verify-and-use-api-key";
 import { analysisLifecycleService } from "@/server/modules/analysis/services/analysis-lifecycle.service";
 import { withApiHandler } from "@/server/utils/with-api-handler";
 
