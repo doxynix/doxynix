@@ -31,17 +31,11 @@ function isProcedure(value: unknown): value is Procedure {
 function flatten(router: unknown, prefix = ""): Map<string, Procedure> {
   const out = new Map<string, Procedure>();
 
-  // `createTRPCRouter` returns a router instance whose procedures hang off
-  // `_def.procedures`, keyed by their full dotted path. Nested routers created
-  // by `createTRPCRouter` are already flattened by tRPC, so there is no second
-  // level to walk here.
   const bag = isProcedure(router) ? router._def?.procedures : router;
   if (bag == null || typeof bag !== "object") {
     return out;
   }
 
-  // tRPC builds `procedures` as a lazy Proxy. Materialize it before walking,
-  // otherwise the enumeration can come back empty depending on access order.
   const entries = Object.entries(bag as AnyRecord);
   if (entries.length === 0) {
     return out;
@@ -54,8 +48,6 @@ function flatten(router: unknown, prefix = ""): Map<string, Procedure> {
 
     const label = prefix === "" ? key : `${prefix}.${key}`;
 
-    // tRPC procedures are callable objects, so a procedure is a `function`
-    // that also carries `_def`; only a plain object is a nested router.
     if (isProcedure(value)) {
       out.set(label, value);
     } else if (typeof value === "object") {
@@ -68,11 +60,6 @@ function flatten(router: unknown, prefix = ""): Map<string, Procedure> {
   return out;
 }
 
-/**
- * `toJSONSchema` only accepts a real zod schema. Procedures without an
- * `.output()` are the interesting case for the audit, so they are recorded as
- * `null` rather than dropped: the forbidden-key test needs to see them.
- */
 function toJsonSchema(value: unknown, io: "input" | "output"): unknown {
   if (value == null || typeof value !== "object") {
     return {};
@@ -81,8 +68,6 @@ function toJsonSchema(value: unknown, io: "input" | "output"): unknown {
   try {
     return z.toJSONSchema(value as z.ZodType, { io, unrepresentable: "any" });
   } catch {
-    // A procedure without a real zod output still has to appear in the
-    // document, so fall back to an opaque schema rather than failing the run.
     return {};
   }
 }

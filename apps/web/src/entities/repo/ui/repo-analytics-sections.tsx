@@ -21,11 +21,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 import type { RepoMetricsItem } from "../model/repo.types";
 import { ComplexityScatterChart } from "./repo-complexity-scatter-chart";
 
-/**
- * The finding shape `onTriggerFix` forwards into `createFix`. Every field is
- * optional because the two sections that render it build the object from
- * different sources and each supplies a different subset.
- */
 type FixTriggerFinding = {
   line?: null | number;
   message?: null | string;

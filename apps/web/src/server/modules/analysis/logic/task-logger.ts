@@ -27,18 +27,10 @@ function safeCurrentMetadata() {
   }
 }
 
-/**
- * Utility for managing task progress and logs.
- * Separates the real-time stream (metadata) from permanent storage (DB).
- */
 export const taskLogger = {
   error(msg: string) {
     this.log(msg, "error");
   },
-  /**
-   * Final sync. Called once at the end.
-   * Collects ALL logs from metadata and stores them in the DB permanently.
-   */
   async finalize(analysisId: string, status: Status = Status.DONE, message?: string) {
     const finalMsg =
       message ?? (status === Status.DONE ? "Completed successfully" : "Analysis failed");
@@ -72,16 +64,10 @@ export const taskLogger = {
       userId: analysis.repo.userId,
     });
   },
-  /**
-   * Helpers for different log levels
-   */
   info(msg: string) {
     this.log(msg, "info");
   },
-  /**
-   * Granular log. Only for real-time display.
-   * Line format: "level:::timestamp:::message"
-   */
+  // Real-time only; persisted to the DB later by `finalize`
   log(msg: string, level: LogLevel = "info") {
     const timestamp = new Date().toLocaleTimeString();
     const line = `${level}:::${timestamp}:::${msg}`;
@@ -91,9 +77,6 @@ export const taskLogger = {
     safeMetadata(() => metadata.append(TRIGGER_CONFIG.metadataKeys.taskLogs, line));
   },
 
-  /**
-   * Updates the current stage status.
-   */
   async milestone(params: { analysisId: string; msg: string; percent: number; userId: string }) {
     const { analysisId, msg, percent, userId } = params;
 

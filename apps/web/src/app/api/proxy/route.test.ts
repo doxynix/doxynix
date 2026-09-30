@@ -89,8 +89,6 @@ describe("Proxy API Route — SSRF Prevention Suite", () => {
     });
 
     it("rejects a non-string header value that undici could not send", async () => {
-      // This is the case the previous blind `as ProxyRequestBody` let through
-      // to a runtime failure inside undici.
       const req = new Request("http://localhost/api/proxy", {
         body: JSON.stringify({
           headers: { "x-trace": { nested: true } },

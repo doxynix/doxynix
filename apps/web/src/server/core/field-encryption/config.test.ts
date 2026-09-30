@@ -29,37 +29,21 @@ describe("field-encryption config", () => {
   });
 
   it("hashes the salted value to a known-good digest", () => {
-    // `sha256("user@example.com" + "unit-test-salt")`. The retired library's
-    // `hashString` streamed `update(value)` then `update(utf8(salt))`; for
-    // SHA-256 that is the digest of the concatenation. Pinning the literal is
-    // what makes this a contract test - recomputing it with `createHash` the
-    // same way `hashValue` does would pass by construction and could never
-    // disagree with the implementation.
+    // `sha256("user@example.com" + "unit-test-salt")`, the retired library's streamed `update(value)` then `update(utf8(salt))`; pinning the literal is what makes this a contract test instead of one that passes by construction.
     expect(hashValue("user@example.com", ["lowercase", "trim"])).toBe(
       "98ede1c4555925b16f5aa92fae3f23cd7036de4e58ed980987f68b926dc85d62",
     );
   });
 
   it("stays byte-compatible with getRawHash, the reference the repo already trusts", () => {
-    // `getRawHash` is an independent implementation - the one-shot `crypto.hash`
-    // rather than a streamed `createHash` - documented in
-    // `src/server/utils/hash.ts` as byte-compatible with `prisma-field-encryption`
-    // and covered by its own suite. Cross-checking against it tests the
-    // compatibility claim instead of restating this function's own algorithm.
+    // `getRawHash` is an independent implementation (one-shot `crypto.hash`, documented in `src/server/utils/hash.ts` as byte-compatible with `prisma-field-encryption`), so this tests the compatibility claim instead of restating this function's own algorithm.
     for (const value of ["user@example.com", "SESS_SECRET", "Ünïcødé 🎯", ""]) {
       expect(hashValue(value, [])).toBe(getRawHash(value));
     }
   });
 
   it("does not NFC-normalize, which is what separates it from getNormalizedHash", () => {
-    // The descriptor's normalize vocabulary is only `lowercase` and `trim`; the
-    // generator never emits anything else. Pin the boundary so a silently added
-    // Unicode normalization pass cannot change every non-ASCII digest, and so the
-    // difference from `getNormalizedHash` (which always applies NFC) stays
-    // intentional rather than accidental.
-    // "café" in NFC (U+00E9) vs NFD ("e" + U+0301). Built from code points
-    // rather than literals so no editor or formatter can normalise the source
-    // and quietly collapse the two into the same string.
+    // The normalize vocabulary is only `lowercase`/`trim`, so a silently added Unicode pass must not change every non-ASCII digest; the NFC/NFD strings are built from code points so no formatter can collapse them.
     const nfc = String.fromCodePoint(0x63, 0x61, 0x66, 0xe9);
     const nfd = String.fromCodePoint(0x63, 0x61, 0x66, 0x65, 0x3_01);
 

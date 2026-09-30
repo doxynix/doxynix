@@ -19,7 +19,6 @@ type Props = {
   setSessionId: (id: null | string) => void;
 };
 
-/** A session that is guaranteed to carry a repo, so grouping can read its fields. */
 type SessionWithRepo = AgentSession & { repo: NonNullable<AgentSession["repo"]> };
 
 export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: Readonly<Props>) {

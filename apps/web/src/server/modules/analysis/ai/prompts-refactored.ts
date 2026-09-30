@@ -1,10 +1,3 @@
-/**
- * Prompt Generators
- * Centralized construction functions for all tasks.
- * Refactored to align with Gemma 4 latency/reasoning optimizations.
- * Strictly formatted and structured according to the Diátaxis framework.
- */
-
 import { dedent, escape } from "es-toolkit";
 
 import { PromptFactory, UserPromptBuilder } from "@/server/modules/analysis/logic/prompt-builder";
@@ -24,10 +17,6 @@ const WRITER_TRACEABILITY_RULE = dedent`
 
 const NO_THEORY_CONSTRAINT = dedent`
   CRITICAL NO-THEORY CONSTRAINT: Never explain baseline technologies, languages, libraries, or protocols (e.g., do NOT explain what Java, Spring, Express, Prisma, or JWT are). Assume the reader is a Senior/Staff Developer who understands the tech stack. Focus exclusively on the unique architecture, custom code patterns, explicit telemetry, and dependencies of THIS repository.`;
-
-// =============================================================================
-// SENTINEL PROMPTS (Security Filter) - BYPASS THINKING (Latency Critical)
-// =============================================================================
 
 export function buildSentinelSystemPrompt(): string {
   return PromptFactory.forRole("security-sentinel")
@@ -60,13 +49,9 @@ export function buildSentinelUserPrompt(instructions: string): string {
     .build();
 }
 
-// =============================================================================
-// MAPPER PROMPTS (Repository Architecture Extraction) - USE THINKING
-// =============================================================================
-
 export function buildMapperSystemPrompt(): string {
   return PromptFactory.forRole("architect", "English")
-    .withThinking(true) // Activate native deep reasoning <|think|> for codebase topology processing
+    .withThinking(true)
     .withTask(
       dedent`
       Conduct an exhaustive structural mapping and topological analysis of the codebase.
@@ -110,13 +95,9 @@ export function buildMapperUserPrompt(skeletonJson: string): string {
     .build();
 }
 
-// =============================================================================
-// ANALYSIS PROMPTS (Comprehensive Repository Analysis) - USE THINKING
-// =============================================================================
-
 export function buildAnalysisSystemPrompt(targetLanguage: string = "English"): string {
   return PromptFactory.forRole("code-analyzer", targetLanguage)
-    .withThinking(true) // Activate native reasoning for complex telemetry analysis
+    .withThinking(true)
     .withTask(
       dedent`
       Generate a grounded, high-density repository intelligence report.
@@ -160,9 +141,6 @@ export function buildAnalysisUserPrompt(
     .addRaw(codeSnippetXml)
     .build();
 }
-// =============================================================================
-// API WRITER PROMPTS (Reference Quadrant) - USE THINKING
-// =============================================================================
 
 export function buildApiWriterSystemPrompt(targetLanguage: string = "English"): string {
   return PromptFactory.forRole("api-documentarian", targetLanguage)
@@ -239,9 +217,6 @@ export function buildApiWriterUserPrompt(
     .addXmlSection("api_context", apiFilesContext)
     .build();
 }
-// =============================================================================
-// README WRITER PROMPTS (Tutorial/Explanation Hybrid) - USE THINKING
-// =============================================================================
 
 export function buildReadmeWriterSystemPrompt(targetLanguage: string = "English"): string {
   return PromptFactory.forRole("readme-writer", targetLanguage)
@@ -322,10 +297,6 @@ export function buildReadmeWriterUserPrompt(
     .build();
 }
 
-// =============================================================================
-// CONTRIBUTING / DEVELOPMENT WRITER PROMPTS (How-To Guides) - USE THINKING
-// =============================================================================
-
 export function buildContributingWriterSystemPrompt(targetLanguage: string = "English"): string {
   return PromptFactory.forRole("contributing-writer", targetLanguage)
     .withThinking(true)
@@ -392,10 +363,6 @@ export function buildContributingWriterUserPrompt(
     .build();
 }
 
-// =============================================================================
-// CHANGELOG WRITER PROMPTS (Reference / History) - USE THINKING
-// =============================================================================
-
 export function buildChangelogWriterSystemPrompt(targetLanguage: string = "English"): string {
   return PromptFactory.forRole("changelog-writer", targetLanguage)
     .withThinking(true)
@@ -452,9 +419,6 @@ export function buildChangelogWriterUserPrompt(params: {
     .build();
 }
 
-// =============================================================================
-// CODE DOC PROMPTS - USE THINKING (Prevents laziness/code truncation)
-// =============================================================================
 export function buildCodeDocSystemPrompt(targetLanguage: string = "English"): string {
   return PromptFactory.forRole("code-documenter", targetLanguage)
     .withThinking(true)
@@ -488,10 +452,6 @@ export function buildCodeDocUserPrompt(filePath: string, content: string): strin
     .addXmlSection("file", content, { path: escape(filePath) })
     .build();
 }
-
-// =============================================================================
-// ARCHITECTURE WRITER PROMPTS (Explanation / ADRs) - USE THINKING
-// =============================================================================
 
 export function buildArchitectureWriterSystemPrompt(targetLanguage: string = "English"): string {
   return PromptFactory.forRole("architecture-writer", targetLanguage)
@@ -582,10 +542,6 @@ export function buildArchitectureWriterUserPrompt(
     .build();
 }
 
-// =============================================================================
-// SINGLE FILE ANALYSIS PROMPT - USE THINKING
-// =============================================================================
-
 export function buildSingleFileAnalysisPrompt(language: string = "English"): string {
   return PromptFactory.forRole("code-reviewer", language)
     .withThinking(true) // Native reasoning helps accurately trace lines and bugs without offset errors
@@ -629,10 +585,6 @@ For each suggestion, use exactly this format:
     )
     .buildSystem();
 }
-
-// =============================================================================
-// PR DIFF REVIEW PROMPTS (Reference / Explanation hybrid) - USE THINKING
-// =============================================================================
 
 export function buildPrReviewSystemPrompt(targetLanguage: string = "English"): string {
   return PromptFactory.forRole("code-reviewer", targetLanguage)
@@ -704,9 +656,6 @@ type FindingInputForPrompt = {
   type: string;
 };
 
-/**
- * System prompt for professional AI code refactoring (SEARCH/REPLACE).
- */
 export function buildCodeFixerSystemPrompt(targetLanguage: string = "English"): string {
   return PromptFactory.forRole("generic", targetLanguage)
     .reset()
@@ -800,9 +749,6 @@ export function buildCodeFixerSystemPrompt(targetLanguage: string = "English"): 
     .buildSystem();
 }
 
-/**
- * User prompt that wraps files and vulnerabilities into XML.
- */
 export function buildCodeFixerUserPrompt(
   findings: FindingInputForPrompt[],
   fileContents: Record<string, string>,

@@ -8,7 +8,7 @@ import {
   type RegexSymbolPattern,
 } from "./regex-signal-specs";
 
-// Reference: Counts matches quickly without allocating heavy JS arrays in memory
+// Counts matches in a single pass without allocating match arrays.
 function countRegexMatches(content: string, patterns: RegExp[]): number {
   let total = 0;
   for (const pattern of patterns) {

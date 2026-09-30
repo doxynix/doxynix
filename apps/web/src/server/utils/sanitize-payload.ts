@@ -99,10 +99,6 @@ export function sanitizePayload(obj: unknown): unknown {
   }
 }
 
-/**
- * Technical Prisma keys that must never be persisted in an audit-log payload.
- * Shared with the audit-log mapper, which skips them when building the detail rows.
- */
 export const SKIP_FIELDS = new Set([
   "analysisId",
   "githubId",
@@ -166,7 +162,6 @@ export function maskSensitiveFields(modelName: string, data: unknown): unknown {
     const nested = record.data;
 
     if (nested != null && typeof nested === "object") {
-      // `typeof` narrows to `object`, which has no string index signature.
       const payload = nested as Record<string, unknown>;
 
       for (const key of Object.keys(payload)) {

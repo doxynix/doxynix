@@ -13,7 +13,7 @@ import { AppButton } from "./button";
 
 interface AnimatedThemeTogglerProps extends ComponentPropsWithoutRef<"button"> {
   duration?: number;
-  /** When true, the transition expands from the viewport center instead of the button center. */
+  // When true, expands the transition from the viewport center instead of the button center.
   fromCenter?: boolean;
   variant?: TransitionVariant;
 }

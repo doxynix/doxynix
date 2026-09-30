@@ -88,7 +88,6 @@ export const githubTokenService = {
         "status" in error &&
         (error.status === 400 || error.status === 401);
 
-      // Clear tokens for poisoned account to prevent infinite retry
       if (isFatal) {
         try {
           await prisma.account.updateMany({

@@ -28,11 +28,6 @@ type InstallationRepoItem =
 type GitHubRepoResponse = InstallationRepoItem | SearchRepoItem;
 type GitHubContextType = "app" | "installation" | "oauth" | "public";
 const FALLBACK_RETRYABLE_STATUSES = new Set([401, 403, 404]);
-/**
- * Validates repository access and returns metadata
- * Throws GitHubAuthRequiredError for unauthorized access to private repos
- * Complexity: 6 branches
- */
 
 async function getRepoDataOrAuthError(
   client: OctokitInstance,
@@ -57,9 +52,6 @@ async function getRepoDataOrAuthError(
     throw error;
   }
 }
-/**
- * Transforms GitHub API repo objects to RepoItemFields
- */
 
 export function mapRepos(data: GitHubRepoResponse[]): RepoItemFields[] {
   return data.map((repo) => ({
@@ -104,13 +96,6 @@ async function fetchOauthRepos(account: { accessToken: null | string; id: string
     return [];
   }
 }
-/**
- * Lists all repositories accessible to user through:
- * - GitHub App installations
- * - OAuth tokens
- * Returns deduplicated list by fullName
- * Complexity: 8 branches
- */
 
 export async function getMyRepos(prisma: DbClient, userId: string): Promise<RepoItemFields[]> {
   try {
@@ -137,19 +122,12 @@ export async function getMyRepos(prisma: DbClient, userId: string): Promise<Repo
       result.status === "fulfilled" ? result.value : [],
     );
 
-    // Deduplicate by fullName
     return dedupeReposByFullName(allRepos);
   } catch (error) {
     appLogger.error({ error, msg: "Error fetching combined repositories", userId });
     return [];
   }
 }
-/**
- * Searches public/accessible repositories
- * For public contexts: filters to public repos only
- * Query length must be 2-256 chars
- * Complexity: 7 branches
- */
 
 export async function searchRepos(
   prisma: DbClient,
@@ -187,11 +165,6 @@ export async function searchRepos(
     return [];
   }
 }
-/**
- * Gets repository metadata (name, visibility, default branch, etc)
- * Validates access for public contexts
- * Retries with fallback on auth errors
- */
 
 export async function getRepoInfo(prisma: DbClient, userId: string, owner: string, name: string) {
   const context = await resolveClientContext(prisma, userId, {
@@ -204,11 +177,6 @@ export async function getRepoInfo(prisma: DbClient, userId: string, owner: strin
     return getRepoDataOrAuthError(client, owner, name, context.type);
   });
 }
-/**
- * Lists branch names for repository
- * For public contexts: validates repo access first
- * Pagination: 100 per page
- */
 
 export async function getRepoBranches(
   prisma: DbClient,
@@ -236,12 +204,6 @@ export async function getRepoBranches(
     return branches.map((b) => b.name);
   });
 }
-/**
- * Gets repository file tree (blob entries only, recursively)
- * Filters ignored files via ProjectPolicy
- * Returns: {path, sha, type}[]
- * Complexity: 8 branches (error handling)
- */
 
 export async function getRepoTree(
   prisma: DbClient,
@@ -304,12 +266,6 @@ type GitHubFileResponse = {
     url: null | string;
   };
 };
-/**
- * Retrieves file content from repository
- * Decodes base64 response to UTF-8
- * Validates that path is a file (not directory)
- * Retries with fallback on auth errors
- */
 
 export async function getFileContent(
   prisma: DbClient,
@@ -334,9 +290,7 @@ export async function getFileContent(
     });
 
     if (Array.isArray(data) || data.type !== "file") {
-      // Typed so the caller gets a 400 with an explanation instead of a masked
-      // 500. Reachable from `githubBrowse.getFileContent` and from the agent
-      // file tools, so it crosses both transports.
+      // Typed so the caller gets a 400 with an explanation instead of a masked 500; reachable from the browse route and the agent file tools alike.
       throw new AppError({ code: "BAD_REQUEST", publicMessage: "Target path is not a file" });
     }
 
@@ -350,13 +304,9 @@ export async function getFileContent(
       },
     };
   });
-} /**
- * Executes operation with fallback retry on auth errors
- * For installation/oauth clients: tries available oauth tokens on 401/403/404
- * Cycles through all available oauth accounts
- * Complexity: 10 branches
- */
+}
 
+// Retries with each available OAuth token on 401/403/404 for installation/oauth clients.
 export async function executeWithFallback<T>(
   prisma: DbClient,
   userId: string,
@@ -368,12 +318,9 @@ export async function executeWithFallback<T>(
     return await operation(initialOctokit);
   } catch (error) {
     if (shouldRetryWithOauthFallback(initialType, error)) {
-      // Fetch all available oauth accounts
       const oauthAccounts = await prisma.account.findMany({
         where: { accessToken: { not: null }, providerId: "github", userId },
       });
-
-      // Try each oauth account
 
       for (const oauthAcc of oauthAccounts) {
         if (oauthAcc.accessToken == null) {
@@ -400,14 +347,7 @@ type BusFactorResult = {
     login: string;
   }>;
 };
-/**
- * Calculates bus factor for repository
- * - Fetches contributors (max 500)
- * - Sorts by commit count
- * - Finds minimum team size for 50% of commits
- * - Validates private repo access
- * Complexity: 12 branches (error handling + auth)
- */
+
 export async function calculateBusFactor(
   repo: Repo,
   userId: string,
@@ -425,7 +365,6 @@ export async function calculateBusFactor(
     const octokit = context.octokit;
     const clientType = context.type;
 
-    // Validate private repo access
     if (repo.visibility === "PRIVATE" && (clientType === "app" || clientType === "public")) {
       taskLogger.error("GitHub: Private repository access denied (missing installation)");
       throw new GitHubAuthRequiredError();
@@ -458,7 +397,6 @@ export async function calculateBusFactor(
 
     taskLogger.info(`GitHub: Successfully retrieved ${contributors.length} active contributors`);
 
-    // Normalize and sort contributors
     const rawContributors = contributors
       .map((contributor: (typeof contributors)[number]) => ({
         contributions: contributor.contributions,
@@ -476,7 +414,6 @@ export async function calculateBusFactor(
       };
     }
 
-    // Calculate bus factor: min team size for 50% of commits
     let runningSum = 0;
     let busFactor = 0;
 
@@ -499,7 +436,6 @@ export async function calculateBusFactor(
       rawContributors,
     };
   } catch (error) {
-    // Extract HTTP status if available
     const status =
       typeof error === "object" && error !== null && "status" in error
         ? Number((error as { status?: number }).status)
@@ -507,7 +443,6 @@ export async function calculateBusFactor(
 
     const isMissingAuth = error instanceof GitHubAuthRequiredError;
 
-    // Private repo requires auth
     if (repo.visibility === "PRIVATE" && (isMissingAuth || isRetryableGithubStatus(status))) {
       taskLogger.error("GitHub: Failed to access private repository contributors");
       if (isMissingAuth) {
@@ -516,7 +451,6 @@ export async function calculateBusFactor(
       throw new GitHubAuthRequiredError();
     }
 
-    // Public repo: log and return default
     if (isMissingAuth || isRetryableGithubStatus(status)) {
       taskLogger.warn(
         "GitHub: Bus Factor calculation failed (likely due to API limits). Defaulting to 0.",

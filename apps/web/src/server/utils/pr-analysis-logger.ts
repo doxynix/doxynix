@@ -2,9 +2,6 @@ import type { PRAnalysisConfig } from "@/server/modules/analysis/logic/pr.types"
 
 import { appLogger as baseLogger } from "../core/app-logger";
 
-/**
- * Structured logging for PR analysis operations
- */
 export const prAnalysisLogger = {
   analyzeCompleted: (
     repoId: string,

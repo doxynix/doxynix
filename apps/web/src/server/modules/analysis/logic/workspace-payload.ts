@@ -4,11 +4,6 @@ import type { StructureMapPayload } from "./graph-navigator";
 
 type RepoOverview = NonNullable<ReturnType<typeof analysisMapper.toOverview>>;
 
-/**
- * Projects the raw analysis overview and structure map into the flat payload the
- * workspace screen consumes. Pure projection: no field of either input is
- * dropped, and `source` is narrowed to the only value the UI understands.
- */
 export function buildWorkspacePayload(params: {
   overview: RepoOverview;
   structure: StructureMapPayload;

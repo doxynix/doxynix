@@ -2,11 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { analysisDocsRouter } from "./analysis-docs.router";
 
-/**
- * DXNX-237: the sub-router split must not change the client-visible surface.
- * This is the cheapest possible guard - it only reads the exported key set, so
- * it stays fast and needs no tRPC context.
- */
+// Sub-router split must not change the client-visible procedure surface.
 const EXPECTED = [
   "documentFile",
   "getAvailableDocs",
@@ -29,8 +25,7 @@ describe("analysisDocsRouter", () => {
   });
 
   it("keeps documentFile and quickFileAudit on the shared input schema", () => {
-    // Both were separate but identical zod objects before the split; a future
-    // edit that diverges them would silently change one client contract.
+    // Identical input schemas by design; diverging them would silently change one client contract.
     const documentFile = analysisDocsRouter.documentFile;
     const quickFileAudit = analysisDocsRouter.quickFileAudit;
 

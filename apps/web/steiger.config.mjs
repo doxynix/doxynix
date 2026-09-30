@@ -1,17 +1,7 @@
 import fsd from "@feature-sliced/steiger-plugin";
 import { defineConfig } from "steiger";
 
-// Full-power FSD config: every rule from @feature-sliced/steiger-plugin is
-// enabled at its maximum severity ("error"), including the three rules that
-// are defined but NOT part of fsd.configs.recommended:
-//   - fsd/no-cross-imports
-//   - fsd/no-higher-level-imports
-//   - fsd/import-locality
-//
-// The barrel-file (public API) rules are intentionally turned OFF — this
-// codebase deliberately does not use barrel files:
-//   - fsd/public-api              (requires slices to have an index.ts)
-//   - fsd/no-public-api-sidestep  (bans deep imports that bypass index.ts)
+// Public-API rules are off because this codebase deliberately uses deep imports instead of barrel files.
 export default defineConfig([
   ...fsd.configs.recommended,
 
@@ -42,10 +32,7 @@ export default defineConfig([
   },
 
   {
-    // The shared layer has no slices — its segments may import each other
-    // freely, and the import-locality rationale (slice-internal imports stay
-    // relative) does not apply. Enforcing it there only fights the IDE, which
-    // suggests the "@/shared/..." alias over relative paths.
+    // `shared` has no slices, so import-locality (slice-internal relative imports) does not apply there.
     files: ["./src/shared/**"],
     rules: {
       "fsd/import-locality": "off",

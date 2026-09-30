@@ -22,10 +22,6 @@ export type MatchableDoc = {
   version: string;
 };
 
-/**
- * Lowercased search terms for a node's related files: each path contributes both
- * its bare filename and the full path, so a section title can match either.
- */
 export function buildDocSearchTerms(relatedFiles: string[]): string[] {
   return relatedFiles.flatMap((path) => {
     const fileName = basename(path);
@@ -33,12 +29,7 @@ export function buildDocSearchTerms(relatedFiles: string[]): string[] {
   });
 }
 
-/**
- * Picks the documentation sections worth showing next to a graph node: sections
- * the node is already linked to, plus sections whose title or body mentions the
- * node label or any related file. Capped per document and overall so a node
- * with a huge document does not flood the inspector.
- */
+// Capped per document and overall so one huge document cannot flood the inspector
 export function matchDocSections(params: {
   docs: MatchableDoc[];
   graph: DependencyGraph;

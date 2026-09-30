@@ -11,9 +11,7 @@ describe("math-utils", () => {
 
     it("should calculate the correct percentile", () => {
       const values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-      // 0.5 ratio should be median (5.5) or nearest integer
       expect(percentile(values, 0.5)).toBe(5);
-      // 0.9 ratio
       expect(percentile(values, 0.9)).toBe(9);
     });
 
@@ -35,7 +33,6 @@ describe("math-utils", () => {
     });
 
     it("should handle values.length > 0 but not zero check", () => {
-      // This should kill the surviving conditional mutation
       expect(percentile([1], 0.5)).toBe(1);
     });
   });

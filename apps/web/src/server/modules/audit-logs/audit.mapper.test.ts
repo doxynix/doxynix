@@ -7,20 +7,12 @@ vi.mock("@/server/utils/ua-parser", () => ({
 
 import { auditMapper } from "./audit.mapper";
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
 const DESKTOP_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 const IPHONE_UA =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1";
 const IPAD_UA =
   "Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1";
-
-// ---------------------------------------------------------------------------
-// Factory
-// ---------------------------------------------------------------------------
 
 function makeAuditLog(overrides: Partial<AuditLog> = {}): AuditLog {
   return {
@@ -37,18 +29,10 @@ function makeAuditLog(overrides: Partial<AuditLog> = {}): AuditLog {
   }; // spread of Partial<AuditLog> over full defaults keeps the result assignable to AuditLog
 }
 
-// ===========================================================================
-// auditMapper.toDto
-// ===========================================================================
-
 describe("auditMapper.toDto", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
-
-  // -----------------------------------------------------------------------
-  // OP_MAP / severity
-  // -----------------------------------------------------------------------
 
   describe("OP_MAP / severity", () => {
     it.each([
@@ -69,10 +53,6 @@ describe("auditMapper.toDto", () => {
       },
     );
   });
-
-  // -----------------------------------------------------------------------
-  // MODEL_CONFIG / targetName
-  // -----------------------------------------------------------------------
 
   describe("MODEL_CONFIG / targetName", () => {
     it("Repo with data.fullName uses fullName", () => {
@@ -145,10 +125,6 @@ describe("auditMapper.toDto", () => {
     });
   });
 
-  // -----------------------------------------------------------------------
-  // details / device / browser
-  // -----------------------------------------------------------------------
-
   describe("details / device / browser", () => {
     it("primitive fields become details with camelCase labels", () => {
       const log = makeAuditLog({
@@ -202,10 +178,6 @@ describe("auditMapper.toDto", () => {
       expect(auditMapper.toDto(log).deviceType).toBe("desktop");
     });
   });
-
-  // -----------------------------------------------------------------------
-  // rawPayload
-  // -----------------------------------------------------------------------
 
   describe("rawPayload", () => {
     it("returns sanitized payload with SKIP_FIELDS removed", () => {

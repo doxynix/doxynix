@@ -63,7 +63,6 @@ export function withTastefulEasing(
   transition: TransitionMap,
   kind: "enter" | "exit",
 ): TransitionMap {
-  // Springs / per-property transitions keep their own physics.
   if (hasPerPropertyTransitions(transition)) {
     return transition;
   }
@@ -78,7 +77,6 @@ export function withTastefulEasing(
   };
 }
 
-/** Copy of the current variants table in text-animate.tsx (lines 97–293). */
 const rawItemAnimationVariants: Record<AnimationVariant, { container: Variants; item: Variants }> =
   {
     blurIn: {

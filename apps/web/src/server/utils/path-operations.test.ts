@@ -33,12 +33,7 @@ describe("path-operations", () => {
 
   describe("uniqueObjectPaths", () => {
     it("should deduplicate and apply numeric limit", () => {
-      const items = [
-        { path: "/a" },
-        { path: "/b" },
-        { path: "/a" }, // duplicate
-        { path: "/b" }, // duplicate
-      ];
+      const items = [{ path: "/a" }, { path: "/b" }, { path: "/a" }, { path: "/b" }];
       expect(uniqueObjectPaths(items)).toEqual(["/a", "/b"]);
       expect(uniqueObjectPaths(items, 1)).toEqual(["/a"]);
     });

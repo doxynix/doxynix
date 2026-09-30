@@ -46,9 +46,7 @@ const LUA_COMMENT: CommentSyntax = {
 };
 
 const SYNTAX_MAP: Record<string, CommentSyntax> = {
-  // Hash-style comments
   bash: HASH_COMMENT,
-  // C-like languages
   c: C_LIKE_COMMENT,
   cc: C_LIKE_COMMENT,
   conf: HASH_COMMENT,
@@ -63,8 +61,6 @@ const SYNTAX_MAP: Record<string, CommentSyntax> = {
   groovy: C_LIKE_COMMENT,
   h: C_LIKE_COMMENT,
   hpp: C_LIKE_COMMENT,
-
-  // Markup
   htm: HTML_COMMENT,
   html: HTML_COMMENT,
   java: C_LIKE_COMMENT,
@@ -74,8 +70,6 @@ const SYNTAX_MAP: Record<string, CommentSyntax> = {
   kt: C_LIKE_COMMENT,
   kts: C_LIKE_COMMENT,
   less: C_LIKE_COMMENT,
-
-  // SQL & Lua
   lua: LUA_COMMENT,
   mjs: C_LIKE_COMMENT,
   php: C_LIKE_COMMENT,
@@ -221,9 +215,7 @@ export function countSourceStats(content: string, rawExtension: string): CodeSta
     }
 
     if (syntax.single && line.includes(syntax.single)) {
-      // Mixed line: code + trailing single-line comment. This is the branch
-      // that leasot could never reach, because every one of its parsers anchors
-      // the comment marker at the start of the line.
+      // Mixed line: code + trailing single-line comment.
       source++;
       comments++;
       todos += countTodoMarkers(line.slice(line.indexOf(syntax.single) + syntax.single.length));

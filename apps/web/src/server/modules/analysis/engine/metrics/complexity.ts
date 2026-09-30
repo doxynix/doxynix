@@ -3,9 +3,6 @@ import { clamp } from "es-toolkit";
 import type { HealthScoreParams } from "../core/metrics.types";
 import { MODERN_HEALTH_SCORE } from "../core/scoring-constants";
 
-/**
- * Calculates the modern, deep repository health score (Health Score).
- */
 export function calculateHealthScore(params: HealthScoreParams): number {
   const {
     busFactor,

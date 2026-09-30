@@ -56,9 +56,6 @@ export function ssrfSafeLookup(
           msg: "SSRF prevention triggered during socket lookup",
           range: ipaddr.process(address).range(),
         });
-        // Thrown as a typed error so the route handler maps it to 403 by shape
-        // rather than by matching on the message text, which silently breaks the
-        // moment the copy is reworded.
         callback(
           new AppError({ code: "FORBIDDEN", publicMessage: UNSAFE_TARGET_MESSAGE }),
           null,
@@ -77,8 +74,6 @@ export function ssrfSafeLookup(
   });
 }
 
-// `globalThis.fetch` in Node is undici's, so `dispatcher` really is honoured — the
-// DOM `RequestInit` type is simply what does not know about it.
 type ProxiedRequestInit = RequestInit & { dispatcher?: Agent };
 
 export const ssrfSafeAgent = new Agent({
@@ -154,8 +149,6 @@ async function handler(req: Request) {
   try {
     response = await fetch(validatedUrl, proxiedInit);
   } catch (error) {
-    // An SSRF rejection surfaces here wrapped by undici as `TypeError: fetch
-    // failed`; unwrap it so the typed FORBIDDEN wins over the 502 below.
     const ssrf = findAppError(error);
 
     if (ssrf != null) {

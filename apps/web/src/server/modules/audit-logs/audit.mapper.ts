@@ -24,11 +24,7 @@ type AuditPayload = {
   where?: Record<string, unknown>;
 };
 
-/**
- * `log.payload` is a Prisma `JsonValue` column, so it is `unknown` until proven.
- * Both members are open records because the audit log records whatever
- * `where`/`data` the calling mutation passed, which is unbounded.
- */
+// Open records: the audit log stores whatever `where`/`data` the calling mutation passed, which is unbounded.
 const AuditPayloadSchema = z
   .looseObject({
     data: z.record(z.string(), z.unknown()).optional(),

@@ -263,7 +263,6 @@ ${"+a\n".repeat(301)}`;
       PR_METADATA,
     );
 
-    // AI duplicate of Stripe dropped; 5 sentinel findings remain.
     expect(result.findings).toHaveLength(5);
     expect(result.summary).toBe("mocked summary");
   });

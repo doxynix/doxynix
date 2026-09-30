@@ -43,7 +43,7 @@ const MAGIC_LINK_MAX_AGE = 10 * 60; // TIME: 10 minutes
 
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
-/** Unauthenticated sign-in bodies: only `email` is read, and it must be a string. */
+// Unauthenticated sign-in bodies: only `email` is read, and it must be a string.
 const EmailRequestBody = z.object({
   email: z.string().optional(),
 });
@@ -315,9 +315,7 @@ export const auth = betterAuth({
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
       if (ctx.path.startsWith("/sign-in/email") || ctx.path.startsWith("/magic-link/send")) {
-        // Validated rather than asserted: this is an unauthenticated request
-        // body, and the previous cast trusted whatever shape arrived. A
-        // non-string `email` previously reached `normalizeEmail` unchecked.
+        // Parsed rather than cast: the body is unauthenticated, so a non-string `email` must not reach `normalizeEmail` unchecked.
         const body = EmailRequestBody.safeParse(ctx.body);
 
         if (!body.success || body.data.email == null) {

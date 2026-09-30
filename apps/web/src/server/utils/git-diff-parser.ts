@@ -47,7 +47,6 @@ export function extractAddedLinesFromPatch(patch: string): GitDiffAddedLine[] {
     } else if (line?.startsWith("\\")) {
       // Ignore the metastring “\ No newline at end of file”"
     } else {
-      // Contextual string (unchanged)
       currentLineAfter++;
     }
   }

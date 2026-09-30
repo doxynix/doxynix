@@ -11,15 +11,7 @@ type PatchScan = {
   lineMap: Map<string, number>;
 };
 
-/**
- * Single pass over a unified diff collecting both things the reviewer needs:
- * the new-file line numbers GitHub accepts inline comments on (context and added
- * lines only), and a `trimmed added line -> line number` lookup used to repair
- * hallucinated finding lines.
- *
- * Removed lines are never commentable and never advance the cursor, because they
- * do not exist in the new file.
- */
+// Removed lines are never commentable and never advance the cursor — they do not exist in the new file
 function scanPatch(patch: string): PatchScan {
   const commentable = new Set<number>();
   const lineMap = new Map<string, number>();
@@ -74,11 +66,7 @@ export function buildLineMappingFromPatch(patch: string): Map<string, number> {
   return scanPatch(patch).lineMap;
 }
 
-/**
- * Recovers the real line number of a finding whose LLM-reported `line` drifted.
- * Tries, in order: exact snippet match, bidirectional substring match, then a
- * fuzzy match above `FUZZY_HEAL_THRESHOLD`. Falls back to the reported line.
- */
+// Recovers the real line number of a finding whose LLM-reported `line` drifted
 export function healFindingLine(
   lineMap: Map<string, number>,
   codeSnippet: string,
@@ -123,14 +111,7 @@ export type PatchHealResult = {
   findings: PRFinding[];
 };
 
-/**
- * Corrects every finding's line number against its file patch and splits the
- * findings into those GitHub will accept inline and those it will not.
- *
- * Findings are corrected in place, so the returned `findings` array and the
- * caller's input array are the same objects: downstream code that re-reads the
- * original list sees the repaired line numbers.
- */
+// Findings are corrected in place: the returned `findings` array holds the caller's own objects
 export function healAndPartitionFindings(params: {
   changedFiles: ReadonlyArray<{ filename: string; patch?: null | string }>;
   findings: PRFinding[];

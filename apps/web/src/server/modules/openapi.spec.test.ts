@@ -153,7 +153,7 @@ const FORBIDDEN_RESPONSE_KEYS = [
   "tokenHash",
 ] as const;
 
-/** `resultJson` is sanctioned for this one procedure only. */
+// `resultJson` is sanctioned for this one procedure only.
 const RESULT_JSON_ALLOWLIST = new Set(["/analysis.getById"]);
 
 function collectPropertyNames(schema: unknown, out = new Set<string>()): Set<string> {

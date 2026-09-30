@@ -12,11 +12,7 @@ export type AnalyzeEntityContext = {
   structureContext: null | StructureContext;
 };
 
-/**
- * The read surface `analysis.mapper` needs, declared as an interface so the mapper can
- * depend on the shape instead of on `createAnalyzeContextBuilder`. Depending on the
- * concrete builder made the mapper a participant in every cycle the builder sits in.
- */
+// Declared as an interface so the mapper depends on the shape, not on `createAnalyzeContextBuilder` (avoids dependency cycles)
 export interface AnalyzeContext {
   getAnalysisRef(): AnalysisRef | null;
   getEntityContext(): AnalyzeEntityContext;

@@ -97,8 +97,7 @@ export const analysisLifecycleService = {
     });
 
     if (repo == null) {
-      // No message means tRPC substitutes the code, so the client renders the
-      // literal string "NOT_FOUND".
+      // No message means tRPC substitutes the code, so the client renders the literal string "NOT_FOUND".
       throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found or access denied" });
     }
     return repo;
@@ -258,11 +257,7 @@ export const analysisLifecycleService = {
       teamRoles,
     });
 
-    // Write-side guard, deliberately still `parseRepoMetrics` and not the
-    // `safeParseRepoMetrics` variant the read path uses: this one reports *whether*
-    // the blob is valid, which is the question being asked here. The read path
-    // only needs the parsed value. Not dead — `parseRepoMetrics` is unchanged and
-    // still rejects a malformed overlay.
+    // Write-side guard, deliberately `parseRepoMetrics` and not the read path's `safeParseRepoMetrics`: this one reports *whether* the blob is valid, which is the question here.
     if (parseRepoMetrics(finalMetrics) == null) {
       appLogger.error({
         analysisId,
@@ -289,10 +284,7 @@ export const analysisLifecycleService = {
           commitSha: currentSha,
           complexityScore: hardMetrics.complexityScore,
           message: "Completed successfully",
-          // `safeJsonClone` round-trips through `JSON.stringify`/`parse`, which
-          // both proves the blob is JSON-safe (no `Date`, `bigint`, `undefined`
-          // or cycle reaches the driver) and narrows the result to a plain JSON
-          // value — so the assertion is now doing work rather than papering over.
+          // `safeJsonClone` round-trips through `JSON.stringify`/`parse`, proving the blob is JSON-safe (no `Date`, `bigint`, `undefined` or cycle reaches the driver) and narrowing it to a plain JSON value.
           metricsJson: safeJsonClone<Prisma.InputJsonValue>(finalMetrics),
           onboardingScore: onboardingScore,
           progress: 100,

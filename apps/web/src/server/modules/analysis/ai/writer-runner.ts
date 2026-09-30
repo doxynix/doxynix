@@ -37,10 +37,8 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   });
 }
 
-/**
- * Runs a documentation writer through the shared LLM rate limiter.
- * Used inline from analyze-repo (avoids batch.triggerByTaskAndWait parent hang).
- */
+// Runs inline from analyze-repo rather than via `batch.triggerByTaskAndWait`, which hangs
+// the parent run.
 export async function runWriterWithLimiter(
   name: WriterName,
   input: WriterInput,

@@ -17,11 +17,7 @@ export const agentMapper = {
     let parts: SessionMessagePart[];
 
     try {
-      // `Array.isArray` narrows the `any` that `JSON.parse` returns, so a row
-      // whose `parts` column holds an object or a scalar no longer flows on as
-      // an unchecked message-parts array. The element cast is irreducible:
-      // `SessionMessagePart` is the AI SDK's `UIMessagePart` union, and a schema
-      // here would duplicate the SDK's contract and break on every upgrade.
+      // The element cast is irreducible: `SessionMessagePart` is the AI SDK's `UIMessagePart` union, and a schema here would duplicate the SDK's contract and break on every upgrade.
       const parsed: unknown = JSON.parse(message.parts);
       parts = Array.isArray(parsed) ? (parsed as SessionMessagePart[]) : [];
     } catch (error) {

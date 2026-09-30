@@ -31,8 +31,6 @@ const handler = createMcpHandler(
               messages: [],
               toolCallId: `mcp-${tool.name}-${Date.now()}`,
             };
-            // `execute` is narrowed to `(...args: unknown[]) => unknown` by
-            // `filterAndPrepareTools`, so `Parameters<>` is enough — no cast.
             const execute = tool.execute as GenericExecuteFn;
             const result = await execute(parsedArgs, dummyContext);
 

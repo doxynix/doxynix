@@ -41,18 +41,10 @@ function transformPayloadData(data: Record<string, unknown>): Record<string, unk
   return result;
 }
 
-/** A row as this adapter sees it: better-auth addresses rows by field name. */
+// better-auth addresses rows by field name, so rows stay untyped here.
 type AdapterRow = Record<string, unknown> & { id: string };
 
-/**
- * The Prisma model delegate.
- *
- * `client` is a real `DbClient` union, but better-auth names its models as runtime
- * strings, so the delegate's own generics cannot be recovered from a string key.
- * Rather than give up the whole client, the untyped hop is bounded to this one
- * signature: the eight methods this adapter calls, each with a real argument and
- * return type.
- */
+// better-auth names models as runtime strings, so the delegate's own generics are unrecoverable; the untyped hop is bounded to the eight methods this adapter calls.
 type ModelDelegate = {
   count: (args: { where: unknown }) => Promise<number>;
   create: (args: { data: unknown }) => Promise<AdapterRow>;
@@ -217,7 +209,6 @@ export function createAdapterInstance(client: DbClient): DBAdapter {
     },
 
     transaction: async (callback) => {
-      // A `TransactionClient` carries no `$transaction` of its own, hence the `in` guard.
       if ("$transaction" in client && typeof client.$transaction === "function") {
         return client.$transaction(async (tx: DbClient) => {
           const txAdapter = createAdapterInstance(tx);

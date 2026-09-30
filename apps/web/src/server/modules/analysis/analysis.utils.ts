@@ -11,10 +11,7 @@ import type {
 } from "./analysis.schemas";
 import { ProjectPolicy } from "./engine/core/project-policy";
 
-/**
- * Control characters that indicate binary-like content (C0 controls except tab, LF and CR).
- * Built at runtime so the regex literal contains no raw control characters.
- */
+// C0 controls except tab, LF and CR; built at runtime so the regex literal holds no raw control characters.
 const CONTROL_CHAR_PATTERN = new RegExp(
   `[${String.fromCharCode(0x00)}-${String.fromCharCode(0x08)}${String.fromCharCode(0x0b)}${String.fromCharCode(0x0c)}${String.fromCharCode(0x0e)}-${String.fromCharCode(0x1f)}]`,
 );

@@ -78,8 +78,7 @@ describe("matchDocSections", () => {
   });
 
   it("matches a section already linked to the node in the dependency graph", () => {
-    // The graph is the ONLY route to a match here: the node label and the related
-    // file list are both chosen so the title/body heuristics cannot fire.
+    // The graph is the only route to a match here: label and file list cannot fire the heuristics
     const result = matchDocSections({
       docs: [doc({ content: "# Overview\n\nThe service named payments handles all billing." })],
       graph: { nodes: [{ id: "file:src/payments.ts", label: "payments" }] },
@@ -173,7 +172,7 @@ describe("matchDocSections", () => {
       relatedFiles: [],
     });
 
-    // 4 from d1 + 4 from d2, truncated to the overall cap of 8.
+    // 4 from d1 + 4 from d2, cut to the overall cap of 8
     expect(result).toHaveLength(8);
   });
 

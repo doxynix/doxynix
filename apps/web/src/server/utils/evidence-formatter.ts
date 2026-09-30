@@ -1,15 +1,7 @@
-/**
- * EvidenceFormatter
- * Unified XML and JSON formatting for evidence blocks embedded in prompts.
- * Provides consistent transformation and escaping across all evidence types.
- */
 import { escape, toMerged } from "es-toolkit";
 
 import { appLogger } from "../core/app-logger";
 
-/**
- * Evidence block types
- */
 export type EvidenceType =
   | "api"
   | "architecture"
@@ -21,34 +13,17 @@ export type EvidenceType =
   | "risks"
   | "security";
 
-/**
- * Formatting options for evidence blocks
- */
 export type EvidenceFormattingOptions = {
-  /** Custom attributes for XML root tag */
   attributes?: Record<string, string>;
-
-  /** Include metadata comment */
   includeMetadata?: boolean;
-
-  /** Maximum size of evidence block in bytes */
   maxSize?: number;
-
-  /** Whether to pretty-print JSON */
   prettyPrint?: boolean;
-
-  /** Truncation suffix when truncated */
   truncationSuffix?: string;
 };
 
-/**
- * Result of formatting evidence
- */
 export type FormattedEvidence = {
-  /** The formatted XML/JSON block */
   content: string;
 
-  /** Metadata about the formatting */
   metadata: {
     format: "json" | "text" | "xml";
     originalSize?: number;
@@ -56,16 +31,11 @@ export type FormattedEvidence = {
     type: EvidenceType;
   };
 
-  /** Total size in bytes */
   size: number;
 
-  /** Whether the content was truncated */
   truncated: boolean;
 };
 
-/**
- * EvidenceFormatter: Manages consistent evidence presentation in prompts
- */
 export class EvidenceFormatter {
   private defaultOptions: EvidenceFormattingOptions = {
     includeMetadata: false,
@@ -74,16 +44,12 @@ export class EvidenceFormatter {
     truncationSuffix: "\n<!-- [DATA TRUNCATED] -->",
   };
 
-  /**
-   * Create evidence block with validation
-   */
   createCheckedBlock(
     type: EvidenceType,
     data: object,
     validator?: (data: object) => boolean | string,
     options: EvidenceFormattingOptions = {},
   ): FormattedEvidence {
-    // Run validator if provided
     if (validator) {
       const result = validator(data);
       if (result === false) {
@@ -101,9 +67,6 @@ export class EvidenceFormatter {
     return this.formatXml(type, data, options);
   }
 
-  /**
-   * Format multiple evidence blocks as a single XML document
-   */
   formatComposite(
     blocks: Array<{ data: object; label?: string; type: EvidenceType }>,
     options: EvidenceFormattingOptions = {},
@@ -123,7 +86,6 @@ export class EvidenceFormatter {
       }
     }
 
-    // Check total size
     let composite = xmlBlocks.join("\n\n");
     let truncated = false;
 
@@ -148,23 +110,17 @@ export class EvidenceFormatter {
     };
   }
 
-  /**
-   * Format evidence as JSON block
-   */
   formatJson(data: object, options: EvidenceFormattingOptions = {}): FormattedEvidence {
     const opts = this.resolveOptions(options);
 
-    // Convert to JSON
     let json = JSON.stringify(data, null, opts.prettyPrint === true ? 2 : 0);
     const originalSize = json.length;
 
-    // Check size and truncate if needed
     let truncated = false;
     if (opts.maxSize != null && json.length > opts.maxSize) {
       json = json.slice(0, opts.maxSize);
       if (opts.truncationSuffix != null && !opts.truncationSuffix.includes("<")) {
-        // For JSON, use JSON-compatible truncation
-        json = json.replace(/,\s*$/, ""); // Remove trailing comma if any
+        json = json.replace(/,\s*$/, "");
         json += "\n  // [DATA TRUNCATED]";
       }
       truncated = true;
@@ -183,9 +139,6 @@ export class EvidenceFormatter {
     };
   }
 
-  /**
-   * Format paths list as evidence
-   */
   formatPaths(
     paths: string[],
     format: "json" | "text" | "xml" = "xml",
@@ -213,10 +166,6 @@ export class EvidenceFormatter {
 
     return this.formatXml("paths", { items: paths }, options);
   }
-
-  /**
-   * Format evidence as XML block
-   */
   formatXml(
     tag: EvidenceType | string,
     data: object,
@@ -224,14 +173,11 @@ export class EvidenceFormatter {
   ): FormattedEvidence {
     const opts = this.resolveOptions(options);
 
-    // Convert object to JSON
     const json = JSON.stringify(data, null, opts.prettyPrint === true ? 2 : 0);
     const originalSize = json.length;
 
-    // Escape XML
     let content = escape(json);
 
-    // Check size and truncate if needed
     let truncated = false;
     if (opts.maxSize != null && content.length > opts.maxSize) {
       content = content.slice(0, opts.maxSize);
@@ -241,7 +187,6 @@ export class EvidenceFormatter {
       truncated = true;
     }
 
-    // Build attributes
     let attrs = "";
     if (opts.attributes) {
       attrs =
@@ -251,7 +196,6 @@ export class EvidenceFormatter {
           .join(" ");
     }
 
-    // Add metadata comment if requested
     let metadata = "";
     if (opts.includeMetadata === true) {
       metadata = `<!-- Evidence: ${tag}, Size: ${originalSize} bytes, Truncated: ${truncated} -->\n`;
@@ -276,31 +220,19 @@ export class EvidenceFormatter {
     return toMerged(this.defaultOptions, options ?? {});
   }
 
-  /**
-   * Set default formatting options
-   */
   setDefaults(options: Partial<EvidenceFormattingOptions>): this {
     this.defaultOptions = toMerged(this.defaultOptions, options);
     return this;
   }
 }
 
-/**
- * Global evidence formatter singleton
- */
 let globalFormatter: EvidenceFormatter | null = null;
 
-/**
- * Get or create global evidence formatter
- */
 export function getGlobalEvidenceFormatter(): EvidenceFormatter {
   globalFormatter ??= new EvidenceFormatter();
   return globalFormatter;
 }
 
-/**
- * Reset global formatter (for testing)
- */
 export function resetGlobalEvidenceFormatter(): void {
   globalFormatter = null;
 }

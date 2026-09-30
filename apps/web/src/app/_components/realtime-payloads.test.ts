@@ -4,15 +4,8 @@ import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { parseRealtimePayload, RealtimeUserPayloads } from "./realtime-payloads";
 
-/**
- * Ably types `InboundMessage.data` as `any`, so these payloads used to be read
- * with a blind assertion. A message with an unexpected shape rendered
- * `undefined` into toasts and cache updates instead of being dropped.
- */
 describe("realtime user payloads", () => {
   it("keys the record by the event names the config uses", () => {
-    // The provider indexes this record by `REALTIME_CONFIG.events.user.*`. A
-    // rename on either side would silently stop matching, so pin the contract.
     expect(Object.keys(RealtimeUserPayloads).sort()).toEqual(
       [
         REALTIME_CONFIG.events.user.analysisProgress,
@@ -78,8 +71,6 @@ describe("realtime user payloads", () => {
     });
 
     it("drops a payload whose prNumber arrived as a string", () => {
-      // The route built `/pull/${prNumber}` from this, so a string would have
-      // produced a silently wrong link.
       expect(parseRealtimePayload(schema, { ...valid, prNumber: "7" })).toBeNull();
     });
   });
@@ -119,9 +110,6 @@ describe("realtime user payloads", () => {
   });
 
   it("drops a payload that is not an object, for every event", () => {
-    // The record is heterogeneous, so `Object.values` would widen to a union
-    // and lose the per-schema result type. Each schema is covered on its own in
-    // the blocks above; this pins the shared behaviour without the widening.
     expect(parseRealtimePayload(RealtimeUserPayloads.notification, null)).toBeNull();
     expect(parseRealtimePayload(RealtimeUserPayloads.fileActionCompleted, "s")).toBeNull();
     expect(parseRealtimePayload(RealtimeUserPayloads["pr-comment-received"], 42)).toBeNull();

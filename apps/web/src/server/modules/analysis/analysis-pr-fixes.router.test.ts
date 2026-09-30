@@ -2,11 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { analysisPrFixesRouter } from "./analysis-pr-fixes.router";
 
-/**
- * DXNX-237: the sub-router split must not change the client-visible surface.
- * This is the cheapest possible guard - it only reads the exported key set, so
- * it stays fast and needs no tRPC context.
- */
+// Sub-router split must not change the client-visible procedure surface.
 const EXPECTED = [
   "applyFix",
   "clearStaging",

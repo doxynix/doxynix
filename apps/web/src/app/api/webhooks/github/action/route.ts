@@ -76,9 +76,4 @@ async function handler(req: Request) {
   return NextResponse.json({ jobId: analysisResponse.jobId });
 }
 
-/**
- * The previous `catch {}` here discarded its binding, so a failure anywhere in
- * the handler answered `500 {"error":"Internal Server Error"}` with nothing
- * logged anywhere — the one route in the app where a bug was invisible.
- */
 export const POST = withApiHandler(handler, { scope: "webhooks/github/action" });

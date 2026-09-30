@@ -8,11 +8,9 @@ export type FieldEncryptionKeys = {
   keychain: Keychain;
 };
 
-/**
- * `Prisma.defineExtension` types `$allOperations` as a union across every model
- * and operation, which leaves `query` impossible to call. Pinning the handler
- * shape is what makes it callable here and keeps `db.ts` free of an `any` cast.
- */
+// `Prisma.defineExtension` types `$allOperations` as a union across every model and
+// operation, so `query` cannot be called; pinning the handler shape fixes that
+// without an `any` cast in db.ts.
 type AllOperationsArgs = {
   args: Record<string, unknown>;
   model?: null | string;
@@ -20,12 +18,7 @@ type AllOperationsArgs = {
   query: (args: unknown) => Promise<unknown>;
 };
 
-/**
- * Return type is deliberately inferred. Annotating it as
- * `ReturnType<typeof Prisma.defineExtension>` erases the concrete
- * `PrismaClientExtends<...>` and makes `client.$extends(extension)` resolve to
- * `unknown`, which then poisons every `tx` / `prisma` type in the app.
- */
+// Return type is deliberately inferred: annotating it as `ReturnType<typeof Prisma.defineExtension>` erases `PrismaClientExtends<...>` and makes `client.$extends(extension)` resolve to `unknown`, poisoning every `tx`/`prisma` type.
 export function buildFieldEncryptionExtension(config: {
   decryptionKeys?: readonly string[];
   encryptionKey: string;

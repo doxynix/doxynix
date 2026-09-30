@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { z } from "zod";
 
-// ── Hoisted mocks ────────────────────────────────────────────────────────────
 const mocks = vi.hoisted(() => ({
   apiForUser: vi.fn(),
   appLogger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
@@ -33,7 +32,6 @@ import { buildRepositoryToolProfile, type RepositoryToolProfile } from "./ai-too
 
 const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
 function buildTools(profile: RepositoryToolProfile) {
   return buildRepositoryToolProfile(profile, USER_ID, "repo-uuid", "main");
 }
@@ -48,7 +46,6 @@ function getTool(toolSet: Record<string, unknown>, name: string): ToolValue {
   return toolSet[name] as ToolValue;
 }
 
-// ── Tests ────────────────────────────────────────────────────────────────────
 describe("ai-tools profile composition", () => {
   const profileExpectedKeys: Record<RepositoryToolProfile, string[]> = {
     architect: ["readFile", "readMultipleFiles", "searchCode"],

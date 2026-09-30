@@ -6,12 +6,7 @@ import { analysisDocsRouter } from "./analysis-docs.router";
 import { analysisPrFixesRouter } from "./analysis-pr-fixes.router";
 import { analysisRepoRouter } from "./analysis-repo.router";
 
-/**
- * DXNX-237: the contract the typed client depends on. The frontend calls
- * `trpc.analysis.<name>`, so the composed router must stay a FLAT map of the
- * same 36 procedures. If someone nests the sub-routers instead of spreading
- * them, every client call breaks at compile time - this test catches it first.
- */
+// Client calls `trpc.analysis.<name>`, so the composed router must stay a FLAT map of the same 36 procedures.
 const ALL_PROCEDURES = [
   "analyze",
   "applyFix",
@@ -51,7 +46,7 @@ const ALL_PROCEDURES = [
   "unstageFile",
 ];
 
-/** Members tRPC attaches to a composed router; not procedures. */
+// Members tRPC attaches to a composed router; not procedures.
 const TRPC_MEMBERS = ["_def", "createCaller"];
 
 const proceduresOf = (router: object): string[] =>
@@ -65,8 +60,7 @@ describe("analysisRouter", () => {
   });
 
   it("carries no tRPC internals beyond the expected two", () => {
-    // A composed tRPC router attaches its own members. If an upgrade adds one,
-    // this fails so the test above is re-read rather than silently widened.
+    // If an upgrade adds a tRPC member, this fails so the expectation above is re-read rather than silently widened.
     expect(
       Object.keys(analysisRouter)
         .filter((key) => !ALL_PROCEDURES.includes(key))
@@ -98,8 +92,7 @@ describe("analysisRouter", () => {
     const { appRouter } = await import("@/server/modules");
 
     expect(Object.keys(appRouter)).toContain("analysis");
-    // The app router re-creates the procedures, so this is the exact surface the
-    // typed client sees - no tRPC internals at all.
+    // The app router re-creates the procedures, so this is the exact surface the typed client sees.
     expect(Object.keys(appRouter.analysis).sort()).toEqual(ALL_PROCEDURES);
   });
 });

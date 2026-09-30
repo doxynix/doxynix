@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useResizable } from "./use-resizable";
 
-/** Waits a frame so the hook's rAF-batched width update lands. */
+// Waits a frame so the hook's rAF-batched width update lands.
 async function nextFrame() {
   await act(async () => {
     await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
@@ -26,7 +26,6 @@ function release(eventName: "pointercancel" | "pointerup") {
   });
 }
 
-// jsdom implements no Pointer Events, so stand in for the target element.
 function down(clientX: number, mocks: { preventDefault?: Mock; setPointerCapture?: Mock } = {}) {
   return {
     button: 0,
@@ -45,7 +44,6 @@ function key(k: string, mocks: { preventDefault?: Mock } = {}) {
 }
 
 describe("useResizable", () => {
-  // The hook mutates global body styles and localStorage, so reset both.
   beforeEach(() => {
     localStorage.clear();
     document.body.style.cursor = "";
@@ -106,8 +104,6 @@ describe("useResizable", () => {
         useResizable({ defaultWidth: 250, initialWidth: 380, maxWidth: 480, minWidth: 200 }),
       );
 
-      // Without this the client would fall back to defaultWidth and snap the
-      // panel to a different size the moment it hydrated.
       expect(result.current.width).toBe(380);
     });
 
@@ -173,7 +169,6 @@ describe("useResizable", () => {
         result.current.handleProps.onPointerDown(down(500));
       });
 
-      // Grabbed 200px into the panel, so clientX 560 is +60px of movement.
       await move(560);
 
       expect(result.current.width).toBe(360);
@@ -204,7 +199,6 @@ describe("useResizable", () => {
         result.current.handleProps.onPointerDown(down(900));
       });
 
-      // Grabbed the panel's left edge, so 60px further left is +60px wide.
       await move(840);
 
       expect(result.current.width).toBe(360);
@@ -236,13 +230,11 @@ describe("useResizable", () => {
       act(() => {
         result.current.handleProps.onPointerDown(down(250));
       });
-      // No frame awaited: the rAF is still queued when the release arrives.
       act(() => {
         window.dispatchEvent(new PointerEvent("pointermove", { clientX: 400 }));
       });
       release("pointerup");
 
-      // Synchronous flush in the release handler, not a later rAF tick.
       expect(result.current.width).toBe(450);
     });
 
@@ -315,7 +307,6 @@ describe("useResizable", () => {
         result.current.handleProps.onKeyDown(key("ArrowRight", { preventDefault }));
       });
       expect(result.current.width).toBe(316);
-      // Keeps the page from scrolling while the separator is focused.
       expect(preventDefault).toHaveBeenCalled();
 
       act(() => {
@@ -402,7 +393,6 @@ describe("useResizable", () => {
       });
       release("pointerup");
 
-      // The sidebar rail needs this to tell a click apart from a drag.
       expect(onDragEnd).toHaveBeenCalledWith(300, false);
     });
 

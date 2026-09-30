@@ -1,21 +1,5 @@
-/**
- * Offline bundle report for a build produced by `bun run analyze` (ANALYZE=true, webpack).
- *
- * `@next/bundle-analyzer` writes a treemap that is hard to read: every module is attributed
- * to a directory, nothing tells you what a given route actually downloads, and the biggest
- * entry (`@shikijs/langs`) is an artifact of code splitting rather than a real payload.
- *
- * This script reads the same `window.chartData` JSON, attributes every module to its npm
- * package, and reconstructs the webpack chunk graph from the build output so it can report
- * what each route pays up front versus what is code-split.
- *
- * Usage:
- *   bun run analyze:report                    # per-package table (client)
- *   bun run analyze:report routes             # per-route initial vs lazy payload
- *   bun run analyze:report groups             # per-package totals grouped by feature area
- *   bun run analyze:report chunks             # heavy chunks + which routes can reach them
- *   bun run analyze:report -- --file nodejs.html --top 30
- */
+// The @next/bundle-analyzer treemap attributes every module to a directory and never
+// shows what a route actually downloads, so this re-derives package + per-route payloads.
 import { existsSync, readFileSync } from "node:fs";
 
 import { sumBy } from "es-toolkit";
@@ -29,10 +13,6 @@ const BUILD_MANIFEST = join(APP_DIR, ".next", "build-manifest.json");
 
 const REPORT_FILES = ["client.html", "edge.html", "nodejs.html"] as const;
 type ReportFile = (typeof REPORT_FILES)[number];
-
-// ---------------------------------------------------------------------------
-// types
-// ---------------------------------------------------------------------------
 
 type ChartNode = {
   label?: string;
@@ -53,7 +33,7 @@ type Leaf = {
   gzip: number;
 };
 
-/** [stat, parsed, gzip] triple, used everywhere a size vector is accumulated. */
+// [stat, parsed, gzip]
 type Size = [number, number, number];
 
 type PackageStats = {
@@ -65,13 +45,13 @@ type PackageStats = {
 };
 
 type ChunkGraph = {
-  /** webpack chunk id -> chunk path relative to `.next` */
+  // webpack chunk id -> chunk path relative to `.next`
   idToFile: Map<string, string>;
-  /** chunk path -> ids the chunk itself is registered under */
+  // chunk path -> ids the chunk itself is registered under
   fileIds: Map<string, Set<string>>;
-  /** chunk path -> ids it blocks on before the entry runs (`.O(0, [ids], entry)`) */
+  // chunk path -> ids it blocks on before the entry runs (`.O(0, [ids], entry)`)
   syncDeps: Map<string, Set<string>>;
-  /** chunk path -> ids it imports asynchronously (`.e(id)`) */
+  // chunk path -> ids it imports asynchronously (`.e(id)`)
   lazyDeps: Map<string, Set<string>>;
 };
 
@@ -81,10 +61,6 @@ type RouteReport = {
   initial: Set<string>;
   deferred: Set<string>;
 };
-
-// ---------------------------------------------------------------------------
-// formatting helpers
-// ---------------------------------------------------------------------------
 
 const kb = (bytes: number): string =>
   bytes >= 1e6
@@ -110,15 +86,7 @@ const header = (title: string, width = 108): void => {
   console.info(rule(width, "="));
 };
 
-// ---------------------------------------------------------------------------
-// module path -> npm package
-// ---------------------------------------------------------------------------
-
-/**
- * Bun's isolated store lays modules out as
- *   node_modules/.bun/@codemirror+lang-json@6.0.2/node_modules/@codemirror/lang-json/dist/index.js
- * where the store key is the package name with `/` turned into `+` and the version appended.
- */
+// Bun store layout: node_modules/.bun/<name-with-+>@<version>/node_modules/<real path>
 const BUN_STORE_RE = /node_modules\/\.bun\/([^/]+?)(?:@([0-9][^/]*))?\/node_modules\/(.+)$/;
 
 function resolvePackage(path: string): [string, string] {
@@ -148,10 +116,6 @@ function resolvePackage(path: string): [string, string] {
   return [parts[0], parts.slice(1).join("/")];
 }
 
-// ---------------------------------------------------------------------------
-// @next/bundle-analyzer payload
-// ---------------------------------------------------------------------------
-
 function loadChart(file: ReportFile): ChartNode[] {
   const path = join(ANALYZE_DIR, file);
   if (!existsSync(path)) {
@@ -171,11 +135,7 @@ function loadChart(file: ReportFile): ChartNode[] {
   return JSON.parse(sliceJsonValue(html, start + marker.length)) as ChartNode[];
 }
 
-/**
- * Extract one JSON value starting at `from` (must be `[` or `{`).
- * The script tag holds several statements (`window.chartData = [...]`, then
- * `window.defaultSizes = ...`), so `JSON.parse` on the tail would choke.
- */
+// The script tag holds several statements, so the tail cannot be JSON.parsed directly.
 function sliceJsonValue(src: string, from: number): string {
   const start = src[from] === "[" || src[from] === "{" ? from : -1;
   if (start < 0) {
@@ -218,7 +178,6 @@ function sliceJsonValue(src: string, from: number): string {
   throw new Error("bundle-report: unterminated chartData JSON");
 }
 
-/** Flatten the treemap into one record per leaf module. */
 function collectLeaves(chart: ChartNode[]): Leaf[] {
   const leaves: Leaf[] = [];
 
@@ -294,21 +253,8 @@ function byChunk(leaves: Leaf[]): Map<string, Map<string, Size>> {
 
 const chunkSize = (chunk: Map<string, Size>): Size => totalOf(chunk.values());
 
-// ---------------------------------------------------------------------------
-// webpack chunk graph
-// ---------------------------------------------------------------------------
-
-/**
- * Next's `__webpack_require__.u` resolves a chunk id to a filename as
- *
- *   e => 22943 === e ? "static/chunks/22943-<hash>.js"
- *            : ...
- *            : "static/chunks/" + ((map1)[e] || e) + "." + ((map2)[e]) + ".js"
- *
- * where `map1` optionally shortens the id (17377 -> "92c799b9") and `map2` holds the hash.
- * The two maps plus the special-cased branches cover the whole build; anything still missing
- * is resolved from the numeric prefix of the filename on disk.
- */
+// `__webpack_require__.u` maps chunk id -> filename via two id maps plus special-cased
+// branches; anything still unresolved falls back to the filename's numeric prefix on disk.
 function parseRuntimeChunkIds(): Map<string, string> {
   const runtime = fg.sync("webpack-*.js", { absolute: true, cwd: CHUNKS_DIR }).sort().at(0);
 
@@ -411,11 +357,6 @@ function buildGraph(): ChunkGraph {
   return { fileIds, idToFile, lazyDeps, syncDeps };
 }
 
-// ---------------------------------------------------------------------------
-// routes
-// ---------------------------------------------------------------------------
-
-/** Route-scoped chunks live at `static/chunks/app/<route>-<hash>.js`. */
 function routeOf(chunk: string): string | null {
   const marker = "static/chunks/app/";
   const idx = chunk.indexOf(marker);
@@ -494,10 +435,6 @@ function buildRouteReports(
 
   return reports;
 }
-
-// ---------------------------------------------------------------------------
-// reports
-// ---------------------------------------------------------------------------
 
 function reportPackages(file: ReportFile, top: number): void {
   const chart = loadChart(file);
@@ -598,7 +535,7 @@ function reportRoutes(file: ReportFile, filter?: string): void {
   }
 }
 
-/** Feature areas, so a 480-package table is readable at a glance. */
+// Feature areas, so a ~480-package table stays readable at a glance.
 const FEATURE_GROUPS: [string, RegExp][] = [
   [
     "Syntax highlight (shiki)",
@@ -732,10 +669,6 @@ function reportChunks(file: ReportFile, minKb: number, filter?: string): void {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// cli
-// ---------------------------------------------------------------------------
 
 const VALUE_FLAGS = new Set(["file", "top", "min-kb", "route"]);
 

@@ -1,25 +1,11 @@
 import * as z from "zod/mini";
 
-/**
- * Payload shapes for the Ably events the client subscribes to.
- *
- * Ably types `InboundMessage.data` as `any`, so these were previously read with
- * a blind assertion and a malformed message rendered `undefined` into the UI.
- * They live here rather than in the provider component so they can be tested:
- * `realtime-provider.tsx` is a client component and cannot be imported by a
- * node-environment test.
- *
- * The keys are the `REALTIME_CONFIG.events.user.*` values, since the provider
- * indexes this record by them.
- */
+// Ably types data as any, so these parse instead of asserting; they live here (not in the client provider) so node tests can import them, and are keyed by REALTIME_CONFIG.events.user.*.
 export const RealtimeUserPayloads = {
   "analysis-progress": z.object({
     analysisId: z.string(),
     message: z.string(),
     progress: z.number(),
-    // Mirrors the generated `Status` enum. Not imported from `@doxynix/shared`
-    // because that module is built on `zod/mini`'s full build and pulling it
-    // into the client bundle is not worth the coupling.
     status: z.enum(["DONE", "FAILED", "NEW", "PENDING"]),
   }),
   fileActionCompleted: z.object({
@@ -44,12 +30,7 @@ export const RealtimeUserPayloads = {
 
 export type RealtimeUserEvent = keyof typeof RealtimeUserPayloads;
 
-/**
- * Parses a payload against its schema. Returns `null` when the message does not
- * match, so an unexpected payload is dropped rather than rendered with
- * `undefined` fields. The result type is inferred from the schema, so no call
- * site needs an assertion.
- */
+// Returns null on mismatch so an unexpected payload is dropped instead of rendering undefined fields, and the type needs no assertion.
 export function parseRealtimePayload<T>(schema: z.ZodMiniType<T>, data: unknown): null | T {
   const parsed = schema.safeParse(data);
   return parsed.success ? parsed.data : null;

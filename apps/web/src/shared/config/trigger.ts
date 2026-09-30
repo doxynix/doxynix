@@ -1,6 +1,3 @@
-/**
- * Centralized config for Trigger.dev.
- */
 export const TRIGGER_CONFIG = {
   metadataKeys: {
     aiChunks: "ai_chunks",

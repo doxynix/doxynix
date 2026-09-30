@@ -7,13 +7,7 @@ import enMessages from "../../../messages/en.json";
 import ruMessages from "../../../messages/ru.json";
 import { AUTH_EMAIL_KEYS, AuthEmail } from "./auth-email";
 
-/**
- * A real translator over a real locale file. The parameter is
- * `AbstractIntlMessages` rather than `typeof enMessages`: TypeScript infers
- * *literal* string types for the `en` JSON import, so a `typeof enMessages`
- * annotation would reject `ru`, whose values are plain `string`. Structural key
- * parity between locales is enforced by `check-locales.ts`.
- */
+// `AbstractIntlMessages` rather than `typeof enMessages`: the en JSON import infers *literal* string types, which would reject `ru` (key parity is enforced by check-locales.ts).
 function translatorFor(locale: "en" | "ru", messages: AbstractIntlMessages) {
   return createTranslator({ locale, messages, namespace: "Auth" });
 }

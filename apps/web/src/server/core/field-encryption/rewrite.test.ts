@@ -12,7 +12,6 @@ vi.mock("@/shared/config/env.server", () => ({
 const KEY = `k1.aesgcm256.${Buffer.from("0123456789abcdef0123456789abcdef").toString("base64url")}`;
 const parsedKey = parseKey(KEY);
 
-/** Narrows a rewritten `args` tree to a plain record at the given key path. */
 const at = (root: unknown, ...keys: string[]): Record<string, unknown> => {
   let cursor: unknown = root;
   for (const key of keys) {
@@ -71,8 +70,7 @@ describe("encryptOnWrite", () => {
   it("drops orderBy on an encrypted field because ciphertext cannot be sorted", () => {
     const out = encryptOnWrite({ orderBy: { email: "asc" } }, "User", parsedKey);
 
-    // The clause is removed, which leaves an empty (and Prisma-valid) `orderBy`,
-    // exactly as the library's `object-path.del` did.
+    // Removal leaves an empty but Prisma-valid `orderBy`, matching the previous object-path.del behavior.
     expect(out.orderBy).toEqual({});
   });
 
@@ -91,8 +89,7 @@ describe("encryptOnWrite", () => {
   });
 
   it("encrypts an encrypted field reached through a nested relation write", () => {
-    // `Account` has no encrypted fields of its own relevant here, but `User`
-    // does, so the walk must follow `data.accounts.create`.
+    // `Account` has no encrypted fields of its own, but `User` does, so the walk must follow `data.accounts.create`.
     const out = encryptOnWrite(
       { data: { accounts: { create: { accessToken: "tok", email: "acct@example.com" } } } },
       "User",
@@ -106,8 +103,7 @@ describe("encryptOnWrite", () => {
   });
 
   it("follows a relation from a model with no encrypted fields of its own", () => {
-    // `Analysis` has no encrypted fields, but `Document.content` is encrypted,
-    // so an early exit on `Analysis` would write the document in plaintext.
+    // `Analysis` has no encrypted fields, but `Document.content` is encrypted, so an early exit there would write the document in plaintext.
     const out = encryptOnWrite(
       { data: { documents: { create: { content: "secret body" } } } },
       "Analysis",

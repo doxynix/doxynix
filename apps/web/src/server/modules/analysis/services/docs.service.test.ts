@@ -79,13 +79,7 @@ describe("docsService.getWithGraphLinks", () => {
 
     await docsService.getWithGraphLinks(db, INPUT);
 
-    // `RepositoryEvidence.dependencyGraph` is computed per analysis but never
-    // written to `resultJson` or `metricsJson`, so reading it back could only
-    // ever yield `undefined`. This test used to inject a graph through the
-    // `analysis.findUnique` mock, which proved nothing: the row it fabricated is
-    // a shape no code in the repo produces. Asserting the query is not made is
-    // the honest contract, and it fails loudly if someone re-adds it expecting
-    // it to matter.
+    // `dependencyGraph` is computed per analysis but never written to `resultJson`/`metricsJson`, so reading it back could only yield `undefined`; asserting the query is not made is the honest contract.
     expect(captured.analysisSelect).toBeUndefined();
     expect(captured.analysisQueried).toBe(false);
   });
@@ -119,11 +113,7 @@ describe("docsService.getWithGraphLinks", () => {
 
     const result = await docsService.getWithGraphLinks(db, INPUT);
 
-    // `withGraphLinks` accepts `null` and guards on `graph?.nodes`, so every
-    // section comes back with an empty `graphNodeIds`. The two endpoints that
-    // DO link are `workspace-search.service` (reads `structure.graph`) and
-    // `doc-section-matcher` (receives one); both are covered by
-    // `section-graph-linker.test.ts`.
+    // `withGraphLinks` accepts `null` and guards on `graph?.nodes`; the two endpoints that DO link are covered by `section-graph-linker.test.ts`.
     for (const section of result.sections) {
       expect(section.graphNodeIds).toStrictEqual([]);
     }
@@ -154,7 +144,7 @@ describe("docsService.pinAuditToDocs", () => {
   const COMMIT_SHA = "deadbeef";
   const AUDIT_PATH = "src/app.ts";
 
-  /** The blob `analyze-file.task.ts` writes: the preview plus top-level ref keys. */
+  // The blob `analyze-file.task.ts` writes: the preview plus top-level ref keys.
   function makeRedis(overrides: Record<string, unknown> = {}) {
     return {
       get: async () => ({

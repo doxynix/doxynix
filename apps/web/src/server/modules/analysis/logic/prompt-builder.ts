@@ -15,10 +15,6 @@ type PromptRole =
   | "readme-writer"
   | "security-sentinel";
 
-/**
- * FluentPromptBuilder for consistent prompt construction.
- * Supports native reasoning controls optimized for Gemma 4 26B-A4B-IT MoE.
- */
 class PromptBuilder {
   private language: string = "English";
   private sections: Map<string, string> = new Map();
@@ -29,17 +25,11 @@ class PromptBuilder {
     this.role = role;
   }
 
-  /**
-   * Add custom section
-   */
   addSection(title: string, content: string): this {
     this.sections.set(title.toLowerCase(), `# ${title.toUpperCase()}\n${content}`);
     return this;
   }
 
-  /**
-   * Build the final system prompt with precise token alignment for Gemma 4.
-   */
   buildSystem(): string {
     const sections: string[] = [];
 
@@ -62,7 +52,6 @@ class PromptBuilder {
       }
     }
 
-    // Add any custom sections not in the standard order
     for (const [key, section] of this.sections.entries()) {
       if (!order.includes(key)) {
         sections.push(section);
@@ -71,7 +60,6 @@ class PromptBuilder {
 
     let result = sections.join("\n\n");
 
-    // Gemma 4 specific block formatting alignment
     if (this.thinkingEnabled) {
       result = `<|think|>\n${result}`;
     } else {
@@ -81,33 +69,21 @@ class PromptBuilder {
     return result;
   }
 
-  /**
-   * Build individual sections (useful for debugging or testing)
-   */
   getSections(): Map<string, string> {
     return new Map(this.sections);
   }
 
-  /**
-   * Clear all sections
-   */
   reset(): this {
     this.sections.clear();
     this.thinkingEnabled = true;
     return this;
   }
 
-  /**
-   * Set the target language for output
-   */
   setLanguage(lang: string): this {
     this.language = lang;
     return this;
   }
 
-  /**
-   * Forces the AI to write dense, highly technical text without filler words.
-   */
   withAntiFluff(): this {
     this.sections.set(
       "anti_fluff",
@@ -116,9 +92,6 @@ class PromptBuilder {
     return this;
   }
 
-  /**
-   * Add constraints/rules section
-   */
   withConstraints(...rules: (string | undefined)[]): this {
     const filtered = rules.filter(Boolean);
     if (filtered.length > 0) {
@@ -128,9 +101,6 @@ class PromptBuilder {
     return this;
   }
 
-  /**
-   * Add grounding rules section
-   */
   withGrounding(...rules: (string | undefined)[]): this {
     const filtered = rules.filter(Boolean);
     if (filtered.length > 0) {
@@ -140,9 +110,6 @@ class PromptBuilder {
     return this;
   }
 
-  /**
-   * Add JSON schema output specification
-   */
   withJsonSchema(schema: Record<string, unknown>): this {
     this.sections.set(
       "output",
@@ -151,9 +118,6 @@ class PromptBuilder {
     return this;
   }
 
-  /**
-   * Set language awareness in output
-   */
   withLanguageNotice(): this {
     if (this.language && this.language.toLowerCase() !== "english") {
       this.sections.set(
@@ -164,9 +128,6 @@ class PromptBuilder {
     return this;
   }
 
-  /**
-   * Add output format section
-   */
   withOutputFormat(format: string | { content: string; title: string }): this {
     if (typeof format === "string") {
       this.sections.set("output", `# OUTPUT\n${format}`);
@@ -176,17 +137,11 @@ class PromptBuilder {
     return this;
   }
 
-  /**
-   * Add role/persona section
-   */
   withRole(description: string): this {
     this.sections.set("role", `# ROLE\n${description}`);
     return this;
   }
 
-  /**
-   * Add strategy/thinking protocol section
-   */
   withStrategy(...steps: (string | undefined)[]): this {
     const filtered = steps.filter(Boolean);
     if (filtered.length > 0) {
@@ -196,51 +151,31 @@ class PromptBuilder {
     return this;
   }
 
-  /**
-   * Add task description section
-   */
   withTask(description: string): this {
     this.sections.set("task", `# TASK\n${description}`);
     return this;
   }
 
-  /**
-   * Toggle Gemma 4 native thinking mode.
-   * True: Prepend `<|think|>` for structural planning.
-   * False: Inject clear operational bypass directives to minimize latency on fast-path tasks.
-   */
+  // false injects bypass directives to minimize latency on fast-path tasks
   withThinking(enabled: boolean): this {
     this.thinkingEnabled = enabled;
     return this;
   }
 }
 
-/**
- * UserPromptBuilder for constructing user prompts with structured data.
- * Handles XML wrapping, escaping, and multi-part inputs.
- */
 export class UserPromptBuilder {
   private parts: Array<{ content: string; escape: boolean; tag?: string }> = [];
 
-  /**
-   * Add heading
-   */
   addHeading(level: 1 | 2 | 3 | 4, text: string): this {
     const hash = "#".repeat(level);
     return this.addRaw(`\n${hash} ${text}\n`);
   }
 
-  /**
-   * Add JSON block (auto-escaped if needed)
-   */
   addJsonBlock(data: object, tag = "data"): this {
     const json = JSON.stringify(data, null, 2);
     return this.addXmlSection(tag, json);
   }
 
-  /**
-   * Add list items
-   */
   addList(items: string[], ordered = false): this {
     const listItems = items
       .map((item, i) => (ordered ? `${i + 1}. ${item}` : `- ${item}`))
@@ -248,17 +183,12 @@ export class UserPromptBuilder {
     return this.addRaw(listItems);
   }
 
-  /**
-   * Add raw text (no escaping, no wrapping)
-   */
   addRaw(text: string): this {
     this.parts.push({ content: text, escape: false });
     return this;
   }
 
-  /**
-   * Add XML-wrapped content (auto-escaped)
-   */
+  // A literal `]]>` inside CDATA would close the section early
   addXmlSection(tag: string, content: string, attributes?: Record<string, string>): this {
     const attrs =
       attributes && Object.keys(attributes).length > 0
@@ -278,33 +208,20 @@ export class UserPromptBuilder {
     return this;
   }
 
-  /**
-   * Build final user prompt
-   */
   build(): string {
     return this.parts.map((p) => p.content).join("\n");
   }
 
-  /**
-   * Reset builder
-   */
   reset(): this {
     this.parts = [];
     return this;
   }
 }
 
-/**
- * Convenience factory functions
- */
 export const PromptFactory = {
-  /**
-   * Create a system prompt builder for a specific role
-   */
   forRole: (role: PromptRole, language: string = "English"): PromptBuilder => {
     const builder = new PromptBuilder(role).setLanguage(language);
 
-    // Add role-specific defaults
     const roleDescriptions: Record<PromptRole, string> = {
       "api-documentarian":
         "You are a Principal API Architect. Your task is to reverse-engineer source code and extract interface contracts. Output must strictly follow the OpenAPI 3.0+ specification in YAML format. Do not invent endpoints or parameters.",
@@ -344,8 +261,5 @@ export const PromptFactory = {
     return builder.withRole(selectedDescription);
   },
 
-  /**
-   * Create a user prompt builder
-   */
   user: (): UserPromptBuilder => new UserPromptBuilder(),
 };

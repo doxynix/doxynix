@@ -32,6 +32,7 @@ export const mermaidThemes: Record<string, MermaidThemeVariables> = {
     tertiaryColor: "#fef3c7",
     textColor: "#78350f",
   },
+
   charcoal: {
     background: "#111827",
     lineColor: "#6b7280",
@@ -42,7 +43,6 @@ export const mermaidThemes: Record<string, MermaidThemeVariables> = {
     tertiaryColor: "#374151",
     textColor: "#f9fafb",
   },
-  // Warm Family
   coral: {
     background: "#fff7ed",
     lineColor: "#c2410c",
@@ -64,7 +64,6 @@ export const mermaidThemes: Record<string, MermaidThemeVariables> = {
     textColor: "#991b1b",
   },
 
-  // Classic Green Family
   emerald: {
     background: "#f0fdf4",
     lineColor: "#166534",
@@ -106,7 +105,6 @@ export const mermaidThemes: Record<string, MermaidThemeVariables> = {
     tertiaryColor: "#ecfdf5",
     textColor: "#047857",
   },
-  // Cool Blue Family
   ocean: {
     background: "#eff6ff",
     lineColor: "#0369a1",
@@ -138,7 +136,6 @@ export const mermaidThemes: Record<string, MermaidThemeVariables> = {
     tertiaryColor: "#f0f9ff",
     textColor: "#0369a1",
   },
-  // Dark Professional
   slate: {
     background: "#0f172a",
     lineColor: "#334155",
@@ -150,7 +147,6 @@ export const mermaidThemes: Record<string, MermaidThemeVariables> = {
     textColor: "#f1f5f9",
   },
 
-  // Green Variations
   teal: {
     background: "#f0fdfa",
     lineColor: "#115e59",
@@ -161,7 +157,6 @@ export const mermaidThemes: Record<string, MermaidThemeVariables> = {
     tertiaryColor: "#f0fdfa",
     textColor: "#0f766e",
   },
-  // Purple/Pink Family
   violet: {
     background: "#faf5ff",
     lineColor: "#7c3aed",

@@ -7,29 +7,12 @@ import { IS_PROD } from "@/shared/config/env.flags";
 
 import { requestContext } from "./request-context";
 
-/**
- * Transport-agnostic error vocabulary.
- *
- * The codebase already speaks tRPC error codes end to end (services throw
- * `TRPCError`, `core/trpc/init.ts` filters on `error.code`, the client reads
- * `error.code`). Reusing that union here means the HTTP adapter and the tRPC
- * adapter are two serializers over one normalizer instead of two parallel
- * taxonomies, and no new vocabulary has to be learned or translated.
- */
+// Reuses tRPC's union so the HTTP and tRPC adapters are two serializers over one normalizer, not two taxonomies.
 export type ErrorCode = TRPCError["code"];
 
 const GENERIC_MESSAGE = "An unexpected error occurred, please try again later.";
 
-/**
- * Codes whose message is a deliberate, user-facing explanation. Anything not
- * listed here is treated as an internal fault and its message is masked in
- * production — it may embed SQL, file paths, tokens or upstream payloads.
- *
- * `PRECONDITION_FAILED` is included because `fixes.service.ts` and
- * `pr-comments.service.ts` throw it with actionable copy ("install the GitHub
- * App first"); the previous list in `core/trpc/init.ts` omitted it and so hid
- * that copy behind the generic message in production.
- */
+// Anything not listed here is masked in production, since its message may embed SQL, file paths, tokens or upstream payloads.
 const PUBLIC_CODES = new Set<ErrorCode>([
   "BAD_REQUEST",
   "CONFLICT",
@@ -42,12 +25,7 @@ const PUBLIC_CODES = new Set<ErrorCode>([
   "UNPROCESSABLE_CONTENT",
 ]);
 
-/**
- * Maps a code to its HTTP status by delegating to tRPC's own table, so this
- * module cannot drift from what the tRPC procedures already return for the
- * same code. Every one of tRPC's 21 codes is covered without maintaining a
- * local copy.
- */
+// Delegates to tRPC's own table so this module cannot drift from what tRPC procedures already return for the same code.
 export function statusForCode(code: ErrorCode): number {
   return getHTTPStatusCodeFromError(new TRPCError({ code }));
 }
@@ -56,18 +34,9 @@ export function isPublicCode(code: ErrorCode): boolean {
   return PUBLIC_CODES.has(code);
 }
 
-/**
- * Which system produced the failure. `kind` is what tells the logger whether a
- * line needs a developer's attention, so it survives normalization instead of
- * being recomputed per transport.
- */
+// `kind` tells the logger whether a line needs a developer's attention, so it survives normalization instead of being recomputed per transport.
 export type ErrorKind = "app" | "octokit" | "prisma" | "trpc" | "unknown" | "zod";
 
-/**
- * Domain-specific copy for a Prisma failure. `uniqueConstraint` is keyed by
- * column name; the rest are single strings. The index signature allows the
- * `custom` key that `users/user.service.ts` passes for a specific code.
- */
 export type ErrorMapping = {
   [key: string]: Record<string, string> | string | undefined;
   defaultConflict?: string;
@@ -90,12 +59,7 @@ type AppErrorOptions = {
   zodIssues?: unknown;
 };
 
-/**
- * The single error type both transports understand. Throw it directly for
- * expected failures (`throw new AppError({ code: "NOT_FOUND", ... })`) — it is
- * the recommended shape for new code, while legacy `TRPCError` throws keep
- * working because `normalizeError` passes them through unchanged.
- */
+// The single error type both transports understand; legacy TRPCError throws still pass through normalizeError unchanged.
 export class AppError extends Error {
   public readonly code: ErrorCode;
   public readonly isUnexpected: boolean;
@@ -119,11 +83,6 @@ export class AppError extends Error {
     return statusForCode(this.code);
   }
 
-  /**
-   * The message actually safe to put on the wire. Non-public codes are replaced
-   * in production so that SQL fragments, upstream tokens and absolute paths
-   * never reach a client; the real text is always in the logs.
-   */
   public clientMessage(): string {
     return IS_PROD && !isPublicCode(this.code) ? GENERIC_MESSAGE : this.publicMessage;
   }
@@ -136,13 +95,7 @@ type PrismaErrorMeta = {
   mapKey?: keyof ErrorMapping;
 };
 
-/**
- * Prisma's documented known-request error codes. The previous table in
- * `handle-error.ts` covered 11 of these; unmapped codes fell through to a
- * blanket `INTERNAL_SERVER_ERROR`, which turned ordinary, diagnosable
- * conditions (a missing row, a null violation, a stale relation) into opaque
- * 500s.
- */
+// Unmapped codes fall through to a blanket INTERNAL_SERVER_ERROR, so cover Prisma's known-request codes to keep ordinary faults diagnosable.
 const PRISMA_ERROR_MAP: Record<string, PrismaErrorMeta> = {
   P1000: { code: "INTERNAL_SERVER_ERROR", defaultMessage: "Database authentication failed" },
   P1001: { code: "INTERNAL_SERVER_ERROR", defaultMessage: "Database server is unreachable" },
@@ -224,11 +177,6 @@ function isZodError(error: unknown): error is { issues: unknown } {
   );
 }
 
-/**
- * Resolves the caller's domain copy for a Prisma failure. Kept separate from
- * `normalizeError` so the `uniqueConstraint` column lookup — the only branch
- * with real logic — stays readable and independently testable.
- */
 function resolvePrismaMessage(
   error: Prisma.PrismaClientKnownRequestError,
   meta: PrismaErrorMeta,
@@ -248,8 +196,7 @@ function resolvePrismaMessage(
     }
 
     const targetRaw: unknown = error.meta?.target;
-    // `Array.isArray` narrows the `any`, and the filter proves the elements
-    // are strings rather than asserting it.
+    // The filter proves elements are strings rather than asserting it.
     const target: string[] = Array.isArray(targetRaw)
       ? targetRaw.filter((f): f is string => typeof f === "string")
       : typeof targetRaw === "string"
@@ -271,15 +218,7 @@ function resolvePrismaMessage(
   return typeof override === "string" && override.length > 0 ? override : fallback;
 }
 
-/**
- * Walks an error's `cause` chain looking for an `AppError`.
- *
- * Wrapping is the norm, not the exception: undici re-throws a failed
- * `fetch` as `TypeError: fetch failed` with the real error in `cause`, and the
- * same is true of most HTTP and DB clients. Without this, a typed error thrown
- * deep inside a dependency degrades to a generic 500 as soon as anything
- * catches it. The depth is bounded so a cycle in `cause` cannot spin.
- */
+// undici re-throws a failed fetch as `TypeError: fetch failed` with the real error in `cause`, so a typed error thrown inside a dependency would otherwise degrade to a generic 500. Depth is bounded so a `cause` cycle cannot spin.
 export function findAppError(error: unknown, maxDepth = 5): AppError | undefined {
   let current: unknown = error;
 
@@ -298,12 +237,7 @@ export function findAppError(error: unknown, maxDepth = 5): AppError | undefined
   return undefined;
 }
 
-/**
- * Folds any thrown value into an `AppError`. Pure: it never throws and never
- * logs, so the caller decides what is worth reporting and how loudly. The tRPC
- * adapter and the route-handler adapter then serialize the same result two
- * different ways.
- */
+// Never throws and never logs, so the caller decides what is worth reporting; both adapters serialize the same result differently.
 export function normalizeError(error: unknown, map?: ErrorMapping): AppError {
   if (error instanceof AppError) {
     return error;
@@ -360,9 +294,7 @@ export function normalizeError(error: unknown, map?: ErrorMapping): AppError {
   if (isOctokitError(error)) {
     const mapped = OCTOKIT_STATUS_MAP[error.status];
 
-    // An unmapped Octokit status (notably 5xx) is an upstream fault, not a
-    // client mistake, so it stays unexpected and the original message is kept
-    // only for the logs.
+    // An unmapped Octokit status (notably 5xx) is an upstream fault, not a client mistake.
     return new AppError({
       cause: error,
       code: mapped?.code ?? "INTERNAL_SERVER_ERROR",
@@ -384,15 +316,7 @@ export function normalizeError(error: unknown, map?: ErrorMapping): AppError {
   });
 }
 
-/**
- * `next/navigation`'s `redirect()`, `permanentRedirect()`, `notFound()`,
- * `forbidden()` and `unauthorized()` do not return — they throw a control-flow
- * error that Next itself unwinds, keyed by a `digest` prefix. Swallowing one
- * would turn a redirect into a 500, so the route adapter rethrows instead.
- *
- * The check mirrors `isRedirectError` / `isHTTPAccessFallbackError` from
- * `next/dist/client/components/*`, which are internal and must not be imported.
- */
+// next/navigation's redirect()/notFound()/forbidden()/unauthorized() throw a control-flow error Next unwinds itself; swallowing one would turn a redirect into a 500. Mirrors the internal next/dist helpers, which must not be imported.
 const NEXT_CONTROL_FLOW_PREFIXES = ["NEXT_REDIRECT", "NEXT_HTTP_ERROR_FALLBACK", "NEXT_NOT_FOUND"];
 
 export function isNextControlFlowError(error: unknown): boolean {
@@ -413,11 +337,7 @@ type ErrorResponseBody = {
   };
 };
 
-/**
- * The one wire shape every route handler uses. `requestId` is always present so
- * a user can quote it in a support request and it can be matched against the
- * `requestContext` fields that `appLogger` merges into every log line.
- */
+// `requestId` is always present so a user can quote it and it can be matched against the requestContext fields appLogger merges into every log line.
 export function toErrorResponse(error: AppError): NextResponse<ErrorResponseBody> {
   return NextResponse.json(
     {

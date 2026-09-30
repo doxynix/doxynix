@@ -2,10 +2,7 @@ import { appLogger } from "../core/app-logger";
 import { prisma } from "../core/db";
 import { extractPayloadFromKey, getApiKeyHash, validateApiKeyChecksum } from "./hash";
 
-/**
- * Verifies a raw API key against its HMAC-SHA256 hash in the database.
- * First validates the checksum on the CPU, then hashes and looks up only the payload in the DB.
- */
+// Checksum is checked on the CPU first so only the payload is hashed and looked up in the DB.
 export async function verifyAndUseApiKey(token: string) {
   if (!validateApiKeyChecksum(token)) {
     return null;

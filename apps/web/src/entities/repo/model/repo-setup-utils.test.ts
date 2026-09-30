@@ -75,7 +75,6 @@ describe("getFolderSelectionState", () => {
 
     expect(getFolderSelectionState(tree, new Set(["deep1"]))).toBe("indeterminate");
     expect(getFolderSelectionState(tree, new Set(["deep1", "b"]))).toBe("indeterminate");
-    // dir is counted but not selectable, so full selection never resolves to true
     expect(getFolderSelectionState(tree, new Set(["deep1", "deep2", "b"]))).toBe("indeterminate");
   });
 });

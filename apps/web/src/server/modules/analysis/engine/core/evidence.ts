@@ -24,7 +24,6 @@ import { selectRepositoryFrameworkFacts } from "./framework-catalog";
 import { findDependencyCycles } from "./graph";
 import { ProjectPolicy } from "./project-policy";
 
-// Source-of-truth builder for repository structure: modules, graph, entrypoints, routes, configs, and hotspots.
 export async function collectRepositoryEvidence(
   files: RepositoryFile[],
   fileComplexities: FileComplexity[],

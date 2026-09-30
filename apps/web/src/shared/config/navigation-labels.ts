@@ -2,13 +2,7 @@ import { useTranslations } from "next-intl";
 
 import type { NavLabelKey } from "./navigation.types";
 
-/**
- * Resolves navigation labels for client components.
- *
- * The `t()` calls are intentionally literal: eloqnt's orphan detection is
- * disabled as soon as any dynamic `t(variable)` call exists, so passing a key
- * straight through would silently drop that safety net for the whole app.
- */
+// t() calls are intentionally literal: eloqnt's orphan detection dies as soon as any dynamic t(variable) call exists.
 export function useNavLabels(): Record<NavLabelKey, string> {
   const t = useTranslations("Common");
 

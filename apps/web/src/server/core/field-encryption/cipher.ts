@@ -94,8 +94,7 @@ export function decryptString(envelope: string, rawKey: Buffer): string {
   );
   decipher.setAuthTag(bytes.subarray(tagStart));
 
-  // Concatenating buffers rather than decoding each chunk to a string: a UTF-8
-  // code point straddling the two chunks would otherwise be mangled.
+  // Concatenating buffers rather than decoding each chunk to a string: a UTF-8 code point straddling the two chunks would otherwise be mangled.
   return Buffer.concat([decipher.update(bytes.subarray(0, tagStart)), decipher.final()]).toString(
     "utf8",
   );

@@ -11,11 +11,6 @@ import { ExternalLink } from "@/shared/ui/kit/external-link";
 
 type StatusType = "down" | "maintenance" | "unknown" | "up";
 
-/**
- * Parsed rather than asserted. A status page that is behind a proxy, a
- * captive portal, or an error handler can return any shape, and the previous
- * cast would have rendered `undefined` into the footer.
- */
 const StatusResponse = z.object({
   status: z.enum(["down", "maintenance", "unknown", "up"]),
 });

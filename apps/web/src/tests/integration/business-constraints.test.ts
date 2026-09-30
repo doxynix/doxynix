@@ -36,7 +36,6 @@ describe("Business Logic & Integrity Constraints", () => {
       },
     });
 
-    // Same (repo, version, type) but different analysis - should succeed
     await alice.db.document.create({
       data: {
         analysis: { connect: { id: analysis1.id } },
@@ -61,7 +60,6 @@ describe("Business Logic & Integrity Constraints", () => {
       }),
     ).resolves.toBeDefined();
 
-    // Same (repo, version, type, analysis) - should fail
     await expectValidationFail(
       alice.db.document.create({
         data: {
@@ -75,7 +73,6 @@ describe("Business Logic & Integrity Constraints", () => {
       }),
     );
 
-    // Different version/type - should always succeed
     await expect(
       alice.db.document.create({
         data: {

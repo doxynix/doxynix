@@ -5,10 +5,7 @@ import { analysisDocsRouter } from "./analysis-docs.router";
 import { analysisPrFixesRouter } from "./analysis-pr-fixes.router";
 import { analysisRepoRouter } from "./analysis-repo.router";
 
-/**
- * Composition root only. The sub-routers are spread rather than nested so every
- * procedure keeps the flat `analysis.<name>` path the typed client calls.
- */
+// Composition root only: sub-routers are spread, not nested, so procedures keep the flat `analysis.<name>` path the typed client calls.
 export const analysisRouter = createTRPCRouter({
   ...analysisCoreRouter,
   ...analysisDocsRouter,

@@ -7,7 +7,7 @@ import { cn } from "@/shared/lib/cn";
 
 type AnimatedBeamProps = {
   className?: string;
-  containerRef: RefObject<HTMLElement | null>; // Container ref
+  containerRef: RefObject<HTMLElement | null>;
   curvature?: number;
   delay?: number;
   duration?: number;
@@ -43,7 +43,7 @@ export const AnimatedBeam: FC<AnimatedBeamProps> = ({
   pathOpacity = 0.2,
   pathWidth = 2,
   repeatDelay = 0,
-  reverse = false, // Include the reverse prop
+  reverse = false,
   startXOffset = 0,
   startYOffset = 0,
   toRef,
@@ -55,7 +55,6 @@ export const AnimatedBeam: FC<AnimatedBeamProps> = ({
   const [pathD, setPathD] = useState("");
   const [svgDimensions, setSvgDimensions] = useState({ height: 0, width: 0 });
 
-  // Calculate the gradient coordinates based on the reverse prop
   const gradientCoordinates = reverse
     ? {
         x1: ["90%", "-10%"],
@@ -92,20 +91,16 @@ export const AnimatedBeam: FC<AnimatedBeamProps> = ({
       }
     };
 
-    // Initialize ResizeObserver
     const resizeObserver = new ResizeObserver(() => {
       updatePath();
     });
 
-    // Observe the container element
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
 
-    // Call the updatePath initially to set the initial path
     updatePath();
 
-    // Clean up the observer on component unmount
     return () => {
       resizeObserver.disconnect();
     };

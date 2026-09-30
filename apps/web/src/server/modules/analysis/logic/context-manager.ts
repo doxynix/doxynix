@@ -230,7 +230,6 @@ function buildSelectionReason(stage: AiContextStage, filePath: string, preferred
   return "secondary-support";
 }
 
-/** One scored candidate file, as produced by the ranking pass inside `buildStageContextPack`. */
 type StageCandidate = {
   file: RepositoryModuleFile;
   path: string;

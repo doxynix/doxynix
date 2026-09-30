@@ -1,7 +1,7 @@
 const PROJECT_MAP_FIELD_PATTERN =
   /,\s*"(key_decisions|language_breakdown|mermaid_graph|modules)"\s*:/u;
 
-/** Spreads the value so the result is a real `Record`, not a view over `any`. */
+// Spreads the value so the result is a real `Record`, not a view over `any`.
 function asRecord(value: unknown): Record<string, unknown> {
   if (typeof value !== "object" || value == null) {
     return {};

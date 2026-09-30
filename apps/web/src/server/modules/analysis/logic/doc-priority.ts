@@ -48,9 +48,6 @@ type GeneratedDocsInput = {
   swaggerYaml?: string;
 };
 
-/**
- * Calculates the documentation completeness scoring.
- */
 export function calculateDocumentationOutputScore(docs: GeneratedDocsInput) {
   let score = 0;
   let generatedCount = 0;

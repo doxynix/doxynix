@@ -121,7 +121,6 @@ async function handler(req: Request) {
           );
         }
       } else {
-        // Previously answered 500 with no log line at all.
         throw new AppError({
           cause: error,
           code: "INTERNAL_SERVER_ERROR",
@@ -214,8 +213,5 @@ async function handler(req: Request) {
   });
 }
 
-/**
- * Reuses the delivery-scoped `requestContext` store built above, so the
- * `requestId` in any error body is the `svix-id` and matches the log lines.
- */
+// Reuses the delivery-scoped store above, so the requestId in an error body is the svix-id and matches the log lines.
 export const POST = withApiHandler(handler, { scope: "webhooks/resend" });

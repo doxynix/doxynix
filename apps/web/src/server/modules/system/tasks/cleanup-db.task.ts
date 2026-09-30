@@ -4,9 +4,6 @@ import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
 
-/**
- * Single comprehensive daily database maintenance and cleanup task
- */
 export const dailyDatabaseMaintenance = schedules.task({
   cron: "0 3 * * *",
   id: "daily-database-maintenance",

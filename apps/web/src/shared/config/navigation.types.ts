@@ -1,11 +1,6 @@
 import type { ComponentType } from "react";
 
-/**
- * Translation keys for navigation labels.
- *
- * Kept as an explicit union (rather than inline strings) so that the label
- * resolver in `navigation-labels.ts` is checked for completeness against it.
- */
+// An explicit union (not inline strings) so the resolver in navigation-labels.ts is checked for completeness against it.
 export type NavLabelKey =
   | "about"
   | "analyze"
@@ -30,7 +25,6 @@ export type NavLabelKey =
   | "settings"
   | "support";
 
-/** Public (marketing) header only uses a subset of the nav labels. */
 export type PublicNavLabelKey = Extract<NavLabelKey, "about" | "help" | "high_five" | "home">;
 
 export type MenuItem = {

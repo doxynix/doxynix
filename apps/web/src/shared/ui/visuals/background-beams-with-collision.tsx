@@ -236,7 +236,7 @@ const CollisionMechanism = forwardRef<
 CollisionMechanism.displayName = "CollisionMechanism";
 
 const Explosion = ({ ...props }: HTMLProps<HTMLDivElement>) => {
-  // Randomize the burst once per mount via lazy state initializers (keeps rendering pure).
+  // Randomize the burst once per mount via lazy state initializers.
   const [spans] = useState(() =>
     Array.from({ length: 20 }, (_, index) => ({
       directionX: Math.floor(Math.random() * 80 - 40),
