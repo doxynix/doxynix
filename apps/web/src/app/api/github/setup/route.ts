@@ -5,7 +5,7 @@ import type { NextRequest } from "next/server";
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
 import { prisma } from "@/server/core/db";
-import { githubAppService } from "@/server/core/github/github-app.service";
+import { githubAppService } from "@/server/modules/repos/github-app.service";
 import { withApiHandler } from "@/server/utils/with-api-handler";
 
 async function handler(request: NextRequest) {
