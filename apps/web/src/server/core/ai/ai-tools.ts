@@ -40,6 +40,31 @@ const TOOL_KEYS_BY_PROFILE: Record<RepositoryToolProfile, readonly string[]> = {
   writer_readme: ["readFile", "readPreviousDocument"],
 };
 
+async function readRepoFileForTool(
+  path: string,
+  ctx: { branch: string; repoId: string; shouldSkeletonize: boolean; userId: string },
+  maxChars: number,
+): Promise<{ content: string; path: string; skeletonized: boolean }> {
+  const fileData = await githubBrowseService.getFileContent(
+    prisma,
+    prisma,
+    ctx.userId,
+    ctx.repoId,
+    path,
+    ctx.branch,
+  );
+
+  const processedContent = ctx.shouldSkeletonize
+    ? await CodeOptimizer.optimize(fileData.content, path)
+    : await CodeOptimizer.cleanForTool(fileData.content);
+
+  return {
+    content: processedContent.slice(0, maxChars),
+    path,
+    skeletonized: ctx.shouldSkeletonize,
+  };
+}
+
 function buildRepositoryTools(userId: string, repoId: string, branch: string) {
   return {
     getBranches: tool({
@@ -127,24 +152,11 @@ function buildRepositoryTools(userId: string, repoId: string, branch: string) {
             userId,
           });
 
-          const fileData = await githubBrowseService.getFileContent(
-            prisma,
-            prisma,
-            userId,
-            repoId,
+          return await readRepoFileForTool(
             path,
-            branch,
+            { branch, repoId, shouldSkeletonize, userId },
+            50_000,
           );
-
-          const processedContent = shouldSkeletonize
-            ? await CodeOptimizer.optimize(fileData.content, path)
-            : await CodeOptimizer.cleanForTool(fileData.content);
-
-          return {
-            content: processedContent.slice(0, 50_000),
-            path: path,
-            skeletonized: shouldSkeletonize,
-          };
         } catch (error) {
           appLogger.warn({ error, msg: "AI Tool Failed: readFile", path });
           return `Error: Could not read file ${path}. Proceed with available info.`;
@@ -177,23 +189,12 @@ function buildRepositoryTools(userId: string, repoId: string, branch: string) {
           return await Promise.all(
             paths.slice(0, 10).map(async (path) => {
               try {
-                const fileData = await githubBrowseService.getFileContent(
-                  prisma,
-                  prisma,
-                  userId,
-                  repoId,
-                  path,
-                  branch,
-                );
-
-                const processedContent = shouldSkeletonize
-                  ? await CodeOptimizer.optimize(fileData.content, path)
-                  : await CodeOptimizer.cleanForTool(fileData.content);
-
                 return {
-                  content: processedContent.slice(0, 15_000),
-                  path,
-                  skeletonized: shouldSkeletonize,
+                  ...(await readRepoFileForTool(
+                    path,
+                    { branch, repoId, shouldSkeletonize, userId },
+                    15_000,
+                  )),
                   success: true,
                 };
               } catch {
