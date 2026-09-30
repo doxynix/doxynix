@@ -1,5 +1,16 @@
 # Changelog
 
+## [6.0.0](https://github.com/doxynix/doxynix/compare/doxynix-v5.0.7...doxynix-v6.0.0) (2026-09-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* **web:** drop English copy from API responses and the auth email ([#2245](https://github.com/doxynix/doxynix/issues/2245))
+
+### Code Refactoring
+
+* **web:** drop English copy from API responses and the auth email ([#2245](https://github.com/doxynix/doxynix/issues/2245)) ([612e98d](https://github.com/doxynix/doxynix/commit/612e98dc6f6169b66b8abb898e53f6e715986ee7))
+
 ## [5.0.7](https://github.com/doxynix/doxynix/compare/doxynix-v5.0.6...doxynix-v5.0.7) (2026-09-30)
 
 
