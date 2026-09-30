@@ -154,7 +154,7 @@ describe("apiKeyService mutations", () => {
 
     const result = await apiKeyService.update(db, { description: "new", id: KEY_ID, name: "ci" });
 
-    expect(result).toStrictEqual({ message: "API Key data updated", success: true });
+    expect(result).toStrictEqual({ success: true });
     const args = updateMany.mock.calls[0]?.[0] as { data: Record<string, unknown> };
     expect(Object.keys(args.data).sort()).toStrictEqual(["description", "name"]);
     expect(args.data).not.toHaveProperty("hashedKey");
@@ -165,7 +165,7 @@ describe("apiKeyService mutations", () => {
 
     const result = await apiKeyService.revoke(db, KEY_ID);
 
-    expect(result).toStrictEqual({ message: "API Key revoked", success: true });
+    expect(result).toStrictEqual({ success: true });
     expect(JSON.stringify(result)).not.toContain("dxnx_");
   });
 });

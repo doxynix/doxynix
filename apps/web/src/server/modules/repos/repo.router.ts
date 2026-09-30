@@ -29,7 +29,6 @@ export const repoRouter = createTRPCRouter({
     .input(CreateRepoSchema)
     .output(
       z.object({
-        message: z.string(),
         repo: PublicRepoSchema,
         success: z.boolean(),
       }),
@@ -38,7 +37,6 @@ export const repoRouter = createTRPCRouter({
       const newRepo = await repoService.createRepo(ctx.db, ctx.session.user.id, input.url);
 
       return {
-        message: "Repository added",
         repo: { ...repoMapper.toPublicFields(newRepo), status: "NEW" },
         success: true,
       };
@@ -46,14 +44,14 @@ export const repoRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(z.object({ id: z.uuid() }))
-    .output(z.object({ message: z.string(), success: z.boolean() }))
+    .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       return repoService.delete(ctx.db, input.id);
     }),
 
   deleteAll: protectedProcedure
     .input(z.object({}).optional())
-    .output(z.object({ message: z.string(), success: z.boolean() }))
+    .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx }) => {
       return repoService.deleteAll(ctx.db);
     }),
@@ -67,7 +65,6 @@ export const repoRouter = createTRPCRouter({
     .output(
       z.object({
         count: z.number(),
-        message: z.string(),
         success: z.boolean(),
       }),
     )

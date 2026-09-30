@@ -9,7 +9,7 @@ import { notificationsService } from "./notifications.service";
 export const notificationRouter = createTRPCRouter({
   deleteOne: protectedProcedure
     .input(z.object({ id: z.uuid() }))
-    .output(z.object({ message: z.string(), success: z.boolean() }))
+    .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       return notificationsService.deleteOne(ctx.db, input.id);
     }),
@@ -19,7 +19,6 @@ export const notificationRouter = createTRPCRouter({
     .output(
       z.object({
         deletedCount: z.number().int().min(0),
-        message: z.string(),
         success: z.boolean(),
       }),
     )
@@ -45,7 +44,6 @@ export const notificationRouter = createTRPCRouter({
     .input(NotificationsBulkFilterSchema)
     .output(
       z.object({
-        message: z.string(),
         success: z.boolean(),
         updatedCount: z.number().int(),
       }),
@@ -56,7 +54,7 @@ export const notificationRouter = createTRPCRouter({
 
   markAs: protectedProcedure
     .input(z.object({ id: z.uuid(), isRead: z.boolean() }))
-    .output(z.object({ message: z.string(), success: z.boolean() }))
+    .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       return notificationsService.markAs(ctx.db, input.id, input.isRead);
     }),

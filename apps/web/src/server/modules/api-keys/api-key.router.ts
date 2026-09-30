@@ -8,7 +8,7 @@ import { apiKeyService } from "./api-key.service";
 export const apiKeyRouter = createTRPCRouter({
   create: protectedProcedure
     .input(CreateApiKeySchema)
-    .output(z.object({ key: z.string(), message: z.string() }))
+    .output(z.object({ key: z.string() }))
     .mutation(async ({ ctx, input }) => {
       return apiKeyService.create(ctx.db, ctx.session.user.id, input);
     }),
@@ -22,7 +22,7 @@ export const apiKeyRouter = createTRPCRouter({
 
   revoke: protectedProcedure
     .input(z.object({ id: z.uuid() }))
-    .output(z.object({ message: z.string(), success: z.boolean() }))
+    .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       return apiKeyService.revoke(ctx.db, input.id);
     }),
@@ -36,7 +36,7 @@ export const apiKeyRouter = createTRPCRouter({
 
   update: protectedProcedure
     .input(z.extend(CreateApiKeySchema, { id: z.uuid() }))
-    .output(z.object({ message: z.string(), success: z.boolean() }))
+    .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       return apiKeyService.update(ctx.db, input);
     }),

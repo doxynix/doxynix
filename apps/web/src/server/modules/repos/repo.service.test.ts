@@ -480,3 +480,25 @@ describe("repoService.getByOwner", () => {
     expect(Object.keys(result ?? {})).not.toContain("userId");
   });
 });
+
+describe("repoService.deleteAll", () => {
+  function createDeleteAllDbMock() {
+    const deleteMany = vi.fn().mockResolvedValue({ count: 0 });
+
+    return { db: { repo: { deleteMany } } as unknown as DbClient, deleteMany };
+  }
+
+  // The zero-row case is the load-bearing one: `deleteAll` used to answer
+  // `{ success: false }` under a 200 when `deleteMany` matched nothing, and the
+  // web client renders a toast only on success -- so deleting from an empty
+  // list produced no feedback at all. Deleting zero rows is an idempotent
+  // no-op, so it must now answer `{ success: true }`.
+  it("returns success when there is nothing to delete", async () => {
+    const { db, deleteMany } = createDeleteAllDbMock();
+
+    const result = await repoService.deleteAll(db);
+
+    expect(result).toStrictEqual({ success: true });
+    expect(deleteMany).toHaveBeenCalledTimes(1);
+  });
+});

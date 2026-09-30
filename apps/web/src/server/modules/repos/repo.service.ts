@@ -137,7 +137,7 @@ export const repoService = {
         where: { id: id },
       });
 
-      return { message: "Repository deleted", success: true };
+      return { success: true };
     } catch (error) {
       handlePrismaError(error, { notFound: "Repository not found" });
     }
@@ -145,12 +145,9 @@ export const repoService = {
 
   async deleteAll(db: DbClient) {
     try {
-      const deletedRepoCount = await db.repo.deleteMany();
-      if (deletedRepoCount.count === 0) {
-        return { message: "No repositories found", success: false };
-      }
+      await db.repo.deleteMany();
 
-      return { message: "All repositories have been deleted", success: true };
+      return { success: true };
     } catch (error) {
       handlePrismaError(error, { notFound: "Repositories not found" });
     }
@@ -163,11 +160,7 @@ export const repoService = {
       },
     });
 
-    return {
-      count: result.count,
-      message: `Deleted ${result.count} repositories for ${owner}`,
-      success: true,
-    };
+    return { count: result.count, success: true };
   },
 
   async getAll(db: DbClient, input: RepoFiltersInput) {
