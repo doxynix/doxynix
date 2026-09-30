@@ -119,21 +119,14 @@ const ChartTooltip = RechartsPrimitive.Tooltip;
 
 export type ChartTooltipPayloadItem = TooltipPayloadEntry;
 
-/**
- * Recharts types `dataKey` as a literal *or* an accessor function. A React key
- * must be a string, so only the literal forms are usable; an accessor falls
- * through to the surrounding `"value"` default, as the `||` chain did before.
- */
+// Recharts types `dataKey` as a literal *or* an accessor fn; a React key must be a string, so an accessor falls through to the `"value"` default.
 const asKeyPart = (dataKey: ChartTooltipPayloadItem["dataKey"]): NameType | "" =>
   typeof dataKey === "function" ? "" : (dataKey ?? "");
 
 export type ChartTooltipContentProps = ComponentProps<"div"> & {
   active?: boolean;
   color?: string;
-  /**
-   * Mirrors recharts' own `Formatter<TValue, TName>`: the first two are `| undefined`
-   * and the fifth is the whole payload array, not a single value.
-   */
+  // Mirrors recharts' `Formatter<TValue, TName>`: first two args are `| undefined`, fifth is the whole payload array.
   formatter?: (
     value: TooltipValueType | undefined,
     name: NameType | undefined,
@@ -192,9 +185,7 @@ const ChartTooltipContent = forwardRef<HTMLDivElement, ChartTooltipContentProps>
           : itemConfig?.label;
 
       if (labelFormatter) {
-        // `value` is a `ReactNode`, which recharts' `ValueType` excludes (it admits
-        // no `bigint` and no `Promise`). The label of a chart tooltip is a string or
-        // a number in practice; anything else stringifies rather than crashing.
+        // `value` is a `ReactNode`, which recharts' `ValueType` excludes (no `bigint`, no `Promise`); a string or number covers real labels, anything else stringifies.
         const labelValue: TooltipValueType =
           typeof value === "string" || typeof value === "number" ? value : "";
 
@@ -364,7 +355,6 @@ const ChartLegendContent = forwardRef<HTMLDivElement, ChartLegendContentProps>(
 );
 ChartLegendContent.displayName = "ChartLegend";
 
-// Helper to extract item config from a payload.
 function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key: string) {
   if (typeof payload !== "object" || payload == null) {
     return;

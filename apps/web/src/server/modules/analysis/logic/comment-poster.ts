@@ -8,9 +8,6 @@ import { appLogger } from "@/server/core/app-logger";
 
 import type { PRFinding } from "./pr.types";
 
-/**
- * Generates a unique signature for each finding to avoid duplicate comments.
- */
 function generateFindingSignature(finding: PRFinding): string {
   const normFile = finding.file.replaceAll("\\", "/");
   const content = `${normFile}:${finding.line}:${finding.type}:${finding.title}`;
@@ -34,9 +31,6 @@ const getAction = (count: number, label: string) => {
   return `Review ${count} flagged ${label} issue(s) immediately`;
 };
 
-/**
- * Formats PR findings into GitHub comment bodies
- */
 export const CommentFormatter = {
   formatFinding(finding: PRFinding, style: PRCommentStyle): string {
     const signature = generateFindingSignature(finding);
@@ -85,9 +79,6 @@ export const CommentFormatter = {
     return isSentence && hasNoCodeIndicators;
   },
 
-  /**
-   * Strips stray markdown tags from the generated AI suggestion.
-   */
   sanitizeSuggestion(suggestion: string): string {
     let clean = suggestion.trim();
     clean = clean.replace(/^```[a-z]*\r?\n/i, "");
@@ -96,14 +87,8 @@ export const CommentFormatter = {
   },
 };
 
-/**
- * Thread-safe stateless class for working with GitHub comments.
- */
 export class GitHubCommentPoster {
-  /**
-   * Post PR comments in batch (single review with all findings)
-   * Deduplicates using hash signatures embedded in existing GitHub comments.
-   */
+  // Deduplicates via the `doxynix-signature` HTML tag embedded in existing review comments
   async postComments(
     octokit: Octokit,
     owner: string,
@@ -190,10 +175,6 @@ export class GitHubCommentPoster {
     }
   }
 
-  /**
-   * Publishes or updates the existing interactive Doxynix dashboard in the PR.
-   * Prevents duplicates and spam in PR discussions.
-   */
   async postMainDashboardComment(
     octokit: Octokit,
     owner: string,
@@ -285,9 +266,6 @@ export class GitHubCommentPoster {
     }
   }
 
-  /**
-   * Update existing PR comment
-   */
   async updateComment(
     octokit: Octokit,
     owner: string,

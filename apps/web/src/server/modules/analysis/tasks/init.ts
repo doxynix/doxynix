@@ -13,10 +13,7 @@ export function getTaskPrisma() {
   return locals.getOrThrow(PrismaLocal);
 }
 
-/**
- * Universal mini-helper for safe and consistent error parsing.
- * Prevents "[object Object]" from appearing in logs and the DB.
- */
+// Prevents "[object Object]" from reaching logs and the DB.
 function formatTaskError(error: unknown, defaultMessage: string): string {
   if (error instanceof Error) {
     return error.message;
@@ -71,9 +68,6 @@ tasks.onStartAttempt(({ ctx }) => {
   });
 });
 
-/**
- * Single helper method to reset stuck database statuses after an abortive termination
- */
 async function cleanupFailsafeDatabaseState(taskName: string, payload: unknown, errorMsg: string) {
   const safePayload = payload as null | Record<string, unknown>;
 
@@ -148,9 +142,6 @@ async function cleanupFailsafeDatabaseState(taskName: string, payload: unknown, 
   }
 }
 
-/**
- * Hook on task completion (errors, timeouts, retries exhausted)
- */
 tasks.onComplete(async ({ ctx, payload, result }) => {
   if (result.ok) {
     return;
@@ -164,17 +155,11 @@ tasks.onComplete(async ({ ctx, payload, result }) => {
   await cleanupFailsafeDatabaseState(ctx.task.id, payload, errorMsg);
 });
 
-/**
- * Hook for a hard manual task cancellation by the user in the dashboard (onCancel)
- */
 tasks.onCancel(async ({ ctx, payload }) => {
   const cancelReason = "Task execution manually cancelled on Trigger.dev Dashboard.";
   await cleanupFailsafeDatabaseState(ctx.task.id, payload, cancelReason);
 });
 
-/**
- * Hook for critical failures of task execution attempts
- */
 tasks.onFailure(async ({ ctx, error, payload }) => {
   const errorMsg = formatTaskError(error, "Something unexpected happened");
   await cleanupFailsafeDatabaseState(ctx.task.id, payload, errorMsg);

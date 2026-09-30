@@ -488,11 +488,7 @@ describe("repoService.deleteAll", () => {
     return { db: { repo: { deleteMany } } as unknown as DbClient, deleteMany };
   }
 
-  // The zero-row case is the load-bearing one: `deleteAll` used to answer
-  // `{ success: false }` under a 200 when `deleteMany` matched nothing, and the
-  // web client renders a toast only on success -- so deleting from an empty
-  // list produced no feedback at all. Deleting zero rows is an idempotent
-  // no-op, so it must now answer `{ success: true }`.
+  // Deleting zero rows is an idempotent no-op, and the web client only toasts on success, so an empty list must still answer success.
   it("returns success when there is nothing to delete", async () => {
     const { db, deleteMany } = createDeleteAllDbMock();
 

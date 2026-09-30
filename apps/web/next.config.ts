@@ -14,8 +14,7 @@ import { LOCALE_REGEX_STR } from "@/shared/config/locales";
 
 import pkg from "./package.json" with { type: "json" };
 
-// Flag to enable webpack-stats generation (RelativeCI). Disabled by default.
-// Enable ONLY when explicitly needed via: STATS=true bun run build
+// RelativeCI webpack stats; off unless STATS=true or ENABLE_RELATIVE_CI=true.
 const IS_STATS_ENABLED = process.env.STATS === "true" || process.env.ENABLE_RELATIVE_CI === "true";
 
 const bundleAnalyzer = withBundleAnalyzer({
@@ -273,57 +272,46 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   async redirects() {
     const shortcuts = [
-      // --- CORE ---
       { d: "/dashboard", s: "/o" },
       { d: "/dashboard", s: "/dash" },
       { d: "/dashboard", s: "/home" },
 
-      // --- LOGICAL REDIRECTS ---
       { d: "/dashboard/settings/profile", s: "/dashboard/settings" },
       { d: "/dashboard/repos", s: "/dashboard/repo" },
       { d: "/dashboard/repo/:owner/:name/pulls", s: "/dashboard/repo/:owner/:name/pull" },
 
-      // --- REPOS ---
       { d: "/dashboard/repos", s: "/r" },
       { d: "/dashboard/repos", s: "/repos" },
       { d: "/dashboard/repos", s: "/code" },
 
-      // --- SETTINGS & PROFILE ---
       { d: "/dashboard/settings/profile", s: "/s" },
       { d: "/dashboard/settings/profile", s: "/settings" },
       { d: "/dashboard/settings/profile", s: "/me" },
       { d: "/dashboard/settings/profile", s: "/profile" },
 
-      // --- API & DEVELOPER ---
       { d: "/dashboard/settings/api-keys", s: "/k" },
       { d: "/dashboard/settings/api-keys", s: "/keys" },
       { d: "/dashboard/settings/api-keys", s: "/token" },
       { d: "/dashboard/settings/api-keys", s: "/api" },
 
-      // --- NOTIFICATIONS ---
       { d: "/dashboard/notifications", s: "/n" },
       { d: "/dashboard/notifications", s: "/notif" },
       { d: "/dashboard/notifications", s: "/inbox" },
       { d: "/dashboard/notifications", s: "/alerts" },
 
-      // --- DANGER ZONE ---
       { d: "/dashboard/settings/danger-zone", s: "/d" },
       { d: "/dashboard/settings/danger-zone", s: "/danger" },
       { d: "/dashboard/settings/danger-zone", s: "/rip" },
 
-      // --- AUTH / ONBOARDING ---
       { d: "/auth", s: "/in" },
       { d: "/auth", s: "/login" },
       { d: "/auth", s: "/join" },
 
-      // --- SUPPORT ---
       { d: "/support", s: "/h" },
 
-      // --- PRIVACY & TERMS ---
       { d: "/terms", s: "/tos" },
       { d: "/privacy", s: "/pp" },
 
-      // --- EXTERNAL ---
       { d: "https://status.doxynix.space", s: "/status" },
     ];
 
@@ -385,16 +373,7 @@ const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: false },
 
   webpack: (config, { dev, isServer }) => {
-    // ---------------------------------------------------------------------------------
-    // RelativeCI / Webpack Stats Generator
-    // ---------------------------------------------------------------------------------
-    // WHY DISABLED BY DEFAULT:
-    // StatsWriterPlugin with 'modules: true' serializes the entire module graph
-    // into a massive JSON payload in RAM, causing severe GC freezes and CI timeouts.
-    //
-    // HOW TO RUN ON DEMAND:
-    // STATS=true bun run build
-    // ---------------------------------------------------------------------------------
+    // StatsWriterPlugin with 'modules: true' serialises the whole module graph into RAM, causing GC freezes.
     if (IS_STATS_ENABLED && !dev && !isServer) {
       const outputPath = config.output?.path ?? join(process.cwd(), ".next");
 
@@ -451,8 +430,7 @@ const sentryOptions: SentryBuildOptions = {
     },
   },
 
-  // Crucial: Uploads source maps for all client-side dependencies & app chunks,
-  // preventing mangled/minified stack traces in the Sentry dashboard
+  // Crucial: uploads source maps for all client-side deps, keeping Sentry stack traces unmangled.
   widenClientFileUpload: true,
 };
 

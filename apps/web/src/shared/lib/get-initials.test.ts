@@ -2,8 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { getInitials } from "./get-initials";
 
-// Matches unpaired UTF-16 surrogates: a high surrogate not followed by a low one,
-// or a low surrogate not preceded by a high one.
 const NO_LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
 
 describe("getInitials", () => {

@@ -5,8 +5,7 @@ import { traverseTree } from "./traverse";
 describe("traverseTree", () => {
   it("visits every nested value with its dotted path", () => {
     const seen: Array<[string, unknown]> = [];
-    // Biome's `useSortedKeys` assist fixes this literal's declaration order to
-    // `data` before `where`, so that is the DFS order asserted below.
+    // Biome's `useSortedKeys` assist fixes this literal's declaration order to `data` before `where`, so that is the DFS order asserted below.
     const input = { args: { data: { name: "x" }, where: { email: "a@b.c" } } };
 
     traverseTree(

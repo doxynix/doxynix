@@ -54,11 +54,5 @@ async function handler(request: NextRequest) {
   return redirect("/dashboard?success=github_connected");
 }
 
-/**
- * `redirect()` and `unauthorized()` throw rather than return; `withApiHandler`
- * recognizes Next's control-flow digests and re-throws them untouched, so
- * wrapping this route keeps the redirects working. Failures inside
- * `saveInstallation` are still caught locally, because the browser must land on
- * the dashboard with `?error=setup_failed` rather than see a JSON 500.
- */
+// redirect()/unauthorized() throw; withApiHandler recognizes Next's control-flow digests and re-throws them, so the local catch only covers saveInstallation failures.
 export const GET = withApiHandler(handler, { scope: "github/setup" });

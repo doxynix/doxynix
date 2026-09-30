@@ -26,18 +26,16 @@ describe("code-metric-formulas", () => {
       });
       expect(score).toBeGreaterThanOrEqual(0);
       expect(score).toBeLessThanOrEqual(100);
-      // Ensure we hit the score paths (not 0 or 100)
       expect(score).toBeGreaterThan(0);
       expect(score).toBeLessThan(100);
     });
 
     it("should handle threshold cases", () => {
-      // High complexity scores
       const score = normalizeComplexityScore({
         cycles: 0,
         fileCount: 5,
         maxNesting: 0,
-        scores: [90, 90, 90, 90, 90], // All high complexity
+        scores: [90, 90, 90, 90, 90],
       });
       expect(score).toBeLessThan(100);
     });
@@ -69,7 +67,6 @@ describe("code-metric-formulas", () => {
     });
 
     it("should handle edge cases", () => {
-      // High penalties that should result in the minimum possible score (based on penalty caps)
       const score = normalizeTechDebtScore({
         dependencyCycles: 100,
         duplicationPercentage: 100,

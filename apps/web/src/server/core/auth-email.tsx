@@ -19,13 +19,7 @@ type EmailProps = {
   url: string;
 };
 
-/**
- * Synchronous email template rendered via `@react-email/render`
- * (renderToStaticMarkup), which does not support async React components.
- * Localized strings are injected as a translate function from the caller so the
- * template has no dependency on the Next.js request scope (emails are sent from
- * background/plugin contexts).
- */
+// Must stay synchronous: `@react-email/render` (renderToStaticMarkup) rejects async components, and emails are sent from background/plugin contexts, so translations arrive as a `t` prop.
 export function AuthEmail({ host, t, url }: Readonly<EmailProps>) {
   return (
     <Html>

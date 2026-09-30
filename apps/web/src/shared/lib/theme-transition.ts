@@ -47,7 +47,6 @@ export function getThemeTransitionClipPaths(
       return [polygonCollapsed(cx, cy, 3), `polygon(${verts})`];
     }
     case "diamond": {
-      // Slightly larger than the view-transition circle radius so axis-aligned coverage matches the circle reveal.
       const R = maxRadius * Math.SQRT2;
       const end = [
         `${cx}px ${cy - R}px`,
@@ -78,7 +77,6 @@ export function getThemeTransitionClipPaths(
       return [polygonCollapsed(cx, cy, 4), `polygon(${end})`];
     }
     case "star": {
-      // Small overscan so the last frames never leave a 1px seam before the transition group ends.
       const R = maxRadius * Math.SQRT2 * 1.03;
       const innerRatio = 0.42;
       const starPolygon = (radius: number) => {

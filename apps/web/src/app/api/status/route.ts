@@ -16,12 +16,7 @@ type MonitorListResponse = {
   data: Monitor[];
 };
 
-/**
- * Deliberately answers `200 {"status":"unknown"}` on failure rather than a 5xx:
- * this feeds a public status widget, and a failing upstream must not read as
- * "our service is down". The wrapper logs the reason, which the previous
- * `console.error` outside the request context never managed to correlate.
- */
+// Failure answers 200 {"status":"unknown"} on purpose: this feeds a public widget, so a broken upstream must not read as "our service is down".
 async function handler() {
   const res = await fetch("https://uptime.betterstack.com/api/v2/monitors", {
     headers: {

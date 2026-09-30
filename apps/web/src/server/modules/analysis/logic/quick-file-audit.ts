@@ -20,13 +20,7 @@ import {
   isBinaryLikeContent,
 } from "../analysis.utils";
 
-/**
- * Single-file AI audit.
- *
- * Lives outside `analysis.utils` on purpose: it needs the AI tool profile, which
- * reaches the tRPC server, and a pure utility module must not depend on the
- * router that ultimately calls it.
- */
+// Lives outside `analysis.utils` on purpose: it needs the AI tool profile, which reaches the tRPC server
 export async function runQuickFileAudit(
   userId: string,
   input: FileActionInput,

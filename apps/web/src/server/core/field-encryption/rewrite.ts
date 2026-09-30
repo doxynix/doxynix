@@ -3,15 +3,14 @@ import { type FieldSpec, getHashFieldName, getModelSpec, hashValue } from "./con
 import { findKeyForMessage, type Keychain } from "./keyring";
 import { type TreeNode, traverseTree } from "./traverse";
 
-/** `{ field: { equals | not | set: value } }` wrappers Prisma accepts on input. */
+// `{ field: { equals | not | set: value } }` wrappers Prisma accepts on input.
 const INPUT_SUB_FIELDS = ["equals", "not", "set"] as const;
-/** Clauses that must compare against the deterministic hash column instead. */
+// Clauses that must compare against the deterministic hash column instead.
 const HASH_CLAUSES = ["connect", "cursor", "where"];
 const SORT_DIRECTIONS = new Set(["asc", "desc"]);
 
 type ModelState = { model: string };
 
-/** One encrypted value found in the input tree, with the model it belongs to. */
 type Target = {
   field: string;
   fieldSpec: FieldSpec;
@@ -27,9 +26,7 @@ export function encryptOnWrite(
   model: string,
   key: { fingerprint: string; raw: Buffer },
 ): Record<string, unknown> {
-  // No fast path here, unlike the read side: a model with no encrypted fields of
-  // its own can still own a relation that has them (`Analysis` -> `Document.content`,
-  // `ChatSession` -> `ChatMessage.parts`), so the tree always has to be walked.
+  // No fast path here, unlike the read side: a model with no encrypted fields of its own can still own a relation that has them (`Analysis` -> `Document.content`).
   const draft = structuredClone(args);
 
   for (const target of collectTargets(draft, model)) {
@@ -73,14 +70,7 @@ export function decryptOnRead(
   );
 }
 
-// -- input side --
-
-/**
- * Single pass over the whole `args` tree, following relations so nested writes
- * such as `data.accounts.create.accessToken` are visited against the right
- * model. Rewrites are applied afterwards so the walk never reads a tree it is
- * concurrently mutating.
- */
+// Collects targets in one pass, following relations so nested writes are visited against the right model; rewrites run afterwards so the walk never reads a tree it is concurrently mutating.
 function collectTargets(draft: Record<string, unknown>, model: string): Target[] {
   const targets: Target[] = [];
 
@@ -90,9 +80,7 @@ function collectTargets(draft: Record<string, unknown>, model: string): Target[]
       const nodeSpec = getModelSpec(state.model);
 
       if (Object.hasOwn(nodeSpec.fields, node.key)) {
-        // `Object.hasOwn` rather than `in`: `noUncheckedIndexedAccess` makes the
-        // lookup `FieldSpec | undefined`, and `in` would also match inherited
-        // members such as `toString`.
+        // `Object.hasOwn` rather than `in`: `in` would also match inherited members such as `toString`.
         const fieldSpec = nodeSpec.fields[node.key];
 
         if (fieldSpec == null) {
@@ -148,8 +136,7 @@ function rewriteTarget(
   const fieldPath = fieldPathOf(target.path);
   const hashPath = siblingPath(fieldPath, getHashFieldName(target.field));
 
-  // Searching an encrypted column is meaningless: swap it for the hash column
-  // and drop the wrapper, so `where.email.equals` becomes `where.emailHash`.
+  // Ciphertext cannot be searched: swap in the hash column and drop the wrapper, so `where.email.equals` becomes `where.emailHash`.
   if (fieldSpec.hash != null && isHashClausePath(target.path)) {
     writePath(draft, hashPath, hashFor(target.value, fieldSpec));
     deletePath(draft, fieldPath);
@@ -162,8 +149,7 @@ function rewriteTarget(
     return;
   }
 
-  // A `{ field: { set | equals | not: value } }` wrapper is replaced wholesale:
-  // the encrypted column is a scalar and cannot hold a nested operator.
+  // A `{ field: { set | equals | not: value } }` wrapper is replaced wholesale: the encrypted column is a scalar and cannot hold a nested operator.
   writePath(draft, fieldPath, encryptString(target.value, key.raw, key.fingerprint));
 
   if (fieldSpec.hash != null) {
@@ -175,12 +161,12 @@ function hashFor(value: string, fieldSpec: FieldSpec): string {
   return hashValue(value, fieldSpec.hash?.normalize ?? []);
 }
 
-/** The path of the field itself, with any `{ set | equals | not }` wrapper stripped. */
+// The path of the field itself, with any `{ set | equals | not }` wrapper stripped.
 function fieldPathOf(path: string[]): string[] {
   return isSubField(last(path)) ? path.slice(0, -1) : path;
 }
 
-/** The hash column is a sibling of the encrypted column, not a child of it. */
+// The hash column is a sibling of the encrypted column, not a child of it.
 function siblingPath(fieldPath: string[], name: string): string[] {
   return [...fieldPath.slice(0, -1), name];
 }
@@ -189,13 +175,13 @@ function isSubField(segment: string | undefined): boolean {
   return segment != null && (INPUT_SUB_FIELDS as readonly string[]).includes(segment);
 }
 
-/** Mirrors the library's `rewriteHashedFieldPath` + `rewriteWritePath` clause set. */
+// Mirrors the library's `rewriteHashedFieldPath` + `rewriteWritePath` clause set.
 function isHashClausePath(path: string[]): boolean {
   const items = fieldPathOf(path);
   return HASH_CLAUSES.some((clause) => items.includes(clause));
 }
 
-/** Mirrors the library's `isOrderBy`. */
+// Mirrors the library's `isOrderBy`.
 function isOrderByPath(path: string[], value: string): boolean {
   return path.includes("orderBy") && SORT_DIRECTIONS.has(value.toLowerCase());
 }
@@ -203,8 +189,6 @@ function isOrderByPath(path: string[], value: string): boolean {
 function last(items: string[]): string | undefined {
   return items.at(-1);
 }
-
-// -- shared helpers --
 
 function safeDecrypt(
   value: string,

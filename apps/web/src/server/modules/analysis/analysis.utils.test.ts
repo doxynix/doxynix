@@ -23,8 +23,7 @@ import {
   scoreSearchMatch,
 } from "./analysis.utils";
 
-// Heavy/IO-bound modules are mocked so the module under test imports cleanly.
-// ProjectPolicy stays real: it is pure (picomatch-based path classification).
+// Heavy/IO-bound modules are mocked; ProjectPolicy stays real because it is pure (picomatch-based) path classification.
 vi.mock("@/server/utils/call", () => ({ callWithFallback: vi.fn() }));
 vi.mock("@/server/utils/optimizers", () => ({
   CodeOptimizer: { cleanForTool: vi.fn(), optimize: vi.fn() },
@@ -77,12 +76,12 @@ function repoAt(pushedAtMs: null | number, updatedAtMs = pushedAtMs ?? NOW): Rep
   } as Repo;
 }
 
-/** n pretend paths, e.g. for padding getContextStrength signal counts. */
+// n pretend paths, e.g. for padding getContextStrength signal counts.
 function paths(n: number): string[] {
   return Array.from({ length: n }, (_, i) => `p${i}.ts`);
 }
 
-/** count lines of `lineLen` chars joined by newlines, for minification probes. */
+// count lines of `lineLen` chars joined by newlines, for minification probes.
 function manyLines(lineLen: number, count: number): string {
   return Array.from({ length: count }, () => "a".repeat(lineLen)).join("\n");
 }

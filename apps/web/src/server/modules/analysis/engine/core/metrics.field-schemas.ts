@@ -10,17 +10,10 @@ import type {
 import type { DocumentationInputModel } from "./documentation.types";
 import type { ChurnHotspot } from "./metrics.types";
 
-/**
- * The nine `RepoMetricsSchema` fields that used to be `z.unknown().optional()`.
- *
- * Every one is `.optional()` because the engine omits any of them for a repository
- * that has no such signal, and `metrics.schemas.test.ts` pins a minimal payload that
- * carries none of the nine.
- *
- * Field names are transcribed from the source types, not guessed — the unions are
- * spelled out rather than widened to `z.string()` so a typo'd category becomes a
- * parse failure instead of a silent pass-through.
- */
+// Every schema here is `.optional()` because the engine omits the field for a repository with
+// no such signal, and the minimal test payload carries none of them. Unions are spelled out
+// rather than widened to `z.string()` so a typo'd category fails to parse instead of passing
+// through silently.
 
 export const ChangeCouplingSchema: z.ZodType<ChangeCouplingRef> = z.looseObject({
   commits: z.number(),
@@ -104,14 +97,9 @@ export const OpenApiInventorySchema: z.ZodType<OpenApiInventory> = z.looseObject
   sourceFiles: z.array(z.string()),
 });
 
-/**
- * `DocumentationInputModel` is a ~50-field, five-level-deep engine payload: its
- * own `sections` are keyed by document section and each carries a distinct body
- * type. Transcribing it would be roughly 150 lines of schema that nothing in the
- * read path ever inspects, and any drift would fail every read of every metrics
- * blob. `z.custom` keeps the precise type link at zero runtime cost, which is the
- * honest trade for a field this schema only ever passes through.
- */
+// `DocumentationInputModel` is a ~50-field, five-level-deep payload the read path never
+// inspects; transcribing it would be ~150 lines of schema whose drift would fail every
+// metrics read, so `z.custom` keeps the type link at zero runtime cost.
 export const DocumentationInputSchema = z.custom<DocumentationInputModel>(
   (value) => value != null && typeof value === "object",
   { message: "documentationInput must be an object" },

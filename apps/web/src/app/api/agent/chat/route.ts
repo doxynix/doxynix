@@ -37,9 +37,6 @@ async function handler(req: Request) {
   const agentModelId = activeModels.AGENT[0];
 
   if (agentModelId == null) {
-    // Previously a bare `throw new Error(...)`, which escaped as a Next.js 500
-    // with no log line. A missing model is a server misconfiguration, so it is
-    // reported as one: logged with context, still masked on the wire.
     throw new AppError({
       code: "INTERNAL_SERVER_ERROR",
       publicMessage: "No model configured for AGENT role",
@@ -207,11 +204,5 @@ async function handler(req: Request) {
   return createUIMessageStreamResponse({ stream: uiMessageStream });
 }
 
-/**
- * Safe to wrap even though it streams: `withApiHandler` only wraps the
- * *setup* — reading the body, resolving the model, persisting the user turn and
- * building the stream. Everything thrown after `createUIMessageStreamResponse`
- * is delivered as an in-stream error part by the AI SDK, long after the
- * wrapper has returned.
- */
+// Safe to wrap though it streams: the wrapper only covers setup, and anything thrown after the response is delivered in-stream.
 export const POST = withApiHandler(handler, { scope: "agent/chat" });

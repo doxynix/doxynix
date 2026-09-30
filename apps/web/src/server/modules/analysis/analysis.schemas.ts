@@ -157,13 +157,7 @@ export const GeneratedFixDTO = z.object({
 
 export type GeneratedFixView = z.infer<typeof GeneratedFixDTO>;
 
-/**
- * `resultJson` is not a `GeneratedFix` column — it is the cached
- * `fix-result:{fixId}` payload, read and already validated with
- * `FixResultSchema.safeParse` in `services/fixes.service.ts`, whose single
- * producer `fixesMapper.toDetailed` already declares `FixResult | null`.
- * The failure path writes `{ error }`, which that safeParse rejects to `null`.
- */
+// `resultJson` is not a `GeneratedFix` column — it is the cached `fix-result:{fixId}` payload, validated by `FixResultSchema.safeParse` in `services/fixes.service.ts`; the failure path writes `{ error }`, which that safeParse rejects to `null`.
 export const GeneratedFixDetailedDTO = GeneratedFixDTO.extend({
   resultJson: FixResultSchema.nullable(),
 });
@@ -360,8 +354,7 @@ export const NodeContextOutputSchema = z
     related: z.object({
       docs: z.array(
         z.object({
-          // `docId` references a Document row; `id` is the markdown anchor of the
-          // matched section and is not a key, so it stays a string.
+          // `docId` references a Document row; `id` is the markdown anchor of the matched section, so it stays a string.
           docId: z.uuid(),
           docType: z.string(),
           id: z.string(),

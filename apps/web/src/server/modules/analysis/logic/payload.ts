@@ -26,9 +26,7 @@ export function coerceAnalysisPayload(
     return null;
   }
 
-  // `metricsJson` is a `Prisma.JsonValue` column, so it is `unknown` until proven
-  // otherwise. Previously it was double-cast straight to `RepoMetrics`, which meant
-  // a malformed field reached every consumer as a string. Validate here instead.
+  // `metricsJson` is a `Prisma.JsonValue` column (i.e. `unknown`), so validate instead of casting
   const metricsResult = safeParseRepoMetrics(analysis.metricsJson);
   const metrics = metricsResult.success ? metricsResult.data : EMPTY_REPO_METRICS;
   if (!metricsResult.success) {

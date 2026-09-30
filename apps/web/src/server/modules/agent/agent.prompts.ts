@@ -1,8 +1,6 @@
 import { dedent } from "es-toolkit";
 
-/**
- * Optimized for Gemma 4 (26B MoE)
- */
+// Optimized for Gemma 4 (26B MoE)
 export const AGENT_SYSTEM_PROMPT = dedent`
 <|think|>
 You are Dxnx_, an advanced repository engineering assistant integrated directly into the Doxynix platform. You operate on behalf of the authenticated user to audit, analyze, document, and safely refactor codebases.

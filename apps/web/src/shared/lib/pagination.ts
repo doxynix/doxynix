@@ -9,19 +9,7 @@ export type PaginationItem =
       page: number;
     };
 
-/**
- * Computes the visible pagination items for a page-number bar.
- *
- * Mirrors the windowing rules previously inlined in `AppPagination`:
- * - `totalPages <= 7` renders every page number.
- * - Otherwise pages farther than one step away from the current page
- *   (excluding first/last) collapse into a single ellipsis marker placed
- *   exactly two steps away from the current page.
- *
- * `key` preserves the original per-item React key (the source loop index),
- * so swapping the inline `Array.from(...).map(...)` for this function does
- * not change reconciliation behavior.
- */
+// Windowing: <= 7 pages renders every number; otherwise pages more than one step from the current (excluding first/last) collapse into a single ellipsis exactly two steps away. `key` is the page index, preserving the original reconciliation keys.
 export function getPaginationItems(totalPages: number, currentPage: number): PaginationItem[] {
   const items: PaginationItem[] = [];
 

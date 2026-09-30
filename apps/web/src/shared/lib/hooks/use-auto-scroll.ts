@@ -76,8 +76,6 @@ export function useAutoScroll<T extends HTMLElement>(
         clearTimeout(throttleTimeoutRef.current);
       }
     };
-    // React Compiler memoizes these plain functions, so they are referentially stable at
-    // runtime; the compiler-blind exhaustive-deps rule flags them as recreated each render.
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [handleScrollThrottled, getContainer]);
 
@@ -106,9 +104,6 @@ export function useAutoScroll<T extends HTMLElement>(
     }
 
     return () => observer.disconnect();
-    // The auto-scroll effect intentionally re-subscribes on dynamic caller deps (e.g. new chat
-    // messages or filtered logs); the deps list cannot be statically verified, so `...deps`
-    // (the re-run trigger) is an accepted exception to exhaustive-deps.
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [getContainer, ...deps]);
 
@@ -119,9 +114,6 @@ export function useAutoScroll<T extends HTMLElement>(
   };
 }
 
-/**
- * Whether the container is within 15px of the bottom scroll boundary.
- */
 export function isNearBottom(
   scrollHeight: number,
   scrollTop: number,

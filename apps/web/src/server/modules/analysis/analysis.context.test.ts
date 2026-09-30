@@ -1,8 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// ---------------------------------------------------------------------------
-// Hoisted mocks — declared BEFORE any source imports
-// ---------------------------------------------------------------------------
 const mocks = vi.hoisted(() => ({
   getNodeExplain: vi.fn(),
   getRepoSnapshot: vi.fn(),
@@ -18,9 +15,6 @@ vi.mock("./logic/analyze-context-builder", () => ({
 
 import { analysisContext } from "./analysis.context";
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 const db = {} as never;
 
 function makeExplainFixture() {
@@ -63,9 +57,6 @@ function expectedNodeContextFrom(explain: ReturnType<typeof makeExplainFixture>)
   };
 }
 
-// ---------------------------------------------------------------------------
-// analysisContext.build
-// ---------------------------------------------------------------------------
 describe("analysisContext.build", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -109,9 +100,6 @@ describe("analysisContext.build", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// analysisContext.getDiagnostics
-// ---------------------------------------------------------------------------
 describe("analysisContext.getDiagnostics", () => {
   it("returns 'none' diagnostics for null context", () => {
     expect(analysisContext.getDiagnostics(null)).toEqual({
@@ -173,9 +161,6 @@ describe("analysisContext.getDiagnostics", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// analysisContext.getMeta
-// ---------------------------------------------------------------------------
 describe("analysisContext.getMeta", () => {
   it("returns default meta for null context", () => {
     expect(analysisContext.getMeta(null)).toEqual({

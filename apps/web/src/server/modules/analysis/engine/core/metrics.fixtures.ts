@@ -1,11 +1,7 @@
 import { RepoMetricsSchema } from "./metrics.schemas";
 
-/**
- * The minimal payload that satisfies `RepoMetricsSchema`'s 34 required fields —
- * i.e. every field that is not declared `.optional()`. Lifted out of
- * `metrics.schemas.test.ts` so the schema suite and the read-path suite prove
- * against one object and cannot disagree about what "valid" means.
- */
+// Minimal payload satisfying `RepoMetricsSchema`'s 34 required fields, shared by the schema
+// and read-path suites so they cannot disagree about what "valid" means.
 export const VALID_REPO_METRICS = RepoMetricsSchema.parse({
   analysisCoverage: {
     heuristicFiles: 1,

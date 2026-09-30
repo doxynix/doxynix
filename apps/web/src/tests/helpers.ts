@@ -3,16 +3,9 @@ import { expect } from "vitest";
 
 import { prisma } from "@/server/core/db";
 
-/**
- * `cleanupDatabase` TRUNCATEs, so pointing it at a development database destroys
- * real data. Integration tests must therefore run against a disposable database:
- * CI provides `test_db`; locally set DATABASE_URL to something matching this.
- */
 const DISPOSABLE_DATABASE_PATTERN = /test/i;
 
 export async function assertDisposableDatabase() {
-  // current_database() returns the internal `name` type, which Prisma cannot
-  // deserialize, hence the explicit cast to text.
   const rows = await prisma.$queryRawUnsafe<Array<{ database_name: string }>>(
     "SELECT current_database()::text AS database_name;",
   );
@@ -76,8 +69,6 @@ export function createAnon() {
   return { db: enhance(prisma, { user: undefined }) };
 }
 
-// `Promise<unknown>` rather than `Promise<any>`: the value is only ever awaited
-// for its rejection, never inspected, so `unknown` is the honest type.
 export async function expectDenied(promise: Promise<unknown>) {
   await expect(promise).rejects.toThrow(
     /denied|p2004|p2025|not found|unique constraint|result is not allowed to be read back/i,

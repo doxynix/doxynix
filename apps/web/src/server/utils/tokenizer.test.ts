@@ -2,8 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { countTokens } from "./tokenizer";
 
-// One representative sample per writing system/script family. Tokenization is
-// script-level behavior, not per-language, so a small matrix covers the world.
 const SCRIPT_SAMPLES = [
   ["ASCII", "semantic parsing and safe fallback heuristics"],
   ["Latin with accents", "Crème brûlée café naïve"],

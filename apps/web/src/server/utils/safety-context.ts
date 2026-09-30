@@ -1,24 +1,8 @@
-/**
- * SafetyContext
- * Unified safety settings and data handling rules for LLM interactions.
- * Centralizes escaping, sanitization, and validation logic.
- */
-
 import { appLogger } from "../core/app-logger";
 
-/**
- * Safety level for handling user input
- */
 type SafetyLevel = "moderate" | "permissive" | "strict";
-
-/**
- * Data handling strategy
- */
 type DataHandlingStrategy = "escape-json" | "escape-xml" | "no-escape" | "sanitize-html";
 
-/**
- * SafetyContext manages all data safety and escaping across LLM prompts
- */
 export class SafetyContext {
   private level: SafetyLevel = "strict";
   private strategies: Map<string, DataHandlingStrategy> = new Map();
@@ -28,9 +12,6 @@ export class SafetyContext {
     this.setupDefaultStrategies();
   }
 
-  /**
-   * Create a safety-checked evidence block
-   */
   createEvidenceBlock(
     tag: string,
     data: object,
@@ -45,13 +26,11 @@ export class SafetyContext {
     let content = json;
     let invalidPaths: string[] = [];
 
-    // Check size
     if (content.length > maxSize) {
       content = `${content.slice(0, maxSize)}\n// [DATA TRUNCATED]`;
       truncated = true;
     }
 
-    // Validate paths if requested
     if (validatePaths && "paths" in data && Array.isArray(data.paths)) {
       const pathsData = (data as { paths: string[] }).paths;
       const validation = this.validatePaths(pathsData, allowedPaths);
@@ -67,9 +46,6 @@ export class SafetyContext {
     };
   }
 
-  /**
-   * Escape data based on context type
-   */
   escape(data: string, context: "json" | "xml-attr" | "xml-text" = "xml-text"): string {
     if (this.level === "permissive") {
       return data;
@@ -91,9 +67,6 @@ export class SafetyContext {
     }
   }
 
-  /**
-   * Get a safety report for an evidence block
-   */
   generateSafetyReport(data: {
     maxDataSize?: number;
     pathsValidated?: number;
@@ -116,17 +89,11 @@ export class SafetyContext {
     return report.join("\n");
   }
 
-  /**
-   * Prepare allowed paths list for inclusion in prompts
-   */
   prepareAllowedPaths(paths: string[]): string {
     const safe = paths.map((p) => this.escape(p, "xml-text"));
     return safe.join("\n");
   }
 
-  /**
-   * Prepare file content for embedding in prompts
-   */
   prepareFileContent(
     filePath: string,
     content: string,
@@ -147,29 +114,18 @@ export class SafetyContext {
       truncated,
     };
   }
-
-  /**
-   * Prepare JSON for embedding in prompts
-   */
   prepareJsonForPrompt(data: object, escape = true): string {
     const json = JSON.stringify(data, null, 2);
     return escape ? this.escape(json, "xml-text") : json;
   }
 
-  /**
-   * Register custom handling strategy for a data type
-   */
   registerStrategy(dataType: string, strategy: DataHandlingStrategy): this {
     this.strategies.set(dataType, strategy);
     return this;
   }
 
-  /**
-   * Sanitize user input that will be embedded in prompts
-   */
   sanitizeUserInput(input: string): string {
     if (this.level === "strict") {
-      // Remove or reject potentially dangerous patterns
       const dangerous = [
         /prompt\s*injection/i,
         /system\s*prompt/i,
@@ -192,23 +148,16 @@ export class SafetyContext {
     return this.escape(input, "xml-text");
   }
 
-  /**
-   * Set safety level
-   */
   setSafetyLevel(level: SafetyLevel): this {
     this.level = level;
     return this;
   }
 
-  /**
-   * Validate repository paths
-   */
   validatePaths(
     paths: string[],
     allowedPaths?: Set<string>,
   ): { invalid: string[]; valid: string[] } {
     if (!allowedPaths || allowedPaths.size === 0) {
-      // If no restrictions, all paths are valid
       return { invalid: [], valid: paths };
     }
 
@@ -226,9 +175,6 @@ export class SafetyContext {
     return { invalid, valid };
   }
 
-  /**
-   * Setup default escaping strategies per data type
-   */
   private setupDefaultStrategies(): void {
     this.strategies.set("xml", "escape-xml");
     this.strategies.set("json", "escape-json");
@@ -237,22 +183,13 @@ export class SafetyContext {
   }
 }
 
-/**
- * Global safety context singleton
- */
 let globalSafetyContext: null | SafetyContext = null;
 
-/**
- * Get or create global safety context
- */
 export function getGlobalSafetyContext(level: SafetyLevel = "strict"): SafetyContext {
   globalSafetyContext ??= new SafetyContext(level);
   return globalSafetyContext;
 }
 
-/**
- * Reset global safety context (for testing)
- */
 export function resetGlobalSafetyContext(): void {
   globalSafetyContext = null;
 }

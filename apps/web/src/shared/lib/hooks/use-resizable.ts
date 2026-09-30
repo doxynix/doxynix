@@ -4,16 +4,16 @@ import type { KeyboardEvent, PointerEvent } from "react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 type UseResizableOptions = {
-  /** Width used on first render and by the double-click reset. */
+  // Width used on first render and by the double-click reset.
   defaultWidth?: number;
   initialWidth?: number;
   maxWidth?: number;
   minWidth?: number;
-  /** Called with the final clamped width when a pointer drag ends. */
+  // Called with the final clamped width when a pointer drag ends.
   onDragEnd?: (width: number, didMove: boolean) => void;
-  /** Viewport edge the panel is anchored to. */
+  // Viewport edge the panel is anchored to.
   side?: "left" | "right";
-  /** localStorage key. Omit to disable persistence. */
+  // localStorage key. Omit to disable persistence.
   storageKey?: string;
 };
 
@@ -31,11 +31,6 @@ function readWidth(storageKey: string | undefined, fallback: number, min: number
   return Number.isFinite(stored) ? clamp(stored, min, max) : clamp(fallback, min, max);
 }
 
-/**
- * Drag-to-resize state for a fixed panel anchored to the left or right viewport
- * edge, with an optional localStorage-persisted width.
- *
- */
 export function useResizable({
   defaultWidth = 256,
   initialWidth,

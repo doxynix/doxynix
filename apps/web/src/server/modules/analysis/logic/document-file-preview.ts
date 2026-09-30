@@ -19,14 +19,7 @@ import {
 import type { FileActionRequest } from "../services/file-actions.service";
 import { applyDocumentSurgicalEdit } from "./document-surgical-edit";
 
-/**
- * Single-file documentation pass.
- *
- * Lives outside the file-actions service on purpose: it needs the AI tool
- * profile, which reaches the tRPC server, and a service that the router calls
- * must not depend on the router.
- */
-
+// Lives outside the file-actions service on purpose: it needs the AI tool profile, which reaches the tRPC server
 export async function runDocumentFilePreview(
   userId: string,
   input: FileActionRequest,

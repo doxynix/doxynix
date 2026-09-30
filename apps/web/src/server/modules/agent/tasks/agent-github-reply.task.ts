@@ -119,10 +119,7 @@ export const agentGithubReplyTask = task({
       appLogger.error({ err: error, msg: "Failed to assemble rich GitHub conversation context" });
     }
 
-    // The task runs with no HTTP context, but `buildRequestStore` only ever reads
-    // headers (plus the optional Vercel `ip`/`geo` fields, absent here). Irreducible:
-    // a `NextRequest` cannot be constructed without a real origin, and a synthetic
-    // one would be a fabricated host.
+    // No HTTP context here, and a synthetic NextRequest would fabricate a host, so an empty-header cast is the least-wrong option.
     const taskRequest = { headers: new Headers() } as unknown as NextRequest;
 
     const store = buildRequestStore({

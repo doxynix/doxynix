@@ -26,9 +26,6 @@ import {
   buildSingleFileAnalysisPrompt,
 } from "./prompts-refactored";
 
-// ---------------------------------------------------------------------------
-// Sentinel
-// ---------------------------------------------------------------------------
 describe("buildSentinelSystemPrompt", () => {
   it("returns non-empty string with security sentinel markers", () => {
     const out = buildSentinelSystemPrompt();
@@ -48,9 +45,6 @@ describe("buildSentinelUserPrompt", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Mapper
-// ---------------------------------------------------------------------------
 describe("buildMapperSystemPrompt", () => {
   it("returns prompt with architect role and mapping instructions", () => {
     const out = buildMapperSystemPrompt();
@@ -72,9 +66,6 @@ describe("buildMapperUserPrompt", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Analysis
-// ---------------------------------------------------------------------------
 describe("buildAnalysisSystemPrompt", () => {
   it("defaults to English role", () => {
     const out = buildAnalysisSystemPrompt();
@@ -107,9 +98,6 @@ describe("buildAnalysisUserPrompt", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// API Writer
-// ---------------------------------------------------------------------------
 describe("buildApiWriterSystemPrompt", () => {
   it("includes api-documentarian role and OpenAPI reference", () => {
     const out = buildApiWriterSystemPrompt();
@@ -136,9 +124,6 @@ describe("buildApiWriterUserPrompt", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Readme Writer
-// ---------------------------------------------------------------------------
 describe("buildReadmeWriterSystemPrompt", () => {
   it("includes readme-writer role", () => {
     const out = buildReadmeWriterSystemPrompt();
@@ -159,9 +144,6 @@ describe("buildReadmeWriterUserPrompt", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Contributing Writer
-// ---------------------------------------------------------------------------
 describe("buildContributingWriterSystemPrompt", () => {
   it("includes contributing-writer role", () => {
     const out = buildContributingWriterSystemPrompt();
@@ -186,9 +168,6 @@ describe("buildContributingWriterUserPrompt", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Changelog Writer
-// ---------------------------------------------------------------------------
 describe("buildChangelogWriterSystemPrompt", () => {
   it("includes changelog-writer role", () => {
     const out = buildChangelogWriterSystemPrompt();
@@ -212,9 +191,6 @@ describe("buildChangelogWriterUserPrompt", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Code Doc
-// ---------------------------------------------------------------------------
 describe("buildCodeDocSystemPrompt", () => {
   it("includes code-documenter role", () => {
     const out = buildCodeDocSystemPrompt();
@@ -233,9 +209,6 @@ describe("buildCodeDocUserPrompt", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Architecture Writer
-// ---------------------------------------------------------------------------
 describe("buildArchitectureWriterSystemPrompt", () => {
   it("includes architecture-writer role", () => {
     const out = buildArchitectureWriterSystemPrompt();
@@ -267,9 +240,6 @@ describe("buildArchitectureWriterUserPrompt", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Single File Analysis
-// ---------------------------------------------------------------------------
 describe("buildSingleFileAnalysisPrompt", () => {
   it("returns code-reviewer prompt with default language", () => {
     const out = buildSingleFileAnalysisPrompt();
@@ -286,9 +256,6 @@ describe("buildSingleFileAnalysisPrompt", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// PR Review
-// ---------------------------------------------------------------------------
 describe("buildPrReviewSystemPrompt", () => {
   it("includes code-reviewer role and diff review instruction", () => {
     const out = buildPrReviewSystemPrompt();
@@ -310,9 +277,6 @@ describe("buildPrReviewUserPrompt", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Code Fixer
-// ---------------------------------------------------------------------------
 describe("buildCodeFixerSystemPrompt", () => {
   it("includes SEARCH/REPLACE instruction", () => {
     const out = buildCodeFixerSystemPrompt();

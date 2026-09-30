@@ -78,8 +78,7 @@ describe("AppError", () => {
     });
 
     expect(error.status).toBe(500);
-    // In the test env `IS_PROD` is false, so the assertion pins the code's
-    // public/private classification rather than the dev rendering.
+    // `IS_PROD` is false in tests, so this pins the public/private classification, not the dev rendering.
     expect(error.publicMessage).toBe('relation "User" does not exist');
     expect(error.code).toBe("INTERNAL_SERVER_ERROR");
   });
@@ -108,8 +107,7 @@ describe("normalizeError", () => {
   });
 
   it("exposes Zod issues on a BAD_REQUEST TRPCError, the way tRPC stores them", () => {
-    // `core/trpc/init.ts` publishes `error.cause` as `zodError` for
-    // BAD_REQUEST, and tRPC only ever puts a real `ZodError` there.
+    // core/trpc/init.ts publishes `error.cause` as `zodError` for BAD_REQUEST, and tRPC only puts a real ZodError there.
     const parsed = z.object({ name: z.string() }).safeParse({});
     const zodError = parsed.success ? undefined : parsed.error;
 

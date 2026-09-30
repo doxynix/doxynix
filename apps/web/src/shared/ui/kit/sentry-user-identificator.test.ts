@@ -17,7 +17,6 @@ vi.mock("@sentry/nextjs", () => ({
   setUser: (...args: unknown[]) => mocks.setUser(...args),
 }));
 
-// Mirrors what `auth()` hands to the private layout: a better-auth session user.
 const user = {
   banExpires: null,
   banned: false,

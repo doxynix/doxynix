@@ -12,16 +12,11 @@ const llmTpmLimiter = new Ratelimit({
   redis: redisClient,
   timeout: 3000,
 });
-
-/**
- * Parses an error message from the Google Gemini API to extract the exact retry delay.
- */
 function parseGoogleRetryAfter(error: unknown): null | number {
   if (error == null) {
     return null;
   }
 
-  // Safely extract the error message string
   let errorMessage = "";
   if (typeof error === "string") {
     errorMessage = error;
@@ -47,7 +42,6 @@ function parseGoogleRetryAfter(error: unknown): null | number {
     }
   }
 
-  // Check retry-after headers if the error is an object
   if (
     typeof error === "object" &&
     "status" in error &&
@@ -77,9 +71,6 @@ function parseGoogleRetryAfter(error: unknown): null | number {
   return null;
 }
 
-/**
- * Unified limiter interface
- */
 export const llmLimiter = {
   schedule: async <T>(
     options: { id: string; weight: number },

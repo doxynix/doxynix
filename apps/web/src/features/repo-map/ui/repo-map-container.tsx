@@ -91,8 +91,6 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
   const isFetching = viewId == null ? isMapFetching : isNodeFetching;
   const latestData = currentData ?? null;
 
-  // React-canonical "adjust state during render": keep showing the previous snapshot while a
-  // new query is fetching, and clear it once a query finishes without data.
   const [lastQuery, setLastQuery] = useState({ isFetching, latestData });
   if (latestData !== lastQuery.latestData || isFetching !== lastQuery.isFetching) {
     setLastQuery({ isFetching, latestData });

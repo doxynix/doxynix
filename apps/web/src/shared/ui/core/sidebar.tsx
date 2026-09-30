@@ -34,7 +34,7 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/core/tooltip";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
-const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // TIME: 1 year
+const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 // const SIDEBAR_KEYBOARD_SHORTCUT = "b";
@@ -44,7 +44,7 @@ const SIDEBAR_MAX_WIDTH = 480;
 const SIDEBAR_DEFAULT_WIDTH = 256;
 const SIDEBAR_WIDTH_STORAGE_KEY = "app-sidebar-width";
 const SIDEBAR_WIDTH_COOKIE_NAME = "sidebar_width";
-/** How far a closed sidebar must be dragged before it reopens. */
+// How far a closed sidebar must be dragged before it reopens.
 const SIDEBAR_REOPEN_DRAG = 24;
 
 type SidebarContextProps = {
@@ -52,7 +52,7 @@ type SidebarContextProps = {
   isResizing: boolean;
   open: boolean;
   openMobile: boolean;
-  /** Handlers for SidebarRail: resize while open, reopen while closed. */
+  // Handlers for SidebarRail: resize while open, reopen while closed.
   railProps: {
     onClick: () => void;
     onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
@@ -87,7 +87,7 @@ function SidebarProvider({
   ...props
 }: ComponentProps<"div"> & {
   defaultOpen?: boolean;
-  /** Width the server read from the cookie, so the first paint is already right. */
+  // Width the server read from the cookie, so the first paint is already right.
   defaultWidth?: number;
   onOpenChange?: (open: boolean) => void;
   open?: boolean;
@@ -95,8 +95,6 @@ function SidebarProvider({
   const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = useState(false);
 
-  // This is the internal state of the sidebar.
-  // We use openProp and setOpenProp for control from outside the component.
   const [_open, _setOpen] = useState(defaultOpen);
   const open = openProp ?? _open;
 
@@ -109,22 +107,18 @@ function SidebarProvider({
     _setOpen((prev) => (typeof value === "function" ? value(prev) : value));
   };
 
-  // This sets the cookie to keep the sidebar state.
   useEffect(() => {
     setClientCookie(SIDEBAR_COOKIE_NAME, open, SIDEBAR_COOKIE_MAX_AGE);
   }, [open]);
 
-  // Helper to toggle the sidebar.
   const toggleSidebar = () => {
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
   };
 
-  // A drag is followed by a click; swallow that click so finishing a resize or a
-  // reopen does not immediately toggle the sidebar back.
+  // A drag is followed by a click; swallow that click so a resize or reopen does not toggle back.
   const suppressClickRef = useRef(false);
 
-  // One rail drives everything: drag to resize, drag to the edge to collapse,
-  // and drag outwards from the closed state to reopen.
+  // One rail drives everything: drag to resize, drag to the edge to collapse, drag outwards to reopen.
   const { handleProps, isResizing, setWidth, width } = useResizable({
     defaultWidth: SIDEBAR_DEFAULT_WIDTH,
     initialWidth: defaultWidth,
@@ -142,8 +136,7 @@ function SidebarProvider({
     storageKey: SIDEBAR_WIDTH_STORAGE_KEY,
   });
 
-  // Mirrored into a cookie so the next server render already knows the width and
-  // the panel does not snap to it after hydration.
+  // Mirrored into a cookie so the next server render already knows the width and does not snap to it after hydration.
   useEffect(() => {
     if (isResizing) {
       return;
@@ -155,12 +148,9 @@ function SidebarProvider({
   // Pointer x where a reopen drag started, or null when no such drag is active.
   const reopenFromRef = useRef<null | number>(null);
 
-  // Latest refs so the reopen gesture keeps one stable set of window listeners.
-  // Re-registering them mid-drag (which happens as soon as `open` flips) drops
-  // the tail of the movement and leaves the panel at its minimum width.
+  // Latest refs so the gesture keeps one stable set of window listeners; re-registering them mid-drag drops the tail of the movement and leaves the panel at its minimum width.
   const gestureRef = useRef({ setOpen, setWidth });
-  // No dep array on purpose: this is the useLatest pattern, so the gesture
-  // handlers always see the current setters without re-subscribing listeners.
+  // No dep array on purpose: this is the useLatest pattern, so the handlers always see the current setters.
   useEffect(() => {
     gestureRef.current = { setOpen, setWidth };
   });
@@ -212,8 +202,7 @@ function SidebarProvider({
         return;
       }
 
-      // Closed: the rail sits at the viewport edge, so horizontal travel is the
-      // new width. Wait for real travel before committing to reopening.
+      // Closed: the rail sits at the viewport edge, so horizontal travel is the new width. Wait for real travel before reopening.
       event.preventDefault();
       reopenFromRef.current = event.clientX;
     },
@@ -232,8 +221,7 @@ function SidebarProvider({
   //   return () => globalThis.removeEventListener("keydown", handleKeyDown);
   // }, [toggleSidebar]);
 
-  // We add a state so that we can do data-state="expanded" or "collapsed".
-  // This makes it easier to style the sidebar with Tailwind classes.
+  // data-state drives the Tailwind styling of the expanded/collapsed variants.
   const state = open ? "expanded" : "collapsed";
 
   const contextValue: SidebarContextProps = {
@@ -342,7 +330,6 @@ function Sidebar({
       data-state={state}
       data-variant={variant}
     >
-      {/* This is what handles the sidebar gap on desktop */}
       <div
         className={cn(
           "relative w-(--sidebar-width) bg-transparent transition-[width] duration-300 ease-out-expo",
@@ -363,7 +350,6 @@ function Sidebar({
           side === "left"
             ? "left-0 group-data-[collapsible=offcanvas]:-left-(--sidebar-width)"
             : "right-0 group-data-[collapsible=offcanvas]:-right-(--sidebar-width)",
-          // Adjust the padding for floating and inset variants.
           variant === "floating" || variant === "inset"
             ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
@@ -408,11 +394,7 @@ function SidebarTrigger({ className, onClick, ...props }: ComponentProps<typeof 
   );
 }
 
-/**
- * The single sidebar affordance: drag to resize, drag to the minimum to
- * collapse, drag outwards from the closed state to reopen. A plain click (no
- * travel) still toggles.
- */
+// Drag to resize, drag to the minimum to collapse, drag outwards from closed to reopen; a plain click (no travel) toggles.
 function SidebarRail({ className, ...props }: ComponentProps<"button">) {
   const tCommon = useTranslations("Common");
   const { railProps, state } = useSidebar();
@@ -424,15 +406,11 @@ function SidebarRail({ className, ...props }: ComponentProps<"button">) {
         "z-20 hidden w-4 cursor-col-resize touch-none select-none transition-standard ease-out sm:flex",
         "after:absolute after:inset-y-0 after:left-1/2 after:w-0.5 hover:after:bg-sidebar-border",
         "focus-visible:after:bg-sidebar-border",
-        // The negative offset straddles the boundary: half the grab area inside
-        // the panel, half outside, with the hairline exactly on the edge. A
-        // translate would push the hairline inboard instead.
+        // The negative offset straddles the boundary: half the grab area inside, half outside, hairline exactly on the edge; a translate would push it inboard.
         state === "expanded"
-          ? // Absolute so the rail inherits the panel's vertical bounds and stops
-            // below the app header, which is stacked above the whole sidebar.
+          ? // Absolute so the rail inherits the panel's vertical bounds and stops below the app header, which is stacked above the whole sidebar.
             "absolute inset-y-0 -right-2"
-          : // Offcanvas slides the panel off-screen, taking an absolute rail with
-            // it, so a closed sidebar falls back to a viewport-anchored strip.
+          : // Offcanvas slides the panel off-screen with an absolute rail, so closed falls back to a viewport-anchored strip.
             "fixed inset-y-0 -left-2",
         className,
       )}

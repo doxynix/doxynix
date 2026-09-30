@@ -148,11 +148,8 @@ export function resolveModuleImport(
   return null;
 }
 
-/**
- * The only parts of a JSONC `tsconfig.json` this module reads. `looseObject`
- * keeps every other compiler option, so an unknown key is ignored rather
- * than rejected.
- */
+// Only the `tsconfig.json` parts this module reads; `looseObject` ignores every other
+// compiler option instead of rejecting it.
 const TsconfigPathsSchema = z.looseObject({
   compilerOptions: z.looseObject({
     baseUrl: z.string().optional(),

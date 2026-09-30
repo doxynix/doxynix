@@ -5,19 +5,9 @@ import * as z from "zod";
 import { api } from "@/server/core/trpc/server";
 import type { AppRouter } from "@/server/modules";
 
-/** The `findings` input the `createFix` tool actually sends to `analysis.createFix`. */
 type CreateFixFindings = inferRouterInputs<AppRouter>["analysis"]["createFix"]["findings"];
 
-/**
- * One finding the `createFix` tool accepts.
- *
- * Declared here rather than imported from `@/server/modules/analysis` because the
- * server module boundary forbids cross-slice imports, and the agent slice only
- * reaches `analysis` through
- * the tRPC client. The `z.ZodType<CreateFixFindings[number]>` annotation below is
- * the drift guard: it stops compiling the moment this shape and the router's input
- * disagree, so the two cannot silently part ways.
- */
+// Declared here because the module boundary forbids cross-slice imports; the `z.ZodType<CreateFixFindings[number]>` annotation is the drift guard against the router's input.
 export const AgentFixFindingSchema: z.ZodType<CreateFixFindings[number]> = z.object({
   file: z.string(),
   line: z.number(),

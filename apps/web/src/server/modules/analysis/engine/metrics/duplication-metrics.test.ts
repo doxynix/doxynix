@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from "vitest";
 
 import { calculateRepositoryDuplication } from "./duplication-metrics";
 
-// Mock @jscpd/core and @jscpd/tokenizer
 vi.mock("@jscpd/core", () => {
   return {
     Detector: vi.fn(function DetectorMock() {
@@ -37,7 +36,6 @@ vi.mock("@jscpd/tokenizer", () => ({
   Tokenizer: vi.fn(),
 }));
 
-// Mock ProjectPolicy
 vi.mock("../core/project-policy", () => ({
   ProjectPolicy: {
     isConfigFile: vi.fn((path) => path.endsWith("config.ts")),
@@ -69,11 +67,7 @@ describe("calculateRepositoryDuplication", () => {
     ] as any;
     const report = await calculateRepositoryDuplication(files);
 
-    // Total lines = 10 + 20 = 30
-    // The mocked detector produces one duplicate clone per scanned file,
-    // so total duplicated lines equal 12 (two clones × 6 lines each).
-    // Percentage = (12 / 30) * 100 = 40%
-
+    // Mocked detector yields two 6-line clones over 10 + 20 = 30 lines → 12 duplicated (40%)
     expect(report.totalDuplicatedLines).toBe(12);
     expect(report.duplicationPercentage).toBe(40);
   });

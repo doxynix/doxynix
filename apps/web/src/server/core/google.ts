@@ -17,9 +17,7 @@ export const google = createGoogleGenerativeAI({
   apiKey: GOOGLE_GENERATIVE_AI_API_KEY,
   baseURL: `https://gateway.ai.cloudflare.com/v1/${CF_ACCOUNT_ID}/${CF_GATEWAY_ID}/google-ai-studio/v1beta`,
 
-  // Irreducible: undici's `Response` and the DOM `Response` the AI SDK declares are
-  // structurally incompatible, so the bridge between them has to stay a cast. What
-  // is fixed here is the `any` in the options spread and the if/ternary shape.
+  // Irreducible: undici's `Response` and the DOM `Response` the AI SDK declares are structurally incompatible, so the bridge between them has to stay a cast.
   fetch:
     proxyAgent == null
       ? undefined

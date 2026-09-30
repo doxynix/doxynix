@@ -114,8 +114,6 @@ describe("coerceAnalysisPayload", () => {
     );
 
     expect(result).not.toBeNull();
-    // The whole-object parse failed, so the caller gets the zero-valued fallback
-    // and a warning rather than a partially-validated blob.
     expect(result?.metrics.totalLoc).toBe(0);
     expect(appLogger.warn).toHaveBeenCalledWith(
       expect.objectContaining({ id: "an-1", msg: expect.stringContaining("metricsJson") }),

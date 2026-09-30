@@ -73,9 +73,7 @@ export function buildStructureMapPayloadFromContext(
     target: makeStructureNodeId("group", edge.target),
   }));
 
-  // `buildTopLevelNodes` reads its nodes straight out of `context.groupMap`, so
-  // the lookup below always hits. Guard rather than assert it anyway: a fabricated
-  // fallback would silently render an all-zero inspect card.
+  // The `groupMap` lookup always hits since nodes come from it; guard rather than assert — a fabricated fallback would render an all-zero inspect card
   const inspectByNodeId = Object.fromEntries(
     nodes.flatMap((node) => {
       const entry = context.groupMap.get(node.path);

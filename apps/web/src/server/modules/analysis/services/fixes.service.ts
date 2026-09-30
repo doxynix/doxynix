@@ -35,7 +35,6 @@ export const fixesService = {
     });
 
     try {
-      // Fetch repo metadata (owner, name, defaultBranch)
       const repo = await db.repo.findUnique({
         where: { id: input.repoId },
       });
@@ -47,7 +46,6 @@ export const fixesService = {
         });
       }
 
-      // Resolve GitHub client context (installation or OAuth)
       const clientContext = await getClientContext(db, userId, repo.owner);
 
       const fix = await analysisRepo.getById(db, input.fixId);
@@ -56,7 +54,6 @@ export const fixesService = {
         throw new TRPCError({ code: "NOT_FOUND", message: "Fix not found" });
       }
 
-      // Apply fix using full-content strategy
       const fixService = new FixService();
       const result = await fixService.applyFix(clientContext.octokit, {
         branch: input.branch,
@@ -69,7 +66,6 @@ export const fixesService = {
         title: input.title,
       });
 
-      // Update fix status with PR metadata (no diffs stored)
       await analysisRepo.updateStatus(db, fix.id, "PR_OPENED", {
         githubPrNumber: result.prNumber,
         githubPrUrl: result.prUrl,
@@ -130,7 +126,6 @@ export const fixesService = {
         }
       }
 
-      // Fetch repo metadata (to detect language)
       const repo = await db.repo.findUnique({
         where: { id: input.repoId },
       });
@@ -185,9 +180,6 @@ export const fixesService = {
     }
   },
 
-  /**
-   * Get fix metadata (no diffs in response)
-   */
   async getById(
     db: DbClient,
     redis: Redis,
@@ -208,9 +200,6 @@ export const fixesService = {
     return fixesMapper.toDetailed(fix, parsedResult.success ? parsedResult.data : null);
   },
 
-  /**
-   * Get all fixes for a repo (metadata only)
-   */
   async getByRepository(
     db: DbClient,
     repoId: string,

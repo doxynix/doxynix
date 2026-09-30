@@ -9,8 +9,6 @@ vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-// jsdom implements neither matchMedia nor Pointer Events capture. Assigned
-// unconditionally: the DOM types claim they exist, so `??=` reads as dead code.
 beforeEach(() => {
   HTMLElement.prototype.setPointerCapture = vi.fn();
   HTMLElement.prototype.releasePointerCapture = vi.fn();
@@ -48,12 +46,9 @@ function mount({ defaultOpen = true } = {}) {
 const rail = () => screen.getByRole("button", { name: "resize_sidebar" });
 const wrapper = () => document.querySelector("[data-slot='sidebar-wrapper']");
 const aside = () => document.querySelector("[data-slot='sidebar-container']");
-// offcanvas keeps the panel mounted and slides it out of view, so collapse is
-// observable through data-state rather than through absence.
 const state = () => document.querySelector("[data-slot='sidebar']")?.getAttribute("data-state");
 const width = () => (wrapper() as HTMLElement).style.getPropertyValue("--sidebar-width");
 
-/** Waits a frame so the hook's rAF-batched width update lands. */
 async function nextFrame() {
   await act(async () => {
     await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
@@ -69,7 +64,6 @@ async function drag(from: number, to: number) {
   act(() => {
     window.dispatchEvent(new PointerEvent("pointermove", { clientX: to }));
   });
-  // Let the rAF-batched width update land.
   await nextFrame();
 }
 
@@ -90,8 +84,6 @@ describe("SidebarRail", () => {
   it("is actually displayed on desktop", () => {
     mount();
 
-    // Regression guard: `hidden` without a `sm:flex` counterpart leaves the rail
-    // at display:none, so it exists in the DOM but can never be seen or grabbed.
     expect(rail().className).toContain("hidden");
     expect(rail().className).toContain("sm:flex");
   });
@@ -99,12 +91,9 @@ describe("SidebarRail", () => {
   it("anchors the rail to the panel edge so it clears the app header", () => {
     mount();
 
-    // absolute, not fixed: a fixed rail would span the whole viewport height and
-    // sit underneath the header, swallowing clicks on the logo and the trigger.
     expect(rail().className).toContain("absolute");
     expect(rail().className).toContain("-right-2");
     expect(rail().className).not.toContain("fixed");
-    // The hairline is the rail's midpoint, so a translate would sit it inboard.
     expect(rail().className).not.toContain("translate");
   });
 
@@ -178,7 +167,6 @@ describe("SidebarRail", () => {
       rail().dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    // The drag resized; the trailing click must not also collapse the sidebar.
     expect(state()).toBe("expanded");
     expect(width()).toBe("380px");
   });

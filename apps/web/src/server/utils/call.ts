@@ -148,10 +148,7 @@ export async function callWithFallback<T>({
           taskLogger.success(
             `AI Text (${String(attemptMetadata.phase ?? taskType)}): generated successfully.`,
           );
-          // Irreducible: `generateText().text` is `string`, while `T` is the same
-          // type parameter the structured-output branch above resolves through
-          // `outputSchema`. A caller that passes `outputSchema: null` is asserting
-          // what `T` is; the compiler cannot check a caller's assertion.
+          // Irreducible: `T` is the same parameter the structured branch resolves via `outputSchema`, which the compiler cannot check when a caller passes null.
           return result.text as unknown as T;
         }
 

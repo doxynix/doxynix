@@ -165,14 +165,7 @@ export type StructureNodeInspectPayload = StructureInspectPayload & {
   contains: string[];
 };
 
-/**
- * Payload shapes are declared here, in the slice's leaf module, so that `analysis.mapper`
- * never has to reach back into `graph-navigator` / `node-explainer` for its types.
- * Their producers (`buildStructureMapPayloadFromContext`,
- * `buildStructureNodePayloadFromContext`, `buildNodeExplainPayloadFromContext`) annotate
- * their return types with these aliases, so the compiler — not a hand-written test —
- * is what fails if a producer and its declaration ever drift apart.
- */
+// Declared in this leaf module so `analysis.mapper` never reaches back into the producers; producers annotate their returns with these aliases, so the compiler catches drift
 export type StructureMapPayload = {
   analysisRef: AnalysisRef | null;
   filters: {

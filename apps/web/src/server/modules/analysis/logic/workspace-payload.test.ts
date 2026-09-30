@@ -2,11 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { buildWorkspacePayload } from "./workspace-payload";
 
-/**
- * Every leaf the projection reads gets a distinctive sentinel, so a field that is
- * accidentally dropped during refactoring shows up as a missing sentinel rather
- * than as an `undefined` that quietly matches.
- */
+// Distinctive sentinels so a dropped field shows up as missing rather than as an `undefined` that quietly matches
 const SENTINEL = {
   architectureStyle: "modular-monolith",
   defaultNodeId: "group:apps",

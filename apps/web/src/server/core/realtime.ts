@@ -7,8 +7,7 @@ import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { appLogger } from "./app-logger";
 
-// Irreducible: `globalThis` has no `ably`; this is the Next.js dev-HMR singleton
-// idiom, so the module instance is parked on the global object across reloads.
+// Irreducible: `globalThis` has no `ably`; this is the Next.js dev-HMR singleton idiom, so the instance is parked on the global across reloads.
 const globalForAbly = globalThis as unknown as { ably?: Ably.Rest };
 
 export const realtimeServer =

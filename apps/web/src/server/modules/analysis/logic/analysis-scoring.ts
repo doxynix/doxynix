@@ -8,11 +8,7 @@ import { calculateHealthScore } from "../engine/metrics/complexity";
 const MAX_ONBOARDING_SCORE = 100;
 const DOC_DENSITY_THRESHOLD = 10;
 
-/**
- * Blends the AI's documentation output score with cheap hard signals (how much
- * of the repo is documented, whether it has entrypoints, config and described
- * architecture). Capped, so a strong LLM score cannot exceed a perfect 100.
- */
+// Capped so a strong LLM score cannot exceed a perfect 100
 export function computeOnboardingScore(params: {
   docOutputScore: number;
   hardMetrics: RepoMetrics;
@@ -49,11 +45,7 @@ export function computeHealthScore(params: {
   });
 }
 
-/**
- * Merges the AI result with the measured hard metrics. Static secret-like
- * findings from the scanner are promoted to `vulnerabilities` so the UI reads
- * one shape regardless of whether the finding came from the LLM or the scanner.
- */
+// Scanner findings are promoted to `vulnerabilities` so the UI reads one shape regardless of source
 export function buildResultToStore(params: {
   aiResult: AIResult;
   hardMetrics: RepoMetrics;

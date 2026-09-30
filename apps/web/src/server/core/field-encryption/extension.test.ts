@@ -32,9 +32,7 @@ describe("fieldEncryptionExtension", () => {
   });
 
   it("builds without touching Prisma.dmmf", () => {
-    // The regression this task exists for: the old library read
-    // `Prisma.dmmf`, which Prisma 7 removes. The extension must construct
-    // without any DMMF access, so calling it outside a Prisma context is fine.
+    // Regression guard: the retired library read `Prisma.dmmf`, which Prisma 7 removes, so the extension must construct with no DMMF access.
     expect(() => fieldEncryptionExtension({ encryptionKey: KEY })).not.toThrow();
   });
 

@@ -11,12 +11,7 @@ type Frame<TState> = { key: string; path: string[]; state: TState; value: unknow
 
 const MAX_DEPTH = 64;
 
-/**
- * Iterative depth-first walk in declaration order, replacing the library's
- * `traverseTree`. The callback is invoked for the root and for every child as
- * it is popped, and the state it returns is carried into that node's own
- * subtree - that is how a relation key switches the tracked model.
- */
+// Iterative DFS in declaration order, replacing the library's `traverseTree`; the state returned for a node is carried into that node's own subtree, which is how a relation key switches the tracked model.
 export function traverseTree<TState>(
   input: unknown,
   callback: (state: TState, node: TreeNode) => TState,
@@ -35,8 +30,7 @@ export function traverseTree<TState>(
     const value = frame.value;
     const isCollection = isPlainObject(value) || Array.isArray(value);
 
-    // A Prisma `args` object is acyclic in practice, but nothing stops a
-    // caller from handing us a cycle. One visit per object is enough.
+    // A Prisma `args` object is acyclic in practice, but one visit per object is enough to survive a caller-supplied cycle.
     if (isCollection) {
       if (seen.has(value)) {
         continue;
@@ -56,8 +50,7 @@ export function traverseTree<TState>(
     }
 
     const entries = Object.entries(value);
-    // Reversed so the LIFO stack pops them in declaration order, which is what
-    // `prisma-field-encryption`'s `traverseTree` did.
+    // Reversed so the LIFO stack pops them in declaration order, matching the library's `traverseTree`.
     for (const [key, child] of entries.toReversed()) {
       stack.push({ key, path: [...frame.path, key], state, value: child });
     }

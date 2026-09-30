@@ -1,11 +1,4 @@
-/**
- * Deep-clones through JSON, replacing cycles and bigints.
- *
- * The `T` is a caller assertion, not a guarantee: `JSON.parse` cannot know the
- * shape it produced. The only two callers pass `Prisma.InputJsonValue` for a
- * value that was already assembled as JSON, so the cast is sound in practice.
- * A clone that could return a validated `T` would need a schema per call site.
- */
+// The `T` is a caller assertion, not a guarantee: JSON.parse cannot know the shape it produced.
 export function safeJsonClone<T = unknown>(
   value: unknown,
   replacer?: (key: string, value: unknown) => unknown,

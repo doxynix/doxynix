@@ -23,15 +23,7 @@ import { githubTokenService } from "./github-token.service";
 const AppOctokit = Octokit.plugin(retry, throttling, paginateRest, createPullRequest);
 export type OctokitInstance = InstanceType<typeof AppOctokit>;
 
-/**
- * The throttle callbacks, typed from the plugin's own declarations so every
- * parameter — `options` and `octokit` included — is inferred rather than `any`.
- * The `boolean` return is load-bearing: the plugin reads it to decide whether to
- * retry, even though the published handler signature declares `void`.
- *
- * `ThrottlingOptions` is a union whose second member marks both handlers optional,
- * hence the `NonNullable`.
- */
+// The `boolean` return is load-bearing: the plugin reads it to decide on retry even though the published signature declares `void`; `ThrottlingOptions` is a union whose second member makes both handlers optional, hence the `NonNullable`.
 type ThrottleHandler = NonNullable<ThrottlingOptions["onRateLimit"]>;
 
 const onRateLimit: ThrottleHandler = (retryAfter, options, octokit, retryCount) => {
@@ -114,17 +106,12 @@ type ClientContextOptions = {
   owner?: string;
 };
 
-/**
- * Resolves user's GitHub client context based on available credentials
- * Priority: specific installation > oauth > any installation
- * Throws GitHubAuthRequiredError if no context available
- */
+// Priority: specific installation > oauth > any installation; throws `GitHubAuthRequiredError` when nothing is available.
 export async function getClientContext(
   prisma: DbClient,
   userId: string,
   owner?: string,
 ): Promise<GitHubClientContext> {
-  // Try specific installation for owner
   if (owner != null) {
     const specificInstallation = await prisma.githubInstallation.findFirst({
       where: { accountLogin: { equals: owner, mode: "insensitive" }, isSuspended: false, userId },
@@ -140,7 +127,6 @@ export async function getClientContext(
     }
   }
 
-  // Get token
   const validToken = await githubTokenService.getValidToken(userId);
   if (validToken != null) {
     return {
@@ -150,7 +136,6 @@ export async function getClientContext(
     };
   }
 
-  // Try any installation (if owner not specified)
   if (owner == null) {
     const anyInstallation = await prisma.githubInstallation.findFirst({
       where: { isSuspended: false, userId },
@@ -169,12 +154,6 @@ export async function getClientContext(
   throw new GitHubAuthRequiredError();
 }
 
-/**
- * Resolves client context with fallback chain:
- * 1. Primary client context
- * 2. If auth fails: public PAT (if allowPublicFallback)
- * 3. If auth fails: system app (if allowSystemFallback)
- */
 export async function resolveClientContext(
   prisma: DbClient,
   userId: string,
@@ -184,7 +163,6 @@ export async function resolveClientContext(
     return await getClientContext(prisma, userId, options?.owner);
   } catch (error) {
     if (error instanceof GitHubAuthRequiredError) {
-      // Fallback 1: System PAT for public queries
       if (options?.allowPublicFallback === true) {
         return {
           hasUserToken: false,
@@ -193,7 +171,6 @@ export async function resolveClientContext(
         };
       }
 
-      // Fallback 2: System app installation
       if (options?.allowSystemFallback === true) {
         return {
           hasUserToken: false,
@@ -206,17 +183,10 @@ export async function resolveClientContext(
   }
 }
 
-/**
- * Parses GitHub URL or owner/repo string
- * Validates and normalizes owner and name
- * Throws if format invalid
- */
 export function parseUrl(input: string): { name: string; owner: string } {
   const trimmedInput = input.trim();
   if (trimmedInput === "") {
-    // Typed rather than a bare `Error` so both transports agree: an empty
-    // string is a bad request, not a server fault. Reachable from
-    // `repos.createRepo` and from the agent tools.
+    // Typed rather than a bare `Error` so both transports agree: an empty string is a bad request, not a server fault.
     throw new AppError({ code: "BAD_REQUEST", publicMessage: "Field cannot be empty" });
   }
 
@@ -235,10 +205,7 @@ export function parseUrl(input: string): { name: string; owner: string } {
   }
 }
 
-/**
- * Gets installation metadata from GitHub App
- * Requires system app credentials
- */
+// Always authenticates as the system app, whatever `installationId` is passed.
 export async function getInstallationInfo(installationId: number) {
   const octokit = getInstallationClient(Number(GITHUB_SYSTEM_INSTALLATION_ID));
   const { data } = await octokit.rest.apps.getInstallation({

@@ -36,10 +36,6 @@ type PRAnalysisMetadata = {
   userId: string;
 };
 
-/**
- * Analyzes PR diff using reduced token budget (30-50K vs 210K for full analysis)
- * Runs Sentinel phase for security findings, Mapper for dependency impact
- */
 export class DifferentialAnalyzer {
   private config: PRAnalysisConfig;
   private readonly isExcluded: (path: string) => boolean;
@@ -143,9 +139,7 @@ export class DifferentialAnalyzer {
       return findings;
     }
 
-    // `PRFinding["type"]` and `PRFocusArea` are deliberately different unions —
-    // a finding type that is not a focus area is simply not a match, so widen
-    // rather than erase the check.
+    // `PRFinding["type"]` and `PRFocusArea` are deliberately different unions — widen, don't erase the check
     return findings.filter((f) => (this.config.focusAreas as string[]).includes(f.type));
   }
 
@@ -196,9 +190,6 @@ export class DifferentialAnalyzer {
     return "LOW";
   }
 
-  /**
-   * Calls the AI model for a deep review, returning findings and an overall PR summary
-   */
   private async runAiReviewPhase(
     relevantFiles: PRDiffInfo["changedFiles"],
     projectOverviewJson: string,

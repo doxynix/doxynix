@@ -37,13 +37,7 @@ async function getNextAfterApi() {
   return cachedAfterFn;
 }
 
-/**
- * Runs the audit logging task in the background.
- * Uses Next.js after() for non-blocking execution within HTTP requests.
- * Dynamically detects the absence of the Next.js context for compatibility with Trigger.dev and builds.
- *
- * @param task The async background task function
- */
+// Prefers Next.js `after()` and falls back to a direct await elsewhere; the import is dynamic so Trigger.dev tasks and builds, which have no Next.js request context, still work.
 async function runAsBackgroundTask(task: () => Promise<void>): Promise<void> {
   const afterFn = await getNextAfterApi();
 
@@ -74,10 +68,7 @@ async function runAsBackgroundTask(task: () => Promise<void>): Promise<void> {
   });
 }
 
-/**
- * Factory for lazy initialization of the Prisma database singleton.
- * Picks the PrismaPg TCP driver for Node.js runtimes and the PrismaNeon WebSocket driver for Edge.
- */
+// Lazy singleton: PrismaPg over TCP on Node runtimes, PrismaNeon over WebSocket on Edge.
 function createPrismaInstance() {
   let baseClient: PrismaClient;
 
@@ -223,8 +214,7 @@ export type TransactionClient = Parameters<Parameters<PrismaClientExtended["$tra
 
 export type DbClient = PrismaClientExtended | TransactionClient;
 
-// Irreducible: `globalThis` has no `prisma`; this is the Next.js dev-HMR singleton
-// idiom, so one client is reused across hot reloads instead of leaking pools.
+// Irreducible: `globalThis` has no `prisma`; this is the Next.js dev-HMR singleton idiom, so one client is reused across hot reloads instead of leaking pools.
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClientExtended };
 
 export const prisma = globalForPrisma.prisma ?? createPrismaInstance();

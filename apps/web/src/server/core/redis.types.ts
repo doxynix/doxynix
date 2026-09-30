@@ -1,17 +1,9 @@
 import type { AnalysisRefView } from "@doxynix/shared";
 
-/**
- * Shapes of the values cached in Redis per user. Kept next to the only
- * non-slice consumer, `server/core/redis.ts`.
- */
+// Shapes of the values cached in Redis per user; lives here next to its only non-slice consumer, `server/core/redis.ts`.
 export type FileActionPreviewResult = {
   action: "document-file-preview" | "quick-file-audit";
-  /**
-   * The analysis and commit this preview was produced against. Added by
-   * `analyze-file.task.ts` on top of the preview; `contentRef` was never a key of
-   * the cached blob, which is why `pinAuditToDocs` read `undefined` from it and
-   * every pinned document was stored as `version: "manual"` with no analysis link.
-   */
+  // Set by `analyze-file.task.ts`; `contentRef` was never a key of the cached blob, which is why `pinAuditToDocs` read `undefined` and every pinned document landed as `version: "manual"` with no analysis link.
   analysisId?: string;
   commitSha?: string;
   analysisRef: AnalysisRefView | null;

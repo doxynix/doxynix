@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { triggerByTaskAndWait } = vi.hoisted(() => ({ triggerByTaskAndWait: vi.fn() }));
 
-// `writer.tasks.ts` builds real `queue()`/`task()` handles at import time, which
-// needs a live Trigger connection. Only the ids are read here, so stub them.
+// `writer.tasks.ts` builds real `task()` handles at import time (needs a live Trigger
+// connection); only the ids are read here, so stub them.
 vi.mock("@trigger.dev/sdk", () => ({
   batch: { triggerByTaskAndWait },
   queue: vi.fn(() => ({})),
@@ -147,16 +147,8 @@ describe("orchestrateWriterTasks engineering dossier strip", () => {
     vi.clearAllMocks();
   });
 
-  /**
-   * Regression cover, not a red-green proof: this behaviour was already correct
-   * before the typing change, so the test passes against both the old cast-based
-   * strip and the new typed one. Its value is pinning the observable contract —
-   * the edges must never reach the LLM prompt, and `sections` must be gone rather
-   * than `null` — so a future refactor of the strip cannot silently reintroduce
-   * them. The part this task actually fixed (the `as unknown as Record<string,
-   * unknown>` cast and the `sections: undefined` type violation) is compile-time
-   * and is not observable from a test.
-   */
+  // Pins the observable contract only — the cast/type fix itself is compile-time. Edges
+  // must never reach the LLM prompt, and `sections` must be gone rather than `null`.
   it("empties the top-level and architecture graphReliability edges in the writer payload", async () => {
     const jobs = await runOrchestrator();
 
@@ -166,9 +158,8 @@ describe("orchestrateWriterTasks engineering dossier strip", () => {
       graphReliability: { edges?: unknown[] };
     };
 
-    // `compactPayload` drops empty arrays entirely, so an emptied `edges` is absent
-    // from the serialized payload — which is the point of the strip: the edges
-    // never reach the LLM prompt.
+    // `compactPayload` drops empty arrays entirely, so an emptied `edges` is absent from
+    // the serialized payload — which is the point: the edges never reach the LLM prompt.
     expect(payload.graphReliability.edges).toBeUndefined();
     expect(payload.documentationInput.architecture.graphReliability.edges).toBeUndefined();
   });
@@ -190,9 +181,8 @@ describe("orchestrateWriterTasks engineering dossier strip", () => {
       documentationInput: { risks?: Record<string, unknown> };
     };
 
-    // The removed branch wrote here. `DocumentationInputModel["risks"]` is
-    // `{ changeCoupling, hotspots }`, so the write was unreachable dead code.
-    // With both arrays empty `compactPayload` compacts `risks` away entirely.
+    // `risks` is `{ changeCoupling, hotspots }` on the snapshot, so writing a
+    // `graphReliability` there was unreachable dead code.
     expect(payload.documentationInput.risks?.graphReliability).toBeUndefined();
   });
 

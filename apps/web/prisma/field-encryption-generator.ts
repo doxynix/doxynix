@@ -35,10 +35,8 @@ type DmmfField = {
 };
 type DmmfModel = { fields?: readonly DmmfField[]; name: string };
 
-/** Structural, `readonly` view of the generator's DMMF (it hands over a `ReadonlyDeep`). */
 type Datamodel = { datamodel?: { models?: readonly DmmfModel[] } };
 
-/** Exported for unit tests; the generator itself only needs `onGenerate`. */
 export function buildSpec(dmmf: Datamodel): Spec {
   const models = dmmf.datamodel?.models ?? [];
   const spec: Spec = {};
@@ -128,7 +126,6 @@ function parseHash(
   return { fieldName: match.groups.fieldName, normalize };
 }
 
-/** Stable alphabetical order. Explicit so the generated file is reproducible. */
 const byName = (a: string, b: string): number => a.localeCompare(b);
 
 function render(dmmf: Datamodel): string {
@@ -193,12 +190,7 @@ generatorHandler({
     await fs.mkdir(dirname(outputPath), { recursive: true });
     await fs.writeFile(outputPath, render(options.dmmf), "utf-8");
 
-    // Immediately bring the generated file into repo format so the pre-commit
-    // Biome pass doesn't rewrite it on every `db:generate`. A formatting error
-    // must not fail generation. Mirrors `enum-generator.ts`.
     try {
-      // `process.execPath` is the bun running this generator. Looking `bun` up on
-      // PATH would make the result depend on the caller's environment.
       execFileSync(process.execPath, ["x", "biome", "format", "--write", outputPath], {
         stdio: "ignore",
       });

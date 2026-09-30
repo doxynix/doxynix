@@ -14,12 +14,6 @@ function escapeRegExp(str: string) {
   return str.replaceAll(/[$()*+.?[\\\]^{|}]/g, String.raw`\$&`);
 }
 
-/**
- * Integrations that pull in ~340 KB (Replay, httpClient, reportingObserver, browserTracing)
- * are registered after the first paint instead of at module scope. `Sentry.init` stays
- * eager so that errors thrown during hydration are still captured — the client exists,
- * it just has no heavy integrations yet.
- */
 function afterFirstPaint(callback: () => void): void {
   if (typeof requestIdleCallback === "function") {
     requestIdleCallback(callback, { timeout: 2000 });
@@ -79,13 +73,6 @@ if (IS_PROD) {
   });
 }
 
-// PostHog stays eager on purpose. `instrumentation-client` runs before React
-// hydration (Next.js order: instrumentationClientInject -> this file -> hydration),
-// and PostHog records route views and DOM interactions from the moment it boots, so
-// deferring init here would silently drop the first view and the opening interaction
-// window. The SDK is ~300 KB, but losing landing-page analytics is not worth 96 KB
-// gzip. Only the Sentry integrations above are deferred: they have no first-paint
-// semantics, and `replaysOnErrorSampleRate` still covers the gap because `init` ran.
 if (IS_PROD) {
   posthog.init(NEXT_PUBLIC_POSTHOG_KEY, {
     api_host: `${API_PREFIX}/dxnx/p`,

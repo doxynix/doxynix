@@ -19,11 +19,8 @@ import { CONFIDENCE_LEVELS } from "../core/scoring-constants";
 
 const nodeRequire = createRequire(import.meta.url);
 
-/**
- * `createRequire` is typed to return `any`. Routing through `unknown` keeps the
- * `any` at the CJS boundary and forces the interop to be asserted deliberately
- * at the call site, where `initRuntime` immediately validates the shape anyway.
- */
+// `createRequire` is typed `any`; routing through `unknown` keeps the `any` at the CJS
+// boundary and forces the interop to be asserted deliberately at the call site.
 const requireModule = (id: string): unknown => nodeRequire(id);
 
 type LanguageSpec = {
@@ -362,18 +359,10 @@ const SPECS: Record<string, LanguageSpec> = {
 
 export const TREE_SITTER_SUPPORTED_EXTENSIONS = Object.keys(SPECS);
 
-/**
- * The shape `web-tree-sitter` is actually loaded as at runtime. `createRequire` is
- * untyped, so this is the one unavoidable hop; everything below it is typed from
- * the package's own shipped declarations.
- *
- * The package is CJS with `export = Parser`, so the module object can itself *be*
- * the `Parser` class — hence the intersection with `typeof Parser`, which is what
- * makes the `Parser = mod` fallback below legal.
- *
- * The `import type` above is fully erased at compile time, so it creates no runtime
- * edge and does not defeat the `createRequire` / Turbopack-NFT avoidance below.
- */
+// CJS `export = Parser`, so the module object can itself *be* the `Parser` class — the
+// intersection is what makes the `Parser = mod` fallback below legal. The `import type`
+// above is erased, so it adds no runtime edge and does not defeat the createRequire/Turbopack
+// avoidance.
 type WebTreeSitterModule = typeof Parser & {
   default?: typeof Parser;
   init?: (moduleOptions?: object) => Promise<void>;
@@ -402,10 +391,8 @@ async function initRuntime() {
       Parser = mod;
     }
 
-    // `WebTreeSitterModule` is a *declared* shape for a module we load through an
-    // untyped `createRequire`, so these three fallbacks genuinely can fail at
-    // runtime depending on whether the package resolves to CJS, an ESM default,
-    // or the class itself. The type-level "always truthy" verdict is wrong here.
+    // The declared shape is not proof the module resolves to CJS/ESM-default/the class,
+    // so these three fallbacks can genuinely be falsy at runtime.
     /* oxlint-disable-next-line typescript/no-unnecessary-condition */
     if (!Parser || typeof Parser.init !== "function") {
       throw new Error(
@@ -420,7 +407,7 @@ async function initRuntime() {
       join(resolve(nodeRequire.resolve("web-tree-sitter"), ".."), runtimeWasmName),
     ];
 
-    // Turbopack ignore comment prevents aggressive whole-project NFT tracing
+    // turbopackIgnore stops NFT from tracing the whole project for this path
     const finalWasmPath = pathsToTry.find((p) => fs.existsSync(/* turbopackIgnore: true */ p));
     if (!finalWasmPath) {
       throw new Error(`[TreeSitter] Runtime WASM not found. Checked: ${pathsToTry.join(", ")}`);
@@ -452,8 +439,7 @@ export async function loadLanguage(ext: string, spec: LanguageSpec) {
       (async () => {
         const wasmPath = resolveGrammarWasmPath(spec);
 
-        // Same runtime-vs-type mismatch as in `initRuntime`: the declared module
-        // shape is not proof that `Language` is attached to one of these three.
+        // Same runtime-vs-type mismatch as in `initRuntime`.
         /* oxlint-disable-next-line typescript/no-unnecessary-condition */
         const Language = Parser.Language || mod.Language || mod.default?.Language;
 
@@ -462,7 +448,7 @@ export async function loadLanguage(ext: string, spec: LanguageSpec) {
           throw new Error(`[TreeSitter] Language.load is missing!`);
         }
 
-        // Turbopack ignore comment prevents aggressive whole-project NFT tracing
+        // turbopackIgnore stops NFT from tracing the whole project for this path
         const wasmBytes = fs.readFileSync(/* turbopackIgnore: true */ wasmPath);
 
         return Language.load(wasmBytes);
@@ -485,7 +471,7 @@ function resolveGrammarWasmPath(spec: LanguageSpec): string {
   ].filter(Boolean);
 
   for (const path of candidates) {
-    // Turbopack ignore comment prevents recursive filesystem traversal in node_modules
+    // turbopackIgnore stops NFT from walking node_modules recursively
     if (fs.existsSync(/* turbopackIgnore: true */ path)) {
       return path;
     }

@@ -1,17 +1,3 @@
-// dependency-cruiser config for apps/siem-client (FSD boundary gate).
-// Shared "dependency health" rules + options live in the base config
-// `@doxynix/config/depcruise-base.json` (see `extends` below); only the
-// app-specific rules (orphan exceptions, FSD layer constraints) stay here.
-// - This package declares "type": "module", so the config is ESM (`export
-//   default`). Requires Node >= 22.18 (type stripping) or any Bun runtime.
-// - The "missing-typescript-transpiler" warning you may see on runs is benign:
-//   dep-cruiser 18 resolves the monorepo root typescript@7 (outside its
-//   supported <7.0.0 range), but .ts parsing still happens via @swc/core,
-//   including type-only imports (verified). Results are identical to 17.4.3.
-// - Import flow (FSD): routes -> widgets -> features -> entities -> shared.
-//   Deep imports into @doxynix/siem-server are blocked at build time by that
-//   package's "exports" map (only "." and "./client" are reachable), so the
-//   client's server-type isolation is covered by not-to-unresolvable.
 import type { IConfiguration } from "dependency-cruiser";
 
 const config: IConfiguration = {
@@ -27,11 +13,10 @@ const config: IConfiguration = {
       from: {
         orphan: true,
         pathNot: [
-          "(^|/)[.][^/]+[.](?:js|cjs|mjs|ts|cts|mts|json)$", // dot files
-          "[.]d[.]ts$", // TypeScript declaration files
-          "(^|/)tsconfig[.]json$", // TypeScript config
-          "(^|/)(?:babel|webpack)[.]config[.](?:js|cjs|mjs|ts|cts|mts|json)$", // other configs
-          // Vite entry point - started by the bundler, never imported:
+          "(^|/)[.][^/]+[.](?:js|cjs|mjs|ts|cts|mts|json)$",
+          "[.]d[.]ts$",
+          "(^|/)tsconfig[.]json$",
+          "(^|/)(?:babel|webpack)[.]config[.](?:js|cjs|mjs|ts|cts|mts|json)$",
           "^src/main[.]tsx$",
         ],
       },
@@ -39,9 +24,6 @@ const config: IConfiguration = {
       severity: "error",
       to: {},
     },
-    // FSD: a feature slice must not import from another feature slice.
-    // Group matching ($1) exempts the slice's own folder. Cross-feature logic
-    // belongs in entities or shared (or composed in widgets/routes).
     {
       comment: "FSD (siem-client): no imports between feature slices.",
       from: {
@@ -55,9 +37,6 @@ const config: IConfiguration = {
         pathNot: "^src/features/$1/",
       },
     },
-    // FSD: imports flow downward only (routes -> widgets -> features ->
-    // entities -> shared). Each rule forbids its FROM layer from importing any
-    // layer above it.
     {
       comment: "FSD (siem-client): shared must not import from layers above it.",
       from: {
@@ -106,9 +85,6 @@ const config: IConfiguration = {
         path: "^src/routes/",
       },
     },
-    // FSD: a shared module used by fewer than 2 files in the layers above is
-    // not really shared — consider moving it closer to its consumer. Advisory
-    // (info): complements steiger (structure/naming), which cannot see usage.
     {
       comment: "FSD (siem-client): shared module used once or never — move closer to the consumer.",
       from: {

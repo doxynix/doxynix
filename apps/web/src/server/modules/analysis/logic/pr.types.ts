@@ -1,7 +1,3 @@
-// ============================================================================
-// FINDINGS & ANALYSIS
-// ============================================================================
-
 import type { PRCommentStyle, PRFocusArea } from "@doxynix/shared";
 
 export type PRFinding = {
@@ -10,7 +6,7 @@ export type PRFinding = {
   line: number;
   message: string;
   score: number;
-  severity: "CRITICAL" | "HIGH" | "LOW" | "MEDIUM"; // Labels used in the UI
+  severity: "CRITICAL" | "HIGH" | "LOW" | "MEDIUM";
   suggestion?: string;
   title: string;
   type: "ARCHITECTURE" | "BUG" | "COMPLEXITY" | "PERFORMANCE" | "SECURITY" | "STYLE";
@@ -34,14 +30,7 @@ export type PRAnalysisConfig = {
   tokenBudget: number;
 };
 
-// ============================================================================
-// FIX GENERATION (STATELESS)
-// ============================================================================
-/**
- * PRIVACY: Diff is NEVER stored in DB. Generated on-demand, sent to frontend,
- * and sent back to applyFix. This prevents code storage violations.
- */
-
+// PRIVACY: the diff is never stored in the DB — generated on demand, sent to the frontend and back to applyFix
 export type FindingForFix = {
   file: string;
   line: number;
@@ -49,14 +38,11 @@ export type FindingForFix = {
   type: string;
 };
 
-/**
- * Diff content (unified format). NOT stored in DB.
- */
 export type GeneratedDiff = {
   additions: number;
   deletions: number;
   filePath: string;
-  patch: string; // Unified diff format
+  patch: string;
 };
 
 export type PRChangedFileSnapshot = {

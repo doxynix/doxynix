@@ -117,10 +117,8 @@ function stripPluginTitle(children: ReactNode): ReactNode {
   });
 }
 
-/** Most markdown blocks are rendered with our own classes and ignore any incoming className. */
 type BlockProps = Readonly<{ children?: ReactNode }>;
 
-/** `react-markdown` forwards the node's className, which blockquote and code both need. */
 type ClassableBlockProps = Readonly<BlockProps & { className?: string }>;
 
 function Blockquote({ children, className }: ClassableBlockProps) {
