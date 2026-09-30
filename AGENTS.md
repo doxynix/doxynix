@@ -65,9 +65,12 @@ path filter can never reach those files — hence the separate `vitest.integrati
 - **Client FSD** (`apps/web/src/{app,entities,features,widgets,shared}`, `apps/siem-client`):
   imports flow downward only; no cross-slice imports. `steiger` is the methodology gate
   (`lint:fsd`).
-- **Server VSA** (`apps/web/src/server/modules`, `apps/siem-server/src/modules`,
-  `packages/cli/src/commands`): slices must not import each other's internals. Only
-  `core`/`utils`/`ui` sit outside a slice.
+- **Server modules** (`apps/web/src/server/modules`, `apps/siem-server/src/modules`,
+  `packages/cli/src/commands`): a modular monolith — one folder per feature, imports flow
+  **downward only**. A slice must not import another slice's internals, and `core`/`utils`/`ui`
+  sit *below* slices so they must never import up into one. (This was called "VSA" before; the
+  term was a .NET/MediatR pattern whose premise — no service/repository layer — this server does
+  not follow, so the name was dropped to stop promising a structure the code lacks.)
 - `dep-cruiser` (`arch:check`) is the hard gate, run in pre-commit and CI. It compares against a
   known-violations baseline — new violations fail, old ones do not. After deliberate refactors,
   refresh it with `bun --filter @doxynix/<app> arch:baseline` and review the diff.
@@ -135,7 +138,7 @@ Workflow: `.agents/skills/drizzle-migration/SKILL.md`, `.agents/skills/hono-rpc-
 
 ### `packages/cli` (`dxnx`)
 
-- VSA over `src/commands`; `src/core` + `src/ui` are shared and must not import command slices.
+- Command slices over `src/commands`; `src/core` + `src/ui` are shared and must not import command slices.
 
 ### `packages/shared`
 

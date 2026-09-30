@@ -11,8 +11,9 @@ type CreateFixFindings = inferRouterInputs<AppRouter>["analysis"]["createFix"]["
 /**
  * One finding the `createFix` tool accepts.
  *
- * Declared here rather than imported from `@/server/modules/analysis` because VSA
- * forbids cross-slice imports and the agent slice only reaches `analysis` through
+ * Declared here rather than imported from `@/server/modules/analysis` because the
+ * server module boundary forbids cross-slice imports, and the agent slice only
+ * reaches `analysis` through
  * the tRPC client. The `z.ZodType<CreateFixFindings[number]>` annotation below is
  * the drift guard: it stops compiling the moment this shape and the router's input
  * disagree, so the two cannot silently part ways.

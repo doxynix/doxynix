@@ -97,7 +97,9 @@ export const analysisLifecycleService = {
     });
 
     if (repo == null) {
-      throw new TRPCError({ code: "NOT_FOUND" });
+      // No message means tRPC substitutes the code, so the client renders the
+      // literal string "NOT_FOUND".
+      throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found or access denied" });
     }
     return repo;
   },

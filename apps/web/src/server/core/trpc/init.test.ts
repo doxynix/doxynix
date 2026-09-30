@@ -1,8 +1,44 @@
 import { getErrorShape, TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+type KnownErrorOptions = {
+  clientVersion: string;
+  code: string;
+  meta?: { target?: string | string[] };
+};
+
+/**
+ * `api-error.ts` narrows with `instanceof Prisma.PrismaClientKnownRequestError`,
+ * so these tests must throw an instance of the very class that module sees. A
+ * stand-in keeps the generated Prisma client out of a unit test.
+ */
+const MockPrismaClientKnownRequestError = vi.hoisted(
+  () =>
+    class PrismaClientKnownRequestError extends Error {
+      public code: string;
+      public meta: KnownErrorOptions["meta"];
+
+      public constructor(message: string, options: KnownErrorOptions) {
+        super(message);
+        this.code = options.code;
+        this.meta = options.meta;
+      }
+    },
+);
+
+vi.mock("@prisma/client/runtime/library", () => ({
+  PrismaClientKnownRequestError: MockPrismaClientKnownRequestError,
+}));
+
+vi.mock("@prisma/client", () => ({
+  Prisma: { PrismaClientKnownRequestError: MockPrismaClientKnownRequestError },
+}));
+
+const prismaError = (code: string) =>
+  new MockPrismaClientKnownRequestError("db failed", { clientVersion: "test", code });
+
 const mocks = vi.hoisted(() => ({
-  appLogger: { error: vi.fn(), info: vi.fn() },
+  appLogger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
   isProd: false,
 }));
 
@@ -21,12 +57,31 @@ vi.mock("../app-logger", () => ({ appLogger: mocks.appLogger }));
 
 import { createCallerFactory, createTRPCRouter, protectedProcedure, publicProcedure } from "./init";
 
-function formatError(code: TRPCError["code"], message: string) {
+function buildConfig() {
   const router = createTRPCRouter({ test: publicProcedure.query(() => "ok") });
+  return router._def["_config"];
+}
+
+function formatError(code: TRPCError["code"], message: string) {
   return getErrorShape({
-    config: router._def["_config"],
+    config: buildConfig(),
     ctx: undefined,
     error: new TRPCError({ code, message }),
+    input: undefined,
+    path: "test",
+    type: "query",
+  });
+}
+
+/**
+ * Mirrors what tRPC does to an unwrapped throw: `getTRPCErrorFromUnknown` builds
+ * an INTERNAL_SERVER_ERROR `TRPCError` whose `cause` is the original.
+ */
+function formatCause(cause: unknown) {
+  return getErrorShape({
+    config: buildConfig(),
+    ctx: undefined,
+    error: new TRPCError({ cause, code: "INTERNAL_SERVER_ERROR" }),
     input: undefined,
     path: "test",
     type: "query",
@@ -56,6 +111,42 @@ describe("tRPC Error Formatting & Security Boundaries", () => {
     const shape = formatError("BAD_REQUEST", "Invalid UUID supplied");
 
     expect(shape.message).toBe("Invalid UUID supplied");
+  });
+
+  it("preserves the actionable copy of PRECONDITION_FAILED, which the old list omitted", () => {
+    mocks.isProd = true;
+    const shape = formatError("PRECONDITION_FAILED", "GitHub App is not installed for this repo.");
+
+    expect(shape.message).toBe("GitHub App is not installed for this repo.");
+    expect(shape.data.code).toBe("PRECONDITION_FAILED");
+  });
+
+  it("re-maps a raw Prisma cause that a service never wrapped in handlePrismaError", () => {
+    // tRPC wraps an unwrapped Prisma throw as INTERNAL_SERVER_ERROR and parks
+    // the original on `cause`. The formatter must recover NOT_FOUND from it,
+    // otherwise all 62 unprotected Prisma call sites answer 500.
+    const shape = formatCause(prismaError("P2025"));
+
+    expect(shape.data.code).toBe("NOT_FOUND");
+    expect(shape.data.httpStatus).toBe(404);
+    expect(shape.message).toBe("Record not found");
+  });
+
+  it("writes the re-mapped status into data.httpStatus so tRPC honours it", () => {
+    // `getHTTPStatusCode` prefers `error.data.httpStatus` over deriving a status
+    // from the code; without this the wire would still say 500.
+    const shape = formatCause(prismaError("P2002"));
+
+    expect(shape.data.code).toBe("CONFLICT");
+    expect(shape.data.httpStatus).toBe(409);
+  });
+
+  it("keeps an unexpected cause masked in PROD while still reporting a requestId", () => {
+    mocks.isProd = true;
+    const shape = formatCause(prismaError("P2999"));
+
+    expect(shape.message).toBe("An unexpected error occurred, please try again later.");
+    expect(shape.data.requestId).toBe("req-123");
   });
 
   it("blocks unauthenticated callers on protectedProcedure with UNAUTHORIZED", async () => {

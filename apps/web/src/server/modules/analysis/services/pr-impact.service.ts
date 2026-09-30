@@ -1,3 +1,5 @@
+import { TRPCError } from "@trpc/server";
+
 import type { DbClient } from "@/server/core/db";
 
 import { analysisMapper } from "../analysis.mapper";
@@ -24,7 +26,10 @@ export const prImpactService = {
     });
 
     if (analysis == null) {
-      throw new Error("Analysis not found");
+      // Was `new Error(...)`, reported to the client as a 500. `NOT_FOUND` is
+      // what the caller needs to distinguish "no such analysis" from a real
+      // failure, and it keeps the message visible in production.
+      throw new TRPCError({ code: "NOT_FOUND", message: "Analysis not found" });
     }
 
     return analysis;

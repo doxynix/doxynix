@@ -7,10 +7,14 @@ import { Agent } from "undici";
 
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
+import { AppError, findAppError } from "@/server/utils/api-error";
+import { withApiHandler } from "@/server/utils/with-api-handler";
 
 import { ProxyRequestBody } from "./proxy-request.schema";
 
 type DnsLookupCallback = (err: Error | null, address: null | string, family: null | number) => void;
+
+const UNSAFE_TARGET_MESSAGE = "Forbidden: Unsafe target IP detected";
 
 export function isSafeIp(ip: string): boolean {
   if (!ipaddr.isValid(ip)) {
@@ -52,7 +56,14 @@ export function ssrfSafeLookup(
           msg: "SSRF prevention triggered during socket lookup",
           range: ipaddr.process(address).range(),
         });
-        callback(new Error("Forbidden: Unsafe target IP detected"), null, null);
+        // Thrown as a typed error so the route handler maps it to 403 by shape
+        // rather than by matching on the message text, which silently breaks the
+        // moment the copy is reworded.
+        callback(
+          new AppError({ code: "FORBIDDEN", publicMessage: UNSAFE_TARGET_MESSAGE }),
+          null,
+          null,
+        );
         return;
       }
       callback(null, address, family);
@@ -76,83 +87,96 @@ export const ssrfSafeAgent = new Agent({
   } as never,
 });
 
-export async function POST(req: Request) {
+async function handler(req: Request) {
   const session = await auth.api.getSession({
     headers: await getRequestHeaders(),
   });
 
   if (!session?.user) {
-    return new NextResponse("Unauthorized", { status: 401 });
+    throw new AppError({ code: "UNAUTHORIZED", publicMessage: "Unauthorized" });
   }
+
+  const parsed = ProxyRequestBody.safeParse(await req.json());
+
+  if (!parsed.success) {
+    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Invalid request body" });
+  }
+
+  const { body, headers, method, url } = parsed.data;
+
+  if (url == null || method == null) {
+    throw new AppError({
+      code: "BAD_REQUEST",
+      publicMessage: "Missing url or method parameters",
+    });
+  }
+
+  let validatedUrl: string;
+  try {
+    const parsedUrl = new URL(url);
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+      throw new AppError({ code: "FORBIDDEN", publicMessage: "Forbidden: Unsafe protocol" });
+    }
+    validatedUrl = parsedUrl.toString();
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Invalid URL format" });
+  }
+
+  const filteredHeaders: Record<string, string> = {};
+  if (headers && typeof headers === "object") {
+    const forbiddenHeaders = new Set(["connection", "cookie", "host"]);
+    for (const [key, value] of Object.entries(headers)) {
+      if (!forbiddenHeaders.has(key.toLowerCase())) {
+        filteredHeaders[key] = String(value);
+      }
+    }
+  }
+
+  const requestBody =
+    method !== "GET" && method !== "HEAD" && body != null
+      ? typeof body === "string"
+        ? body
+        : JSON.stringify(body)
+      : undefined;
+
+  const proxiedInit: ProxiedRequestInit = {
+    body: requestBody,
+    dispatcher: ssrfSafeAgent,
+    headers: filteredHeaders,
+    method,
+  };
+
+  let response: Response;
 
   try {
-    const parsed = ProxyRequestBody.safeParse(await req.json());
-
-    if (!parsed.success) {
-      return new NextResponse("Invalid request body", { status: 400 });
-    }
-
-    const { body, headers, method, url } = parsed.data;
-
-    if (url == null || method == null) {
-      return new NextResponse("Missing url or method parameters", { status: 400 });
-    }
-
-    let validatedUrl: string;
-    try {
-      const parsedUrl = new URL(url);
-      if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
-        return new NextResponse("Forbidden: Unsafe protocol", { status: 403 });
-      }
-      validatedUrl = parsedUrl.toString();
-    } catch {
-      return new NextResponse("Invalid URL format", { status: 400 });
-    }
-
-    const filteredHeaders: Record<string, string> = {};
-    if (headers && typeof headers === "object") {
-      const forbiddenHeaders = new Set(["connection", "cookie", "host"]);
-      for (const [key, value] of Object.entries(headers)) {
-        if (!forbiddenHeaders.has(key.toLowerCase())) {
-          filteredHeaders[key] = String(value);
-        }
-      }
-    }
-
-    const requestBody =
-      method !== "GET" && method !== "HEAD" && body != null
-        ? typeof body === "string"
-          ? body
-          : JSON.stringify(body)
-        : undefined;
-
-    const proxiedInit: ProxiedRequestInit = {
-      body: requestBody,
-      dispatcher: ssrfSafeAgent,
-      headers: filteredHeaders,
-      method,
-    };
-
-    const response = await fetch(validatedUrl, proxiedInit);
-
-    const responseData = await response.text();
-
-    return NextResponse.json({
-      body: responseData,
-      headers: Object.fromEntries(response.headers.entries()),
-      status: response.status,
-    });
+    response = await fetch(validatedUrl, proxiedInit);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    // An SSRF rejection surfaces here wrapped by undici as `TypeError: fetch
+    // failed`; unwrap it so the typed FORBIDDEN wins over the 502 below.
+    const ssrf = findAppError(error);
 
-    if (errorMessage.includes("Forbidden: Unsafe target IP detected")) {
-      return new NextResponse("Forbidden: Unsafe target URL detected", { status: 403 });
+    if (ssrf != null) {
+      throw ssrf;
     }
 
-    appLogger.error({
-      error: errorMessage,
-      msg: "Proxy request failed",
+    throw new AppError({
+      cause: error,
+      code: "BAD_GATEWAY",
+      publicMessage: "Proxy Error",
+      unexpected: true,
     });
-    return new NextResponse("Proxy Error", { status: 502 });
   }
+
+  const responseData = await response.text();
+
+  return NextResponse.json({
+    body: responseData,
+    headers: Object.fromEntries(response.headers.entries()),
+    status: response.status,
+  });
 }
+
+export const POST = withApiHandler(handler, { scope: "proxy" });

@@ -1,7 +1,7 @@
-// dependency-cruiser config for packages/cli (VSA for command slices + dep health gate).
+// dependency-cruiser config for packages/cli (command-slice boundaries + dep health gate).
 // Shared "dependency health" rules + options live in the base config
 // `@doxynix/config/depcruise-base.json` (see `extends` below); only the
-// app-specific rules (orphan exceptions, VSA slices, cli not-to-dev-dep
+// app-specific rules (orphan exceptions, command slices, cli not-to-dev-dep
 // override) stay here.
 // - This package declares "type": "module", so the config is ESM (`export
 //   default`). Requires Node >= 22.18 (type stripping) or any Bun runtime.
@@ -40,10 +40,10 @@ const config: IConfiguration = {
       severity: "error",
       to: {},
     },
-    // VSA: a command slice must not import from another command slice's
-    // internals. Group matching ($1) exempts the slice's own folder.
+    // Command slice boundary: a command slice must not import from another
+    // command slice's internals. Group matching ($1) exempts its own folder.
     {
-      comment: "VSA (cli): no imports between command slices.",
+      comment: "Command slices: no imports between slices.",
       from: {
         path: "^src/commands/([^/]+)/",
         pathNot: ["[.](?:spec|test)[.](?:ts|tsx)$"],
@@ -58,7 +58,7 @@ const config: IConfiguration = {
     // Layering: core/ and ui/ are shared infrastructure below commands.
     // Commands MAY import core/ui, but core/ui MUST NOT import commands.
     {
-      comment: "VSA (cli): core and ui must not import from command slices.",
+      comment: "Command slices: core and ui must not import from command slices.",
       from: {
         path: "^src/(?:core|ui)/",
         pathNot: ["[.](?:spec|test)[.](?:ts|tsx)$"],
@@ -71,7 +71,7 @@ const config: IConfiguration = {
     },
     // Dead-code gate: every src module must be reachable from the CLI entry.
     {
-      comment: "VSA (cli): module unreachable from src/index.ts — dead code.",
+      comment: "Command slices: module unreachable from src/index.ts — dead code.",
       from: {
         path: "^src/index[.]ts$",
       },

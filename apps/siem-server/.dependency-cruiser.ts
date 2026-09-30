@@ -1,7 +1,8 @@
-// dependency-cruiser config for apps/siem-server (VSA + dependency health gate).
+// dependency-cruiser config for apps/siem-server (server module boundaries +
+// dependency health gate).
 // Shared "dependency health" rules + options live in the base config
 // `@doxynix/config/depcruise-base.json` (see `extends` below); only the
-// app-specific rules (orphan exceptions, VSA) stay here.
+// app-specific rules (orphan exceptions, module boundaries) stay here.
 // - `import type` + `module.exports` (NOT `export default`): keeps Node from
 //   double-parsing this file (the package has no "type": "module"), so no
 //   MODULE_TYPELESS_PACKAGE_JSON warning. Requires Node >= 22.18 (type
@@ -43,19 +44,21 @@ const config: IConfiguration = {
       severity: "error",
       to: {},
     },
-    // Vertical Slice Architecture (VSA): a module inside a server slice MUST NOT
-    // import from another slice's internals. Group matching ($1) exempts the
-    // slice's own folder. Imports to `src/core`, `src/utils`, node_modules and
-    // @doxynix/* are unaffected (they don't match `to.path`). Test files may
-    // cross slices - that's test-only coupling and doesn't leak into the
-    // runtime graph.
+    // Server module boundary: a slice MUST NOT import from another slice's
+    // internals. Group matching ($1) exempts the slice's own folder. Imports to
+    // `src/core`, `src/utils`, node_modules and @doxynix/* are unaffected (they
+    // don't match `to.path`). Test files may cross slices - that's test-only
+    // coupling and doesn't leak into the runtime graph.
+    //
+    // Not "VSA": this is a modular monolith with layered slices, not a
+    // .NET-style vertical slice (which would have no service/repository layer).
     {
-      comment: "VSA (siem-server): no imports between server slices.",
+      comment: "Server modules: no imports between slices.",
       from: {
         path: "^src/modules/([^/]+)/",
         pathNot: ["[.](?:spec|test)[.](?:ts|tsx)$"],
       },
-      name: "vsa-no-cross-slice-imports",
+      name: "no-cross-slice-imports",
       severity: "error",
       to: {
         path: "^src/modules/[^/]+/",
@@ -69,7 +72,7 @@ const config: IConfiguration = {
     // in-process, so exempt (same reasoning as the no-orphans exception).
     {
       comment:
-        "VSA (siem-server): module unreachable from src/index.ts — dead code or unmounted slice.",
+        "Server modules: module unreachable from src/index.ts — dead code or unmounted slice.",
       from: {
         path: "^src/index[.]ts$",
       },

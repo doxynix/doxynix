@@ -93,7 +93,9 @@ export const docsService = {
     });
 
     if (doc == null) {
-      throw new TRPCError({ code: "NOT_FOUND" });
+      // No message meant tRPC substituted the code, so the client saw the
+      // literal string "NOT_FOUND".
+      throw new TRPCError({ code: "NOT_FOUND", message: "Document not found" });
     }
 
     const html = await unstable_cache(
@@ -141,7 +143,11 @@ export const docsService = {
     });
 
     if (document == null) {
-      throw new Error("Document not found");
+      // Was `new Error(...)`, which tRPC reported as a 500 INTERNAL_SERVER_ERROR
+      // and masked in production — a missing document looked like a server
+      // fault. The two checks above this one in the same file already throw
+      // NOT_FOUND for the identical condition.
+      throw new TRPCError({ code: "NOT_FOUND", message: "Document not found" });
     }
 
     // Graph links are not built here. `RepositoryEvidence.dependencyGraph` is

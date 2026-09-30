@@ -10,7 +10,7 @@
     ],
     "rule": {
       "severity": "error",
-      "name": "vsa-no-cross-slice-imports"
+      "name": "no-cross-slice-imports"
     }
   },
   {
@@ -24,7 +24,7 @@
     ],
     "rule": {
       "severity": "error",
-      "name": "vsa-no-cross-slice-imports"
+      "name": "no-cross-slice-imports"
     }
   }
 ]

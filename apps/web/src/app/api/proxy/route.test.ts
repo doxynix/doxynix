@@ -3,6 +3,7 @@ import dns from "node:dns";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/server/core/auth";
+import { AppError } from "@/server/utils/api-error";
 
 import { isSafeIp, POST, ssrfSafeLookup } from "./route";
 
@@ -112,7 +113,56 @@ describe("Proxy API Route — SSRF Prevention Suite", () => {
 
       const res = await POST(req);
       expect(res.status).toBe(403);
-      await expect(res.text()).resolves.toBe("Forbidden: Unsafe protocol");
+      await expect(res.json()).resolves.toEqual({
+        error: {
+          code: "FORBIDDEN",
+          message: "Forbidden: Unsafe protocol",
+          requestId: expect.any(String),
+        },
+      });
+    });
+
+    it("reports a 502 with the shared envelope when the upstream is unreachable", async () => {
+      globalFetchMock.mockRejectedValueOnce(new TypeError("fetch failed"));
+
+      const req = new Request("http://localhost/api/proxy", {
+        body: JSON.stringify({ method: "GET", url: "https://example.com/api" }),
+        method: "POST",
+      });
+
+      const res = await POST(req);
+
+      expect(res.status).toBe(502);
+      await expect(res.json()).resolves.toEqual({
+        error: {
+          code: "BAD_GATEWAY",
+          message: "Proxy Error",
+          requestId: expect.any(String),
+        },
+      });
+    });
+
+    it("unwraps an AppError that undici wrapped in TypeError to keep the SSRF 403", async () => {
+      globalFetchMock.mockRejectedValueOnce(
+        new TypeError("fetch failed", {
+          cause: new AppError({
+            code: "FORBIDDEN",
+            publicMessage: "Forbidden: Unsafe target IP detected",
+          }),
+        }),
+      );
+
+      const req = new Request("http://localhost/api/proxy", {
+        body: JSON.stringify({ method: "GET", url: "http://127.0.0.1/api" }),
+        method: "POST",
+      });
+
+      const res = await POST(req);
+
+      expect(res.status).toBe(403);
+      await expect(res.json()).resolves.toMatchObject({
+        error: { code: "FORBIDDEN", message: "Forbidden: Unsafe target IP detected" },
+      });
     });
 
     it("strips sensitive headers (cookie, host, connection) before sending request", async () => {

@@ -58,7 +58,7 @@ import type { IConfiguration } from "dependency-cruiser";
 
 const config: IConfiguration = {
   extends: "@doxynix/config/depcruise-base.json",
-  // Only add app-specific rules here (no-orphans exceptions, VSA/FSD);
+  // Only add app-specific rules here (no-orphans exceptions, module boundaries, FSD);
   // all "health" rules live in the base.
   forbidden: [],
 };

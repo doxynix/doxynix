@@ -14,6 +14,7 @@ import {
   GITHUB_SYSTEM_PAT,
 } from "@/shared/config/env.server";
 
+import { AppError } from "../../utils/api-error";
 import { appLogger } from "../app-logger";
 import type { DbClient } from "../db";
 import { parseGitUrl } from "./git-url";
@@ -213,7 +214,10 @@ export async function resolveClientContext(
 export function parseUrl(input: string): { name: string; owner: string } {
   const trimmedInput = input.trim();
   if (trimmedInput === "") {
-    throw new Error("Field cannot be empty");
+    // Typed rather than a bare `Error` so both transports agree: an empty
+    // string is a bad request, not a server fault. Reachable from
+    // `repos.createRepo` and from the agent tools.
+    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Field cannot be empty" });
   }
 
   try {
@@ -224,7 +228,10 @@ export function parseUrl(input: string): { name: string; owner: string } {
       owner: parsed.owner,
     };
   } catch {
-    throw new Error("Invalid format. Enter 'owner/repo' or repository URL");
+    throw new AppError({
+      code: "BAD_REQUEST",
+      publicMessage: "Invalid format. Enter 'owner/repo' or repository URL",
+    });
   }
 }
 

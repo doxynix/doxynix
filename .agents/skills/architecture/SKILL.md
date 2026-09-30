@@ -1,9 +1,9 @@
 ---
 name: architecture
-description: Enforces Feature-Sliced Design (FSD) for client apps and Vertical Slice Architecture (VSA) for server apps in Doxynix. Use when adding, moving, refactoring files, or when checking import boundaries, dependency cruiser errors, or Lefthook pre-commit failures.
+description: Enforces Feature-Sliced Design (FSD) for client apps and modular-monolith server modules for server apps in Doxynix. Use when adding, moving, refactoring files, or when checking import boundaries, dependency cruiser errors, or Lefthook pre-commit failures.
 ---
 
-# Architecture Compliance (FSD & VSA)
+# Architecture Compliance (FSD & Server Modules)
 
 ## Overview
 Doxynix strictly isolates layers to prevent cyclic dependencies and spaghetti imports. Violations will fail CI and Lefthook pre-commit hooks.
@@ -44,24 +44,37 @@ import { AuthForm } from '@/features/auth';
 
 ---
 
-## 2. Server Architecture: Vertical Slice Architecture (VSA)
+## 2. Server Architecture: modular monolith (server modules)
 Applies to: `apps/siem-server/src/modules`, `apps/web/src/server/modules`, and `packages/cli/src/commands`.
+
+One folder per feature; imports flow **downward only**:
+
+```
+app/api  ->  modules  ->  core / utils
+```
+
+> Historically labelled "VSA" (Vertical Slice Architecture). Dropped deliberately: VSA is a
+> .NET/MediatR pattern premised on the service and repository layers *melting away*, and these
+> servers do have them. The label promised a structure the code did not follow. These are
+> feature modules with layered internals — a modular monolith.
 
 ### Architectural Rules:
 - **Slice Isolation**: `modules/incidents` MUST NOT import private services or routers from `modules/rules`. Same for CLI command slices (`commands/staging` must not import from `commands/pr`).
-- **Core Abstractions**: Only cross-cutting concerns (DB client, redis, bus, auth middleware, CLI `core/`/`ui/`) live outside slices. Everything domain-specific stays inside the slice. CLI `core/`/`ui/` MUST NOT import from command slices.
+- **Layering Direction**: `core/` and `utils/` are the LOWER layers. They MUST NOT import from `modules/` — imports flow down only. (`apps/web` rule: `no-lower-layer-to-module-imports`; `packages/cli` already had `cli-core-not-from-commands`.) The one exception is a composition root such as `apps/web/src/server/core/trpc/server.ts`, which assembles routers on purpose.
+- **Core Abstractions**: Only cross-cutting concerns (DB client, redis, bus, auth middleware, CLI `core/`/`ui/`) live outside slices. Everything domain-specific stays inside the slice.
+- **Slice Size**: A slice is a *module*, not a subsystem. When one slice grows past roughly 10x its nearest sibling it has stopped being a module — split it. `apps/web`'s `analysis` slice is the current offender.
 - **Client-Server Boundary**: Client code MUST NEVER import directly from server internals. Import shared schemas from `@doxynix/shared` or RPC contracts from `@doxynix/siem-server/client`.
 
 ---
 
 ## 3. Tooling Map
 
-| Place | FSD/VSA methodology lint (warn) | Dependency gate (error + baseline) |
+| Place | FSD/module methodology lint (warn) | Dependency gate (error + baseline) |
 |---|---|---|
-| `apps/web` | steiger (`lint:fsd`) | dep-cruiser: VSA server + FSD boundaries + shared-reuse + cycles + orphans |
+| `apps/web` | steiger (`lint:fsd`) | dep-cruiser: server modules + layering direction + FSD boundaries + shared-reuse + cycles + orphans |
 | `apps/siem-client` | steiger (`lint:fsd`) | dep-cruiser: FSD layer order + cross-feature + shared-reuse + cycles + orphans |
-| `apps/siem-server` | — (no FSD) | dep-cruiser: VSA slices + entry-reachability + cycles + orphans |
-| `packages/cli` | — (no FSD) | dep-cruiser: VSA command slices + layering + entry-reachability + cycles + orphans |
+| `apps/siem-server` | — (no FSD) | dep-cruiser: module slices + entry-reachability + cycles + orphans |
+| `packages/cli` | — (no FSD) | dep-cruiser: command slices + layering + entry-reachability + cycles + orphans |
 | `packages/shared`, `packages/config` | — | — (leaf packages: pure types / configs, no meaningful graph) |
 
 - **steiger** = FSD *methodology* (segment structure, public api, naming) — warns, never blocks.
@@ -77,16 +90,16 @@ Before finishing any structural changes, run a dependency audit for the affected
 # Full-repo gate (root script) - also wired into Lefthook pre-commit
 bun run arch:check
 
-# Web (Next.js) - dep-cruiser: VSA (src/server/modules), FSD, cycles, orphans
+# Web (Next.js) - dep-cruiser: server modules (src/server/modules) + layering, FSD, cycles, orphans
 bun --filter @doxynix/web arch:check
 
-# SIEM server - dep-cruiser: VSA (src/modules), cycles, orphans
+# SIEM server - dep-cruiser: module slices (src/modules), cycles, orphans
 bun --filter @doxynix/siem-server arch:check
 
 # SIEM client - dep-cruiser: FSD boundaries, cycles, orphans (+ steiger in validate)
 bun --filter @doxynix/siem-client arch:check
 
-# CLI - dep-cruiser: VSA for command slices (src/commands), cycles, orphans
+# CLI - dep-cruiser: command slices (src/commands) + layering, cycles, orphans
 bun --filter @doxynix/cli arch:check
 
 # Refresh a known-violations baseline after deliberate changes
