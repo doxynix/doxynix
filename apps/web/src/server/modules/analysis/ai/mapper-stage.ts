@@ -1,10 +1,10 @@
 import { getActiveModels, SAFETY_SETTINGS } from "@/server/core/ai/ai-constants";
-import { buildRepositoryToolProfile } from "@/server/core/ai/ai-tools";
+import { isSchemaMismatchError } from "@/server/core/ai/schema-mismatch";
 import { appLogger } from "@/server/core/app-logger";
+import { buildRepositoryToolProfile } from "@/server/domain/ai/ai-tools";
 import { callWithFallback } from "@/server/utils/call";
 
 import {
-  isSchemaMismatchError,
   normalizeProjectMapOutput,
   projectMapGenerationSchema,
 } from "../engine/core/ai-result-normalize";

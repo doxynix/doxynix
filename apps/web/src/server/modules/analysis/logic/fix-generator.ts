@@ -5,7 +5,7 @@ import { generateBranchName } from "@/shared/lib/get-branch-name";
 
 import { getActiveModels, SAFETY_SETTINGS } from "@/server/core/ai/ai-constants";
 import { appLogger } from "@/server/core/app-logger";
-import type { OctokitInstance } from "@/server/core/github/github-provider";
+import type { OctokitInstance } from "@/server/core/github/github-client";
 import { callWithFallback } from "@/server/utils/call";
 
 import { buildCodeFixerSystemPrompt, buildCodeFixerUserPrompt } from "../ai/prompts-refactored";

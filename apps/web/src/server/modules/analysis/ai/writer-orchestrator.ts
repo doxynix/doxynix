@@ -2,9 +2,9 @@ import { DocType } from "@doxynix/shared";
 import type { Repo } from "@prisma/client";
 import { batch } from "@trigger.dev/sdk";
 
+import { uniquePaths } from "@/server/modules/analysis/engine/core/array-utils";
 import { buildDocumentationInputModel } from "@/server/modules/analysis/engine/pipeline/documentation-input";
-import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
-import { uniquePaths } from "@/server/utils/array-utils";
+import { taskLogger } from "@/server/utils/task-logger";
 
 import type { AIResult } from "../engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "../engine/core/discovery.types";

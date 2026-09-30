@@ -1,5 +1,6 @@
 import { dedent, escape } from "es-toolkit";
 
+import { SafetyContext } from "@/server/modules/analysis/ai/safety-context";
 import { PromptFactory, UserPromptBuilder } from "@/server/modules/analysis/logic/prompt-builder";
 import {
   BehavioralRules,
@@ -7,7 +8,6 @@ import {
   LanguageRules,
   OutputFormatRules,
 } from "@/server/modules/analysis/logic/prompt-rules";
-import { SafetyContext } from "@/server/utils/safety-context";
 
 const safety = new SafetyContext("strict");
 

@@ -1,8 +1,7 @@
+import { TREE_SITTER_SUPPORTED_EXTENSIONS } from "@/server/core/tree-sitter";
+
 import { ADAPTER_PRIORITIES } from "../core/scoring-constants";
-import {
-  collectTreeSitterSignals,
-  TREE_SITTER_SUPPORTED_EXTENSIONS,
-} from "../extractors/tree-sitter-signals";
+import { collectTreeSitterSignals } from "../extractors/tree-sitter-signals";
 import type { LanguageAdapter } from "./types";
 
 export const treeSitterAdapter: LanguageAdapter = {

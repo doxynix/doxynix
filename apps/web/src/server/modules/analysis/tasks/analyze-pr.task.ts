@@ -4,9 +4,10 @@ import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import { getClientContext } from "@/server/core/github/github-provider";
-import { prAnalysisLogger } from "@/server/utils/pr-analysis-logger";
+import { getClientContext } from "@/server/core/github/github-client";
+import { prAnalysisLogger } from "@/server/modules/analysis/tasks/pr-analysis-logger";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
+import { taskLogger } from "@/server/utils/task-logger";
 
 import { analysisRepo } from "../analysis.repository";
 import { persistedFindingSchema } from "../analysis.schemas";
@@ -15,7 +16,6 @@ import { DifferentialAnalyzer } from "../logic/differential-analyzer";
 import { healAndPartitionFindings } from "../logic/patch-healer";
 import { mergePrBody } from "../logic/pr-body";
 import { PRConfigService } from "../logic/pr-config";
-import { taskLogger } from "../logic/task-logger";
 
 async function updateCommitStatus(
   octokit: Octokit,

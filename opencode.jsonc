@@ -134,8 +134,8 @@
     }
   },
   "permissions": [
-    { "action": "external_directory", "effect": "ask", "resource": "*" },
-    { "action": "shell", "effect": "ask", "resource": "*" },
+    { "action": "external_directory", "effect": "allow", "resource": "*" },
+    { "action": "shell", "effect": "allow", "resource": "*" },
     { "action": "shell", "effect": "allow", "resource": "git status *" },
     { "action": "shell", "effect": "allow", "resource": "git diff *" },
     { "action": "shell", "effect": "allow", "resource": "git log *" },

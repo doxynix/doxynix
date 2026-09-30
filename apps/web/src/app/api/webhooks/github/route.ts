@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 
 import { GITHUB_WEBHOOK_SECRET } from "@/shared/config/env.server";
 
+import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { agentGithubReplyTask } from "@/server/modules/agent/tasks/agent-github-reply.task";
@@ -14,7 +15,6 @@ import { handleIssueCommentEvent } from "@/server/modules/webhooks/issue-comment
 import { handlePushEvent } from "@/server/modules/webhooks/push-webhook-handler";
 import { handleRepositoryEvent } from "@/server/modules/webhooks/repository-webhook-handler";
 import { handleReviewCommentEvent } from "@/server/modules/webhooks/review-comment-webhook-handler";
-import { AppError } from "@/server/utils/api-error";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";
 import { withApiHandler } from "@/server/utils/with-api-handler";
 

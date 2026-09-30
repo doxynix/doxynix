@@ -159,6 +159,21 @@ Workflow: `.agents/skills/drizzle-migration/SKILL.md`, `.agents/skills/hono-rpc-
   errors, so no `.only` and every test needs an `expect`-family call.
 - `cspell` runs on staged files in pre-commit — unusual product words need a `cspell.json` entry.
 
+### Comments
+
+Default to no comment. Write one only when the code is misread without it, and keep
+it to at most two lines within the 100-column `lineWidth`.
+
+- Never repeat the identifier, the next line, or a nearby string literal.
+- No file-header boilerplate, no `// ====` section banners, no git-history narration.
+- JSDoc blocks only for the exported API of a workspace package (`packages/shared`,
+  `apps/siem-server/src/client.ts`). Inside `apps/*/src` the types are the contract.
+- Keep every `TODO:` / `FIXME:` / `NOTE:` / `HACK:` marker, and give it a ticket or
+  an owner. An undated, ownerless TODO is deleted, not kept.
+- Functional directives (`oxlint-disable`, `@ts-expect-error`, `biome-ignore`,
+  `/// <reference>`) must carry a one-line reason. The directive goes on the line
+  immediately before the code it suppresses.
+
 ---
 
 ## Git workflow

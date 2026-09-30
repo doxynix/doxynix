@@ -1,7 +1,7 @@
 import { maxBy, sumBy } from "es-toolkit";
 
+import { percentile } from "@/server/modules/analysis/engine/core/math-utils";
 import { getLanguageColor } from "@/server/utils/language-metadata";
-import { percentile } from "@/server/utils/math-utils";
 
 import type { FileSignals, LanguageMetric } from "../core/discovery.types";
 import type { RepoMetrics } from "../core/metrics.types";

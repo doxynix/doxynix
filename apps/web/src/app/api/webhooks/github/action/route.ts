@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import * as z from "zod";
 
+import { AppError } from "@/server/core/api-error";
+import { verifyAndUseApiKey } from "@/server/core/auth/verify-api-key";
 import { prisma } from "@/server/core/db";
 import { analysisLifecycleService } from "@/server/modules/analysis/services/analysis-lifecycle.service";
-import { AppError } from "@/server/utils/api-error";
-import { verifyAndUseApiKey } from "@/server/utils/verify-and-use-api-key";
 import { withApiHandler } from "@/server/utils/with-api-handler";
 
 async function handler(req: Request) {

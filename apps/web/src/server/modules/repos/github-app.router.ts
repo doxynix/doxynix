@@ -1,7 +1,7 @@
 import * as z from "zod";
 
-import { githubAppService } from "@/server/core/github/github-app.service";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
+import { githubAppService } from "@/server/modules/repos/github-app.service";
 
 export const githubAppRouter = createTRPCRouter({
   getGithubInstallUrl: protectedProcedure.input(z.object({}).optional()).query(async ({ ctx }) => {

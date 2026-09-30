@@ -1,8 +1,6 @@
 import { prisma } from "@/server/core/db";
-import type {
-  GithubMentionReply,
-  PullRequestReviewCommentPayload,
-} from "@/server/core/github/github-webhook.types";
+import type { PullRequestReviewCommentPayload } from "@/server/core/github/github-webhook.types";
+import type { GithubMentionReply } from "@/server/domain/github-mention-reply";
 
 export async function handleReviewCommentEvent(
   payload: PullRequestReviewCommentPayload,

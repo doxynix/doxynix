@@ -8,12 +8,14 @@ import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import { cloneRepository, getAnalysisContext } from "@/server/core/github/git";
+import { cloneRepository } from "@/server/core/git/clone";
 import { calculateBusFactor } from "@/server/core/github/github-api";
-import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
-import { handleError } from "@/server/utils/handle-task-error";
+import { getAnalysisContext } from "@/server/modules/analysis/logic/analysis-context";
+import { analysisProgress } from "@/server/modules/analysis/logic/analysis-progress";
+import { cleanup, readAndFilterFiles } from "@/server/modules/analysis/logic/repo-file-scanner";
+import { handleError } from "@/server/modules/analysis/tasks/handle-task-error";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
-import { cleanup, readAndFilterFiles } from "@/server/utils/utils";
+import { taskLogger } from "@/server/utils/task-logger";
 
 import { generateDeepDocs, runAiPipeline } from "../ai/ai-pipeline";
 import type { RepoMetrics } from "../engine/core/metrics.types";
@@ -56,7 +58,7 @@ export const analyzeRepoTask = task({
     const channelName = REALTIME_CONFIG.channels.user(userId);
 
     try {
-      await taskLogger.milestone({
+      await analysisProgress.milestone({
         analysisId,
         msg: "Initializing analysis engine",
         percent: 5,
@@ -69,7 +71,7 @@ export const analyzeRepoTask = task({
       );
 
       if (repo == null) {
-        await taskLogger.finalize(
+        await analysisProgress.finalize(
           analysisId,
           Status.DONE,
           "Current commit SHA matches last analysis. Skipping re-run.",
@@ -77,7 +79,7 @@ export const analyzeRepoTask = task({
         return { reason: "SHA_MATCH", skipped: true };
       }
 
-      await taskLogger.milestone({
+      await analysisProgress.milestone({
         analysisId,
         msg: "Fetching repository metadata",
         percent: 10,
@@ -85,7 +87,7 @@ export const analyzeRepoTask = task({
       });
       const { busFactor, rawContributors } = await calculateBusFactor(repo, userId, prisma);
 
-      await taskLogger.milestone({
+      await analysisProgress.milestone({
         analysisId,
         msg: "Cloning repository to worker",
         percent: 20,
@@ -93,7 +95,7 @@ export const analyzeRepoTask = task({
       });
       await cloneRepository(repo, token, tempClonePath, selectedBranch);
 
-      await taskLogger.milestone({
+      await analysisProgress.milestone({
         analysisId,
         msg: "Reading and filtering source files",
         percent: 30,
@@ -102,7 +104,7 @@ export const analyzeRepoTask = task({
       const validFiles = await readAndFilterFiles(tempClonePath, selectedFiles);
       taskLogger.info(`Successfully indexed ${validFiles.length} files for analysis`);
 
-      await taskLogger.milestone({
+      await analysisProgress.milestone({
         analysisId,
         msg: "Running deep static analysis",
         percent: 45,
@@ -131,7 +133,7 @@ export const analyzeRepoTask = task({
         teamRoles,
       });
 
-      await taskLogger.milestone({
+      await analysisProgress.milestone({
         analysisId,
         msg: "Invoking AI Multi-Agent Pipeline",
         percent: 65,
@@ -151,7 +153,7 @@ export const analyzeRepoTask = task({
         selectedBranch ?? repo.defaultBranch,
       );
 
-      await taskLogger.milestone({
+      await analysisProgress.milestone({
         analysisId,
         msg: "Generating technical documentation",
         percent: 85,
@@ -187,7 +189,7 @@ export const analyzeRepoTask = task({
         swaggerYaml,
       };
 
-      await taskLogger.milestone({
+      await analysisProgress.milestone({
         analysisId,
         msg: "Persisting results to database",
         percent: 95,
@@ -208,12 +210,12 @@ export const analyzeRepoTask = task({
         userId,
       });
 
-      await taskLogger.finalize(analysisId, Status.DONE, "Analysis completed successfully");
+      await analysisProgress.finalize(analysisId, Status.DONE, "Analysis completed successfully");
       return { success: true };
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       taskLogger.error(`Analysis failed: ${errorMessage}`);
-      await taskLogger.finalize(analysisId, Status.FAILED, errorMessage);
+      await analysisProgress.finalize(analysisId, Status.FAILED, errorMessage);
 
       appLogger.error({ error, msg: `Repo analyze failed: ${errorMessage}` });
 

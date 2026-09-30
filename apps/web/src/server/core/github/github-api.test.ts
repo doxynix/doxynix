@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { DbClient } from "../db";
 import { calculateBusFactor, executeWithFallback, mapRepos } from "./github-api";
-import type { OctokitInstance } from "./github-provider";
+import type { OctokitInstance } from "./github-client";
 
 const mocks = vi.hoisted(() => ({
   appLogger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
@@ -24,11 +24,11 @@ vi.mock("@/server/utils/language-metadata", () => ({
 
 vi.mock("../app-logger", () => ({ appLogger: mocks.appLogger }));
 
-vi.mock("@/server/modules/analysis/logic/task-logger", () => ({
+vi.mock("@/server/utils/task-logger", () => ({
   taskLogger: mocks.taskLogger,
 }));
 
-vi.mock("./github-provider", () => ({
+vi.mock("./github-client", () => ({
   GitHubAuthRequiredError: mocks.GitHubAuthRequiredError,
   getPublicClient: mocks.getPublicClient,
   resolveClientContext: mocks.resolveClientContext,

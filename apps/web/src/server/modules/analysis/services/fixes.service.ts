@@ -6,7 +6,7 @@ import { generateBranchName } from "@/shared/lib/get-branch-name";
 
 import { appLogger } from "@/server/core/app-logger";
 import type { DbClient } from "@/server/core/db";
-import { getClientContext, getInstallationClient } from "@/server/core/github/github-provider";
+import { getClientContext, getInstallationClient } from "@/server/core/github/github-client";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 
 import { analysisRepo } from "../analysis.repository";

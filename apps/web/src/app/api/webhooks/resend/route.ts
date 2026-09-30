@@ -7,9 +7,9 @@ import * as z from "zod";
 
 import { RESEND_WEBHOOK_SECRET } from "@/shared/config/env.server";
 
+import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import { AppError } from "@/server/utils/api-error";
 import { maskEmail, normalizeEmail } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";

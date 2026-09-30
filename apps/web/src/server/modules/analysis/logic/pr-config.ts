@@ -2,8 +2,8 @@ import { PRCommentStyle, PRFocusArea } from "@doxynix/shared";
 import { clamp } from "es-toolkit";
 
 import type { DbClient } from "@/server/core/db";
+import { PATH_PATTERNS } from "@/server/core/path-classify/patterns";
 
-import { PATH_PATTERNS } from "../engine/core/project-policy-rules";
 import type { PRAnalysisConfig } from "./pr.types";
 
 const SYSTEM_IGNORES = [

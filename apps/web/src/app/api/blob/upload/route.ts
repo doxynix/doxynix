@@ -6,10 +6,10 @@ import * as z from "zod";
 
 import { VERCEL_BLOB_CALLBACK_URL } from "@/shared/config/env.server";
 
+import { AppError, findAppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
 import { prisma } from "@/server/core/db";
-import { AppError, findAppError } from "@/server/utils/api-error";
 import { withApiHandler } from "@/server/utils/with-api-handler";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;

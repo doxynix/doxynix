@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { AppError } from "@/server/utils/api-error";
+import { AppError } from "@/server/core/api-error";
 import { requestContext } from "@/server/utils/request-context";
 import { withApiHandler } from "@/server/utils/with-api-handler";
 

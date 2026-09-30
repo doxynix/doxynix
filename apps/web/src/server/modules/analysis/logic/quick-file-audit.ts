@@ -1,7 +1,7 @@
 import type * as z from "zod";
 
 import { getActiveModels } from "@/server/core/ai/ai-constants";
-import { buildRepositoryToolProfile } from "@/server/core/ai/ai-tools";
+import { buildRepositoryToolProfile } from "@/server/domain/ai/ai-tools";
 import { callWithFallback } from "@/server/utils/call";
 import { CodeOptimizer } from "@/server/utils/optimizers";
 

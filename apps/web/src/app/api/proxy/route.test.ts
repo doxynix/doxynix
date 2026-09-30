@@ -2,8 +2,8 @@ import dns from "node:dns";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { AppError } from "@/server/core/api-error";
 import { auth } from "@/server/core/auth";
-import { AppError } from "@/server/utils/api-error";
 
 import { isSafeIp, POST, ssrfSafeLookup } from "./route";
 

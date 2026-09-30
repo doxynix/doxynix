@@ -3,8 +3,8 @@ import { sumBy } from "es-toolkit";
 import { normalize } from "pathe";
 import * as z from "zod";
 
+import { markdownToHtml } from "@/server/modules/analysis/services/markdown-to-html";
 import { getLanguageColor } from "@/server/utils/language-metadata";
-import { markdownToHtml } from "@/server/utils/markdown-to-html";
 import { hasText } from "@/server/utils/string-utils";
 
 import type {

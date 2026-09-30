@@ -2,9 +2,9 @@ import { TRPCError } from "@trpc/server";
 
 import { appLogger } from "@/server/core/app-logger";
 
-import { type AppError, type ErrorMapping, normalizeError } from "./api-error";
+import { type AppError, type ErrorMapping, normalizeError } from "../core/api-error";
 
-// Mapping tables live in ./api-error so HTTP route handlers and tRPC procedures cannot drift apart.
+// Mapping tables live in `core/api-error` so HTTP route handlers and tRPC procedures cannot drift apart.
 function toTrpcError(error: AppError): TRPCError {
   return new TRPCError({
     cause: error.zodIssues,
@@ -36,7 +36,7 @@ export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
   throw toTrpcError(normalized);
 }
 
-export { isOctokitError } from "./api-error";
+export { isOctokitError } from "../core/api-error";
 
 // Returns undefined for statuses this app has no copy for, so the caller rethrows the original error untouched.
 export function toOctokitTrpcError(error: unknown): TRPCError | undefined {

@@ -1,3 +1,7 @@
+import type { SymbolKind } from "@/server/core/tree-sitter";
+
+export type { SymbolKind };
+
 export type ParseTier = "heuristic" | "tree-sitter" | "typescript-ast";
 
 export type RepositoryFile = {
@@ -36,19 +40,6 @@ export type FrameworkFact = {
   name: string;
   sources: string[];
 };
-
-export type SymbolKind =
-  | "class"
-  | "const"
-  | "enum"
-  | "function"
-  | "interface"
-  | "method"
-  | "module"
-  | "struct"
-  | "trait"
-  | "type"
-  | "variable";
 
 export type SymbolRef = {
   confidence: number;

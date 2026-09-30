@@ -4,8 +4,8 @@ import { generateBranchName } from "@/shared/lib/get-branch-name";
 
 import { appLogger } from "@/server/core/app-logger";
 import type { DbClient } from "@/server/core/db";
-import { getInstallationClient } from "@/server/core/github/github-provider";
-import { resolveDocumentMaterializedPath } from "@/server/utils/document-materialization";
+import { getInstallationClient } from "@/server/core/github/github-client";
+import { resolveDocumentMaterializedPath } from "@/server/modules/analysis/services/document-materialization";
 
 import { analysisRepo } from "../analysis.repository";
 import { FixService } from "../logic/fix-generator";

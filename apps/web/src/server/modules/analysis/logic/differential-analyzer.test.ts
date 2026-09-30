@@ -12,7 +12,7 @@ vi.mock("@/server/core/ai/ai-constants", () => ({
   getActiveModels: vi.fn(async () => ({ FAST: ["fast-model"], POWERFUL: ["powerful-model"] })),
 }));
 
-vi.mock("@/server/core/ai/ai-tools", () => ({ buildRepositoryToolProfile: vi.fn(() => ({})) }));
+vi.mock("@/server/domain/ai/ai-tools", () => ({ buildRepositoryToolProfile: vi.fn(() => ({})) }));
 
 vi.mock("../ai/prompts-refactored", () => ({
   buildPrReviewSystemPrompt: vi.fn(() => "system-prompt"),

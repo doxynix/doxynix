@@ -5,7 +5,7 @@ import superjson from "superjson";
 
 import { IS_PROD } from "@/shared/config/env.flags";
 
-import { normalizeError } from "@/server/utils/api-error";
+import { normalizeError } from "@/server/core/api-error";
 import {
   buildRequestStore,
   requestContext,
