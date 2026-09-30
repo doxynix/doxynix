@@ -8,8 +8,9 @@ import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import { cloneRepository, getAnalysisContext } from "@/server/core/github/git";
+import { cloneRepository } from "@/server/core/github/git";
 import { calculateBusFactor } from "@/server/core/github/github-api";
+import { getAnalysisContext } from "@/server/modules/analysis/logic/analysis-context";
 import { cleanup, readAndFilterFiles } from "@/server/modules/analysis/logic/repo-file-scanner";
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
 import { handleError } from "@/server/modules/analysis/tasks/handle-task-error";
