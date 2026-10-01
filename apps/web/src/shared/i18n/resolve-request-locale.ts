@@ -3,14 +3,6 @@ import { cookies, headers } from "next/headers";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/shared/config/locales";
 import { LOCALE_COOKIE_NAME } from "@/shared/i18n/routing";
 
-/**
- * Best-supported locale from an `Accept-Language` header, or `undefined`.
- *
- * next-intl's own middleware resolves in the order URL prefix -> locale cookie
- * -> accept-language -> default (next-intl/dist/esm/development/middleware/
- * resolveLocale.js). We cannot use that entry point here because `/api/auth`
- * is excluded from the middleware, so the last two steps are reimplemented here.
- */
 export function parseAcceptLanguage(
   header: string | null,
   locales: readonly Locale[],
@@ -25,8 +17,6 @@ export function parseAcceptLanguage(
       const [tag = "", ...params] = part.trim().split(";");
       const qParam = params.find((param) => param.trim().startsWith("q="));
       const parsed = qParam == null ? 1 : Number.parseFloat(qParam.trim().slice(2));
-      // RFC 9110 caps q at 1 and floors it at 0. Clamping keeps a bogus
-      // `q=5` from outranking a real preference.
       const q = Number.isFinite(parsed) ? Math.min(Math.max(parsed, 0), 1) : 0;
 
       return { index, q, tag: tag.trim() };
@@ -35,9 +25,6 @@ export function parseAcceptLanguage(
     .sort((a, b) => b.q - a.q || a.index - b.index);
 
   for (const { tag } of ranked) {
-    // Language tags are case-insensitive (RFC 9110 §4.2.6). `hasLocale` is a
-    // case-sensitive lookup, so canonicalize before matching: browsers send
-    // `pt-br` as often as `pt-BR`.
     const lower = tag.toLowerCase();
     const canonical = locales.find((locale) => locale.toLowerCase() === lower);
 
@@ -45,8 +32,6 @@ export function parseAcceptLanguage(
       return canonical;
     }
 
-    // `ru-RU` -> `ru`. A regional variant of a supported language still
-    // resolves; an unsupported one falls through to the next candidate.
     const base = lower.split("-")[0];
     const baseMatch = locales.find((locale) => locale.toLowerCase() === base);
 

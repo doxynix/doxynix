@@ -29,8 +29,8 @@ const FACT_CATEGORIES = [
   "security",
   "infrastructure",
 ] as const;
-// Derived from the same tuple the Zod enum and `RepositoryFinding` use, so the
-// normalizer can never emit a category the schema or the consumer type denies.
+// Aliases the tuple the Zod enum and `RepositoryFinding` share, so the normalizer can
+// never emit a category either of them denies.
 const FINDING_CATEGORIES = REPOSITORY_FINDING_CATEGORIES;
 
 function coerceEnum<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
@@ -74,12 +74,8 @@ function asStringArray(value: unknown): string[] {
   return value.map((item) => asString(item)).filter((item) => item.length > 0);
 }
 
-/**
- * Spreads the value rather than asserting it, so the result is a real
- * `Record<string, unknown>` instead of a view over the original `any`. Callers
- * in this file receive loose AI-SDK output, where `typeof value === "object"`
- * does not narrow `any`, which is why every site needed an assertion.
- */
+// Spreads rather than asserting, so the result is a real `Record<string, unknown>` and not
+// a view over the loose AI-SDK `any` this file receives.
 function asRecord(value: unknown): Record<string, unknown> {
   if (typeof value !== "object" || value == null) {
     return {};
@@ -497,16 +493,4 @@ export function normalizeProjectMapOutput(raw: unknown): ProjectMap {
     modules,
     overview: asString(record.overview, "Repository topology map"),
   };
-}
-
-export function isSchemaMismatchError(error: unknown): boolean {
-  if (!(error instanceof Error)) {
-    return false;
-  }
-  return (
-    error.name === "AI_NoObjectGeneratedError" ||
-    error.name === "AI_NoOutputGeneratedError" ||
-    error.message.includes("did not match schema") ||
-    error.message.includes("No object generated")
-  );
 }

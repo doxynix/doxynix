@@ -4,9 +4,9 @@ import { createMcpHandler, withMcpAuth } from "mcp-handler";
 import { APP_VERSION } from "@/shared/config/env.server";
 
 import { appLogger } from "@/server/core/app-logger";
+import { verifyAndUseApiKey } from "@/server/core/auth/verify-api-key";
 import { AGENT_SYSTEM_PROMPT } from "@/server/modules/agent/agent.prompts";
 import { getAgentTools } from "@/server/modules/agent/agent.tools";
-import { verifyAndUseApiKey } from "@/server/utils/verify-and-use-api-key";
 
 import { filterAndPrepareTools } from "./mcp-utils";
 
@@ -31,8 +31,6 @@ const handler = createMcpHandler(
               messages: [],
               toolCallId: `mcp-${tool.name}-${Date.now()}`,
             };
-            // `execute` is narrowed to `(...args: unknown[]) => unknown` by
-            // `filterAndPrepareTools`, so `Parameters<>` is enough — no cast.
             const execute = tool.execute as GenericExecuteFn;
             const result = await execute(parsedArgs, dummyContext);
 

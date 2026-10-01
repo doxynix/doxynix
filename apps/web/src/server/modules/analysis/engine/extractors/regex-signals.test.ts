@@ -36,7 +36,6 @@ describe("collectRegexSignals", () => {
     });
 
     it("counts exports by export/function/class/interface lines and ignores comments", () => {
-      // export function, export const, interface User, class Service, function helper
       expect(signals.exports).toBe(5);
     });
 
@@ -160,12 +159,10 @@ describe("collectRegexSignals", () => {
     });
 
     it("counts apiSurface with double matching of router.GET (actual behavior)", () => {
-      // both GET(...) and router.GET(...) match each route: 2 routes * 2 patterns = 4
       expect(signals.apiSurface).toBe(4);
     });
 
     it("counts exports only for exported (uppercase) functions — main is not an export", () => {
-      // `main` starts with a lowercase letter → doesn't match [A-Z]\w* (Go export rule)
       expect(signals.exports).toBe(0);
     });
 

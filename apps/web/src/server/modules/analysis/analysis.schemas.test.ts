@@ -11,9 +11,6 @@ import {
   QuickFileAuditSchema,
 } from "./analysis.schemas";
 
-// ---------------------------------------------------------------------------
-// QuickFileAuditSchema
-// ---------------------------------------------------------------------------
 describe("QuickFileAuditSchema", () => {
   const valid = {
     confidence: "high" as const,
@@ -38,9 +35,6 @@ describe("QuickFileAuditSchema", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// CodeDocEditSchema
-// ---------------------------------------------------------------------------
 describe("CodeDocEditSchema", () => {
   const valid = { replace: "/** docs */ function foo() {}", search: "function foo() {}" };
 
@@ -59,9 +53,6 @@ describe("CodeDocEditSchema", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// DocumentFilePreviewSchema
-// ---------------------------------------------------------------------------
 describe("DocumentFilePreviewSchema", () => {
   const valid = {
     confidence: "medium" as const,
@@ -79,9 +70,6 @@ describe("DocumentFilePreviewSchema", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// changedFileSnapshotSchema
-// ---------------------------------------------------------------------------
 describe("changedFileSnapshotSchema", () => {
   const valid = {
     additions: 10,
@@ -110,9 +98,6 @@ describe("changedFileSnapshotSchema", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// persistedFindingSchema
-// ---------------------------------------------------------------------------
 describe("persistedFindingSchema", () => {
   const valid = {
     file: "src/index.ts",
@@ -136,9 +121,6 @@ describe("persistedFindingSchema", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// FixApplicationPayloadSchema
-// ---------------------------------------------------------------------------
 describe("FixApplicationPayloadSchema", () => {
   const valid = {
     branch: "main",
@@ -168,9 +150,6 @@ describe("FixApplicationPayloadSchema", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// PrAiReviewFindingSchema
-// ---------------------------------------------------------------------------
 describe("PrAiReviewFindingSchema", () => {
   const valid = {
     file: "src/api.ts",
@@ -201,9 +180,6 @@ describe("PrAiReviewFindingSchema", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// PrAiReviewOutputSchema
-// ---------------------------------------------------------------------------
 describe("PrAiReviewOutputSchema", () => {
   const valid = {
     findings: [

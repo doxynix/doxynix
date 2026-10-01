@@ -10,11 +10,9 @@ vi.mock("@/server/core/app-logger", () => ({
   },
 }));
 
-import {
-  collectTreeSitterSignals,
-  getSpecByExt,
-  TREE_SITTER_SUPPORTED_EXTENSIONS,
-} from "./tree-sitter-signals";
+import { getSpecByExt, TREE_SITTER_SUPPORTED_EXTENSIONS } from "@/server/core/tree-sitter";
+
+import { collectTreeSitterSignals } from "./tree-sitter-signals";
 
 describe("tree-sitter-signals: spec contract (without wasm)", () => {
   it("exports the expected list of supported extensions", () => {

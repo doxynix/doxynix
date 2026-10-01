@@ -136,12 +136,9 @@ describe("computeOnboardingScore", () => {
 });
 
 describe("computeHealthScore", () => {
-  // The scoring formula itself is covered by engine/metrics/complexity.test.ts.
-  // What matters here is that this wrapper converts `dependencyCycles` to a
-  // count and forwards the remaining measured fields unchanged.
-  //
-  // Expected value derived by hand from MODERN_HEALTH_SCORE's published weights
-  // (a repo pushed long ago earns no recency bonus):
+  // The scoring formula is covered by engine/metrics/complexity.test.ts; here it matters that this wrapper
+  // converts `dependencyCycles` to a count and forwards the rest unchanged.
+  // Hand-derived from MODERN_HEALTH_SCORE's weights (long-idle repo, so no recency bonus):
   //   security 70*.24 = 16.8 | techDebt 30*.20 = 6.0 | complexity 11*.16 = 1.76
   //   duplication (100-9*2)*.12 = 9.84 | docs (5*4)*.08 = 1.6
   //   busFactor (4*18)*.10 = 7.2 | cycles (100-2*18)*.10 = 6.4
@@ -294,8 +291,7 @@ describe("buildFinalMetrics", () => {
     expect(result.teamRoles).toEqual([{ login: "a", role: "core", share: 1 }]);
   });
 
-  // The active/stale/dead boundaries are covered by analysis.utils.test.ts. Here we
-  // only pin that the status is derived from the repo and lands on the metrics payload.
+  // Boundaries are covered by analysis.utils.test.ts; here we only pin that the status reaches the metrics payload.
   it("derives the maintenance status from the repo", () => {
     const result = buildFinalMetrics({
       busFactor: 1,

@@ -9,8 +9,8 @@ import { highlightCode } from "@/shared/lib/shiki";
 
 import type { DbClient } from "@/server/core/db";
 import type { FileActionPreviewResult } from "@/server/core/redis.types";
-import { resolveDocumentMaterializedPath } from "@/server/utils/document-materialization";
-import { markdownToHtml } from "@/server/utils/markdown-to-html";
+import { resolveDocumentMaterializedPath } from "@/server/modules/analysis/services/document-materialization";
+import { markdownToHtml } from "@/server/modules/analysis/services/markdown-to-html";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 
 import { analysisMapper } from "../analysis.mapper";
@@ -93,8 +93,7 @@ export const docsService = {
     });
 
     if (doc == null) {
-      // No message meant tRPC substituted the code, so the client saw the
-      // literal string "NOT_FOUND".
+      // No message means tRPC substitutes the code, so the client sees the literal string "NOT_FOUND".
       throw new TRPCError({ code: "NOT_FOUND", message: "Document not found" });
     }
 
@@ -143,24 +142,11 @@ export const docsService = {
     });
 
     if (document == null) {
-      // Was `new Error(...)`, which tRPC reported as a 500 INTERNAL_SERVER_ERROR
-      // and masked in production — a missing document looked like a server
-      // fault. The two checks above this one in the same file already throw
-      // NOT_FOUND for the identical condition.
+      // A bare `Error` is reported as a 500 and masked in production, so a missing document must throw NOT_FOUND.
       throw new TRPCError({ code: "NOT_FOUND", message: "Document not found" });
     }
 
-    // Graph links are not built here. `RepositoryEvidence.dependencyGraph` is
-    // computed per analysis but never persisted to `resultJson` or
-    // `metricsJson`, so reading it back from either column has always yielded
-    // `undefined` and the caller's `graph?.nodes` guard has always short-circuited.
-    // `withGraphLinks` accepts `null` for exactly this case.
-    //
-    // The two live callers of the linker do pass a real graph and are unaffected:
-    // `workspace-search.service` reads `structure.graph` from the analyze
-    // context, and `doc-section-matcher` receives one. This service has no access
-    // to the analyze context, so it passes `null`. Persisting the graph to enable
-    // links here is tracked separately.
+    // No graph to link against: `RepositoryEvidence.dependencyGraph` is computed per analysis but never persisted to `resultJson`/`metricsJson`, so reading it back always yields `undefined`; `withGraphLinks` accepts `null` for this. Persisting it is tracked separately.
     const formatted = DocumentFormatter.withGraphLinks(
       document.content,
       null,

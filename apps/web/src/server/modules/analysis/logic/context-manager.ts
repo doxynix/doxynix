@@ -1,10 +1,10 @@
 import { escape } from "es-toolkit";
 import { dirname, normalize } from "pathe";
 
+import { getFileScore } from "@/server/core/path-classify/score";
+import { countTokens } from "@/server/modules/analysis/ai/tokenizer";
 import { CodeOptimizer, skeletonizeCode } from "@/server/utils/optimizers";
-import { countTokens } from "@/server/utils/tokenizer";
 
-import { getFileScore } from "../engine/core/file-classifier";
 import { ProjectPolicy } from "../engine/core/project-policy";
 import { PROJECT_POLICY_RULES } from "../engine/core/project-policy-rules";
 import { FILE_CONTEXT_MODIFIERS } from "../engine/core/scoring-constants";
@@ -230,7 +230,6 @@ function buildSelectionReason(stage: AiContextStage, filePath: string, preferred
   return "secondary-support";
 }
 
-/** One scored candidate file, as produced by the ranking pass inside `buildStageContextPack`. */
 type StageCandidate = {
   file: RepositoryModuleFile;
   path: string;

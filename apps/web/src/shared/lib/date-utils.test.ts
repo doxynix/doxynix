@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LOCALES, type Locale } from "@/shared/config/locales";
 import { formatFullDate, formatRelativeTime } from "@/shared/lib/date-utils";
 
-// Golden values captured from the test runtime (TZ=UTC, fake clock 2026-02-27T12:00:00Z).
 const RELATIVE_YESTERDAY: Record<Locale, string> = {
   de: "gestern",
   en: "yesterday",
@@ -34,8 +33,6 @@ const RELATIVE_LAST_MONTH: Record<Locale, string> = {
   "zh-CN": "上个月",
 };
 
-// Written-date portion only — ordering is stable per locale, while the time-plus-separator
-// suffix (e.g. "at 03:04", "г. в 03:04") can vary across ICU versions.
 const FULL_DATE_PART: Record<Locale, string> = {
   de: "2. Januar 2026",
   en: "January 2, 2026",

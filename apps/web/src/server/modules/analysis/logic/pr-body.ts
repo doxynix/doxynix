@@ -1,11 +1,7 @@
 const START_MARKER = "<!-- DOXYNIX_START -->";
 const END_MARKER = "<!-- DOXYNIX_END -->";
 
-/**
- * Writes the AI summary into the PR body between stable HTML markers, so
- * re-analysis replaces the previous summary instead of appending a new one and
- * never touches prose the user wrote outside the markers.
- */
+// Writes the summary between stable markers so re-analysis replaces it and never touches prose outside them
 export function mergePrBody(existingBody: null | string, aiSummary: string): string {
   const body = existingBody ?? "";
   const formattedSummary = `${START_MARKER}\n\n${aiSummary}\n\n${END_MARKER}`;

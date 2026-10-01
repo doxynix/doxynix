@@ -27,7 +27,7 @@ function severityForScore(score: number): RiskFindingRef["severity"] {
   return "LOW";
 }
 
-function buildGraphReliability(
+export function buildGraphReliability(
   evidence: RepositoryEvidence,
   metrics: Pick<RepoMetrics, "graphReliability">,
 ): DependencyGraphEvidence {
@@ -49,7 +49,7 @@ function buildRiskRawMetrics(
   changeCoupling: ChangeCouplingRef[],
   graphReliability: DependencyGraphEvidence,
 ): RiskRawMetrics {
-  // Reference: Linear extremum search to avoid Maximum call stack size exceeded on large datasets
+  // Linear extremum search avoids the "Maximum call stack size exceeded" spread limit.
   let strongestChangeCouplingCommits = 0;
   for (const pair of changeCoupling) {
     if (pair.commits > strongestChangeCouplingCommits) {
@@ -151,7 +151,8 @@ function buildDependencyCycleFinding(
     return null;
   }
 
-  // Reference: Extract unique files from the first three Tarjan cycles to broaden the evidence context for the AI
+  // Only the first three Tarjan cycles: more would broaden the evidence past what the
+  // AI prompt can carry.
   const topCyclesFiles = uniq(evidence.dependencyCycles.slice(0, 3).flat());
 
   return createRiskFinding({
@@ -301,7 +302,6 @@ function buildRiskFindings(
     buildGraphReliabilityFinding(graphReliability, derivedScores),
   ].filter((finding): finding is RiskFindingRef => finding != null);
 
-  // Reference: Safe immutable sort of findings
   return allFindings.toSorted((left, right) => right.score - left.score);
 }
 

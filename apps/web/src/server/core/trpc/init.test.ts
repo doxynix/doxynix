@@ -7,11 +7,7 @@ type KnownErrorOptions = {
   meta?: { target?: string | string[] };
 };
 
-/**
- * `api-error.ts` narrows with `instanceof Prisma.PrismaClientKnownRequestError`,
- * so these tests must throw an instance of the very class that module sees. A
- * stand-in keeps the generated Prisma client out of a unit test.
- */
+// `api-error.ts` narrows with `instanceof Prisma.PrismaClientKnownRequestError`, so these tests must throw an instance of the very class that module sees.
 const MockPrismaClientKnownRequestError = vi.hoisted(
   () =>
     class PrismaClientKnownRequestError extends Error {
@@ -73,10 +69,7 @@ function formatError(code: TRPCError["code"], message: string) {
   });
 }
 
-/**
- * Mirrors what tRPC does to an unwrapped throw: `getTRPCErrorFromUnknown` builds
- * an INTERNAL_SERVER_ERROR `TRPCError` whose `cause` is the original.
- */
+// Mirrors tRPC: `getTRPCErrorFromUnknown` builds an INTERNAL_SERVER_ERROR `TRPCError` whose `cause` is the original.
 function formatCause(cause: unknown) {
   return getErrorShape({
     config: buildConfig(),
@@ -122,9 +115,7 @@ describe("tRPC Error Formatting & Security Boundaries", () => {
   });
 
   it("re-maps a raw Prisma cause that a service never wrapped in handlePrismaError", () => {
-    // tRPC wraps an unwrapped Prisma throw as INTERNAL_SERVER_ERROR and parks
-    // the original on `cause`. The formatter must recover NOT_FOUND from it,
-    // otherwise all 62 unprotected Prisma call sites answer 500.
+    // The formatter must recover NOT_FOUND from `cause`, otherwise every unprotected Prisma call site answers 500.
     const shape = formatCause(prismaError("P2025"));
 
     expect(shape.data.code).toBe("NOT_FOUND");
@@ -133,8 +124,7 @@ describe("tRPC Error Formatting & Security Boundaries", () => {
   });
 
   it("writes the re-mapped status into data.httpStatus so tRPC honours it", () => {
-    // `getHTTPStatusCode` prefers `error.data.httpStatus` over deriving a status
-    // from the code; without this the wire would still say 500.
+    // `getHTTPStatusCode` prefers `error.data.httpStatus` over deriving a status from the code; without this the wire would still say 500.
     const shape = formatCause(prismaError("P2002"));
 
     expect(shape.data.code).toBe("CONFLICT");

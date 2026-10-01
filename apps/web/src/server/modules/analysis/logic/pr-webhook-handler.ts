@@ -6,10 +6,6 @@ import { PRConfigService } from "@/server/modules/analysis/logic/pr-config";
 import { analysisRepo } from "../analysis.repository";
 import { analyzePrTask } from "../tasks/analyze-pr.task";
 
-/**
- * Handle GitHub PR webhook events (opened, synchronize actions only)
- * Validates config, creates analysis record, and triggers Trigger.dev task for differential analysis
- */
 export async function handlePullRequestEvent(payload: PullRequestPayload): Promise<void> {
   const { action, pull_request, repository } = payload;
 
@@ -43,7 +39,6 @@ export async function handlePullRequestEvent(payload: PullRequestPayload): Promi
   });
 
   try {
-    // Find repo in DB by GitHub ID
     const repo = await prisma.repo.findFirst({
       where: { githubId: repository.id },
     });
@@ -58,7 +53,6 @@ export async function handlePullRequestEvent(payload: PullRequestPayload): Promi
       return;
     }
 
-    // Check if PR analysis is enabled
     const config = await PRConfigService.getConfig(repo.id, prisma);
     if (!config.enabled) {
       appLogger.debug({
@@ -69,7 +63,6 @@ export async function handlePullRequestEvent(payload: PullRequestPayload): Promi
       return;
     }
 
-    // Check for existing analysis (DB record)
     const existingAnalysis = await analysisRepo.getByRepoAndPRNumber(
       prisma,
       repo.id,
@@ -88,7 +81,6 @@ export async function handlePullRequestEvent(payload: PullRequestPayload): Promi
     let prAnalysisId: string;
 
     if (existingAnalysis == null) {
-      // Create new analysis
       const analysis = await analysisRepo.createPRAnalysis(prisma, {
         baseSha: pull_request.base.sha,
         headSha: pull_request.head.sha,
@@ -114,7 +106,6 @@ export async function handlePullRequestEvent(payload: PullRequestPayload): Promi
       prAnalysisId = updatedAnalysis.id;
     }
 
-    // Trigger Trigger.dev task for differential analysis
     await analyzePrTask.trigger({
       baseSha: pull_request.base.sha,
       headSha: pull_request.head.sha,

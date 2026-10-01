@@ -18,14 +18,7 @@ export type ChangedFileImpact = PRChangedFileSnapshot & {
   zoneLabel: null | string;
 };
 
-/**
- * Resolves each changed file to the architecture node a reviewer should land on.
- *
- * A file that the structure context already tracks becomes a `file:` node and
- * opens the code view; anything else falls back to its containing top-level
- * zone (`group:`) and opens the map. `nodeDetailCache` is shared with the
- * caller so repeated resolutions of the same node do not re-parse the snapshot.
- */
+// Tracked files become `file:` nodes (code view); anything else falls back to its top-level zone (`group:`, map view)
 export function mapChangedFilesToImpactNodes(params: {
   analyzeContext: AnalyzeContext;
   changedFiles: PRChangedFileSnapshot[];

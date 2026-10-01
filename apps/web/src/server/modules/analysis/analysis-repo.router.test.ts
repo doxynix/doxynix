@@ -2,11 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { analysisRepoRouter } from "./analysis-repo.router";
 
-/**
- * DXNX-237: the sub-router split must not change the client-visible surface.
- * This is the cheapest possible guard - it only reads the exported key set, so
- * it stays fast and needs no tRPC context.
- */
+// Sub-router split must not change the client-visible procedure surface.
 const EXPECTED = [
   "getAnalysis",
   "getByPRNumber",
@@ -31,8 +27,7 @@ describe("analysisRepoRouter", () => {
   });
 
   it("keeps both PR-number lookups that share one service call", () => {
-    // getByPRNumber and getImpactByPRNumber intentionally differ: the former
-    // accepts z.string() and the latter z.uuid(). They must both survive.
+    // Intentionally differ: the former accepts z.string() and the latter z.uuid(); both must survive.
     const keys = Object.keys(analysisRepoRouter);
 
     expect(keys).toContain("getByPRNumber");

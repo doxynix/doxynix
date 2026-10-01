@@ -2,9 +2,9 @@ import { DocType } from "@doxynix/shared";
 import type { Repo } from "@prisma/client";
 import { batch } from "@trigger.dev/sdk";
 
+import { uniquePaths } from "@/server/modules/analysis/engine/core/array-utils";
 import { buildDocumentationInputModel } from "@/server/modules/analysis/engine/pipeline/documentation-input";
-import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
-import { uniquePaths } from "@/server/utils/array-utils";
+import { taskLogger } from "@/server/utils/task-logger";
 
 import type { AIResult } from "../engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "../engine/core/discovery.types";
@@ -40,11 +40,8 @@ type ModuleDependencyContext = {
 
 type DocumentationInputSnapshot = NonNullable<RepoMetrics["documentationInput"]>;
 
-/**
- * Maps each writer task id to the `WriterName` it corresponds to. Checked against
- * both key and value types, so adding a writer task without its name (or renaming
- * a `WriterName`) fails to compile here rather than at runtime.
- */
+// Checked against both key and value types, so a writer task added without its name (or a
+// renamed `WriterName`) fails here at compile time rather than at runtime.
 const WRITER_NAME_BY_TASK_ID = {
   "write-api": "api",
   "write-architecture": "architecture",
@@ -191,18 +188,15 @@ export async function orchestrateWriterTasks(
 
   const engineeringDossierPaths = getEngineeringDossierPaths(engineeringDossier);
 
-  // `structuredClone<T>` already returns a deep copy of the dossier, so no cast is
-  // needed. The three `edges` fields below are real: `graphReliability` and
-  // `documentationInput.architecture.graphReliability` both exist on the snapshot.
+  // `structuredClone<T>` already returns a deep copy, so no cast is needed; the three
+  // `edges` fields below are real (both graphReliability shapes carry one).
   const strippedDossier = structuredClone(engineeringDossier);
 
   strippedDossier.graphReliability.edges = [];
   strippedDossier.documentationInput.architecture.graphReliability.edges = [];
 
-  // `documentationInput.sections` is required on the snapshot, and every read of it
-  // happens above, before the strip. The strip therefore produces a genuinely
-  // smaller object, described by its own type rather than by lying about
-  // `EngineeringDossier` with `as unknown as Record<string, unknown>`.
+  // Every read of `sections` happens above, so the strip yields a genuinely smaller
+  // object — typed as `Omit<..., "sections">` rather than lied about with a double cast.
   const { sections: _sections, ...documentationInputWithoutSections } =
     strippedDossier.documentationInput;
   const dossierForPrompt: Omit<EngineeringDossier, "documentationInput"> & {
@@ -393,12 +387,10 @@ export async function orchestrateWriterTasks(
     }
 
     return {
-      // `WriterResult["error"]` is `string | undefined`, so a non-`Error` rejection
-      // reason is normalized to `undefined` rather than `null`.
+      // A non-`Error` rejection reason normalizes to `undefined`, not `null`.
       error: run.error instanceof Error ? run.error.message : undefined,
-      // The map is exhaustive over the five task ids, so the index is total —
-      // `noUncheckedIndexedAccess` widens it to `| undefined` but the lookup
-      // cannot actually miss.
+      // The map is exhaustive over the five task ids, so `noUncheckedIndexedAccess`
+      // widening the lookup to `| undefined` can never actually miss.
       name: WRITER_NAME_BY_TASK_ID[taskInstance.id],
       status: "failed" as const,
     };

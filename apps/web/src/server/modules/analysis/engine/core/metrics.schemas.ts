@@ -90,9 +90,8 @@ const HotspotSignalSchema = z.looseObject({
   outbound: z.number(),
   path: z.string(),
   score: z.number(),
-  // `HotspotSignal` narrows `source` to the risk model; only the risk-model
-  // producer writes a row with `churnScore`/`score`, so accepting the other two
-  // would let a shape through that the type then denies.
+  // `HotspotSignal` narrows `source` to the risk model, and only that producer writes
+  // `score` — a wider union would let a shape through that the type then denies.
   source: z.literal("risk-model"),
 });
 
@@ -168,19 +167,13 @@ export function parseRepoMetrics(value: unknown): ParsedRepoMetrics | null {
   return parsed.success ? parsed.data : null;
 }
 
-/**
- * The `safeParse` form of {@link parseRepoMetrics}, for callers that need to know
- * *why* a blob was rejected. Kept separate so `parseRepoMetrics`' 11 existing
- * assertions and its `T | null` signature are untouched.
- */
+// `safeParse` form of `parseRepoMetrics`, for callers that need the rejection reason; kept
+// separate so `parseRepoMetrics`' signature and its assertions stay untouched.
 export const safeParseRepoMetrics = (value: unknown): z.ZodSafeParseResult<ParsedRepoMetrics> =>
   RepoMetricsSchema.safeParse(value);
 
-/**
- * The zero-valued metrics handed to callers whose stored blob failed validation.
- * `RepoMetrics` has 34 required fields, so a hand-written literal would drift from
- * the schema; parsing a canonical blank keeps the two in step by construction.
- */
+// Zero-valued metrics for callers whose stored blob failed validation. `RepoMetrics` has 34
+// required fields, so parsing a canonical blank keeps this literal from drifting.
 export const EMPTY_REPO_METRICS: ParsedRepoMetrics = RepoMetricsSchema.parse({
   analysisCoverage: {
     heuristicFiles: 0,

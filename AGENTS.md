@@ -68,9 +68,7 @@ path filter can never reach those files — hence the separate `vitest.integrati
 - **Server modules** (`apps/web/src/server/modules`, `apps/siem-server/src/modules`,
   `packages/cli/src/commands`): a modular monolith — one folder per feature, imports flow
   **downward only**. A slice must not import another slice's internals, and `core`/`utils`/`ui`
-  sit *below* slices so they must never import up into one. (This was called "VSA" before; the
-  term was a .NET/MediatR pattern whose premise — no service/repository layer — this server does
-  not follow, so the name was dropped to stop promising a structure the code lacks.)
+  sit *below* slices so they must never import up into one.
 - `dep-cruiser` (`arch:check`) is the hard gate, run in pre-commit and CI. It compares against a
   known-violations baseline — new violations fail, old ones do not. After deliberate refactors,
   refresh it with `bun --filter @doxynix/<app> arch:baseline` and review the diff.
@@ -160,6 +158,21 @@ Workflow: `.agents/skills/drizzle-migration/SKILL.md`, `.agents/skills/hono-rpc-
   small). Tests get a relaxed override; `vitest/no-focused-tests` and `vitest/expect-expect` are
   errors, so no `.only` and every test needs an `expect`-family call.
 - `cspell` runs on staged files in pre-commit — unusual product words need a `cspell.json` entry.
+
+### Comments
+
+Default to no comment. Write one only when the code is misread without it, and keep
+it to at most two lines within the 100-column `lineWidth`.
+
+- Never repeat the identifier, the next line, or a nearby string literal.
+- No file-header boilerplate, no `// ====` section banners, no git-history narration.
+- JSDoc blocks only for the exported API of a workspace package (`packages/shared`,
+  `apps/siem-server/src/client.ts`). Inside `apps/*/src` the types are the contract.
+- Keep every `TODO:` / `FIXME:` / `NOTE:` / `HACK:` marker, and give it a ticket or
+  an owner. An undated, ownerless TODO is deleted, not kept.
+- Functional directives (`oxlint-disable`, `@ts-expect-error`, `biome-ignore`,
+  `/// <reference>`) must carry a one-line reason. The directive goes on the line
+  immediately before the code it suppresses.
 
 ---
 

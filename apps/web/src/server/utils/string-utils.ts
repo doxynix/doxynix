@@ -1,15 +1,9 @@
 import { compact, uniq } from "es-toolkit";
 import { normalize } from "pathe";
 
-/**
- * Type-safe guard for non-empty strings.
- */
 export const hasText = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
 
-/**
- * Check if empty/whitespace.
- */
 export const isEmpty = (value: unknown): boolean =>
   typeof value !== "string" || value.trim().length === 0;
 

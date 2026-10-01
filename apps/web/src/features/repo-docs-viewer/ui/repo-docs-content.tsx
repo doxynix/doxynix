@@ -43,13 +43,10 @@ const EMPTY_SUBSCRIBE = () => () => {};
 const cleanTextNodes = (nodes: DOMNode[]): DOMNode[] => {
   return nodes.map((node) => {
     if (isTextNode(node)) {
-      // Irreducible: `Text`/`Comment` are classes, and spreading one yields a plain
-      // object that no longer satisfies `DOMNode`'s class members. The replacement
-      // is built by object spread on purpose — `html-react-parser` reads `type`,
-      // `data` and `children` off it, which a spread preserves. One cast here
-      // replaces the two the original code needed.
       return {
-        // oxlint-disable-next-line typescript/no-misused-spread -- see above
+        // `Text`/`Comment` are classes, so a spread yields a plain object that no longer
+        // satisfies `DOMNode`; `html-react-parser` only reads `type`/`data`/`children`.
+        // oxlint-disable-next-line typescript/no-misused-spread
         ...node,
         data: node.data.replaceAll(/\s+/gu, " "),
       } as unknown as DOMNode;
@@ -131,8 +128,8 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
       content.removeEventListener("focusin", trackHover);
       content.removeEventListener("focusout", trackHoverEnd);
     };
-    // React Compiler memoizes these plain functions, so they are referentially stable at
-    // runtime; the compiler-blind exhaustive-deps rule flags them as recreated each render.
+    // React Compiler memoizes these, so the compiler-blind rule flags stable
+    // functions as recreated on every render.
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [handleHoverOrFocus, handleHoverOrBlur, data, isLoading]);
 
@@ -231,9 +228,9 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
 
             const IconComponent = alertConfig.icon;
 
-            // Same single spread-and-cast as `cleanTextNodes`.
             const cleanedFirstTextNode = {
-              // oxlint-disable-next-line typescript/no-misused-spread -- see above
+              // Same single spread-and-cast as `cleanTextNodes`.
+              // oxlint-disable-next-line typescript/no-misused-spread
               ...firstTextNode,
               data: remainingText,
             } as unknown as DOMNode;
@@ -396,7 +393,6 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
 
   return (
     <div className="fade-in slide-in-from-bottom-2 animate-in duration-500">
-      {/* Container tracks pointer/focus of child wiki-links (the interactive targets); keyboard parity via onFocus/onBlur. */}
       <article
         aria-label={t("repo_docs_content_aria")}
         className="prose dark:prose-invert wrap-break-word min-w-0 max-w-none prose-pre:bg-transparent prose-pre:p-0"

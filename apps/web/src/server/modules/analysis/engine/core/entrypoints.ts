@@ -1,10 +1,7 @@
 import type { RepositoryFile } from "./discovery.types";
 import { ProjectPolicy } from "./project-policy";
 
-/**
- * Computes likely entrypoints in the analyzed codebase.
- * Relies on file name patterns, folder semantics, and the dependency graph (files with no inbound imports).
- */
+// Relies on file name patterns, folder semantics, and files with no inbound imports.
 export function getLikelyEntrypoints(
   files: RepositoryFile[],
   inboundByFile: Map<string, number>,

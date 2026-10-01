@@ -10,8 +10,7 @@ if (!process.env.DATABASE_URL!) {
 }
 
 if (!process.env.DIRECT_URL) {
-  // prisma.config.ts requires DIRECT_URL at config load (zenstack generate).
-  // Client generation does not connect to the DB, so a local fallback is fine.
+  // prisma.config.ts requires DIRECT_URL at config load; generation never connects, so a local fallback is fine.
   process.env.DIRECT_URL = "postgresql://postgres:password@localhost:5432/db";
 }
 

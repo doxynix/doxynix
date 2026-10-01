@@ -1,8 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// ---------------------------------------------------------------------------
-// Hoisted mocks — declared BEFORE any source imports
-// ---------------------------------------------------------------------------
 const mocks = vi.hoisted(() => {
   const createOpenAICalls: unknown[] = [];
   return {
@@ -13,7 +10,6 @@ const mocks = vi.hoisted(() => {
       info: vi.fn(),
       warn: vi.fn(),
     },
-    // Runs at module load time with GROQ_API_KEY; capture the options.
     createOpenAI: vi.fn((options: unknown) => {
       createOpenAICalls.push(options);
       return {};
@@ -28,9 +24,6 @@ vi.mock("@vercel/global-config", () => ({ get: mocks.getEdgeConfig }));
 vi.mock("@/shared/config/env.server", () => ({ GROQ_API_KEY: "test-groq-key" }));
 vi.mock("@/server/core/app-logger", () => ({ appLogger: mocks.appLogger }));
 
-// ---------------------------------------------------------------------------
-// Module under test (import must follow the mocks)
-// ---------------------------------------------------------------------------
 import { DEFAULT_AI_MODELS, getActiveModels, SAFETY_SETTINGS } from "./ai-constants";
 
 const ALL_ROLES = [
@@ -88,7 +81,6 @@ describe("ai-constants", () => {
     });
 
     it("returns a valid remote config as-is", async () => {
-      // Zod 4 z.record(enum, value) requires ALL enum keys to be present.
       const remoteConfig = {
         AGENT: ["m1"],
         ARCHITECT: ["m2"],
@@ -105,7 +97,6 @@ describe("ai-constants", () => {
     });
 
     it("falls back to defaults when a partial remote config omits roles", async () => {
-      // Zod 4 treats partial records as invalid (missing enum keys -> parse failure).
       mocks.getEdgeConfig.mockResolvedValue({ AGENT: ["m1"], SENTINEL: ["m2"] });
 
       await expect(getActiveModels()).resolves.toBe(DEFAULT_AI_MODELS);

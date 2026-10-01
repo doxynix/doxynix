@@ -4,10 +4,9 @@ import { clamp, uniq } from "es-toolkit";
 import { normalize } from "pathe";
 
 import { appLogger } from "@/server/core/app-logger";
-import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
-import { countSourceStats } from "@/server/utils/code-counter";
 import { normalizeLanguageName } from "@/server/utils/language-metadata";
 import { getFileExtension } from "@/server/utils/path-operations";
+import { taskLogger } from "@/server/utils/task-logger";
 
 import { calculateDocDensity } from "../core/common";
 import type {
@@ -23,6 +22,7 @@ import { collectStructuralSignals, scoreStructuralModularity } from "../core/str
 import { collectPolyglotSignals } from "../extractors/language-signals";
 import { OpenApiDiscoveryEngine } from "../extractors/openapi-inventory";
 import { collectTypeScriptStaticHints } from "../extractors/ts-static-hints";
+import { countSourceStats } from "./code-counter";
 import {
   mergeRouteInventories,
   normalizeComplexityScore,

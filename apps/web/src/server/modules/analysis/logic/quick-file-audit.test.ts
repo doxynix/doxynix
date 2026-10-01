@@ -1,12 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-/**
- * DXNX-239. Only system boundaries are mocked: the AI provider
- * (`callWithFallback`) and the remote model config (Edge Config). Everything
- * else - CodeOptimizer, the prompt builder, the tool profile and the shared
- * analysis.utils heuristics - runs for real, so these tests exercise the real
- * decision logic rather than a re-statement of it.
- */
+// DXNX-239. Only system boundaries are mocked (AI provider, remote model config); everything else runs for real
 const callWithFallback = vi.hoisted(() => vi.fn());
 const edgeConfigGet = vi.hoisted(() => vi.fn());
 
@@ -24,7 +18,7 @@ type CallArgs = {
   taskType?: string;
 };
 
-/** `noUncheckedIndexedAccess` + oxlint's no-unsafe-optional-chaining guard. */
+// `noUncheckedIndexedAccess` + oxlint's no-unsafe-optional-chaining guard
 function firstCall(): CallArgs {
   const [call] = callWithFallback.mock.calls;
   if (call == null) {
@@ -44,7 +38,7 @@ const FILE_ACTION = {
 beforeEach(() => {
   callWithFallback.mockReset();
   edgeConfigGet.mockReset();
-  // null makes getActiveModels fall back to its static defaults, deterministically.
+  // null makes getActiveModels fall back to its static defaults, deterministically
   edgeConfigGet.mockResolvedValue(null);
   callWithFallback.mockResolvedValue({
     confidence: "high",

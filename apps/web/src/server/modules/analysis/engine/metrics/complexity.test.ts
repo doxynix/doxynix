@@ -97,7 +97,7 @@ describe("calculateHealthScore", () => {
   });
 
   it("should reflect significant changes in component metrics", () => {
-    // Make base score more sensitive to docDensity change
+    // Pin the other components at 100 so docDensity has headroom to move the total
     const baseParamsWithHighImpact = {
       ...baseParams,
       complexityScore: 100,

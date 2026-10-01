@@ -24,11 +24,7 @@ type RequestStore = {
 
 export const requestContext = new AsyncLocalStorage<RequestStore>();
 
-/**
- * Anonymizes an IP address for GDPR compliance and storage in the PostgreSQL INET type.
- * IPv4: zeroes the last octet (1.2.3.4 -> 1.2.3.0)
- * IPv6: zeroes the last 64 bits (2001:db8:85a3:0:0:8a2e:370:7334 -> 2001:db8:85a3:0::)
- */
+// GDPR masking for PG INET: IPv4 zeroes the last octet, IPv6 the last 64 bits.
 export function anonymizeIp(ip: null | string | undefined): null | string {
   if (ip == null || ip === "unknown" || ip.trim() === "") {
     return null;
@@ -72,14 +68,7 @@ type VercelRequest = Request & {
   ip?: string;
 };
 
-/**
- * These read only `headers` plus Vercel's optional `ip`/`geo` extensions, none
- * of which are `NextRequest`-specific — `nextUrl` and `cookies` are never
- * touched. Accepting the base `Request` therefore widens the contract without
- * changing behaviour, and lets route handlers that declare `req: Request`
- * populate the store without a cast. `NextRequest extends Request`, so every
- * existing caller is unaffected.
- */
+// Only `headers` plus Vercel's optional `ip`/`geo` are read, never `nextUrl`/`cookies`, so the base `Request` widens the contract safely.
 export function getIp(request: Request): string {
   return (
     (request as VercelRequest).ip ??

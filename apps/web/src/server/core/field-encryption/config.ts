@@ -21,11 +21,7 @@ export function getModelSpec(model: string): ModelSpec {
   return FIELD_ENCRYPTION_SPEC[model] ?? EMPTY_SPEC;
 }
 
-/**
- * Field names that must never reach an audit-log payload: the ciphertext
- * columns themselves plus their deterministic hash columns, which are
- * credential-equivalent (a sha256 of a normalized email can be brute-forced).
- */
+// Hash columns are credential-equivalent too: a sha256 of a normalized email can be brute-forced.
 export function getSensitiveFieldNames(model: string): Set<string> {
   const names = new Set<string>();
 
@@ -40,13 +36,7 @@ export function getSensitiveFieldNames(model: string): Set<string> {
   return names;
 }
 
-/**
- * Byte-compatible with `prisma-field-encryption`'s `hashString`: the library
- * streamed `update(normalized)` then, **only when a salt was configured**,
- * `update(utf8(salt))`. For SHA-256 that is the hash of the concatenation - but
- * the guard matters, because appending an absent salt as the literal string
- * `"undefined"` would produce a different digest than the stored rows.
- */
+// Byte-compatible with `prisma-field-encryption`'s `hashString`: append the salt only when one is configured, because appending an absent salt as `"undefined"` would not match the stored rows.
 export function hashValue(value: string, normalize: Array<"lowercase" | "trim">): string {
   let normalized = value;
 

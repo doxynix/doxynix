@@ -5,7 +5,7 @@ import * as z from "zod";
 
 import type { DbClient } from "@/server/core/db";
 import { redisService } from "@/server/core/redis";
-import { markdownToHtml } from "@/server/utils/markdown-to-html";
+import { markdownToHtml } from "@/server/modules/analysis/services/markdown-to-html";
 
 import type { NodeContext } from "../analysis.context";
 import { analysisContext } from "../analysis.context";

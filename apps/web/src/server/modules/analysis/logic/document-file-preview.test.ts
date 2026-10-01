@@ -1,11 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-/**
- * DXNX-239. Only system boundaries are mocked: the AI provider
- * (`callWithFallback`) and the remote model config (Edge Config). The surgical
- * edit applier and the shared heuristics run for real, so the edit-application
- * loop is genuinely covered.
- */
+// DXNX-239. Only system boundaries are mocked; the surgical edit applier and shared heuristics run for real
 const callWithFallback = vi.hoisted(() => vi.fn());
 const edgeConfigGet = vi.hoisted(() => vi.fn());
 
@@ -23,7 +18,7 @@ type CallArgs = {
   taskType?: string;
 };
 
-/** `noUncheckedIndexedAccess` + oxlint's no-unsafe-optional-chaining guard. */
+// `noUncheckedIndexedAccess` + oxlint's no-unsafe-optional-chaining guard
 function firstCall(): CallArgs {
   const [call] = callWithFallback.mock.calls;
   if (call == null) {
@@ -148,9 +143,7 @@ describe("runDocumentFilePreview", () => {
 
     expect(callWithFallback).not.toHaveBeenCalled();
     expect(result.summary).toMatch(/empty/i);
-    // buildDocumentFallback puts the explanation in `documentation` as well as
-    // `summary`. Safe today because the task only caches this as a UI preview;
-    // it would be wrong if this value ever became the new file content.
+    // The explanation lands in `documentation` too — safe only while this is a cached UI preview, never the new file content
     expect(result.documentation).toBe(result.summary);
     expect(result.edits).toEqual([]);
   });

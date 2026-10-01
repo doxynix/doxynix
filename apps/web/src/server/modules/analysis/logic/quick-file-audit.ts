@@ -1,7 +1,7 @@
 import type * as z from "zod";
 
 import { getActiveModels } from "@/server/core/ai/ai-constants";
-import { buildRepositoryToolProfile } from "@/server/core/ai/ai-tools";
+import { buildRepositoryToolProfile } from "@/server/domain/ai/ai-tools";
 import { callWithFallback } from "@/server/utils/call";
 import { CodeOptimizer } from "@/server/utils/optimizers";
 
@@ -20,13 +20,7 @@ import {
   isBinaryLikeContent,
 } from "../analysis.utils";
 
-/**
- * Single-file AI audit.
- *
- * Lives outside `analysis.utils` on purpose: it needs the AI tool profile, which
- * reaches the tRPC server, and a pure utility module must not depend on the
- * router that ultimately calls it.
- */
+// Lives outside `analysis.utils` on purpose: it needs the AI tool profile, which reaches the tRPC server
 export async function runQuickFileAudit(
   userId: string,
   input: FileActionInput,

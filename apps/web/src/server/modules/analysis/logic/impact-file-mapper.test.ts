@@ -18,10 +18,7 @@ function snapshot(overrides: Partial<PRChangedFileSnapshot> = {}): PRChangedFile
   } as PRChangedFileSnapshot;
 }
 
-/**
- * `analyzeContext` arrives as a parameter, so a plain object is test data rather
- * than a mocked collaborator. Only `file:` node ids ever reach it.
- */
+// `analyzeContext` arrives as a parameter, so a plain object is test data rather than a mocked collaborator
 function contextWithNodes(nodes: Record<string, { label: string }>) {
   return {
     getStructureNode: (nodeId: string) => {

@@ -2,11 +2,7 @@ import { appLogger } from "@/server/core/app-logger";
 
 import { applySurgicalEditBlock } from "./surgical-edit";
 
-/**
- * Applies one AI-proposed documentation edit to a file, tolerating imperfect
- * whitespace: the block is matched exactly, by indentation, or fuzzily, and a
- * failed match leaves the file untouched instead of corrupting it.
- */
+// Tolerates imperfect whitespace: exact, indentation-based, or fuzzy match; a failed match leaves the file untouched
 export function applyDocumentSurgicalEdit(params: {
   filePath: string;
   original: string;

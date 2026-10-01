@@ -431,9 +431,7 @@ export const analysisRepo = {
         error: data?.error,
         riskScore: data?.riskScore,
         status,
-        // `Prisma.InputJsonValue` excludes `undefined`, which is what
-        // `data?.findingsJson` evaluates to whenever `data` is omitted. Spread
-        // the key in only when there is something to write.
+        // `Prisma.InputJsonValue` excludes `undefined`, which is what `data?.findingsJson` is when `data` is omitted.
         ...(data?.findingsJson != null && { findingsJson: data.findingsJson }),
       },
       where: { id },

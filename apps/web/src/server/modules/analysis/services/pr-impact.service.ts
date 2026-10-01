@@ -26,9 +26,7 @@ export const prImpactService = {
     });
 
     if (analysis == null) {
-      // Was `new Error(...)`, reported to the client as a 500. `NOT_FOUND` is
-      // what the caller needs to distinguish "no such analysis" from a real
-      // failure, and it keeps the message visible in production.
+      // NOT_FOUND, not a bare `Error`: the caller must distinguish "no such analysis" from a real failure, and a 500 is masked in production.
       throw new TRPCError({ code: "NOT_FOUND", message: "Analysis not found" });
     }
 

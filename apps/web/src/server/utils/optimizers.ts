@@ -1,12 +1,13 @@
 import { compact, isString } from "es-toolkit";
 
-import { appLogger } from "../core/app-logger";
 import {
   getRuntime,
   getSpecByExt,
   loadLanguage,
   TREE_SITTER_SUPPORTED_EXTENSIONS,
-} from "../modules/analysis/engine/extractors/tree-sitter-signals";
+} from "@/server/core/tree-sitter";
+
+import { appLogger } from "../core/app-logger";
 import { getFileExtension } from "./path-operations";
 
 type AiTextLike = {
@@ -15,14 +16,7 @@ type AiTextLike = {
   text?: unknown;
 };
 
-/**
- * Minimal structural view of the tree-sitter API surface used by the skeletonizer.
- *
- * These must stay assignable from `web-tree-sitter`'s own declarations, which the
- * real runtime now returns (see `getRuntime`). Two deliberate differences:
- * `SyntaxNode` has no `delete` (only `Tree` and `Parser` do), and the members use
- * method syntax so their parameters stay bivariant under `strictFunctionTypes`.
- */
+// Must stay assignable from `web-tree-sitter`'s own declarations: SyntaxNode has no `delete`, and method syntax keeps params bivariant under `strictFunctionTypes`.
 type TreeSitterNode = {
   child(index: number): null | TreeSitterNode;
   childCount: number;
@@ -108,9 +102,6 @@ export const CodeOptimizer = {
     return code.replace(/^\s*\/\*[\S\s]*?(?:license|copyright)[\S\s]*?\*\//i, "");
   },
 
-  /**
-   * Polyglot skeletonization via Tree-Sitter (TypeScript, JavaScript, Go, Python, Rust, C#, etc.)
-   */
   async skeletonizePolyglot(code: string, fileName: string): Promise<string> {
     const ext = getFileExtension(fileName);
     const spec = getSpecByExt(ext);

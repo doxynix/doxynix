@@ -21,32 +21,16 @@ import { createHighlighterCore, type HighlighterCore } from "shiki/core";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 import { bundledLanguages, bundledLanguagesAlias } from "shiki/langs";
 
-/**
- * Client-side Shiki highlighter (fine-grained bundle):
- * - no WASM — uses the pure-JS regex engine;
- * - a small set of hot languages ships in the initial chunk;
- * - every other bundled language is loaded on
- *   demand as its own lazy chunk via `shiki/langs` getters.
- *
- * `highlight` never throws: unknown languages resolve to `null` and the
- * caller falls back to a plain `<pre>`.
- */
-
-/** Plain-text pseudo-languages that need no grammar. */
 const PLAIN_LANGS = new Set(["text", "txt", "plaintext", "plain"]);
 
-/** Shorthands missing from shiki's own alias map (shiki v4 splits Fortran). */
 const EXTRA_ALIASES: Record<string, string> = {
   fortran: "fortran-free-form",
   golang: "go",
 };
 
-/** Every bundled language and alias resolves to its lazy import getter. */
 const LANG_GETTERS = bundledLanguages as Record<string, DynamicImportLanguageRegistration>;
 const ALIAS_GETTERS = bundledLanguagesAlias as Record<string, DynamicImportLanguageRegistration>;
 
-// Irreducible: `globalThis` has no `doxynixClientShiki`; this is the Next.js
-// dev-HMR singleton idiom, so the in-flight highlighter promise survives reloads.
 const globalForShiki = globalThis as unknown as {
   doxynixClientShiki?: Promise<HighlighterCore>;
 };

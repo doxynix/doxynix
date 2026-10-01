@@ -12,30 +12,17 @@ const StagedFixResultSchema = z.object({
   fixedFiles: z.array(StagedFixedFileSchema).min(1),
 });
 
-/**
- * The per-user staging area that accumulates file contents until the user opens
- * a pull request. Backed by a single Redis hash: `pr-stage:{userId}:{repoId}`.
- */
+// Per-user staging area, backed by a single Redis hash `pr-stage:{userId}:{repoId}`.
 export const stagingService = {
-  /**
-   * Clears the staging area after creating a PR.
-   */
   async clearStaging(userId: string, repoId: string) {
     await redisService.staging.clear(userId, repoId);
     return { success: true };
   },
 
-  /**
-   * Gets all currently staged changes for creating a PR.
-   */
   async getStagedFiles(userId: string, repoId: string) {
     return redisService.staging.getAll(userId, repoId);
   },
 
-  /**
-   * Adds a file to the repository's staged changes in Redis.
-   * Key: pr-stage:{userId}:{repoId}
-   */
   async stageFile(userId: string, repoId: string, filePath: string, content: string) {
     const stagedCount = await redisService.staging.addFiles(userId, repoId, {
       [filePath]: content,

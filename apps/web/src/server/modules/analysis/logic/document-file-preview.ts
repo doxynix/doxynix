@@ -1,7 +1,7 @@
 import type * as z from "zod";
 
 import { getActiveModels } from "@/server/core/ai/ai-constants";
-import { buildRepositoryToolProfile } from "@/server/core/ai/ai-tools";
+import { buildRepositoryToolProfile } from "@/server/domain/ai/ai-tools";
 import { callWithFallback } from "@/server/utils/call";
 import { CodeOptimizer } from "@/server/utils/optimizers";
 
@@ -19,14 +19,7 @@ import {
 import type { FileActionRequest } from "../services/file-actions.service";
 import { applyDocumentSurgicalEdit } from "./document-surgical-edit";
 
-/**
- * Single-file documentation pass.
- *
- * Lives outside the file-actions service on purpose: it needs the AI tool
- * profile, which reaches the tRPC server, and a service that the router calls
- * must not depend on the router.
- */
-
+// Lives outside the file-actions service on purpose: it needs the AI tool profile, which reaches the tRPC server
 export async function runDocumentFilePreview(
   userId: string,
   input: FileActionRequest,

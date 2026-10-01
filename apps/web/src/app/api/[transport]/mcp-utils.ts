@@ -6,12 +6,7 @@ import { MUTATION_TOOLS } from "@/server/modules/agent/agent.tools";
 
 export type RawTool = {
   execute: unknown;
-  /**
-   * The AI SDK types a tool's schema as `FlexibleSchema`, which also admits plain
-   * `StandardSchemaV1` validators, and its `description` as either a literal or a
-   * factory over the chat context. This module only ever calls `.parse` and filters
-   * to real Zod objects, so both stay as wide as the SDK's and are narrowed below.
-   */
+  // AI SDK also admits StandardSchemaV1 schemas and description factories; this module only uses .parse and real Zod objects, so both stay wide and are narrowed below.
   description?: Tool["description"];
   inputSchema: FlexibleSchema<unknown>;
 };
@@ -19,11 +14,7 @@ export type RawTool = {
 const isFunction = (value: unknown): value is (...args: unknown[]) => unknown =>
   typeof value === "function";
 
-/**
- * The MCP registry wants a literal string and has no chat context to hand a
- * description factory. Every tool in `getAgentTools()` passes a literal, so the
- * factory branch is a guard, not a live path.
- */
+// The MCP registry wants a literal and has no chat context; every getAgentTools() tool passes one, so the factory branch is a guard.
 const resolveDescription = (description: Tool["description"]): string =>
   typeof description === "string" ? description : "";
 

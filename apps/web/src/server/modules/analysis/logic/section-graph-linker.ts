@@ -13,11 +13,7 @@ type DocumentWithSections = {
   version: string;
 };
 
-/**
- * A section mid-accumulation. Only the fields known at heading time are declared
- * here; `content` and `endLine` are supplied at push time, so a spread of this
- * type plus those two is a complete `DocumentSection` with no cast.
- */
+// Only heading-time fields are declared; `content`/`endLine` arrive at push time so no cast is needed
 type OpenSection = Pick<DocumentSection, "graphNodeIds" | "id" | "startLine" | "title">;
 
 type GraphNode = {
@@ -40,14 +36,7 @@ const MENTION_PATTERNS = [
   /###\s+(?:component|module):\s+(\w+)/gi,
 ];
 
-/**
- * Links documentation sections to dependency graph nodes
- * Enables UI synergy: click graph node -> highlight doc section
- */
 class DocumentGraphLinker {
-  /**
-   * Extract anchors and link to graph nodes
-   */
   public static linkSectionsToGraph(
     document: string,
     dependencyGraph: DependencyGraph | null | undefined,
@@ -55,7 +44,6 @@ class DocumentGraphLinker {
   ): DocumentSection[] {
     const sections: DocumentSection[] = [];
 
-    // Split document into sections (by headings)
     const lines = document.split("\n");
     let currentSection: null | OpenSection = null;
     let contentBuffer: string[] = [];
@@ -63,10 +51,7 @@ class DocumentGraphLinker {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]!;
 
-      // Detect heading (markdown # style)
       if (HEADING_REGEX.test(line)) {
-        // Save previous section. `content` and `endLine` are supplied at push
-        // time instead of being assigned onto the partial, so no cast is needed.
         if (currentSection) {
           sections.push({
             ...currentSection,
@@ -84,7 +69,6 @@ class DocumentGraphLinker {
           });
         }
 
-        // Start new section
         const title = line.replace(HEADING_REGEX, "").trim();
 
         currentSection = {
@@ -100,7 +84,6 @@ class DocumentGraphLinker {
       }
     }
 
-    // Save last section
     if (currentSection) {
       sections.push({
         ...currentSection,
@@ -108,7 +91,6 @@ class DocumentGraphLinker {
         endLine: lines.length - 1,
       });
     } else if (document.trim().length > 0) {
-      // Fallback: create single section if no headings found
       sections.push({
         content: document.trim(),
         endLine: lines.length - 1,
@@ -119,17 +101,12 @@ class DocumentGraphLinker {
       });
     }
 
-    // Link sections to graph nodes
     return sections.map((section) => ({
       ...section,
       graphNodeIds: DocumentGraphLinker.findRelatedGraphNodes(section, dependencyGraph),
     }));
   }
 
-  /**
-   * Find graph nodes related to doc section
-   * Uses heuristics: component name mentions, file references, etc.
-   */
   private static findRelatedGraphNodes(
     section: DocumentSection,
     graph: DependencyGraph | null | undefined,
@@ -138,7 +115,6 @@ class DocumentGraphLinker {
     const content = section.content.toLowerCase();
     const sectionTitleLower = section.title.toLowerCase();
 
-    // Extract potential node names from content
     const mentionedNames = new Set<string>();
 
     for (const pattern of MENTION_PATTERNS) {
@@ -151,7 +127,6 @@ class DocumentGraphLinker {
       }
     }
 
-    // Match against graph nodes
     if (graph?.nodes != null && Array.isArray(graph.nodes)) {
       for (const node of graph.nodes) {
         const nodeName = (node.label ?? node.name ?? "").toLowerCase();
@@ -174,7 +149,6 @@ class DocumentGraphLinker {
   }
 
   private static isSimilar(str1: string, str2: string): boolean {
-    // Simple similarity: contains or shared meaningful words
     const words1 = str1.split(WORD_SPLIT_REGEX).filter((w) => w.length > 1);
     const words2 = str2.split(WORD_SPLIT_REGEX).filter((w) => w.length > 1);
 
@@ -198,9 +172,6 @@ class DocumentGraphLinker {
   }
 }
 
-/**
- * Formats document with graph links for API response
- */
 export class DocumentFormatter {
   public static withGraphLinks(
     document: string,

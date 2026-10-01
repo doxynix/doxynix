@@ -6,20 +6,15 @@ import * as z from "zod";
 
 import { VERCEL_BLOB_CALLBACK_URL } from "@/shared/config/env.server";
 
+import { AppError, findAppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
 import { prisma } from "@/server/core/db";
-import { AppError, findAppError } from "@/server/utils/api-error";
 import { withApiHandler } from "@/server/utils/with-api-handler";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 async function handler(request: Request) {
-  // `request.json()` is typed `any`. The body is a Vercel SDK contract
-  // (`GenerateClientTokenEvent | UploadCompletedEvent`) that `handleUpload`
-  // validates and answers with a 400 itself, so reproducing that union here
-  // would only duplicate the SDK. What is worth checking locally is that a
-  // non-object body is rejected before it reaches the SDK.
   let rawBody: unknown;
 
   try {
@@ -117,19 +112,12 @@ async function handler(request: Request) {
 
     return NextResponse.json(jsonResponse);
   } catch (error) {
-    // The UNAUTHORIZED thrown by `onBeforeGenerateToken` is an expected,
-    // caller-facing rejection, so it must stay a 401 rather than be flattened
-    // into the SDK's generic validation failure. The SDK wraps what it catches,
-    // hence the cause-chain lookup.
     const appError = findAppError(error);
 
     if (appError != null) {
       throw appError;
     }
 
-    // `handleUpload` throws a plain `Error` for its own validation failures
-    // (unsupported content type, oversized body). Those are 400s carrying copy
-    // the SDK wrote for humans, so the message is safe to echo.
     throw new AppError({
       cause: error,
       code: "BAD_REQUEST",

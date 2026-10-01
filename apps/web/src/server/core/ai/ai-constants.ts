@@ -40,11 +40,7 @@ const aiModelsSchema = z.record(
   z.array(z.string()),
 );
 
-/**
- * Dynamically fetches the current model map.
- * Tries to read Edge Config; on failure or invalid format,
- * safely falls back to the static hardcoded config.
- */
+// Falls back to the static map when Edge Config is missing or fails schema validation.
 export async function getActiveModels(): Promise<Record<AIModelRole, AllAvailableModels[]>> {
   try {
     const remoteConfig = await get("AI_MODELS_CONFIG");

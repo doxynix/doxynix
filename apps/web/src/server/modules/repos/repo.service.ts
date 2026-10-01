@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 
 import type { DbClient } from "@/server/core/db";
 import { getRepoInfo } from "@/server/core/github/github-api";
-import { GitHubAuthRequiredError, parseUrl } from "@/server/core/github/github-provider";
+import { GitHubAuthRequiredError, parseUrl } from "@/server/core/github/github-client";
 import { handlePrismaError, toOctokitTrpcError } from "@/server/utils/handle-error";
 import { clampPage, getPaginationMeta } from "@/server/utils/pagination";
 import { normalizeSearchInput, tokenizeSearchInput } from "@/server/utils/search";

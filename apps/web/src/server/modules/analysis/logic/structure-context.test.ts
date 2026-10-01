@@ -79,9 +79,7 @@ describe("buildBreadcrumbs", () => {
     ]);
   });
 
-  // `NodeContextOutputSchema` requires `nodeType` on
-  // `explain.relationships.breadcrumbs`, so every reachable path has to emit
-  // one of the two literals.
+  // `NodeContextOutputSchema` requires `nodeType` on every breadcrumb, so each path must emit one of the two literals
   it.each([
     ["file", "src/features/ui/button.tsx"],
     ["file", "app.ts"],
@@ -99,11 +97,7 @@ describe("buildBreadcrumbs", () => {
     expect(crumbs.at(-1)?.nodeType).toBe(nodeType);
   });
 
-  // The only inputs that reach the `parts.length === 0` early return are the
-  // ones `pathe.normalize` collapses to "/" (i.e. a bare root path). It emits
-  // zero crumbs rather than a crumb without a nodeType, so the required field is
-  // never missing. ("", "." and "./" normalize to "." / "./", which do produce a
-  // single crumb - and that crumb carries nodeType, per the case above.)
+  // Only inputs `pathe.normalize` collapses to "/" hit the early return, and it emits zero crumbs rather than a crumb missing the required `nodeType`
   it.each(["/", "//", "///"])("returns no crumbs at all for the root path %o", (path) => {
     expect(buildBreadcrumbs("file", path)).toEqual([]);
     expect(buildBreadcrumbs("group", path)).toEqual([]);

@@ -1,8 +1,8 @@
 import type { DocType } from "@doxynix/shared";
 import type { Repo } from "@prisma/client";
 
-import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
-import { llmLimiter } from "@/server/utils/llm-limiter";
+import { llmLimiter } from "@/server/modules/analysis/ai/llm-limiter";
+import { taskLogger } from "@/server/utils/task-logger";
 
 import type { AIResult } from "../engine/core/analysis-result.schemas";
 import type {
@@ -27,10 +27,6 @@ export type DeepDocsResult = {
   swaggerYaml?: string;
 };
 
-/**
- * Main AI Pipeline Orchestrator
- * Coordinates Sentinel → Mapper → Architect → Writers stages
- */
 export async function runAiPipeline(
   validFiles: { content: string; path: string }[],
   repositoryFacts: RepositoryFact[],
@@ -46,7 +42,6 @@ export async function runAiPipeline(
 ): Promise<AIResult> {
   taskLogger.log("Initializing AI Multi-Agent Pipeline...");
 
-  // Stage 1: Prompt injection detection (Censor)
   const sentinelStatus = await llmLimiter.schedule(
     { id: `${analysisId}-sentinel`, weight: 5000 },
     () => executeSentinelPhase(instructions, analysisId),
@@ -58,14 +53,12 @@ export async function runAiPipeline(
   }
   taskLogger.success("Security Sentinel: Instructions verified as safe");
 
-  // Stage 2: Project mapping
   taskLogger.info("Project Mapper: Scanning topology and module boundaries...");
   const projectMap = await llmLimiter.schedule({ id: `${analysisId}-mapper`, weight: 80_000 }, () =>
     executeMapperPhase(validFiles, hardMetrics, evidence, analysisId, userId, repoId, branch),
   );
   taskLogger.success(`Project Mapper: Identified ${projectMap.modules.length} core modules`);
 
-  // Stage 3: Deep analysis & Context Assembly
   taskLogger.info("Lead Architect: Assembling context and analyzing patterns...");
 
   hardMetrics.documentationInput ??= buildDocumentationInputModel(evidence, hardMetrics);
@@ -99,10 +92,6 @@ export async function runAiPipeline(
   return result;
 }
 
-/**
- * Document Generation Pipeline
- * Coordinates parallel writer tasks for all requested documentation
- */
 export async function generateDeepDocs(
   files: { content: string; path: string }[],
   analysisResult: AIResult,

@@ -14,10 +14,11 @@ import { TOOL_APPROVAL_SECRET } from "@/shared/config/env.server";
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { getActiveModels } from "@/server/core/ai/ai-constants";
+import { google } from "@/server/core/ai/google";
+import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
 import { prisma } from "@/server/core/db";
-import { google } from "@/server/core/google";
 import { realtimeService } from "@/server/core/realtime";
 import {
   AGENT_SYSTEM_PROMPT,
@@ -25,7 +26,6 @@ import {
 } from "@/server/modules/agent/agent.prompts";
 import { getAgentTools, MUTATION_TOOLS } from "@/server/modules/agent/agent.tools";
 import { processMessageParts } from "@/server/modules/agent/agent-storage";
-import { AppError } from "@/server/utils/api-error";
 import { withApiHandler } from "@/server/utils/with-api-handler";
 
 export const maxDuration = 60;
@@ -37,9 +37,6 @@ async function handler(req: Request) {
   const agentModelId = activeModels.AGENT[0];
 
   if (agentModelId == null) {
-    // Previously a bare `throw new Error(...)`, which escaped as a Next.js 500
-    // with no log line. A missing model is a server misconfiguration, so it is
-    // reported as one: logged with context, still masked on the wire.
     throw new AppError({
       code: "INTERNAL_SERVER_ERROR",
       publicMessage: "No model configured for AGENT role",
@@ -207,11 +204,5 @@ async function handler(req: Request) {
   return createUIMessageStreamResponse({ stream: uiMessageStream });
 }
 
-/**
- * Safe to wrap even though it streams: `withApiHandler` only wraps the
- * *setup* — reading the body, resolving the model, persisting the user turn and
- * building the stream. Everything thrown after `createUIMessageStreamResponse`
- * is delivered as an in-stream error part by the AI SDK, long after the
- * wrapper has returned.
- */
+// Safe to wrap though it streams: the wrapper only covers setup, and anything thrown after the response is delivered in-stream.
 export const POST = withApiHandler(handler, { scope: "agent/chat" });

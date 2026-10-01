@@ -1,8 +1,8 @@
 import type { NextRequest } from "next/server";
 
 import { auth } from "@/server/core/auth";
+import { verifyAndUseApiKey } from "@/server/core/auth/verify-api-key";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";
-import { verifyAndUseApiKey } from "@/server/utils/verify-and-use-api-key";
 
 import { prisma } from "../db";
 import { redisClient } from "../redis";
@@ -36,8 +36,7 @@ export async function createContext({ req }: Props) {
             createdAt: now,
             expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
             id: "api-key",
-            // better-auth requires `token` and both timestamps; an API key has no
-            // real session row, so these are synthetic but well-formed.
+            // better-auth requires `token` and both timestamps; an API key has no real session row, so these are synthetic but well-formed.
             token: "api-key",
             updatedAt: now,
             userId: keyRecord.user.id,
@@ -45,10 +44,7 @@ export async function createContext({ req }: Props) {
           user: {
             banned: keyRecord.user.banned,
             createdAt: keyRecord.user.createdAt,
-            // `User.email`, `User.name` and `User.image` are nullable columns while
-            // better-auth's session shape types all three as plain `string`. Same
-            // fallbacks the task runner's synthetic session uses in
-            // `core/trpc/server.ts`, so both impersonations behave alike.
+            // `email`/`name`/`image` are nullable columns but better-auth types them as `string`; these are the same fallbacks as the task runner's synthetic session in `core/trpc/server.ts`.
             email: keyRecord.user.email ?? "",
             emailVerified: keyRecord.user.emailVerified,
             id: keyRecord.user.id,

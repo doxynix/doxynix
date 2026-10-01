@@ -13,171 +13,6 @@ export type ProjectPolicySemanticKind =
   | "shared"
   | "unknown";
 
-export const PATH_PATTERNS = {
-  API: [
-    "**/{api,routes,routers,controllers,handlers,graphql,gql,rpc,endpoints}/**",
-    "**/*.{controller,handler,router,route,schema,dto,model,trpc,openapi,swagger,gql,graphql,proto,thrift}.*",
-  ],
-  ASSET: [
-    "**/{public,static,assets,css,scss,less,sass,icons,images,fonts,theme,themes,media,videos,audio}/**",
-    "**/*.{css,scss,less,sass,svg,png,jpg,jpeg,gif,ico,woff,woff2,ttf,eot,webp,avif,obj,glb}",
-  ],
-  BENCHMARK: [
-    "**/{bench,benchmarks,perf-measures,performance}/**",
-    "**/*bench*.{ts,tsx,js,jsx,mts,cts,py,go,rs,java,kt,cs,rb,php}",
-    "**/*benchmark*.{ts,tsx,js,jsx,mts,cts,py,go,rs,java,kt,cs,rb,php}",
-  ],
-  CONFIG: [
-    "**/package.json",
-    "**/.npmrc",
-    "**/.yarnrc*",
-    "**/pnpm-workspace.yaml",
-    "**/pnpm-lock.yaml",
-    "**/bun.lock",
-    "**/bun.lockb",
-    "**/deno.lock",
-    "**/tsconfig*.json",
-    "**/jsconfig.json",
-    "**/{vite,rollup,next,nuxt,svelte,astro,tsup,rspack,farm,rolldown}.config.*",
-    "**/biome.json",
-    "**/{nginx.conf,Caddyfile,Procfile}",
-    "**/{netlify.toml,vercel.json}",
-    "**/bunfig.toml",
-    "**/deno.json",
-    "**/deno.jsonc",
-    "**/tsconfig.json",
-    "**/tsconfig.*.json",
-    "**/CMakeLists.txt",
-    "**/meson.build",
-    "**/BUILD",
-    "**/BUILD.bazel",
-    "**/WORKSPACE",
-    "**/go.mod",
-    "**/go.sum",
-    "**/Cargo.lock",
-    "**/Cargo.toml",
-    "**/pom.xml",
-    "**/build.gradle*",
-    "**/settings.gradle",
-    "**/settings.gradle.kts",
-    "**/gradlew",
-    "**/gradlew.bat",
-    "**/*.csproj",
-    "**/*.fsproj",
-    "**/*.vbproj",
-    "**/*.sln",
-    "**/Directory.Build.props",
-    "**/Directory.Packages.props",
-    "**/composer.json",
-    "**/Gemfile",
-    "**/pyproject.toml",
-    "**/poetry.lock",
-    "**/Pipfile",
-    "**/Pipfile.lock",
-    "**/requirements.txt",
-    "**/setup.py",
-    "**/setup.cfg",
-    "**/mix.exs",
-    "**/mix.lock",
-    "**/rebar.config",
-    "**/rebar.lock",
-    "**/docker-compose.{yml,yaml}",
-    "**/Dockerfile",
-    "**/Makefile",
-    "**/app.config",
-    "**/web.config",
-    "**/*.{prisma,zmodel,proto,thrift,sql}",
-    "**/*.{yml,yaml,toml,ini,conf,properties,env,env.local,env.production,env.example}",
-  ],
-  DOCS: [
-    "**/{docs,doc,documentation,examples,samples,guides,website,wiki,manual}/**",
-    "**/example/**",
-    "**/sample/**",
-    "**/{README,CHANGELOG,CONTRIBUTING,CODE_OF_CONDUCT,SECURITY,LICENSE,AUTHORS,HISTORY}*",
-    "**/*.{md,txt,rst,adoc}",
-  ],
-  ENTRY: [
-    "**/main.{ts,js,py,go,rs,cpp,c,java,kt,cs,rb,php,swift,ex,scala,zig,m,mm}",
-    "**/index.{ts,js,py,php}",
-    "**/server.{ts,js,py,go}",
-    "**/app.{ts,js,py,rb,swift}",
-    "**/manage.py",
-    "**/wsgi.py",
-    "**/asgi.py",
-    "**/lambda_function.py",
-    "**/__main__.py",
-    "**/program.cs",
-    "**/startup.cs",
-    "**/bootstrap.{php,ts,js}",
-    "**/handler.{js,ts,py}",
-  ],
-  GENERATED: [
-    "**/{generated,.generated,dist,build,out,target,bin,obj,vendor,node_modules,.next,.nuxt,.svelte-kit,.astro,.nitro,.wrangler,.output,.turbo,.cache,.parcel-cache}/**",
-    "**/__generated__/**",
-  ],
-  IGNORE: [
-    "**/{.git,node_modules,dist,build,out,public,static,target,.next,.nuxt,.svelte-kit,.astro,.nitro,.wrangler,.output,vendor,bower_components,coverage,.pnpm-store,.yarn,.turbo,.parcel-cache,.cache,.serverless,.terraform,.gradle,.mvn,.dart_tool,__pycache__,.pytest_cache,.mypy_cache,.ruff_cache,.tox,.nox,.venv,venv,obj,Debug,Release}/**",
-    "**/{.ds_store,thumbs.db,.idea,.vscode}/**",
-    "**/*.{pdf,doc,docx,xls,xlsx,ppt,pptx,zip,tar,gz,7z,rar,mp3,mp4,wav,exe,dll,so,pyc, png, jpg, jpeg}",
-  ],
-  INFRA: [
-    "**/.github/workflows/**",
-    "**/{deploy,deployment,helm,k8s,terraform,infra,infrastructure}/**",
-    "**/docker-compose.{yml,yaml}",
-    "**/.gitlab-ci.yml",
-    "**/azure-pipelines.yml",
-    "**/Jenkinsfile",
-    "**/{cloudformation,pulumi}/**",
-    "**/*.{tfvars,nomad,hcl}",
-    "**/Dockerfile",
-    "**/*.tf",
-  ],
-  INFRA_DIRS: [
-    "**/cmd/**",
-    "**/bin/**",
-    "**/pages/api/**",
-    "**/app/api/**",
-    "**/functions/**",
-    "**/k8s/**",
-  ],
-  ML: [
-    "**/{models,notebooks,data_science,training,datasets,inference}/**",
-    "**/*.{ipynb,onnx,pb,h5,pt,pth,pkl,joblib,dvc}",
-  ],
-  MOBILE: [
-    "**/{ios,android,mobile,cordova,capacitor,flutter,react-native}/**",
-    "**/*.{swift,plist,xcworkspace,xcodeproj,storyboard,xib}",
-  ],
-  OPENAPI: [
-    "**/openapi.{json,yaml,yml}",
-    "**/swagger.{json,yaml,yml}",
-    "**/*openapi*",
-    "**/*swagger*",
-  ],
-  RUNTIME_SOURCE: [
-    "**/{src,app,lib,core,domain,internal,pkg,services,server,include,crates,packages,modules,cmd,cli,sdk,entities,features,widgets}/**",
-    "**/*.{service,repository,use-case,handler,router,route,controller,model,entity,dto,contract,action,util,helper,logic}.*",
-  ],
-  SENSITIVE: [
-    "**/.env*",
-    "**/*.{keystore,jks}",
-    "**/config/master.key",
-    "**/credentials.json",
-    "**/{secrets,secret,credentials,keys}/**",
-    "**/*.{pem,key,p12,pfx,crt,der}",
-  ],
-  TEST: [
-    "**/{test,tests,spec,__tests__,__mocks__,fixture,fixtures,e2e}/**",
-    "**/runtime-tests/**",
-    "**/*.{test,spec,cy,steps}.*",
-  ],
-  TOOLING: [
-    "**/{scripts,cli,tools}/**",
-    "**/{eslint,prettier,vitest,playwright,jest,stryker,typedoc,webpack,vite,rollup,postcss}.config.*",
-    "**/*.config.{js,ts,mjs,cjs}",
-  ],
-} as const;
-
 export const PROJECT_POLICY_RULES = {
   categoryPolicy: {
     nonArchitectureCategories: new Set<FileCategory>([
@@ -238,24 +73,6 @@ export const PROJECT_POLICY_RULES = {
   ],
 
   fileHints: {
-    dependencyLockfiles: [
-      "package-lock.json",
-      "pnpm-lock.yaml",
-      "yarn.lock",
-      "bun.lock",
-      "bun.lockb",
-      "deno.lock",
-      "go.sum",
-      "cargo.lock",
-      "poetry.lock",
-      "pipfile.lock",
-      "mix.lock",
-      "rebar.lock",
-      "composer.lock",
-      "gradle.lockfile",
-      ".terraform.lock.hcl",
-    ],
-    lowSignalConfigNames: ["gradlew", "gradlew.bat"],
     polyglotConfigHints: [
       "build.gradle",
       "build.gradle.kts",
@@ -396,8 +213,8 @@ export const PROJECT_POLICY_RULES = {
       { id: "raw_sql", pattern: /\.raw\(|db\.execute\(|db\.run\(/i, title: "Raw SQL Execution" },
       {
         id: "sql_concat",
-        // Use a non-greedy, minimal-matching pattern to avoid catastrophic backtracking.
-        // Matches typical `select ... from ... where ... = ${` templated SQL usages.
+        // Non-greedy and minimal on purpose: avoids catastrophic backtracking while still
+        // matching templated `select ... from ... where ... = ${`.
         pattern: /\bselect\b[\S\s]*?\bfrom\b[\S\s]*?\bwhere\b[\S\s]*?=\s*\${/i,
         title: "SQL Injection (String Concatenation)",
       },
@@ -523,15 +340,6 @@ export const PROJECT_POLICY_RULES = {
       "mongoose",
       "supabase",
     ],
-    frontendDirectories: [
-      "ui",
-      "components",
-      "views",
-      "screens",
-      "containers",
-      "layouts",
-      "widgets",
-    ],
     frontendSegments: [
       "app",
       "pages",
@@ -578,9 +386,6 @@ type FrameworkCatalogEntry = {
   name: string;
 };
 export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
-  // ==========================================
-  // 1. JS/TS ECOSYSTEM (Frontend & Backend Meta-frameworks)
-  // ==========================================
   { aliases: ["hono", "@hono/"], category: "framework", name: "Hono" },
   { aliases: ["express"], category: "framework", name: "Express" },
   { aliases: ["fastify"], category: "framework", name: "Fastify" },
@@ -595,9 +400,6 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   { aliases: ["@elysiajs/", "elysia"], category: "framework", name: "ElysiaJS" },
   { aliases: ["h3", "nitro"], category: "framework", name: "Nuxt Nitro" },
 
-  // ==========================================
-  // 2. JS/TS UI FRAMEWORKS & VIEW LIBRARIES
-  // ==========================================
   { aliases: ["react", "react-dom"], category: "ui", name: "React" },
   { aliases: ["vue", "@vue/"], category: "ui", name: "Vue" },
   { aliases: ["svelte"], category: "ui", name: "Svelte" },
@@ -607,9 +409,6 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   { aliases: ["alpinejs"], category: "ui", name: "Alpine.js" },
   { aliases: ["angular", "@angular/core"], category: "ui", name: "Angular" },
 
-  // ==========================================
-  // 3. FRONTEND STATE MANAGEMENT & DATA FETCHING
-  // ==========================================
   {
     aliases: ["@tanstack/react-query", "react-query", "@tanstack/query"],
     category: "framework",
@@ -625,9 +424,6 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   { aliases: ["jotai"], category: "framework", name: "Jotai" },
   { aliases: ["pinia"], category: "framework", name: "Pinia" },
 
-  // ==========================================
-  // 4. AI & LLM ORCHESTRATION
-  // ==========================================
   { aliases: ["openai", "@openai/"], category: "api", name: "OpenAI SDK" },
   { aliases: ["@anthropic-ai/sdk", "anthropic"], category: "api", name: "Anthropic SDK" },
   { aliases: ["@google/generative-ai"], category: "api", name: "Google Gemini SDK" },
@@ -636,9 +432,6 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   { aliases: ["ollama"], category: "infrastructure", name: "Ollama" },
   { aliases: ["ai", "@ai-sdk/"], category: "framework", name: "Vercel AI SDK" },
 
-  // ==========================================
-  // 5. PYTHON ECOSYSTEM
-  // ==========================================
   { aliases: ["fastapi"], category: "framework", name: "FastAPI" },
   { aliases: ["flask"], category: "framework", name: "Flask" },
   { aliases: ["django", "django-rest-framework"], category: "framework", name: "Django" },
@@ -646,9 +439,6 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   { aliases: ["pyramid"], category: "framework", name: "Pyramid" },
   { aliases: ["masonite"], category: "framework", name: "Masonite" },
 
-  // ==========================================
-  // 6. GO ECOSYSTEM
-  // ==========================================
   { aliases: ["gin-gonic/gin"], category: "framework", name: "Gin" },
   { aliases: ["gorilla/mux"], category: "framework", name: "Gorilla Mux" },
   { aliases: ["labstack/echo"], category: "framework", name: "Echo" },
@@ -656,9 +446,6 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   { aliases: ["beego"], category: "framework", name: "Beego" },
   { aliases: ["revel"], category: "framework", name: "Revel" },
 
-  // ==========================================
-  // 7. RUST ECOSYSTEM
-  // ==========================================
   { aliases: ["actix-web"], category: "framework", name: "Actix Web" },
   { aliases: ["axum"], category: "framework", name: "Axum" },
   { aliases: ["rocket"], category: "framework", name: "Rocket" },
@@ -666,9 +453,6 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   { aliases: ["leptos"], category: "framework", name: "Leptos" },
   { aliases: ["poise"], category: "framework", name: "Poise" },
 
-  // ==========================================
-  // 8. JAVA / KOTLIN ECOSYSTEM
-  // ==========================================
   {
     aliases: ["spring-boot", "spring-boot-starter", "springframework"],
     category: "framework",
@@ -683,9 +467,6 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   },
   { aliases: ["ktor", "io.ktor"], category: "framework", name: "Ktor" },
 
-  // ==========================================
-  // 9. PHP ECOSYSTEM
-  // ==========================================
   { aliases: ["laravel/framework", "laravel/laravel"], category: "framework", name: "Laravel" },
   {
     aliases: ["symfony/symfony", "symfony/framework-bundle"],
@@ -696,9 +477,6 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   { aliases: ["codeigniter4/framework"], category: "framework", name: "CodeIgniter" },
   { aliases: ["cakephp/cakephp"], category: "framework", name: "CakePHP" },
 
-  // ==========================================
-  // 10. .NET / C#
-  // ==========================================
   {
     aliases: ["microsoft.aspnetcore", "microsoft.extensions.hosting"],
     category: "framework",
@@ -706,17 +484,11 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   },
   { aliases: ["microsoft.entityframeworkcore"], category: "orm", name: "Entity Framework" },
 
-  // ==========================================
-  // 11. MOBILE ECOSYSTEM
-  // ==========================================
   { aliases: ["react-native"], category: "framework", name: "React Native" },
   { aliases: ["flutter", "io.flutter"], category: "framework", name: "Flutter" },
   { aliases: ["@ionic/core", "@ionic/react"], category: "framework", name: "Ionic" },
   { aliases: ["nativescript"], category: "framework", name: "NativeScript" },
 
-  // ==========================================
-  // 12. API / INTERACTION TIER
-  // ==========================================
   { aliases: ["@trpc/", "trpc"], category: "api", name: "tRPC" },
   {
     aliases: ["graphql", "@apollo/", "apollo-server", "graphql-tag"],
@@ -726,9 +498,6 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   { aliases: ["openapi", "swagger"], category: "api", name: "OpenAPI" },
   { aliases: ["grpc", "@grpc/grpc-js", "google.golang.org/grpc"], category: "api", name: "gRPC" },
 
-  // ==========================================
-  // 13. ORM, ODM & DATA PERSISTENCE
-  // ==========================================
   { aliases: ["prisma", "@prisma/client"], category: "orm", name: "Prisma" },
   { aliases: ["typeorm"], category: "orm", name: "TypeORM" },
   { aliases: ["sequelize"], category: "orm", name: "Sequelize" },
@@ -739,9 +508,6 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   { aliases: ["gorm.io/gorm", "github.com/jinzhu/gorm"], category: "orm", name: "GORM" },
   { aliases: ["diesel"], category: "orm", name: "Diesel" },
 
-  // ==========================================
-  // 14. DATABASES & CACHES
-  // ==========================================
   { aliases: ["redis", "ioredis"], category: "database", name: "Redis" },
   {
     aliases: ["pg", "postgres", "postgresql", "pg-promise"],
@@ -758,9 +524,6 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
     name: "Firebase",
   },
 
-  // ==========================================
-  // 15. UI / CSS / STYLING
-  // ==========================================
   { aliases: ["tailwindcss", "@tailwindcss/"], category: "ui", name: "Tailwind CSS" },
   { aliases: ["@chakra-ui/react", "@chakra-ui/"], category: "ui", name: "Chakra UI" },
   { aliases: ["@mui/material", "@mui/"], category: "ui", name: "Material UI" },
@@ -768,36 +531,24 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   { aliases: ["bootstrap"], category: "ui", name: "Bootstrap" },
   { aliases: ["sass", "scss"], category: "ui", name: "Sass" },
 
-  // ==========================================
-  // 16. INFRASTRUCTURE, CICD & DEV ENVIRONMENT
-  // ==========================================
   { aliases: ["docker", "dockerfile"], category: "infrastructure", name: "Docker" },
   { aliases: ["terraform"], category: "infrastructure", name: "Terraform" },
   { aliases: ["kubernetes", "k8s", "helm"], category: "infrastructure", name: "Kubernetes" },
   { aliases: ["ansible"], category: "infrastructure", name: "Ansible" },
   { aliases: [".github/workflows", "github actions"], category: "tooling", name: "GitHub Actions" },
 
-  // ==========================================
-  // 17. MODERN HIGH-SPEED RUST-BASED TOOLING (Ultra-current!)
-  // ==========================================
   { aliases: ["@rspack/core", "rspack"], category: "tooling", name: "Rspack" }, // ByteDance's ultra-fast bundler
   { aliases: ["turbopack"], category: "tooling", name: "Turbopack" },
   { aliases: ["oxc", "oxlint"], category: "tooling", name: "Oxc/Oxlint" }, // ESLint replacement in Rust
   { aliases: ["rolldown"], category: "tooling", name: "Rolldown" }, // Vite's future core
   { aliases: ["biome", "@biomejs/biome"], category: "tooling", name: "Biome" }, // Prettier/ESLint replacement in Rust
 
-  // ==========================================
-  // 18. TESTING SUITES
-  // ==========================================
   {
     aliases: ["vitest", "jest", "pytest", "junit", "mocha", "cypress", "playwright"],
     category: "testing",
     name: "Testing Frameworks",
   },
 
-  // ==========================================
-  // 19. ANDROID / KOTLIN MOBILE ECOSYSTEM
-  // ==========================================
   { aliases: ["androidx.compose", "compose"], category: "ui", name: "Jetpack Compose" },
   { aliases: ["dagger.hilt", "hilt"], category: "framework", name: "Hilt DI" },
   { aliases: ["org.webrtc", "webrtc"], category: "api", name: "WebRTC" },

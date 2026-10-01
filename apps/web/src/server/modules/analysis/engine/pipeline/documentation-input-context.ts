@@ -8,7 +8,7 @@ import {
   getPrimaryEntrypointPaths,
   getSecondaryEntrypointPaths,
 } from "./report-helpers";
-import { buildRiskSectionBody } from "./risk-model";
+import { buildGraphReliability, buildRiskSectionBody } from "./risk-model";
 
 type FrameworkFactInput = DocumentationInputModel["api"]["frameworkFacts"][number];
 type EntrypointInput = DocumentationInputModel["api"]["entrypoints"][number];
@@ -129,27 +129,11 @@ function buildStackProfile(
   ).sort((left, right) => left.localeCompare(right));
 }
 
-function mergeGraphReliability(
-  evidence: RepositoryEvidence,
-  metrics: RepoMetrics,
-): RepositoryEvidence["dependencyGraph"] {
-  if (metrics.graphReliability == null) {
-    return evidence.dependencyGraph;
-  }
-
-  return {
-    ...evidence.dependencyGraph,
-    resolvedEdges: metrics.graphReliability.resolvedEdges,
-    unresolvedImportSpecifiers: metrics.graphReliability.unresolvedImportSpecifiers,
-    unresolvedSamples: metrics.graphReliability.unresolvedSamples,
-  };
-}
-
 export function buildDocumentationContext(
   evidence: RepositoryEvidence,
   metrics: RepoMetrics,
 ): DocumentationContext {
-  const graphReliability = mergeGraphReliability(evidence, metrics);
+  const graphReliability = buildGraphReliability(evidence, metrics);
   const frameworkFacts = buildFrameworkFacts(evidence, metrics);
   const entrypoints = buildEntrypoints(evidence, metrics);
   const routeInventory = buildRouteInventory(evidence, metrics, frameworkFacts);

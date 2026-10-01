@@ -79,7 +79,6 @@ function buildRiskInput(context: DocumentationContext): DocumentationInputModel[
   };
 }
 
-// Canonical bridge from deterministic backend analysis to section-first report inputs for docs and AI writers.
 export function buildDocumentationInputModel(
   evidence: RepositoryEvidence,
   metrics: RepoMetrics,

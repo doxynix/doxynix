@@ -3,8 +3,8 @@ import { TRPCError } from "@trpc/server";
 import * as z from "zod";
 
 import type { DbClient } from "@/server/core/db";
-import { getInstallationClient } from "@/server/core/github/github-provider";
-import { markdownToHtml } from "@/server/utils/markdown-to-html";
+import { getInstallationClient } from "@/server/core/github/github-client";
+import { markdownToHtml } from "@/server/modules/analysis/services/markdown-to-html";
 
 export const prCommentsService = {
   async getComments(db: DbClient, analysisId: string) {

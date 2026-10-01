@@ -36,15 +36,8 @@ import { AgentHeader } from "./agent-header";
 import { AgentSidebar } from "./agent-sidebar";
 import { ToolCallIndicator, type ToolIndicatorPart } from "./tool-call-indicator";
 
-/** The `parts` element type `useChat` hands us, via the session-history query. */
 type SessionMessagePart = UIMessagePart<UIDataTypes, UITools>;
 
-/**
- * A `tool-${string}` part as `ToolCallIndicator` reads it. `ToolUIPart<UITools>`
- * is `Record<string, UITool>` with no concrete tool names, so its default form
- * is assignable to `ToolIndicatorPart` — that assignability is the drift guard:
- * if the SDK ever renames a `state` or drops a field, this line stops compiling.
- */
 type RenderedToolPart = ToolUIPart & ToolIndicatorPart;
 
 function isToolPart(part: SessionMessagePart): part is RenderedToolPart {

@@ -13,53 +13,17 @@ import {
 } from "./text-animate.variants";
 
 interface TextAnimateProps extends MotionProps {
-  /**
-   * Whether to enable accessibility features (default: true)
-   */
   accessible?: boolean;
-  /**
-   * The animation preset to use
-   */
   animation?: AnimationVariant;
-  /**
-   * The element type to render
-   */
   as?: ElementType;
-  /**
-   * How to split the text ("text", "word", "character")
-   */
   by?: AnimationType;
-  /**
-   * The text content to animate
-   */
   children: string;
-  /**
-   * The class name to be applied to the component
-   */
   className?: string;
-  /**
-   * The delay before the animation starts
-   */
   delay?: number;
-  /**
-   * The duration of the animation
-   */
   duration?: number;
-  /**
-   * Whether to animate only once
-   */
   once?: boolean;
-  /**
-   * The class name to be applied to each segment
-   */
   segmentClassName?: string;
-  /**
-   * Whether to start animation when component enters viewport
-   */
   startOnView?: boolean;
-  /**
-   * Custom motion variants for the animation
-   */
   variants?: Variants;
 }
 
@@ -78,8 +42,7 @@ const TextAnimateBase = ({
   variants,
   ...props
 }: TextAnimateProps) => {
-  // The motion wrapper is created lazily once per mount (lazy state initializer keeps the render
-  // pure and avoids re-creating the component identity on every render).
+  // Lazily built once per mount: keeps the render pure and avoids re-creating the component identity every render.
   const [MotionComponent] = useState(() => motion.create(Component));
 
   let segments: string[] = [];

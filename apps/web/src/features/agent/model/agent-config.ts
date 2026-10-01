@@ -74,15 +74,9 @@ export const toolLabelKeys: Record<string, AgentToolLabelKey> = {
   updateUserProfile: "tool_update_user_profile",
 };
 
-/** The tRPC react-query utils proxy, as `useUtils()` returns it. */
 type TrpcUtils = ReturnType<typeof trpc.useUtils>;
 
-/**
- * Declared as returning a promise because every entry awaits one or more
- * `invalidate()` calls. The `void` return (and the `any` parameter) it used to
- * declare is why a dozen of these floated un-awaited — the linter could not see
- * a floating promise through an `any`.
- */
+// The promise return is deliberate: every entry awaits invalidate() calls, so the linter can see a floating promise.
 export const TOOL_INVALIDATIONS: Record<string, (utils: TrpcUtils) => Promise<void>> = {
   applyFix: (utils) => utils.analysis.listByRepository.invalidate(),
   clearReadNotifications: (utils) =>
@@ -96,8 +90,6 @@ export const TOOL_INVALIDATIONS: Record<string, (utils: TrpcUtils) => Promise<vo
     Promise.all([
       utils.repo.getAll.invalidate(),
       utils.repo.getSlim.invalidate(),
-      // The router key is `agent`, not `agentChat` — the old call silently did
-      // nothing, leaving the sidebar listing a deleted repository's chats.
       utils.agent.listSessions.invalidate(),
     ]).then(() => undefined),
   markAllNotificationsAsRead: (utils) =>

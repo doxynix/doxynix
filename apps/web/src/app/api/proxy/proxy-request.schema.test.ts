@@ -2,11 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { ProxyRequestBody } from "./proxy-request.schema";
 
-/**
- * The proxy route forwards an attacker-supplied URL to the server, so this body
- * is the untrusted boundary. It used to be read with a blind
- * `as ProxyRequestBody`, which let a nested-object header value reach undici.
- */
 describe("ProxyRequestBody", () => {
   it("accepts a minimal body with just a url and method", () => {
     const parsed = ProxyRequestBody.safeParse({ method: "GET", url: "https://example.com" });
@@ -25,8 +20,6 @@ describe("ProxyRequestBody", () => {
   });
 
   it("rejects a non-string header value, which undici cannot send", () => {
-    // This is the case the previous cast let through to a runtime failure deep
-    // inside undici instead of a 400 at the boundary.
     const parsed = ProxyRequestBody.safeParse({
       headers: { "x-trace": { nested: true } },
       method: "GET",

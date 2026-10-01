@@ -13,18 +13,12 @@ import { makeKeychain, parseKey } from "./keyring";
 import { decryptOnRead, encryptOnWrite } from "./rewrite";
 
 const KEY = `k1.aesgcm256.${Buffer.from("0123456789abcdef0123456789abcdef").toString("base64url")}`;
-// sha256 yields exactly the 32 raw bytes the key format requires, without a
-// 32-character literal in the source.
+// sha256 yields exactly the 32 raw bytes the key format requires, without a 32-character literal in the source.
 const ROTATED = `k1.aesgcm256.${createHash("sha256").update("rotated").digest("base64url")}`;
 const key = parseKey(KEY);
 const keychain = makeKeychain([KEY, ROTATED]);
 
-/**
- * The encrypted surface the retired `ENCRYPTED_METADATA_MAP` declared: seven
- * models, 12 ciphertext columns, 6 of them paired with a deterministic hash
- * column. `null` means "encrypted, no hash column"; an array is the hash
- * column's `normalize` options.
- */
+// The encrypted surface the retired `ENCRYPTED_METADATA_MAP` declared: `null` = encrypted with no hash column, an array = the hash column's `normalize` options.
 const EXPECTED_SPEC: Record<string, Record<string, null | string[]>> = {
   Account: {
     accessToken: null,
@@ -44,8 +38,7 @@ describe("field-encryption end to end", () => {
   it("covers every model and field the generated spec declares", () => {
     const spec = getModelSpec("User");
 
-    // `emailHash` is not a separate entry: the generator folds `@encryption:hash`
-    // onto the field it hashes, so only the ciphertext columns are listed.
+    // `emailHash` is not a separate entry: the generator folds `@encryption:hash` onto the field it hashes, so only ciphertext columns are listed.
     expect(Object.keys(spec.fields).sort()).toEqual(["email", "name"]);
     expect(Object.keys(spec.connections)).toContain("accounts");
   });

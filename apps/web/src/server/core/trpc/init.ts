@@ -5,7 +5,7 @@ import superjson from "superjson";
 
 import { IS_PROD } from "@/shared/config/env.flags";
 
-import { normalizeError } from "@/server/utils/api-error";
+import { normalizeError } from "@/server/core/api-error";
 import {
   buildRequestStore,
   requestContext,
@@ -17,25 +17,7 @@ import type { DbClient } from "../db";
 import type { Context } from "./context";
 
 const t = initTRPC.context<Context>().create({
-  /**
-   * Single normalization point for every procedure in the app.
-   *
-   * tRPC wraps any non-`TRPCError` throw via `getTRPCErrorFromUnknown`, which
-   * hardcodes `code: "INTERNAL_SERVER_ERROR"` and parks the original on
-   * `cause` (identity-preserved for every `Error` subclass, so Prisma, Zod and
-   * `AppError` all survive). A service that calls Prisma without wrapping it in
-   * `handlePrismaError` therefore still lands here with the real error
-   * attached, so re-normalizing `cause` maps all 62 previously-unprotected
-   * Prisma call sites in the service layer with no per-service try/catch.
-   *
-   * Writing `data.httpStatus` is what makes the re-mapped code reach the wire:
-   * tRPC's `getHTTPStatusCode` prefers `error.data.httpStatus` over deriving a
-   * status from the code, and `getErrorShape` seeds that field from the
-   * pre-normalization error.
-   *
-   * For a `TRPCError` thrown deliberately, `cause` is usually undefined, so the
-   * code and message pass through unchanged.
-   */
+  // tRPC hardcodes `INTERNAL_SERVER_ERROR` for any non-`TRPCError` throw and parks the original on `cause`, so re-normalizing `cause` here covers every unwrapped Prisma/Zod/`AppError`; writing `data.httpStatus` is what makes the re-mapped code reach the wire, since `getErrorShape` seeds that field from the pre-normalization error.
   errorFormatter({ ctx, error, shape }) {
     const requestId =
       requestContext.getStore()?.requestId ?? resolveRequestId(ctx?.req) ?? "unknown";
@@ -63,8 +45,7 @@ const withZenStack = t.middleware(async ({ ctx, next }) => {
   const userId = sessionUser?.id;
   const userRole = sessionUser?.role == null ? undefined : (sessionUser.role as UserRole);
 
-  // `enhance`'s declared return type is already assignable to `DbClient`; a
-  // `satisfies` keeps it honest without widening to the union by assertion.
+  // `enhance`'s declared return type is already assignable to `DbClient`; a `satisfies` keeps it honest without widening by assertion.
   const protectedDb = enhance(ctx.prisma, {
     user: userId == null ? undefined : { id: userId, role: userRole },
   }) satisfies DbClient;
@@ -116,10 +97,7 @@ const loggerMiddleware = t.middleware(async ({ next, path, type }) => {
     return result;
   }
 
-  // Normalized the same way `errorFormatter` normalizes, so a log line and the
-  // response the client receives always report the same code. Previously a
-  // service that let a Prisma error bubble was logged here as
-  // INTERNAL_SERVER_ERROR while the formatter had no way to say otherwise.
+  // Normalized the same way `errorFormatter` does, so the log line and the client's response always report the same code.
   const normalized = normalizeError(result.error.cause ?? result.error);
   const logMeta = {
     ...meta,
@@ -144,8 +122,7 @@ const loggerMiddleware = t.middleware(async ({ next, path, type }) => {
     return result;
   }
 
-  // An expected 4xx is not an incident; logging it at `error` trained everyone
-  // to ignore the channel. `withApiHandler` splits the same way.
+  // An expected 4xx is not an incident; logging it at `error` trained everyone to ignore the channel. `withApiHandler` splits the same way.
   appLogger.warn({ ...logMeta, msg: `tRPC [${type}] rejected: ${path}` });
 
   return result;

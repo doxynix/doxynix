@@ -45,12 +45,7 @@ export interface MermaidProps {
   config?: MermaidConfig;
   debounceTime?: number;
   onError?: (error: string) => void;
-  /**
-   * The native DOM `MouseEvent`, because the handler is registered with
-   * `figure.addEventListener` — it is not a React synthetic event. The only
-   * consumer calls `preventDefault()` and reads the href, both of which the DOM
-   * type carries, so this needs no cast at the call site.
-   */
+  // Native DOM MouseEvent: the handler is registered via figure.addEventListener, not a React synthetic event.
   onLinkClick?: (href: string, e: globalThis.MouseEvent) => void;
   onSuccess?: (svg: string) => void;
 }
@@ -77,9 +72,6 @@ function useMermaid({
   const configString = JSON.stringify({
     darkMode: isDark,
     theme: isDark ? ("charcoal" as const) : ("default" as const),
-    // `config` is already a `MermaidConfig`. The previous
-    // `JSON.parse(JSON.stringify(config))` round-trip existed only to launder
-    // the `any` that `JSON.parse` returns, and its result was only ever spread.
     ...config,
   });
 

@@ -46,8 +46,7 @@ export const auditService = {
     });
 
     if (log == null) {
-      // Without a message tRPC substitutes the code, so the client rendered the
-      // literal string "NOT_FOUND" to the user.
+      // Without a message tRPC substitutes the code, so the client would render the literal string "NOT_FOUND".
       throw new TRPCError({ code: "NOT_FOUND", message: "Audit log not found" });
     }
 

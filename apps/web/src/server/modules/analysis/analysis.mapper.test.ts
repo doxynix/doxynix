@@ -17,7 +17,9 @@ const mocks = vi.hoisted(() => ({
 vi.mock("next/cache", () => ({ unstable_cache: mocks.unstable_cache }));
 vi.mock("@/server/core/app-logger", () => ({ appLogger: mocks.appLogger }));
 vi.mock("@/server/utils/language-metadata", () => ({ getLanguageColor: mocks.getLanguageColor }));
-vi.mock("@/server/utils/markdown-to-html", () => ({ markdownToHtml: mocks.markdownToHtml }));
+vi.mock("@/server/modules/analysis/services/markdown-to-html", () => ({
+  markdownToHtml: mocks.markdownToHtml,
+}));
 vi.mock("@/server/utils/string-utils", () => ({ hasText: mocks.hasText }));
 
 import { analysisMapper } from "./analysis.mapper";

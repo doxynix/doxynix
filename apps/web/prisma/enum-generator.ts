@@ -12,8 +12,6 @@ generatorHandler({
     const enums = options.dmmf.datamodel.enums;
 
     const output = enums.map((e) => {
-      // Sort values alphabetically: DMMF returns them in declaration order
-      // in schema.prisma, while the repo's biome policy (useSortedKeys) requires sorting.
       const values = [...e.values].sort((a, b) => a.name.localeCompare(b.name));
       const valuesArray = values.map(({ name: value }) => `"${value}"`).join(", ");
 
@@ -38,9 +36,6 @@ generatorHandler({
     await fs.mkdir(dirname(outputPath), { recursive: true });
     await fs.writeFile(outputPath, header + output.join("\n"), "utf-8");
 
-    // Immediately bring the generated file into repo format (wrapping of long
-    // z.enum arrays, etc.) so biome doesn't need to be run manually after
-    // every `db:generate`. A formatting error must not fail generation.
     try {
       execFileSync("bun", ["x", "biome", "format", "--write", outputPath], {
         stdio: "ignore",

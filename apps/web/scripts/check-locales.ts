@@ -38,8 +38,6 @@ function isCopyPlaceholder(key: string, value: string): boolean {
     return true;
   }
   if (segments.length === 3 && segments[0] === "repo") {
-    // e.g. `repo_status_lines` → "Repo Status Lines"; short natural copy
-    // like "Check System Status" never matches the (segments[0] === "repo") branch.
     return true;
   }
   if (segments.length >= 2) {

@@ -85,7 +85,7 @@ describe("lineSimilarity", () => {
   });
 
   it("returns the Jaccard index of the token sets", () => {
-    // {const,total,price,fees} vs {const,total,price,tax} → 3 common of 5
+    // {const,total,price,fees} vs {const,total,price,tax}: 3 shared of 5
     expect(lineSimilarity("const total = price + fees;", "const total = price + tax;")).toBeCloseTo(
       0.6,
     );

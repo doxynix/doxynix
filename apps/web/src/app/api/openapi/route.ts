@@ -11,10 +11,5 @@ async function handler() {
   });
 }
 
-/**
- * The previous `catch` here had no logging branch at all, so a failure to load
- * or serialize the generated spec answered 500 in silence. The wrapper logs it
- * and puts `requestId` in the body, and `IS_PROD` keeps the underlying reason
- * off the wire.
- */
+// withApiHandler logs failures and returns requestId; IS_PROD keeps the underlying reason off the wire.
 export const GET = withApiHandler(handler, { scope: "openapi" });

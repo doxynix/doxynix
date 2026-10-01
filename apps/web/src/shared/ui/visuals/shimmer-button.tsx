@@ -74,18 +74,11 @@ export const ShimmerButton = forwardRef<ComponentRef<typeof Link>, ShimmerButton
 
           <span className="relative z-20 inline-flex items-center justify-center">{children}</span>
 
-          {/* Highlight */}
           <div
             className={cn(
               "absolute inset-0 z-20 size-full rounded-(--radius)",
-
-              // transition
               "transform-gpu transition-standard",
-
-              // on hover
               "group-hover:[box-shadow:inset_0_-6px_10px_color-mix(in_oklab,var(--primary-foreground)_25%,transparent)]",
-
-              // on click
               "group-active:[box-shadow:inset_0_-10px_10px_color-mix(in_oklab,var(--primary-foreground)_25%,transparent)]",
             )}
           />

@@ -8,15 +8,8 @@ import {
 } from "./patch-healer";
 import type { PRFinding } from "./pr.types";
 
-/**
- * New-file line numbering after the hunk header sets the cursor to 10:
- *   " const untouched = 1;"  context -> 10, cursor 11
- *   "-const removed = 2;"    removal -> not commentable, cursor stays 11
- *   "+const added = 3;"      added   -> 11, cursor 12
- *   "+const alsoAdded = 4;"  added   -> 12, cursor 13
- *   " return added;"         context -> 13, cursor 14
- *   "}"                      context -> 14
- */
+// New-file line numbering: hunk header sets the cursor to 10, then context/added lines advance it while removals neither
+// become commentable nor advance it (a removal is not present in the new file)
 const PATCH = [
   "@@ -10,7 +10,8 @@ export function run() {",
   " const untouched = 1;",
@@ -41,7 +34,7 @@ function makeFinding(overrides: Partial<PRFinding> = {}): PRFinding {
   };
 }
 
-/** `noUncheckedIndexedAccess` makes `arr[0]` nullable; these tests always expect one. */
+// `noUncheckedIndexedAccess` makes `arr[0]` nullable; these tests always expect one
 function only<T>(items: T[]): T {
   expect(items).toHaveLength(1);
   return items[0] as T;
@@ -57,8 +50,7 @@ describe("getCommentableLinesFromPatch", () => {
   });
 
   it("does not advance the new-file cursor for removed lines", () => {
-    // The removed line sits at old-file 11; that number is never commentable
-    // because it was never present in the new file.
+    // The removed line sits at old-file 11, which is never commentable
     const lines = getCommentableLinesFromPatch(PATCH);
     expect(lines.has(11)).toBe(true); // 11 is "+const added = 3;" in the new file
     expect(getCommentableLinesFromPatch("@@ -1,3 +1,2 @@\n-a\n-b\n+c")).toEqual(new Set([1]));
@@ -141,7 +133,7 @@ describe("healFindingLine", () => {
   });
 
   it("resolves a near-identical line above the fuzzy threshold", () => {
-    // Jaccard on tokens = 6/7 = 0.857 > 0.75, and neither substring check fires.
+    // Token Jaccard = 6/7 = 0.857 > 0.75, no substring check fires
     const map = new Map([
       ["const total = computeTotal(items) + applyTax(total) + round(total)", 5],
     ]);
@@ -156,7 +148,7 @@ describe("healFindingLine", () => {
   });
 
   it("does not fuzzy-match below the threshold", () => {
-    // Jaccard on tokens = 3/5 = 0.6 < 0.75.
+    // Token Jaccard = 3/5 = 0.6 < 0.75
     const map = new Map([["const total = computeTotal(items);", 5]]);
 
     expect(healFindingLine(map, "const total = computeTotal(item);", 1)).toBe(1);

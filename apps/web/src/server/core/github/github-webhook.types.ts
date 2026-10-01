@@ -4,6 +4,8 @@ type PayloadOf<TEvent extends EmitterWebhookEventName> = EmitterWebhookEvent<TEv
 
 export type InstallationPayload = PayloadOf<"installation">;
 
+export type IssueCommentCreatedPayload = EmitterWebhookEvent<"issue_comment.created">["payload"];
+
 export type PullRequestPayload = PayloadOf<"pull_request">;
 
 export type PullRequestReviewCommentPayload = PayloadOf<"pull_request_review_comment">;
