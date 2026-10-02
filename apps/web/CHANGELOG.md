@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.0.1](https://github.com/doxynix/doxynix/compare/web-v5.0.0...web-v5.0.1) (2026-10-02)
+
+
+### Bug Fixes
+
+* **web:** restore i18n request config and unblock react compiler ([#2255](https://github.com/doxynix/doxynix/issues/2255)) ([0ff56b1](https://github.com/doxynix/doxynix/commit/0ff56b1080252570d7565f79882b7979dea53b69))
+
 ## [5.0.0](https://github.com/doxynix/doxynix/compare/web-v4.0.7...web-v5.0.0) (2026-09-30)
 
 
