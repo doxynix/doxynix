@@ -57,9 +57,10 @@ export function UserNav() {
   const [loading, setLoading] = useState(false);
 
   async function handleSignOut() {
-    try {
-      setLoading(true);
-      await authClient.signOut({
+    setLoading(true);
+
+    await authClient
+      .signOut({
         fetchOptions: {
           onError: (ctx) => {
             toast.error(ctx.error.message);
@@ -68,12 +69,13 @@ export function UserNav() {
             router.push("/auth");
           },
         },
+      })
+      .catch((error: unknown) => {
+        toast.error(error instanceof Error ? error.message : t("sign_out_failed"));
+      })
+      .finally(() => {
+        setLoading(false);
       });
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("sign_out_failed"));
-    } finally {
-      setLoading(false);
-    }
   }
 
   if (!isHydrated || isPending) {

@@ -79,20 +79,21 @@ export function CreateRepoDialog() {
     setLoading(true);
     posthog.capture("github_app_install_started");
 
-    try {
-      const { data: url, error } = await getInstallUrl();
+    await getInstallUrl()
+      .then(({ data: url, error }) => {
+        if (error != null || url == null) {
+          posthog.capture("github_app_install_failed");
+          return;
+        }
 
-      if (error != null || url == null) {
+        window.location.assign(url);
+      })
+      .catch(() => {
         posthog.capture("github_app_install_failed");
-        return;
-      }
-
-      window.location.assign(url);
-    } catch {
-      posthog.capture("github_app_install_failed");
-    } finally {
-      setLoading(false);
-    }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }
 
   const isUrl = isGitHubUrl(debouncedValue);
@@ -132,22 +133,25 @@ export function CreateRepoDialog() {
   };
 
   async function handleSignIn() {
-    try {
-      setLoadingOauth(true);
-      posthog.capture("github_oauth_started");
+    setLoadingOauth(true);
+    posthog.capture("github_oauth_started");
 
-      const { error } = await authClient.signIn.social({
+    await authClient.signIn
+      .social({
         callbackURL: "/dashboard",
         provider: "github",
-      });
-      if (error != null) {
+      })
+      .then(({ error }) => {
+        if (error != null) {
+          posthog.capture("github_oauth_failed");
+        }
+      })
+      .catch(() => {
         posthog.capture("github_oauth_failed");
-      }
-    } catch {
-      posthog.capture("github_oauth_failed");
-    } finally {
-      setLoadingOauth(false);
-    }
+      })
+      .finally(() => {
+        setLoadingOauth(false);
+      });
   }
 
   const handleSelectRepo = (repoUrl: string) => {

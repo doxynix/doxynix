@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { runQuickFileAudit } from "./quick-file-audit";
+
 // DXNX-239. Only system boundaries are mocked (AI provider, remote model config); everything else runs for real
 const callWithFallback = vi.hoisted(() => vi.fn());
 const edgeConfigGet = vi.hoisted(() => vi.fn());
 
 vi.mock("@/server/utils/call", () => ({ callWithFallback }));
 vi.mock("@vercel/global-config", () => ({ get: edgeConfigGet }));
-
-const { runQuickFileAudit } = await import("./quick-file-audit");
 
 const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 

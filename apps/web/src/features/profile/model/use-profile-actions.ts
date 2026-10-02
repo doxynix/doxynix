@@ -120,52 +120,52 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
     const localPreviewUrl = URL.createObjectURL(file);
     propsRef.current.onAvatarUpdateSuccess?.(localPreviewUrl);
 
-    const processUpload = async () => {
-      try {
-        const compressedBlob = await compressImage(file, {
-          fileType: "image/webp",
-          initialQuality: 0.8,
-          maxSizeMB: 0.1,
-          maxWidthOrHeight: 512,
-        });
+    const uploadAvatarBlob = async () => {
+      const compressedBlob = await compressImage(file, {
+        fileType: "image/webp",
+        initialQuality: 0.8,
+        maxSizeMB: 0.1,
+        maxWidthOrHeight: 512,
+      });
 
-        const cleanName = sanitizeAvatarBaseName(file.name);
+      const cleanName = sanitizeAvatarBaseName(file.name);
 
-        const fileName = `${Date.now()}-${cleanName || "avatar"}.webp`;
-        const finalFile = new File([compressedBlob], fileName, { type: "image/webp" });
+      const fileName = `${Date.now()}-${cleanName || "avatar"}.webp`;
+      const finalFile = new File([compressedBlob], fileName, { type: "image/webp" });
 
-        const blobResult = await upload(`avatars/${fileName}`, finalFile, {
-          access: "public",
-          handleUploadUrl: "/api/blob/upload",
-        });
+      const blobResult = await upload(`avatars/${fileName}`, finalFile, {
+        access: "public",
+        handleUploadUrl: "/api/blob/upload",
+      });
 
-        await authClient.updateUser({
-          image: blobResult.url,
-        });
+      await authClient.updateUser({
+        image: blobResult.url,
+      });
 
-        utils.user.me.setData(undefined, (old) => {
-          if (old == null) {
-            return old;
-          }
-          return {
-            ...old,
-            user: { ...old.user, image: blobResult.url },
-          };
-        });
+      utils.user.me.setData(undefined, (old) => {
+        if (old == null) {
+          return old;
+        }
+        return {
+          ...old,
+          user: { ...old.user, image: blobResult.url },
+        };
+      });
 
-        propsRef.current.onAvatarUpdateSuccess?.(blobResult.url);
+      propsRef.current.onAvatarUpdateSuccess?.(blobResult.url);
 
-        return blobResult;
-      } catch (error) {
-        propsRef.current.onAvatarUpdateSuccess?.(session?.user.image ?? "");
-        throw error;
-      } finally {
-        setIsProcessing(false);
-        URL.revokeObjectURL(localPreviewUrl);
-      }
+      return blobResult;
     };
 
-    const uploadPromise = processUpload();
+    const uploadPromise = uploadAvatarBlob()
+      .catch((error: unknown) => {
+        propsRef.current.onAvatarUpdateSuccess?.(session?.user.image ?? "");
+        throw error;
+      })
+      .finally(() => {
+        setIsProcessing(false);
+        URL.revokeObjectURL(localPreviewUrl);
+      });
 
     toast.promise(uploadPromise, {
       error: (error: unknown) => t(resolveAvatarUploadErrorKey(error)),

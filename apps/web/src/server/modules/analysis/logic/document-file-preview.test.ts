@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { runDocumentFilePreview } from "./document-file-preview";
+
 // DXNX-239. Only system boundaries are mocked; the surgical edit applier and shared heuristics run for real
 const callWithFallback = vi.hoisted(() => vi.fn());
 const edgeConfigGet = vi.hoisted(() => vi.fn());
 
 vi.mock("@/server/utils/call", () => ({ callWithFallback }));
 vi.mock("@vercel/global-config", () => ({ get: edgeConfigGet }));
-
-const { runDocumentFilePreview } = await import("./document-file-preview");
 
 const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 

@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 
+// The dynamic import lives here rather than in the component: React Compiler cannot lower a
+// dynamic import and bails out of the whole function that contains one.
+async function loadSentry() {
+  return import("@sentry/nextjs");
+}
+
 export default function GlobalError({
   error,
   reset,
@@ -31,7 +37,7 @@ export default function GlobalError({
       });
     }
 
-    void import("@sentry/nextjs").then((Sentry) => {
+    void loadSentry().then((Sentry) => {
       if (!isActive) {
         return;
       }

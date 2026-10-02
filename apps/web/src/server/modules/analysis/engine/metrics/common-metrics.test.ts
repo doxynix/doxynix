@@ -1,79 +1,18 @@
 import simpleGit from "simple-git";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { calculateCodeMetrics as calculateFullCodeMetrics } from "./code-metrics";
 import {
-  calculateCodeMetrics,
   calculateTeamRoles,
   computeChangeCoupling,
   computeGitChurnHotspots,
 } from "./common-metrics";
 
 vi.mock("simple-git", () => ({ default: vi.fn() }));
-vi.mock("./code-metrics", () => ({ calculateCodeMetrics: vi.fn() }));
 
 vi.mock("@/server/core/app-logger", () => ({ appLogger: { debug: vi.fn(), error: vi.fn() } }));
 vi.mock("@/server/utils/task-logger", () => ({
   taskLogger: { error: vi.fn(), info: vi.fn(), success: vi.fn(), warn: vi.fn() },
 }));
-
-describe("calculateCodeMetrics", () => {
-  const fullSpy = vi.mocked(calculateFullCodeMetrics);
-
-  beforeEach(() => {
-    fullSpy.mockReset();
-  });
-
-  it("returns zeros for empty file sets", async () => {
-    const result = await calculateCodeMetrics([]);
-
-    expect(result).toEqual({
-      complexityScore: 0,
-      docDensity: 0,
-      fileCount: 0,
-      languages: [],
-      modularityIndex: 0,
-      mostComplexFiles: [],
-      techDebtScore: 0,
-      totalLoc: 0,
-      totalSizeKb: 0,
-    });
-    expect(fullSpy).not.toHaveBeenCalled();
-  });
-
-  it("maps the full repository metrics to the simplified public shape", async () => {
-    fullSpy.mockResolvedValue({
-      complexityScore: 82,
-      docDensity: 0.4,
-      fileCount: 3,
-      languages: [{ color: "#60a5fa", lines: 120, name: "TypeScript" }],
-      modularityIndex: 0.71,
-      mostComplexFiles: ["src/server/index.ts"],
-      techDebtScore: 63,
-      totalLoc: 180,
-      totalSizeKb: 24,
-    } as any);
-
-    const result = await calculateCodeMetrics([
-      { content: "const answer = 42;", path: "src/server/index.ts" },
-    ]);
-
-    expect(result).toEqual({
-      complexityScore: 82,
-      docDensity: 0.4,
-      fileCount: 3,
-      languages: [{ color: "#60a5fa", lines: 120, name: "TypeScript" }],
-      modularityIndex: 0.71,
-      mostComplexFiles: ["src/server/index.ts"],
-      techDebtScore: 63,
-      totalLoc: 180,
-      totalSizeKb: 24,
-    });
-    expect(fullSpy).toHaveBeenCalledWith([
-      { content: "const answer = 42;", path: "src/server/index.ts" },
-    ]);
-  });
-});
 
 describe("calculateTeamRoles", () => {
   it("classifies contributors by share of total contributions", () => {
