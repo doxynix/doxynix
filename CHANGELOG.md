@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.0.2](https://github.com/doxynix/doxynix/compare/doxynix-v6.0.1...doxynix-v6.0.2) (2026-10-02)
+
+
+### Bug Fixes
+
+* **web:** restore i18n request config and unblock react compiler ([#2255](https://github.com/doxynix/doxynix/issues/2255)) ([0ff56b1](https://github.com/doxynix/doxynix/commit/0ff56b1080252570d7565f79882b7979dea53b69))
+
 ## [6.0.1](https://github.com/doxynix/doxynix/compare/doxynix-v6.0.0...doxynix-v6.0.1) (2026-09-30)
 
 
