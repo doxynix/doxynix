@@ -9,51 +9,6 @@ import type { ChurnHotspot, TeamRole } from "../../engine/core/metrics.types";
 import type { ChangeCouplingRef } from "../core/discovery.types";
 import { ProjectPolicy } from "../core/project-policy";
 
-type SimplifiedRepoMetrics = {
-  complexityScore: number;
-  docDensity: number;
-  fileCount: number;
-  languages: Array<{ color: string; lines: number; name: string }>;
-  modularityIndex: number;
-  mostComplexFiles: string[];
-  techDebtScore: number;
-  totalLoc: number;
-  totalSizeKb: number;
-};
-
-export async function calculateCodeMetrics(
-  files: { content: string; path: string }[],
-): Promise<SimplifiedRepoMetrics> {
-  if (files.length === 0) {
-    return {
-      complexityScore: 0,
-      docDensity: 0,
-      fileCount: 0,
-      languages: [],
-      modularityIndex: 0,
-      mostComplexFiles: [],
-      techDebtScore: 0,
-      totalLoc: 0,
-      totalSizeKb: 0,
-    };
-  }
-
-  const { calculateCodeMetrics: calculateFullCodeMetrics } = await import("./code-metrics");
-  const metrics = await calculateFullCodeMetrics(files);
-
-  return {
-    complexityScore: metrics.complexityScore,
-    docDensity: metrics.docDensity,
-    fileCount: metrics.fileCount,
-    languages: metrics.languages,
-    modularityIndex: metrics.modularityIndex,
-    mostComplexFiles: metrics.mostComplexFiles,
-    techDebtScore: metrics.techDebtScore,
-    totalLoc: metrics.totalLoc,
-    totalSizeKb: metrics.totalSizeKb,
-  };
-}
-
 export function calculateTeamRoles(
   contributors: { contributions: number; login: string }[],
 ): TeamRole[] {

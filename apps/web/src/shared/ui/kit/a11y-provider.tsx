@@ -9,6 +9,13 @@ type Props = {
   children: ReactNode;
 };
 
+// The dynamic import lives here rather than in the component: React Compiler cannot lower a
+// dynamic import and bails out of the whole function that contains one.
+async function startAxeScan() {
+  const axe = await import("@axe-core/react");
+  await axe.default(React, ReactDOM, 1000);
+}
+
 export function A11yProvider({ children }: Readonly<Props>) {
   const t = useTranslations("Common");
   const pathname = usePathname();
@@ -17,9 +24,7 @@ export function A11yProvider({ children }: Readonly<Props>) {
 
   useEffect(() => {
     if (process.env.NODE_ENV === "development" && typeof globalThis.window !== "undefined") {
-      void import("@axe-core/react").then((axe) => {
-        void axe.default(React, ReactDOM, 1000);
-      });
+      void startAxeScan();
     }
   }, []);
 

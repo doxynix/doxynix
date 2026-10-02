@@ -19,6 +19,13 @@ interface ElkNodeWithChildren extends ElkNode {
   children?: ElkNode[];
 }
 
+// The dynamic import lives here rather than in the hook: React Compiler cannot lower a
+// dynamic import and bails out of the whole function that contains one.
+async function loadElk(): Promise<ELK> {
+  const ELKModule = await import("elkjs/lib/elk.bundled.js");
+  return new ELKModule.default();
+}
+
 type RepoMapEdgeInput = {
   id: string;
   relation?: string;
@@ -154,10 +161,7 @@ export function useMapLayout(data: RepoMapDisplayData) {
       };
 
       try {
-        if (elkRef.current == null) {
-          const ELKModule = await import("elkjs/lib/elk.bundled.js");
-          elkRef.current = new ELKModule.default();
-        }
+        elkRef.current ??= await loadElk();
 
         const layoutedGraph = (await elkRef.current.layout(elkGraph)) as ElkNodeWithChildren;
         if (cancelled) {

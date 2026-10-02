@@ -67,17 +67,19 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
   });
 
   const handleConnect = async (provider: "github" | "yandex") => {
-    try {
-      setLoadingProvider(provider);
-      await authClient.signIn.social({
+    setLoadingProvider(provider);
+
+    await authClient.signIn
+      .social({
         callbackURL: window.location.href,
         provider,
+      })
+      .catch(() => {
+        toast.error(t("settings_auth_link_failed"));
+      })
+      .finally(() => {
+        setLoadingProvider(null);
       });
-    } catch {
-      toast.error(t("settings_auth_link_failed"));
-    } finally {
-      setLoadingProvider(null);
-    }
   };
 
   return (

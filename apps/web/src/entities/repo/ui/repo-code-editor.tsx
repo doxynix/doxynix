@@ -11,13 +11,13 @@ import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import CodeMirrorMerge from "react-codemirror-merge";
 
-import { BASE_EXTENSIONS, getIdeOnlyExtensions, THEME_EXTENSION } from "../model/editor-extensions";
+import { buildEditorExtensions } from "../model/editor-extensions";
+import { loadLanguageExtension } from "../model/editor-language-loader";
 import type { EditorStats } from "../model/editor-stats.types";
 
 type Props = {
   compareValue?: string;
   initialValue?: string;
-  minimal?: boolean;
   onChange?: (v: string) => void;
   onStats?: (stats: EditorStats) => void;
   onViewCreated?: (view: EditorView) => void;
@@ -30,7 +30,6 @@ type Props = {
 export function RepoCodeEditor({
   compareValue,
   initialValue,
-  minimal = false,
   onChange,
   onStats,
   onViewCreated,
@@ -40,41 +39,21 @@ export function RepoCodeEditor({
   value,
 }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
-
-  const startingExtensions = minimal
-    ? [...BASE_EXTENSIONS, THEME_EXTENSION]
-    : [
-        ...BASE_EXTENSIONS,
-        ...getIdeOnlyExtensions({ syntaxError: t("editor_syntax_error") }),
-        THEME_EXTENSION,
-      ];
-
-  const [ext, setExt] = useState<Extension[]>(startingExtensions);
+  const [ext, setExt] = useState<Extension[]>(() =>
+    buildEditorExtensions({ syntaxError: t("editor_syntax_error") }),
+  );
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     let cancelled = false;
     async function loadDynamicLanguage() {
-      const extName = (path.split(".").pop() ?? "").toLowerCase();
-      const baseExtensions = minimal
-        ? [...BASE_EXTENSIONS, THEME_EXTENSION]
-        : [
-            ...BASE_EXTENSIONS,
-            ...getIdeOnlyExtensions({ syntaxError: t("editor_syntax_error") }),
-            THEME_EXTENSION,
-          ];
-
+      const baseExtensions = buildEditorExtensions({ syntaxError: t("editor_syntax_error") });
       const dynamicExt: Extension[] = [...baseExtensions];
 
       try {
-        const { languages } = await import("@codemirror/language-data");
+        const languageSupport = await loadLanguageExtension(path);
 
-        const langDesc = languages.find(
-          (l) => l.extensions.includes(extName) || l.alias.includes(extName),
-        );
-
-        if (langDesc) {
-          const languageSupport = await langDesc.load();
+        if (languageSupport) {
           dynamicExt.push(languageSupport);
         }
 
@@ -93,7 +72,7 @@ export function RepoCodeEditor({
     return () => {
       cancelled = true;
     };
-  }, [path, minimal, t]);
+  }, [path, t]);
 
   const isDiffMode = showDiff && compareValue != null;
   const mergeExtensionsReadOnly = [

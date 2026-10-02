@@ -141,8 +141,8 @@ export function AuthForm() {
 
     setClientCookie("cf-turnstile-response", token, 300);
 
-    try {
-      await authClient.signIn.magicLink({
+    await authClient.signIn
+      .magicLink({
         callbackURL: "/dashboard",
         email: values.email,
         fetchOptions: {
@@ -151,20 +151,22 @@ export function AuthForm() {
           },
         },
         newUserCallbackURL: "/welcome",
+      })
+      .then(() => {
+        setIsSent(true);
+        toast.success(t("sent_toast_success"));
+        posthog.capture("sign_in_email_sent", { provider: "email" });
+      })
+      .catch(() => {
+        toast.error(t("sent_toast_error"));
+        turnstileRef.current?.reset();
+        setTurnstileToken(null);
+      })
+      .finally(() => {
+        setLoadingProvider(null);
+        pendingDataRef.current = null;
+        setTurnstileToken(null);
       });
-
-      setIsSent(true);
-      toast.success(t("sent_toast_success"));
-      posthog.capture("sign_in_email_sent", { provider: "email" });
-    } catch {
-      toast.error(t("sent_toast_error"));
-      turnstileRef.current?.reset();
-      setTurnstileToken(null);
-    } finally {
-      setLoadingProvider(null);
-      pendingDataRef.current = null;
-      setTurnstileToken(null);
-    }
   };
 
   const onSubmit = async (values: MagicLinkSchemaValue) => {
@@ -186,23 +188,24 @@ export function AuthForm() {
   };
 
   async function handleSignIn(provider: AllowedProviders) {
-    try {
-      setLoadingProvider(provider);
-      posthog.capture("sign_in_attempted", { provider });
+    setLoadingProvider(provider);
+    posthog.capture("sign_in_attempted", { provider });
 
-      const currentEmail = form.getValues("email");
+    const currentEmail = form.getValues("email");
 
-      await authClient.signIn.social({
+    await authClient.signIn
+      .social({
         callbackURL: "/dashboard",
         loginHint: currentEmail || undefined,
         newUserCallbackURL: "/welcome",
         provider,
+      })
+      .catch(() => {
+        toast.error(t("error_social_signin_failed"));
+      })
+      .finally(() => {
+        setLoadingProvider(null);
       });
-    } catch {
-      toast.error(t("error_social_signin_failed"));
-    } finally {
-      setLoadingProvider(null);
-    }
   }
 
   const handleTwoFactorVerify = async (e: SubmitEvent<HTMLFormElement>) => {
@@ -214,60 +217,63 @@ export function AuthForm() {
     }
 
     setIsTwoFactorVerifying(true);
-    try {
-      if (isBackupMode) {
-        const { error } = await authClient.twoFactor.verifyBackupCode({
-          code: twoFactorCode,
-        });
-        if (error) {
-          throw new Error(error.message);
-        }
-      } else {
-        const { error } = await authClient.twoFactor.verifyTotp({
-          code: twoFactorCode,
-          trustDevice: true,
-        });
-        if (error) {
-          throw new Error(error.message);
-        }
-      }
 
-      toast.success(t("success_authenticated"));
-      void setTwoFactorParam(null);
-      router.replace("/dashboard");
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : t("error_verification_failed");
-      toast.error(msg);
-    } finally {
-      setIsTwoFactorVerifying(false);
-    }
+    const verification = isBackupMode
+      ? authClient.twoFactor.verifyBackupCode({ code: twoFactorCode }).then(({ error }) => {
+          if (error) {
+            throw new Error(error.message);
+          }
+        })
+      : authClient.twoFactor
+          .verifyTotp({ code: twoFactorCode, trustDevice: true })
+          .then(({ error }) => {
+            if (error) {
+              throw new Error(error.message);
+            }
+          });
+
+    await verification
+      .then(() => {
+        toast.success(t("success_authenticated"));
+        void setTwoFactorParam(null);
+        router.replace("/dashboard");
+      })
+      .catch((error: unknown) => {
+        const msg = error instanceof Error ? error.message : t("error_verification_failed");
+        toast.error(msg);
+      })
+      .finally(() => {
+        setIsTwoFactorVerifying(false);
+      });
   };
 
   const handlePasskeySignIn = async () => {
     setLoadingProvider("passkey");
     posthog.capture("sign_in_attempted", { provider: "passkey" });
 
-    try {
-      const { error } = await authClient.signIn.passkey({
+    await authClient.signIn
+      .passkey({
         fetchOptions: {
           onSuccess: () => {
             router.replace("/dashboard");
           },
         },
-      });
-
-      if (error) {
-        if ("code" in error && error.code === "NO_CREDENTIALS") {
-          toast.error(t("error_no_security_keys"));
-        } else {
-          toast.error(error.message ?? t("error_authentication_failed"));
+      })
+      .then(({ error }) => {
+        if (error) {
+          if ("code" in error && error.code === "NO_CREDENTIALS") {
+            toast.error(t("error_no_security_keys"));
+          } else {
+            toast.error(error.message ?? t("error_authentication_failed"));
+          }
         }
-      }
-    } catch {
-      toast.error(t("error_passkey_failed"));
-    } finally {
-      setLoadingProvider(null);
-    }
+      })
+      .catch(() => {
+        toast.error(t("error_passkey_failed"));
+      })
+      .finally(() => {
+        setLoadingProvider(null);
+      });
   };
 
   const onTurnstileSuccess = (token: string) => {
