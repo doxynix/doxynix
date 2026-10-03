@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.0.2](https://github.com/doxynix/doxynix/compare/web-v5.0.1...web-v5.0.2) (2026-10-03)
+
+
+### Bug Fixes
+
+* **web:** fix duplicated animations and sign-out dialog ([#2258](https://github.com/doxynix/doxynix/issues/2258)) ([372a826](https://github.com/doxynix/doxynix/commit/372a8269198dc9e196e588a02a4bb4dba967905b))
+
 ## [5.0.1](https://github.com/doxynix/doxynix/compare/web-v5.0.0...web-v5.0.1) (2026-10-02)
 
 
