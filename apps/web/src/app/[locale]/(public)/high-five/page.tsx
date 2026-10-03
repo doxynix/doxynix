@@ -24,7 +24,9 @@ export default async function HighFivePage() {
         variant="link"
       />
       <div className="mb-20">
-        <h1 className="mb-6 font-bold text-5xl text-foreground md:text-6xl">{t("page_title")}</h1>
+        <h1 className="mb-6 font-bold hyphens-auto break-words text-2xl text-foreground xs:text-3xl sm:text-4xl md:text-6xl">
+          {t("page_title")}
+        </h1>
         <p className="max-w-2xl text-lg text-text-secondary">{t("page_desc")}</p>
       </div>
 

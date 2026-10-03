@@ -33,7 +33,7 @@
     },
     "apps/siem-client": {
       "name": "@doxynix/siem-client",
-      "version": "0.3.5",
+      "version": "0.3.6",
       "dependencies": {
         "@doxynix/shared": "workspace:*",
         "@doxynix/siem-server": "workspace:*",

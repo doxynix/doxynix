@@ -12,15 +12,6 @@ import { Link, useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
 import { AppButton } from "@/shared/ui/core/button";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/shared/ui/core/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -32,7 +23,7 @@ import {
 } from "@/shared/ui/core/dropdown-menu";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
-import { LoadingButton } from "@/shared/ui/kit/loading-button";
+import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 
 const noopSubscribe = () => () => {};
 const getHydratedSnapshot = () => true;
@@ -55,6 +46,7 @@ export function UserNav() {
   const name = user?.name;
   const email = user?.email;
   const [loading, setLoading] = useState(false);
+  const [signOutOpen, setSignOutOpen] = useState(false);
 
   async function handleSignOut() {
     setLoading(true);
@@ -83,96 +75,77 @@ export function UserNav() {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <AppButton
-          className="flex items-center gap-3"
-          size="icon"
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <AppButton
+            className="flex items-center gap-3"
+            size="icon"
+          >
+            <AppAvatar
+              alt={user?.name ?? tCommon("user")}
+              className="size-9 border-0"
+              fallbackClassName="text-xs"
+              fallbackText={user?.name ?? user?.email ?? undefined}
+              priority={true}
+              src={avatar}
+            />
+          </AppButton>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="w-56"
         >
-          <AppAvatar
-            alt={user?.name ?? tCommon("user")}
-            className="size-9 border-0"
-            fallbackClassName="text-xs"
-            fallbackText={user?.name ?? user?.email ?? undefined}
-            priority={true}
-            src={avatar}
-          />
-        </AppButton>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-56"
-      >
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col gap-1">
-            <p className="truncate font-medium text-sm">{name}</p>
-            <p className="truncate text-muted-foreground text-xs">{email}</p>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          {userNavMenu.map((item) => (
-            <DropdownMenuItem
-              asChild
-              className="group"
-              key={item.href}
-            >
-              <Link
-                className="flex items-center"
-                href={item.href as Route}
-              >
-                {item.icon != null && <item.icon />}
-                <span>{navLabels[item.labelKey]}</span>
-                {item.shortcut != null && (
-                  <DropdownMenuShortcut className="opacity-0 transition-opacity group-hover:opacity-100">
-                    {item.shortcut}
-                  </DropdownMenuShortcut>
-                )}
-              </Link>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-
-        <Dialog>
-          <DialogTrigger asChild>
-            <DropdownMenuItem
-              className="text-destructive focus:bg-destructive/20 focus:text-destructive"
-              onSelect={(e) => e.preventDefault()}
-            >
-              <LogOut className="text-destructive" />
-              {t("logout")}
-            </DropdownMenuItem>
-          </DialogTrigger>
-
-          <DialogContent className="sm:max-w-105">
-            <DialogHeader>
-              <DialogTitle>{t("logout_title")}</DialogTitle>
-              <DialogDescription>{t("logout_confirmation_desc")}</DialogDescription>
-            </DialogHeader>
-            <div className="flex flex-col gap-4">
-              <div className="flex justify-end gap-2">
-                <DialogClose asChild>
-                  <AppButton
-                    disabled={loading}
-                    variant="outline"
-                  >
-                    {tCommon("cancel")}
-                  </AppButton>
-                </DialogClose>
-                <LoadingButton
-                  disabled={loading}
-                  isLoading={loading}
-                  onClick={() => void handleSignOut()}
-                  variant="destructive"
-                >
-                  {t("logout")}
-                </LoadingButton>
-              </div>
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col gap-1">
+              <p className="truncate font-medium text-sm">{name}</p>
+              <p className="truncate text-muted-foreground text-xs">{email}</p>
             </div>
-          </DialogContent>
-        </Dialog>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            {userNavMenu.map((item) => (
+              <DropdownMenuItem
+                asChild
+                className="group"
+                key={item.href}
+              >
+                <Link
+                  className="flex items-center"
+                  href={item.href as Route}
+                >
+                  {item.icon != null && <item.icon />}
+                  <span>{navLabels[item.labelKey]}</span>
+                  {item.shortcut != null && (
+                    <DropdownMenuShortcut className="opacity-0 transition-opacity group-hover:opacity-100">
+                      {item.shortcut}
+                    </DropdownMenuShortcut>
+                  )}
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem
+            className="text-destructive focus:bg-destructive/20 focus:text-destructive"
+            onSelect={() => setSignOutOpen(true)}
+          >
+            <LogOut className="text-destructive" />
+            {t("logout")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <DangerActionDialog
+        confirmLabel={t("logout")}
+        description={t("logout_confirmation_desc")}
+        isLoading={loading}
+        onConfirm={() => void handleSignOut()}
+        onOpenChange={setSignOutOpen}
+        open={signOutOpen}
+        title={t("logout_title")}
+      />
+    </>
   );
 }

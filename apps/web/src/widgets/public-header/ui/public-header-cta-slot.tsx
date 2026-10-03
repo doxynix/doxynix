@@ -14,11 +14,13 @@ export function PublicHeaderCtaSlot() {
     return (
       <AppButton
         asChild
+        className="max-lg:size-9 max-lg:px-0"
         variant="outline"
       >
         <Link href="/">
           <MoveLeft size={16} />
-          {tCommon("back_home")}
+          <span className="hidden lg:inline">{tCommon("back_home")}</span>
+          <span className="sr-only lg:hidden">{tCommon("back_home")}</span>
         </Link>
       </AppButton>
     );

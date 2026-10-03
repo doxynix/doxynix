@@ -179,6 +179,7 @@
     "close": "Fermer",
     "command_menu_desc": "Rechercher des commandes",
     "command_menu_title": "Menu de commandes",
+    "confirm_phrase_hint": "Saisissez <phrase></phrase> pour confirmer. Cette action est irréversible.",
     "connect": "Connecter",
     "copy": "Copier",
     "copy_code": "Copier le code",

@@ -179,6 +179,7 @@
     "close": "Zamknij",
     "command_menu_desc": "Szukaj poleceń",
     "command_menu_title": "Menu poleceń",
+    "confirm_phrase_hint": "Wpisz <phrase></phrase>, aby potwierdzić. Tej operacji nie można cofnąć.",
     "connect": "Połącz",
     "copy": "Kopiuj",
     "copy_code": "Kopiuj kod",

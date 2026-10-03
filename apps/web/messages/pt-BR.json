@@ -179,6 +179,7 @@
     "close": "Fechar",
     "command_menu_desc": "Pesquisar comandos",
     "command_menu_title": "Menu de comandos",
+    "confirm_phrase_hint": "Digite <phrase></phrase> para confirmar. Esta ação não pode ser desfeita.",
     "connect": "Conectar",
     "copy": "Copiar",
     "copy_code": "Copiar código",

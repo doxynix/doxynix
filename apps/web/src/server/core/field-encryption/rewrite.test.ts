@@ -40,9 +40,9 @@ describe("encryptOnWrite", () => {
   });
 
   it("encrypts a field on update", () => {
-    const out = encryptOnWrite({ data: { name: "Ada" } }, "User", parsedKey);
+    const out = encryptOnWrite({ data: { content: "notes" } }, "Document", parsedKey);
 
-    expect(parseEncryptedString((out.data as Record<string, unknown>).name as string)).not.toBe(
+    expect(parseEncryptedString((out.data as Record<string, unknown>).content as string)).not.toBe(
       false,
     );
   });

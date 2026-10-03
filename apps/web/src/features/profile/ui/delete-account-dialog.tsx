@@ -25,6 +25,7 @@ export function DeleteAccountDialog() {
 
   return (
     <DangerActionDialog
+      confirmationPhrase="DELETE"
       confirmLabel={t("settings_danger_delete_confirmation")}
       description={t("settings_danger_delete_account_dialog_desc")}
       destructiveAlertContent={t("settings_danger_delete_account_alert_desc")}
