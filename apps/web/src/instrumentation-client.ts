@@ -9,6 +9,7 @@ import {
 } from "./shared/config/env.client";
 import { IS_DEV, IS_PROD } from "./shared/config/env.flags";
 import { SENTRY_DATA_COLLECTION } from "./shared/config/sentry";
+import { SENTRY_REPLAY_INTEGRATION_OPTIONS } from "./shared/config/sentry-replay";
 
 function escapeRegExp(str: string) {
   return str.replaceAll(/[$()*+.?[\\\]^{|}]/g, String.raw`\$&`);
@@ -51,12 +52,7 @@ if (IS_PROD) {
         replayIntegration,
       } = await import("./shared/config/sentry-integrations");
 
-      Sentry.addIntegration(
-        replayIntegration({
-          blockAllMedia: true,
-          maskAllText: true,
-        }),
-      );
+      Sentry.addIntegration(replayIntegration(SENTRY_REPLAY_INTEGRATION_OPTIONS));
       Sentry.addIntegration(
         httpClientIntegration({
           failedRequestTargets: [
