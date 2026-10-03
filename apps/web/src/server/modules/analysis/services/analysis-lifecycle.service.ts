@@ -7,6 +7,7 @@ import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import { type DbClient, prisma } from "@/server/core/db";
+import { trackServerEvent } from "@/server/core/posthog-events";
 import { realtimeService } from "@/server/core/realtime";
 import { safeJsonClone } from "@/server/utils/safe-json";
 
@@ -87,6 +88,19 @@ export const analysisLifecycleService = {
       data: { jobId: handle.id },
       where: { id: analysis.id },
     });
+
+    trackServerEvent(
+      "repo_analysis_queued",
+      {
+        analysis_id: analysis.id,
+        doc_types_count: input.docTypes.length,
+        has_custom_instructions: (input.instructions?.length ?? 0) > 0,
+        language: input.language,
+        selected_branch: input.branch ?? null,
+        selected_files_count: input.files.length,
+      },
+      userId,
+    );
 
     return { jobId: handle.id, publicAccessToken: handle.publicAccessToken, status: "QUEUED" };
   },
