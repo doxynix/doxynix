@@ -2,6 +2,10 @@ import { captureServerEvent } from "@/server/core/posthog-server";
 import { requestContext } from "@/server/utils/request-context";
 
 export type ServerAnalyticsEvent =
+  | "fix_generated"
+  | "fix_generation_failed"
+  | "pr_analysis_completed"
+  | "pr_analysis_failed"
   | "repo_analysis_completed"
   | "repo_analysis_failed"
   | "repo_analysis_queued"
