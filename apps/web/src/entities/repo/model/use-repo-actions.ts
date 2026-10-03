@@ -1,9 +1,9 @@
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
 import { useRouter } from "@/shared/i18n/navigation";
+import { trackClientEvent } from "@/shared/lib/posthog-client";
 
 export function useRepoActions() {
   const utils = trpc.useUtils();
@@ -26,7 +26,7 @@ export function useRepoActions() {
         },
       });
       invalidate();
-      posthog.capture("repo_added");
+      trackClientEvent("repo_added");
     },
   });
 
@@ -35,7 +35,7 @@ export function useRepoActions() {
     onSuccess: () => {
       toast.success(t("settings_danger_delete_all_repos_toast_success"));
       invalidate();
-      posthog.capture("all_repos_deleted");
+      trackClientEvent("all_repos_deleted");
     },
   });
 
@@ -49,7 +49,7 @@ export function useRepoActions() {
         }),
       );
       invalidate();
-      posthog.capture("repos_by_owner_deleted");
+      trackClientEvent("repos_by_owner_deleted");
     },
   });
 
@@ -58,7 +58,7 @@ export function useRepoActions() {
     onSuccess: () => {
       toast.success(t("settings_danger_delete_repo_toast_success"));
       invalidate();
-      posthog.capture("repo_deleted");
+      trackClientEvent("repo_deleted");
     },
   });
 

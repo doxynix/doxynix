@@ -5,6 +5,7 @@ import { uniq } from "es-toolkit";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { githubBrowseService } from "@/server/core/github/github-content";
+import { trackServerEvent } from "@/server/core/posthog-events";
 import { redisClient, redisService } from "@/server/core/redis";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
@@ -25,6 +26,7 @@ export const generateFixTask = task({
     userId: string;
   }) => {
     const fixService = new FixService();
+    const startTime = Date.now();
 
     try {
       const repo = await prisma.repo.findUnique({
@@ -96,6 +98,21 @@ export const generateFixTask = task({
 
       await analysisRepo.updateStatus(prisma, payload.fixId, "COMPLETED");
 
+      trackServerEvent(
+        "fix_generated",
+        {
+          duration_ms: Date.now() - startTime,
+          estimated_impact: fixResult.estimatedImpact,
+          findings_count: payload.findings.length,
+          fix_id: payload.fixId,
+          fixed_files_count: fixResult.fixedFiles.length,
+          is_pr_scoped: payload.prAnalysisId != null,
+          repo_id: payload.repoId,
+          unique_files_count: uniqueFiles.length,
+        },
+        payload.userId,
+      );
+
       appLogger.info({
         fixId: payload.fixId,
         msg: "fix_created",
@@ -109,6 +126,19 @@ export const generateFixTask = task({
       await redisClient.set(cacheKey, { error: errorMsg }, { ex: REDIS_CONFIG.ttl.fixResult });
 
       await analysisRepo.updateStatus(prisma, payload.fixId, "FAILED");
+
+      trackServerEvent(
+        "fix_generation_failed",
+        {
+          duration_ms: Date.now() - startTime,
+          findings_count: payload.findings.length,
+          fix_id: payload.fixId,
+          is_pr_scoped: payload.prAnalysisId != null,
+          repo_id: payload.repoId,
+        },
+        payload.userId,
+      );
+
       throw error;
     }
   },

@@ -1,8 +1,8 @@
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
+import { trackClientEvent } from "@/shared/lib/posthog-client";
 
 export function useApiKeyActions() {
   const utils = trpc.useUtils();
@@ -14,7 +14,7 @@ export function useApiKeyActions() {
     onSuccess: () => {
       toast.success(t("settings_api_keys_created_toast_success"));
       invalidate();
-      posthog.capture("api_key_created");
+      trackClientEvent("api_key_created");
     },
   });
 
@@ -23,7 +23,7 @@ export function useApiKeyActions() {
     onSuccess: () => {
       toast.success(t("settings_api_keys_revoked_toast_success"));
       invalidate();
-      posthog.capture("api_key_revoked");
+      trackClientEvent("api_key_revoked");
     },
   });
 

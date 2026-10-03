@@ -27,4 +27,9 @@ describe("instrumentation-client", () => {
     expect(source).toContain("addIntegration");
     expect(source).toMatch(/requestIdleCallback|setTimeout/);
   });
+
+  it("enables Sentry Logs in production", () => {
+    expect(source).toContain("enableLogs: true");
+    expect(source).not.toContain("enableLogs: !IS_PROD");
+  });
 });

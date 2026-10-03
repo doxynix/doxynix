@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
-import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod/mini";
@@ -31,6 +30,7 @@ import { Link, useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
 import { cn } from "@/shared/lib/cn";
 import { setClientCookie } from "@/shared/lib/cookies";
+import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { Logo } from "@/shared/ui/branding/doxynix-logo";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
@@ -166,7 +166,7 @@ export function AuthForm() {
       .then(() => {
         setIsSent(true);
         toast.success(t("sent_toast_success"));
-        posthog.capture("sign_in_email_sent", { provider: "email" });
+        trackClientEvent("sign_in_email_sent", { provider: "email" });
       })
       .catch(() => {
         toast.error(t("sent_toast_error"));
@@ -200,7 +200,7 @@ export function AuthForm() {
 
   async function handleSignIn(provider: AllowedProviders) {
     setLoadingProvider(provider);
-    posthog.capture("sign_in_attempted", { provider });
+    trackClientEvent("sign_in_attempted", { provider });
 
     const currentEmail = form.getValues("email");
 
@@ -260,7 +260,7 @@ export function AuthForm() {
 
   const handlePasskeySignIn = async () => {
     setLoadingProvider("passkey");
-    posthog.capture("sign_in_attempted", { provider: "passkey" });
+    trackClientEvent("sign_in_attempted", { provider: "passkey" });
 
     await authClient.signIn
       .passkey({

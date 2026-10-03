@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Book, Plus, RefreshCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
-import posthog from "posthog-js";
 import { useForm, useWatch } from "react-hook-form";
 
 import { trpc } from "@/shared/api/trpc";
@@ -14,6 +13,7 @@ import { authClient } from "@/shared/lib/auth-client";
 import { isGitHubUrl } from "@/shared/lib/github-url";
 import { useClickOutside } from "@/shared/lib/hooks/use-click-outside";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
+import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,
@@ -77,19 +77,19 @@ export function CreateRepoDialog() {
 
   async function handleInstallGitHubApp() {
     setLoading(true);
-    posthog.capture("github_app_install_started");
+    trackClientEvent("github_app_install_started");
 
     await getInstallUrl()
       .then(({ data: url, error }) => {
         if (error != null || url == null) {
-          posthog.capture("github_app_install_failed");
+          trackClientEvent("github_app_install_failed");
           return;
         }
 
         window.location.assign(url);
       })
       .catch(() => {
-        posthog.capture("github_app_install_failed");
+        trackClientEvent("github_app_install_failed");
       })
       .finally(() => {
         setLoading(false);
@@ -134,7 +134,7 @@ export function CreateRepoDialog() {
 
   async function handleSignIn() {
     setLoadingOauth(true);
-    posthog.capture("github_oauth_started");
+    trackClientEvent("github_oauth_started");
 
     await authClient.signIn
       .social({
@@ -143,11 +143,11 @@ export function CreateRepoDialog() {
       })
       .then(({ error }) => {
         if (error != null) {
-          posthog.capture("github_oauth_failed");
+          trackClientEvent("github_oauth_failed");
         }
       })
       .catch(() => {
-        posthog.capture("github_oauth_failed");
+        trackClientEvent("github_oauth_failed");
       })
       .finally(() => {
         setLoadingOauth(false);
