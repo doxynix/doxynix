@@ -31,6 +31,8 @@ const config: IConfiguration = {
           "^src/instrumentation[.]ts$",
           "^src/instrumentation-client[.]ts$",
           "^src/instrumentation-client[.]test[.]ts$",
+          "^src/sentry[.]edge[.]config[.]test[.]ts$",
+          "^src/sentry[.]server[.]config[.]test[.]ts$",
           "^src/app/\\[locale\\]/opengraph-image[.]tsx$",
           "^src/app/\\[locale\\]/\\(private\\)/dashboard/repo/\\[owner\\]/\\[name\\]/opengraph-image[.]tsx$",
           "^src/app/manifest[.]ts$",
