@@ -40,7 +40,7 @@ describe("analysisLifecycleService.analyze analytics", () => {
   it("tracks repo_analysis_queued with the analysis id and the caller's user", async () => {
     await analysisLifecycleService.analyze(buildDb(), "user-1", {
       branch: "main",
-      docTypes: ["api", "readme"],
+      docTypes: ["API", "README"],
       files: ["a.ts", "b.ts"],
       instructions: "be brief",
       language: "en",
