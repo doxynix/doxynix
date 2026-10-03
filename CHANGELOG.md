@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.1.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.0.3...doxynix-v6.1.0) (2026-10-03)
+
+
+### Features
+
+* **web:** harden Sentry logging and add PostHog server analytics ([#2260](https://github.com/doxynix/doxynix/issues/2260)) ([2354180](https://github.com/doxynix/doxynix/commit/23541803cc6441d2585eb1c1eed0faba2db498ea))
+
 ## [6.0.3](https://github.com/doxynix/doxynix/compare/doxynix-v6.0.2...doxynix-v6.0.3) (2026-10-03)
 
 
