@@ -10,6 +10,10 @@ import { RESEND_WEBHOOK_SECRET } from "@/shared/config/env.server";
 import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
+import {
+  markWebhookDeliveryFailed,
+  toInternalAppError,
+} from "@/server/modules/webhooks/webhook-delivery-failure";
 import { maskEmail, normalizeEmail } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";
@@ -187,20 +191,9 @@ async function handler(req: Request) {
       } catch (error) {
         appLogger.error({ email: maskEmail(email), error, msg: "Failed to process transaction" });
 
-        await prisma.webhookDelivery.update({
-          data: {
-            error: error instanceof Error ? error.message : String(error),
-            status: "FAILED",
-          },
-          where: { id: delivery.id },
-        });
+        await markWebhookDeliveryFailed(delivery.id, error);
 
-        throw new AppError({
-          cause: error,
-          code: "INTERNAL_SERVER_ERROR",
-          publicMessage: "Internal Error",
-          unexpected: true,
-        });
+        throw toInternalAppError(error);
       }
     } else {
       await prisma.webhookDelivery.update({

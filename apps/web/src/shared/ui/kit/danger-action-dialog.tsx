@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -18,11 +18,14 @@ import {
 } from "@/shared/ui/core/dialog";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
+import { ConfirmationField, phraseMatches } from "./confirmation-field";
+
 type Props = {
   children?: ReactNode;
   confirmLabel: string;
+  confirmationPhrase?: string;
   description: string;
-  destructiveAlertContent: ReactNode;
+  destructiveAlertContent?: ReactNode;
   isLoading: boolean;
   onConfirm: () => void;
   onOpenChange: (open: boolean) => void;
@@ -30,12 +33,13 @@ type Props = {
   successAlertContent?: ReactNode;
   successAlertTitle?: string;
   title: string;
-  trigger: ReactNode;
+  trigger?: ReactNode;
 };
 
 export function DangerActionDialog({
   children,
   confirmLabel,
+  confirmationPhrase,
   description,
   destructiveAlertContent,
   isLoading,
@@ -48,13 +52,25 @@ export function DangerActionDialog({
   trigger,
 }: Readonly<Props>) {
   const tCommon = useTranslations("Common");
+  const [phraseInput, setPhraseInput] = useState("");
+  const isConfirmed = confirmationPhrase == null || phraseMatches(phraseInput, confirmationPhrase);
+
+  // Radix unmounts the content on close, but `phraseInput` lives here, so it needs clearing
+  // explicitly or reopening the dialog would leave the confirm button armed.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (wasOpen !== open) {
+    setWasOpen(open);
+    if (!open) {
+      setPhraseInput("");
+    }
+  }
 
   return (
     <Dialog
       onOpenChange={onOpenChange}
       open={open}
     >
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {trigger != null && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="gap-2 sm:gap-0">
@@ -71,6 +87,14 @@ export function DangerActionDialog({
 
         {children}
 
+        {confirmationPhrase != null && (
+          <ConfirmationField
+            onValueChange={setPhraseInput}
+            phrase={confirmationPhrase}
+            value={phraseInput}
+          />
+        )}
+
         {successAlertTitle && successAlertContent && (
           <Alert
             className="border-success/10 bg-success/5 text-success"
@@ -81,21 +105,24 @@ export function DangerActionDialog({
           </Alert>
         )}
 
-        <Alert
-          className="border-destructive/10 bg-destructive/5 text-destructive"
-          variant="destructive"
-        >
-          <AlertTitle className="font-bold text-base">
-            <span>{tCommon("warning")}</span>
-          </AlertTitle>
-          <AlertDescription>{destructiveAlertContent}</AlertDescription>
-        </Alert>
+        {destructiveAlertContent != null && (
+          <Alert
+            className="border-destructive/10 bg-destructive/5 text-destructive"
+            variant="destructive"
+          >
+            <AlertTitle className="font-bold text-base">
+              <span>{tCommon("warning")}</span>
+            </AlertTitle>
+            <AlertDescription>{destructiveAlertContent}</AlertDescription>
+          </Alert>
+        )}
 
         <DialogFooter>
           <DialogClose asChild>
             <AppButton variant="outline">{tCommon("cancel")}</AppButton>
           </DialogClose>
           <LoadingButton
+            disabled={!isConfirmed}
             isLoading={isLoading}
             onClick={onConfirm}
             variant="destructive"

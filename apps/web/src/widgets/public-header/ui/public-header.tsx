@@ -5,8 +5,9 @@ import { getTranslations } from "next-intl/server";
 import { publicHeaderMenu } from "@/shared/config/navigation";
 import type { PublicNavLabelKey } from "@/shared/config/navigation.types";
 import { Link } from "@/shared/i18n/navigation";
+import { cn } from "@/shared/lib/cn";
 import { Logo } from "@/shared/ui/branding/doxynix-logo";
-import { AppButton } from "@/shared/ui/core/button";
+import { AppButton, buttonVariants } from "@/shared/ui/core/button";
 import {
   Sheet,
   SheetClose,
@@ -36,7 +37,7 @@ export async function PublicHeader() {
           <Logo className="w-20" />
         </div>
 
-        <nav className="hidden gap-4 md:flex">
+        <nav className="hidden gap-4 lg:flex">
           {publicHeaderMenu.map((item) => (
             <AppButton
               asChild
@@ -60,7 +61,7 @@ export async function PublicHeader() {
             </span>
           </AppTooltip>
           <PublicHeaderCtaSlot />
-          <div className="flex items-center gap-2 md:hidden">
+          <div className="flex items-center gap-2 lg:hidden">
             <Sheet>
               <SheetTrigger asChild>
                 <AppButton
@@ -86,19 +87,16 @@ export async function PublicHeader() {
                         asChild
                         key={item.href}
                       >
-                        <AppButton
-                          asChild
-                          className="justify-start"
-                          variant="ghost"
+                        <Link
+                          className={cn(
+                            buttonVariants({ variant: "ghost" }),
+                            "w-full justify-start",
+                          )}
+                          href={item.href as Route}
                         >
-                          <Link
-                            className="flex items-center gap-2"
-                            href={item.href as Route}
-                          >
-                            {item.icon != null && <item.icon />}
-                            {publicNavLabels[item.labelKey]}
-                          </Link>
-                        </AppButton>
+                          {item.icon != null && <item.icon />}
+                          {publicNavLabels[item.labelKey]}
+                        </Link>
                       </SheetClose>
                     ))}
                   </nav>

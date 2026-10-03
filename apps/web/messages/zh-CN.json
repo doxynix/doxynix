@@ -179,6 +179,7 @@
     "close": "关闭",
     "command_menu_desc": "搜索命令",
     "command_menu_title": "命令菜单",
+    "confirm_phrase_hint": "请输入 <phrase></phrase> 以确认。此操作无法撤销。",
     "connect": "连接",
     "copy": "复制",
     "copy_code": "复制代码",

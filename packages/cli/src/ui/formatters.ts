@@ -148,23 +148,25 @@ export function getScoreLabel(score: number | null | undefined): string {
   return brand.error("Critical");
 }
 
-export function formatDateTime(dateInput: DateInput): string {
+function toDate(dateInput: DateInput): Date | null {
   if (!dateInput) {
-    return brand.muted("—");
+    return null;
   }
   const date = typeof dateInput === "object" ? dateInput : new Date(dateInput);
-  if (Number.isNaN(date.getTime())) {
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+export function formatDateTime(dateInput: DateInput): string {
+  const date = toDate(dateInput);
+  if (date == null) {
     return brand.muted("—");
   }
   return date.toLocaleString();
 }
 
 export function formatDate(dateInput: DateInput): string {
-  if (!dateInput) {
-    return brand.muted("—");
-  }
-  const date = typeof dateInput === "object" ? dateInput : new Date(dateInput);
-  if (Number.isNaN(date.getTime())) {
+  const date = toDate(dateInput);
+  if (date == null) {
     return brand.muted("—");
   }
   return date.toLocaleDateString("en-US", {

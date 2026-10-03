@@ -6,6 +6,7 @@
     "**/dist/**",
     "**/build/**",
     "**/*.d.ts",
+    "**/.dependency-cruiser.ts",
     "**/*.test.ts",
     "**/*.spec.ts",
     "**/routeTree.gen.ts",

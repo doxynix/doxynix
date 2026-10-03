@@ -1,22 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, CheckCheck, Trash2 } from "lucide-react";
+import { CheckCheck, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { AppButton } from "@/shared/ui/core/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/shared/ui/core/dialog";
+import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { notificationsParsers } from "@/entities/notification/model/notifications-parsers";
@@ -32,7 +23,6 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
   const { deleteRead, markAllAsRead } = useNotificationActions();
   const [open, setOpen] = useState(false);
   const t = useTranslations("Notifications");
-  const tCommon = useTranslations("Common");
 
   const debouncedSearch = useDebounce(filters.search, 500);
 
@@ -59,11 +49,15 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
       >
         <CheckCheck /> {t("mark_all_as_read")}
       </LoadingButton>
-      <Dialog
+      <DangerActionDialog
+        confirmLabel={t("yes_delete")}
+        description={t("delete_all_read_description", { count: stats?.read ?? 0 })}
+        isLoading={deleteRead.isPending}
+        onConfirm={handleDelete}
         onOpenChange={setOpen}
         open={open}
-      >
-        <DialogTrigger asChild>
+        title={t("delete_all_read_confirm")}
+        trigger={
           <AppButton
             className="flex"
             disabled={isDeleteReadDisabled}
@@ -71,35 +65,8 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
           >
             <Trash2 /> {t("delete_all_read")}
           </AppButton>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader className="gap-2 sm:gap-0">
-            <div className="flex items-center gap-4">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-destructive/15">
-                <AlertTriangle className="size-5 text-destructive" />
-              </div>
-              <div className="flex flex-col gap-1 overflow-hidden">
-                <DialogTitle>{t("delete_all_read_confirm")}</DialogTitle>
-                <DialogDescription>
-                  {t("delete_all_read_description", { count: stats?.read ?? 0 })}
-                </DialogDescription>
-              </div>
-            </div>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose asChild>
-              <AppButton variant="outline">{tCommon("cancel")}</AppButton>
-            </DialogClose>
-            <LoadingButton
-              isLoading={deleteRead.isPending}
-              onClick={handleDelete}
-              variant="destructive"
-            >
-              {t("yes_delete")}
-            </LoadingButton>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        }
+      />
     </div>
   );
 }

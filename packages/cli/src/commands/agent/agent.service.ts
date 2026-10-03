@@ -110,6 +110,28 @@ export const agentService = {
       }
     };
 
+    const drainCompleteLines = () => {
+      if (!lineBuffer.includes("\n")) {
+        return;
+      }
+      const lines = lineBuffer.split("\n");
+      lineBuffer = lines.pop() ?? "";
+      for (const line of lines) {
+        process.stdout.write(renderMarkdownLine(line) + "\n");
+      }
+    };
+
+    const toSseData = (line: string): null | string => {
+      if (!line.startsWith("data:")) {
+        return null;
+      }
+      let dataValue = line.slice(5);
+      if (dataValue.startsWith(" ")) {
+        dataValue = dataValue.slice(1);
+      }
+      return dataValue;
+    };
+
     const dispatchPayload = (payload: string) => {
       const trimmed = payload.trim();
       if (!trimmed || trimmed === "[DONE]") {
@@ -127,13 +149,7 @@ export const agentService = {
           fullText += event.delta;
           lineBuffer += event.delta;
 
-          if (lineBuffer.includes("\n")) {
-            const lines = lineBuffer.split("\n");
-            lineBuffer = lines.pop() ?? "";
-            for (const line of lines) {
-              process.stdout.write(renderMarkdownLine(line) + "\n");
-            }
-          }
+          drainCompleteLines();
         } else if (event.type === "tool-input-start" || event.type === "tool-call") {
           flushLineBuffer();
 
@@ -210,13 +226,7 @@ export const agentService = {
           fullText += trimmed;
           lineBuffer += trimmed;
 
-          if (lineBuffer.includes("\n")) {
-            const lines = lineBuffer.split("\n");
-            lineBuffer = lines.pop() ?? "";
-            for (const line of lines) {
-              process.stdout.write(renderMarkdownLine(line) + "\n");
-            }
-          }
+          drainCompleteLines();
         }
       }
     };
@@ -236,12 +246,11 @@ export const agentService = {
                   dispatchPayload(currentEventData.join("\n"));
                   currentEventData = [];
                 }
-              } else if (line.startsWith("data:")) {
-                let dataValue = line.slice(5);
-                if (dataValue.startsWith(" ")) {
-                  dataValue = dataValue.slice(1);
+              } else {
+                const dataValue = toSseData(line);
+                if (dataValue != null) {
+                  currentEventData.push(dataValue);
                 }
-                currentEventData.push(dataValue);
               }
             }
           }
@@ -265,11 +274,8 @@ export const agentService = {
             continue;
           }
 
-          if (line.startsWith("data:")) {
-            let dataValue = line.slice(5);
-            if (dataValue.startsWith(" ")) {
-              dataValue = dataValue.slice(1);
-            }
+          const dataValue = toSseData(line);
+          if (dataValue != null) {
             currentEventData.push(dataValue);
           }
         }

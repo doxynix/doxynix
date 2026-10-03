@@ -20,14 +20,14 @@ export function HighFiveCard({ group }: Readonly<Props>) {
   const uniqueLicenses = Array.from(new Set(packages.map((p) => p.license)));
 
   return (
-    <Card className="flex flex-col justify-between transition-standard hover:border-border-strong">
-      <CardHeader className="pb-4">
+    <Card className="flex flex-col justify-between gap-3 py-4 transition-standard hover:border-border-strong sm:gap-6 sm:py-6">
+      <CardHeader className="px-4 pb-3 sm:px-6 sm:pb-4">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-4 overflow-hidden">
+          <div className="flex min-w-0 items-center gap-3 overflow-hidden sm:gap-4">
             <AppAvatar
               alt={author}
               fallbackText={author}
-              sizeClassName="size-12"
+              sizeClassName="size-10 sm:size-12"
               src={avatar}
             />
 
@@ -38,7 +38,7 @@ export function HighFiveCard({ group }: Readonly<Props>) {
               >
                 {author}
               </CardTitle>
-              <div className="mt-1 flex gap-1.5">
+              <div className="mt-1 flex flex-wrap gap-1.5">
                 {uniqueLicenses.map((lic) => (
                   <AppBadge
                     key={lic}
@@ -53,7 +53,7 @@ export function HighFiveCard({ group }: Readonly<Props>) {
         </div>
       </CardHeader>
 
-      <CardContent className="flex grow flex-col gap-4 pt-0">
+      <CardContent className="flex grow flex-col gap-3 px-4 pt-0 sm:gap-4 sm:px-6">
         <div className="flex flex-col gap-2">
           <p className="text-muted-foreground text-xs">
             {t("package_count", { count: packages.length })}
@@ -61,11 +61,12 @@ export function HighFiveCard({ group }: Readonly<Props>) {
           <div className="flex flex-wrap gap-1.5">
             {packages.map((pkg) => (
               <AppBadge
+                className="max-w-full"
                 key={pkg.name}
                 variant="outline"
               >
                 <Package className="size-3 text-muted-foreground" />
-                <span className="truncate">
+                <span className="break-all">
                   {pkg.name.includes("/") ? (
                     <>
                       <span className="text-muted-foreground">{`${pkg.name.split("/")[0]}/`}</span>
@@ -80,7 +81,7 @@ export function HighFiveCard({ group }: Readonly<Props>) {
           </div>
         </div>
 
-        <div className="mt-auto border-t pt-4">
+        <div className="mt-auto border-t pt-3 sm:pt-4">
           <ExternalLink
             className="ml-auto flex w-fit items-center gap-2 text-muted-foreground text-xs transition-colors hover:text-foreground"
             href={authorLink}

@@ -51,7 +51,9 @@ export default async function AboutPage() {
       />
 
       <div className="mb-20">
-        <h1 className="mb-6 font-bold text-5xl text-foreground md:text-6xl">{t("hero_title")}</h1>
+        <h1 className="mb-6 font-bold hyphens-auto break-words text-2xl text-foreground xs:text-3xl sm:text-4xl md:text-6xl">
+          {t("hero_title")}
+        </h1>
         <p className="max-w-2xl text-lg text-text-secondary">{t("hero_desc")}</p>
       </div>
 
@@ -98,13 +100,15 @@ export default async function AboutPage() {
       </section>
 
       <section className="mb-20 rounded-2xl border bg-landing-bg-light/50">
-        <div className="flex flex-col gap-8 p-12 text-center md:p-16">
+        <div className="flex flex-col gap-8 p-6 text-center sm:p-8 md:p-16">
           <div className="flex flex-col gap-3">
-            <h2 className="font-bold text-4xl">{t("cta_title")}</h2>
+            <h2 className="font-bold break-words text-2xl sm:text-3xl md:text-4xl">
+              {t("cta_title")}
+            </h2>
             <p className="text-lg text-text-secondary">{t("cta_desc")}</p>
           </div>
           <Link
-            className="inline-flex items-center gap-3 rounded-xl bg-foreground px-8 py-4 font-semibold text-background transition-standard hover:opacity-90 active:scale-95"
+            className="inline-flex items-center gap-3 rounded-xl bg-foreground px-5 py-4 font-semibold whitespace-nowrap text-background transition-standard hover:opacity-90 active:scale-95 sm:px-8"
             href="/auth"
           >
             {tCommon("get_started_free")}
