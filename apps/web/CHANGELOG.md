@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.1.0](https://github.com/doxynix/doxynix/compare/web-v5.0.2...web-v5.1.0) (2026-10-03)
+
+
+### Features
+
+* **web:** harden Sentry logging and add PostHog server analytics ([#2260](https://github.com/doxynix/doxynix/issues/2260)) ([2354180](https://github.com/doxynix/doxynix/commit/23541803cc6441d2585eb1c1eed0faba2db498ea))
+
 ## [5.0.2](https://github.com/doxynix/doxynix/compare/web-v5.0.1...web-v5.0.2) (2026-10-03)
 
 
