@@ -22,8 +22,10 @@ const HOST = "https://us.i.posthog.com";
 async function loadServer(env: { apiKey: string; isProd: boolean }) {
   vi.resetModules();
   vi.doMock("@/shared/config/env.flags", () => ({ IS_PROD: env.isProd }));
+  vi.doMock("@/shared/config/env.client", () => ({
+    NEXT_PUBLIC_POSTHOG_KEY: env.apiKey,
+  }));
   vi.doMock("@/shared/config/env.server", () => ({
-    POSTHOG_API_KEY: env.apiKey,
     POSTHOG_HOST: HOST,
   }));
 

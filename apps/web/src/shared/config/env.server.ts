@@ -40,7 +40,6 @@ const envServer = createEnv({
     GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
     LOG_SALT_SECRET: process.env.LOG_SALT_SECRET,
-    POSTHOG_API_KEY: process.env.POSTHOG_API_KEY,
     POSTHOG_HOST: process.env.POSTHOG_HOST,
     PRISMA_FIELD_ENCRYPTION_DECRYPTION_KEYS: process.env.PRISMA_FIELD_ENCRYPTION_DECRYPTION_KEYS,
     PRISMA_FIELD_ENCRYPTION_HASH_SALT: process.env.PRISMA_FIELD_ENCRYPTION_HASH_SALT,
@@ -84,7 +83,6 @@ const envServer = createEnv({
     GOOGLE_GENERATIVE_AI_API_KEY: stringSchema,
     GROQ_API_KEY: stringSchema,
     LOG_SALT_SECRET: stringSchema,
-    POSTHOG_API_KEY: z.optional(stringSchema),
     POSTHOG_HOST: z.optional(z.url()),
     PRISMA_FIELD_ENCRYPTION_DECRYPTION_KEYS: z.optional(stringSchema),
     PRISMA_FIELD_ENCRYPTION_HASH_SALT: stringSchema,
@@ -141,7 +139,6 @@ export const GITHUB_APP_PRIVATE_KEY =
 export const GITHUB_SYSTEM_PAT = envServer.GITHUB_SYSTEM_PAT;
 export const GITHUB_WEBHOOK_SECRET = envServer.GITHUB_WEBHOOK_SECRET;
 export const GITHUB_SYSTEM_INSTALLATION_ID = envServer.GITHUB_SYSTEM_INSTALLATION_ID;
-export const POSTHOG_API_KEY = envServer.POSTHOG_API_KEY;
 export const POSTHOG_HOST = envServer.POSTHOG_HOST;
 
 export const AUTH_PROVIDERS = {
