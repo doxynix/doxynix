@@ -30,7 +30,7 @@ const EXPECTED_SPEC: Record<string, Record<string, null | string[]>> = {
   ChatMessage: { parts: null },
   Document: { content: null },
   Session: { token: [] },
-  User: { email: ["lowercase", "trim"], name: null },
+  User: { email: ["lowercase", "trim"] },
   Verification: { identifier: ["lowercase", "trim"], value: [] },
 };
 
@@ -39,7 +39,7 @@ describe("field-encryption end to end", () => {
     const spec = getModelSpec("User");
 
     // `emailHash` is not a separate entry: the generator folds `@encryption:hash` onto the field it hashes, so only ciphertext columns are listed.
-    expect(Object.keys(spec.fields).sort()).toEqual(["email", "name"]);
+    expect(Object.keys(spec.fields).sort()).toEqual(["email"]);
     expect(Object.keys(spec.connections)).toContain("accounts");
   });
 
@@ -52,8 +52,9 @@ describe("field-encryption end to end", () => {
     const data = written.data as Record<string, unknown>;
 
     expect(parseEncryptedString(data.email as string)).not.toBe(false);
-    expect(parseEncryptedString(data.name as string)).not.toBe(false);
     expect(data.emailHash).toBe(hashValue("User@Example.com", ["lowercase", "trim"]));
+    // `name` lost its `@encrypted` annotation, so it has to survive the write untouched.
+    expect(data.name).toBe("Ada");
 
     const read: Record<string, unknown> = { ...data };
     decryptOnRead(read, "User", true, keychain, () => {

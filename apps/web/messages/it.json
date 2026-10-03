@@ -179,6 +179,7 @@
     "close": "Chiudi",
     "command_menu_desc": "Cerca comandi",
     "command_menu_title": "Menu comandi",
+    "confirm_phrase_hint": "Digita <phrase></phrase> per confermare. L'operazione non può essere annullata.",
     "connect": "Connetti",
     "copy": "Copia",
     "copy_code": "Copia codice",

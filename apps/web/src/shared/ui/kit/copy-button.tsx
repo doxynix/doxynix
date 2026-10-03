@@ -10,6 +10,7 @@ import { AppButton } from "../core/button";
 import { AppTooltip } from "./app-tooltip";
 
 type Props = {
+  alwaysVisible?: boolean;
   className?: string;
   disabled?: boolean;
   tooltipSide?: "bottom" | "left" | "right" | "top";
@@ -18,6 +19,7 @@ type Props = {
 };
 
 export function CopyButton({
+  alwaysVisible = false,
   className,
   disabled,
   tooltipSide,
@@ -39,7 +41,9 @@ export function CopyButton({
           "relative size-6 not-md:opacity-100 transition-standard duration-300",
           "group/copy-btn",
           !isCopied &&
-            "text-muted-foreground opacity-0 hover:text-foreground group-hover:opacity-100",
+            (alwaysVisible
+              ? "text-muted-foreground hover:text-foreground"
+              : "text-muted-foreground opacity-0 hover:text-foreground group-hover:opacity-100"),
           isCopied && "pointer-events-none text-success opacity-100",
           className,
         )}

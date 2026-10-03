@@ -179,6 +179,7 @@
     "close": "Close",
     "command_menu_desc": "Search commands",
     "command_menu_title": "Command Menu",
+    "confirm_phrase_hint": "Type <phrase></phrase> to confirm. This cannot be undone.",
     "connect": "Connect",
     "copy": "Copy",
     "copy_code": "Copy code",

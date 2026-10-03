@@ -179,6 +179,7 @@
     "close": "閉じる",
     "command_menu_desc": "コマンドを検索",
     "command_menu_title": "コマンドメニュー",
+    "confirm_phrase_hint": "確認するには <phrase></phrase> と入力してください。この操作は元に戻せません。",
     "connect": "接続",
     "copy": "コピー",
     "copy_code": "コードをコピー",

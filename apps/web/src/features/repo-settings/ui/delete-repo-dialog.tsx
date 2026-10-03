@@ -10,9 +10,9 @@ import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 
 import { useRepoActions } from "@/entities/repo/model/use-repo-actions";
 
-type Props = { id: string };
+type Props = { id: string; name: string };
 
-export function DeleteRepoDialog({ id }: Readonly<Props>) {
+export function DeleteRepoDialog({ id, name }: Readonly<Props>) {
   const [open, setOpen] = useState(false);
   const t = useTranslations("Dashboard");
   const { deleteRepo } = useRepoActions();
@@ -32,6 +32,7 @@ export function DeleteRepoDialog({ id }: Readonly<Props>) {
 
   return (
     <DangerActionDialog
+      confirmationPhrase={name}
       confirmLabel={t("settings_danger_delete_confirmation")}
       description={t("settings_repo_delete_desc")}
       destructiveAlertContent={

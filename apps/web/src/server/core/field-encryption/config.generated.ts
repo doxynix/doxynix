@@ -154,7 +154,6 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
     },
     fields: {
       email: { hash: { normalize: ["lowercase", "trim"] } },
-      name: {},
     },
   },
   Verification: {

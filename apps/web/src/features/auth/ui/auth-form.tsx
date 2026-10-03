@@ -1,6 +1,13 @@
 "use client";
 
-import { type ComponentType, type SubmitEvent, useEffect, useRef, useState } from "react";
+import {
+  type ComponentType,
+  type SubmitEvent,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import {
@@ -69,6 +76,10 @@ type AuthBenefit = {
   title: string;
 };
 
+const noopSubscribe = () => () => undefined;
+const getLastUsedLoginMethod = () => authClient.getLastUsedLoginMethod();
+const getNoLastUsedLogin = () => null;
+
 export function AuthForm() {
   const router = useRouter();
   const tCommon = useTranslations("Common");
@@ -109,7 +120,7 @@ export function AuthForm() {
   const [loadingProvider, setLoadingProvider] = useState<null | string>(null);
   const [isVerifying, setIsVerifying] = useState(false);
 
-  const lastLogin = authClient.getLastUsedLoginMethod();
+  const lastLogin = useSyncExternalStore(noopSubscribe, getLastUsedLoginMethod, getNoLastUsedLogin);
   const [twoFactorParam, setTwoFactorParam] = useQueryState("two_factor");
   const isTwoFactorRequired = twoFactorParam === "true";
 
@@ -580,7 +591,7 @@ export function AuthForm() {
               </LoadingButton>
 
               <AppButton
-                className="mx-auto text-muted-foreground text-xs hover:text-foreground"
+                className="mx-auto max-w-full whitespace-normal text-muted-foreground text-xs hover:text-foreground"
                 disabled={isTwoFactorVerifying}
                 onClick={() => {
                   setIsBackupMode(!isBackupMode);
