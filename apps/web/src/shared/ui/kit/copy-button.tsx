@@ -13,6 +13,7 @@ type Props = {
   alwaysVisible?: boolean;
   className?: string;
   disabled?: boolean;
+  onCopy?: () => void;
   tooltipSide?: "bottom" | "left" | "right" | "top";
   tooltipText?: string;
   value: string;
@@ -22,6 +23,7 @@ export function CopyButton({
   alwaysVisible = false,
   className,
   disabled,
+  onCopy,
   tooltipSide,
   tooltipText,
   value,
@@ -48,7 +50,10 @@ export function CopyButton({
           className,
         )}
         disabled={disabled}
-        onClick={() => void copy(value)}
+        onClick={() => {
+          void copy(value);
+          onCopy?.();
+        }}
         size="icon"
         type="button"
         variant="ghost"

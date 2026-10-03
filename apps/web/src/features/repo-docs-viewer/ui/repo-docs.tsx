@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { trpc } from "@/shared/api/trpc";
 import { formatFullDate } from "@/shared/lib/date-utils";
 import { saveFile } from "@/shared/lib/file-saver";
+import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
@@ -183,6 +184,7 @@ export function RepoDocs({
     const blob = new Blob([docContent.raw], { type: "text/markdown;charset=utf-8" });
     const fileName = `${activeTab}.md`;
     saveFile(blob, fileName);
+    trackClientEvent("doc_downloaded", { doc_type: activeTab, repo_id: repoId });
   };
 
   const tabItems = availableDocs
@@ -205,7 +207,11 @@ export function RepoDocs({
   return (
     <Tabs
       className="flex h-[calc(100dvh-250px)] w-full flex-row gap-10"
-      onValueChange={(value) => onTabChange(value as DocType)}
+      onValueChange={(value) => {
+        const nextType = value as DocType;
+        trackClientEvent("doc_viewed", { doc_type: nextType, repo_id: repoId });
+        onTabChange(nextType);
+      }}
       orientation="vertical"
       value={activeTab}
     >
@@ -334,6 +340,12 @@ export function RepoDocs({
                             <CopyButton
                               className="size-8 px-3 opacity-100"
                               disabled={isDocLoading}
+                              onCopy={() =>
+                                trackClientEvent("doc_copied", {
+                                  doc_type: doc.type,
+                                  repo_id: repoId,
+                                })
+                              }
                               tooltipText={t("repo_docs_copy_file")}
                               value={docContent?.raw ?? ""}
                             />

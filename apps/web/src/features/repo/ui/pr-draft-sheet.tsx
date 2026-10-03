@@ -10,6 +10,7 @@ import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
 import { generateBranchName } from "@/shared/lib/get-branch-name";
+import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import {
@@ -60,6 +61,11 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
               window.open(data.prUrl, "_blank", "noopener,noreferrer");
             },
           },
+        });
+
+        trackClientEvent("pr_opened", {
+          repo_id: repoId,
+          staged_files: filesCount,
         });
 
         void utils.analysis.getStagedFiles.invalidate();

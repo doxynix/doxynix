@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { upload } from "@vercel/blob/client";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
 import { useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
 import { compressImage } from "@/shared/lib/image-compression";
+import { trackClientEvent } from "@/shared/lib/posthog-client";
 
 import { resolveAvatarUploadErrorKey, sanitizeAvatarBaseName } from "./avatar-utils";
 
@@ -61,7 +61,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
         name: data.user.name ?? null,
       });
 
-      posthog.capture("profile_updated", {
+      trackClientEvent("profile_updated", {
         has_email_changed: (session?.user.email ?? null) !== (data.user.email ?? null),
         has_name_changed: (session?.user.name ?? null) !== (data.user.name ?? null),
         user_id: data.user.id,
@@ -73,7 +73,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
     onError: (err) => toast.error(err.message),
     onSuccess: async () => {
       toast.success(t("settings_danger_delete_account_toast_success"));
-      posthog.capture("account_deleted");
+      trackClientEvent("account_deleted");
       await authClient.signOut({
         fetchOptions: {
           onSuccess: () => {

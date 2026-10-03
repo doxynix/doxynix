@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
+import { trackClientEvent } from "@/shared/lib/posthog-client";
 
 export function usePrStage(repoId: string) {
   const utils = trpc.useUtils();
@@ -14,6 +15,10 @@ export function usePrStage(repoId: string) {
       toast.error(t("repo_pull_fix_add_failed", { error: error.message }));
     },
     onSuccess: (data) => {
+      trackClientEvent("fix_staged", {
+        repo_id: repoId,
+        staged_files: data.stagedFilesAdded,
+      });
       toast.success(
         t("repo_pull_fix_added", {
           added: data.stagedFilesAdded,

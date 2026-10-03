@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import {
   Activity,
   FileCode,
@@ -19,6 +20,7 @@ import { toast } from "sonner";
 import { trpc } from "@/shared/api/trpc";
 import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
+import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
@@ -76,6 +78,24 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
 
   const { isStaging, stageFix } = usePrStage(repoId);
 
+  const findingsCount = impact?.summary.findings ?? 0;
+  const prAnalysisId = analysis?.analysis.id;
+  const riskScore = impact?.analysis.riskScore ?? analysis?.analysis.riskScore;
+
+  useEffect(() => {
+    if (prAnalysisId == null) {
+      return;
+    }
+
+    trackClientEvent("pr_findings_viewed", {
+      findings_count: findingsCount,
+      pr_analysis_id: prAnalysisId,
+      pr_number: analysis?.analysis.prNumber ?? 0,
+      repo_id: repoId,
+      risk_score: riskScore ?? 0,
+    });
+  }, [analysis?.analysis.prNumber, findingsCount, prAnalysisId, repoId, riskScore]);
+
   const createFixMutation = trpc.analysis.createFix.useMutation({
     onError: (err) => {
       toast.error(t("repo_pull_fix_error"), {
@@ -86,6 +106,11 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
       if (data.success === true && data.fixId != null) {
         toast.success(t("repo_pull_fix_queued"), {
           description: t("repo_pull_fix_queued_desc"),
+        });
+        trackClientEvent("fix_requested", {
+          findings_count: findingsCount,
+          fix_id: data.fixId,
+          repo_id: repoId,
         });
         void utils.analysis.getByRepository.invalidate({ repoId });
       }
