@@ -1,13 +1,12 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreDependencies": ["posthog-node"],
   "workspaces": {
     "apps/siem-server": {
       "entry": ["src/index.ts", "scripts/*.ts"]
     },
     "apps/web": {
       "entry": ["src/app/**/page.tsx", "src/app/api/**/route.ts", "prisma/seed.ts"],
-      "ignore": ["src/server/core/posthog-server.ts", "src/shared/i18n/request.ts"]
+      "ignore": ["src/shared/i18n/request.ts"]
     },
     "packages/cli": {
       "entry": ["src/commands/profile.ts"]
