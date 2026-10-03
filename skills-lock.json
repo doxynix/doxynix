@@ -1,5 +1,4 @@
 {
-  "version": 1,
   "skills": {
     "ai-sdk": {
       "computedHash": "0883204d11b055e968dee697c5858e68064c27dfd4deb6310212895daa65c5ad",
@@ -38,10 +37,10 @@
       "sourceType": "github"
     },
     "documentation-writer": {
-      "source": "github/awesome-copilot",
-      "sourceType": "github",
+      "computedHash": "ee53d65b163cd7eb953a930c95841cfe398cc2c0bd24c06508bbaa07c432be35",
       "skillPath": "skills/documentation-writer/SKILL.md",
-      "computedHash": "ee53d65b163cd7eb953a930c95841cfe398cc2c0bd24c06508bbaa07c432be35"
+      "source": "github/awesome-copilot",
+      "sourceType": "github"
     },
     "drizzle-best-practices": {
       "computedHash": "c723c157f3af98486d64dea4a1c1250ca0c57e1d0cdd426a6c301f844dcdbaed",
@@ -95,6 +94,24 @@
       "computedHash": "2b2d642a6698cf1767d7a65f8beb4aceb078033d5afc5838c08da6d683fc333d",
       "skillPath": "skills/hono/SKILL.md",
       "source": "honojs/skills",
+      "sourceType": "github"
+    },
+    "instrument-error-tracking": {
+      "computedHash": "d99861f732f21f9fdce4cf2dfa322c9d0272cb32fd8f85984b1a301377f1251d",
+      "skillPath": "skills/omnibus/instrument-error-tracking/SKILL.md",
+      "source": "posthog/skills",
+      "sourceType": "github"
+    },
+    "instrument-integration": {
+      "computedHash": "98df556954793de11e2618d2c3781ac4f5134c1ced58de6be1c3d7eb1e97a39c",
+      "skillPath": "skills/omnibus/instrument-integration/SKILL.md",
+      "source": "posthog/skills",
+      "sourceType": "github"
+    },
+    "instrument-product-analytics": {
+      "computedHash": "cd16d176c8b7bbf6cc300086ba7ce8d0616c2fd2a2748e3a3d478bc01c449e91",
+      "skillPath": "skills/omnibus/instrument-product-analytics/SKILL.md",
+      "source": "posthog/skills",
       "sourceType": "github"
     },
     "jscpd": {
@@ -157,6 +174,24 @@
       "source": "bmad-labs/skills",
       "sourceType": "github"
     },
+    "sentry-fix-issues": {
+      "computedHash": "0ef2103f20d698acc56d856a07a372a0a68cb02bad654d0dacb4e2ffe87e98b5",
+      "skillPath": "skills-legacy/sentry-fix-issues/SKILL.md",
+      "source": "getsentry/sentry-for-ai",
+      "sourceType": "github"
+    },
+    "sentry-nextjs-sdk": {
+      "computedHash": "03d3615a553aea79f21cb78e4ea4d37c30bc9d5c1bc5c90629424aa9e7fdd647",
+      "skillPath": "skills-legacy/sentry-nextjs-sdk/SKILL.md",
+      "source": "getsentry/sentry-for-ai",
+      "sourceType": "github"
+    },
+    "sentry-node-sdk": {
+      "computedHash": "bb6688a6e3c89e52bea2c3c10feab48fe7662392bd20e73745226111d8fd6da9",
+      "skillPath": "skills-legacy/sentry-node-sdk/SKILL.md",
+      "source": "getsentry/sentry-for-ai",
+      "sourceType": "github"
+    },
     "shadcn": {
       "computedHash": "f615de216e085a84e31593ad0fa9062232adc40cd87b7c7ab2b8e49abf6500be",
       "skillPath": "skills/shadcn/SKILL.md",
@@ -164,10 +199,10 @@
       "sourceType": "github"
     },
     "skill-creator": {
-      "source": "anthropics/skills",
-      "sourceType": "github",
+      "computedHash": "5ea13a6d9f0d4bb694405d79acd00cadec0d21bb138c4dd10fcf3c500cb835c2",
       "skillPath": "skills/skill-creator/SKILL.md",
-      "computedHash": "5ea13a6d9f0d4bb694405d79acd00cadec0d21bb138c4dd10fcf3c500cb835c2"
+      "source": "anthropics/skills",
+      "sourceType": "github"
     },
     "systematic-debugging": {
       "computedHash": "a2750dfbaed1690da73b120254892c4f926b4576cb82eb16fc877783941fe39b",
@@ -253,5 +288,6 @@
       "source": "pproenca/dot-skills",
       "sourceType": "github"
     }
-  }
+  },
+  "version": 1
 }
