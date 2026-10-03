@@ -28,7 +28,7 @@ Sentry.init({
 
   enabled: IS_PROD,
 
-  enableLogs: !IS_PROD,
+  enableLogs: true,
 
   replaysOnErrorSampleRate: 1,
 
