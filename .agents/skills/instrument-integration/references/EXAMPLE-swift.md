@@ -213,7 +213,7 @@ PostHogSDK.shared.reset()
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "POSTHOG_PROJECT_TOKEN"
-            value = "phc_jE9kXU0depRekiuabVROlxxkIXn95NqsNO3qB4qNKtl"
+            value = "phc_EXAMPLE_PLACEHOLDER_TOKEN_REPLACE_ME"
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
