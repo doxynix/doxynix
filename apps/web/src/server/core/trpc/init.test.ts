@@ -48,6 +48,7 @@ vi.mock("@/server/utils/request-context", () => ({
   buildRequestStore: () => ({ requestId: "req-123" }),
   requestContext: { getStore: () => ({ requestId: "req-123" }), run: (_s: any, fn: any) => fn() },
   resolveRequestId: () => "req-123",
+  withProcedureContext: (_parent: any, _overrides: any, fn: any) => fn(),
 }));
 vi.mock("../app-logger", () => ({ appLogger: mocks.appLogger }));
 

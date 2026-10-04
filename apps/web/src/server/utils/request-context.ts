@@ -163,3 +163,36 @@ export function buildRequestStore(input: RequestContextInput): RequestStore {
     userRole: input.userRole,
   };
 }
+
+// A batched tRPC request shares one outer store, so each procedure gets its own
+// scope instead of mutating the shared one and inheriting the last writer's path.
+export function deriveProcedureStore(
+  parent: RequestStore,
+  overrides: {
+    method: string;
+    path: string;
+    userId?: string;
+    userRole?: string;
+  },
+): RequestStore {
+  return {
+    ...parent,
+    method: overrides.method,
+    path: overrides.path,
+    userId: overrides.userId ?? parent.userId,
+    userRole: overrides.userRole ?? parent.userRole,
+  };
+}
+
+export function withProcedureContext<T>(
+  parent: RequestStore,
+  overrides: {
+    method: string;
+    path: string;
+    userId?: string;
+    userRole?: string;
+  },
+  fn: () => T,
+): T {
+  return requestContext.run(deriveProcedureStore(parent, overrides), fn);
+}
