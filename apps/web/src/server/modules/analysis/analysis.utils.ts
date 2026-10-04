@@ -11,6 +11,15 @@ import type {
 } from "./analysis.schemas";
 import { ProjectPolicy } from "./engine/core/project-policy";
 
+const MAX_SEARCHABLE_DOCUMENTS_PER_TYPE = 3;
+
+// Upper bound on `DocType` members, so the bounded fetch stays bounded if the enum grows.
+const MAX_DOCUMENT_TYPES = 8;
+
+export const MAX_SEARCHABLE_DOCUMENT_FETCH = MAX_SEARCHABLE_DOCUMENTS_PER_TYPE * MAX_DOCUMENT_TYPES;
+
+const MAX_SEARCH_RESULTS = 20;
+
 // C0 controls except tab, LF and CR; built at runtime so the regex literal holds no raw control characters.
 const CONTROL_CHAR_PATTERN = new RegExp(
   `[${String.fromCharCode(0x00)}-${String.fromCharCode(0x08)}${String.fromCharCode(0x0b)}${String.fromCharCode(0x0c)}${String.fromCharCode(0x0e)}-${String.fromCharCode(0x1f)}]`,
@@ -324,7 +333,10 @@ export function scoreSearchMatch(terms: string[], values: Array<null | string | 
 export function dedupeSearchResults(results: RepoSearchResult[]) {
   const sortedByBest = orderBy(results, [(r) => r.score], ["desc"]);
   const unique = uniqBy(sortedByBest, (r) => r.id);
-  return orderBy(unique, [(r) => r.score, (r) => r.label], ["desc", "asc"]);
+  return orderBy(unique, [(r) => r.score, (r) => r.label], ["desc", "asc"]).slice(
+    0,
+    MAX_SEARCH_RESULTS,
+  );
 }
 
 export function pickLatestDocsByType<TDoc extends { type: DocType; updatedAt: Date }>(
