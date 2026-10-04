@@ -71,21 +71,36 @@ async function runAsBackgroundTask(task: () => Promise<void>): Promise<void> {
   });
 }
 
-let sharedPool: Pool | null = null;
-
 // Held here so the slow-query log can read queue depth off the pool Prisma actually uses.
+// Also stashed on globalThis: the dev client singleton survives HMR, so a module-scoped
+// reference would go stale and silently report zero counters.
+const globalForPool = globalThis as unknown as { pgPool?: Pool; pgPoolConnects?: number };
+
 function createPgPool(): Pool {
-  sharedPool ??= new Pool({ connectionString: DATABASE_URL });
-  return sharedPool;
+  globalForPool.pgPool ??= new Pool({ connectionString: DATABASE_URL });
+  const pool = globalForPool.pgPool;
+
+  globalForPool.pgPoolConnects ??= 0;
+  if (pool.listenerCount("connect") === 0) {
+    pool.on("connect", () => {
+      globalForPool.pgPoolConnects = (globalForPool.pgPoolConnects ?? 0) + 1;
+    });
+  }
+
+  return pool;
 }
 
-export function poolQueueSnapshot(
-  pool: Pick<Pool, "idleCount" | "totalCount" | "waitingCount">,
-): { poolIdle: number; poolTotal: number; poolWaiting: number } | undefined {
-  if (pool.waitingCount === 0) {
-    return undefined;
-  }
+// A cold serverless instance pays TCP+TLS+auth on its first query and never shows up as
+// queue depth, so the connect count is the only signal that separates cold start from
+// genuine database cost.
+export function poolQueueSnapshot(pool: Pick<Pool, "idleCount" | "totalCount" | "waitingCount">): {
+  poolConnects: number;
+  poolIdle: number;
+  poolTotal: number;
+  poolWaiting: number;
+} {
   return {
+    poolConnects: globalForPool.pgPoolConnects ?? 0,
     poolIdle: pool.idleCount,
     poolTotal: pool.totalCount,
     poolWaiting: pool.waitingCount,
@@ -218,12 +233,13 @@ function createPrismaInstance() {
               });
             }
           } else if (duration > 200) {
+            const activePool = globalForPool.pgPool;
             appLogger.warn({
               durationMs: Number(duration.toFixed(2)),
               model,
               msg: "Slow DB Query",
               operation,
-              ...(sharedPool == null ? {} : poolQueueSnapshot(sharedPool)),
+              ...(activePool == null ? {} : poolQueueSnapshot(activePool)),
               type: "db.slow",
             });
           }

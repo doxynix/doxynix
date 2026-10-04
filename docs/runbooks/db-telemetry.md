@@ -8,17 +8,30 @@
 - `fields.path` — the tRPC procedure that issued the query. Since the fix in
   `request-context.ts`, batching no longer overwrites this: every procedure in
   a batch gets its own scope.
-- `poolWaiting` / `poolTotal` / `poolIdle` — present **only** when at least one
-  request was queued for a connection at log time. Absence means no queueing.
+- `poolConnects` — connections opened since this instance started. Flat on a warm instance, `1`
+  on a cold serverless container, so a slow query logged with `poolConnects: 1` is mostly
+  connection setup rather than query cost.
+- `poolWaiting` / `poolTotal` / `poolIdle` — `poolWaiting` counts requests queued for a
+  connection; `0` means nobody waited, `poolTotal` is the pool ceiling.
 
 ## Triage
 
 | Symptom | Reading | Next step |
 | --- | --- | --- |
-| `durationMs` high, `poolWaiting` absent | Real DB cost | `EXPLAIN (ANALYZE, BUFFERS)` the query |
+| `durationMs` high, `poolWaiting` 0, `poolConnects` 1 | Cold serverless start | Move behind PgBouncer / Accelerate / Neon |
 | `durationMs` high, `poolWaiting` high | Pool starvation | Size the pool, or cut query count |
+| `durationMs` high, `poolWaiting` 0, `poolConnects` > 1 | Real DB cost | `EXPLAIN (ANALYZE, BUFFERS)` the query |
 | `durationMs` high on `Document`/`ChatMessage` only | Decryption cost | Move decryption out of the hot path |
 | Many models slow at one timestamp | Instance-level stall | Check provider-side, not indexes |
+
+`poolConnects` counts connections opened since the instance started. On a long-lived
+instance it stays flat; a fresh serverless container starts at 1. A slow query logged
+with `poolConnects: 1` was the first query the instance ever ran, and its `durationMs`
+is mostly TCP+TLS+auth rather than query cost — `poolWaiting` cannot show this, because
+a cold start has one caller and no queue.
+
+Read it as a ratio, not an absolute: group by instance via `fields.instance` if present,
+otherwise compare the first slow query of a burst against later ones in the same burst.
 
 ## Queries
 
