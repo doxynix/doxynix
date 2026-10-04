@@ -1,10 +1,10 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 
+import { recordAuditLog } from "@/core/audit-log";
 import { requireAuth } from "@/core/middleware/auth.middleware";
 import { getRequestContext } from "@/utils/request-context";
 
-import { recordAuditLog } from "../audit/audit.service";
 import { scanRequestSchema } from "./scan.schema";
 import { scanLogContent } from "./scan.service";
 

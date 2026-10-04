@@ -1,10 +1,9 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 
+import { recordAuditLog } from "@/core/audit-log";
 import { requireAuth, requireRole } from "@/core/middleware/auth.middleware";
 import { getRequestContext } from "@/utils/request-context";
-
-import { recordAuditLog } from "@/modules/audit/audit.service";
 
 import {
   createRuleSchema,

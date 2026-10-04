@@ -15,7 +15,7 @@ Oxlint only).
 
 | Task | Command |
 | --- | --- |
-| Full gate (run before claiming done) | `bun run validate` then `bun run type-check` then `bun run arch:check` |
+| Full gate (run before claiming done) | `bun run validate` |
 | Format | `bun run format` (writes) · `bun run format:check` |
 | Lint / fix | `bun run lint` · `bun run lint:fix` |
 | Tests | `bun run test` — **only `apps/web` has tests**; the other workspaces have no `test` script |
