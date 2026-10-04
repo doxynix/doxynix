@@ -1,4 +1,4 @@
-import simpleGit from "simple-git";
+import { simpleGit } from "simple-git";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -7,7 +7,7 @@ import {
   computeGitChurnHotspots,
 } from "./common-metrics";
 
-vi.mock("simple-git", () => ({ default: vi.fn() }));
+vi.mock("simple-git", () => ({ simpleGit: vi.fn() }));
 
 vi.mock("@/server/core/app-logger", () => ({ appLogger: { debug: vi.fn(), error: vi.fn() } }));
 vi.mock("@/server/utils/task-logger", () => ({

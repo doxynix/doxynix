@@ -1,12 +1,15 @@
 "use client";
 
+import { useState } from "react";
+
 type Props = {
   isYear?: boolean;
   value?: Date | string;
 };
 
 export function DateComp({ isYear = false, value }: Readonly<Props>) {
-  const targetDate = value ? new Date(value) : new Date();
+  const [now] = useState(() => new Date());
+  const targetDate = value ? new Date(value) : now;
 
   return (
     <span suppressHydrationWarning>
