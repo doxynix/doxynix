@@ -10,7 +10,7 @@ vi.mock("node:fs/promises", () => ({
   default: { mkdir: vi.fn(), rm: vi.fn() },
 }));
 
-vi.mock("simple-git", () => ({ default: () => mockGit }));
+vi.mock("simple-git", () => ({ simpleGit: () => mockGit }));
 
 vi.mock("@/server/utils/task-logger", () => ({
   taskLogger: { error: vi.fn(), info: vi.fn(), success: vi.fn() },

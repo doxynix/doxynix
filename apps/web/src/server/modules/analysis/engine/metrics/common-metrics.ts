@@ -1,6 +1,6 @@
 import { sumBy } from "es-toolkit";
 import { normalize } from "pathe";
-import simpleGit from "simple-git";
+import { simpleGit } from "simple-git";
 
 import { appLogger } from "@/server/core/app-logger";
 import { taskLogger } from "@/server/utils/task-logger";
