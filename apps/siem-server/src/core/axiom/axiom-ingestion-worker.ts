@@ -127,8 +127,8 @@ async function runAxiomSyncCycle(): Promise<SyncCycle> {
 
   console.warn(`[Axiom Sync] Querying dataset '${env.AXIOM_DATASET}' from ${lastTime}...`);
 
-  const queryOptions = lastCursor ? { cursor: lastCursor } : undefined;
-  const response = await axiom.query(aplQuery, queryOptions);
+  // @axiomhq/js v2 defaults to tabular; legacy yields one entry per row, with _time.
+  const response = await axiom.query(aplQuery, { cursor: lastCursor, format: "legacy" });
 
   if (!response.matches || response.matches.length === 0) {
     console.warn("[Axiom Sync] No new logs found. Up to date.");
