@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.1.1](https://github.com/doxynix/doxynix/compare/doxynix-v6.1.0...doxynix-v6.1.1) (2026-10-04)
+
+
+### Bug Fixes
+
+* **deps:** upgrade sentry, mcp, axiom and simple-git to next majors ([#2266](https://github.com/doxynix/doxynix/issues/2266)) ([14d57bc](https://github.com/doxynix/doxynix/commit/14d57bc21842ea8dc78b0486c68fac0852dab2e4))
+
 ## [6.1.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.0.3...doxynix-v6.1.0) (2026-10-03)
 
 

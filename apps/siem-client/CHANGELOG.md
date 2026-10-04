@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.7](https://github.com/doxynix/doxynix/compare/siem-client-v0.3.6...siem-client-v0.3.7) (2026-10-04)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @doxynix/siem-server bumped to 0.3.2
+
 ## [0.3.6](https://github.com/doxynix/doxynix/compare/siem-client-v0.3.5...siem-client-v0.3.6) (2026-09-30)
 
 
