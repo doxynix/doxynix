@@ -179,6 +179,7 @@
     "close": "Kapat",
     "command_menu_desc": "Komutları ara",
     "command_menu_title": "Komut Menüsü",
+    "confirm_phrase_hint": "Onaylamak için <phrase></phrase> yazın. Bu işlem geri alınamaz.",
     "connect": "Bağlan",
     "copy": "Kopyala",
     "copy_code": "Kodu kopyala",

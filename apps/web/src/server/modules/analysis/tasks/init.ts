@@ -5,6 +5,7 @@ import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
+import { trackServerEvent } from "@/server/core/posthog-events";
 import { realtimeService } from "@/server/core/realtime";
 
 const PrismaLocal = locals.create<typeof prisma>("prisma");
@@ -68,6 +69,35 @@ tasks.onStartAttempt(({ ctx }) => {
   });
 });
 
+type PlatformFailureTrigger = "manual_cancel" | "platform_failure" | "task_timeout";
+
+function readAnalysisId(payload: unknown): string | undefined {
+  const value = (payload as Record<string, unknown> | null)?.analysisId;
+  return value == null ? undefined : String(value);
+}
+
+async function emitPlatformFailure(input: {
+  analysisId?: string;
+  distinctId?: string;
+  fixId?: string;
+  stage: string;
+  trigger: PlatformFailureTrigger;
+}) {
+  trackServerEvent(
+    "repo_analysis_failed",
+    {
+      analysis_id: input.analysisId ?? null,
+      // Platform timeouts have no reliable start time here; a null is filterable, a 0 would skew averages.
+      duration_ms: null,
+      fix_id: input.fixId ?? null,
+      source: "platform",
+      stage: input.stage,
+      trigger: input.trigger,
+    },
+    input.distinctId,
+  );
+}
+
 async function cleanupFailsafeDatabaseState(taskName: string, payload: unknown, errorMsg: string) {
   const safePayload = payload as null | Record<string, unknown>;
 
@@ -110,23 +140,41 @@ async function cleanupFailsafeDatabaseState(taskName: string, payload: unknown, 
     if (taskName === "analyze-pr" && safePayload?.analysisId != null) {
       const prAnalysisId = String(safePayload.prAnalysisId);
 
-      await db.pullRequestAnalysis.update({
+      const prAnalysis = await db.pullRequestAnalysis.update({
         data: {
           error: errorMsg,
           status: PRAnalysisStatus.FAILED,
         },
+        include: { repo: { select: { userId: true } } },
         where: { id: prAnalysisId },
+      });
+
+      await emitPlatformFailure({
+        analysisId: prAnalysisId,
+        distinctId: prAnalysis.repo.userId,
+        fixId: undefined,
+        stage: "analyze_pr",
+        trigger: "platform_failure",
       });
     }
 
     if (taskName === "generate-fix" && safePayload?.fixId != null) {
       const fixId = String(safePayload.fixId);
 
-      await db.generatedFix.update({
+      const fix = await db.generatedFix.update({
         data: {
           status: "FAILED" as FixStatus,
         },
+        include: { repo: { select: { userId: true } } },
         where: { id: fixId },
+      });
+
+      await emitPlatformFailure({
+        analysisId: undefined,
+        distinctId: fix.repo.userId,
+        fixId,
+        stage: "generate_fix",
+        trigger: "platform_failure",
       });
 
       appLogger.info({
@@ -153,14 +201,32 @@ tasks.onComplete(async ({ ctx, payload, result }) => {
   );
 
   await cleanupFailsafeDatabaseState(ctx.task.id, payload, errorMsg);
+
+  await emitPlatformFailure({
+    analysisId: readAnalysisId(payload),
+    stage: String(ctx.task.id),
+    trigger: "task_timeout",
+  });
 });
 
 tasks.onCancel(async ({ ctx, payload }) => {
   const cancelReason = "Task execution manually cancelled on Trigger.dev Dashboard.";
   await cleanupFailsafeDatabaseState(ctx.task.id, payload, cancelReason);
+
+  await emitPlatformFailure({
+    analysisId: readAnalysisId(payload),
+    stage: String(ctx.task.id),
+    trigger: "manual_cancel",
+  });
 });
 
 tasks.onFailure(async ({ ctx, error, payload }) => {
   const errorMsg = formatTaskError(error, "Something unexpected happened");
   await cleanupFailsafeDatabaseState(ctx.task.id, payload, errorMsg);
+
+  await emitPlatformFailure({
+    analysisId: readAnalysisId(payload),
+    stage: String(ctx.task.id),
+    trigger: "platform_failure",
+  });
 });

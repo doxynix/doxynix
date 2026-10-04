@@ -10,6 +10,7 @@ import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { cloneRepository } from "@/server/core/git/clone";
 import { calculateBusFactor } from "@/server/core/github/github-api";
+import { trackServerEvent } from "@/server/core/posthog-events";
 import { getAnalysisContext } from "@/server/modules/analysis/logic/analysis-context";
 import { analysisProgress } from "@/server/modules/analysis/logic/analysis-progress";
 import { cleanup, readAndFilterFiles } from "@/server/modules/analysis/logic/repo-file-scanner";
@@ -54,6 +55,7 @@ export const analyzeRepoTask = task({
       userId,
     } = payload;
 
+    const startedAt = Date.now();
     const tempClonePath = join(os.tmpdir(), `doxynix-clone-${analysisId}`);
     const channelName = REALTIME_CONFIG.channels.user(userId);
 
@@ -76,6 +78,17 @@ export const analyzeRepoTask = task({
           Status.DONE,
           "Current commit SHA matches last analysis. Skipping re-run.",
         );
+
+        trackServerEvent(
+          "repo_analysis_skipped",
+          {
+            analysis_id: analysisId,
+            duration_ms: Date.now() - startedAt,
+            reason: "sha_match",
+          },
+          userId,
+        );
+
         return { reason: "SHA_MATCH", skipped: true };
       }
 
@@ -211,6 +224,19 @@ export const analyzeRepoTask = task({
       });
 
       await analysisProgress.finalize(analysisId, Status.DONE, "Analysis completed successfully");
+
+      trackServerEvent(
+        "repo_analysis_completed",
+        {
+          analysis_id: analysisId,
+          doc_types_count: docTypes.length,
+          duration_ms: Date.now() - startedAt,
+          language,
+          selected_files_count: selectedFiles.length,
+        },
+        userId,
+      );
+
       return { success: true };
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -218,6 +244,19 @@ export const analyzeRepoTask = task({
       await analysisProgress.finalize(analysisId, Status.FAILED, errorMessage);
 
       appLogger.error({ error, msg: `Repo analyze failed: ${errorMessage}` });
+
+      trackServerEvent(
+        "repo_analysis_failed",
+        {
+          analysis_id: analysisId,
+          duration_ms: Date.now() - startedAt,
+          is_unexpected: !(error instanceof Error),
+          language,
+          source: "task",
+          stage: "run",
+        },
+        userId,
+      );
 
       await handleError(error, analysisId, channelName, tempClonePath);
       throw error;

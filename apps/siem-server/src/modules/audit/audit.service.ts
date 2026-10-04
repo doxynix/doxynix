@@ -1,38 +1,10 @@
 import { desc } from "drizzle-orm";
 
-import { db } from "@/core/db/db";
 import { executePaginatedQuery, type PaginatedResponse } from "@/core/db/pagination";
 import { type AuditLogSelect, auditLogs } from "@/core/db/schema";
 import { combineConditions, ilikeIf } from "@/core/db/utils";
-import type { RequestContext } from "@/utils/request-context";
 
 import type { GetAuditLogsQuery } from "./audit.schema";
-
-export type RecordAuditInput = {
-  actor: string;
-  action: string;
-  target: string;
-  ctx: RequestContext;
-};
-
-export async function recordAuditLog(input: RecordAuditInput): Promise<void> {
-  const { actor, action, target, ctx } = input;
-
-  await db
-    .insert(auditLogs)
-    .values({
-      action,
-      actor,
-      country: ctx.country,
-      ipAddress: ctx.ip,
-      requestId: ctx.requestId,
-      target,
-      userAgent: ctx.userAgent,
-    })
-    .catch((error) => {
-      console.error("[Audit Service] Failed to write audit log entry:", error);
-    });
-}
 
 export async function getAuditLogsList(
   query: GetAuditLogsQuery,

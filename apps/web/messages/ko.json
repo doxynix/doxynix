@@ -179,6 +179,7 @@
     "close": "닫기",
     "command_menu_desc": "명령 검색",
     "command_menu_title": "명령 메뉴",
+    "confirm_phrase_hint": "확인하려면 <phrase></phrase>을(를) 입력하세요. 이 작업은 되돌릴 수 없습니다.",
     "connect": "연결",
     "copy": "복사",
     "copy_code": "코드 복사",

@@ -14,6 +14,8 @@ import { redisClient } from "../redis";
 import { createContext } from "./context";
 import { createCallerFactory } from "./init";
 
+// Dynamic because server slices import this file back for `apiForUser`; a static import
+// would close the cycle, and deferring keeps the routers out of unrelated entrypoints.
 export const apiForUser = cache(async (userId: string) => {
   const { appRouter } = await import("@/server/modules");
   const createCaller = createCallerFactory(appRouter);

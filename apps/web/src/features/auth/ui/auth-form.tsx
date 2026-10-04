@@ -1,6 +1,13 @@
 "use client";
 
-import { type ComponentType, type SubmitEvent, useEffect, useRef, useState } from "react";
+import {
+  type ComponentType,
+  type SubmitEvent,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import {
@@ -14,7 +21,6 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
-import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod/mini";
@@ -24,6 +30,7 @@ import { Link, useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
 import { cn } from "@/shared/lib/cn";
 import { setClientCookie } from "@/shared/lib/cookies";
+import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { Logo } from "@/shared/ui/branding/doxynix-logo";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
@@ -69,6 +76,10 @@ type AuthBenefit = {
   title: string;
 };
 
+const noopSubscribe = () => () => undefined;
+const getLastUsedLoginMethod = () => authClient.getLastUsedLoginMethod();
+const getNoLastUsedLogin = () => null;
+
 export function AuthForm() {
   const router = useRouter();
   const tCommon = useTranslations("Common");
@@ -109,7 +120,7 @@ export function AuthForm() {
   const [loadingProvider, setLoadingProvider] = useState<null | string>(null);
   const [isVerifying, setIsVerifying] = useState(false);
 
-  const lastLogin = authClient.getLastUsedLoginMethod();
+  const lastLogin = useSyncExternalStore(noopSubscribe, getLastUsedLoginMethod, getNoLastUsedLogin);
   const [twoFactorParam, setTwoFactorParam] = useQueryState("two_factor");
   const isTwoFactorRequired = twoFactorParam === "true";
 
@@ -141,8 +152,8 @@ export function AuthForm() {
 
     setClientCookie("cf-turnstile-response", token, 300);
 
-    try {
-      await authClient.signIn.magicLink({
+    await authClient.signIn
+      .magicLink({
         callbackURL: "/dashboard",
         email: values.email,
         fetchOptions: {
@@ -151,20 +162,22 @@ export function AuthForm() {
           },
         },
         newUserCallbackURL: "/welcome",
+      })
+      .then(() => {
+        setIsSent(true);
+        toast.success(t("sent_toast_success"));
+        trackClientEvent("sign_in_email_sent", { provider: "email" });
+      })
+      .catch(() => {
+        toast.error(t("sent_toast_error"));
+        turnstileRef.current?.reset();
+        setTurnstileToken(null);
+      })
+      .finally(() => {
+        setLoadingProvider(null);
+        pendingDataRef.current = null;
+        setTurnstileToken(null);
       });
-
-      setIsSent(true);
-      toast.success(t("sent_toast_success"));
-      posthog.capture("sign_in_email_sent", { provider: "email" });
-    } catch {
-      toast.error(t("sent_toast_error"));
-      turnstileRef.current?.reset();
-      setTurnstileToken(null);
-    } finally {
-      setLoadingProvider(null);
-      pendingDataRef.current = null;
-      setTurnstileToken(null);
-    }
   };
 
   const onSubmit = async (values: MagicLinkSchemaValue) => {
@@ -186,23 +199,24 @@ export function AuthForm() {
   };
 
   async function handleSignIn(provider: AllowedProviders) {
-    try {
-      setLoadingProvider(provider);
-      posthog.capture("sign_in_attempted", { provider });
+    setLoadingProvider(provider);
+    trackClientEvent("sign_in_attempted", { provider });
 
-      const currentEmail = form.getValues("email");
+    const currentEmail = form.getValues("email");
 
-      await authClient.signIn.social({
+    await authClient.signIn
+      .social({
         callbackURL: "/dashboard",
         loginHint: currentEmail || undefined,
         newUserCallbackURL: "/welcome",
         provider,
+      })
+      .catch(() => {
+        toast.error(t("error_social_signin_failed"));
+      })
+      .finally(() => {
+        setLoadingProvider(null);
       });
-    } catch {
-      toast.error(t("error_social_signin_failed"));
-    } finally {
-      setLoadingProvider(null);
-    }
   }
 
   const handleTwoFactorVerify = async (e: SubmitEvent<HTMLFormElement>) => {
@@ -214,60 +228,63 @@ export function AuthForm() {
     }
 
     setIsTwoFactorVerifying(true);
-    try {
-      if (isBackupMode) {
-        const { error } = await authClient.twoFactor.verifyBackupCode({
-          code: twoFactorCode,
-        });
-        if (error) {
-          throw new Error(error.message);
-        }
-      } else {
-        const { error } = await authClient.twoFactor.verifyTotp({
-          code: twoFactorCode,
-          trustDevice: true,
-        });
-        if (error) {
-          throw new Error(error.message);
-        }
-      }
 
-      toast.success(t("success_authenticated"));
-      void setTwoFactorParam(null);
-      router.replace("/dashboard");
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : t("error_verification_failed");
-      toast.error(msg);
-    } finally {
-      setIsTwoFactorVerifying(false);
-    }
+    const verification = isBackupMode
+      ? authClient.twoFactor.verifyBackupCode({ code: twoFactorCode }).then(({ error }) => {
+          if (error) {
+            throw new Error(error.message);
+          }
+        })
+      : authClient.twoFactor
+          .verifyTotp({ code: twoFactorCode, trustDevice: true })
+          .then(({ error }) => {
+            if (error) {
+              throw new Error(error.message);
+            }
+          });
+
+    await verification
+      .then(() => {
+        toast.success(t("success_authenticated"));
+        void setTwoFactorParam(null);
+        router.replace("/dashboard");
+      })
+      .catch((error: unknown) => {
+        const msg = error instanceof Error ? error.message : t("error_verification_failed");
+        toast.error(msg);
+      })
+      .finally(() => {
+        setIsTwoFactorVerifying(false);
+      });
   };
 
   const handlePasskeySignIn = async () => {
     setLoadingProvider("passkey");
-    posthog.capture("sign_in_attempted", { provider: "passkey" });
+    trackClientEvent("sign_in_attempted", { provider: "passkey" });
 
-    try {
-      const { error } = await authClient.signIn.passkey({
+    await authClient.signIn
+      .passkey({
         fetchOptions: {
           onSuccess: () => {
             router.replace("/dashboard");
           },
         },
-      });
-
-      if (error) {
-        if ("code" in error && error.code === "NO_CREDENTIALS") {
-          toast.error(t("error_no_security_keys"));
-        } else {
-          toast.error(error.message ?? t("error_authentication_failed"));
+      })
+      .then(({ error }) => {
+        if (error) {
+          if ("code" in error && error.code === "NO_CREDENTIALS") {
+            toast.error(t("error_no_security_keys"));
+          } else {
+            toast.error(error.message ?? t("error_authentication_failed"));
+          }
         }
-      }
-    } catch {
-      toast.error(t("error_passkey_failed"));
-    } finally {
-      setLoadingProvider(null);
-    }
+      })
+      .catch(() => {
+        toast.error(t("error_passkey_failed"));
+      })
+      .finally(() => {
+        setLoadingProvider(null);
+      });
   };
 
   const onTurnstileSuccess = (token: string) => {
@@ -574,7 +591,7 @@ export function AuthForm() {
               </LoadingButton>
 
               <AppButton
-                className="mx-auto text-muted-foreground text-xs hover:text-foreground"
+                className="mx-auto max-w-full whitespace-normal text-muted-foreground text-xs hover:text-foreground"
                 disabled={isTwoFactorVerifying}
                 onClick={() => {
                   setIsBackupMode(!isBackupMode);

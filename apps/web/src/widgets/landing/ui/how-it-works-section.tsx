@@ -142,7 +142,7 @@ export function HowItWorksSection() {
 
   const COLUMNS: ColumnTypes[] = [
     {
-      className: "flex h-full flex-col justify-center",
+      className: "flex h-full min-w-0 flex-col justify-center",
       nodes: [
         {
           circleClass: "border-border-strong",
@@ -155,7 +155,7 @@ export function HowItWorksSection() {
       ],
     },
     {
-      className: "flex h-full flex-col justify-center px-8 md:px-0",
+      className: "flex h-full min-w-0 flex-col justify-center px-0 sm:px-8 md:px-0",
       nodes: [
         {
           circleClass: "border-brand-trigger/40 size-16 sm:size-24",
@@ -167,7 +167,7 @@ export function HowItWorksSection() {
       ],
     },
     {
-      className: "flex h-full flex-col justify-between gap-8",
+      className: "flex h-full min-w-0 flex-col justify-between gap-8",
       nodes: [
         {
           circleClass: "border-brand-ai/40",
@@ -215,7 +215,7 @@ export function HowItWorksSection() {
           >
             {col.nodes.map((node, nodeIdx) => (
               <div
-                className={cn("flex flex-col items-center", node.gapClass)}
+                className={cn("flex min-w-0 flex-col items-center", node.gapClass)}
                 key={nodeIdx}
               >
                 <Circle
@@ -224,7 +224,12 @@ export function HowItWorksSection() {
                 >
                   {node.icon}
                 </Circle>
-                <span className={cn("text-muted-foreground text-xs sm:text-sm", node.labelClass)}>
+                <span
+                  className={cn(
+                    "max-w-full px-1 text-center break-words text-muted-foreground text-xs sm:text-sm",
+                    node.labelClass,
+                  )}
+                >
                   {node.label}
                 </span>
               </div>

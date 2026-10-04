@@ -9,5 +9,7 @@ Sentry.init({
   dsn: SENTRY_DSN,
   enabled: IS_PROD,
 
+  enableLogs: true,
+
   tracesSampleRate: 0.1,
 });

@@ -15,6 +15,7 @@ import { parseAsString, useQueryState } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
 import { useRouter } from "@/shared/i18n/navigation";
+import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { AppButton } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppSearch } from "@/shared/ui/kit/app-search";
@@ -41,16 +42,17 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
   const [isVisible, setIsVisible] = useState(false);
   const { aid, name, owner } = useRepoParams();
   const [search] = useQueryState("search", parseAsString.withDefault(""));
+  const debouncedSearch = useDebounce(search, 300);
 
-  const [prevSearch, setPrevSearch] = useState(search);
-  if (search !== prevSearch) {
-    setPrevSearch(search);
-    if (search.trim().length >= 2) {
+  const [prevSearch, setPrevSearch] = useState(debouncedSearch);
+  if (debouncedSearch !== prevSearch) {
+    setPrevSearch(debouncedSearch);
+    if (debouncedSearch.trim().length >= 2) {
       setIsVisible(true);
     }
   }
 
-  const trimmedSearch = search.trim();
+  const trimmedSearch = debouncedSearch.trim();
   const isQueryEnabled = trimmedSearch.length >= 2;
 
   const { data, isFetching } = trpc.analysis.searchWorkspace.useQuery(

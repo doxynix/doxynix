@@ -23,6 +23,8 @@ import { realtimeService } from "./realtime";
 let cachedAfterFn: null | typeof NextAfterFn = null;
 let isAfterChecked = false;
 
+// Dynamic on purpose: Trigger.dev runs on the node runtime, where `next/server` is not
+// always resolvable, and a failed import must degrade to a direct await, never crash db.ts.
 async function getNextAfterApi() {
   if (isAfterChecked) {
     return cachedAfterFn;

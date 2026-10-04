@@ -179,6 +179,7 @@
     "close": "Закрыть",
     "command_menu_desc": "Поиск команд",
     "command_menu_title": "Меню команд",
+    "confirm_phrase_hint": "Введите <phrase></phrase>, чтобы подтвердить. Это действие необратимо.",
     "connect": "Подключить",
     "copy": "Копировать",
     "copy_code": "Копировать код",

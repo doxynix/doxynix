@@ -1,5 +1,26 @@
 # Changelog
 
+## [6.1.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.0.3...doxynix-v6.1.0) (2026-10-03)
+
+
+### Features
+
+* **web:** harden Sentry logging and add PostHog server analytics ([#2260](https://github.com/doxynix/doxynix/issues/2260)) ([2354180](https://github.com/doxynix/doxynix/commit/23541803cc6441d2585eb1c1eed0faba2db498ea))
+
+## [6.0.3](https://github.com/doxynix/doxynix/compare/doxynix-v6.0.2...doxynix-v6.0.3) (2026-10-03)
+
+
+### Bug Fixes
+
+* **web:** fix duplicated animations and sign-out dialog ([#2258](https://github.com/doxynix/doxynix/issues/2258)) ([372a826](https://github.com/doxynix/doxynix/commit/372a8269198dc9e196e588a02a4bb4dba967905b))
+
+## [6.0.2](https://github.com/doxynix/doxynix/compare/doxynix-v6.0.1...doxynix-v6.0.2) (2026-10-02)
+
+
+### Bug Fixes
+
+* **web:** restore i18n request config and unblock react compiler ([#2255](https://github.com/doxynix/doxynix/issues/2255)) ([0ff56b1](https://github.com/doxynix/doxynix/commit/0ff56b1080252570d7565f79882b7979dea53b69))
+
 ## [6.0.1](https://github.com/doxynix/doxynix/compare/doxynix-v6.0.0...doxynix-v6.0.1) (2026-09-30)
 
 

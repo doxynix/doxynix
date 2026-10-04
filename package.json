@@ -1,6 +1,6 @@
 {
   "name": "doxynix",
-  "version": "6.0.1",
+  "version": "6.1.0",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -16,7 +16,7 @@
     "db:studio": "turbo db:studio",
     "dev": "turbo dev --filter=!@doxynix/cli",
     "dump:packages": "find . \\( -name \"node_modules\" -o -name \".next\" -o -name \".turbo\" \\) -prune -o -name \"package.json\" -print -exec bunx cli-highlight {} \\;",
-    "dup": "jscpd",
+    "dup": "jscpd . --skip-isolated \"apps/web|apps/siem-server|apps/siem-client|packages/cli|packages/config|packages/shared\"",
     "format": "turbo format",
     "format:check": "biome check .",
     "postinstall": "bun scripts/clean-symlinks.ts",

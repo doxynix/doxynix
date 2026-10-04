@@ -3,9 +3,9 @@
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
-import { posthog } from "posthog-js";
 import { toast } from "sonner";
 
+import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 
 export function GithubConnectionFeedback() {
@@ -21,7 +21,7 @@ export function GithubConnectionFeedback() {
         icon: <GitHubIcon />,
       });
 
-      posthog.capture("github_integration_success");
+      trackClientEvent("github_integration_success");
 
       void setSuccess(null);
     }
@@ -32,7 +32,7 @@ export function GithubConnectionFeedback() {
 
       toast.error(t("github_connection_error"), { description: message, duration: 5000 });
 
-      posthog.capture("github_integration_failed", { reason: error });
+      trackClientEvent("github_integration_failed", { reason: error });
 
       void setError(null);
     }

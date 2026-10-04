@@ -43,27 +43,32 @@ export function TwoFactorCard() {
   const handleOpenSetup = async () => {
     setIsSetupOpen(true);
     setIsGenerating(true);
-    try {
-      const res = await authClient.twoFactor.enable({});
-      if (res.error) {
-        throw new Error(res.error.message);
-      }
 
-      setBackupCodes(res.data.backupCodes);
+    await authClient.twoFactor
+      .enable({})
+      .then((res) => {
+        if (res.error) {
+          throw new Error(res.error.message);
+        }
 
-      const totpRes = await authClient.twoFactor.getTotpUri({});
-      if (totpRes.error) {
-        throw new Error(totpRes.error.message);
-      }
-      if (totpRes.data.totpURI) {
-        setTotpUri(totpRes.data.totpURI);
-      }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("settings_2fa_setup_failed"));
-      setIsSetupOpen(false);
-    } finally {
-      setIsGenerating(false);
-    }
+        setBackupCodes(res.data.backupCodes);
+        return authClient.twoFactor.getTotpUri({});
+      })
+      .then((totpRes) => {
+        if (totpRes.error) {
+          throw new Error(totpRes.error.message);
+        }
+        if (totpRes.data.totpURI) {
+          setTotpUri(totpRes.data.totpURI);
+        }
+      })
+      .catch((error: unknown) => {
+        toast.error(error instanceof Error ? error.message : t("settings_2fa_setup_failed"));
+        setIsSetupOpen(false);
+      })
+      .finally(() => {
+        setIsGenerating(false);
+      });
   };
 
   const enable2FA = useMutation({

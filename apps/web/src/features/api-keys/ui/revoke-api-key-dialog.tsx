@@ -33,6 +33,7 @@ export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
 
   return (
     <DangerActionDialog
+      confirmationPhrase={apiKey.name}
       confirmLabel={t("settings_api_keys_confirm_revoke")}
       description={t("settings_api_keys_revoke_key_desc")}
       destructiveAlertContent={t("settings_api_keys_revoke_note")}

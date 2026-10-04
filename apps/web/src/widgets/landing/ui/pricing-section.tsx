@@ -2,10 +2,10 @@
 
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 
 import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
+import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { AppButton } from "@/shared/ui/core/button";
 
 export function PricingSection() {
@@ -96,7 +96,7 @@ export function PricingSection() {
                   plan.popular && "bg-foreground text-background hover:bg-accent-foreground",
                 )}
                 onClick={() =>
-                  posthog.capture("pricing_plan_clicked", {
+                  trackClientEvent("pricing_plan_clicked", {
                     is_popular: plan.popular,
                     plan_id: plan.href === "/auth" ? "auth_entry" : "unknown",
                     plan_name_display: plan.name,

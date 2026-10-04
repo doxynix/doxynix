@@ -31,7 +31,9 @@ export default async function TermsPage() {
       />
 
       <div className="mb-12 border-b border-b-foreground py-6">
-        <h1 className="mb-4 font-bold text-4xl text-foreground md:text-5xl">{t("title")}</h1>
+        <h1 className="mb-4 font-bold hyphens-auto break-words text-2xl text-foreground xs:text-3xl sm:text-4xl md:text-5xl">
+          {t("title")}
+        </h1>
         <div className="flex items-center gap-2 text-sm text-text-secondary">
           <span>{t("last_updated")}</span>
         </div>

@@ -5,6 +5,7 @@ import * as z from "zod";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { getClientContext } from "@/server/core/github/github-client";
+import { trackServerEvent } from "@/server/core/posthog-events";
 import { prAnalysisLogger } from "@/server/modules/analysis/tasks/pr-analysis-logger";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
 import { taskLogger } from "@/server/utils/task-logger";
@@ -58,10 +59,10 @@ export const analyzePrTask = task({
     repoName: string;
   }) => {
     let octokitInstance: null | Octokit = null;
+    let userId: string | undefined;
+    const startTime = Date.now();
 
     try {
-      const startTime = Date.now();
-
       const repo = await prisma.repo.findUnique({
         select: { id: true, userId: true },
         where: { id: payload.repoId },
@@ -72,6 +73,7 @@ export const analyzePrTask = task({
       }
 
       const { octokit } = await getClientContext(prisma, repo.userId, payload.owner);
+      userId = repo.userId;
       octokitInstance = octokit;
 
       await updateCommitStatus(
@@ -266,6 +268,22 @@ export const analyzePrTask = task({
         payload.prNumber,
       );
 
+      trackServerEvent(
+        "pr_analysis_completed",
+        {
+          analyzed_lines: result.analyzedLines,
+          changed_files: result.changedFiles,
+          duration_ms: duration,
+          findings_count: healedFindings.length,
+          findings_validated: validated.success,
+          pr_analysis_id: payload.prAnalysisId,
+          pr_number: payload.prNumber,
+          repo_id: payload.repoId,
+          risk_score: result.riskScore,
+        },
+        userId,
+      );
+
       prAnalysisLogger.analyzeCompleted(
         payload.repoId,
         payload.prNumber,
@@ -301,6 +319,21 @@ export const analyzePrTask = task({
       });
 
       prAnalysisLogger.analyzeFailed(payload.repoId, payload.prNumber, errorMsg);
+
+      // This task retries, so one logical run emits one event per attempt. The definitive
+      // failure is the `repo_analysis_failed` (source: platform) emitted by the init.ts hooks.
+      trackServerEvent(
+        "pr_analysis_failed",
+        {
+          duration_ms: Date.now() - startTime,
+          is_unexpected: !(error instanceof Error),
+          pr_analysis_id: payload.prAnalysisId,
+          pr_number: payload.prNumber,
+          repo_id: payload.repoId,
+          source: "task_attempt",
+        },
+        userId,
+      );
 
       throw error;
     }

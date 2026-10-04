@@ -32,6 +32,7 @@ export function DeleteByOwnerDialog({ owner }: Readonly<Props>) {
 
   return (
     <DangerActionDialog
+      confirmationPhrase={owner}
       confirmLabel={t("settings_danger_delete_confirmation")}
       description={t("settings_danger_delete_all_repos_desc")}
       destructiveAlertContent={tsRich("settings_danger_delete_all_repos_note_4")}

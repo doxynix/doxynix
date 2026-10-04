@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Book, Plus, RefreshCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
-import posthog from "posthog-js";
 import { useForm, useWatch } from "react-hook-form";
 
 import { trpc } from "@/shared/api/trpc";
@@ -14,6 +13,7 @@ import { authClient } from "@/shared/lib/auth-client";
 import { isGitHubUrl } from "@/shared/lib/github-url";
 import { useClickOutside } from "@/shared/lib/hooks/use-click-outside";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
+import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,
@@ -77,22 +77,23 @@ export function CreateRepoDialog() {
 
   async function handleInstallGitHubApp() {
     setLoading(true);
-    posthog.capture("github_app_install_started");
+    trackClientEvent("github_app_install_started");
 
-    try {
-      const { data: url, error } = await getInstallUrl();
+    await getInstallUrl()
+      .then(({ data: url, error }) => {
+        if (error != null || url == null) {
+          trackClientEvent("github_app_install_failed");
+          return;
+        }
 
-      if (error != null || url == null) {
-        posthog.capture("github_app_install_failed");
-        return;
-      }
-
-      window.location.assign(url);
-    } catch {
-      posthog.capture("github_app_install_failed");
-    } finally {
-      setLoading(false);
-    }
+        window.location.assign(url);
+      })
+      .catch(() => {
+        trackClientEvent("github_app_install_failed");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }
 
   const isUrl = isGitHubUrl(debouncedValue);
@@ -132,22 +133,25 @@ export function CreateRepoDialog() {
   };
 
   async function handleSignIn() {
-    try {
-      setLoadingOauth(true);
-      posthog.capture("github_oauth_started");
+    setLoadingOauth(true);
+    trackClientEvent("github_oauth_started");
 
-      const { error } = await authClient.signIn.social({
+    await authClient.signIn
+      .social({
         callbackURL: "/dashboard",
         provider: "github",
+      })
+      .then(({ error }) => {
+        if (error != null) {
+          trackClientEvent("github_oauth_failed");
+        }
+      })
+      .catch(() => {
+        trackClientEvent("github_oauth_failed");
+      })
+      .finally(() => {
+        setLoadingOauth(false);
       });
-      if (error != null) {
-        posthog.capture("github_oauth_failed");
-      }
-    } catch {
-      posthog.capture("github_oauth_failed");
-    } finally {
-      setLoadingOauth(false);
-    }
   }
 
   const handleSelectRepo = (repoUrl: string) => {

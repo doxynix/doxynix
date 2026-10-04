@@ -121,7 +121,7 @@ function createUniversalSyntaxLinter(syntaxErrorMessage: string) {
   });
 }
 
-export const BASE_EXTENSIONS: Extension[] = [
+const BASE_EXTENSIONS: Extension[] = [
   // zebraStripes({ step: 2 }), // highlights empty rows, looks odd
   color,
   hyperLink,
@@ -161,7 +161,7 @@ export const BASE_EXTENSIONS: Extension[] = [
   ]),
 ];
 
-export function getIdeOnlyExtensions(labels: { syntaxError: string }): Extension[] {
+function getIdeOnlyExtensions(labels: { syntaxError: string }): Extension[] {
   return [
     search({ top: true }),
     lineNumbers(),
@@ -189,7 +189,7 @@ export function getIdeOnlyExtensions(labels: { syntaxError: string }): Extension
   ];
 }
 
-export const THEME_EXTENSION = EditorView.theme({
+const THEME_EXTENSION = EditorView.theme({
   ".close-btn": {
     "&:hover": {
       backgroundColor: "color-mix(in srgb, var(--status-error), transparent 90%)",
@@ -321,3 +321,11 @@ export const THEME_EXTENSION = EditorView.theme({
   },
   "&.cm-focused .cm-cursor": { borderLeftColor: "var(--foreground)" },
 });
+
+export function buildEditorExtensions(options: { syntaxError: string }): Extension[] {
+  return [
+    ...BASE_EXTENSIONS,
+    ...getIdeOnlyExtensions({ syntaxError: options.syntaxError }),
+    THEME_EXTENSION,
+  ];
+}

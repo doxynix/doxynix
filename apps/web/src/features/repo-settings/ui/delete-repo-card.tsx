@@ -6,9 +6,9 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/c
 
 import { DeleteRepoDialog } from "./delete-repo-dialog";
 
-type Props = { id: string };
+type Props = { id: string; name: string };
 
-export function DeleteRepoCard({ id }: Readonly<Props>) {
+export function DeleteRepoCard({ id, name }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
 
   return (
@@ -19,7 +19,10 @@ export function DeleteRepoCard({ id }: Readonly<Props>) {
           <span>{t("settings_danger_delete_all_repos_note_1")}</span>
           <span>{t("settings_danger_delete_all_repos_note_2")}</span>
         </CardDescription>
-        <DeleteRepoDialog id={id} />
+        <DeleteRepoDialog
+          id={id}
+          name={name}
+        />
       </CardHeader>
     </Card>
   );

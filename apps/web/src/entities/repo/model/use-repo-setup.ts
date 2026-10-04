@@ -2,11 +2,12 @@ import { useState } from "react";
 import { DocType } from "@doxynix/shared";
 import { useLocale } from "next-intl";
 import { useQueryState } from "nuqs";
-import posthog from "posthog-js";
 import type { TreeApi } from "react-arborist";
 
 import { trpc } from "@/shared/api/trpc";
 import { useRouter } from "@/shared/i18n/navigation";
+import { trackClientEvent } from "@/shared/lib/posthog-client";
+import { searchTextParam } from "@/shared/lib/search-params";
 
 import type { UiRepoDetailed } from "./repo.types";
 import type { FileNode, FileTuple } from "./repo-setup.types";
@@ -34,9 +35,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
     defaultValue: repo.defaultBranch,
   });
 
-  const [searchTerm, setSearchTerm] = useQueryState("search", {
-    defaultValue: "",
-  });
+  const [searchTerm, setSearchTerm] = useQueryState("search", searchTextParam);
 
   const [treeApi, setTreeApi] = useState<null | TreeApi<FileNode>>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -129,7 +128,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
       language: analysisLocale,
       repoId: repo.id,
     });
-    posthog.capture("repo_analysis_started", {
+    trackClientEvent("repo_analysis_started", {
       branch: selectedBranch,
       doc_types: selectedDocs,
       has_custom_instructions: instructions.length > 0,

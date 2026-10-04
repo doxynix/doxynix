@@ -179,6 +179,7 @@
     "close": "Schließen",
     "command_menu_desc": "Befehle durchsuchen",
     "command_menu_title": "Befehlsmenü",
+    "confirm_phrase_hint": "Gib <phrase></phrase> ein, um zu bestätigen. Dies kann nicht rückgängig gemacht werden.",
     "connect": "Verbinden",
     "copy": "Kopieren",
     "copy_code": "Code kopieren",

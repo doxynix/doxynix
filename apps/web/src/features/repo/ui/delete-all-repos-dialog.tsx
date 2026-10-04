@@ -32,6 +32,7 @@ export function DeleteAllReposDialog({ hasRepos }: Readonly<Props>) {
 
   return (
     <DangerActionDialog
+      confirmationPhrase="DELETE ALL"
       confirmLabel={t("settings_danger_delete_confirmation")}
       description={t("settings_danger_delete_all_repos_desc")}
       destructiveAlertContent={tsRich("settings_danger_delete_all_repos_note_4")}

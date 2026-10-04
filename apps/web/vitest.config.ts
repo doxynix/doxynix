@@ -54,7 +54,6 @@ export default defineConfig({
 
         "src/shared/i18n/**",
         "src/shared/api/**",
-        "src/server/core/posthog-server.ts",
 
         "src/server/modules/index.ts",
       ],
