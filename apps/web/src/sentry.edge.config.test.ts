@@ -6,8 +6,8 @@ import { describe, expect, it } from "vitest";
 const source = readFileSync(join(import.meta.dirname, "..", "sentry.edge.config.ts"), "utf8");
 
 describe("sentry.edge.config", () => {
-  it("enables Sentry Logs", () => {
-    expect(source).toContain("enableLogs: true");
+  it("does not pass options removed in Sentry v11", () => {
+    expect(source).not.toContain("enableLogs");
   });
 
   it("stays prod-only and samples traces", () => {
