@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.1.2](https://github.com/doxynix/doxynix/compare/web-v5.1.1...web-v5.1.2) (2026-10-04)
+
+
+### Bug Fixes
+
+* **web:** repair DB telemetry attribution and add confirmed indexes ([#2269](https://github.com/doxynix/doxynix/issues/2269)) ([5a1bf7d](https://github.com/doxynix/doxynix/commit/5a1bf7d8f5fa983545c30c9bb7783ee2f9503ade))
+
 ## [5.1.1](https://github.com/doxynix/doxynix/compare/web-v5.1.0...web-v5.1.1) (2026-10-04)
 
 
