@@ -1,8 +1,9 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { parseAsInteger, parseAsString, throttle, useQueryStates } from "nuqs";
+import { parseAsInteger, useQueryStates } from "nuqs";
 
+import { searchTextParam } from "@/shared/lib/search-params";
 import { Input } from "@/shared/ui/core/input";
 
 type Props = {
@@ -14,9 +15,7 @@ const ICON_STYLES = "text-muted-foreground absolute top-2.5 left-2.5";
 export function AppSearch({ placeholder }: Readonly<Props>) {
   const [{ search }, setParams] = useQueryStates({
     page: parseAsInteger.withDefault(1),
-    search: parseAsString.withDefault("").withOptions({
-      limitUrlUpdates: throttle(100),
-    }),
+    search: searchTextParam,
   });
 
   return (

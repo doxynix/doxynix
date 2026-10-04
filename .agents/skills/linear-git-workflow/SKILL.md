@@ -155,9 +155,7 @@ If a hook rejects your commit/branch, fix the message or rename the branch
 
 Per AGENTS.md, before saying a task with code changes is done:
 
-1. `bun run validate` (Biome + Oxlint)
-2. `bun run type-check` (Turbo TS across workspaces)
-3. `bun run arch:check` (dependency-cruiser boundaries)
+`bun run validate`
 
 And confirm: branch name satisfies `check-branch-name.ts`, commit subjects pass
 `check-commit-name.ts`, and the Linear issue identifier is present in the branch name
