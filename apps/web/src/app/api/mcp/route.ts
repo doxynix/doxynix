@@ -63,8 +63,11 @@ const handler = createMcpHandler(
       );
     }
   },
-  { instructions: AGENT_SYSTEM_PROMPT, serverInfo: { name: "Doxynix", version: APP_VERSION } },
-  { basePath: "/api", maxDuration: 60, verboseLogs: true },
+  {
+    instructions: AGENT_SYSTEM_PROMPT,
+    serverInfo: { name: "Doxynix", version: APP_VERSION },
+    verboseLogs: true,
+  },
 );
 
 const withMcpAuthHandler = withMcpAuth(
