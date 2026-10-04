@@ -171,6 +171,7 @@ model Session {
   @@allow('create', (auth() != null && userId == auth().id) || auth().role == 'ADMIN')
 
   @@index([userId])
+  @@index([expiresAt])
   @@map("sessions")
 }
 
@@ -194,6 +195,7 @@ model Verification {
 
   @@allow('all', auth().role == 'ADMIN')
   @@unique([identifierHash, valueHash])
+  @@index([expiresAt])
   @@map("verification_tokens")
 }
 
