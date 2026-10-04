@@ -29,6 +29,27 @@ describe("analysisRepo.loadLatestDocumentsWithContent", () => {
 
     expect(findMany.mock.calls[0]?.[0]?.take).toBe(MAX_SEARCHABLE_DOCUMENT_FETCH);
   });
+
+  it("orders the capped fetch by type first so every type survives the cap", async () => {
+    const findMany = vi.fn<(args: { orderBy?: unknown }) => Promise<never[]>>(async () => []);
+    const db = { document: { findMany } } as unknown as DbClient;
+
+    await analysisRepo.loadLatestDocumentsWithContent(db, REPO_ID);
+
+    // Documents are versioned, so a cap ordered by recency alone can be filled
+    // entirely by one type and starve the rest of the DocType enum.
+    const orderBy = findMany.mock.calls[0]?.[0]?.orderBy as
+      | Array<Record<string, string>>
+      | Record<string, string>
+      | undefined;
+    const keys = Array.isArray(orderBy)
+      ? orderBy.map((entry) => Object.keys(entry)[0])
+      : orderBy == null
+        ? []
+        : [Object.keys(orderBy)[0]];
+
+    expect(keys).toEqual(["type", "updatedAt"]);
+  });
 });
 
 describe("workspaceSearchService.search", () => {

@@ -313,7 +313,7 @@ export const analysisRepo = {
 
   async loadLatestDocumentsWithContent(db: DbClient, repoId: string, aid?: string) {
     const docs = await db.document.findMany({
-      orderBy: { updatedAt: "desc" },
+      orderBy: [{ type: "asc" }, { updatedAt: "desc" }],
       select: {
         analysis: { select: { id: true } },
         content: true,
