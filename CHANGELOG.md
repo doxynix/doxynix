@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.1.2](https://github.com/doxynix/doxynix/compare/doxynix-v6.1.1...doxynix-v6.1.2) (2026-10-04)
+
+
+### Bug Fixes
+
+* **web:** repair DB telemetry attribution and add confirmed indexes ([#2269](https://github.com/doxynix/doxynix/issues/2269)) ([5a1bf7d](https://github.com/doxynix/doxynix/commit/5a1bf7d8f5fa983545c30c9bb7783ee2f9503ade))
+
 ## [6.1.1](https://github.com/doxynix/doxynix/compare/doxynix-v6.1.0...doxynix-v6.1.1) (2026-10-04)
 
 
