@@ -4,6 +4,7 @@ import type { after as NextAfterFn } from "next/server";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { type Prisma, PrismaClient } from "@prisma/client";
+import { Pool } from "pg";
 
 import { IS_DEV, IS_TEST } from "@/shared/config/env.flags";
 import {
@@ -70,6 +71,42 @@ async function runAsBackgroundTask(task: () => Promise<void>): Promise<void> {
   });
 }
 
+// Held here so the slow-query log can read queue depth off the pool Prisma actually uses.
+// Also stashed on globalThis: the dev client singleton survives HMR, so a module-scoped
+// reference would go stale and silently report zero counters.
+const globalForPool = globalThis as unknown as { pgPool?: Pool; pgPoolConnects?: number };
+
+function createPgPool(): Pool {
+  globalForPool.pgPool ??= new Pool({ connectionString: DATABASE_URL });
+  const pool = globalForPool.pgPool;
+
+  globalForPool.pgPoolConnects ??= 0;
+  if (pool.listenerCount("connect") === 0) {
+    pool.on("connect", () => {
+      globalForPool.pgPoolConnects = (globalForPool.pgPoolConnects ?? 0) + 1;
+    });
+  }
+
+  return pool;
+}
+
+// A cold serverless instance pays TCP+TLS+auth on its first query and never shows up as
+// queue depth, so the connect count is the only signal that separates cold start from
+// genuine database cost.
+export function poolQueueSnapshot(pool: Pick<Pool, "idleCount" | "totalCount" | "waitingCount">): {
+  poolConnects: number;
+  poolIdle: number;
+  poolTotal: number;
+  poolWaiting: number;
+} {
+  return {
+    poolConnects: globalForPool.pgPoolConnects ?? 0,
+    poolIdle: pool.idleCount,
+    poolTotal: pool.totalCount,
+    poolWaiting: pool.waitingCount,
+  };
+}
+
 // Lazy singleton: PrismaPg over TCP on Node runtimes, PrismaNeon over WebSocket on Edge.
 function createPrismaInstance() {
   let baseClient: PrismaClient;
@@ -96,7 +133,9 @@ function createPrismaInstance() {
       transactionOptions,
     });
   } else {
-    const adapter = new PrismaPg({ connectionString: DATABASE_URL });
+    // `PrismaPg` takes the pool positionally and branches on `instanceof pg.Pool`;
+    // wrapping it in `{ pool }` would be read as a PoolConfig and silently rebuild one.
+    const adapter = new PrismaPg(createPgPool());
     baseClient = new PrismaClient({
       adapter,
       log: logConfig,
@@ -194,11 +233,13 @@ function createPrismaInstance() {
               });
             }
           } else if (duration > 200) {
+            const activePool = globalForPool.pgPool;
             appLogger.warn({
               durationMs: Number(duration.toFixed(2)),
               model,
               msg: "Slow DB Query",
               operation,
+              ...(activePool == null ? {} : poolQueueSnapshot(activePool)),
               type: "db.slow",
             });
           }

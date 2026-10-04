@@ -10,6 +10,7 @@ import {
   buildRequestStore,
   requestContext,
   resolveRequestId,
+  withProcedureContext,
 } from "@/server/utils/request-context";
 
 import { appLogger } from "../app-logger";
@@ -63,15 +64,16 @@ const contextMiddleware = t.middleware(async ({ ctx, next, path, type }) => {
   const activeStore = requestContext.getStore();
 
   if (activeStore) {
-    activeStore.method = type;
-    activeStore.path = path;
-
-    if (sessionUser?.id != null) {
-      activeStore.userId = sessionUser.id;
-      activeStore.userRole = sessionUser.role;
-    }
-
-    return next({ ctx });
+    return withProcedureContext(
+      activeStore,
+      {
+        method: type,
+        path,
+        userId: sessionUser?.id,
+        userRole: sessionUser?.role,
+      },
+      () => next({ ctx }),
+    );
   }
 
   const store = buildRequestStore({

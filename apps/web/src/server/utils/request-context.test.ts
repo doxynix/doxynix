@@ -1,7 +1,15 @@
 import type { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { anonymizeIp, getCountry, getIp, getUa } from "./request-context";
+import {
+  anonymizeIp,
+  deriveProcedureStore,
+  getCountry,
+  getIp,
+  getUa,
+  requestContext,
+  withProcedureContext,
+} from "./request-context";
 
 type RequestExtras = {
   geo?: {
@@ -116,5 +124,77 @@ describe("request-context utils", () => {
     const { getCountry } = await import("@/server/utils/request-context");
 
     expect(getCountry(createRequest())).toBe("UNKNOWN");
+  });
+});
+
+describe("withProcedureContext", () => {
+  function makeParent() {
+    return deriveProcedureStore(
+      {
+        country: "LOCAL",
+        ip: "203.0.113.0",
+        method: "query",
+        path: "/api/trpc",
+        requestId: "req-1",
+        userAgent: "vitest",
+      },
+      { method: "batch", path: "/api/trpc" },
+    );
+  }
+
+  it("keeps concurrent procedures from clobbering each other's path", async () => {
+    const parent = makeParent();
+
+    const readPath = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      return requestContext.getStore()?.path;
+    };
+
+    const [a, b] = await Promise.all([
+      withProcedureContext(parent, { method: "query", path: "analytics.getTrends" }, readPath),
+      withProcedureContext(parent, { method: "query", path: "repo.getAll" }, readPath),
+    ]);
+
+    expect(a).toBe("analytics.getTrends");
+    expect(b).toBe("repo.getAll");
+  });
+
+  it("does not mutate the parent store", () => {
+    const parent = makeParent();
+
+    withProcedureContext(parent, { method: "query", path: "notification.getAll" }, () => null);
+
+    expect(parent.path).toBe("/api/trpc");
+  });
+
+  it("preserves request-scoped fields from the parent", () => {
+    const parent = makeParent();
+
+    const child = deriveProcedureStore(parent, {
+      method: "mutation",
+      path: "repo.create",
+      userId: "user-1",
+      userRole: "USER",
+    });
+
+    expect(child.requestId).toBe("req-1");
+    expect(child.ip).toBe("203.0.113.0");
+    expect(child.userAgent).toBe("vitest");
+    expect(child.method).toBe("mutation");
+    expect(child.path).toBe("repo.create");
+    expect(child.userId).toBe("user-1");
+    expect(child.userRole).toBe("USER");
+  });
+
+  it("lets a procedure override the authenticated user on the store", () => {
+    const parent = makeParent();
+
+    const child = deriveProcedureStore(parent, {
+      method: "query",
+      path: "user.me",
+      userId: "user-2",
+    });
+
+    expect(child.userId).toBe("user-2");
   });
 });

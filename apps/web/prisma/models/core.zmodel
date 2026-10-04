@@ -122,6 +122,7 @@ model ChatSession {
 
   @@index([userId])
   @@index([repoId])
+  @@index([userId, updatedAt(sort: Desc)])
 
   @@allow('all', (auth() != null && userId == auth().id && (repoId == null || repo.userId == auth().id)) || auth().role == 'ADMIN')
   @@map("chat_sessions")
@@ -140,7 +141,7 @@ model ChatMessage {
 
   @@allow('all', (auth() != null && session.userId == auth().id) || auth().role == 'ADMIN')
 
-  @@index([sessionId])
+  @@index([sessionId, createdAt(sort: Asc)])
   @@map("chat_messages")
 }
 

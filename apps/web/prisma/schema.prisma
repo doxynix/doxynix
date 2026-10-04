@@ -267,6 +267,7 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([expiresAt])
   @@map("sessions")
 }
 
@@ -287,6 +288,7 @@ model Verification {
   updatedAt      DateTime @default(now()) @updatedAt() @map("updated_at")
 
   @@unique([identifierHash, valueHash])
+  @@index([expiresAt])
   @@map("verification_tokens")
 }
 
@@ -631,6 +633,7 @@ model ChatSession {
 
   @@index([userId])
   @@index([repoId])
+  @@index([userId, updatedAt(sort: Desc)])
   @@map("chat_sessions")
 }
 
@@ -643,6 +646,6 @@ model ChatMessage {
   parts     String
   createdAt DateTime    @default(now()) @map("created_at")
 
-  @@index([sessionId])
+  @@index([sessionId, createdAt(sort: Asc)])
   @@map("chat_messages")
 }

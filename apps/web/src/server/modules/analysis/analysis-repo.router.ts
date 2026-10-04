@@ -77,7 +77,13 @@ export const analysisRepoRouter = {
       return prCommentsService.postCommentToPR(ctx.db, input);
     }),
   searchWorkspace: protectedProcedure
-    .input(z.object({ aid: z.string().optional(), repoId: z.uuid(), search: z.string() }))
+    .input(
+      z.object({
+        aid: z.string().optional(),
+        repoId: z.uuid(),
+        search: z.string().trim().min(2).max(200),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       return workspaceSearchService.search(ctx.db, input.repoId, input.search, input.aid);
     }),

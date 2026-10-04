@@ -7,7 +7,7 @@ import type { z } from "zod";
 import type { DbClient } from "@/server/core/db";
 
 import type { persistedFindingSchema } from "./analysis.schemas";
-import { pickLatestDocsByType } from "./analysis.utils";
+import { MAX_SEARCHABLE_DOCUMENT_FETCH, pickLatestDocsByType } from "./analysis.utils";
 import { fixesMapper } from "./fixes.mapper";
 import type { PRChangedFileSnapshot } from "./logic/pr.types";
 
@@ -313,7 +313,7 @@ export const analysisRepo = {
 
   async loadLatestDocumentsWithContent(db: DbClient, repoId: string, aid?: string) {
     const docs = await db.document.findMany({
-      orderBy: { updatedAt: "desc" },
+      orderBy: [{ type: "asc" }, { updatedAt: "desc" }],
       select: {
         analysis: { select: { id: true } },
         content: true,
@@ -322,6 +322,7 @@ export const analysisRepo = {
         updatedAt: true,
         version: true,
       },
+      take: MAX_SEARCHABLE_DOCUMENT_FETCH,
       where: {
         repo: { id: repoId },
         ...(aid != null ? { analysis: { id: aid } } : {}),
