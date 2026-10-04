@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.1.1](https://github.com/doxynix/doxynix/compare/web-v5.1.0...web-v5.1.1) (2026-10-04)
+
+
+### Bug Fixes
+
+* **deps:** upgrade sentry, mcp, axiom and simple-git to next majors ([#2266](https://github.com/doxynix/doxynix/issues/2266)) ([14d57bc](https://github.com/doxynix/doxynix/commit/14d57bc21842ea8dc78b0486c68fac0852dab2e4))
+
 ## [5.1.0](https://github.com/doxynix/doxynix/compare/web-v5.0.2...web-v5.1.0) (2026-10-03)
 
 

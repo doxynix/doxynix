@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/doxynix/doxynix/compare/siem-server-v0.3.1...siem-server-v0.3.2) (2026-10-04)
+
+
+### Bug Fixes
+
+* **deps:** upgrade sentry, mcp, axiom and simple-git to next majors ([#2266](https://github.com/doxynix/doxynix/issues/2266)) ([14d57bc](https://github.com/doxynix/doxynix/commit/14d57bc21842ea8dc78b0486c68fac0852dab2e4))
+
 ## [0.3.1](https://github.com/doxynix/doxynix/compare/siem-server-v0.3.0...siem-server-v0.3.1) (2026-09-24)
 
 
