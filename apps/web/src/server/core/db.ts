@@ -4,6 +4,7 @@ import type { after as NextAfterFn } from "next/server";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { type Prisma, PrismaClient } from "@prisma/client";
+import { Pool } from "pg";
 
 import { IS_DEV, IS_TEST } from "@/shared/config/env.flags";
 import {
@@ -70,6 +71,27 @@ async function runAsBackgroundTask(task: () => Promise<void>): Promise<void> {
   });
 }
 
+let sharedPool: Pool | null = null;
+
+// Held here so the slow-query log can read queue depth off the pool Prisma actually uses.
+function createPgPool(): Pool {
+  sharedPool ??= new Pool({ connectionString: DATABASE_URL });
+  return sharedPool;
+}
+
+export function poolQueueSnapshot(
+  pool: Pick<Pool, "idleCount" | "totalCount" | "waitingCount">,
+): { poolIdle: number; poolTotal: number; poolWaiting: number } | undefined {
+  if (pool.waitingCount === 0) {
+    return undefined;
+  }
+  return {
+    poolIdle: pool.idleCount,
+    poolTotal: pool.totalCount,
+    poolWaiting: pool.waitingCount,
+  };
+}
+
 // Lazy singleton: PrismaPg over TCP on Node runtimes, PrismaNeon over WebSocket on Edge.
 function createPrismaInstance() {
   let baseClient: PrismaClient;
@@ -96,7 +118,9 @@ function createPrismaInstance() {
       transactionOptions,
     });
   } else {
-    const adapter = new PrismaPg({ connectionString: DATABASE_URL });
+    // `PrismaPg` takes the pool positionally and branches on `instanceof pg.Pool`;
+    // wrapping it in `{ pool }` would be read as a PoolConfig and silently rebuild one.
+    const adapter = new PrismaPg(createPgPool());
     baseClient = new PrismaClient({
       adapter,
       log: logConfig,
@@ -199,6 +223,7 @@ function createPrismaInstance() {
               model,
               msg: "Slow DB Query",
               operation,
+              ...(sharedPool == null ? {} : poolQueueSnapshot(sharedPool)),
               type: "db.slow",
             });
           }
