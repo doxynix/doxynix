@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.1.4](https://github.com/doxynix/doxynix/compare/web-v5.1.3...web-v5.1.4) (2026-10-09)
+
+
+### Bug Fixes
+
+* **deps:** update dependency motion to v14 ([#2272](https://github.com/doxynix/doxynix/issues/2272)) ([6d0834a](https://github.com/doxynix/doxynix/commit/6d0834a5338148a1bdbe0e134856b7273f5f504c))
+
 ## [5.1.3](https://github.com/doxynix/doxynix/compare/web-v5.1.2...web-v5.1.3) (2026-10-08)
 
 
