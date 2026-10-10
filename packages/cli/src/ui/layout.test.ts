@@ -74,8 +74,8 @@ describe("renderKeyValue", () => {
   });
 
   it("honours a custom indent", () => {
-    expect(renderKeyValue([["k", "v"]], 4).startsWith("    ")).toBe(true);
-    expect(renderKeyValue([["k", "v"]], 0).startsWith("k:")).toBe(true);
+    expect(stripAnsi(renderKeyValue([["k", "v"]], 4)).startsWith("    ")).toBe(true);
+    expect(stripAnsi(renderKeyValue([["k", "v"]], 0)).startsWith("k:")).toBe(true);
   });
 });
 

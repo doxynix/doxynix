@@ -24,6 +24,8 @@ vi.mock("@clack/prompts", () => ({
   text: prompts.text,
 }));
 
+import { stripAnsi } from "@/ui/formatters";
+
 import { confirmOrAbort, guardPrompt, PromptCancelledError, resolveEntityOrPick } from "./prompts";
 
 afterEach(() => {
@@ -66,7 +68,8 @@ describe("resolveEntityOrPick", () => {
         selectMessage: "Pick one",
       }),
     ).resolves.toBeNull();
-    expect(prompts.outro).toHaveBeenCalledWith("No items found.");
+    expect(prompts.outro.mock.calls[0]?.[0]).toBeDefined();
+    expect(stripAnsi(prompts.outro.mock.calls[0]?.[0] ?? "")).toBe("No items found.");
   });
 
   it("matches a partial identifier when a target is provided", async () => {
@@ -92,9 +95,19 @@ describe("confirmOrAbort", () => {
   });
 
   it("returns false when the confirmation prompt is rejected", async () => {
+    // CI=true makes confirmOrAbort auto-confirm without prompting, so the
+    // rejection path is only reachable when it is unset.
+    const ci = process.env.CI;
+    process.env.CI = "";
     prompts.confirm.mockResolvedValue(false);
 
     await expect(confirmOrAbort("Delete all?")).resolves.toBe(false);
     expect(prompts.outro).toHaveBeenCalled();
+
+    if (ci === undefined) {
+      delete process.env.CI;
+    } else {
+      process.env.CI = ci;
+    }
   });
 });

@@ -19,7 +19,7 @@ export default defineConfig({
       ],
       include: ["src/**/*.ts"],
       provider: "v8",
-      reporter: ["text", "json-summary"],
+      reporter: ["text", "json-summary", "json"],
     },
     environment: "node",
     include: ["src/**/*.{test,spec}.ts"],
