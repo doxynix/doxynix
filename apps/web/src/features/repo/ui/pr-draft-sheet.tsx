@@ -124,7 +124,15 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
         </AppButton>
       </SheetTrigger>
 
-      <SheetContent className="flex flex-col gap-6 p-6 sm:max-w-lg">
+      <SheetContent
+        className="flex flex-col gap-6 p-6"
+        resizable={{
+          defaultWidth: 512,
+          maxWidth: 900,
+          minWidth: 360,
+          storageKey: "sheet-pr-draft-width",
+        }}
+      >
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <GitPullRequest />

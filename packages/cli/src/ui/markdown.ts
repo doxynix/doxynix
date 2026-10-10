@@ -5,9 +5,9 @@ let inCodeBlock = false;
 const BULLET_REGEX = /^([ \t]*)[*+-][ \t]+(.*)$/;
 const NUM_LIST_REGEX = /^([ \t]*)(\d+\.)[ \t]+(.*)$/;
 
-export function renderInlineMarkdown(text: string | undefined): string | undefined {
+export function renderInlineMarkdown(text: string): string {
   if (!text) {
-    return undefined;
+    return "";
   }
   return text
     .replaceAll(/`([^`]+)`/g, (_, code) => pc.yellow(code))
@@ -17,7 +17,7 @@ export function renderInlineMarkdown(text: string | undefined): string | undefin
     .replaceAll(/(?<!_)_([^_]+)_(?!_)/g, (_, italic) => pc.italic(italic));
 }
 
-export function renderMarkdownLine(line: string): string | undefined {
+export function renderMarkdownLine(line: string): string {
   const trimmed = line.trim();
 
   if (trimmed.startsWith("```")) {
@@ -48,7 +48,7 @@ export function renderMarkdownLine(line: string): string | undefined {
   if (bulletMatch) {
     const indent = bulletMatch[1];
     const content = bulletMatch[2];
-    return `${indent}${pc.magenta("•")} ${renderInlineMarkdown(content)}`;
+    return `${indent}${pc.magenta("•")} ${renderInlineMarkdown(content ?? "")}`;
   }
 
   const numMatch = NUM_LIST_REGEX.exec(line);
@@ -56,7 +56,7 @@ export function renderMarkdownLine(line: string): string | undefined {
     const indent = numMatch[1];
     const num = numMatch[2];
     const content = numMatch[3];
-    return `${indent}${pc.cyan(num)} ${renderInlineMarkdown(content)}`;
+    return `${indent}${pc.cyan(num)} ${renderInlineMarkdown(content ?? "")}`;
   }
 
   if (trimmed.startsWith("> ")) {

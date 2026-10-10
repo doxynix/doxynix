@@ -63,7 +63,15 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
           </AppButton>
         </SheetTrigger>
       </AppTooltip>
-      <SheetContent className="flex flex-col gap-6 p-6 sm:max-w-2xl">
+      <SheetContent
+        className="flex flex-col gap-6 p-6"
+        resizable={{
+          defaultWidth: 672,
+          maxWidth: 1200,
+          minWidth: 380,
+          storageKey: "sheet-audit-log-width",
+        }}
+      >
         <div className="grid h-full grid-rows-[auto_1fr] gap-6">
           <SheetHeader className="flex flex-col gap-4">
             <div className="flex items-center justify-between">

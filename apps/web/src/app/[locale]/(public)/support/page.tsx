@@ -13,7 +13,6 @@ export const generateMetadata = createMetadata("support_title", "support_desc");
 type SupportChannel = {
   action: string;
   description: string;
-  external?: boolean;
   href: string;
   icon: ComponentType<{ className?: string }>;
   title: string;
@@ -36,7 +35,6 @@ export default async function SupportPage() {
     {
       action: t("channel_github_action"),
       description: t("channel_github_desc"),
-      external: true,
       href: "https://github.com/doxynix/doxynix/issues",
       icon: GitHubIcon,
       title: t("channel_github_title"),
@@ -44,7 +42,6 @@ export default async function SupportPage() {
     {
       action: t("channel_discord_action"),
       description: t("channel_discord_desc"),
-      external: true,
       href: "https://discord.gg/doxynix",
       icon: MessageSquare,
       title: t("channel_discord_title"),
@@ -52,7 +49,6 @@ export default async function SupportPage() {
     {
       action: t("channel_docs_action"),
       description: t("channel_docs_desc"),
-      external: true,
       href: "https://docs.doxynix.space",
       icon: BookOpen,
       title: t("channel_docs_title"),
@@ -108,25 +104,29 @@ export default async function SupportPage() {
           <h2 className="font-bold text-3xl">{t("channels_title")}</h2>
         </div>
         <div className="grid gap-6 md:grid-cols-2">
-          {supportChannels.map((channel) => (
-            <a
-              className="group relative flex cursor-pointer flex-col gap-5 overflow-hidden rounded-2xl border bg-landing-bg-light/50 p-8 transition-standard hover:border-border-accent hover:bg-surface-panel"
-              href={channel.href}
-              key={channel.title}
-              rel={(channel.external ?? false) ? "noopener noreferrer" : undefined}
-              target={(channel.external ?? false) ? "_blank" : undefined}
-            >
-              <div className="flex size-14 items-center justify-center rounded-xl border bg-surface-hover transition-standard group-hover:border-border-accent">
-                <channel.icon className="size-7 text-foreground" />
-              </div>
-              <h3 className="font-semibold text-foreground text-lg">{channel.title}</h3>
-              <p className="-mt-3 text-sm text-text-secondary">{channel.description}</p>
-              <div className="flex items-center gap-2 pt-2 font-medium text-foreground text-sm transition-transform group-hover:translate-x-1">
-                {channel.action}
-                <MoveLeft className="rotate-180" />
-              </div>
-            </a>
-          ))}
+          {supportChannels.map((channel) => {
+            const isExternal = channel.href.startsWith("http");
+
+            return (
+              <a
+                className="group relative flex cursor-pointer flex-col gap-5 overflow-hidden rounded-2xl border bg-landing-bg-light/50 p-8 transition-standard hover:border-border-accent hover:bg-surface-panel"
+                href={channel.href}
+                key={channel.title}
+                rel={isExternal ? "noopener noreferrer" : undefined}
+                target={isExternal ? "_blank" : undefined}
+              >
+                <div className="flex size-14 items-center justify-center rounded-xl border bg-surface-hover transition-standard group-hover:border-border-accent">
+                  <channel.icon className="size-7 text-foreground" />
+                </div>
+                <h3 className="font-semibold text-foreground text-lg">{channel.title}</h3>
+                <p className="-mt-3 text-sm text-text-secondary">{channel.description}</p>
+                <div className="flex items-center gap-2 pt-2 font-medium text-foreground text-sm transition-transform group-hover:translate-x-1">
+                  {channel.action}
+                  <MoveLeft className="rotate-180" />
+                </div>
+              </a>
+            );
+          })}
         </div>
       </section>
 

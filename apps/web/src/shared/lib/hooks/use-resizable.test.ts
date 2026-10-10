@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import type { KeyboardEvent, PointerEvent } from "react";
-import { act, renderHook } from "@testing-library/react";
+import { createElement, type KeyboardEvent, type PointerEvent, useEffect } from "react";
+import { act, render, renderHook } from "@testing-library/react";
 import type { Mock } from "vitest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -497,5 +497,72 @@ describe("useResizable", () => {
 
     expect(result.current.width).toBe(500);
     expect(localStorage.length).toBe(0);
+  });
+
+  describe("with an attached panel", () => {
+    let renders = 0;
+
+    function Panel() {
+      useEffect(() => {
+        renders += 1;
+      });
+      const { handleProps, panelRef, width } = useResizable({
+        cssVar: "--panel-width",
+        defaultWidth: 250,
+        maxWidth: 500,
+        minWidth: 100,
+        storageKey: "w",
+      });
+
+      return createElement(
+        "div",
+        { ref: panelRef, style: { "--panel-width": `${width}px` } },
+        createElement("div", { ...handleProps, "data-testid": "handle" }),
+      );
+    }
+
+    beforeEach(() => {
+      renders = 0;
+      HTMLElement.prototype.setPointerCapture = vi.fn();
+    });
+
+    it("drives the CSS variable straight from the pointer, with no per-frame re-render", async () => {
+      const { getByTestId } = render(createElement(Panel));
+      const rendersBeforeDrag = renders;
+
+      act(() => {
+        getByTestId("handle").dispatchEvent(
+          new PointerEvent("pointerdown", { bubbles: true, button: 0, clientX: 250 }),
+        );
+      });
+
+      for (let i = 1; i <= 30; i++) {
+        await move(250 + i * 5);
+      }
+
+      const panel = getByTestId("handle").parentElement;
+      expect(panel?.style.getPropertyValue("--panel-width")).toBe("400px");
+      expect(renders - rendersBeforeDrag).toBeLessThanOrEqual(2);
+
+      release("pointerup");
+      expect(panel?.style.getPropertyValue("--panel-width")).toBe("400px");
+    });
+
+    it("commits to state and storage once, when the drag ends", async () => {
+      const { getByTestId } = render(createElement(Panel));
+
+      act(() => {
+        getByTestId("handle").dispatchEvent(
+          new PointerEvent("pointerdown", { bubbles: true, button: 0, clientX: 250 }),
+        );
+      });
+      await move(320);
+
+      expect(localStorage.length).toBe(0);
+
+      release("pointerup");
+
+      expect(localStorage.getItem("w")).toBe("320");
+    });
   });
 });

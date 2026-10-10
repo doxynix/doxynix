@@ -4,60 +4,15 @@ import type { Command } from "commander";
 import { resolveRepository } from "@/core/repo";
 
 import { brand, pc } from "@/ui/colors";
-import { parseDateArg } from "@/ui/formatters";
 import { renderSection } from "@/ui/layout";
 import { output } from "@/ui/output";
 import { withTaskSpinner } from "@/ui/spinner";
 
 import { renderDashboardStats, renderTrendsTable } from "./analytics.formatter";
+import { type AnalyticsCliOptions, buildAnalyticsInput } from "./analytics.input";
 import { analyticsService } from "./analytics.service";
-import type { DashboardStatsInput } from "./analytics.types";
 
-type AnalyticsCliOptions = {
-  from?: string;
-  json?: boolean;
-  repo?: string;
-  to?: string;
-};
-
-function buildAnalyticsInput(
-  options: AnalyticsCliOptions,
-  repoId?: string,
-): DashboardStatsInput | null {
-  const input: DashboardStatsInput = {};
-  if (repoId) {
-    input.repoId = repoId;
-  }
-
-  if (options.from) {
-    const fromDate = parseDateArg(options.from);
-    if (!fromDate) {
-      p.outro(brand.error(`Invalid --from date format: '${options.from}'. Expected YYYY-MM-DD.`));
-      return null;
-    }
-    input.from = fromDate;
-  }
-
-  if (options.to) {
-    const toDate = parseDateArg(options.to);
-    if (!toDate) {
-      p.outro(brand.error(`Invalid --to date format: '${options.to}'. Expected YYYY-MM-DD.`));
-      return null;
-    }
-    input.to = toDate;
-  }
-
-  if (input.from && input.to && input.from.getTime() > input.to.getTime()) {
-    p.outro(
-      brand.error(
-        `Invalid date range: --from (${options.from}) cannot be later than --to (${options.to}).`,
-      ),
-    );
-    return null;
-  }
-
-  return input;
-}
+export type { AnalyticsCliOptions };
 
 export function registerAnalyticsCommand(program: Command) {
   const analytics = program
@@ -88,8 +43,9 @@ export function registerAnalyticsCommand(program: Command) {
         targetLabel = repoContext.target;
       }
 
-      const inputPayload = buildAnalyticsInput(options, repoId);
-      if (!inputPayload) {
+      const built = buildAnalyticsInput(options, repoId);
+      if (!built.ok) {
+        p.outro(brand.error(built.message));
         return;
       }
 
@@ -99,7 +55,7 @@ export function registerAnalyticsCommand(program: Command) {
           start: `Aggregating intelligence for ${pc.cyan(targetLabel)}...`,
           stop: "Metrics calculated",
         },
-        () => analyticsService.getDashboardStats(inputPayload),
+        () => analyticsService.getDashboardStats(built.input),
       );
 
       if (output.json(stats, options.json)) {
@@ -138,8 +94,9 @@ export function registerAnalyticsCommand(program: Command) {
         targetLabel = repoContext.target;
       }
 
-      const inputPayload = buildAnalyticsInput(options, repoId);
-      if (!inputPayload) {
+      const built = buildAnalyticsInput(options, repoId);
+      if (!built.ok) {
+        p.outro(brand.error(built.message));
         return;
       }
 
@@ -149,7 +106,7 @@ export function registerAnalyticsCommand(program: Command) {
           start: `Fetching metric trends for ${pc.cyan(targetLabel)}...`,
           stop: "Trends data loaded",
         },
-        () => analyticsService.getTrends(inputPayload),
+        () => analyticsService.getTrends(built.input),
       );
 
       if (output.json(trendsData, options.json)) {

@@ -22,7 +22,12 @@ type RequestStore = {
   userRole?: string;
 };
 
-export const requestContext = new AsyncLocalStorage<RequestStore>();
+const globalForRequestContext = globalThis as unknown as {
+  requestContext?: AsyncLocalStorage<RequestStore>;
+};
+
+export const requestContext = (globalForRequestContext.requestContext ??=
+  new AsyncLocalStorage<RequestStore>());
 
 // GDPR masking for PG INET: IPv4 zeroes the last octet, IPv6 the last 64 bits.
 export function anonymizeIp(ip: null | string | undefined): null | string {

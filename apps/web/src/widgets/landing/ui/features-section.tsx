@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { Route } from "next";
 import { Activity, Code2, Cpu, FileJson, Lock, Share2, Terminal } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
@@ -11,7 +12,7 @@ type BentoFeature = {
   className: string;
   cta: string;
   description: string;
-  href: string;
+  href: Route;
   Icon: typeof Activity;
   name: string;
 };
@@ -38,7 +39,7 @@ export async function FeaturesSection() {
           <SimulationTerminal />
         </div>
       ),
-      className: "lg:col-span-2 lg:row-span-2",
+      className: "sm:col-span-2 lg:col-span-2 lg:row-span-2",
       cta: t("section_features_cli_cta"),
       description: t("section_features_cli_desc"),
       href: "/docs/cli",

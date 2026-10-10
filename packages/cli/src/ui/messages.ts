@@ -32,4 +32,7 @@ export const MESSAGES = {
     deletedForOwner: (count: number, owner: string): string =>
       `Deleted ${count} ${count === 1 ? "repository" : "repositories"} for ${owner}`,
   },
+  session: {
+    revoked: "Session revoked",
+  },
 } as const;

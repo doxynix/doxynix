@@ -46,7 +46,7 @@ export async function BrandsSection() {
                 className="flex cursor-default items-center gap-2 rounded-2xl border border-transparent px-3 py-3 font-semibold text-muted-foreground text-xl grayscale transition-standard hover:border-border hover:bg-card hover:text-foreground hover:grayscale-0 sm:px-8"
                 key={tech.name}
               >
-                <tech.icon />
+                <tech.icon className="h-5 w-auto sm:h-8" />
               </div>
             ))}
           </Marquee>

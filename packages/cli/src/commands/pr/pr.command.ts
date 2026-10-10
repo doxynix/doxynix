@@ -4,7 +4,6 @@ import type { Command } from "commander";
 
 import type { FixItem } from "@/core/fixes";
 import { fetchFixes } from "@/core/fixes";
-import { readLocalFileIfExists } from "@/core/fs";
 import { guardPrompt, resolveEntityOrPick } from "@/core/prompts";
 import { resolveRepository } from "@/core/repo";
 import { validateField } from "@/core/validation";
@@ -15,6 +14,7 @@ import { renderCard, renderSection } from "@/ui/layout";
 import { output } from "@/ui/output";
 import { withTaskSpinner } from "@/ui/spinner";
 
+import { buildCreateFixPayload, buildSingleFinding, parseFindingsFile } from "./pr.findings";
 import {
   renderFixesTable,
   renderPRAnalysisDetails,
@@ -23,13 +23,7 @@ import {
   renderPRListTable,
 } from "./pr.formatter";
 import { prService } from "./pr.service";
-import type {
-  CreateFixInput,
-  FindingForFix,
-  FixDetails,
-  PRListItem,
-  StagedFixedFile,
-} from "./pr.types";
+import type { FindingForFix, FixDetails, PRListItem, StagedFixedFile } from "./pr.types";
 
 async function resolveFixId(repoId: string, fixIdArg?: string): Promise<string | null> {
   return resolveEntityOrPick({
@@ -256,32 +250,14 @@ export function registerPrCommand(program: Command) {
         let findings: FindingForFix[] = [];
 
         if (options?.findingsFile) {
-          const raw = readLocalFileIfExists(options.findingsFile);
-          if (!raw) {
-            p.outro(brand.error(`Findings file '${options.findingsFile}' not found.`));
+          const parsed = parseFindingsFile(options.findingsFile);
+          if (!parsed.ok) {
+            p.outro(brand.error(parsed.message));
             return;
           }
-
-          try {
-            const parsed: unknown = JSON.parse(raw);
-            if (!Array.isArray(parsed)) {
-              p.outro(
-                brand.error(
-                  `Findings file '${options.findingsFile}' must contain a JSON array of findings.`,
-                ),
-              );
-              return;
-            }
-            findings = parsed as FindingForFix[];
-          } catch (parseError) {
-            const errorMsg = parseError instanceof Error ? parseError.message : String(parseError);
-            p.outro(
-              brand.error(`Invalid JSON in findings file '${options.findingsFile}': ${errorMsg}`),
-            );
-            return;
-          }
+          findings = parsed.findings;
         } else {
-          let filePath = options?.file;
+          let filePath = options?.file?.trim();
           if (!filePath) {
             const filePrompt = await guardPrompt(
               p.text({
@@ -307,31 +283,14 @@ export function registerPrCommand(program: Command) {
             message = msgPrompt.trim();
           }
 
-          const line = Number(options?.line) || 1;
-          findings = [
-            {
-              file: filePath,
-              line,
-              suggestion: message,
-              type: "CODE_SMELL",
-            },
-          ];
+          findings = buildSingleFinding({ file: filePath, line: options?.line, message });
         }
 
-        const fileContents: Record<string, string> = {};
-        for (const f of findings) {
-          const fileText = readLocalFileIfExists(f.file);
-          if (fileText !== null) {
-            fileContents[f.file] = fileText;
-          }
-        }
-
-        const payload: CreateFixInput = {
-          fileContents,
+        const payload = buildCreateFixPayload({
           findings,
           prAnalysisId: options?.prAnalysisId,
           repoId: repoContext.repo.id,
-        };
+        });
 
         const result = await withTaskSpinner(
           {

@@ -1,3 +1,5 @@
+import type { ComponentType } from "react";
+import type { Route } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/shared/i18n/navigation";
@@ -8,6 +10,35 @@ import { DateComp } from "@/shared/ui/kit/date-comp";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 
 import { SystemStatus } from "./system-status";
+
+type InternalLinkItem = {
+  href: Route;
+  label: string;
+};
+
+type SocialLinkItem = {
+  href: string;
+  icon: ComponentType<{ className: string }>;
+  label: string;
+};
+
+const INTERNAL_LINKS_STYLE =
+  "-my-2 px-1 py-2 text-center text-xs transition-colors hover:text-foreground";
+
+const INTERNAL_LINKS = [
+  {
+    href: "/terms",
+    label: "terms_of_service",
+  },
+  {
+    href: "/privacy",
+    label: "privacy_policy",
+  },
+  {
+    href: "/high-five",
+    label: "open_source_credits",
+  },
+] as const satisfies readonly InternalLinkItem[];
 
 const SOCIAL_LINKS = [
   {
@@ -25,7 +56,7 @@ const SOCIAL_LINKS = [
     icon: TelegramIcon,
     label: "Telegram",
   },
-] as const;
+] as const satisfies readonly SocialLinkItem[];
 
 export async function AppFooter() {
   const tFooter = await getTranslations("Footer");
@@ -42,29 +73,20 @@ export async function AppFooter() {
           <SystemStatus />
         </div>
         <div className="flex xs:flex-row flex-col flex-wrap items-center justify-center not-md:justify-center gap-2 text-muted-foreground text-sm md:gap-6">
-          <Link
-            className="text-center text-xs transition-colors hover:text-foreground"
-            href="/terms"
-          >
-            {tCommon("terms_of_service")}
-          </Link>
-          <Link
-            className="text-center text-xs transition-colors hover:text-foreground"
-            href="/privacy"
-          >
-            {tCommon("privacy_policy")}
-          </Link>
-          <Link
-            className="text-center text-xs transition-colors hover:text-foreground"
-            href="/high-five"
-          >
-            {tCommon("open_source_credits")}
-          </Link>
+          {INTERNAL_LINKS.map((internal) => (
+            <Link
+              className={INTERNAL_LINKS_STYLE}
+              href={internal.href}
+              key={internal.href}
+            >
+              {tCommon(internal.label)}
+            </Link>
+          ))}
 
           <div className="flex items-center gap-4 border-border md:pl-6 xl:border-l">
             {SOCIAL_LINKS.map((social) => (
               <ExternalLink
-                className="hover:text-foreground"
+                className="-m-2 p-2 hover:text-foreground"
                 href={social.href}
                 key={social.href}
               >

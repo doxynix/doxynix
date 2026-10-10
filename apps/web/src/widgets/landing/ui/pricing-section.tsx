@@ -88,7 +88,7 @@ export function PricingSection() {
                   {plan.price === "Custom" ? "" : t("section_pricing_interval")}
                 </span>
               </div>
-              <p className="mb-6 text-muted-foreground text-sm">{plan.desc}</p>
+              <p className="mb-6 min-h-10 text-muted-foreground text-sm">{plan.desc}</p>
               <AppButton
                 asChild
                 className={cn(

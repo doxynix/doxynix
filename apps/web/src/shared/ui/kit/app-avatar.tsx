@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 import { getSizesFromClassName, isUnoptimizedHost } from "@/shared/lib/avatar-utils";
@@ -44,6 +44,17 @@ export function AppAvatar({
 
   const [prevSrc, setPrevSrc] = useState(src);
 
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (imageRef.current?.complete && imageRef.current.naturalWidth > 0) {
+      if (src) {
+        loadedAvatars.set(src, true);
+      }
+      setStatus("success");
+    }
+  }, [src]);
+
   if (src !== prevSrc) {
     setPrevSrc(src);
     if (!hasSrc) {
@@ -85,6 +96,7 @@ export function AppAvatar({
             setStatus("success");
           }}
           priority={priority}
+          ref={imageRef}
           sizes={getSizesFromClassName(sizeClassName)}
           src={src}
           unoptimized={isUnoptimizedHost(src)}

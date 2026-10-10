@@ -442,6 +442,7 @@
   color-scheme: dark;
 }
 
+body:has([data-public-theme="marketing-dark"]),
 [data-public-theme="marketing-dark"] {
   --surface-page: oklch(0.102 0.004 255);
   --surface-panel: oklch(0.168 0.004 255);
@@ -498,6 +499,8 @@
   --sonner-text-secondary: var(--text-secondary);
 }
 
+html:has([data-public-theme="marketing-dark"]),
+body:has([data-public-theme="marketing-dark"]),
 [data-public-theme="marketing-dark"] {
   color-scheme: dark;
 }

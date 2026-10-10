@@ -1,6 +1,5 @@
 "use client";
 
-import type { Route } from "next";
 import { useSearchParams } from "next/navigation";
 
 import { getRepoDetailsMenu } from "@/shared/config/navigation";
@@ -28,7 +27,7 @@ export function RepoDetailsTabs({ name, owner }: Readonly<Props>) {
           return null;
         }
         const isActive = isRouteActive(pathname, baseHref, Boolean(n.exact));
-        const href = buildRepoDetailHref(baseHref, searchParams) as Route;
+        const href = buildRepoDetailHref(baseHref, searchParams);
 
         return (
           <AppButton

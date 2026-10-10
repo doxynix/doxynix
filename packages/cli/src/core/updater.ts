@@ -16,7 +16,7 @@ function getCachePath(): string {
   return join(getConfigDir(), "update-check.json");
 }
 
-function isNewerVersion(current: string, latest: string): boolean {
+export function isNewerVersion(current: string, latest: string): boolean {
   const cParts = current.split(".").map((n) => Number.parseInt(n, 10) || 0);
   const lParts = latest.split(".").map((n) => Number.parseInt(n, 10) || 0);
 
@@ -83,9 +83,7 @@ function printUpdateBanner(current: string, latest: string): void {
     "UPDATE AVAILABLE",
     [
       `${pc.gray("Current:")} ${pc.yellow(current)}  →  ${pc.gray("Latest:")} ${brand.success(latest)}`,
-      brand.muted("Run: ") +
-        brand.highlight("npm install -g @doxynix/cli") +
-        brand.muted(" to update"),
+      brand.muted("Run: ") + brand.highlight("bun add -g @doxynix/cli") + brand.muted(" to update"),
     ],
     "warning",
   );
