@@ -1,10 +1,20 @@
 // @vitest-environment jsdom
-import { createElement, type KeyboardEvent, type PointerEvent, useEffect } from "react";
-import { act, render, renderHook } from "@testing-library/react";
+import {
+  createElement,
+  type KeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+  useEffect,
+} from "react";
+import { act, fireEvent, render, renderHook } from "@testing-library/react";
 import type { Mock } from "vitest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useResizable } from "./use-resizable";
+
+if (typeof window !== "undefined" && typeof window.PointerEvent === "undefined") {
+  // @ts-expect-error Mock PointerEvent for jsdom
+  window.PointerEvent = class PointerEvent extends MouseEvent {};
+}
 
 // Waits a frame so the hook's rAF-batched width update lands.
 async function nextFrame() {
@@ -15,14 +25,18 @@ async function nextFrame() {
 
 async function move(clientX: number) {
   act(() => {
-    window.dispatchEvent(new PointerEvent("pointermove", { clientX }));
+    fireEvent.pointerMove(window, { clientX });
   });
   await nextFrame();
 }
 
 function release(eventName: "pointercancel" | "pointerup") {
   act(() => {
-    window.dispatchEvent(new PointerEvent(eventName));
+    if (eventName === "pointercancel") {
+      fireEvent.pointerCancel(window);
+    } else {
+      fireEvent.pointerUp(window);
+    }
   });
 }
 
@@ -33,7 +47,7 @@ function down(clientX: number, mocks: { preventDefault?: Mock; setPointerCapture
     currentTarget: { setPointerCapture: mocks.setPointerCapture ?? vi.fn() },
     pointerId: 1,
     preventDefault: mocks.preventDefault ?? vi.fn(),
-  } as unknown as PointerEvent<HTMLElement>;
+  } as unknown as ReactPointerEvent<HTMLElement>;
 }
 
 function key(k: string, mocks: { preventDefault?: Mock } = {}) {
@@ -151,7 +165,7 @@ describe("useResizable", () => {
 
     it("ignores non-primary buttons", () => {
       const { result } = renderHook(() => useResizable());
-      const event = { ...down(250), button: 2 } as PointerEvent<HTMLElement>;
+      const event = { ...down(250), button: 2 } as ReactPointerEvent<HTMLElement>;
 
       act(() => {
         result.current.handleProps.onPointerDown(event);
@@ -231,7 +245,7 @@ describe("useResizable", () => {
         result.current.handleProps.onPointerDown(down(250));
       });
       act(() => {
-        window.dispatchEvent(new PointerEvent("pointermove", { clientX: 400 }));
+        fireEvent.pointerMove(window, { clientX: 400 });
       });
       release("pointerup");
 
@@ -531,9 +545,11 @@ describe("useResizable", () => {
       const rendersBeforeDrag = renders;
 
       act(() => {
-        getByTestId("handle").dispatchEvent(
-          new PointerEvent("pointerdown", { bubbles: true, button: 0, clientX: 250 }),
-        );
+        fireEvent.pointerDown(getByTestId("handle"), {
+          bubbles: true,
+          button: 0,
+          clientX: 250,
+        });
       });
 
       for (let i = 1; i <= 30; i++) {
@@ -552,9 +568,11 @@ describe("useResizable", () => {
       const { getByTestId } = render(createElement(Panel));
 
       act(() => {
-        getByTestId("handle").dispatchEvent(
-          new PointerEvent("pointerdown", { bubbles: true, button: 0, clientX: 250 }),
-        );
+        fireEvent.pointerDown(getByTestId("handle"), {
+          bubbles: true,
+          button: 0,
+          clientX: 250,
+        });
       });
       await move(320);
 
