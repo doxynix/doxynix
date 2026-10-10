@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.2.0](https://github.com/doxynix/doxynix/compare/web-v5.1.4...web-v5.2.0) (2026-10-10)
+
+
+### Features
+
+* **cli:** add test suite, consolidate web UI, prune dead deps ([#2281](https://github.com/doxynix/doxynix/issues/2281)) ([d2f2081](https://github.com/doxynix/doxynix/commit/d2f2081ac8fb36c3b8287e70c0cfd991e8cdd4d4))
+
 ## [5.1.4](https://github.com/doxynix/doxynix/compare/web-v5.1.3...web-v5.1.4) (2026-10-09)
 
 
