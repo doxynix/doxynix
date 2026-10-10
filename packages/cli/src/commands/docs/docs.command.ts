@@ -2,7 +2,7 @@ import * as p from "@clack/prompts";
 import type { Command } from "commander";
 import { join, resolve } from "pathe";
 
-import { readFileOrPrompt, writeLocalFile } from "@/core/fs";
+import { describeLocalFileError, readLocalFile, writeLocalFile } from "@/core/fs";
 import { getCurrentGitBranch } from "@/core/git";
 import { guardPrompt } from "@/core/prompts";
 import { resolveRepository } from "@/core/repo";
@@ -103,7 +103,7 @@ export function registerDocsCommand(program: Command) {
         }
 
         if (!docType) {
-          docType = (await guardPrompt(
+          docType = await guardPrompt(
             p.select({
               message: "Select document type to read:",
               options: [
@@ -113,7 +113,7 @@ export function registerDocsCommand(program: Command) {
               ],
             }),
             "Cancelled.",
-          )) as DocType;
+          );
         }
 
         let filePath = options?.path;
@@ -185,10 +185,12 @@ export function registerDocsCommand(program: Command) {
           return;
         }
 
-        const fileContent = await readFileOrPrompt(filePath);
-        if (!fileContent) {
+        const file = readLocalFile(filePath);
+        if (!file.ok) {
+          p.outro(brand.error(describeLocalFileError(filePath, file.error)));
           return;
         }
+        const fileContent = file.content;
 
         const branch = options.branch ?? getCurrentGitBranch();
 

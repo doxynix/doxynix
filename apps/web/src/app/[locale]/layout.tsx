@@ -185,6 +185,7 @@ export default async function LocaleLayout({
               <NextTopLoader
                 color="var(--foreground)"
                 showSpinner={false}
+                template='<div class="bar" role="bar" aria-hidden="true"><div class="peg"></div></div><div class="spinner" role="spinner" aria-hidden="true"><div class="spinner-icon"></div></div>'
                 zIndex={9999}
               />
               <Providers>{children}</Providers>

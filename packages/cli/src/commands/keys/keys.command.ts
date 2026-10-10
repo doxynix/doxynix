@@ -38,8 +38,9 @@ export function registerKeysCommand(program: Command) {
     .command("list", { isDefault: true })
     .description("List all active (or archived) API access keys")
     .option("-a, --archived", "Include revoked/archived keys", false)
+    .option("-f, --full-id", "Show the complete UUID instead of the short prefix", false)
     .option("--json", "Output in JSON format")
-    .action(async (options: { archived?: boolean; json?: boolean }) => {
+    .action(async (options: { archived?: boolean; fullId?: boolean; json?: boolean }) => {
       const result = await withTaskSpinner(
         {
           silent: options.json,
@@ -64,7 +65,9 @@ export function registerKeysCommand(program: Command) {
         return;
       }
 
-      console.log(renderSection(brand.logo("Platform API Keys:"), renderKeysTable(keysToShow)));
+      console.log(
+        renderSection(brand.logo("Platform API Keys:"), renderKeysTable(keysToShow, options)),
+      );
       p.outro(
         brand.muted(`Active keys: ${result.active.length}, Archived: ${result.archived.length}`),
       );

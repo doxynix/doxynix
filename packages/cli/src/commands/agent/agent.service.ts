@@ -1,11 +1,10 @@
-import * as p from "@clack/prompts";
-
 import { trpc } from "@/core/client";
 import { getApiUrl, getToken } from "@/core/config";
 
 import { brand, pc } from "@/ui/colors";
 import { icons } from "@/ui/icons";
 import { renderMarkdownLine, resetMarkdownState } from "@/ui/markdown";
+import { createSpinner } from "@/ui/spinner";
 
 import type {
   CreateSessionInput,
@@ -44,9 +43,9 @@ export const agentService = {
   }> {
     const token = getToken();
     const apiUrl = getApiUrl();
-    const s = p.spinner();
+    const s = createSpinner("AI is processing request");
 
-    s.start("AI is processing request...");
+    s.start();
 
     const response = await fetch(`${apiUrl}/agent/chat`, {
       body: JSON.stringify({
@@ -66,13 +65,13 @@ export const agentService = {
     });
 
     if (!response.ok) {
-      s.stop();
+      s.stopAndPersist({ symbol: icons.cross, text: "Request failed" });
       const err = await response.text();
       throw new Error(`Server responded with HTTP ${response.status}: ${err}`);
     }
 
     if (!response.body) {
-      s.stop();
+      s.stopAndPersist({ symbol: icons.cross, text: "No response" });
       throw new Error("Empty response stream from server.");
     }
 
@@ -88,24 +87,33 @@ export const agentService = {
 
     const toolPartsMap = new Map<string, UIMessageToolPart>();
 
-    const stopSpinner = () => {
+    const stopSpinner = (message?: string) => {
       if (isSpinnerRunning) {
-        s.stop();
+        if (message === undefined) {
+          s.stop();
+        } else {
+          s.stopAndPersist({ symbol: icons.check, text: message });
+        }
         isSpinnerRunning = false;
       }
+    };
+
+    const write = (text: string) => {
+      stopSpinner();
+      process.stdout.write(text);
     };
 
     const ensureHeader = () => {
       stopSpinner();
       if (!hasPrintedHeader) {
-        process.stdout.write(`\n${brand.logo("Doxynix AI:")}\n`);
+        write(`\n${brand.logo("Doxynix AI:")}\n`);
         hasPrintedHeader = true;
       }
     };
 
     const flushLineBuffer = () => {
       if (lineBuffer.length > 0) {
-        process.stdout.write(renderMarkdownLine(lineBuffer) + "\n");
+        write(`${renderMarkdownLine(lineBuffer)}\n`);
         lineBuffer = "";
       }
     };
@@ -117,7 +125,7 @@ export const agentService = {
       const lines = lineBuffer.split("\n");
       lineBuffer = lines.pop() ?? "";
       for (const line of lines) {
-        process.stdout.write(renderMarkdownLine(line) + "\n");
+        write(`${renderMarkdownLine(line)}\n`);
       }
     };
 
@@ -166,9 +174,7 @@ export const agentService = {
           });
 
           ensureHeader();
-          process.stdout.write(
-            `\n${icons.pending} ${pc.yellow("[Tool Call]:")} ${pc.bold(toolName)}...\n`,
-          );
+          write(`\n${icons.pending} ${pc.yellow("[Tool Call]:")} ${pc.bold(toolName)}...\n`);
         } else if (event.type === "tool-input-available") {
           flushLineBuffer();
 
@@ -177,6 +183,7 @@ export const agentService = {
           if (existing) {
             existing.args = isRecord(event.input) ? event.input : {};
           }
+          ensureHeader();
           process.stdout.write(pc.gray(`   Arguments: ${JSON.stringify(event.input)}\n`));
         } else if (event.type === "tool-approval-request") {
           flushLineBuffer();
@@ -194,7 +201,8 @@ export const agentService = {
             existing.state = "approval-requested";
             existing.approval = { approved: false, id: approvalId };
           }
-          process.stdout.write(pc.yellow(`   ${icons.warning} Approval required from user...\n`));
+          ensureHeader();
+          write(pc.yellow(`   ${icons.warning} Approval required from user...\n`));
         } else if (event.type === "tool-output-available") {
           flushLineBuffer();
 
@@ -210,15 +218,13 @@ export const agentService = {
               : event.output !== null && event.output !== undefined
                 ? JSON.stringify(event.output)
                 : "";
-          process.stdout.write(
-            `${icons.check} ${pc.green("[Tool Result]:")} ${pc.gray(out.slice(0, 150))}\n`,
-          );
+          ensureHeader();
+          write(`${icons.check} ${pc.green("[Tool Result]:")} ${pc.gray(out.slice(0, 150))}\n`);
         } else if (event.type === "error") {
           flushLineBuffer();
           ensureHeader();
           const errStr = typeof event.error === "string" ? event.error : JSON.stringify(event);
-          const errorMsg = brand.error(`Generation error: ${errStr}`);
-          process.stdout.write(`\n${errorMsg}\n`);
+          write(`\n${brand.error(`Generation error: ${errStr || "unknown error"}`)}\n`);
         }
       } catch {
         if (!trimmed.startsWith("{")) {
@@ -285,11 +291,9 @@ export const agentService = {
         dispatchPayload(currentEventData.join("\n"));
       }
     } finally {
+      flushLineBuffer();
       stopSpinner();
-      if (lineBuffer.length > 0) {
-        process.stdout.write(renderMarkdownLine(lineBuffer) + "\n");
-        lineBuffer = "";
-      } else if (hasPrintedHeader) {
+      if (hasPrintedHeader) {
         process.stdout.write("\n");
       }
     }

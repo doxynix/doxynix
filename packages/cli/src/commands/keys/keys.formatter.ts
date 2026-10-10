@@ -4,12 +4,16 @@ import { createTable } from "@/ui/table";
 
 import type { ApiKeyItem } from "./keys.types";
 
-export function renderKeysTable(keys: ApiKeyItem[]): string {
+export type KeysTableOptions = {
+  fullId?: boolean;
+};
+
+export function renderKeysTable(keys: ApiKeyItem[], options: KeysTableOptions = {}): string {
   const table = createTable(["ID (UUID)", "Name", "Prefix", "Created", "Last Used", "Status"]);
 
   for (const k of keys) {
     table.push([
-      brand.muted(`${k.id.slice(0, 8)}...`),
+      brand.muted(options.fullId ? k.id : `${k.id.slice(0, 8)}...`),
       brand.highlight(k.name),
       brand.info(`${k.prefix}••••`),
       brand.muted(formatRelativeTime(k.createdAt)),

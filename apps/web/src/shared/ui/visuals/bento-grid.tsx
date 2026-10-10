@@ -1,4 +1,5 @@
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
+import type { Route } from "next";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 
 import { Link } from "@/shared/i18n/navigation";
@@ -15,7 +16,7 @@ interface BentoCardProps extends ComponentPropsWithoutRef<"div"> {
   className: string;
   cta: string;
   description: string;
-  href: string;
+  href: Route;
   Icon: ElementType;
   name: string;
 }
@@ -23,7 +24,7 @@ interface BentoCardProps extends ComponentPropsWithoutRef<"div"> {
 const BentoGrid = ({ children, className, ...props }: BentoGridProps) => {
   return (
     <div
-      className={cn("grid w-full auto-rows-88 grid-cols-3 gap-4", className)}
+      className={cn("grid w-full auto-rows-88 grid-cols-3 gap-4 sm:grid-cols-2", className)}
       {...props}
     >
       {children}
@@ -43,7 +44,7 @@ const BentoCard = ({
 }: BentoCardProps) => (
   <div
     className={cn(
-      "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded-xl",
+      "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded-xl sm:col-span-1",
       "bg-background [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
       "transform-gpu dark:bg-background dark:[border:1px_solid_var(--border)] dark:[box-shadow:0_-20px_80px_-20px_color-mix(in_oklab,var(--foreground)_14%,transparent)_inset]",
       className,

@@ -36,12 +36,22 @@ const WIDE_REGEX =
 export function getStringWidth(text: string): number {
   const clean = stripAnsi(text);
   let width = 0;
+
   for (const { segment } of segmenter.segment(clean)) {
     if (segment === "\uFE0E" || segment === "\uFE0F") {
       continue;
     }
+
+    const normalized = segment.replaceAll(/\uFE0E|\uFE0F/g, "");
+    const hasVariationSelector = normalized.length !== segment.length;
+    if (hasVariationSelector && normalized.length === 1) {
+      width += 1;
+      continue;
+    }
+
     width += WIDE_REGEX.test(segment) ? 2 : 1;
   }
+
   return width;
 }
 

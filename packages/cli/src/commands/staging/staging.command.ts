@@ -3,7 +3,7 @@ import type { Command } from "commander";
 
 import type { FixItem } from "@/core/fixes";
 import { fetchFixes } from "@/core/fixes";
-import { readFileOrPrompt } from "@/core/fs";
+import { describeLocalFileError, readLocalFile } from "@/core/fs";
 import { confirmOrAbort, resolveEntityOrPick } from "@/core/prompts";
 import { resolveRepository } from "@/core/repo";
 
@@ -77,10 +77,12 @@ export function registerStagingCommand(program: Command) {
         return;
       }
 
-      const content = await readFileOrPrompt(filePath);
-      if (!content) {
+      const file = readLocalFile(filePath);
+      if (!file.ok) {
+        p.outro(brand.error(describeLocalFileError(filePath, file.error)));
         return;
       }
+      const content = file.content;
 
       const result = await withTaskSpinner(
         {

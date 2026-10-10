@@ -1,10 +1,20 @@
 // @vitest-environment jsdom
-import type { KeyboardEvent, PointerEvent } from "react";
-import { act, renderHook } from "@testing-library/react";
+import {
+  createElement,
+  type KeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+  useEffect,
+} from "react";
+import { act, fireEvent, render, renderHook } from "@testing-library/react";
 import type { Mock } from "vitest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useResizable } from "./use-resizable";
+
+if (typeof window !== "undefined" && typeof window.PointerEvent === "undefined") {
+  // @ts-expect-error Mock PointerEvent for jsdom
+  window.PointerEvent = class PointerEvent extends MouseEvent {};
+}
 
 // Waits a frame so the hook's rAF-batched width update lands.
 async function nextFrame() {
@@ -15,14 +25,18 @@ async function nextFrame() {
 
 async function move(clientX: number) {
   act(() => {
-    window.dispatchEvent(new PointerEvent("pointermove", { clientX }));
+    fireEvent.pointerMove(window, { clientX });
   });
   await nextFrame();
 }
 
 function release(eventName: "pointercancel" | "pointerup") {
   act(() => {
-    window.dispatchEvent(new PointerEvent(eventName));
+    if (eventName === "pointercancel") {
+      fireEvent.pointerCancel(window);
+    } else {
+      fireEvent.pointerUp(window);
+    }
   });
 }
 
@@ -33,7 +47,7 @@ function down(clientX: number, mocks: { preventDefault?: Mock; setPointerCapture
     currentTarget: { setPointerCapture: mocks.setPointerCapture ?? vi.fn() },
     pointerId: 1,
     preventDefault: mocks.preventDefault ?? vi.fn(),
-  } as unknown as PointerEvent<HTMLElement>;
+  } as unknown as ReactPointerEvent<HTMLElement>;
 }
 
 function key(k: string, mocks: { preventDefault?: Mock } = {}) {
@@ -151,7 +165,7 @@ describe("useResizable", () => {
 
     it("ignores non-primary buttons", () => {
       const { result } = renderHook(() => useResizable());
-      const event = { ...down(250), button: 2 } as PointerEvent<HTMLElement>;
+      const event = { ...down(250), button: 2 } as ReactPointerEvent<HTMLElement>;
 
       act(() => {
         result.current.handleProps.onPointerDown(event);
@@ -231,7 +245,7 @@ describe("useResizable", () => {
         result.current.handleProps.onPointerDown(down(250));
       });
       act(() => {
-        window.dispatchEvent(new PointerEvent("pointermove", { clientX: 400 }));
+        fireEvent.pointerMove(window, { clientX: 400 });
       });
       release("pointerup");
 
@@ -497,5 +511,76 @@ describe("useResizable", () => {
 
     expect(result.current.width).toBe(500);
     expect(localStorage.length).toBe(0);
+  });
+
+  describe("with an attached panel", () => {
+    let renders = 0;
+
+    function Panel() {
+      useEffect(() => {
+        renders += 1;
+      });
+      const { handleProps, panelRef, width } = useResizable({
+        cssVar: "--panel-width",
+        defaultWidth: 250,
+        maxWidth: 500,
+        minWidth: 100,
+        storageKey: "w",
+      });
+
+      return createElement(
+        "div",
+        { ref: panelRef, style: { "--panel-width": `${width}px` } },
+        createElement("div", { ...handleProps, "data-testid": "handle" }),
+      );
+    }
+
+    beforeEach(() => {
+      renders = 0;
+      HTMLElement.prototype.setPointerCapture = vi.fn();
+    });
+
+    it("drives the CSS variable straight from the pointer, with no per-frame re-render", async () => {
+      const { getByTestId } = render(createElement(Panel));
+      const rendersBeforeDrag = renders;
+
+      act(() => {
+        fireEvent.pointerDown(getByTestId("handle"), {
+          bubbles: true,
+          button: 0,
+          clientX: 250,
+        });
+      });
+
+      for (let i = 1; i <= 30; i++) {
+        await move(250 + i * 5);
+      }
+
+      const panel = getByTestId("handle").parentElement;
+      expect(panel?.style.getPropertyValue("--panel-width")).toBe("400px");
+      expect(renders - rendersBeforeDrag).toBeLessThanOrEqual(2);
+
+      release("pointerup");
+      expect(panel?.style.getPropertyValue("--panel-width")).toBe("400px");
+    });
+
+    it("commits to state and storage once, when the drag ends", async () => {
+      const { getByTestId } = render(createElement(Panel));
+
+      act(() => {
+        fireEvent.pointerDown(getByTestId("handle"), {
+          bubbles: true,
+          button: 0,
+          clientX: 250,
+        });
+      });
+      await move(320);
+
+      expect(localStorage.length).toBe(0);
+
+      release("pointerup");
+
+      expect(localStorage.getItem("w")).toBe("320");
+    });
   });
 });

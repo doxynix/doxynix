@@ -198,3 +198,26 @@ describe("withProcedureContext", () => {
     expect(child.userId).toBe("user-2");
   });
 });
+
+describe("requestContext singleton", () => {
+  it("survives a duplicate module instance, so db.ts and the route handler share one store", async () => {
+    vi.resetModules();
+    const reimported = await import("@/server/utils/request-context");
+
+    expect(reimported.requestContext).toBe(requestContext);
+
+    const seen = reimported.requestContext.run(
+      {
+        country: "LOCAL",
+        ip: null,
+        method: "GET",
+        path: "/api/auth",
+        requestId: "shared-1",
+        userAgent: "vitest",
+      },
+      () => requestContext.getStore()?.requestId,
+    );
+
+    expect(seen).toBe("shared-1");
+  });
+});

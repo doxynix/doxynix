@@ -27,6 +27,10 @@ export const profileService = {
     return trpc.user.removeAvatar.mutate({});
   },
 
+  async revokeSession(sessionId: string) {
+    return trpc.user.revokeSession.mutate({ sessionId });
+  },
+
   async updateProfile(name: string) {
     return trpc.user.updateUser.mutate({ name });
   },

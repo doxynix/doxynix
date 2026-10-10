@@ -119,7 +119,8 @@ function SidebarProvider({
   const suppressClickRef = useRef(false);
 
   // One rail drives everything: drag to resize, drag to the edge to collapse, drag outwards to reopen.
-  const { handleProps, isResizing, setWidth, width } = useResizable({
+  const { handleProps, isResizing, panelRef, setWidth, width } = useResizable({
+    cssVar: "--sidebar-width",
     defaultWidth: SIDEBAR_DEFAULT_WIDTH,
     initialWidth: defaultWidth,
     maxWidth: SIDEBAR_MAX_WIDTH,
@@ -246,6 +247,7 @@ function SidebarProvider({
         )}
         data-resizing={isResizing || undefined}
         data-slot="sidebar-wrapper"
+        ref={panelRef}
         style={
           {
             "--sidebar-width": `${width}px`,

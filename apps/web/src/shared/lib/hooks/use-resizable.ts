@@ -4,6 +4,8 @@ import type { KeyboardEvent, PointerEvent } from "react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 type UseResizableOptions = {
+  // CSS custom property written on `panelRef` during a drag. Omit to write `width` instead.
+  cssVar?: string;
   // Width used on first render and by the double-click reset.
   defaultWidth?: number;
   initialWidth?: number;
@@ -32,6 +34,7 @@ function readWidth(storageKey: string | undefined, fallback: number, min: number
 }
 
 export function useResizable({
+  cssVar,
   defaultWidth = 256,
   initialWidth,
   maxWidth = 480,
@@ -43,21 +46,39 @@ export function useResizable({
   const [liveWidth, setLiveWidth] = useState<null | number>(null);
   const [isResizing, setIsResizing] = useState(false);
 
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const frameRef = useRef<number | null>(null);
   const pointerXRef = useRef(0);
   const lastWidthRef = useRef(defaultWidth);
   const originRef = useRef({ startWidth: defaultWidth, startX: 0 });
+  const snapshotRef = useRef<null | number>(null);
 
-  const getPersistedWidth = () =>
-    readWidth(storageKey, initialWidth ?? defaultWidth, minWidth, maxWidth);
+  const writeWidth = (value: number) => {
+    const panel = panelRef.current;
+
+    if (panel == null) {
+      setLiveWidth(value);
+    } else if (cssVar == null) {
+      panel.style.width = `${value}px`;
+    } else {
+      panel.style.setProperty(cssVar, `${value}px`);
+    }
+  };
+
+  const getPersistedWidth = () => {
+    snapshotRef.current ??= readWidth(storageKey, initialWidth ?? defaultWidth, minWidth, maxWidth);
+    return snapshotRef.current;
+  };
   const getServerWidth = () => clamp(initialWidth ?? defaultWidth, minWidth, maxWidth);
 
   const width = useSyncExternalStore(noopSubscribe, getPersistedWidth, getServerWidth);
   const currentWidth = liveWidth ?? width;
 
+  // Discrete changes (keyboard, double-click reset, reopen drag) still go through state.
   const applyWidth = (next: number) => {
     const clamped = clamp(next, minWidth, maxWidth);
     lastWidthRef.current = clamped;
+    writeWidth(clamped);
     setLiveWidth(clamped);
     return clamped;
   };
@@ -67,12 +88,18 @@ export function useResizable({
     onDragEndRef.current = onDragEnd;
   }, [onDragEnd]);
 
+  const writeWidthRef = useRef(writeWidth);
+  useEffect(() => {
+    writeWidthRef.current = writeWidth;
+  });
+
   useEffect(() => {
     if (!storageKey || isResizing || liveWidth === null) {
       return;
     }
 
     localStorage.setItem(storageKey, String(liveWidth));
+    snapshotRef.current = liveWidth;
   }, [isResizing, liveWidth, storageKey]);
 
   useEffect(() => {
@@ -94,7 +121,7 @@ export function useResizable({
         maxWidth,
       );
       lastWidthRef.current = clamped;
-      setLiveWidth(clamped);
+      writeWidthRef.current(clamped);
       return clamped;
     };
 
@@ -121,6 +148,7 @@ export function useResizable({
 
       body.style.cursor = previousCursor;
       body.style.userSelect = previousUserSelect;
+      setLiveWidth(finalWidth);
       setIsResizing(false);
       onDragEndRef.current?.(finalWidth, pointerXRef.current !== originRef.current.startX);
     };
@@ -140,7 +168,7 @@ export function useResizable({
       body.style.cursor = previousCursor;
       body.style.userSelect = previousUserSelect;
     };
-  }, [isResizing, maxWidth, minWidth, side]);
+  }, [cssVar, isResizing, maxWidth, minWidth, side]);
 
   const startResizing = (event: PointerEvent<HTMLElement>) => {
     if (event.button !== 0) {
@@ -152,6 +180,7 @@ export function useResizable({
     lastWidthRef.current = currentWidth;
     originRef.current = { startWidth: currentWidth, startX: event.clientX };
     event.currentTarget.setPointerCapture(event.pointerId);
+    writeWidth(currentWidth);
     setIsResizing(true);
   };
 
@@ -193,6 +222,7 @@ export function useResizable({
       tabIndex: 0,
     },
     isResizing,
+    panelRef,
     setWidth: applyWidth,
     width: Math.round(currentWidth),
   };

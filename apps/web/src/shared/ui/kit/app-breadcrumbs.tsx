@@ -1,7 +1,6 @@
 "use client";
 
 import { Fragment, type ReactNode } from "react";
-import type { Route } from "next";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/shared/i18n/navigation";
@@ -106,7 +105,7 @@ export function AppBreadcrumbs({
                             {collapsed.href ? (
                               <Link
                                 className="w-full truncate"
-                                href={collapsed.href as Route}
+                                href={collapsed.href}
                                 onClick={collapsed.onClick}
                               >
                                 {decodeURIComponent(collapsed.label)}

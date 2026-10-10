@@ -1,38 +1,49 @@
 import fs from "node:fs";
 
-import * as p from "@clack/prompts";
 import { dirname, resolve } from "pathe";
 
-import { brand } from "@/ui/colors";
+export type LocalFileError =
+  | { reason: "directory" }
+  | { reason: "missing" }
+  | { reason: "read-failed" };
 
-export type ReadFileOrPromptOptions = {
-  cancelMessage?: string;
-  message?: string;
-  validateMessage?: string;
-};
+export type LocalFileResult = { content: string; ok: true } | { error: LocalFileError; ok: false };
 
-export async function readFileOrPrompt(filePath: string): Promise<string | null> {
+export function readLocalFile(filePath: string): LocalFileResult {
   const localPath = resolve(process.cwd(), filePath);
 
   if (!fs.existsSync(localPath)) {
-    p.outro(brand.error(`File not found: '${filePath}'`));
-    return null;
+    return { error: { reason: "missing" }, ok: false };
   }
 
   if (!fs.statSync(localPath).isFile()) {
-    p.outro(brand.error(`Target path '${filePath}' is a directory, not a file.`));
-    return null;
+    return { error: { reason: "directory" }, ok: false };
   }
 
-  return fs.readFileSync(localPath, "utf-8");
+  try {
+    return { content: fs.readFileSync(localPath, "utf-8"), ok: true };
+  } catch {
+    return { error: { reason: "read-failed" }, ok: false };
+  }
 }
 
 export function readLocalFileIfExists(filePath: string): string | null {
-  const localPath = resolve(process.cwd(), filePath);
-  if (fs.existsSync(localPath) && fs.statSync(localPath).isFile()) {
-    return fs.readFileSync(localPath, "utf-8");
+  const result = readLocalFile(filePath);
+  return result.ok ? result.content : null;
+}
+
+export function describeLocalFileError(filePath: string, error: LocalFileError): string {
+  switch (error.reason) {
+    case "directory": {
+      return `Target path '${filePath}' is a directory, not a file.`;
+    }
+    case "missing": {
+      return `File not found: '${filePath}'`;
+    }
+    case "read-failed": {
+      return `Could not read file: '${filePath}'.`;
+    }
   }
-  return null;
 }
 
 export function writeLocalFile(filePath: string, content: string): string {

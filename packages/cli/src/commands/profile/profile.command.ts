@@ -3,7 +3,7 @@ import { UpdateProfileSchema } from "@doxynix/shared";
 import type { Command } from "commander";
 
 import { getToken, removeToken } from "@/core/config";
-import { confirmOrAbort, guardPrompt } from "@/core/prompts";
+import { confirmOrAbort, guardPrompt, resolveEntityOrPick } from "@/core/prompts";
 import { validateField } from "@/core/validation";
 
 import { brand } from "@/ui/colors";
@@ -15,6 +15,7 @@ import { withTaskSpinner } from "@/ui/spinner";
 
 import { renderLinkedAccountsTable, renderSessionsTable } from "./profile.formatter";
 import { profileService } from "./profile.service";
+import type { UserSessionItem } from "./profile.types";
 
 export function registerProfileCommand(program: Command) {
   const profile = program
@@ -98,6 +99,45 @@ export function registerProfileCommand(program: Command) {
         renderSection(brand.logo("  Active User Sessions:"), renderSessionsTable(sessions)),
       );
       p.outro(brand.muted(`Active devices: ${sessions.length}`));
+    });
+
+  profile
+    .command("revoke-session [sessionId]")
+    .description("Revoke an active session by ID (supports Short-ID prefix and interactive pick)")
+    .action(async (sessionIdArg?: string) => {
+      p.intro(brand.warning("Revoke Session"));
+
+      const targetSessionId = await resolveEntityOrPick({
+        cancelMessage: "Revocation cancelled.",
+        emptyMessage: "No active sessions found.",
+        fetchItems: () =>
+          withTaskSpinner("Fetching active sessions...", () => profileService.getActiveSessions()),
+        getLabel: (item: UserSessionItem) =>
+          `${item.userAgent || "Unknown Device"} [${item.id.slice(0, 8)}]`,
+        idArg: sessionIdArg,
+        notFoundMessage: (target) => `No active session found matching: '${target}'`,
+        selectMessage: "Select a session to revoke:",
+      });
+
+      if (!targetSessionId) {
+        return;
+      }
+
+      const confirmed = await confirmOrAbort({
+        cancelMessage: "Revocation cancelled.",
+        danger: true,
+        message: `Revoke session ${brand.highlight(targetSessionId.slice(0, 8))}?`,
+      });
+
+      if (!confirmed) {
+        return;
+      }
+
+      await withTaskSpinner({ start: "Revoking session...", stop: "Session revoked" }, () =>
+        profileService.revokeSession(targetSessionId),
+      );
+
+      p.outro(brand.success(MESSAGES.session.revoked));
     });
 
   profile

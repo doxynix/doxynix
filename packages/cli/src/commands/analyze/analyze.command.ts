@@ -2,7 +2,7 @@ import * as p from "@clack/prompts";
 import { UpdatePRConfigInput } from "@doxynix/shared";
 import type { Command } from "commander";
 
-import { readFileOrPrompt } from "@/core/fs";
+import { describeLocalFileError, readLocalFile } from "@/core/fs";
 import { getCurrentGitBranch } from "@/core/git";
 import { confirmOrAbort, guardPrompt, resolveEntityOrPick } from "@/core/prompts";
 import { resolveRepository } from "@/core/repo";
@@ -236,10 +236,12 @@ export function registerAnalyzeCommand(program: Command) {
           return;
         }
 
-        const content = await readFileOrPrompt(filePath);
-        if (!content) {
+        const file = readLocalFile(filePath);
+        if (!file.ok) {
+          p.outro(brand.error(describeLocalFileError(filePath, file.error)));
           return;
         }
+        const content = file.content;
 
         const branch = options.branch ?? getCurrentGitBranch();
 
