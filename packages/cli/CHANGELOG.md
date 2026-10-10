@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.1.0](https://github.com/doxynix/doxynix/compare/cli-v5.0.7...cli-v5.1.0) (2026-10-10)
+
+
+### Features
+
+* **cli:** add test suite, consolidate web UI, prune dead deps ([#2281](https://github.com/doxynix/doxynix/issues/2281)) ([d2f2081](https://github.com/doxynix/doxynix/commit/d2f2081ac8fb36c3b8287e70c0cfd991e8cdd4d4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 5.2.0
+
 ## [5.0.7](https://github.com/doxynix/doxynix/compare/cli-v5.0.6...cli-v5.0.7) (2026-10-09)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/doxynix/doxynix/compare/siem-client-v0.3.7...siem-client-v0.4.0) (2026-10-10)
+
+
+### Features
+
+* **cli:** add test suite, consolidate web UI, prune dead deps ([#2281](https://github.com/doxynix/doxynix/issues/2281)) ([d2f2081](https://github.com/doxynix/doxynix/commit/d2f2081ac8fb36c3b8287e70c0cfd991e8cdd4d4))
+
 ## [0.3.7](https://github.com/doxynix/doxynix/compare/siem-client-v0.3.6...siem-client-v0.3.7) (2026-10-04)
 
 

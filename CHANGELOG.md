@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.2.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.1.4...doxynix-v6.2.0) (2026-10-10)
+
+
+### Features
+
+* **cli:** add test suite, consolidate web UI, prune dead deps ([#2281](https://github.com/doxynix/doxynix/issues/2281)) ([d2f2081](https://github.com/doxynix/doxynix/commit/d2f2081ac8fb36c3b8287e70c0cfd991e8cdd4d4))
+
 ## [6.1.4](https://github.com/doxynix/doxynix/compare/doxynix-v6.1.3...doxynix-v6.1.4) (2026-10-09)
 
 
