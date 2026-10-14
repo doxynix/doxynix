@@ -92,6 +92,11 @@ jobs:
       - name: Check Architecture Boundaries
         run: bun --filter @doxynix/cli arch:check
 
+      # cli type-checks against apps/web sources via @doxynix/web/trpc, which re-exports the
+      # generated Prisma client. This step bypasses turbo, so generate it explicitly.
+      - name: Prisma Generate
+        run: bun --filter @doxynix/web db:generate
+
       - name: Type Check
         run: bun --filter @doxynix/cli type-check
 
