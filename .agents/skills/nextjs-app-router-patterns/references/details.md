@@ -401,28 +401,50 @@ export default async function ProductPage({ params }: Props) {
 
 ## Caching Strategies
 
+`cacheComponents` is **disabled** in `apps/web/next.config.ts`, so `'use cache'` and `cacheLife` do
+not apply. And since Next 15 a bare `fetch` is **not cached** — caching is opt-in per call.
+
 ### Data Cache
 
 ```typescript
-// No cache (always fresh)
-fetch(url, { cache: "no-store" });
+// Default: not cached, refetched every request
+await fetch(url);
 
-// Cache forever (static)
-fetch(url, { cache: "force-cache" });
+// Always fresh, even during prerender
+await fetch(url, { cache: "no-store" });
 
-// ISR - revalidate after 60 seconds
-fetch(url, { next: { revalidate: 60 } });
+// Opt into the server-side data cache
+await fetch(url, { cache: "force-cache" });
 
-// Tag-based invalidation
-fetch(url, { next: { tags: ["products"] } });
+// Opt in, and invalidate on demand via revalidateTag("products")
+await fetch(url, { cache: "force-cache", next: { tags: ["products"] } });
 
-// Invalidate via Server Action
+// Cache with a lifetime: revalidates the Data Cache and Full Route Cache after N seconds
+await fetch(url, { next: { revalidate: 60 } });
+```
+
+`next: { revalidate: N }` works alongside `cache: "force-cache"` / `"no-store"`. `force-cache` is the
+default when a `fetch` carries no cache option, and omitting the option entirely means "not cached".
+
+`cacheComponents` is **disabled** in `next.config.ts` (commented out pending a hydration bug), so the
+classic Data Cache model above applies. Do not add `'use cache'` directives or assume every render needs a
+`<Suspense>` boundary — that only becomes true once `cacheComponents` is turned on.
+
+### On-demand invalidation
+
+```typescript
 ("use server");
-import { revalidateTag, revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function updateProduct(id: string, data: ProductData) {
   await db.product.update({ where: { id }, data });
   revalidateTag("products");
-  revalidatePath("/products");
+  // Every route in apps/web lives under [locale] — a locale-less path is a no-op.
+  revalidatePath("/[locale]/products");
 }
 ```
+
+### Prefer tRPC + TanStack Query
+
+User-facing reads and writes go through the tRPC router and React Query rather than the Next data
+cache. See the `trpc` and `tanstack-query-best-practices` skills.

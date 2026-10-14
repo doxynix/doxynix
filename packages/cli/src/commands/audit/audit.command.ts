@@ -61,10 +61,10 @@ export function registerAuditCommand(program: Command) {
         ),
       );
 
-      if (result.nextCursor) {
+      if (result.meta.nextCursor) {
         p.outro(
           brand.muted("Next page: ") +
-            brand.highlight(`dxnx audit list -c ${result.nextCursor}\n`) +
+            brand.highlight(`dxnx audit list -c ${result.meta.nextCursor}\n`) +
             brand.muted("Inspect specific payload with: ") +
             brand.highlight("dxnx audit view <id-or-prefix>"),
         );

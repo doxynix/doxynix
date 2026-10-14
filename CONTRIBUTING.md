@@ -81,6 +81,38 @@ To run it locally:
    bun --filter @doxynix/web test:int
    ```
 
+### Admin Panel: Creating the First Admin
+
+The admin panel at `/admin/users` is gated twice: `adminProcedure` checks the `ADMIN` role, and the
+`(admin)` layout rejects anyone without it on the server. Every admin additionally needs a second
+factor — an admin without TOTP or a passkey gets `FORBIDDEN` from every admin procedure, even
+though their role check passed.
+
+**Local / dev stand:**
+
+1. Set `SEED_ADMIN_EMAIL` in the Doppler config `dev_personal` for `apps/web` (it defaults to
+   `admin@example.test`).
+2. Run the seed. It upserts a user named `Alice` with `role: ADMIN` and `emailVerified: true`,
+   keyed on that address:
+
+   ```bash
+   bun --filter @doxynix/web db:seed
+   ```
+
+3. Sign in with a magic link sent to that address.
+4. **Enroll a passkey** at `/dashboard/settings/connections` before opening the panel. The seed
+   creates no second factor, so without this step every admin call fails closed.
+
+The seed also creates demo repos and users. It is for local development only.
+
+**Promoting an existing user** is the normal path once any admin exists. The better-auth `admin`
+plugin is enabled (`adminRoles: ["ADMIN"]`, `defaultRole: "USER"`), so an existing admin can call
+`POST /admin/set-role`. Promote, then have the new admin enroll their own second factor.
+
+**Production:** do not run the seed and do not set `SEED_ADMIN_EMAIL`. Bootstrap the first admin by
+promoting an existing account through `/admin/set-role`, then have them enroll a second factor
+before granting anyone else access.
+
 ### Commit Formatting (Conventional Commits)
 
 Your commits **must** follow the Conventional Commits specification to enable automated Changelog generation.

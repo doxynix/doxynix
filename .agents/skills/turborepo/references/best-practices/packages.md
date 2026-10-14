@@ -20,14 +20,14 @@ Export TypeScript directly. The consuming app's bundler compiles it.
 ```json
 // packages/ui/package.json
 {
-  "name": "@repo/ui",
+  "name": "@doxynix/ui",
   "exports": {
     "./button": "./src/button.tsx",
     "./card": "./src/card.tsx"
   },
   "scripts": {
-    "lint": "eslint .",
-    "check-types": "tsc --noEmit"
+    "lint": "oxlint",
+    "type-check": "tsc --noEmit"
   }
 }
 ```
@@ -51,7 +51,7 @@ Package handles its own compilation.
 ```json
 // packages/ui/package.json
 {
-  "name": "@repo/ui",
+  "name": "@doxynix/ui",
   "exports": {
     "./button": {
       "types": "./src/button.tsx",
@@ -68,7 +68,7 @@ Package handles its own compilation.
 ```json
 // packages/ui/tsconfig.json
 {
-  "extends": "@repo/typescript-config/library.json",
+  "extends": "@doxynix/typescript-config/library.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src"
@@ -93,10 +93,10 @@ Package handles its own compilation.
 ```json
 {
   "exports": {
-    ".": "./src/index.ts", // @repo/ui
-    "./button": "./src/button.tsx", // @repo/ui/button
-    "./card": "./src/card.tsx", // @repo/ui/card
-    "./hooks": "./src/hooks/index.ts" // @repo/ui/hooks
+    ".": "./src/index.ts", // @doxynix/ui
+    "./button": "./src/button.tsx", // @doxynix/ui/button
+    "./card": "./src/card.tsx", // @doxynix/ui/card
+    "./hooks": "./src/hooks/index.ts" // @doxynix/ui/hooks
   }
 }
 ```
@@ -124,8 +124,7 @@ Package handles its own compilation.
 // apps/web/package.json
 {
   "dependencies": {
-    "@repo/ui": "workspace:*" // pnpm/bun
-    // "@repo/ui": "*"         // npm/yarn
+    "@doxynix/ui": "workspace:*"
   }
 }
 ```
@@ -133,14 +132,15 @@ Package handles its own compilation.
 ### Run Install
 
 ```bash
-pnpm install  # Updates lockfile with new dependency
+bun install  # updates bun.lock with the new dependency
+bun run clean:symlinks  # postinstall equivalent --ignore-scripts skips
 ```
 
 ### Import and Use
 
 ```typescript
 // apps/web/src/page.tsx
-import { Button } from '@repo/ui/button';
+import { Button } from '@doxynix/ui/button';
 
 export default function Page() {
   return <Button>Click me</Button>;
@@ -153,13 +153,10 @@ export default function Page() {
 
 ```
 packages/
-├── ui/                  # Shared UI components
-├── utils/               # General utilities
-├── auth/                # Authentication logic
-├── database/            # Database client/schemas
-├── eslint-config/       # ESLint configuration
-├── typescript-config/   # TypeScript configuration
-└── api-client/          # Generated API client
+├── shared/              # Pure types + Zod schemas (this repo's shared package)
+├── config/              # tsconfig base, depcruise-base.json
+├── cli/                 # The `dxnx` binary
+└── <one-purpose-pkg>/   # One package, one reason to exist
 ```
 
 ### Avoid Mega-Packages
@@ -176,45 +173,20 @@ packages/
 
 // GOOD: Separate by purpose
 packages/
-├── ui/          # Components
-├── utils/       # Utilities
-├── hooks/       # React hooks
-├── types/       # Shared TypeScript types
-└── api-client/  # API utilities
+├── shared/      # types + schemas only
+├── config/      # shared build config
+└── cli/         # the CLI, which imports the AppRouter type
 ```
 
 ## Config Packages
 
-### TypeScript Config
+`packages/config` holds what the workspaces *reference*: `depcruise-base.json` (dependency-cruiser
+base rules, extended by each app's own `.dependency-cruiser.ts`) and the shared TypeScript base.
 
-```json
-// packages/typescript-config/package.json
-{
-  "name": "@repo/typescript-config",
-  "exports": {
-    "./base.json": "./base.json",
-    "./nextjs.json": "./nextjs.json",
-    "./library.json": "./library.json"
-  }
-}
-```
-
-### ESLint Config
-
-```json
-// packages/eslint-config/package.json
-{
-  "name": "@repo/eslint-config",
-  "exports": {
-    "./base": "./base.js",
-    "./next": "./next.js"
-  },
-  "dependencies": {
-    "eslint": "^8.0.0",
-    "eslint-config-next": "latest"
-  }
-}
-```
+**Lint and format config are not packages here.** There is exactly one `biome.json` and one
+`.oxlintrc.json`, both at the repo root — no `@doxynix/eslint-config`, no `@doxynix/biome-config`.
+Adding a per-workspace override means editing the root file, which is listed in `turbo.json`'s
+`globalDependencies` so the cache invalidates when it changes.
 
 ## Common Mistakes
 
@@ -223,12 +195,12 @@ packages/
 ```json
 // BAD: No exports defined
 {
-  "name": "@repo/ui"
+  "name": "@doxynix/ui"
 }
 
 // GOOD: Clear exports
 {
-  "name": "@repo/ui",
+  "name": "@doxynix/ui",
   "exports": {
     "./button": "./src/button.tsx"
   }
@@ -238,12 +210,10 @@ packages/
 ### Wrong Workspace Syntax
 
 ```json
-// pnpm/bun
-{ "@repo/ui": "workspace:*" }  // Correct
+{ "@doxynix/shared": "workspace:*" }  // correct
 
-// npm/yarn
-{ "@repo/ui": "*" }            // Correct
-{ "@repo/ui": "workspace:*" }  // Wrong for npm/yarn!
+{ "@doxynix/shared": "*" }             // resolves by luck, not by declaration — use workspace:*
+{ "@doxynix/shared": "file:../shared" } // breaks the graph; never
 ```
 
 ### Missing from turbo.json Outputs

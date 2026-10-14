@@ -4,72 +4,29 @@
 
 Relations let you describe how tables connect to each other. Once defined, you can use
 the relational query API (`db.query`) to fetch nested data without writing manual joins.
-Drizzle supports two relation APIs — the modern `defineRelations` (RQB v2, the default in
-Drizzle v1) and the legacy `relations()` helper (Drizzle 0.45.x). New projects on `@rc` should
-use `defineRelations`.
 
-## Relations v2 (`defineRelations`) — Recommended (Drizzle v1)
+**This repo runs `drizzle-orm@0.45.3`, where the only relations API is the `relations()` helper.**
+`defineRelations` (RQB v2) is a Drizzle v1 API and does not exist here — importing it is a type
+error. Write the form below; the v1 syntax at the end is reference only.
 
-```typescript
-import { defineRelations } from 'drizzle-orm';
-import * as schema from './schema';
-
-export const relations = defineRelations(schema, (r) => ({
-  users: {
-    posts: r.many.posts(),
-    profile: r.one.profiles({
-      from: r.users.id,
-      to: r.profiles.userId,
-    }),
-  },
-  posts: {
-    author: r.one.users({
-      from: r.posts.authorId,
-      to: r.users.id,
-    }),
-    comments: r.many.comments(),
-  },
-  comments: {
-    post: r.one.posts({
-      from: r.comments.postId,
-      to: r.posts.id,
-    }),
-    author: r.one.users({
-      from: r.comments.authorId,
-      to: r.users.id,
-    }),
-  },
-  profiles: {
-    user: r.one.users({
-      from: r.profiles.userId,
-      to: r.users.id,
-    }),
-  },
-}));
-
-// Pass relations to drizzle()
-const db = drizzle({ client: pool, relations });
-```
-
-**Key points:**
-- `r.one` requires explicit `from`/`to` column mapping
-- `r.many` infers the connection from the other side's `r.one` definition
-- Both sides of a relationship should be defined for full query support
-
-## Legacy Relations API (`relations()`)
-
-Still works and widely used in existing projects:
+## Defining Relations (`relations()` — 0.45.x, this repo)
 
 ```typescript
-// Drizzle 0.45.x: import from 'drizzle-orm'
-// Drizzle v1 (if you keep the legacy API): import from 'drizzle-orm/_relations'
 import { relations } from 'drizzle-orm';
+import { integer, pgTable, text } from 'drizzle-orm/pg-core';
+
+export const users = pgTable('users', {
+  id: integer().primaryKey(),
+  name: text().notNull(),
+});
+
+export const posts = pgTable('posts', {
+  id: integer().primaryKey(),
+  authorId: integer().notNull(),
+  title: text().notNull(),
+});
 
 export const usersRelations = relations(users, ({ one, many }) => ({
-  profile: one(profiles, {
-    fields: [users.id],
-    references: [profiles.userId],
-  }),
   posts: many(posts),
 }));
 
@@ -81,38 +38,75 @@ export const postsRelations = relations(posts, ({ one }) => ({
 }));
 ```
 
-**Note:** The legacy API requires passing the entire schema to `drizzle()`:
+**In this repo** the relations live next to the tables in
+`apps/siem-server/src/core/db/schema.ts` (`incidentsRelations`, `findingsRelations`, …), and
+`src/core/db/db.ts` does:
 
 ```typescript
 import * as schema from './schema';
-const db = drizzle({ schema });
+import { drizzle } from 'drizzle-orm/node-postgres';
+
+export const db = drizzle(client, { schema });
 ```
 
-**Migrating from 0.45.x to v1.** On Drizzle v1 the relational query API (`db.query`) is driven by
-the `defineRelations` object you pass to `drizzle()`. Passing a legacy `schema` (with `relations()`
-helpers) does *not* populate `db.query` — verified empirically against `drizzle-orm@1.0.0-rc.3`:
+Passing the whole `schema` module is what populates `db.query` on 0.45.x. Do not pass a bare table
+list.
+
+**Key points:**
+
+- `one()` needs explicit `fields` / `references`.
+- `many()` infers the connection from the other side's `one()` definition.
+- Both sides should be defined for full query support.
+
+## Querying with `db.query`
 
 ```typescript
-// ✅ v1: relational queries require defineRelations passed as `relations`
-import { relations } from './relations'; // export const relations = defineRelations(...)
-const db = drizzle(process.env.DATABASE_URL!, { relations });
-await db.query.users.findMany({ with: { posts: true } });
-
-// ⚠️ v1: the legacy relations() helper still imports from drizzle-orm/_relations
-// (so old definition files keep compiling), but passing it via `schema` does NOT
-// enable db.query. Convert relation definitions to defineRelations to query relationally.
-import { relations } from 'drizzle-orm/_relations';
+const usersWithPosts = await db.query.users.findMany({
+  with: { posts: true },
+});
+// [{ id: 1, name: 'Alice', posts: [{ id: 9, authorId: 1, title: '…' }] }]
 ```
 
-> Some v1 beta docs describe a `db._query` path for running legacy relational queries side by side
-> with the new API. That path was **removed before `1.0.0-rc.3`** — there is no `db._query`. Don't
-> rely on it; migrate definitions to `defineRelations`.
+Filtering in a relational query is a **callback** in 0.45.x, not a plain object:
+
+```typescript
+const alice = await db.query.users.findFirst({
+  where: (users, { eq }) => eq(users.name, 'Alice'),
+  with: { posts: { where: (posts, { gt }) => gt(posts.id, 10) } },
+});
+```
+
+The same operator functions are imported from `drizzle-orm` and are identical to the ones used in
+`db.select().from(...).where(...)`. Never rewrite a `db.select()` filter into the relational syntax —
+they are two separate APIs.
+
+## Self-Referencing Relations
+
+```typescript
+import { AnyPgColumn } from 'drizzle-orm/pg-core';
+
+export const users = pgTable('users', {
+  id: integer().primaryKey(),
+  name: text().notNull(),
+  invitedBy: integer().references((): AnyPgColumn => users.id),
+});
+
+export const usersRelations = relations(users, ({ one, many }) => ({
+  invitedBy: one(users, {
+    fields: [users.invitedBy],
+    references: [users.id],
+    relationName: 'invitedBy',
+  }),
+  invitees: many(users, { relationName: 'invitedBy' }),
+}));
+```
+
+Note the `(): AnyPgColumn =>` return type annotation — this is needed for circular references, and
+`relationName` disambiguates the two edges.
 
 ## Many-to-Many Relations
 
-You still need the junction table in your schema, but in v1 you no longer query *through* it.
-Use `.through()` to point both sides of the `many` relation at the junction columns, and Drizzle
-collapses the join for you:
+Define a `many` to the junction table on both sides, then traverse it explicitly in the query:
 
 ```typescript
 // Schema — junction table
@@ -125,49 +119,13 @@ export const usersToGroups = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.groupId] })]
 );
 
-// Relations v2 — define the many-to-many directly with .through()
-export const relations = defineRelations(schema, (r) => ({
-  users: {
-    groups: r.many.groups({
-      from: r.users.id.through(r.usersToGroups.userId),
-      to: r.groups.id.through(r.usersToGroups.groupId),
-    }),
-  },
-  groups: {
-    users: r.many.users(), // reverse side; the through mapping is inferred
-  },
-}));
-```
-
-### Querying — no junction in the query
-
-```typescript
-const usersWithGroups = await db.query.users.findMany({
-  with: {
-    groups: true, // junction table is collapsed automatically
-  },
-});
-// [{ id: 1, name: "Alice", groups: [{ id: 7, name: "Admins" }] }]
-```
-
-### Legacy (v0.45.x): query through the junction table
-
-Before v1's `.through()`, you defined a `many` to the junction on each side and traversed it
-explicitly in the query, mapping the rows out yourself:
-
-```typescript
-// Legacy v0.45.x
 export const usersRelations = relations(users, ({ many }) => ({
   usersToGroups: many(usersToGroups),
 }));
-// ...
+
+// Query through the junction, mapping the rows out yourself
 const usersWithGroups = await db.query.users.findMany({
-  with: {
-    usersToGroups: {
-      columns: {},
-      with: { group: true },
-    },
-  },
+  with: { usersToGroups: { columns: {}, with: { group: true } } },
 });
 ```
 
@@ -175,35 +133,33 @@ const usersWithGroups = await db.query.users.findMany({
 
 ```typescript
 // Forgetting to define the reverse side of a relation
-export const relations = defineRelations(schema, (r) => ({
-  posts: {
-    author: r.one.users({
-      from: r.posts.authorId,
-      to: r.users.id,
-    }),
-  },
-  // Missing: users.posts relation
-  // Without it, you can't query db.query.users.findMany({ with: { posts: true } })
+export const postsRelations = relations(posts, ({ one }) => ({
+  author: one(users, { fields: [posts.authorId], references: [users.id] }),
 }));
+// Missing: users.posts — users.findMany({ with: { posts: true } }) will not resolve
 ```
-
-## Self-Referencing Relations
-
-For hierarchical data like comment threads or org charts:
 
 ```typescript
-import { AnyPgColumn } from 'drizzle-orm/pg-core';
-
-export const users = pgTable('users', {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  name: text('name').notNull(),
-  invitedBy: integer('invited_by').references((): AnyPgColumn => users.id),
-});
+// Forgetting the schema when constructing the client: db.query stays empty
+const db = drizzle(client); // ❌
+const db = drizzle(client, { schema }); // ✅
 ```
 
-Note the `(): AnyPgColumn =>` return type annotation — this is needed for circular references.
+```typescript
+// Drizzle v1 syntax — does not exist in 0.45.3
+import { defineRelations } from 'drizzle-orm'; // ❌ in this repo
+```
+
+## Not used here: Drizzle v1 relations (`defineRelations`)
+
+For reference only. Drizzle v1 RC replaces `relations()` with `defineRelations(schema, r => …)` and
+changes relational `where`/`orderBy` from callbacks to plain objects. It is a breaking change that
+also alters the migration folder format, and this repo is on 0.45.3 — do not migrate as a side effect
+of another task. If a v1 migration is ever approved deliberately, re-read the v1 docs rather than
+porting from the snippets above.
 
 ## References
 
-- https://orm.drizzle.team/docs/relations-v2
+- https://orm.drizzle.team/docs/relations
 - https://orm.drizzle.team/docs/rqb
+- https://orm.drizzle.team/docs/relations-v2 (v1 only)

@@ -110,7 +110,7 @@ async function tokenBucketRateLimit(userId: string, capacity: number = 10, rate:
 }
 
 // Production: Use @upstash/ratelimit
-// npm install @upstash/ratelimit
+// bun add @upstash/ratelimit
 import { Ratelimit } from "@upstash/ratelimit";
 
 // Fixed window

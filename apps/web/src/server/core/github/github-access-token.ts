@@ -31,8 +31,8 @@ export const githubTokenService = {
     try {
       return await prisma.$transaction(async (tx) => {
         await tx.$queryRawTyped(getAccountForUpdate(userId, "github"));
-        const lockedAccount = await tx.account.findFirst({
-          where: { providerId: "github", userId },
+        const lockedAccount = await tx.account.findUnique({
+          where: { userId_providerId: { providerId: "github", userId } },
         });
 
         if (

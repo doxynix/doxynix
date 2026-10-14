@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CreatePrSchema, type CreatePrValues } from "@doxynix/shared";
+import { CreatePrSchema, type CreatePrValues, generateBranchName } from "@doxynix/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileIcon, GitPullRequest, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -9,7 +9,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
-import { generateBranchName } from "@/shared/lib/get-branch-name";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";

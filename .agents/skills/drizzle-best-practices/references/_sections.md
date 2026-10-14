@@ -32,14 +32,14 @@ How to write correct, efficient queries using Drizzle's SQL-like API.
 
 ## 3. Relations (HIGH)
 
-Defining and querying relational data without manual joins. Both files document the Drizzle v1
-(RQB v2) API as the default with **Legacy (v0.45.x)** callouts for the older `relations()` /
-callback-query style — check `package.json` (see SKILL.md "Version & API Detection").
+Defining and querying relational data without manual joins. Both files document the **`relations()`
+API of `drizzle-orm@0.45.3`** — the version this repo runs — with a short, clearly labelled
+Drizzle v1 note at the end of each file.
 
 | File | Topic |
 |------|-------|
-| `relations-defining.md` | Defining one-to-one, one-to-many, many-to-many (`.through()`) relations |
-| `relations-querying.md` | findMany/findFirst, object-syntax `where`/`orderBy`, relation filters, columns, limits |
+| `relations-defining.md` | Defining one-to-one, one-to-many, many-to-many with `relations()` |
+| `relations-querying.md` | findMany/findFirst, callback `where`/`orderBy`, column selection, limits |
 
 ## 4. Migrations (HIGH)
 
@@ -58,7 +58,7 @@ Leveraging TypeScript for compile-time safety.
 |------|-------|
 | `types-inference.md` | InferSelectModel, InferInsertModel, $inferSelect |
 | `types-custom-types.md` | Custom types, $type, branded types |
-| `types-validators.md` | Deriving Zod/Valibot/Typebox/Arktype schemas from tables (v1 `drizzle-orm/zod` vs legacy `drizzle-zod`) |
+| `types-validators.md` | Deriving Zod schemas from tables (`drizzle-zod`; not `drizzle-orm/zod`) |
 
 ## 6. Performance (MEDIUM)
 

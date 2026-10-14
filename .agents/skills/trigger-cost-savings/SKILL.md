@@ -5,8 +5,6 @@ description: >
   asked to reduce spend, optimize costs, audit usage, right-size machines, or review task
   efficiency. Combines static source analysis with live run analysis via the Trigger.dev MCP
   tools (list_runs, get_run_details, get_current_worker).
-type: core
-library: trigger.dev
 ---
 
 # Trigger.dev Cost Savings Analysis

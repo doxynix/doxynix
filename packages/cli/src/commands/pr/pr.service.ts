@@ -5,7 +5,6 @@ import type {
   CreateFixInput,
   GetAnalysisInput,
   GetByPRNumberInput,
-  GetImpactByPRNumberInput,
   OpenPullRequestInput,
   PostCommentInput,
 } from "./pr.types";
@@ -33,10 +32,6 @@ export const prService = {
 
   async getFixById(fixId: string) {
     return trpc.analysis.getById.query({ fixId });
-  },
-
-  async getImpactByPRNumber(input: GetImpactByPRNumberInput) {
-    return trpc.analysis.getImpactByPRNumber.query(input);
   },
 
   async listByRepository(repoId: string) {

@@ -57,19 +57,19 @@ function createErrorMap(locale: Locale): z.ZodErrorMap {
 
   return (issue, ctx) => {
     switch (issue.code) {
-      case z.ZodIssueCode.invalid_type:
+      case "invalid_type":
         if (issue.received === 'undefined') {
           return { message: t.required }
         }
         break
 
-      case z.ZodIssueCode.invalid_string:
+      case "invalid_string":
         if (issue.validation === 'email') {
           return { message: t.invalidEmail }
         }
         break
 
-      case z.ZodIssueCode.too_small:
+      case "too_small":
         if (issue.type === 'string') {
           return { message: t.tooShort(issue.minimum as number) }
         }
@@ -124,7 +124,7 @@ function useZodErrorMap() {
 
   return (issue: z.ZodIssue, ctx: z.ErrorMapCtx) => {
     switch (issue.code) {
-      case z.ZodIssueCode.too_small:
+      case "too_small":
         return {
           message: intl.formatMessage(
             { id: 'validation.tooShort' },

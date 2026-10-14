@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts";
-import { CreatePrSchema } from "@doxynix/shared";
+import { CreatePrSchema, generateBranchName } from "@doxynix/shared";
 import type { Command } from "commander";
 
 import type { FixItem } from "@/core/fixes";
@@ -55,7 +55,7 @@ export function registerPrCommand(program: Command) {
         return;
       }
 
-      const prList = await withTaskSpinner(
+      const prPage = await withTaskSpinner(
         {
           silent: options?.json,
           start: `Fetching PR analyses for ${repoContext.target}...`,
@@ -64,9 +64,11 @@ export function registerPrCommand(program: Command) {
         () => prService.listByRepository(repoContext.repo.id),
       );
 
-      if (output.json(prList, options?.json)) {
+      if (output.json(prPage, options?.json)) {
         return;
       }
+
+      const prList = prPage.items;
 
       if (prList.length === 0) {
         p.outro(brand.muted(`No Pull Request analyses recorded yet for ${repoContext.target}.`));
@@ -79,7 +81,13 @@ export function registerPrCommand(program: Command) {
           renderPRListTable(prList),
         ),
       );
-      p.outro(brand.muted(`Total analyzed pull requests: ${prList.length}`));
+      p.outro(
+        brand.muted(
+          prPage.capped
+            ? `Showing ${prList.length} of ${prPage.total} analyzed pull requests.`
+            : `Total analyzed pull requests: ${prList.length}`,
+        ),
+      );
     });
 
   pr.command("fix [fixId]")
@@ -182,8 +190,7 @@ export function registerPrCommand(program: Command) {
           return;
         }
 
-        const branch =
-          options?.branch ?? fix.branch ?? `dxnx-fix-${Date.now().toString().slice(-4)}`;
+        const branch = options?.branch ?? fix.branch ?? generateBranchName();
         const title = options?.title ?? fix.title ?? "fix: AI suggested improvements";
 
         const result = await withTaskSpinner(
@@ -350,7 +357,7 @@ export function registerPrCommand(program: Command) {
           }
 
           const rawPrNumber = Number(identifier);
-          const prList = await withTaskSpinner("Loading PR list for selection...", () =>
+          const { items: prList } = await withTaskSpinner("Loading PR list for selection...", () =>
             prService.listByRepository(repoContext.repo.id),
           );
 
@@ -378,9 +385,10 @@ export function registerPrCommand(program: Command) {
             cancelMessage: "Inspection cancelled.",
             emptyMessage: `No PR analyses found for ${repoContext.target}.`,
             fetchItems: () =>
-              withTaskSpinner("Fetching recent PR analyses for selection...", () =>
-                prService.listByRepository(repoContext.repo.id),
-              ),
+              withTaskSpinner("Fetching recent PR analyses for selection...", async () => {
+                const { items } = await prService.listByRepository(repoContext.repo.id);
+                return items;
+              }),
             getLabel: (item: PRListItem) =>
               `PR #${item.prNumber} [${item.status}] — Risk: ${item.riskScore ?? 0}/100 (${item.id.slice(0, 8)})`,
             idArg: identifier,
@@ -462,7 +470,7 @@ export function registerPrCommand(program: Command) {
 
       let branch = options?.branch;
       if (!branch) {
-        const defaultBranch = `dxnx-fix-${Date.now().toString().slice(-4)}`;
+        const defaultBranch = generateBranchName();
         const branchPrompt = await guardPrompt(
           p.text({
             defaultValue: defaultBranch,
@@ -609,7 +617,7 @@ export function registerPrCommand(program: Command) {
               stop: "Impact data loaded",
             },
             () =>
-              prService.getImpactByPRNumber({
+              prService.getByPRNumber({
                 prNumber: prNum,
                 repoId: repoContext.repo.id,
               }),
@@ -642,9 +650,10 @@ export function registerPrCommand(program: Command) {
           cancelMessage: "Inspection cancelled.",
           emptyMessage: `No PR analyses found for ${repoContext.target}.`,
           fetchItems: () =>
-            withTaskSpinner("Fetching recent PR analyses for selection...", () =>
-              prService.listByRepository(repoContext.repo.id),
-            ),
+            withTaskSpinner("Fetching recent PR analyses for selection...", async () => {
+              const { items } = await prService.listByRepository(repoContext.repo.id);
+              return items;
+            }),
           getLabel: (item: PRListItem) =>
             `PR #${item.prNumber} [${item.status}] — Risk: ${item.riskScore ?? 0}/100 (${item.id.slice(0, 8)})`,
           idArg: identifier,

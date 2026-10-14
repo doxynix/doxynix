@@ -1,402 +1,270 @@
 # monorepo-management — detailed patterns and worked examples
 
-## pnpm Workspaces
+Worked examples for the Bun + Turborepo setup described in `SKILL.md`. Everything here is
+repo-shaped; Nx, Lerna, pnpm workspaces and non-JS package publishing are out of scope.
 
-### Setup
+## Bun Workspaces
 
-```yaml
-# pnpm-workspace.yaml
-packages:
-  - "apps/*"
-  - "packages/*"
-  - "tools/*"
-```
+### Layout
 
-```json
-// .npmrc
-# Hoist shared dependencies
-shamefully-hoist=true
+The root `package.json` declares `"private": true` and
+`"workspaces": ["apps/*", "packages/*"]`. Bun creates the root `node_modules` with hoisted deps
+and symlinks each workspace under `node_modules/@doxynix/*`. There is no `pnpm-workspace.yaml` and
+no `.npmrc`.
 
-# Strict peer dependencies
-auto-install-peers=true
-strict-peer-dependencies=true
+### Version pinning with `catalog:`
 
-# Performance
-store-dir=~/.pnpm-store
-```
+Anything consumed by more than one workspace goes in the root `catalog` and is referenced as
+`"catalog:"`. This is the repo's answer to "one version per dependency" — Renovate understands it,
+and it removes the `--filter` dance when bumping.
 
-### Dependency Management
-
-```bash
-# Install dependency in specific package
-pnpm add react --filter @repo/ui
-pnpm add -D typescript --filter @repo/ui
-
-# Install workspace dependency
-pnpm add @repo/ui --filter web
-
-# Install in all packages
-pnpm add -D eslint -w
-
-# Update all dependencies
-pnpm update -r
-
-# Remove dependency
-pnpm remove react --filter @repo/ui
-```
-
-### Scripts
-
-```bash
-# Run script in specific package
-pnpm --filter web dev
-pnpm --filter @repo/ui build
-
-# Run in all packages
-pnpm -r build
-pnpm -r test
-
-# Run in parallel
-pnpm -r --parallel dev
-
-# Filter by pattern
-pnpm --filter "@repo/*" build
-pnpm --filter "...web" build  # Build web and dependencies
-```
-
-## Nx Monorepo
-
-### Setup
-
-```bash
-# Create Nx monorepo
-npx create-nx-workspace@latest my-org
-
-# Generate applications
-nx generate @nx/react:app my-app
-nx generate @nx/next:app my-next-app
-
-# Generate libraries
-nx generate @nx/react:lib ui-components
-nx generate @nx/js:lib utils
-```
-
-### Configuration
-
-```json
-// nx.json
+```jsonc
+// package.json (root)
 {
-  "extends": "nx/presets/npm.json",
-  "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "targetDefaults": {
-    "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["production", "^production"],
-      "cache": true
-    },
-    "test": {
-      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
-      "cache": true
-    },
-    "lint": {
-      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
-      "cache": true
-    }
+  "devDependencies": { "@biomejs/biome": "2.5.14", "turbo": "2.11.4" },
+  "catalog": {
+    "@trpc/client": "11.18.0",
+    "@trpc/server": "11.18.0",
+    "@tanstack/react-query": "5.102.2",
+    "react": "19.2.8",
+    "zod": "4.5.4"
   },
-  "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
-    "production": [
-      "default",
-      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
-      "!{projectRoot}/tsconfig.spec.json"
-    ],
-    "sharedGlobals": []
-  }
+  "overrides": { "hono": "4.13.9", "ws": "8.22.0" },
+  "trustedDependencies": ["prisma", "@prisma/client", "zenstack", "esbuild", "sharp"]
 }
 ```
 
-### Running Tasks
+Three tiers, and they are not interchangeable:
+
+| Tier | Use for | Example |
+| --- | --- | --- |
+| `catalog` | direct deps in ≥1 workspace | `react`, `zod`, `@trpc/client` |
+| `overrides` | transitive-only pins (security) | `cookie`, `undici`, `mermaid` |
+| `trustedDependencies` | packages allowed to run postinstall | `prisma`, `zenstack`, `@parcel/watcher` |
+
+`trustedDependencies` is not a version pin — it is the allowlist of packages Bun will run install
+scripts for. Dropping a native dep out of it produces a silent "binary missing" failure at runtime.
+
+### Dependency commands
 
 ```bash
-# Run task for specific project
-nx build my-app
-nx test ui-components
-nx lint utils
-
-# Run for affected projects
-nx affected:build
-nx affected:test --base=main
-
-# Visualize dependencies
-nx graph
-
-# Run in parallel
-nx run-many --target=build --all --parallel=3
+bun add zod --cwd apps/web
+bun add -d lefthook
+bun remove pkg
+bun install                 # full resolve
+bun install --frozen-lockfile  # CI / pre-commit
+bun outdated                 # what drifted
 ```
+
+Keep internal deps on `workspace:*`. Never point at a `file:` or a git URL — the arch gate expects
+workspace resolution.
+
+### Running scripts
+
+```bash
+bun --filter @doxynix/web lint
+bun --filter @doxynix/siem-server build
+bun --filter '@doxynix/*' test          # glob over workspace names
+bun --filter @doxynix/siem-server... build   # the package and its dependencies
+bun run lint                             # root -> turbo lint -> every workspace
+```
+
+`bun --filter` (space-separated form) and `bun --filter=<pkg>` are both valid; the repo's docs use
+the space form.
+
+### Version pinning for published binaries
+
+`packages/cli` is the only workspace published to npm, and it is versioned by release-please.
+Its `package.json` version is **not** hand-edited — release-please's `node-workspace` plugin bumps
+it and updates `.release-please-manifest.json`.
 
 ## Shared Configurations
 
-### TypeScript Configuration
+There is exactly one `tsconfig.json`, one `biome.json` and one `.oxlintrc.json`, all at the repo
+root. `packages/config` holds the shared base configs that apps *reference* (not extend-and-fork):
+`packages/config/depcruise-base.json` is listed in `turbo.json`'s `globalDependencies`.
 
-```json
-// packages/tsconfig/base.json
-{
-  "compilerOptions": {
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "incremental": true,
-    "declaration": true
-  },
-  "exclude": ["node_modules"]
-}
-
-// packages/tsconfig/react.json
-{
-  "extends": "./base.json",
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"]
-  }
-}
-
-// apps/web/tsconfig.json
-{
-  "extends": "@repo/tsconfig/react.json",
-  "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src"
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
-}
+```
+packages/config/
+  depcruise-base.json   # dependency-cruiser base rules, extended by each app
 ```
 
-### ESLint Configuration
+Each app keeps its own `.dependency-cruiser.ts` and its own known-violations baseline, because
+FSD and modular-monolith rules differ per app.
 
-```javascript
-// packages/config/eslint-preset.js
-module.exports = {
-  extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended",
-    "prettier",
-  ],
-  plugins: ["@typescript-eslint", "react", "react-hooks"],
-  parser: "@typescript-eslint/parser",
-  parserOptions: {
-    ecmaVersion: 2022,
-    sourceType: "module",
-    ecmaFeatures: {
-      jsx: true,
-    },
-  },
-  settings: {
-    react: {
-      version: "detect",
-    },
-  },
-  rules: {
-    "@typescript-eslint/no-unused-vars": "error",
-    "react/react-in-jsx-scope": "off",
-  },
-};
-
-// apps/web/.eslintrc.js
-module.exports = {
-  extends: ["@repo/config/eslint-preset"],
-  rules: {
-    // App-specific rules
-  },
-};
-```
+ESLint and Prettier are banned repo-wide. Do not add a `packages/config/eslint-preset.js`; add an
+override to `.oxlintrc.json` instead.
 
 ## Code Sharing Patterns
 
-### Pattern 1: Shared UI Components
+### Where does shared code go?
 
-```typescript
-// packages/ui/src/button.tsx
-import * as React from 'react';
+1. One consumer → keep it in that app.
+2. Two or more **apps** → `packages/shared`.
+3. Two or more **slices of the same app** → that app's `src/shared` (client) or a shared module
+   folder (server).
+4. Public npm material → a dedicated `packages/*` with a `build` script.
 
-export interface ButtonProps {
-  variant?: 'primary' | 'secondary';
-  children: React.ReactNode;
-  onClick?: () => void;
-}
+`packages/shared` is intentionally narrow: pure types, Zod schemas, auth contracts. Its only
+runtime dependency is `zod`. If you find yourself adding `react` there, the code belongs in an app.
 
-export function Button({ variant = 'primary', children, onClick }: ButtonProps) {
-  return (
-    <button
-      className={`btn btn-${variant}`}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  );
-}
+### Types across the client/server boundary
 
-// packages/ui/src/index.ts
-export { Button, type ButtonProps } from './button';
-export { Input, type InputProps } from './input';
+The tRPC `AppRouter` type is the client/CLI contract. `apps/web` exposes it through the `"./trpc"`
+package export:
 
-// apps/web/src/app.tsx
-import { Button } from '@repo/ui';
-
-export function App() {
-  return <Button variant="primary">Click me</Button>;
-}
+```jsonc
+// apps/web/package.json
+"exports": { "./trpc": { "types": "./src/server/modules/index.ts" } }
 ```
 
-### Pattern 2: Shared Utilities
+`packages/cli` imports it as a **devDependency, types only**:
 
-```typescript
-// packages/utils/src/string.ts
-export function capitalize(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-export function truncate(str: string, length: number): string {
-  return str.length > length ? str.slice(0, length) + "..." : str;
-}
-
-// packages/utils/src/index.ts
-export * from "./string";
-export * from "./array";
-export * from "./date";
-
-// Usage in apps
-import { capitalize, truncate } from "@repo/utils";
+```ts
+import type { AppRouter } from "@doxynix/web/trpc";
 ```
 
-### Pattern 3: Shared Types
+This is the one permitted cross-app import. A runtime import breaks `arch:check`.
 
-```typescript
-// packages/types/src/user.ts
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: "admin" | "user";
-}
+### Built-artifact contracts
 
-export interface CreateUserInput {
-  email: string;
-  name: string;
-  password: string;
-}
+`apps/siem-server` ships `dist/` and consumers read it through the package `exports` map.
+Consequences:
 
-// Used in both frontend and backend
-import type { User, CreateUserInput } from "@repo/types";
-```
+- `apps/siem-client` and `packages/cli` **type-check against the built output**, not `src/`.
+- That is why `build`, `type-check` and `test` all declare `dependsOn: ["^build"]` in `turbo.json`.
+- Running `bun --filter @doxynix/siem-client type-check` against a stale `dist/` produces phantom
+  type errors. Run through Turbo (`bun run type-check`) or build siem-server first.
 
 ## Build Optimization
 
-### Turborepo Caching
+### Caching
 
-```json
-// turbo.json
+Turbo hashes the task's `inputs` (default: every file in the package), its dependency tasks' hashes,
+and the `env` vars it declares. Anything else is invisible to the cache.
+
+```jsonc
+// turbo.json — the shapes this repo actually uses
 {
-  "pipeline": {
+  "tasks": {
     "build": {
-      // Build depends on dependencies being built first
-      "dependsOn": ["^build"],
-
-      // Cache these outputs
-      "outputs": ["dist/**", ".next/**"],
-
-      // Cache based on these inputs (default: all files)
-      "inputs": ["src/**/*.tsx", "src/**/*.ts", "package.json"]
+      "dependsOn": ["^build", "db:generate"],
+      "env": ["APP_VERSION", "PORT", "NEXT_PUBLIC_*", "VITE_*"],
+      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**", "dist/**", "build/**", ".output/**"]
+    },
+    "db:generate": {
+      "cache": true,
+      "env": ["DATABASE_URL", "DIRECT_URL", "PRISMA_FIELD_ENCRYPTION_KEY"],
+      "inputs": ["prisma/**/*.zmodel", "src/core/db/schema.ts"],
+      "outputs": ["node_modules/.prisma/**", "prisma/generated/**", "src/core/db/migrations/**"]
     },
     "test": {
-      // Run tests in parallel, don't depend on build
-      "cache": true,
-      "outputs": ["coverage/**"]
+      "dependsOn": ["^build", "db:generate"],
+      "env": ["DATABASE_URL", "DIRECT_URL", "PRISMA_FIELD_ENCRYPTION_KEY"],
+      "outputs": ["coverage/**", "test-results/**", "reports/**"]
     }
   }
 }
 ```
 
-### Remote Caching
+Three failure modes to watch:
+
+- **Misses with no cause.** Usually a missing `inputs` entry for a file outside the package, or a
+  root config that belongs in `globalDependencies`.
+- **Hits that shouldn't happen.** A secret read inside the task but missing from `env`. Turbo hashes
+  only what you declare, so the stale secret is replayed from cache.
+- **`outputs` missing an artifact.** The task succeeds, the artifact is not restored, and the next
+  step fails confusingly.
+
+### Remote caching
 
 ```bash
-# Turborepo Remote Cache (Vercel)
-npx turbo login
-npx turbo link
+bun x turbo login
+bun x turbo link
+```
 
-# Custom remote cache
-# turbo.json
+The remote token is supplied in CI via `TURBO_TOKEN` / `TURBO_TEAM`, which are declared in
+`turbo.json`'s `globalEnv`. `cacheMaxAge: "14d"` and `cacheMaxSize: "5GB"` bound the local
+`.turbo/cache` directory.
+
+There is no `remoteCache` block in `turbo.json` — the `signature` / `enabled` keys are a 1.x-era
+configuration and are ignored by Turbo 2.x.
+
+## CI/CD
+
+CI never installs with `npm`/`pnpm`/`yarn` and never uses `actions/setup-node`. The canonical job
+skeleton, matching `.github/workflows/web-ci.yml`:
+
+```yaml
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@<sha-pinned>
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@<sha-pinned>
+        with:
+          bun-version-file: "package.json"
+
+      - name: Install dependencies
+        run: bun install --ignore-scripts
+
+      - name: Clean tree-sitter symlinks
+        run: bun run clean:symlinks
+
+      - name: Linting
+        run: bun --filter @doxynix/web lint
+```
+
+Rules that follow from the existing workflows:
+
+- `bun-version-file: "package.json"` reads `packageManager: "bun@1.4.0"`. Do not hardcode a version.
+- `--ignore-scripts` is mandatory (faster, and untrusted postinstall code does not run); the
+  `clean:symlinks` step replaces what `postinstall` would have done.
+- Every action is **SHA-pinned** with the human version in a trailing comment. A floating tag is a
+  supply-chain hole.
+- Jobs declare `permissions:` explicitly at workflow level; `contents: read` is the default.
+- `concurrency` groups cancel superseded PR runs.
+
+### Running only what changed
+
+```yaml
+- uses: dorny/paths-filter@<sha>
+  id: filter
+  with:
+    base: ${{ github.base_ref || 'main' }}
+    filters: |
+      backend:
+        - 'apps/web/**'
+        - 'package.json'
+        - 'bun.lock'
+        - 'turbo.json'
+
+- run: bun run lint
+  if: steps.filter.outputs.backend == 'true'
+```
+
+`web-ci.yml` triggers on `paths:` directly (`apps/web/**`, `packages/**`, `package.json`,
+`bun.lock`, `turbo.json`) so unrelated PRs do not wake the Next.js build at all. That is cheaper
+than a per-job filter and is the pattern to copy for a new workspace.
+
+## Releasing
+
+Release-please, not changesets:
+
+```jsonc
+// release-please-config.json — shape, not the full file
 {
-  "remoteCache": {
-    "signature": true,
-    "enabled": true
-  }
+  "packages": {
+    ".": { "package-name": "doxynix", "release-type": "node" },
+    "packages/cli": { "package-name": "@doxynix/cli", "release-type": "node" }
+  },
+  "plugins": [{ "type": "node-workspace" }]
 }
 ```
 
-## CI/CD for Monorepos
-
-### GitHub Actions
-
-```yaml
-# .github/workflows/ci.yml
-name: CI
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # For Nx affected commands
-
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: pnpm turbo run build
-
-      - name: Test
-        run: pnpm turbo run test
-
-      - name: Lint
-        run: pnpm turbo run lint
-
-      - name: Type check
-        run: pnpm turbo run type-check
-```
-
-### Deploy Affected Only
-
-```yaml
-# Deploy only changed apps
-- name: Deploy affected apps
-  run: |
-    if pnpm nx affected:apps --base=origin/main --head=HEAD | grep -q "web"; then
-      echo "Deploying web app"
-      pnpm --filter web deploy
-    fi
-```
+`.release-please-manifest.json` tracks the current version per workspace. Both files are
+maintained by the bot — read them, never write them. Full detail in
+`.agents/skills/release-please/SKILL.md`.

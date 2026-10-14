@@ -27,19 +27,23 @@ export function LoadingButton({
   return (
     <AppButton
       {...props}
-      className={cn("relative grid grid-cols-1 grid-rows-1 items-center justify-center", className)}
+      aria-busy={showSpinner}
+      className={cn("relative", className)}
       disabled={isLoading || disabled}
     >
       {showSpinner && (
-        <span className="col-start-1 row-start-1 flex items-center justify-center animate-in fade-in-0 duration-150">
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 flex animate-in items-center justify-center fade-in-0 duration-150"
+        >
           <Spinner />
         </span>
       )}
 
       <span
         className={cn(
-          "col-start-1 row-start-1 flex items-center justify-center gap-1.5 whitespace-nowrap transition-opacity",
-          showSpinner ? "opacity-0 select-none pointer-events-none" : "opacity-100",
+          "transition-opacity",
+          showSpinner && "pointer-events-none opacity-0 select-none",
         )}
       >
         {children}

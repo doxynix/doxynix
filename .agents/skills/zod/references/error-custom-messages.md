@@ -35,17 +35,15 @@ import { z } from 'zod'
 
 const signupSchema = z.object({
   email: z.string({
-    required_error: 'Email is required',
-    invalid_type_error: 'Email must be text',
+    error: (issue) => issue.input === undefined ? 'Email is required' : 'Email must be text',
   }).email('Please enter a valid email address'),
 
   password: z.string({
-    required_error: 'Password is required',
+    error: 'Password is required',
   }).min(8, 'Password must be at least 8 characters'),
 
   age: z.number({
-    required_error: 'Age is required',
-    invalid_type_error: 'Age must be a number',
+    error: (issue) => issue.input === undefined ? 'Age is required' : 'Age must be a number',
   }).min(18, 'You must be at least 18 years old'),
 })
 
@@ -60,14 +58,13 @@ signupSchema.parse({ email: 'bad', password: '123', age: 15 })
 
 ```typescript
 const schema = z.string({
-  // When field is undefined
-  required_error: 'This field is required',
-
-  // When field is wrong type (e.g., number instead of string)
-  invalid_type_error: 'This field must be text',
-
-  // Fallback for any other error
-  message: 'Invalid value',
+  // String = fallback for any error on this schema,
+  // function = discriminate by issue.input / issue.code
+  error: (issue) => {
+    if (issue.input === undefined) return 'This field is required'
+    if (issue.code === 'invalid_type') return 'This field must be text'
+    return 'Invalid value'
+  },
 })
 .min(1, 'Cannot be empty')  // When length < 1
 .max(100, 'Too long')  // When length > 100
@@ -79,7 +76,7 @@ const schema = z.string({
 ```typescript
 const customErrorMap: z.ZodErrorMap = (issue, ctx) => {
   // Customize messages by error code
-  if (issue.code === z.ZodIssueCode.too_small) {
+  if (issue.code === "too_small") {
     if (issue.type === 'string') {
       return { message: `Must be at least ${issue.minimum} characters` }
     }
@@ -88,7 +85,7 @@ const customErrorMap: z.ZodErrorMap = (issue, ctx) => {
     }
   }
 
-  if (issue.code === z.ZodIssueCode.invalid_type) {
+  if (issue.code === "invalid_type") {
     if (issue.expected === 'string') {
       return { message: 'Must be text' }
     }

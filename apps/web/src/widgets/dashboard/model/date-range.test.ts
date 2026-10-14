@@ -8,11 +8,11 @@ const NOW = new Date("2026-09-14T12:00:00Z");
 const PERIODS = [
   {
     getValue: () => ({ from: subMinutes(new Date(), 15), to: new Date() }),
-    period: "15m",
+    key: "15m",
   },
   {
     getValue: () => ({ from: subDays(new Date(), 30), to: new Date() }),
-    period: "30d",
+    key: "30d",
   },
 ] as const;
 

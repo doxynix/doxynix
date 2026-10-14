@@ -25,7 +25,6 @@ const ALL_PROCEDURES = [
   "getDocumentContent",
   "getFileActionResult",
   "getHistory",
-  "getImpactByPRNumber",
   "getLatest",
   "getNodeContext",
   "getRepoConfig",

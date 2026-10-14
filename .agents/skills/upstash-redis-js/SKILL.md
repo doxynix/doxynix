@@ -1,21 +1,47 @@
 ---
 name: upstash-redis-js
-description: Work with the @upstash/redis TypeScript/JavaScript SDK, a serverless HTTP-based Redis client for Next.js, Vercel, Cloudflare Workers, edge runtimes, and Node.js. Use when adding a cache (cache-aside, write-through, TTL and expiration strategies), session storage and user sessions, a key-value store, leaderboards and rankings with sorted sets, counters, distributed locks, queues with lists, streams and consumer groups, JSON documents, pipelines and MULTI/EXEC transactions, Lua scripting, read replicas, or full-text search, typo-tolerant search, facets, and aggregations with Upstash Redis Search (different from regular FT.SEARCH; also available for TCP clients via @upstash/search-redis and @upstash/search-ioredis). Also use when migrating from ioredis or node-redis, when a Redis connection is needed from a serverless function without connection pooling, when integrating @upstash/ratelimit, or when the user says Redis cache, KV store, session store, serverless Redis, or Upstash Redis. Supports automatic serialization/deserialization of JavaScript types.
-license: MIT
-metadata:
-  author: Upstash
-  homepage: https://upstash.com
+description: Work with @upstash/redis 1.39.0 and @upstash/ratelimit 2.2.0 in apps/web — Redis.fromEnv, auto-serialized strings/hashes/lists/sets/sorted sets, JSON documents, TTLs, pipelines and MULTI/EXEC, Lua scripting, read replicas, caching and rate-limiting patterns, and Upstash Redis Search. Use when touching apps/web/src/server/core/redis.ts, ratelimit.ts, or any Redis-backed cache, session, queue or leaderboard. Note that apps/siem-server uses ioredis + Valkey instead — this skill does not apply there.
 ---
 
 # Upstash Redis SDK - Complete Skills Guide
 
-This directory contains comprehensive guides for using the `@upstash/redis` SDK. These skill files are designed to help developers and AI assistants understand and use the SDK effectively.
+Comprehensive guides for the `@upstash/redis` SDK.
+
+## Doxynix scope — apps/web only
+
+| App | Client | Notes |
+|-----|--------|-------|
+| `apps/web` | `@upstash/redis` 1.39.0 + `@upstash/ratelimit` 2.2.0 | HTTP/REST, serverless-friendly |
+| `apps/siem-server` | `ioredis` 6.0.0 + Valkey 9 (local) | TCP pool — **not** this SDK |
+
+Everything below applies to `apps/web`. Do not introduce `@upstash/redis` in `apps/siem-server`, and
+do not rewrite ioredis call sites as Upstash — there is nothing to migrate.
+
+Client construction already lives in `apps/web/src/server/core/redis.ts`:
+
+```typescript
+import { Redis } from "@upstash/redis";
+
+export const redisClient = Redis.fromEnv();
+```
+
+Every call is wrapped in a `safeRedis` helper there that logs via `appLogger` and returns a typed
+fallback — reuse `redisService` rather than calling `redisClient` directly from a new module.
+
+### Credentials
+
+Read `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` through the validated env modules, never
+hardcode them. Locally they are injected by Doppler through the workspace's `with-doppler` helper, so
+run anything that reads them via `bun --filter @doxynix/web <script>` rather than invoking the helper
+from the repo root (there is no root-level `with-doppler` script).
 
 ## Installation
 
 ```bash
-npm install @upstash/redis
+bun add @upstash/redis @upstash/ratelimit
 ```
+
+Both are already installed in `apps/web` — do not reinstall.
 
 ## Quick Start
 
@@ -36,14 +62,13 @@ const redis = Redis.fromEnv();
 
 ### Environment Variables
 
-Set these in your `.env` file:
+Set these in Doppler (the workspace's `with-doppler` helper injects them) — `.env` files are not the
+source of truth here:
 
-```bash
+```
 UPSTASH_REDIS_REST_URL=https://your-redis.upstash.io
 UPSTASH_REDIS_REST_TOKEN=your-token-here
 ```
-
-> **No credentials yet?** If you're an agent that needs scratch Redis and the user hasn't provided a database, you can mint a temporary one with a single POST to `https://upstash.com/start-redis` (3-day TTL, no signup).
 
 ## Skill Files Overview
 
@@ -101,10 +126,12 @@ Full-text search, filtering, and aggregation extension for Redis:
 
 ### Migrations (migrations/)
 
-Migration guides from other libraries:
+Migration guide for coming from another library:
 
-- **from-ioredis.md** - Migration from ioredis, key differences, serialization changes
 - **from-redis-node.md** - Migration from node-redis, API differences
+
+There is deliberately no ioredis guide: `apps/siem-server` already runs on ioredis + Valkey and stays
+that way. `apps/web` is the only Upstash consumer.
 
 ## Common Mistakes (Especially for LLMs)
 

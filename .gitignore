@@ -65,6 +65,7 @@ lerna-debug.log*
 /apps/web/coverage-ts/
 /apps/web/coverage/
 /packages/cli/coverage/
+/packages/shared/coverage/
 
 .stryker-tmp/
 reports/

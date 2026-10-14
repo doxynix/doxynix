@@ -53,11 +53,11 @@ model Repo {
 
   @@unique([owner, name, userId])
   @@unique([githubId, userId])
-  @@index([topics], type: Gin)
   @@index([userId, owner])
   @@index([userId, name])
   @@index([userId, visibility, createdAt(sort: Desc)])
-  @@index([userId, updatedAt(sort: Desc)])
+  @@index([userId, updatedAt(sort: Desc), id(sort: Desc)], map: "repos_user_id_updated_at_id_idx")
+  @@index([updatedAt(sort: Desc), id(sort: Desc)], map: "repos_updated_at_id_idx")
   @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_name_trgm_idx")
   @@index([owner(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_owner_trgm_idx")
   @@index([description(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_description_trgm_idx")

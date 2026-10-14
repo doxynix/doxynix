@@ -67,11 +67,12 @@ The name must be unique within the connection. Use descriptive names that reflec
 
 ## With Relational Queries
 
-In Drizzle v1, the relational `where` is object syntax, so a placeholder goes inside the operator:
+On 0.45.x the relational `where` is a callback, so a placeholder goes inside the operator you build
+in it:
 
 ```typescript
 const getUserWithPosts = db.query.users.findFirst({
-  where: { id: { eq: sql.placeholder('id') } },
+  where: (users, { eq }) => eq(users.id, sql.placeholder('id')),
   with: {
     posts: true,
   },

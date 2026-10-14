@@ -10,7 +10,7 @@ Select specific packages to run tasks in.
 
 ```bash
 turbo build --filter=web
-turbo build -F=@repo/ui -F=@repo/utils
+turbo build -F=@doxynix/ui -F=@doxynix/utils
 turbo test --filter=./apps/*
 ```
 
@@ -220,13 +220,13 @@ Skip CI work when nothing relevant changed. Useful for skipping container setup.
 
 ```bash
 # Check if build is needed for current package (uses Automatic Package Scoping)
-npx turbo-ignore
+bun x turbo-ignore
 
 # Check specific package
-npx turbo-ignore web
+bun x turbo-ignore web
 
 # Check specific task
-npx turbo-ignore --task=test
+bun x turbo-ignore --task=test
 ```
 
 ## Exit Codes
@@ -240,12 +240,12 @@ npx turbo-ignore --task=test
 # GitHub Actions
 - name: Check for changes
   id: turbo-ignore
-  run: npx turbo-ignore web
+  run: bun x turbo-ignore web
   continue-on-error: true
 
 - name: Build
   if: steps.turbo-ignore.outcome == 'failure' # changes detected
-  run: pnpm build
+  run: bun --filter @doxynix/web build
 ```
 
 ## Comparison Depth
@@ -254,10 +254,10 @@ Default: compares to parent commit (`HEAD^1`).
 
 ```bash
 # Compare to specific commit
-npx turbo-ignore --fallback=abc123
+bun x turbo-ignore --fallback=abc123
 
 # Compare to branch
-npx turbo-ignore --fallback=main
+bun x turbo-ignore --fallback=main
 ```
 
 ---

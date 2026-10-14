@@ -71,10 +71,15 @@
     "**/test-results/**": true
   },
   "js/ts.experimental.useTsgo": true,
+
+  "js/ts.preferences.autoImportFileExcludePatterns": ["**/node_modules/**"],
+  "js/ts.preferences.includePackageJsonAutoImports": "off",
   "js/ts.preferences.preferTypeOnlyAutoImports": true,
   "js/ts.suggest.completeFunctionCalls": true,
   "js/ts.tsdk.path": "./node_modules/typescript",
   "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  "js/ts.tsserver.automaticTypeAcquisition.enabled": false,
+  "js/ts.tsserver.experimental.enableProjectDiagnostics": false,
   "js/ts.tsserver.maxMemory": 8192,
 
   "oxc.configPath": ".oxlintrc.json",
@@ -106,9 +111,8 @@
     "containerClassName",
     "contentClassName"
   ],
-  "tailwindCSS.experimental.classRegex": [
-    ["(?:cva|cn|clsx|cx)\\(([^)]*)\\)", "[\"'`]([^\"'`]+)[\"'`]"]
-  ],
+  "tailwindCSS.classFunctions": ["cn", "cva", "clsx", "cx"],
+
   "tailwindCSS.experimental.configFile": {
     "apps/siem-client": "apps/siem-client/src/global.css",
     "apps/web": "apps/web/src/app/globals.css"

@@ -11,6 +11,8 @@ import { trackServerEvent } from "@/server/core/posthog-events";
 import { realtimeService } from "@/server/core/realtime";
 import { safeJsonClone } from "@/server/utils/safe-json";
 
+const HISTORY_LIMIT = 500;
+
 import { analysisLatestSelect } from "../analysis-latest.schemas";
 import type { AIResult } from "../engine/core/analysis-result.schemas";
 import { parseRepoMetrics } from "../engine/core/metrics.schemas";
@@ -118,7 +120,7 @@ export const analysisLifecycleService = {
   },
 
   async cancel(db: DbClient, analysisId: string) {
-    const analysis = await db.analysis.findFirst({
+    const analysis = await db.analysis.findUnique({
       where: { id: analysisId },
     });
 
@@ -163,27 +165,35 @@ export const analysisLifecycleService = {
   },
 
   async getHistory(db: DbClient, repoId: string) {
-    const history = await db.analysis.findMany({
-      orderBy: { createdAt: "desc" },
-      select: {
-        commitSha: true,
-        createdAt: true,
-        id: true,
-        message: true,
-        score: true,
-        status: true,
-      },
-      where: { repo: { id: repoId } },
-    });
+    const [items, total] = await Promise.all([
+      db.analysis.findMany({
+        orderBy: { createdAt: "desc" },
+        select: {
+          commitSha: true,
+          createdAt: true,
+          id: true,
+          message: true,
+          score: true,
+          status: true,
+        },
+        take: HISTORY_LIMIT,
+        where: { repo: { id: repoId } },
+      }),
+      db.analysis.count({ where: { repo: { id: repoId } } }),
+    ]);
 
-    return history.map((h) => ({
-      commitSha: h.commitSha,
-      createdAt: h.createdAt,
-      id: h.id,
-      message: h.message,
-      score: h.score,
-      status: h.status,
-    }));
+    return {
+      capped: total > HISTORY_LIMIT,
+      items: items.map((h) => ({
+        commitSha: h.commitSha,
+        createdAt: h.createdAt,
+        id: h.id,
+        message: h.message,
+        score: h.score,
+        status: h.status,
+      })),
+      total,
+    };
   },
 
   async getLatest(db: DbClient, repoId: string) {

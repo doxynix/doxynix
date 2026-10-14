@@ -25,12 +25,8 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
     prNumber,
     repoId,
   });
-  const { data: impact, isLoading: isImpactLoading } = trpc.analysis.getImpactByPRNumber.useQuery({
-    prNumber,
-    repoId,
-  });
 
-  if (isAnalysisLoading || isImpactLoading) {
+  if (isAnalysisLoading) {
     return (
       <div className="flex justify-center p-10">
         <Loader2 className="animate-spin" />
@@ -42,7 +38,7 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
     return <div>{t("repo_pull_not_found")}</div>;
   }
 
-  const riskScore = impact?.analysis.riskScore ?? analysis.analysis.riskScore;
+  const riskScore = analysis.analysis.riskScore;
 
   return (
     <div className="flex flex-col gap-6">
@@ -95,7 +91,7 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
       </div>
       <RepoPullDetailsContent
         analysis={analysis}
-        impact={impact ?? null}
+        impact={analysis}
         name={name}
         owner={owner}
         repoId={repoId}

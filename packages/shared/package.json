@@ -9,13 +9,16 @@
     "format:check": "biome check .",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "type-check": "tsc -b",
-    "validate": "biome check . && oxlint && bun type-check"
+    "test": "TZ=UTC vitest run --config vitest.config.ts",
+    "test:coverage": "TZ=UTC vitest run --config vitest.config.ts --coverage",
+    "type-check": "bun check -b",
+    "validate": "biome check . && oxlint && bun type-check && bun run test"
   },
   "dependencies": {
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@doxynix/config": "workspace:*"
+    "@doxynix/config": "workspace:*",
+    "vitest": "catalog:"
   }
 }

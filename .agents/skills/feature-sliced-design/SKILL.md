@@ -8,7 +8,7 @@ description: >
   and import boundaries, resolving cross-imports or evaluating the @x pattern,
   deciding whether to create or remove an entity, evaluating whether the
   entities layer is needed at all, deciding where page layouts belong or
-  whether to use the widgets layer (discouraged), deciding whether logic
+  whether to use the widgets layer, deciding whether logic
   should remain local or be extracted, migrating from FSD v2.0 or a non-FSD
   codebase, integrating FSD with frameworks (Next.js App Router and Pages
   Router, React Router, Nuxt, Vite, Astro), or implementing common patterns
@@ -44,37 +44,54 @@ all three conditions hold:
 
 ### The six layers
 
-**Not all layers are required.** Most projects can start with only `shared/`,
-`pages/`, and `app/`. Add `features/` and `entities/` only when they provide
-clear value. Do not create empty layer folders "just in case." The `widgets/`
-layer is **discouraged** (see the callout below).
+**Not all layers are required by the methodology.** Most projects can start with only `shared/`,
+`pages/`, and `app/`. Add `features/` and `entities/` only when they provide clear value, and never
+create empty layer folders "just in case."
+
+> **In this repo, `widgets/` is mandatory, not discouraged.** `apps/web/src/widgets` and
+> `apps/siem-client/src/widgets` both exist and both are part of the enforced layer set. A
+> cross-feature UI composition belongs in a widget; features may **not** import each other, so if
+> feature A renders something feature B owns, the composition is the widget's job. In
+> `apps/siem-client`, whose routes are thin TanStack Router route files, a widget is very often the
+> right home for a whole screen's composition.
+>
+> Gate: `bun run lint:fsd` (`steiger ./src`) runs in both apps' `validate` scripts, and it is part
+> of the pre-commit chain. Steiger flags layer violations, not "too many widgets".
 
 FSD uses 6 standardized layers, listed here from highest to lowest:
 
 ```text
 app/       → App initialization, providers, routing
 pages/     → Route-level composition, owns its own logic
-widgets/   → Reusable UI blocks (discouraged, see the callout below)
+widgets/   → Reusable UI blocks composed from features and entities — REQUIRED in this repo
 features/  → Reusable user interactions (see the extraction rule above)
 entities/  → Reusable business domain models (see the extraction rule above)
 shared/    → Infrastructure with no business logic (UI kit, utils, API client)
 ```
 
-**The official layer reference discourages using the Widgets layer**, and
-this skill follows it. Widgets may seem useful for representing independent
-UI blocks. However, in real frontend code, UI blocks often include logic
-required for user flows, such as data fetching, state management, and event
-handling. In this case, the responsibilities of Features, which handle user
-flows, and Widgets, which handle UI blocks, can overlap, making the boundary
-between the two layers unclear.
+The upstream FSD reference notes that the widgets layer can blur into features, because UI blocks
+often carry the data fetching, state and event handling that belong to a flow. The cure is naming
+and the import rule, not removing the layer: a widget **composes** features and entities, and it
+owns no user flow of its own. If a block only ever appears on one route, it stays in `pages`; a
+reused action and its UI go to `features`; context-free UI goes to `shared`; an app-wide layout
+goes to `app`.
 
-Not creating a widget does not mean moving the block elsewhere untouched.
-A screen-specific composition stays in `pages`; a reused action and the UI
-to perform it go to `features`; context-free UI goes to `shared`; an
-app-wide layout goes to `app`.
+See `references/layer-structure.md` for the widgets layer and layout placement in detail.
 
-Discouraged is not deprecated: an existing widgets layer stays valid. See
-`references/layer-structure.md` for that case and for layout placement.
+### Actual layer folders in this repo
+
+| App | Layers on disk | Notes |
+|---|---|---|
+| `apps/web/src` | `app`, `widgets`, `features`, `entities`, `shared` | Next.js App Router: no `pages` layer — the `app/` route segments do that job. `src/server/` is **not** FSD, it is a modular monolith (see the `architecture` skill). |
+| `apps/siem-client/src` | `routes`, `widgets`, `features`, `entities`, `shared` | TanStack Router: `routes/` plays the `pages` role; `routeTree.gen.ts` is generated, never hand-edited. |
+
+Steiger's defaults expect `pages`; both apps already pass with the folders above
+(`steiger.config.mjs` per app). `apps/web` runs every rule as `error`;
+`apps/siem-client` runs them as `warn`, which is a real difference to keep in mind when judging
+whether a new file is acceptable there.
+
+Server code is judged by `dep-cruiser` (`arch:check`), not Steiger: one folder per feature under
+`apps/web/src/server/modules`, imports flowing downward only.
 
 ### The import rule
 
@@ -315,10 +332,16 @@ linter. Key rules:
 - **`excessive-slicing`**: Suggests merging or grouping when a layer has too
   many slices.
 
+In this repo Steiger is already wired as `lint:fsd` (`steiger ./src`) in `apps/web` and
+`apps/siem-client`; it runs inside each app's `validate` and through `bun run validate` at the root.
+Do not install anything to run it:
+
 ```bash
-npm install -D @feature-sliced/steiger
-npx steiger src
+bun --filter @doxynix/web lint:fsd
+bun --filter @doxynix/siem-client lint:fsd
 ```
+
+The sibling gate is `dep-cruiser` (`arch:check`), which also runs in pre-commit.
 
 ## 6. Anti-patterns (AVOID)
 

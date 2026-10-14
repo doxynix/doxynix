@@ -1,8 +1,7 @@
+import { generateBranchName } from "@doxynix/shared";
 import { TRPCError } from "@trpc/server";
 import type { Redis } from "@upstash/redis";
 import type * as z from "zod";
-
-import { generateBranchName } from "@/shared/lib/get-branch-name";
 
 import { appLogger } from "@/server/core/app-logger";
 import type { DbClient } from "@/server/core/db";

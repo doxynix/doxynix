@@ -49,20 +49,23 @@ async function handler(req: Request) {
   });
   const userId = session?.user.id ?? null;
 
+  if (userId == null) {
+    throw new AppError({ code: "UNAUTHORIZED", publicMessage: "Sign in to use the agent" });
+  }
+
   let resolvedRepoId: string | undefined;
   let internalRepoId: null | string = null;
 
   if (currentRepoId != null) {
-    resolvedRepoId = currentRepoId;
-
     const dbRepo = await prisma.repo.findUnique({
       select: { id: true },
-      where: { id: currentRepoId },
+      where: { id: currentRepoId, userId },
     });
     if (dbRepo != null) {
+      resolvedRepoId = dbRepo.id;
       internalRepoId = dbRepo.id;
     }
-  } else if (currentRepo?.owner != null && currentRepo?.name != null && userId != null) {
+  } else if (currentRepo?.owner != null && currentRepo?.name != null) {
     const dbRepo = await prisma.repo.findUnique({
       select: { id: true },
       where: {
@@ -88,10 +91,11 @@ async function handler(req: Request) {
 
       await prisma.$transaction(async (tx) => {
         const sessionExists = await tx.chatSession.findUnique({
-          where: { id: sessionId },
+          select: { id: true },
+          where: { id: sessionId, userId },
         });
 
-        if (sessionExists == null && userId != null) {
+        if (sessionExists == null) {
           await tx.chatSession.create({
             data: {
               id: sessionId,
@@ -153,7 +157,7 @@ async function handler(req: Request) {
         try {
           const currentSession = await prisma.chatSession.findUnique({
             select: { title: true },
-            where: { id: sessionId },
+            where: { id: sessionId, userId },
           });
 
           if (currentSession?.title === "New Chat") {
@@ -180,7 +184,7 @@ async function handler(req: Request) {
               if (cleanedTitle.length > 0) {
                 await prisma.chatSession.update({
                   data: { title: cleanedTitle },
-                  where: { id: sessionId },
+                  where: { id: sessionId, userId },
                 });
 
                 await realtimeService

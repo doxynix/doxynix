@@ -24,7 +24,7 @@ Root `package.json` scripts for turbo tasks MUST use `turbo run`, not direct com
 }
 ```
 
-**Why this matters:** Running `bun build` or `npm run build` at root bypasses Turborepo entirely - no parallelization, no caching, no dependency graph awareness.
+**Why this matters:** Running `bun build` directly at the root bypasses Turborepo entirely - no parallelization, no caching, no dependency graph awareness.
 
 ## #2 Using `&&` to Chain Turbo Tasks
 
@@ -152,20 +152,20 @@ When you need to create a task (build, lint, test, typecheck, etc.), default to 
 {
   "scripts": {
     "build": "cd apps/web && next build && cd ../api && tsc",
-    "lint": "eslint apps/ packages/",
+    "lint": "oxlint apps/ packages/",
     "test": "vitest"
   }
 }
 
 // CORRECT - DO THIS
 // apps/web/package.json
-{ "scripts": { "build": "next build", "lint": "eslint .", "test": "vitest" } }
+{ "scripts": { "build": "next build", "lint": "oxlint", "test": "vitest" } }
 
 // apps/api/package.json
-{ "scripts": { "build": "tsc", "lint": "eslint .", "test": "vitest" } }
+{ "scripts": { "build": "tsc", "lint": "oxlint", "test": "vitest" } }
 
 // packages/ui/package.json
-{ "scripts": { "build": "tsc", "lint": "eslint .", "test": "vitest" } }
+{ "scripts": { "build": "tsc", "lint": "oxlint", "test": "vitest" } }
 
 // Root package.json - ONLY delegates
 { "scripts": { "build": "turbo run build", "lint": "turbo run lint", "test": "turbo run test" } }

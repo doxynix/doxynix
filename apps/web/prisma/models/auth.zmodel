@@ -45,6 +45,7 @@ model User {
     (auth() == this && future().role == role && future().createdAt == createdAt)
   )
 
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "users_created_at_id_idx")
   @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "users_name_trgm_idx")
   @@map("users")
 }
@@ -124,6 +125,7 @@ model Passkey {
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@allow('all', auth() == user || auth().role == 'ADMIN')
+  @@index([userId])
   @@map("passkeys")
 }
 

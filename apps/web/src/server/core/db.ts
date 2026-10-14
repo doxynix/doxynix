@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 
 import type { after as NextAfterFn } from "next/server";
+import { AuditModel, AuditOperation } from "@doxynix/shared";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { type Prisma, PrismaClient } from "@prisma/client";
@@ -174,26 +175,29 @@ function createPrismaInstance() {
           }
 
           const duration = performance.now() - start;
-          const mutationOps = [
-            "create",
-            "createMany",
-            "createManyAndReturn",
-            "update",
-            "updateMany",
-            "updateManyAndReturn",
-            "upsert",
-            "delete",
-            "deleteMany",
+          const mutationOps: readonly AuditOperation[] = [
+            AuditOperation.CREATE,
+            AuditOperation.CREATE_MANY,
+            AuditOperation.CREATE_MANY_AND_RETURN,
+            AuditOperation.UPDATE,
+            AuditOperation.UPDATE_MANY,
+            AuditOperation.UPDATE_MANY_AND_RETURN,
+            AuditOperation.UPSERT,
+            AuditOperation.DELETE,
+            AuditOperation.DELETE_MANY,
           ];
 
-          if (mutationOps.includes(operation) && model !== "AuditLog") {
+          const auditOperation = operation as AuditOperation;
+
+          if (mutationOps.includes(auditOperation) && model !== "AuditLog" && model in AuditModel) {
+            const auditModel = model;
             const ctxStore = requestContext.getStore();
             const userId = ctxStore?.userId ?? null;
             const requestId = ctxStore?.requestId ?? crypto.randomUUID();
 
             const cleanPayload = sanitizePayload(args);
             const securedPayload = maskSensitiveFields(
-              model,
+              auditModel,
               cleanPayload,
             ) as Prisma.InputJsonValue;
 
@@ -202,8 +206,8 @@ function createPrismaInstance() {
                 await baseClient.auditLog.create({
                   data: {
                     ip: ctxStore?.ip ?? null,
-                    model,
-                    operation,
+                    model: auditModel,
+                    operation: auditOperation,
                     payload: securedPayload,
                     requestId,
                     userAgent: ctxStore?.userAgent ?? "internal",
@@ -211,13 +215,25 @@ function createPrismaInstance() {
                   },
                 });
 
-                if (userId != null && AUDIT_BUSINESS_MODELS.includes(model)) {
+                if (userId != null && AUDIT_BUSINESS_MODELS.includes(auditModel)) {
                   await realtimeService
                     .user(userId)
                     .publish(REALTIME_CONFIG.events.user.auditUpdated, {});
                 }
               } catch (error) {
                 appLogger.error({ error, msg: "AUDIT LOG WRITE FAILED" });
+                return;
+              }
+
+              if (!IS_TEST) {
+                appLogger.info({
+                  model: auditModel,
+                  msg: `Audit: ${auditModel}.${auditOperation}`,
+                  operation: auditOperation,
+                  payload: securedPayload,
+                  requestId,
+                  type: "audit.record",
+                });
               }
             };
 

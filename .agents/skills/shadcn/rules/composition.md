@@ -1,5 +1,11 @@
 # Component Composition
 
+> **Installed-set caveat.** This file documents shadcn/ui components generally. In this repo only the
+> components listed in `SKILL.md` ("Installed components") exist under `src/shared/ui/core/`.
+> `Menubar`, `ContextMenu`, `Drawer`, `AlertDialog`, `HoverCard` and the chat components
+> (`MessageScroller`, `Message`, `Bubble`, `Attachment`, `Marker`) are **not installed** — add them
+> explicitly with the CLI before using them.
+
 ## Contents
 
 - Items always inside their Group component
@@ -48,15 +54,11 @@ This applies to all group-based components:
 |------|-------|
 | `SelectItem`, `SelectLabel` | `SelectGroup` |
 | `DropdownMenuItem`, `DropdownMenuLabel`, `DropdownMenuSub` | `DropdownMenuGroup` |
-| `MenubarItem` | `MenubarGroup` |
-| `ContextMenuItem` | `ContextMenuGroup` |
 | `CommandItem` | `CommandGroup` |
-| `MessageScrollerItem` | `MessageScrollerContent` |
-| `Message` (consecutive, same sender) | `MessageGroup` |
-| `Bubble` (stacked) | `BubbleGroup` |
-| `Attachment` (in a row) | `AttachmentGroup` |
+| `NavigationMenuItem` | `NavigationMenuList` |
 
-Chat components nest in a fixed order (`MessageScrollerProvider` → `MessageScroller` → `MessageScrollerViewport` → `MessageScrollerContent` → `MessageScrollerItem`). See [chat.md](./chat.md).
+`MenubarItem` / `ContextMenuItem` and the chat items (`MessageScrollerItem`, `Message`, `Bubble`,
+`Attachment`) follow the same rule, but none of those components are installed here — add them first.
 
 ---
 

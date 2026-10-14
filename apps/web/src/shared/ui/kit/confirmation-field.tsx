@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useId, useRef } from "react";
 import { useTranslations } from "next-intl";
 
 import { Input } from "@/shared/ui/core/input";
+import { Label } from "@/shared/ui/core/label";
 
 import { CopyButton } from "./copy-button";
 
@@ -32,7 +33,7 @@ export function ConfirmationField({ onValueChange, phrase, value }: Readonly<Pro
 
   const styles = {
     phrase: () => (
-      <label className="inline-flex bg-background rounded-xl px-1 items-center gap-1 align-middle">
+      <span className="inline-flex bg-background rounded-xl px-1 items-center gap-1 align-middle">
         <code className="px-1.5 py-0.5 font-mono font-semibold text-foreground select-all">
           {phrase}
         </code>
@@ -42,23 +43,20 @@ export function ConfirmationField({ onValueChange, phrase, value }: Readonly<Pro
           tooltipText={t("copy")}
           value={phrase}
         />
-      </label>
+      </span>
     ),
   } satisfies Record<string, (chunks: ReactNode) => ReactNode>;
 
   return (
     <div className="flex flex-col gap-2">
-      <label
-        className="font-medium text-sm"
-        htmlFor={inputId}
-      >
+      <Label htmlFor={inputId}>
         <p
           className="text-muted-foreground text-sm"
           id={hintId}
         >
           {t.rich("confirm_phrase_hint", styles)}
         </p>
-      </label>
+      </Label>
 
       <Input
         aria-describedby={hintId}

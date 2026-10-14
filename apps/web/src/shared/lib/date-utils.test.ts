@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LOCALES, type Locale } from "@/shared/config/locales";
-import { formatFullDate, formatRelativeTime } from "@/shared/lib/date-utils";
+import { formatFullDate, formatRelativeTime, formatShortDate } from "@/shared/lib/date-utils";
 
 const RELATIVE_YESTERDAY: Record<Locale, string> = {
   de: "gestern",
@@ -82,5 +82,25 @@ describe("formatFullDate", () => {
 
   it("returns dash fallback for invalid dates", () => {
     expect(formatFullDate("invalid-date", "en")).toBe("—");
+  });
+});
+
+describe("formatShortDate", () => {
+  it("includes the day, the month and the year", () => {
+    const formatted = formatShortDate("2026-01-02T03:04:00.000Z", "en");
+
+    expect(formatted).toContain("2");
+    expect(formatted).toContain("Jan");
+    expect(formatted).toContain("2026");
+  });
+
+  it("uses the locale's month name", () => {
+    expect(formatShortDate("2026-01-02T12:00:00.000Z", "ru")).toContain("янв");
+    expect(formatShortDate("2026-01-02T12:00:00.000Z", "de")).toContain("Jan");
+  });
+
+  it("accepts a Date and returns dash fallback for invalid input", () => {
+    expect(formatShortDate(new Date("2026-03-04T12:00:00.000Z"), "en")).toContain("2026");
+    expect(formatShortDate("invalid-date", "en")).toBe("—");
   });
 });

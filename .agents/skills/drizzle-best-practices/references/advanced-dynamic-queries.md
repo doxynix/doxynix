@@ -150,7 +150,7 @@ async function getUser(id: number, options: QueryOptions) {
   }
 
   return db.query.users.findFirst({
-    where: { id }, // v1 object syntax; on 0.45.x: where: eq(users.id, id)
+    where: (users, { eq }) => eq(users.id, id),
     with: withClause,
   });
 }

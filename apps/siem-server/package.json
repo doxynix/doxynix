@@ -29,7 +29,7 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "seed:admin": "bun with-doppler bun scripts/seed-admin.ts",
-    "type-check": "tsc -b",
+    "type-check": "bun check -b",
     "validate": "biome check . && oxlint && bun run arch:check && bun type-check",
     "with-doppler": "bun ../../scripts/doppler.ts"
   },

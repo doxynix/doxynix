@@ -129,6 +129,78 @@ export const PRFocusArea = {
   STYLE: "STYLE",
 } as const;
 
+// ------------------- AuditOperation -------------------
+export const AuditOperationSchema = z.enum([
+  "CREATE",
+  "CREATE_MANY",
+  "CREATE_MANY_AND_RETURN",
+  "DELETE",
+  "DELETE_MANY",
+  "UPDATE",
+  "UPDATE_MANY",
+  "UPDATE_MANY_AND_RETURN",
+  "UPSERT",
+]);
+export type AuditOperation = z.infer<typeof AuditOperationSchema>;
+export const AuditOperation = {
+  CREATE: "CREATE",
+  CREATE_MANY: "CREATE_MANY",
+  CREATE_MANY_AND_RETURN: "CREATE_MANY_AND_RETURN",
+  DELETE: "DELETE",
+  DELETE_MANY: "DELETE_MANY",
+  UPDATE: "UPDATE",
+  UPDATE_MANY: "UPDATE_MANY",
+  UPDATE_MANY_AND_RETURN: "UPDATE_MANY_AND_RETURN",
+  UPSERT: "UPSERT",
+} as const;
+
+// ------------------- AuditModel -------------------
+export const AuditModelSchema = z.enum([
+  "Account",
+  "Analysis",
+  "ApiKey",
+  "BannedEmail",
+  "ChatMessage",
+  "ChatSession",
+  "Document",
+  "GeneratedFix",
+  "GithubInstallation",
+  "Notification",
+  "Passkey",
+  "PullRequestAnalysis",
+  "PullRequestAnalysisConfig",
+  "PullRequestComment",
+  "Repo",
+  "Session",
+  "TwoFactor",
+  "User",
+  "Verification",
+  "WebhookDelivery",
+]);
+export type AuditModel = z.infer<typeof AuditModelSchema>;
+export const AuditModel = {
+  Account: "Account",
+  Analysis: "Analysis",
+  ApiKey: "ApiKey",
+  BannedEmail: "BannedEmail",
+  ChatMessage: "ChatMessage",
+  ChatSession: "ChatSession",
+  Document: "Document",
+  GeneratedFix: "GeneratedFix",
+  GithubInstallation: "GithubInstallation",
+  Notification: "Notification",
+  Passkey: "Passkey",
+  PullRequestAnalysis: "PullRequestAnalysis",
+  PullRequestAnalysisConfig: "PullRequestAnalysisConfig",
+  PullRequestComment: "PullRequestComment",
+  Repo: "Repo",
+  Session: "Session",
+  TwoFactor: "TwoFactor",
+  User: "User",
+  Verification: "Verification",
+  WebhookDelivery: "WebhookDelivery",
+} as const;
+
 // ------------------- NotifyType -------------------
 export const NotifyTypeSchema = z.enum(["ERROR", "INFO", "SUCCESS", "WARNING"]);
 export type NotifyType = z.infer<typeof NotifyTypeSchema>;

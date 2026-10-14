@@ -1,10 +1,6 @@
 ---
 name: sentry-node-sdk
 description: Full Sentry SDK setup for Node.js, Bun, and Deno. Use when asked to "add Sentry to Node.js", "add Sentry to Bun", "add Sentry to Deno", "install @sentry/node", "@sentry/bun", or "@sentry/deno", or configure error monitoring, tracing, logging, profiling, metrics, crons, or AI monitoring for server-side JavaScript/TypeScript runtimes.
-license: Apache-2.0
-category: sdk-setup
-parent: sentry-sdk-setup
-disable-model-invocation: true
 ---
 
 > [All Skills](../../SKILL_TREE.md) > [SDK Setup](../sentry-sdk-setup/SKILL.md) > Node.js / Bun / Deno SDK

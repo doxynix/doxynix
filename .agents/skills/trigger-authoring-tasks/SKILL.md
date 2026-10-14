@@ -5,53 +5,84 @@ description: >
   schemaTask(), the run function and its ctx, retries, waits, queues and concurrency,
   idempotency keys, run metadata, logging, triggering other tasks (and the Result shape),
   scheduled/cron tasks, and the essentials of trigger.config.ts. Load this whenever you are
-  authoring or editing code inside a /trigger directory, defining a task, or writing backend
-  code that triggers tasks. Realtime/React hooks and AI chat are covered by separate skills.
-type: core
-library: trigger.dev
+  defining or editing a task under apps/web/src/server/modules/<slice>/tasks/, or writing
+  backend code that triggers tasks. Realtime/React hooks are trigger-realtime-and-frontend;
+  AI chat is trigger-authoring-chat-agent.
 ---
 
 # Authoring Trigger.dev Tasks
 
-The full, version-pinned reference for authoring tasks ships **inside your installed `@trigger.dev/sdk`**. Read it before writing code — it always matches the SDK version in this project, so it never drifts:
+The full, version-pinned reference ships **inside the installed `@trigger.dev/sdk`**. Read it before
+writing code — it always matches the SDK version in this project, so it never drifts.
 
-- **Skill:** `node_modules/@trigger.dev/sdk/skills/trigger-authoring-tasks/SKILL.md` — the complete guide (setup, `schemaTask`, retries, triggering + the Result shape, idempotency, waits, metadata, scheduled tasks, queues/concurrency, `trigger.config.ts`).
-- **Docs:** the full, version-pinned docs ship bundled at `node_modules/@trigger.dev/sdk/docs/`; the skill above lists the exact pages it draws from in its `sources:` frontmatter. Grep for an API, e.g. `grep -rl "schemaTask" node_modules/@trigger.dev/sdk/docs/`.
+## Where the reference actually lives
 
-If those paths don't exist, `@trigger.dev/sdk` isn't installed yet — install it first. In a non-hoisted layout, resolve the package with `node -p "require.resolve('@trigger.dev/sdk/package.json')"` and read `skills/` + `docs/` beside it.
+Bun installs per workspace, so there is **no root `node_modules/@trigger.dev`**. The path is
+relative to `apps/web`:
 
-Always import from `@trigger.dev/sdk` — never `@trigger.dev/sdk/v3` (deprecated alias) or `@trigger.dev/core`.
+- **Skill:** `apps/web/node_modules/@trigger.dev/sdk/skills/trigger-authoring-tasks/SKILL.md` — the
+  complete guide (setup, `schemaTask`, retries, triggering + the Result shape, idempotency, waits,
+  metadata, scheduled tasks, queues/concurrency, `trigger.config.ts`).
+- **Docs:** `apps/web/node_modules/@trigger.dev/sdk/docs/` — the skill's frontmatter lists the exact
+  pages it draws from. Grep for an API, e.g.
+  `grep -rl "schemaTask" apps/web/node_modules/@trigger.dev/sdk/docs/`.
 
-## Common mistakes
+Sibling skills in the same directory: `trigger-authoring-chat-agent`,
+`trigger-chat-agent-advanced`, `trigger-realtime-and-frontend`, `trigger-cost-savings`.
 
-1. **CRITICAL: Treating the wait result as the output.** `triggerAndWait` and `wait.forToken` return a Result object, not the raw output.
-   - Wrong: `const out = await childTask.triggerAndWait(p); use(out.foo);`
-   - Correct: `const r = await childTask.triggerAndWait(p); if (r.ok) use(r.output.foo);` (or `.unwrap()`).
+## Repo facts that change the defaults
 
-2. **Wrapping `triggerAndWait` / `batchTriggerAndWait` / `wait` in `Promise.all`.**
-   - Wrong: `await Promise.all([childTask.triggerAndWait(a), childTask.triggerAndWait(b)]);`
-   - Correct: `await childTask.batchTriggerAndWait([{ payload: a }, { payload: b }]);` (or a sequential for-loop).
+| Fact | Value |
+|---|---|
+| SDK version | `4.6.4` (`@trigger.dev/sdk`, `@trigger.dev/build`, `@trigger.dev/react-hooks`) |
+| Where tasks live | `apps/web/src/server/modules/<slice>/tasks/*.task.ts` |
+| `dirs` in `trigger.config.ts` | `["./src/server/**/tasks"]` |
+| Runtime | `runtime: "node-22"` — **not** `bun` |
+| Naming | kebab-case filenames, `*.task.ts`; task `id` must be project-unique |
 
-3. **Importing the task instance into backend code.**
-   - Wrong: `import { emailSequence } from "~/trigger/emails";` in a route handler.
-   - Correct: `import type { emailSequence }` plus `tasks.trigger<typeof emailSequence>("email-sequence", payload)`.
+**There is no `trigger/` directory in this repo.** Tasks belong to the server module that owns them,
+because `src/server/modules/<slice>/` is the modular-monolith boundary that `dep-cruiser`
+(`arch:check`) enforces — a top-level `trigger/` folder would sit outside the module graph. Put
+`analysis.mapper.task.ts` in `src/server/modules/analysis/tasks/`, not in a global task folder.
 
-4. **Calling `metadata.set/get` outside `run()`.**
-   - Wrong: setting metadata at module scope or in unrelated backend code (a no-op; `get` returns `undefined`).
-   - Correct: call inside `run()` or a task lifecycle hook.
+`apps/web/trigger.config.ts` also carries build extensions that matter when you add a task using a
+new native/WASM dependency: a `zenstack-generate` `onBuildStart` extension, `additionalFiles` +
+`additionalPackages` for the tree-sitter WASM grammars, `prismaExtension({ mode: "legacy" })`, and
+a `build.external` list (`ioredis`, `bottleneck`, `web-tree-sitter`, `jscpd`, `colors`, …). A
+dependency that fails to bundle in the cloud build usually belongs in that list or in an extension.
 
-5. **Assuming child tasks inherit the parent's queue or metadata.**
-   - Wrong: expecting a subtask to share the parent's `concurrencyLimit` or see its metadata.
-   - Correct: subtasks run on their own queue; pass metadata explicitly via `{ metadata: metadata.current() }`, or push up with `metadata.parent.*`.
+## Triggering a task from app code
 
-6. **Bundling native/WASM packages.**
-   - Wrong: leaving `sharp`, `re2`, `sqlite3`, or WASM packages in the default bundle.
-   - Correct: add them to `build.external` in `trigger.config.ts`.
+Use a **type-only** import so the task body never gets bundled into a route handler, and trigger by
+id rather than by calling the task object:
 
-7. **Relying on a raw string idempotency key being global.**
-   - Wrong: `trigger(p, { idempotencyKey: "welcome-email" })` expecting once-ever (true only in v4.3.0 and earlier).
-   - Correct: `await idempotencyKeys.create("welcome-email", { scope: "global" })`.
+```ts
+import { tasks } from "@trigger.dev/sdk";
+import type { myTask } from "@/server/modules/<slice>/tasks/<name>.task";
 
-## References
+const handle = await tasks.trigger<typeof myTask>("my-task-id", payload);
+```
 
-Sibling skills: **trigger-realtime-and-frontend** (subscribe to runs, trigger from the frontend), **trigger-authoring-chat-agent** and **trigger-chat-agent-advanced** (AI chat agents).
+`TRIGGER_SECRET_KEY` must be set wherever this runs.
+
+## Commands
+
+Bun only — the other package managers are rejected by the agent hook, and `bun x` needs a shell
+approval, so invoke the CLI as:
+
+```bash
+bun x trigger.dev@latest dev      # run from apps/web, the dir holding trigger.config.ts
+```
+
+There is no root `with-doppler` script, so `bun with-doppler "bun --filter @doxynix/web …"` fails
+from the repo root — use `bun --filter @doxynix/web <script>`.
+
+## Other rules
+
+- `.agents/skills/analysis-engine/SKILL.md` carries the repo-specific rules for the analysis pipeline
+  tasks (Sentinel / Mapper / Architect stages, AST scanning, GitHub PR review comments). Read it
+  before touching those tasks — it is stricter than the upstream SDK skill.
+
+## Version
+
+Pinned to `@trigger.dev/sdk` 4.6.4 as installed in `apps/web`.

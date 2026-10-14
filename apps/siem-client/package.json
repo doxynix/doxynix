@@ -6,7 +6,7 @@
   "scripts": {
     "arch:baseline": "depcruise src --config .dependency-cruiser.ts --baseline",
     "arch:check": "depcruise src --config .dependency-cruiser.ts --output-type err --ignore-known",
-    "build": "tsc -b && vite build",
+    "build": "bun check -b && vite build",
     "dev": "vite",
     "format": "biome check --write .",
     "format:check": "biome check .",
@@ -14,7 +14,7 @@
     "lint:fix": "oxlint --fix",
     "lint:fsd": "steiger ./src",
     "preview": "vite preview",
-    "type-check": "tsc -b",
+    "type-check": "bun check -b",
     "validate": "biome check . && oxlint && bun run lint:fsd && bun run arch:check && bun type-check"
   },
   "dependencies": {

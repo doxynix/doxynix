@@ -25,7 +25,7 @@ export function RepoPullsListContainer({ name, owner, repoId }: Readonly<Props>)
     return <div>{tCommon("loading")}</div>;
   }
 
-  if (pulls == null || pulls.length === 0) {
+  if (pulls == null || pulls.items.length === 0) {
     return (
       <div className="flex h-150 items-center justify-center rounded-xl border border-dashed">
         <EmptyState
@@ -59,9 +59,11 @@ export function RepoPullsListContainer({ name, owner, repoId }: Readonly<Props>)
 
   return (
     <RepoPullsList
+      capped={pulls.capped}
       name={name}
       owner={owner}
-      pulls={pulls}
+      pulls={pulls.items}
+      total={pulls.total}
     />
   );
 }

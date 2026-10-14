@@ -583,4 +583,101 @@ describe("useResizable", () => {
       expect(localStorage.getItem("w")).toBe("320");
     });
   });
+
+  describe("viewport awareness", () => {
+    // Mirrors VIEWPORT_GUTTER: enough room for the handle that sits outside the panel edge.
+    const GUTTER = 32;
+
+    function setViewportWidth(width: number) {
+      Object.defineProperty(window, "innerWidth", { configurable: true, value: width });
+      act(() => {
+        window.dispatchEvent(new Event("resize"));
+      });
+    }
+
+    beforeEach(() => {
+      setViewportWidth(1024);
+    });
+
+    it("fits a stored width that is wider than the window", () => {
+      setViewportWidth(800);
+      localStorage.setItem("w", "1200");
+
+      const { result } = renderHook(() =>
+        useResizable({ defaultWidth: 672, maxWidth: 1200, minWidth: 380, storageKey: "w" }),
+      );
+
+      expect(result.current.width).toBe(800 - GUTTER);
+    });
+
+    it("refits when the window shrinks", () => {
+      setViewportWidth(1200);
+      const { result } = renderHook(() =>
+        useResizable({ defaultWidth: 900, maxWidth: 1200, minWidth: 380 }),
+      );
+      expect(result.current.width).toBe(900);
+
+      setViewportWidth(700);
+
+      expect(result.current.width).toBe(700 - GUTTER);
+    });
+
+    it("keeps the stored preference so a wider window restores it", () => {
+      setViewportWidth(1200);
+      const { result } = renderHook(() =>
+        useResizable({ defaultWidth: 900, maxWidth: 1200, minWidth: 380, storageKey: "w" }),
+      );
+
+      act(() => {
+        result.current.setWidth(1000);
+      });
+      expect(localStorage.getItem("w")).toBe("1000");
+
+      setViewportWidth(700);
+      expect(result.current.width).toBe(700 - GUTTER);
+      expect(localStorage.getItem("w")).toBe("1000");
+
+      setViewportWidth(1200);
+      expect(result.current.width).toBe(1000);
+    });
+
+    it("caps a drag at the window width", async () => {
+      setViewportWidth(800);
+      const { result } = renderHook(() =>
+        useResizable({ defaultWidth: 400, maxWidth: 1200, minWidth: 380, side: "right" }),
+      );
+
+      act(() => {
+        result.current.handleProps.onPointerDown(down(400));
+      });
+      await move(0);
+
+      expect(result.current.width).toBe(800 - GUTTER);
+    });
+
+    it("reports the fitted bound to assistive tech", () => {
+      setViewportWidth(800);
+
+      const { result } = renderHook(() =>
+        useResizable({ defaultWidth: 672, maxWidth: 1200, minWidth: 380 }),
+      );
+
+      expect(result.current.handleProps["aria-valuemax"]).toBe(800 - GUTTER);
+      expect(result.current.handleProps["aria-valuemin"]).toBe(380);
+    });
+
+    it("still honours the configured bounds when they are tighter than the window", () => {
+      setViewportWidth(2000);
+
+      const { result } = renderHook(() =>
+        useResizable({ defaultWidth: 300, maxWidth: 480, minWidth: 200 }),
+      );
+      act(() => {
+        result.current.setWidth(9999);
+      });
+
+      expect(result.current.width).toBe(480);
+      expect(result.current.handleProps["aria-valuemax"]).toBe(480);
+    });
+  });
 });

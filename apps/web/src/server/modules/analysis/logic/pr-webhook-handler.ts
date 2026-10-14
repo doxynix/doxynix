@@ -6,6 +6,76 @@ import { PRConfigService } from "@/server/modules/analysis/logic/pr-config";
 import { analysisRepo } from "../analysis.repository";
 import { analyzePrTask } from "../tasks/analyze-pr.task";
 
+async function analyzeRepoForEvent(
+  repoId: string,
+  action: string,
+  pullRequest: PullRequestPayload["pull_request"],
+  repository: PullRequestPayload["repository"],
+): Promise<void> {
+  const config = await PRConfigService.getConfig(repoId, prisma);
+  if (!config.enabled) {
+    appLogger.debug({
+      msg: "pr_webhook_analysis_disabled",
+      prNumber: pullRequest.number,
+      repoId,
+    });
+    return;
+  }
+
+  const existingAnalysis = await analysisRepo.getByRepoAndPRNumber(
+    prisma,
+    repoId,
+    pullRequest.number,
+  );
+
+  if (existingAnalysis != null && (action === "opened" || action === "ready_for_review")) {
+    appLogger.warn({
+      msg: "pr_webhook_analysis_already_exists",
+      prNumber: pullRequest.number,
+      repoId,
+    });
+    return;
+  }
+
+  let prAnalysisId: string;
+
+  if (existingAnalysis == null) {
+    const analysis = await analysisRepo.createPRAnalysis(prisma, {
+      baseSha: pullRequest.base.sha,
+      headSha: pullRequest.head.sha,
+      owner: repository.owner.login,
+      prNumber: pullRequest.number,
+      repoId,
+      repoName: repository.name,
+    });
+
+    prAnalysisId = analysis.id;
+
+    appLogger.info({
+      analysisId: analysis.id,
+      msg: "pr_webhook_analysis_created",
+      prNumber: pullRequest.number,
+      repoId,
+    });
+  } else {
+    const updatedAnalysis = await analysisRepo.updatePRAnalysis(prisma, existingAnalysis.id, {
+      baseSha: pullRequest.base.sha,
+      headSha: pullRequest.head.sha,
+    });
+    prAnalysisId = updatedAnalysis.id;
+  }
+
+  await analyzePrTask.trigger({
+    baseSha: pullRequest.base.sha,
+    headSha: pullRequest.head.sha,
+    owner: repository.owner.login,
+    prAnalysisId,
+    prNumber: pullRequest.number,
+    repoId,
+    repoName: repository.name,
+  });
+}
+
 export async function handlePullRequestEvent(payload: PullRequestPayload): Promise<void> {
   const { action, pull_request, repository } = payload;
 
@@ -38,90 +108,35 @@ export async function handlePullRequestEvent(payload: PullRequestPayload): Promi
     repo: repository.name,
   });
 
-  try {
-    const repo = await prisma.repo.findFirst({
-      where: { githubId: repository.id },
-    });
+  const repos = await prisma.repo.findMany({
+    select: { id: true },
+    where: { githubId: repository.id },
+  });
 
-    if (repo == null) {
-      appLogger.warn({
-        githubId: repository.id,
-        msg: "pr_webhook_repo_not_found",
-        owner: repository.owner.login,
-        repo: repository.name,
-      });
-      return;
-    }
-
-    const config = await PRConfigService.getConfig(repo.id, prisma);
-    if (!config.enabled) {
-      appLogger.debug({
-        msg: "pr_webhook_analysis_disabled",
-        prNumber: pull_request.number,
-        repoId: repo.id,
-      });
-      return;
-    }
-
-    const existingAnalysis = await analysisRepo.getByRepoAndPRNumber(
-      prisma,
-      repo.id,
-      pull_request.number,
-    );
-
-    if (existingAnalysis != null && (action === "opened" || action === "ready_for_review")) {
-      appLogger.warn({
-        msg: "pr_webhook_analysis_already_exists",
-        prNumber: pull_request.number,
-        repoId: repo.id,
-      });
-      return;
-    }
-
-    let prAnalysisId: string;
-
-    if (existingAnalysis == null) {
-      const analysis = await analysisRepo.createPRAnalysis(prisma, {
-        baseSha: pull_request.base.sha,
-        headSha: pull_request.head.sha,
-        owner: repository.owner.login,
-        prNumber: pull_request.number,
-        repoId: repo.id,
-        repoName: repository.name,
-      });
-
-      prAnalysisId = analysis.id;
-
-      appLogger.info({
-        analysisId: analysis.id,
-        msg: "pr_webhook_analysis_created",
-        prNumber: pull_request.number,
-        repoId: repo.id,
-      });
-    } else {
-      const updatedAnalysis = await analysisRepo.updatePRAnalysis(prisma, existingAnalysis.id, {
-        baseSha: pull_request.base.sha,
-        headSha: pull_request.head.sha,
-      });
-      prAnalysisId = updatedAnalysis.id;
-    }
-
-    await analyzePrTask.trigger({
-      baseSha: pull_request.base.sha,
-      headSha: pull_request.head.sha,
+  if (repos.length === 0) {
+    appLogger.warn({
+      githubId: repository.id,
+      msg: "pr_webhook_repo_not_found",
       owner: repository.owner.login,
-      prAnalysisId,
-      prNumber: pull_request.number,
-      repoId: repo.id,
-      repoName: repository.name,
-    });
-  } catch (error) {
-    appLogger.error({
-      error: error instanceof Error ? error.message : String(error),
-      msg: "pr_webhook_error",
-      owner: repository.owner.login,
-      prNumber: pull_request.number,
       repo: repository.name,
     });
+    return;
   }
+
+  const settled = await Promise.allSettled(
+    repos.map((repo) => analyzeRepoForEvent(repo.id, action, pull_request, repository)),
+  );
+
+  settled.forEach((outcome, index) => {
+    if (outcome.status === "rejected") {
+      appLogger.error({
+        error: outcome.reason instanceof Error ? outcome.reason.message : String(outcome.reason),
+        msg: "pr_webhook_error",
+        owner: repository.owner.login,
+        prNumber: pull_request.number,
+        repo: repository.name,
+        repoId: repos[index]?.id,
+      });
+    }
+  });
 }

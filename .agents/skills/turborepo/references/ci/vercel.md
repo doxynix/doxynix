@@ -1,112 +1,89 @@
 # Vercel Deployment
 
-Turborepo integrates seamlessly with Vercel for monorepo deployments.
+`apps/web` deploys to Vercel (`apps/web/vercel.json` exists; `VERCEL` and `VERCEL_ENV` are in
+`turbo.json`'s `globalEnv`). The other workspaces do not.
 
-## Remote Cache
+## Remote Cache on Vercel
 
-Remote caching is **automatically enabled** when deploying to Vercel. No configuration needed - Vercel detects Turborepo and enables caching.
+Remote caching is enabled automatically when Vercel detects Turborepo at the repo root — no
+`TURBO_TOKEN` / `TURBO_TEAM` setup required there. Cache is shared across deployments, so preview
+and production builds both benefit.
 
-This means:
+Outside Vercel (CI, laptops) those two variables are what authenticate against the remote cache;
+they are declared in `globalEnv` in `turbo.json`.
 
-- No `TURBO_TOKEN` or `TURBO_TEAM` setup required on Vercel
-- Cache is shared across all deployments
-- Preview and production builds benefit from cache
+## Build Command
+
+Vercel auto-detects turbo when `turbo.json` is at the repo root. To scope it to one workspace:
+
+```bash
+turbo build --filter=@doxynix/web
+```
+
+For production-only env strictness:
+
+```bash
+turbo build --filter=@doxynix/web --env-mode=strict
+```
+
+`--env-mode=strict` makes the build fail on a missing declared env var instead of silently
+treating it as empty — worth it in production, painful in preview.
 
 ## turbo-ignore
 
-Skip unnecessary builds when a package hasn't changed using `turbo-ignore`.
+Skip a deployment when nothing relevant changed.
 
-### Installation
-
-```bash
-npx turbo-ignore
-```
-
-Or install globally in your project:
+### Invocation
 
 ```bash
-pnpm add -D turbo-ignore
+bun x turbo-ignore
 ```
 
-### Setup in Vercel
-
-1. Go to your project in Vercel Dashboard
-2. Navigate to Settings > Git > Ignored Build Step
-3. Select "Custom" and enter:
+To add it as a devDependency instead:
 
 ```bash
-npx turbo-ignore
+bun add -d turbo-ignore
 ```
 
-### How It Works
+### Vercel setup
 
-`turbo-ignore` checks if the current package (or its dependencies) changed since the last successful deployment:
+1. Project → Settings → Git → Ignored Build Step
+2. Custom, and enter `bun x turbo-ignore`
 
-1. Compares current commit to last deployed commit
-2. Uses Turborepo's dependency graph
-3. Returns exit code 0 (skip) if no changes
-4. Returns exit code 1 (build) if changes detected
+### How it works
+
+`turbo-ignore` compares the current commit against the last successful deployment, using
+Turborepo's dependency graph:
+
+1. exit 0 → nothing relevant changed → skip the build
+2. exit 1 → something changed → build
 
 ### Options
 
 ```bash
-# Check specific package
-npx turbo-ignore web
-
-# Use specific comparison ref
-npx turbo-ignore --fallback=HEAD~1
-
-# Check a task other than build
-npx turbo-ignore --task=test
-
-# Run in a specific directory
-npx turbo-ignore --directory=apps/web
-
-# Explicitly set which version of turbo to invoke
-npx turbo-ignore --turbo-version=2.5.0
-
-# Raise child process maxBuffer in KB (default: 1024)
-npx turbo-ignore --max-buffer=2048
+bun x turbo-ignore @doxynix/web                    # check one workspace
+bun x turbo-ignore --fallback=HEAD~1              # explicit comparison ref
+bun x turbo-ignore --task=test                    # task other than build
+bun x turbo-ignore --directory=apps/web           # run in a specific directory
+bun x turbo-ignore --turbo-version=2.11.4         # explicit turbo version
+bun x turbo-ignore --max-buffer=2048              # raise child maxBuffer (KB, default 1024)
 ```
-
-## Environment Variables
-
-Set environment variables in Vercel Dashboard:
-
-1. Go to Project Settings > Environment Variables
-2. Add variables for each environment (Production, Preview, Development)
-
-Common variables:
-
-- `DATABASE_URL`
-- `API_KEY`
-- Package-specific config
 
 ## Monorepo Root Directory
 
-For monorepos, set the root directory in Vercel:
+Vercel's project Root Directory is `apps/web`. From there it:
 
-1. Project Settings > General > Root Directory
-2. Set to the package path (e.g., `apps/web`)
+- installs dependencies from the monorepo root
+- runs the build in `apps/web`
+- applies framework settings
 
-Vercel automatically:
+This is why `turbo.json` and `bun.lock` live at the root and must stay there.
 
-- Installs dependencies from monorepo root
-- Runs build from the package directory
-- Detects framework settings
+## Environment Variables
 
-## Build Command
+Set them in Vercel per environment (Production / Preview / Development). Secrets from Doppler are
+injected at runtime; anything the **build** needs (a public URL, a build-time token) must exist as
+a plain Vercel env var, because the build runs before Doppler secrets are available.
 
-Vercel auto-detects `turbo run build` when `turbo.json` exists at root.
-
-Override if needed:
-
-```bash
-turbo run build --filter=web
-```
-
-Or for production-only optimizations:
-
-```bash
-turbo run build --filter=web --env-mode=strict
-```
+Anything the build reads should also be declared in that task's `env` array in `turbo.json`, or
+Turbo will not hash it and a cached build can replay with a stale value.

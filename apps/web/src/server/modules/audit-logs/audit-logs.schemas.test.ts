@@ -1,3 +1,4 @@
+import { AuditOperation, CursorMetaSchema } from "@doxynix/shared";
 import type { AuditLog } from "@prisma/client";
 import { describe, expect, it } from "vitest";
 
@@ -10,7 +11,7 @@ function makeAuditLog(overrides: Partial<AuditLog> = {}): AuditLog {
     id: "0192f0aa-1111-7000-8000-000000000001",
     ip: "127.0.0.1",
     model: "Repo",
-    operation: "create",
+    operation: AuditOperation.CREATE,
     payload: { data: { firstName: "John", isPublic: false } },
     requestId: "req-1",
     userAgent: null,
@@ -29,15 +30,22 @@ describe("audit-logs response schemas", () => {
   it("round-trips the service response without adding, dropping or rewriting keys", () => {
     const response = {
       items: [auditMapper.toDto(makeAuditLog({ ip: null, requestId: null }))],
-      nextCursor: "next-page-cursor",
+      meta: {
+        hasNextPage: true,
+        nextCursor: "0192f0aa-2222-7000-8000-000000000002",
+      },
     };
 
     expect(ActivityLogsOutputSchema.parse(response)).toEqual(response);
   });
 
   it("accepts a last page where the service leaves nextCursor undefined", () => {
-    const response = { items: [], nextCursor: undefined };
+    const response = { items: [], meta: { hasNextPage: false, nextCursor: undefined } };
 
     expect(ActivityLogsOutputSchema.parse(response)).toEqual(response);
+  });
+
+  it("nests the keyset meta, matching every other cursor-paginated response", () => {
+    expect(ActivityLogsOutputSchema.shape.meta).toBe(CursorMetaSchema);
   });
 });

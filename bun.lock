@@ -32,7 +32,7 @@
     },
     "apps/siem-client": {
       "name": "@doxynix/siem-client",
-      "version": "0.3.7",
+      "version": "0.4.0",
       "dependencies": {
         "@doxynix/shared": "workspace:*",
         "@doxynix/siem-server": "workspace:*",
@@ -113,7 +113,7 @@
     },
     "apps/web": {
       "name": "@doxynix/web",
-      "version": "5.1.4",
+      "version": "5.2.0",
       "dependencies": {
         "@ai-sdk/google": "4.0.82",
         "@ai-sdk/openai": "4.0.78",
@@ -338,7 +338,7 @@
     },
     "packages/cli": {
       "name": "@doxynix/cli",
-      "version": "5.0.7",
+      "version": "5.1.0",
       "bin": {
         "doxynix": "./dist/index.js",
         "dxnx": "./dist/index.js",
@@ -361,7 +361,7 @@
         "@vitest/coverage-v8": "5.0.2",
         "dependency-cruiser": "18.4.0",
         "tsup": "8.5.1",
-        "vitest": "5.0.2",
+        "vitest": "catalog:",
       },
     },
     "packages/config": {
@@ -376,6 +376,7 @@
       },
       "devDependencies": {
         "@doxynix/config": "workspace:*",
+        "vitest": "catalog:",
       },
     },
   },
@@ -466,6 +467,7 @@
     "tailwind-merge": "3.6.0",
     "tailwindcss": "4.3.3",
     "temporal-polyfill": "0.3.2",
+    "vitest": "5.0.2",
     "zod": "4.5.4",
   },
   "packages": {

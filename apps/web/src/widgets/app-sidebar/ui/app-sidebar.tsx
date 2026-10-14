@@ -43,7 +43,7 @@ export function AppSidebar() {
       },
       {
         getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
-        initialCursor: 1,
+        initialCursor: undefined,
       },
     );
 

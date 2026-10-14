@@ -33,16 +33,6 @@ export const analysisRepoRouter = {
     .query(async ({ ctx, input }) => {
       return prCommentsService.getComments(ctx.db, input.analysisId);
     }),
-  getImpactByPRNumber: protectedProcedure
-    .input(
-      z.object({
-        prNumber: z.number().int().positive(),
-        repoId: z.uuid(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      return prImpactService.getByRepoAndPRNumber(ctx.db, input.repoId, input.prNumber);
-    }),
   getNodeContext: protectedProcedure
     .input(NodeContextInputSchema)
     .output(NodeContextOutputSchema)

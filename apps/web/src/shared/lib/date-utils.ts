@@ -56,6 +56,26 @@ export function formatRelativeTime(
   }
 }
 
+export function formatShortDate(
+  date: Date | number | string,
+  localeStr: string = DEFAULT_LOCALE,
+): string {
+  try {
+    const parsedDate = new Date(date);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "—";
+    }
+
+    return parsedDate.toLocaleDateString(localeStr, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return "—";
+  }
+}
+
 export function formatFullDate(
   date: Date | number | string,
   localeStr: string = DEFAULT_LOCALE,

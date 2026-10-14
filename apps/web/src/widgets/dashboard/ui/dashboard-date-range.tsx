@@ -2,15 +2,12 @@
 
 import { useState } from "react";
 import { format, subDays, subHours, subMinutes } from "date-fns";
-import { Check, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 import type { DateRange } from "react-day-picker";
 
-import { cn } from "@/shared/lib/cn";
-import { AppButton } from "@/shared/ui/core/button";
-import { Calendar } from "@/shared/ui/core/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/core/popover";
+import { AppDateRange } from "@/shared/ui/kit/app-date-range";
 
 import { dashboardParsers } from "@/features/repo-analytics/model/dashboard-parsers";
 
@@ -19,27 +16,33 @@ import { hasUrlStateChanged, resolveDateRange } from "../model/date-range";
 const DATE_PERIODS = [
   {
     getValue: () => ({ from: subMinutes(new Date(), 15), to: new Date() }),
-    period: "15m",
+    key: "15m",
+    labelKey: "last_15m",
   },
   {
     getValue: () => ({ from: subHours(new Date(), 1), to: new Date() }),
-    period: "1h",
+    key: "1h",
+    labelKey: "last_1h",
   },
   {
     getValue: () => ({ from: subDays(new Date(), 1), to: new Date() }),
-    period: "24h",
+    key: "24h",
+    labelKey: "last_24h",
   },
   {
     getValue: () => ({ from: subDays(new Date(), 7), to: new Date() }),
-    period: "7d",
+    key: "7d",
+    labelKey: "last_7d",
   },
   {
     getValue: () => ({ from: subDays(new Date(), 30), to: new Date() }),
-    period: "30d",
+    key: "30d",
+    labelKey: "last_30d",
   },
   {
     getValue: () => ({ from: subDays(new Date(), 90), to: new Date() }),
-    period: "90d",
+    key: "90d",
+    labelKey: "last_90d",
   },
 ] as const;
 
@@ -60,98 +63,45 @@ export function DashboardDatePeriod() {
     setTempDate(resolveDateRange(urlState.from, urlState.to, urlState.period, DATE_PERIODS));
   }
 
-  const activePeriod = DATE_PERIODS.find((p) => p.period === urlState.period);
+  const activePeriod = DATE_PERIODS.find((p) => p.key === urlState.period);
 
-  const handlePeriodClick = (p: (typeof DATE_PERIODS)[number]) => {
-    const values = p.getValue();
-    setTempDate(values);
-    void setUrlState({ from: null, period: p.period, to: null });
-  };
-
-  const handleCustomSelect = (newDate: DateRange | undefined) => {
+  const handleChange = (newDate: DateRange | undefined) => {
     setTempDate(newDate);
-    if (newDate?.from && newDate.to) {
-      void setUrlState({ from: newDate.from, period: "custom", to: newDate.to });
+    const from = newDate?.from;
+    const to = newDate?.to;
+    if (from != null && to != null) {
+      const matched = DATE_PERIODS.find((p) => {
+        const v = p.getValue();
+        return (
+          Math.abs(v.from.getTime() - from.getTime()) < 60_000 &&
+          Math.abs(v.to.getTime() - to.getTime()) < 60_000
+        );
+      });
+      if (matched) {
+        void setUrlState({ from: null, period: matched.key, to: null });
+        return;
+      }
+      void setUrlState({ from, period: "custom", to });
+      return;
     }
+    void setUrlState({ from: null, period: null, to: null });
   };
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <AppButton
-          className="bg-background"
-          variant="outline"
-        >
-          <Clock />
-          {activePeriod ? (
-            t(activePeriod.period)
-          ) : urlState.from && urlState.to ? (
-            <>
-              {format(urlState.from, "dd MMM")}
-              {" - "}
-              {format(urlState.to, "dd MMM, yyyy")}
-            </>
-          ) : (
-            t("select_period")
-          )}
-        </AppButton>
-      </PopoverTrigger>
-      <PopoverContent
-        align="end"
-        className="w-auto p-0"
-      >
-        <div className="flex">
-          <div className="flex w-40 flex-col p-2">
-            <p className="px-2 py-1.5 text-center text-muted-foreground text-xs">
-              {t("quick_range")}
-            </p>
-            <div className="flex flex-col gap-1">
-              {DATE_PERIODS.map((p) => (
-                <AppButton
-                  className={cn(
-                    "flex w-full items-center justify-between",
-                    urlState.period === p.period &&
-                      "bg-primary text-primary-foreground hover:bg-primary/90",
-                  )}
-                  key={p.period}
-                  onClick={() => handlePeriodClick(p)}
-                  size="sm"
-                  variant="ghost"
-                >
-                  {t(p.period)}
-                  {urlState.period === p.period && <Check />}
-                </AppButton>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col border-l">
-            <div className="flex gap-4 border-b p-3 text-center">
-              <div className="flex flex-1 flex-col gap-1">
-                <span className="text-xs">{t("start_date")}</span>
-                <div className="text-xs">
-                  {tempDate?.from ? format(tempDate.from, "yyyy-MM-dd") : "YYYY-MM-DD"}
-                </div>
-              </div>
-              <div className="flex flex-1 flex-col gap-1">
-                <span className="text-xs">{t("end_date")}</span>
-                <div className="text-xs">
-                  {tempDate?.to ? format(tempDate.to, "yyyy-MM-dd") : "YYYY-MM-DD"}
-                </div>
-              </div>
-            </div>
-            <Calendar
-              className="p-3"
-              defaultMonth={tempDate?.from}
-              key={urlState.period}
-              mode="range"
-              numberOfMonths={2}
-              onSelect={handleCustomSelect}
-              selected={tempDate}
-            />
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
+    <AppDateRange
+      emptyLabel={t("select_period")}
+      onChange={handleChange}
+      presets={DATE_PERIODS}
+      selected={tempDate}
+      selectedPresetKey={activePeriod?.key ?? null}
+      triggerIcon={<Clock />}
+      triggerLabel={
+        activePeriod
+          ? t(activePeriod.key)
+          : urlState.from && urlState.to
+            ? `${format(urlState.from, "dd MMM")} - ${format(urlState.to, "dd MMM, yyyy")}`
+            : undefined
+      }
+    />
   );
 }

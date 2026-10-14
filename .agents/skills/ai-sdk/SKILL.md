@@ -5,10 +5,33 @@ description: 'Answer questions about the AI SDK and help build AI-powered featur
 
 ## What the AI SDK Is
 
-The AI SDK by Vercel (the `ai` package on npm) is a TypeScript toolkit for building AI applications. It provides a unified API across model providers for text generation, structured output, tool calling, agents, embeddings, and framework UI integrations.
+The AI SDK by Vercel (the `ai` package) is a TypeScript toolkit for building AI applications. It provides a unified API across model providers for text generation, structured output, tool calling, agents, embeddings, and framework UI integrations.
 
 - Repository: https://github.com/vercel/ai
 - Documentation: https://ai-sdk.dev/docs
+
+## Doxynix setup
+
+`ai` **7.0.118** lives in `apps/web` only. Nothing else in the monorepo depends on it.
+
+| Package | Version | Where it's used |
+|---------|---------|-----------------|
+| `ai` | 7.0.118 | `server/utils/call.ts`, `server/modules/agent/*`, `app/api/agent/chat/route.ts` |
+| `@ai-sdk/google` | 4.0.82 | `server/core/ai/google.ts`, Gemini models |
+| `@ai-sdk/openai` | 4.0.78 | `server/core/ai/ai-constants.ts` — `createOpenAI` pointed at the Groq base URL |
+| `@ai-sdk/react` | 4.0.121 | `features/agent/ui/agent.tsx` (`useChat`) |
+
+**No AI Gateway.** There is no `@ai-sdk/gateway` dependency, no `gateway()` provider factory and no
+`AI_GATEWAY_API_KEY` anywhere in `apps/web`. Models are referenced directly through
+`createGoogleGenerativeAI(...)` and `createOpenAI({ baseURL: "https://api.groq.com/openai/v1" })`.
+Do not introduce Gateway routing as part of an unrelated task.
+
+Model IDs come from `DEFAULT_AI_MODELS` in `src/server/core/ai/ai-constants.ts`, keyed by role
+(`AGENT`, `ARCHITECT`, `CARTOGRAPHER`, `FALLBACK`, `POWERFUL`, `SENTINEL`, `WRITER`) and overridable
+from Edge Config (`@vercel/global-config`) via `getActiveModels()`. Model lifecycle is Trigger.dev's
+job here — see the `analysis-engine` and `trigger-authoring-tasks` skills.
+
+Package installs use Bun (`bun add ai`), never npm/pnpm/yarn.
 
 ## Critical: Do Not Trust Your Own Memory
 
@@ -20,37 +43,28 @@ Whatever you remember about the AI SDK is likely outdated. The SDK changes frequ
 
 The `ai` package ships its full documentation and source code inside `node_modules`. These always match the installed version, so trust them over anything you remember.
 
-1. Ensure `ai` is installed. If `node_modules/ai/` does not exist, install **only** the `ai` package using the project's package manager (e.g. `pnpm add ai`). Install provider packages (e.g. `@ai-sdk/openai`) and framework packages (e.g. `@ai-sdk/react`) later, when the task requires them.
+1. Ensure `ai` is installed. If `node_modules/ai/` does not exist, install **only** the `ai` package with `bun add ai` from inside `apps/web`. Install provider packages (e.g. `@ai-sdk/openai`) and framework packages (e.g. `@ai-sdk/react`) later, when the task requires them.
 2. Read and grep the bundled docs at `node_modules/ai/docs/` and the source at `node_modules/ai/src/`.
 3. Provider and framework packages bundle their own docs at `node_modules/@ai-sdk/<name>/docs/`.
 4. If something isn't in the bundled docs, search https://ai-sdk.dev/docs. You can append `.md` to any docs page URL to get its markdown, and search via `https://ai-sdk.dev/api/search-docs?q=your_query`.
 5. If you cannot find support for an answer in the docs or source, say so explicitly — do not guess.
 
-## AI Gateway: The Fastest Way to Start
+## AI Gateway — not used here
 
-The Vercel AI Gateway is the fastest way to get started with the AI SDK. It provides access to models from OpenAI, Anthropic, Google, and other providers through a single API, without installing provider packages or managing multiple API keys.
+The Vercel AI Gateway is a valid AI SDK feature, but this repo does not use it: no `@ai-sdk/gateway`
+dependency, no `gateway()` factory, no `AI_GATEWAY_API_KEY`. Provider packages are configured
+directly in `src/server/core/ai/`. Do not suggest Gateway setup, `provider/model` gateway strings, or
+`https://ai-gateway.vercel.sh/v1/models` queries for this codebase — those would be dead ends.
 
-To set it up:
+## Choosing a Model
 
-1. Authenticate with OIDC (for Vercel deployments) or get an AI Gateway API key.
-2. Provide it to your app via the `AI_GATEWAY_API_KEY` environment variable.
-3. Reference models with `provider/model` strings.
+Model IDs are **role-keyed** in `DEFAULT_AI_MODELS` (`src/server/core/ai/ai-constants.ts`), typed as
+`GoogleModelId | GroqModelId` derived from `Parameters<typeof google>[0]` and
+`Parameters<typeof groq>[0]` — so an invalid ID is a compile error, not a runtime surprise. Add or
+change a model there (and in the Edge Config `AI_MODELS_CONFIG` override) rather than hardcoding a
+string at the call site.
 
-For exact setup, authentication, and usage, read the bundled guide and the AI Gateway docs.
-
-### Choosing a Model
-
-Never use model IDs from memory — models are released and retired frequently. Fetch the current list before writing code that references a model. Do not truncate the list (e.g. with `head`) so you can find the newest models:
-
-```bash
-# All available models
-curl -s https://ai-gateway.vercel.sh/v1/models | jq -r '.data[].id'
-
-# Filter by provider (e.g. anthropic, openai, google)
-curl -s https://ai-gateway.vercel.sh/v1/models | jq -r '[.data[] | select(.id | startswith("anthropic/")) | .id] | reverse | .[]'
-```
-
-When multiple versions of a model exist, prefer the one with the highest version number.
+Never use model IDs from memory; verify against the provider package's bundled types and docs.
 
 ## Building and Consuming Agents
 
@@ -58,21 +72,11 @@ Use the SDK's built-in agent abstraction (such as `ToolLoopAgent`) rather than h
 
 Look up the current agent, tool, and type-safety APIs in the bundled docs (`node_modules/ai/docs/`, especially the agents section) or at https://ai-sdk.dev/docs.
 
-## DevTools
-
-AI SDK DevTools captures your AI SDK calls - requests, responses, tool calls, token usage, and multi-step runs - so you can inspect exactly what your agents do. Use it while developing to debug generations. It is a separate package and is intended for local development only.
-
-For setup instructions, read the bundled DevTools documentation.
-
-## Keep the SDK Current
-
-Outdated installs are the most common source of errors. Compare the installed version against the latest:
-
-- **Installed:** the `version` field in `node_modules/ai/package.json`.
-- **Latest:** run `npm view ai version`.
-
-If the installed version is a major version (or more) behind the latest, tell the user they are on an old release, and recommend upgrading before continuing. Migration guides are at https://ai-sdk.dev/docs/migration-guides.
-
 ## After Making Changes
 
-Run the project's type checker. Be minimal — only set options that differ from the defaults, checking docs or source for the defaults rather than over-specifying. Most type errors come from remembered, now-changed APIs; re-check the current docs and source when they occur.
+Run `bun run type-check` (Turbo, covers every workspace) — `apps/web` type-check is memory-heavy and
+needs the generated Prisma/ZenStack client, so go through Turbo rather than invoking `tsc` directly.
+Be minimal: only set options that differ from the defaults, checking docs or source for the defaults
+rather than over-specifying. Most type errors come from remembered, now-changed APIs.
+
+AI SDK DevTools is not installed in this repo; don't add it uninvited.

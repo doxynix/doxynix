@@ -1,3 +1,5 @@
+import { AuditOperation } from "@doxynix/shared";
+import type { Prisma } from "@prisma/client";
 import { enhance } from "@zenstackhq/runtime";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -62,7 +64,12 @@ describe("Users, Admin & Audit Flows", () => {
     const bob = await createTestUser("Bob", "USER");
 
     const log = await alice.db.auditLog.create({
-      data: { model: "User", operation: "login", payload: { ok: true }, userId: alice.user.id },
+      data: {
+        model: "User",
+        operation: AuditOperation.UPDATE,
+        payload: { ok: true },
+        userId: alice.user.id,
+      },
     });
 
     await expect(
@@ -112,12 +119,16 @@ describe("Users, Admin & Audit Flows", () => {
 
   it("should handle Audit Log pagination and ordering", async () => {
     const alice = await createTestUser("Alice");
-    const batch = Array.from({ length: 60 }, (_, i) => ({
-      model: "Repo",
-      operation: "update",
-      payload: { i },
-      userId: alice.user.id,
-    }));
+    const batch = Array.from(
+      { length: 60 },
+      (_, i) =>
+        ({
+          model: "Repo",
+          operation: AuditOperation.UPDATE,
+          payload: { i },
+          userId: alice.user.id,
+        }) satisfies Prisma.AuditLogCreateManyInput,
+    );
 
     await prisma.auditLog.createMany({ data: batch });
 

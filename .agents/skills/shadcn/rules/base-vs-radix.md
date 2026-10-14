@@ -1,6 +1,10 @@
 # Base vs Radix
 
-API differences between `base` and `radix`. Check the `base` field from `npx shadcn@latest info`.
+API differences between `base` and `radix`. Check the `base` field from `bun x shadcn@latest info`.
+
+**This repo is `radix`.** There is no `base` in `components.json`, so every trigger uses `asChild`
+and none of the `render=` / `nativeButton` examples below apply as written. Use this file as the
+translation table when you copy an upstream example; keep the `asChild` branch.
 
 ## Contents
 

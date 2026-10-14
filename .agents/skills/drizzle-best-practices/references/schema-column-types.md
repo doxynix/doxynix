@@ -56,8 +56,9 @@ export const products = pgTable('products', {
 
 | Use Case | Type | TypeScript |
 |----------|------|------------|
-| Primary key | `integer().generatedAlwaysAsIdentity()` | `number` |
-| UUID primary key | `uuid().defaultRandom()` | `string` |
+| Primary key (**this repo's default**) | `uuid('id').primaryKey().default(sql`uuidv7()`)` | `string` |
+| Counter / non-PK sequence key | `integer().generatedAlwaysAsIdentity()` | `number` |
+| UUID primary key (random, avoid here) | `uuid().defaultRandom()` | `string` |
 | Short strings | `varchar({ length: N })` | `string` |
 | Long text | `text()` | `string` |
 | Exact decimals | `numeric({ precision, scale })` | `string` |

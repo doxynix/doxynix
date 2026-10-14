@@ -1,192 +1,120 @@
 # Forms & Inputs
 
+**`src/shared/ui/core/form.tsx` in this repo is the React Hook Form variant**, not the newer
+`Field` / `FieldGroup` / `InputGroup` API. Use these exports:
+
+| Export | Purpose |
+|--------|---------|
+| `Form` | `<form>` provider, wires `useFormContext` |
+| `FormField` | `<Controller>` wrapper bound to a field name |
+| `FormItem` | field wrapper; supplies id / error-id context |
+| `FormLabel` | `<label>` linked to the control via `htmlFor` |
+| `FormControl` | clones the child and injects `id`, `aria-describedby`, `aria-invalid` |
+| `FormDescription` | helper text, referenced by `aria-describedby` |
+| `FormMessage` | validation error, referenced by `aria-describedby` |
+
+Validation itself is Zod via `@hookform/resolvers` (`zodResolver`) wired into `useForm` — see the
+`zod` and `react-hook-form` skills.
+
 ## Contents
 
-- Forms use FieldGroup + Field
-- InputGroup requires InputGroupInput/InputGroupTextarea
-- Buttons inside inputs use InputGroup + InputGroupAddon
-- Option sets (2–7 choices) use ToggleGroup
-- FieldSet + FieldLegend for grouping related fields
-- Field validation and disabled states
+- The canonical field
+- Description and error text
+- Checkboxes, switches and selects
+- Field arrays
+- Grouping
 
 ---
 
-## Forms use FieldGroup + Field
-
-Always use `FieldGroup` + `Field` — never raw `div` with `space-y-*`:
+## The canonical field
 
 ```tsx
-<FieldGroup>
-  <Field>
-    <FieldLabel htmlFor="email">Email</FieldLabel>
-    <Input id="email" type="email" />
-  </Field>
-  <Field>
-    <FieldLabel htmlFor="password">Password</FieldLabel>
-    <Input id="password" type="password" />
-  </Field>
-</FieldGroup>
-```
+const form = useForm<z.infer<typeof Schema>>({
+  resolver: zodResolver(Schema),
+});
 
-Use `Field orientation="horizontal"` for settings pages. Use `FieldLabel className="sr-only"` for visually hidden labels.
-
-**Choosing form controls:**
-
-- Simple text input → `Input`
-- Dropdown with predefined options → `Select`
-- Searchable dropdown → `Combobox`
-- Native HTML select (no JS) → `native-select`
-- Boolean toggle → `Switch` (for settings) or `Checkbox` (for forms)
-- Single choice from few options → `RadioGroup`
-- Toggle between 2–5 options → `ToggleGroup` + `ToggleGroupItem`
-- OTP/verification code → `InputOTP`
-- Multi-line text → `Textarea`
-
----
-
-## InputGroup requires InputGroupInput/InputGroupTextarea
-
-Never use raw `Input` or `Textarea` inside an `InputGroup`.
-
-**Incorrect:**
-
-```tsx
-<InputGroup>
-  <Input placeholder="Search..." />
-</InputGroup>
-```
-
-**Correct:**
-
-```tsx
-import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
-
-<InputGroup>
-  <InputGroupInput placeholder="Search..." />
-</InputGroup>
-```
-
----
-
-## Buttons inside inputs use InputGroup + InputGroupAddon
-
-Never place a `Button` directly inside or adjacent to an `Input` with custom positioning.
-
-**Incorrect:**
-
-```tsx
-<div className="relative">
-  <Input placeholder="Search..." className="pr-10" />
-  <Button className="absolute right-0 top-0" size="icon">
-    <SearchIcon />
-  </Button>
-</div>
-```
-
-**Correct:**
-
-```tsx
-import { InputGroup, InputGroupInput, InputGroupAddon } from "@/components/ui/input-group"
-
-<InputGroup>
-  <InputGroupInput placeholder="Search..." />
-  <InputGroupAddon>
-    <Button size="icon">
-      <SearchIcon data-icon="inline-start" />
+<Form {...form}>
+  <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <FormField
+      control={form.control}
+      name="email"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Email</FormLabel>
+          <FormControl>
+            <Input type="email" {...field} />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+    <Button type="submit" disabled={form.formState.isSubmitting}>
+      Submit
     </Button>
-  </InputGroupAddon>
-</InputGroup>
+  </form>
+</Form>
 ```
 
----
+**`FormControl` is not optional.** It is what injects the generated ids and `aria-invalid`; a bare
+`<Input {...field} />` inside `FormItem` leaves the label and error text unlinked.
 
-## Option sets (2–7 choices) use ToggleGroup
+Layout uses `flex flex-col gap-*` — never `space-y-*` (see [styling.md](./styling.md)).
 
-Don't manually loop `Button` components with active state.
-
-**Incorrect:**
+## Description and error text
 
 ```tsx
-const [selected, setSelected] = useState("daily")
-
-<div className="flex gap-2">
-  {["daily", "weekly", "monthly"].map((option) => (
-    <Button
-      key={option}
-      variant={selected === option ? "default" : "outline"}
-      onClick={() => setSelected(option)}
-    >
-      {option}
-    </Button>
-  ))}
-</div>
+<FormItem>
+  <FormLabel>Password</FormLabel>
+  <FormControl>
+    <Input type="password" {...field} />
+  </FormControl>
+  <FormDescription>At least 12 characters.</FormDescription>
+  <FormMessage />
+</FormItem>
 ```
 
-**Correct:**
+`FormDescription` and `FormMessage` both feed `aria-describedby` on the control. Render
+`FormMessage` in every field — an empty message renders nothing, so it costs nothing when valid.
+
+## Checkboxes, switches and selects
+
+`Checkbox`, `Switch` and `Select` all go through `FormControl` the same way, so the a11y wiring is
+identical:
 
 ```tsx
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-
-<ToggleGroup spacing={2}>
-  <ToggleGroupItem value="daily">Daily</ToggleGroupItem>
-  <ToggleGroupItem value="weekly">Weekly</ToggleGroupItem>
-  <ToggleGroupItem value="monthly">Monthly</ToggleGroupItem>
-</ToggleGroup>
+<FormField
+  control={form.control}
+  name="remember"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Remember me</FormLabel>
+      <FormControl>
+        <Switch checked={field.value} onCheckedChange={field.onChange} />
+      </FormControl>
+    </FormItem>
+  )}
+/>
 ```
 
-Combine with `Field` for labelled toggle groups:
+Remember: `items` always sit inside their group — `SelectItem` inside `SelectGroup`,
+`DropdownMenuItem` inside `DropdownMenuGroup` (see [composition.md](./composition.md)).
+
+Two-digit verification codes use `InputOTP` (`input-otp.tsx`), also wrapped in `FormControl`.
+
+## Field arrays
+
+Use `useFieldArray` for repeatable rows — see the `react-hook-form` skill for the
+`useFieldArray` / disabled-field-array details. The key prop comes from `field.id`, never the index.
+
+## Grouping
+
+Related fields are grouped with a plain `fieldset` + `legend` (`label.tsx` provides `Label`):
 
 ```tsx
-<Field orientation="horizontal">
-  <FieldTitle id="theme-label">Theme</FieldTitle>
-  <ToggleGroup aria-labelledby="theme-label" spacing={2}>
-    <ToggleGroupItem value="light">Light</ToggleGroupItem>
-    <ToggleGroupItem value="dark">Dark</ToggleGroupItem>
-    <ToggleGroupItem value="system">System</ToggleGroupItem>
-  </ToggleGroup>
-</Field>
+<fieldset className="flex flex-col gap-4">
+  <legend className="text-sm font-medium">Notifications</legend>
+  ...
+</fieldset>
 ```
 
-> **Note:** `defaultValue` and `type`/`multiple` props differ between base and radix. See [base-vs-radix.md](./base-vs-radix.md#togglegroup).
-
----
-
-## FieldSet + FieldLegend for grouping related fields
-
-Use `FieldSet` + `FieldLegend` for related checkboxes, radios, or switches — not `div` with a heading:
-
-```tsx
-<FieldSet>
-  <FieldLegend variant="label">Preferences</FieldLegend>
-  <FieldDescription>Select all that apply.</FieldDescription>
-  <FieldGroup className="gap-3">
-    <Field orientation="horizontal">
-      <Checkbox id="dark" />
-      <FieldLabel htmlFor="dark" className="font-normal">Dark mode</FieldLabel>
-    </Field>
-  </FieldGroup>
-</FieldSet>
-```
-
----
-
-## Field validation and disabled states
-
-Both attributes are needed — `data-invalid`/`data-disabled` styles the field (label, description), while `aria-invalid`/`disabled` styles the control.
-
-```tsx
-// Invalid.
-<Field data-invalid>
-  <FieldLabel htmlFor="email">Email</FieldLabel>
-  <Input id="email" aria-invalid />
-  <FieldDescription>Invalid email address.</FieldDescription>
-</Field>
-
-// Disabled.
-<Field data-disabled>
-  <FieldLabel htmlFor="email">Email</FieldLabel>
-  <Input id="email" disabled />
-</Field>
-```
-
-Works for all controls: `Input`, `Textarea`, `Select`, `Checkbox`, `RadioGroupItem`, `Switch`, `Slider`, `NativeSelect`, `InputOTP`.
+There is no `FieldSet` / `FieldLegend` / `FieldGroup` component installed — do not import one.

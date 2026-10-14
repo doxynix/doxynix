@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import type { UserRole } from "@doxynix/shared";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { enhance } from "@zenstackhq/runtime";
@@ -6,6 +7,7 @@ import superjson from "superjson";
 import { IS_PROD } from "@/shared/config/env.flags";
 
 import { normalizeError } from "@/server/core/api-error";
+import { assertAdminSecondFactor, assertNotBanned } from "@/server/utils/admin-access";
 import {
   buildRequestStore,
   requestContext,
@@ -118,7 +120,7 @@ const loggerMiddleware = t.middleware(async ({ next, path, type }) => {
     });
 
     if (IS_PROD) {
-      await appLogger.flush();
+      after(async () => appLogger.flush());
     }
 
     return result;
@@ -142,6 +144,11 @@ const isAuthed = t.middleware(({ ctx, next }) => {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "You are not logged in" });
   }
 
+  assertNotBanned({
+    banExpires: ctx.session.user.banExpires,
+    banned: ctx.session.user.banned,
+  });
+
   return next({
     ctx: {
       session: { ...ctx.session, user: ctx.session.user },
@@ -151,12 +158,24 @@ const isAuthed = t.middleware(({ ctx, next }) => {
 
 export const protectedProcedure = publicProcedure.use(isAuthed);
 
-const isAdmin = t.middleware(({ ctx, next }) => {
+const isAdmin = t.middleware(async ({ ctx, next }) => {
   if (ctx.session?.user.role !== "ADMIN") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Admin rights required" });
   }
 
-  return next({ ctx });
+  const adminUser = await ctx.prisma.user.findUnique({
+    select: { _count: { select: { passkeys: true } }, twoFactorEnabled: true },
+    where: { id: ctx.session.user.id },
+  });
+
+  assertAdminSecondFactor({
+    passkeyCount: adminUser?._count.passkeys ?? 0,
+    twoFactorEnabled: adminUser?.twoFactorEnabled ?? false,
+  });
+
+  return next({
+    ctx: { ...ctx, session: { ...ctx.session, user: ctx.session.user } },
+  });
 });
 
 export const adminProcedure = protectedProcedure.use(isAdmin);

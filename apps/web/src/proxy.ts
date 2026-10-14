@@ -2,10 +2,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import createMiddleware from "next-intl/middleware";
 
+import { IS_PROD, IS_RATE_LIMIT_ENABLED } from "@/shared/config/env.flags";
+
 import { appLogger } from "./server/core/app-logger";
 import { redisClient } from "./server/core/redis";
 import { generateRequestId, getIp, sanitizeRequestId } from "./server/utils/request-context";
-import { IS_PROD } from "./shared/config/env.flags";
 import { routing } from "./shared/i18n/routing";
 import { getCookieName } from "./shared/lib/cookies";
 import { isBypassRoute, resolvePageRedirect } from "./shared/lib/proxy-routing";
@@ -15,7 +16,7 @@ const cookieName = getCookieName();
 let ratelimit: null | Ratelimit = null;
 const ephemeralCache = new Map<string, number>();
 
-if (IS_PROD) {
+if (IS_PROD && IS_RATE_LIMIT_ENABLED) {
   ratelimit = new Ratelimit({
     analytics: false,
     enableProtection: true,

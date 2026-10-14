@@ -117,6 +117,7 @@ export function AuthForm() {
   ] as const;
 
   const [isSent, setIsSent] = useState(false);
+  const [sentEmail, setSentEmail] = useState<string | null>(null);
   const [loadingProvider, setLoadingProvider] = useState<null | string>(null);
   const [isVerifying, setIsVerifying] = useState(false);
 
@@ -164,6 +165,7 @@ export function AuthForm() {
         newUserCallbackURL: "/welcome",
       })
       .then(() => {
+        setSentEmail(values.email);
         setIsSent(true);
         toast.success(t("sent_toast_success"));
         trackClientEvent("sign_in_email_sent", { provider: "email" });
@@ -311,7 +313,7 @@ export function AuthForm() {
     setTurnstileToken(null);
     setIsVerifying(false);
     pendingDataRef.current = null;
-    toast.error(t("error_verification_expired"));
+    // toast.error(t("error_verification_expired"));
   };
 
   const turnstileOptions = {
@@ -620,9 +622,7 @@ export function AuthForm() {
             <h2 className="font-semibold text-2xl">{t("check_email_title")}</h2>
             <p className="max-w-sm text-muted-foreground text-sm">
               {t("check_email_desc")}{" "}
-              <span className="font-semibold text-foreground italic">
-                {form.getValues("email")}
-              </span>
+              <span className="font-semibold text-foreground italic">{sentEmail}</span>
             </p>
             <AppButton
               className="mt-2"

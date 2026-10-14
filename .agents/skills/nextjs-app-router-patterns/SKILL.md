@@ -1,20 +1,33 @@
 ---
 name: nextjs-app-router-patterns
-description: Master Next.js 14+ App Router with Server Components, streaming, parallel routes, and advanced data fetching. Use when building Next.js applications, implementing SSR/SSG, or optimizing React Server Components.
+description: Next.js 16 App Router patterns for apps/web — Server Components, streaming, parallel/intercepting routes, Server Actions and caching, in a `[locale]` next-intl layout. Use when working on files under apps/web/src/app, route segments, layouts, loading/error boundaries, route handlers, metadata, or "use client" boundaries.
 ---
 
 # Next.js App Router Patterns
 
-Comprehensive patterns for Next.js 14+ App Router architecture, Server Components, and modern full-stack React development.
+Patterns for the Next.js **16.3.8** / React **19.2.8** App Router, as used in `apps/web`.
+
+## Doxynix facts
+
+| Fact | Value |
+|------|-------|
+| Framework | `next` 16.3.8, `react` 19.2.8, `reactCompiler: true` |
+| i18n | `next-intl` 4.14.7, 12 locales in `messages/`, `[locale]` dynamic segment |
+| Network boundary | `src/proxy.ts` — Next 16 **renamed `middleware.ts` → `proxy.ts`**; do not recreate a `middleware.ts` |
+| Route groups | `src/app/[locale]/{(admin),(private),(public)}` plus `[...rest]` |
+| Auth boundaries | `experimental.authInterrupts: true` → `forbidden.tsx` / `unauthorized.tsx` under `[locale]/` |
+| `cacheComponents` | **disabled** (commented out in `next.config.ts`) — `'use cache'` / `cacheLife` are not in play |
+| Build | Turbopack by default; `build`/`analyze` scripts pass `--webpack` |
+
+Never treat Pages Router, `getServerSideProps`, `_app.tsx` or the Next 13/14 API surface as current.
 
 ## When to Use This Skill
 
-- Building new Next.js applications with App Router
-- Migrating from Pages Router to App Router
-- Implementing Server Components and streaming
-- Setting up parallel and intercepting routes
-- Optimizing data fetching and caching
-- Building full-stack features with Server Actions
+- Adding or editing anything under `apps/web/src/app`
+- Choosing Server vs Client Components, or placing a `'use client'` boundary
+- Setting up `loading.tsx` / `error.tsx` / `not-found.tsx` / `forbidden.tsx` boundaries
+- Writing a `route.ts` handler, Server Action, or metadata
+- Deciding how a route should fetch data (Server Component vs TanStack Query)
 
 ## Core Concepts
 
@@ -31,84 +44,113 @@ Comprehensive patterns for Next.js 14+ App Router architecture, Server Component
 ### 2. File Conventions
 
 ```
-app/
-├── layout.tsx       # Shared UI wrapper
-├── page.tsx         # Route UI
-├── loading.tsx      # Loading UI (Suspense)
-├── error.tsx        # Error boundary
-├── not-found.tsx    # 404 UI
-├── route.ts         # API endpoint
-├── template.tsx     # Re-mounted layout
-├── default.tsx      # Parallel route fallback
-└── opengraph-image.tsx  # OG image generation
+src/app/
+├── [locale]/
+│   ├── layout.tsx            # Locale + auth/session boundary
+│   ├── error.tsx             # Segment error boundary
+│   ├── not-found.tsx
+│   ├── forbidden.tsx         # authInterrupts
+│   ├── unauthorized.tsx      # authInterrupts
+│   ├── opengraph-image.tsx
+│   ├── (admin)/              # Route groups: URL-invisible
+│   ├── (private)/
+│   ├── (public)/
+│   └── [...rest]/
+├── api/
+├── global-error.tsx          # Root error boundary (outside [locale])
+├── manifest.ts
+└── robots.ts
 ```
+
+Route groups `(admin)` / `(private)` / `(public)` do not affect the URL. `global-error.tsx` must live at
+`src/app/`, not inside `[locale]/`.
 
 ## Quick Start
 
-```typescript
-// app/layout.tsx
-import { Inter } from 'next/font/google'
-import { Providers } from './providers'
+```tsx
+// src/app/[locale]/(public)/products/page.tsx
+import { Suspense } from "react";
+import { setRequestLocale } from "next-intl/server";
 
-const inter = Inter({ subsets: ['latin'] })
+type Props = { searchParams: Promise<{ sort?: string }> };
 
-export const metadata = {
-  title: { default: 'My App', template: '%s | My App' },
-  description: 'Built with Next.js App Router',
-}
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <Providers>{children}</Providers>
-      </body>
-    </html>
-  )
-}
-
-// app/page.tsx - Server Component by default
-async function getProducts() {
-  const res = await fetch('https://api.example.com/products', {
-    next: { revalidate: 3600 }, // ISR: revalidate every hour
-  })
-  return res.json()
-}
-
-export default async function HomePage() {
-  const products = await getProducts()
+export default async function ProductsPage({ searchParams }: Props) {
+  setRequestLocale(localeFromParams); // opt this route into static rendering
+  const { sort } = await searchParams;
 
   return (
     <main>
-      <h1>Products</h1>
-      <ProductGrid products={products} />
+      <Suspense fallback={<ProductListSkeleton />}>
+        <ProductList sort={sort} />
+      </Suspense>
     </main>
-  )
+  );
 }
 ```
 
+## Caching in Next 16
+
+`cacheComponents` is **off** in this repo, so the old ISR playbook does not apply:
+
+- **`fetch` is not cached by default** (changed in Next 15). A bare `fetch(url)` re-fetches on every
+  request; there is no implicit `force-cache`.
+- There is no `'use cache'` / `cacheLife` without enabling `cacheComponents`, and enabling it is a
+  deliberate, project-wide decision — do not flip it in `next.config.ts` as a side effect of a task.
+- Opt in **explicitly** per call when you actually want a cached request:
+
+```ts
+// cached indefinitely until a tag is revalidated
+const cached = await fetch(url, { cache: "force-cache", next: { tags: ["products"] } });
+
+// cached with a lifetime — revalidates Data + Full Route Cache after N seconds
+const timed = await fetch(url, { next: { revalidate: 60 } });
+
+// fresh on every request
+const fresh = await fetch(url, { cache: "no-store" });
+```
+
+- On-demand invalidation from a Server Action:
+
+```ts
+("use server");
+import { revalidatePath, revalidateTag } from "next/cache";
+
+export async function updateProduct(id: string, data: ProductData) {
+  await db.product.update({ where: { id }, data });
+  revalidateTag("products");
+  revalidatePath("/[locale]/products");
+}
+```
+
+`revalidatePath` takes a **route**, and in this app every route lives under `[locale]` — passing a
+locale-less path silently revalidates nothing.
+
+**Prefer tRPC + TanStack Query for user-facing data.** Server-side tRPC calls go through
+`@/server/api/…`; client-side reads use the React Query hooks. Reach for the Next data cache only for
+truly static, non-personalised fetches.
+
 ## Detailed patterns and worked examples
 
-Detailed pattern documentation lives in `references/details.md`. Read that file when the navigation tier above is insufficient.
+Detailed pattern documentation lives in `references/details.md`. Read that file when the summary
+above is insufficient.
 
 ## Best Practices
 
 ### Do's
 
-- **Start with Server Components** - Add 'use client' only when needed
-- **Colocate data fetching** - Fetch data where it's used
-- **Use Suspense boundaries** - Enable streaming for slow data
-- **Leverage parallel routes** - Independent loading states
-- **Use Server Actions** - For mutations with progressive enhancement
+- **Start with Server Components** — add `'use client'` only at the leaf that needs interactivity
+- **Colocate data fetching** — fetch where it is used
+- **Use Suspense boundaries** — enable streaming for slow data
+- **Leverage parallel routes** for independent loading states
+- **Use Server Actions** for mutations with progressive enhancement
+- **Call `setRequestLocale`** in locale-segment routes that should render statically
 
 ### Don'ts
 
-- **Don't pass serializable data** - Server → Client boundary limitations
-- **Don't use hooks in Server Components** - No useState, useEffect
-- **Don't fetch in Client Components** - Use Server Components or React Query
-- **Don't over-nest layouts** - Each layout adds to the component tree
-- **Don't ignore loading states** - Always provide loading.tsx or Suspense
+- **Don't pass non-serializable data** across the Server → Client boundary
+- **Don't use hooks in Server Components** — no `useState`, `useEffect`
+- **Don't fetch in Client Components** — use a Server Component or TanStack Query
+- **Don't reintroduce `middleware.ts`** — Next 16 uses `src/proxy.ts`
+- **Don't enable `cacheComponents`** or `'use cache'` without an explicit decision
+- **Don't add user-facing copy to only `en.json`** — `bun run lint:locales` checks all 12 locales, and
+  `bun run lint:i18n` (eloqnt) runs in `validate`

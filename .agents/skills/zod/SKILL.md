@@ -1,6 +1,6 @@
 ---
 name: zod
-description: Zod schema validation best practices for type safety, parsing, and error handling. This skill should be used when defining z.object schemas, using z.string validations, safeParse, or z.infer. This skill does NOT cover React Hook Form integration patterns (use react-hook-form skill) or OpenAPI client generation (use orval skill).
+description: Zod schema validation best practices for type safety, parsing, and error handling. This skill should be used when defining z.object schemas, using z.string validations, safeParse, or z.infer. This skill does NOT cover React Hook Form integration patterns (use react-hook-form skill) or OpenAPI client generation (not installed here).
 ---
 
 # Zod Best Practices
@@ -116,7 +116,7 @@ For the complete guide with all rules expanded: `AGENTS.md`
 ## Related Skills
 
 - For React Hook Form integration, see `react-hook-form` skill
-- For API client generation, see `orval` skill
+- For API client generation, see the Orval docs
 
 ## Sources
 

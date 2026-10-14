@@ -161,7 +161,10 @@ export function useMapLayout(data: RepoMapDisplayData) {
       };
 
       try {
-        elkRef.current ??= await loadElk();
+        // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- compiler cannot lower `??=`
+        if (elkRef.current == null) {
+          elkRef.current = await loadElk();
+        }
 
         const layoutedGraph = (await elkRef.current.layout(elkGraph)) as ElkNodeWithChildren;
         if (cancelled) {

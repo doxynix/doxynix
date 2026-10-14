@@ -51,7 +51,7 @@ describe("apiKeyService.list", () => {
     const archived = makeApiKeyRow({ id: "archived-id", revoked: true });
     const { db } = createApiKeyDbMock([active, archived]);
 
-    const result = await apiKeyService.list(db);
+    const result = await apiKeyService.list(db, USER_ID);
 
     expect(result.active.map((key) => key.id)).toStrictEqual(["active-id"]);
     expect(result.archived.map((key) => key.id)).toStrictEqual(["archived-id"]);
@@ -60,21 +60,23 @@ describe("apiKeyService.list", () => {
   it("should not apply the redundant revoked OR clause", async () => {
     const { db, findMany } = createApiKeyDbMock();
 
-    await apiKeyService.list(db);
+    await apiKeyService.list(db, USER_ID);
 
     expect(findMany).toHaveBeenCalledTimes(1);
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({ orderBy: { createdAt: "desc" } }),
     );
     const args = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
-    expect(args).not.toHaveProperty("where");
+    // The owner and nothing else — the redundant `revoked` OR clause must not come back, and
+    // `where` must be exactly the tenant rather than a filter that could later be widened.
+    expect(args.where).toStrictEqual({ userId: USER_ID });
     expect(JSON.stringify(args)).not.toContain("OR");
   });
 
   it("should never read the hashed key", async () => {
     const { db, findMany } = createApiKeyDbMock();
 
-    await apiKeyService.list(db);
+    await apiKeyService.list(db, USER_ID);
 
     const args = findMany.mock.calls[0]?.[0] as { select?: Record<string, boolean> };
     expect(Object.keys(args.select ?? {}).sort()).toStrictEqual(SELECTED_COLUMNS);
@@ -87,7 +89,7 @@ describe("apiKeyService.list", () => {
       makeApiKeyRow({ id: "revoked-id", revoked: true }),
     ]);
 
-    const result = await apiKeyService.list(db);
+    const result = await apiKeyService.list(db, USER_ID);
 
     for (const key of [...result.active, ...result.archived]) {
       expect(Object.keys(key).sort()).toStrictEqual(SELECTED_COLUMNS);
@@ -139,12 +141,12 @@ describe("apiKeyService mutations", () => {
     const { db, updateMany } = createApiKeyDbMock();
     updateMany.mockResolvedValue({ count: 1 });
 
-    const result = await apiKeyService.touch(db, KEY_ID);
+    const result = await apiKeyService.touch(db, KEY_ID, USER_ID);
 
     expect(result).toStrictEqual({ success: true });
     expect(updateMany).toHaveBeenCalledWith({
       data: { lastUsed: expect.any(Date) },
-      where: { id: KEY_ID },
+      where: { id: KEY_ID, userId: USER_ID },
     });
   });
 
@@ -152,7 +154,11 @@ describe("apiKeyService mutations", () => {
     const { db, updateMany } = createApiKeyDbMock();
     updateMany.mockResolvedValue({ count: 1 });
 
-    const result = await apiKeyService.update(db, { description: "new", id: KEY_ID, name: "ci" });
+    const result = await apiKeyService.update(
+      db,
+      { description: "new", id: KEY_ID, name: "ci" },
+      USER_ID,
+    );
 
     expect(result).toStrictEqual({ success: true });
     const args = updateMany.mock.calls[0]?.[0] as { data: Record<string, unknown> };
@@ -163,7 +169,7 @@ describe("apiKeyService mutations", () => {
   it("should return no key material from revoke", async () => {
     const { db } = createApiKeyDbMock();
 
-    const result = await apiKeyService.revoke(db, KEY_ID);
+    const result = await apiKeyService.revoke(db, KEY_ID, USER_ID);
 
     expect(result).toStrictEqual({ success: true });
     expect(JSON.stringify(result)).not.toContain("dxnx_");

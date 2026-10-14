@@ -1,4 +1,4 @@
-import { Status, Visibility } from "@doxynix/shared";
+import { MAX_PAGE, Status, Visibility } from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
@@ -6,11 +6,16 @@ import type { DbClient } from "@/server/core/db";
 import { getRepoInfo } from "@/server/core/github/github-api";
 import { GitHubAuthRequiredError, parseUrl } from "@/server/core/github/github-client";
 import { handlePrismaError, toOctokitTrpcError } from "@/server/utils/handle-error";
-import { clampPage, getPaginationMeta } from "@/server/utils/pagination";
+import {
+  buildDateRangeWhere,
+  cappedCount,
+  getPaginatedList,
+  orderWithTiebreak,
+} from "@/server/utils/pagination";
 import { normalizeSearchInput, tokenizeSearchInput } from "@/server/utils/search";
 
 import { repoMapper } from "./repo.mapper";
-import type { RepoFiltersInput } from "./repo.schemas";
+import type { RepoFiltersInput, RepoSlimFiltersInput } from "./repo.schemas";
 
 function buildRepoSearchClause(term: string): Prisma.RepoWhereInput {
   return {
@@ -67,6 +72,7 @@ export const repoService = {
       normalizedOwner != null && normalizedOwner.length > 0
         ? { owner: { equals: normalizedOwner, mode: "insensitive" } }
         : {},
+      buildDateRangeWhere(filters, "updatedAt"),
       statusFilter,
       searchFilter,
     ]);
@@ -131,10 +137,10 @@ export const repoService = {
     }
   },
 
-  async delete(db: DbClient, id: string) {
+  async delete(db: DbClient, id: string, userId: string) {
     try {
       await db.repo.delete({
-        where: { id: id },
+        where: { id, userId },
       });
 
       return { success: true };
@@ -143,9 +149,9 @@ export const repoService = {
     }
   },
 
-  async deleteAll(db: DbClient) {
+  async deleteAll(db: DbClient, userId: string) {
     try {
-      await db.repo.deleteMany();
+      await db.repo.deleteMany({ where: { userId } });
 
       return { success: true };
     } catch (error) {
@@ -153,57 +159,61 @@ export const repoService = {
     }
   },
 
-  async deleteByOwner(db: DbClient, owner: string) {
+  async deleteByOwner(db: DbClient, owner: string, userId: string) {
     const result = await db.repo.deleteMany({
       where: {
         owner: { equals: owner, mode: "insensitive" },
+        userId,
       },
     });
 
     return { count: result.count, success: true };
   },
 
-  async getAll(db: DbClient, input: RepoFiltersInput) {
-    const { cursor, limit, owner, search, sortBy, sortOrder, status, visibility } = input;
-    const page = clampPage(cursor);
-    const skip = (page - 1) * limit;
+  async getAll(db: DbClient, input: RepoFiltersInput, userId: string) {
+    const { limit, owner, page, search, sortBy, sortOrder, status, visibility } = input;
 
-    const where = this.buildWhereClause({ owner, search, status, visibility });
+    const where = { userId, ...this.buildWhereClause({ owner, search, status, visibility }) };
     const contextWhere: Prisma.RepoWhereInput =
       owner == null ? {} : { owner: { equals: owner, mode: "insensitive" } };
 
-    const [items, totalCount, filteredCount] = await Promise.all([
-      db.repo.findMany({
-        include: {
-          analyses: {
-            orderBy: { createdAt: "desc" },
-            select: {
-              complexityScore: true,
-              createdAt: true,
-              onboardingScore: true,
-              score: true,
-              securityScore: true,
-              status: true,
-              techDebtScore: true,
-            },
-            take: 1,
-          },
-        },
-        orderBy: { [sortBy]: sortOrder },
-        skip,
-        take: limit,
-        where,
-      }),
-      db.repo.count({ where: contextWhere }),
-      db.repo.count({ where }),
-    ]);
+    const orderBy = orderWithTiebreak(sortBy, sortOrder);
 
-    const meta = getPaginationMeta({
-      filteredCount,
-      limit,
-      page,
-      search: search ?? undefined,
-      totalCount,
+    const cap = MAX_PAGE * limit;
+    const countMatching = (filterWhere: Prisma.RepoWhereInput) =>
+      cappedCount(
+        (take) => db.repo.findMany({ select: { id: true }, take, where: filterWhere }),
+        cap,
+      );
+
+    const { items, meta } = await getPaginatedList({
+      countCap: cap,
+      countFiltered: () => countMatching(where),
+      countUnfiltered:
+        owner != null && Object.keys(where).length > 0 ? () => countMatching(contextWhere) : null,
+      fetchItems: ({ skip, take }) =>
+        db.repo.findMany({
+          include: {
+            analyses: {
+              orderBy: { createdAt: "desc" },
+              select: {
+                complexityScore: true,
+                createdAt: true,
+                onboardingScore: true,
+                score: true,
+                securityScore: true,
+                status: true,
+                techDebtScore: true,
+              },
+              take: 1,
+            },
+          },
+          orderBy,
+          skip,
+          take,
+          where,
+        }),
+      input: { limit, page, ...(search != null ? { search } : {}) },
     });
 
     return repoMapper.toPaginatedList(items, meta);
@@ -240,33 +250,34 @@ export const repoService = {
     return { ...repoMapper.toPublicFields(repo), status: Status.NEW };
   },
 
-  async getSlim(db: DbClient, input: RepoFiltersInput) {
+  async getSlim(db: DbClient, input: RepoSlimFiltersInput, userId: string) {
     const { cursor, limit, owner, search, status, visibility } = input;
-    const page = clampPage(cursor);
-    const skip = (page - 1) * limit;
 
-    const where = this.buildWhereClause({ owner, search, status, visibility });
+    const where = { userId, ...this.buildWhereClause({ owner, search, status, visibility }) };
 
     const items = await db.repo.findMany({
-      orderBy: { updatedAt: "desc" },
+      cursor: cursor != null ? { id: cursor } : undefined,
+      orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
       select: {
         id: true,
         name: true,
         owner: true,
         ownerAvatarUrl: true,
       },
-      skip,
-      take: limit,
+      take: limit + 1,
       where,
     });
 
-    const totalCount = await db.repo.count({ where });
+    const hasNextPage = items.length > limit;
+    if (hasNextPage) {
+      items.pop();
+    }
 
     return {
       items: items.map((item) => repoMapper.toSlim(item)),
       meta: {
-        nextCursor: skip + items.length < totalCount ? page + 1 : null,
-        totalCount,
+        hasNextPage,
+        nextCursor: items.at(-1)?.id,
       },
     };
   },

@@ -19,6 +19,20 @@ NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE
 
 If you haven't run the verification command in this message, you cannot claim it passes.
 
+## Gates that are easy to forget
+
+- **After `bun install` run `bun run clean:symlinks`.** It removes a circular `tree-sitter-wasms`
+  symlink that otherwise breaks WASM grammar loading. `postinstall` does this, but CI's
+  `bun install --ignore-scripts` does not.
+- **`bun run validate` covers locales too** (`lint:i18n` + `lint:locales` across all 12 locales).
+  New user-facing copy must be added to every file in `messages/`, not just `en.json`.
+- **`bun run knip`** for dead code and **`bun run dup`** for duplication (fails over 5%).
+- **`apps/*` must not import each other.** The one deliberate exception: `packages/cli` imports
+  `type { AppRouter } from "@doxynix/web/trpc"` — types only, via a devDependency. Never at runtime.
+- **Import boundaries are gated by `arch:check`** against a known-violations baseline: new
+  violations fail, old ones do not. After a deliberate refactor refresh it with
+  `bun --filter @doxynix/<app> arch:baseline` and review the diff.
+
 ## The Gate Function
 
 ```
@@ -34,6 +48,23 @@ BEFORE claiming any status or expressing satisfaction:
 
 Skip any step = lying, not verifying
 ```
+
+## Commands for this repository
+
+Bun only — `npm` / `yarn` / `pnpm` are prohibited and the permission hook rejects them.
+
+| Claim | Command |
+|-------|---------|
+| Everything is green | `bun run validate` (Biome + Oxlint + `lint:fsd` + `lint:i18n` + `lint:locales` + `arch:check` + `type-check`) |
+| Tests pass | `bun run test` (unit); `bun --filter @doxynix/web test:unit` for a single app |
+| Types are correct | `bun run type-check` (`apps/web` is memory-heavy, keep `NODE_OPTIONS=--max-old-space-size=8192`) |
+| Import boundaries hold | `bun run arch:check` |
+| No duplication | `bun run dup` (fails over 5%) |
+| No dead code | `bun run knip` |
+| Spelling / secrets | `bun run spellcheck` · `bun run secretlint` |
+
+`bun run validate` transitively runs `db:generate`, which goes through Doppler — locally the
+Doppler CLI must be installed and logged in. `scripts/doppler.ts` passes through when `CI=true`.
 
 ## Common Failures
 

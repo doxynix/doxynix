@@ -1,4 +1,4 @@
-import type { AnalysisRef, RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
+import type { AnalysisRef, RepoSnapshot } from "../analysis.repository";
 import type {
   NodeExplainPayload,
   StructureContext,
@@ -8,7 +8,7 @@ import type {
 
 export type AnalyzeEntityContext = {
   analysisRef: AnalysisRef | null;
-  repo: RepoWithLatestAnalysisAndDocs;
+  repo: RepoSnapshot;
   structureContext: null | StructureContext;
 };
 
