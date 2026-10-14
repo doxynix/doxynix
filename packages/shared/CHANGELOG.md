@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/doxynix/doxynix/compare/shared-v0.3.0...shared-v0.4.0) (2026-10-14)
+
+
+### Features
+
+* add admin panel, DB benchmarks, and prune agent skills ([#2288](https://github.com/doxynix/doxynix/issues/2288)) ([f17088d](https://github.com/doxynix/doxynix/commit/f17088dd2503dc99b3a82ddf256ac44f5235de01))
+
 ## [0.3.0](https://github.com/doxynix/doxynix/compare/shared-v0.2.0...shared-v0.3.0) (2026-09-21)
 
 

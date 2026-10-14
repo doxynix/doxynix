@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.3.0](https://github.com/doxynix/doxynix/compare/web-v5.2.0...web-v5.3.0) (2026-10-14)
+
+
+### Features
+
+* add admin panel, DB benchmarks, and prune agent skills ([#2288](https://github.com/doxynix/doxynix/issues/2288)) ([f17088d](https://github.com/doxynix/doxynix/commit/f17088dd2503dc99b3a82ddf256ac44f5235de01))
+
+
+### Bug Fixes
+
+* **deps:** update dependency react-arborist to v4 ([#2287](https://github.com/doxynix/doxynix/issues/2287)) ([c53a18c](https://github.com/doxynix/doxynix/commit/c53a18c436213f9b0726b0fa81590032ea05f3a4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @doxynix/shared bumped to 0.4.0
+
 ## [5.2.0](https://github.com/doxynix/doxynix/compare/web-v5.1.4...web-v5.2.0) (2026-10-10)
 
 
