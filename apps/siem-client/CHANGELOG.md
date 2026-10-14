@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.5.0](https://github.com/doxynix/doxynix/compare/siem-client-v0.4.0...siem-client-v0.5.0) (2026-10-14)
+
+
+### Features
+
+* add admin panel, DB benchmarks, and prune agent skills ([#2288](https://github.com/doxynix/doxynix/issues/2288)) ([f17088d](https://github.com/doxynix/doxynix/commit/f17088dd2503dc99b3a82ddf256ac44f5235de01))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @doxynix/shared bumped to 0.4.0
+    * @doxynix/siem-server bumped to 0.4.0
+
 ## [0.4.0](https://github.com/doxynix/doxynix/compare/siem-client-v0.3.7...siem-client-v0.4.0) (2026-10-10)
 
 

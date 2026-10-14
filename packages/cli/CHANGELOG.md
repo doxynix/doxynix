@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.2.0](https://github.com/doxynix/doxynix/compare/cli-v5.1.0...cli-v5.2.0) (2026-10-14)
+
+
+### Features
+
+* add admin panel, DB benchmarks, and prune agent skills ([#2288](https://github.com/doxynix/doxynix/issues/2288)) ([f17088d](https://github.com/doxynix/doxynix/commit/f17088dd2503dc99b3a82ddf256ac44f5235de01))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/shared bumped to 0.4.0
+    * @doxynix/web bumped to 5.3.0
+
 ## [5.1.0](https://github.com/doxynix/doxynix/compare/cli-v5.0.7...cli-v5.1.0) (2026-10-10)
 
 

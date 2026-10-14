@@ -1,5 +1,17 @@
 # Changelog
 
+## [6.3.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.2.0...doxynix-v6.3.0) (2026-10-14)
+
+
+### Features
+
+* add admin panel, DB benchmarks, and prune agent skills ([#2288](https://github.com/doxynix/doxynix/issues/2288)) ([f17088d](https://github.com/doxynix/doxynix/commit/f17088dd2503dc99b3a82ddf256ac44f5235de01))
+
+
+### Bug Fixes
+
+* **deps:** update dependency react-arborist to v4 ([#2287](https://github.com/doxynix/doxynix/issues/2287)) ([c53a18c](https://github.com/doxynix/doxynix/commit/c53a18c436213f9b0726b0fa81590032ea05f3a4))
+
 ## [6.2.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.1.4...doxynix-v6.2.0) (2026-10-10)
 
 
