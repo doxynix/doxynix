@@ -1,3 +1,4 @@
+import { CursorMetaSchema } from "@doxynix/shared";
 import * as z from "zod";
 
 const AuditSeveritySchema = z.enum(["info", "warning", "error", "success"]);
@@ -27,7 +28,7 @@ export const AuditLogSchema = z.object({
 
 export const ActivityLogsOutputSchema = z.object({
   items: z.array(AuditLogSchema),
-  nextCursor: z.string().optional(),
+  meta: CursorMetaSchema,
 });
 
 export type AuditLogType = z.infer<typeof AuditLogSchema>;

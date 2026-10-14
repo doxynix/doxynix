@@ -3,15 +3,35 @@ name: better-auth-security-best-practices
 description: Configure rate limiting, manage auth secrets, set up CSRF protection, define trusted origins, secure sessions and cookies, encrypt OAuth tokens, track IP addresses, and implement audit logging for Better Auth. Use when users need to secure their auth setup, prevent brute force attacks, or harden a Better Auth deployment.
 ---
 
+## Doxynix context
+
+Better Auth **1.6.30**, configured in two places:
+
+| | `apps/siem-server` | `apps/web` |
+|---|---|---|
+| Config | `src/core/auth/auth.ts` | `src/server/core/auth/index.ts` |
+| Secrets from | `env.BETTER_AUTH_SECRET` (`@/core/env`) | `BETTER_AUTH_SECRET` (`@/shared/config/env.server`) |
+| Base URL from | `env.BETTER_AUTH_URL` | `BETTER_AUTH_URL` |
+| Cookie prefix | `doxynix-siem` | default |
+| Redis | ioredis / Valkey | `@upstash/redis` + `@upstash/ratelimit` |
+
+**Never read `process.env` for secrets.** Both apps expose validated env modules — a direct
+`process.env.BETTER_AUTH_SECRET` bypasses validation and fails the env-schema checks.
+
+All runtime secrets are injected by Doppler through each workspace's `with-doppler` helper; `CI=true`
+passes straight through.
+
 ## Secret Management
 
 ### Configuring the Secret
 
 ```ts
 import { betterAuth } from "better-auth";
+import { BETTER_AUTH_SECRET } from "@/shared/config/env.server"; // apps/web
+// import { BETTER_AUTH_SECRET } from "@/core/env";              // apps/siem-server
 
 export const auth = betterAuth({
-  secret: process.env.BETTER_AUTH_SECRET, // or via `BETTER_AUTH_SECRET` env
+  secret: BETTER_AUTH_SECRET,
 });
 ```
 
@@ -25,11 +45,16 @@ Better Auth looks for secrets in this order:
 - Rejects default/placeholder secrets in production
 - Warns if shorter than 32 characters or entropy below 120 bits
 - Generate: `openssl rand -base64 32`
-- Never commit secrets to version control
+- Never commit secrets to version control — `bun run secretlint` runs in pre-commit
 
 ## Rate Limiting
 
 Enabled in production by default. Applies to all endpoints. Plugins can override per-endpoint.
+
+`apps/web` additionally rate-limits sign-in with `@upstash/ratelimit` in
+`src/server/core/ratelimit.ts` (`Ratelimit.slidingWindow(3, "10 m")`, prefix
+`@doxynix/ratelimit/email`, `enableProtection: true`) and in `src/proxy.ts`. Prefer those over
+Better Auth's built-in limiter for user-facing flows. See the `upstash-redis-js` skill.
 
 ### Default Configuration
 
@@ -130,9 +155,11 @@ The `baseURL` origin is automatically trusted. Also configurable via env: `BETTE
 trustedOrigins: [
   "*.example.com", // Matches any subdomain
   "https://*.example.com", // Protocol-specific wildcard
-  "exp://192.168.*.*:*/*", // Custom schemes (e.g., Expo)
 ]
 ```
+
+`apps/siem-server` pins `trustedOrigins` to `env.CLIENT_URL` plus explicit localhost/127.0.0.1
+entries on port 3001. Keep that shape — do not widen it with a wildcard.
 
 ### Dynamic Trusted Origins
 
@@ -238,7 +265,8 @@ account: {
 }
 ```
 
-Enable if storing OAuth tokens for API access on behalf of users. Use `skipStateCookieCheck: true` only for mobile apps that cannot maintain cookies.
+Enable if storing OAuth tokens for API access on behalf of users. `apps/web` uses the `genericOAuth`
+plugin — keep the client secret and any stored token out of client-reachable code.
 
 ## IP-Based Security
 
@@ -320,17 +348,16 @@ export const auth = betterAuth({
   advanced: {
     backgroundTasks: {
       handler: (promise) => {
-        // Platform-specific handler
-        // Vercel: waitUntil(promise)
-        // Cloudflare: ctx.waitUntil(promise)
-        waitUntil(promise);
+        // apps/web: hand off to Next.js after()
+        after(() => promise);
       },
     },
   },
 });
 ```
 
-Ensures operations like sending emails don't affect response timing.
+Ensures operations like sending emails don't affect response timing. `apps/web` already imports
+`after` from `next/server`; `apps/siem-server` runs on Node/Bun and needs no handler.
 
 ## Account Enumeration Prevention
 
@@ -338,17 +365,20 @@ Built-in: consistent response messages, dummy operations on invalid requests, ba
 
 ## Complete Security Configuration Example
 
+Shapes from the two configs in this repo, merged. Audit hooks use `appLogger`, not `console` —
+Oxlint's `no-console` only allows `warn` / `error` / `info`.
+
 ```ts
+import { after } from "next/server";
 import { betterAuth } from "better-auth";
 
+import { BETTER_AUTH_SECRET, BETTER_AUTH_URL, CLIENT_URL } from "@/shared/config/env.server";
+
 export const auth = betterAuth({
-  secret: process.env.BETTER_AUTH_SECRET,
-  baseURL: "https://api.example.com",
-  trustedOrigins: [
-    "https://app.example.com",
-    "https://*.preview.example.com",
-  ],
-  
+  baseUrl: BETTER_AUTH_URL,
+  secret: BETTER_AUTH_SECRET,
+  trustedOrigins: [...CLIENT_URL],
+
   // Rate limiting
   rateLimit: {
     enabled: true,
@@ -358,57 +388,38 @@ export const auth = betterAuth({
       "/api/auth/sign-up/email": { window: 60, max: 3 },
     },
   },
-  
-  // Session security
+
+  // Session security — apps/web uses 30 days
   session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days
-    updateAge: 60 * 60 * 24, // 24 hours
-    freshAge: 60 * 60, // 1 hour for sensitive actions
-    cookieCache: {
-      enabled: true,
-      maxAge: 300,
-      strategy: "jwe", // Encrypted session data
-    },
+    expiresIn: 60 * 60 * 24 * 30,
+    updateAge: 60 * 60 * 24,
+    freshAge: 60 * 60,
   },
-  
+
   // OAuth security
   account: {
     encryptOAuthTokens: true,
     storeStateStrategy: "cookie",
   },
-  
-  
-  // Advanced settings
+
   advanced: {
     useSecureCookies: true,
-    cookiePrefix: "myapp",
-    defaultCookieAttributes: {
-      sameSite: "lax",
-    },
+    database: { generateId: false },
     ipAddress: {
       ipAddressHeaders: ["x-forwarded-for"],
       ipv6Subnet: 64,
     },
     backgroundTasks: {
-      handler: (promise) => waitUntil(promise),
+      handler: (promise) => after(() => promise),
     },
   },
-  
+
   // Security auditing
   databaseHooks: {
     session: {
       create: {
-        after: async ({ data, ctx }) => {
-          console.log(`New session for user ${data.userId}`);
-        },
-      },
-    },
-    user: {
-      update: {
-        after: async ({ data, oldData }) => {
-          if (oldData?.email !== data.email) {
-            console.log(`Email changed for user ${data.id}`);
-          }
+        after: async ({ data }) => {
+          appLogger.info({ msg: "New session", userId: data.userId });
         },
       },
     },
@@ -420,13 +431,14 @@ export const auth = betterAuth({
 
 Before deploying to production:
 
-- [ ] **Secret**: Use a strong, unique secret (32+ characters, high entropy)
-- [ ] **HTTPS**: Ensure `baseURL` uses HTTPS
-- [ ] **Trusted Origins**: Configure all valid origins (frontend, mobile apps)
-- [ ] **Rate Limiting**: Keep enabled with appropriate limits
-- [ ] **CSRF Protection**: Keep enabled (`disableCSRFCheck: false`)
-- [ ] **Secure Cookies**: Enabled automatically with HTTPS
-- [ ] **OAuth Tokens**: Consider `encryptOAuthTokens: true` if storing tokens
-- [ ] **Background Tasks**: Configure for serverless platforms
-- [ ] **Audit Logging**: Implement via `databaseHooks` or `hooks`
-- [ ] **IP Tracking**: Configure headers if behind a proxy
+- [ ] **Secret**: strong, unique, ≥32 chars, high entropy, read from a validated env module
+- [ ] **HTTPS**: `baseURL` uses HTTPS
+- [ ] **Trusted Origins**: explicit list, no wildcards in production
+- [ ] **Rate Limiting**: enabled, plus the `@upstash/ratelimit` limiter in `apps/web`
+- [ ] **CSRF Protection**: `disableCSRFCheck` left `false`
+- [ ] **Secure Cookies**: HTTPS in production
+- [ ] **OAuth Tokens**: `encryptOAuthTokens: true` when tokens are persisted
+- [ ] **Background Tasks**: `after()` handler in `apps/web`
+- [ ] **Audit Logging**: `databaseHooks` / `hooks`, logging via `appLogger`
+- [ ] **IP Tracking**: proxy headers configured in `src/proxy.ts`
+- [ ] **Gates**: `bun run secretlint` and `bun run spellcheck` pass

@@ -72,6 +72,7 @@ describe("notificationMapper.toPaginatedList", () => {
   const meta = {
     currentPage: 1,
     filteredCount: 2,
+    hasNextPage: false,
     pageSize: 10,
     totalCount: 2,
     totalPages: 1,

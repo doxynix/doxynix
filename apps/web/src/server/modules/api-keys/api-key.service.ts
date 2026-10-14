@@ -49,7 +49,7 @@ export const apiKeyService = {
     return { key: fullKey };
   },
 
-  async list(db: DbClient) {
+  async list(db: DbClient, userId: string) {
     const allKeys = await db.apiKey.findMany({
       orderBy: { createdAt: "desc" },
       select: {
@@ -62,6 +62,7 @@ export const apiKeyService = {
         revoked: true,
         updatedAt: true,
       },
+      where: { userId },
     });
 
     return {
@@ -70,9 +71,9 @@ export const apiKeyService = {
     };
   },
 
-  async revoke(db: DbClient, id: string) {
+  async revoke(db: DbClient, id: string, userId: string) {
     try {
-      await db.apiKey.update({ data: { revoked: true }, where: { id } });
+      await db.apiKey.update({ data: { revoked: true }, where: { id, userId } });
 
       return { success: true };
     } catch (error) {
@@ -80,9 +81,9 @@ export const apiKeyService = {
     }
   },
 
-  async touch(db: DbClient, id: string) {
+  async touch(db: DbClient, id: string, userId: string) {
     const count = await db.apiKey
-      .updateMany({ data: { lastUsed: new Date() }, where: { id } })
+      .updateMany({ data: { lastUsed: new Date() }, where: { id, userId } })
       .then((result) => result.count)
       .catch((error) => handlePrismaError(error));
 
@@ -96,11 +97,11 @@ export const apiKeyService = {
     return { success: true };
   },
 
-  async update(db: DbClient, input: UpdateKeyInput) {
+  async update(db: DbClient, input: UpdateKeyInput, userId: string) {
     const count = await db.apiKey
       .updateMany({
         data: { description: input.description, name: input.name },
-        where: { id: input.id },
+        where: { id: input.id, userId },
       })
       .then((result) => result.count)
       .catch((error) =>

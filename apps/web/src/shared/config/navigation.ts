@@ -13,8 +13,10 @@ import {
   LayoutGrid,
   Link,
   Logs,
+  MailX,
   Map,
   ScanSearch,
+  ScrollText,
   Settings,
   SquareTerminal,
   TabletSmartphone,
@@ -31,8 +33,8 @@ const DASHBOARD_BASE: MenuItems = [
     icon: LayoutGrid,
     id: "dashboard",
     labelKey: "dashboard",
-    shortcut: "G then O",
-    url: "/o",
+    shortcut: "G then D",
+    url: "/d",
   },
   {
     href: "/dashboard/repos",
@@ -106,8 +108,8 @@ const SETTINGS_PAGES: MenuItems = [
     icon: AlertTriangle,
     id: "danger zone",
     labelKey: "danger_zone",
-    shortcut: "G then D",
-    url: "/d",
+    shortcut: "G then Z",
+    url: "/z",
     variant: "destructive",
   },
 ];
@@ -121,6 +123,41 @@ const GLOBAL_FEATURES: MenuItems = [
     shortcut: "G then H",
     url: "/h",
   },
+];
+
+export const ADMIN_USERS_MENU_ITEM: MenuItem = {
+  href: "/admin/users",
+  icon: Users2,
+  id: "admin_users",
+  labelKey: "admin_users",
+};
+
+export const ADMIN_AUDIT_MENU_ITEM: MenuItem = {
+  href: "/admin/audit",
+  icon: ScrollText,
+  id: "admin_audit",
+  labelKey: "admin_audit",
+};
+
+export const ADMIN_BANNED_EMAILS_MENU_ITEM: MenuItem = {
+  href: "/admin/banned-emails",
+  icon: MailX,
+  id: "admin_banned_emails",
+  labelKey: "admin_banned_emails",
+};
+
+export const ADMIN_REVIEWS_MENU_ITEM: MenuItem = {
+  href: "/admin/reviews",
+  icon: GitPullRequest,
+  id: "admin_reviews",
+  labelKey: "admin_reviews",
+};
+
+export const ADMIN_SIDEBAR_MENU: MenuItems = [
+  ADMIN_USERS_MENU_ITEM,
+  ADMIN_REVIEWS_MENU_ITEM,
+  ADMIN_AUDIT_MENU_ITEM,
+  ADMIN_BANNED_EMAILS_MENU_ITEM,
 ];
 
 const actionsMenu: MenuItems = [

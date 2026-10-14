@@ -137,7 +137,7 @@ async function cleanupFailsafeDatabaseState(taskName: string, payload: unknown, 
         });
     }
 
-    if (taskName === "analyze-pr" && safePayload?.analysisId != null) {
+    if (taskName === "analyze-pr" && safePayload?.prAnalysisId != null) {
       const prAnalysisId = String(safePayload.prAnalysisId);
 
       const prAnalysis = await db.pullRequestAnalysis.update({

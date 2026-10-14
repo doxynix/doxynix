@@ -2,9 +2,13 @@
 
 import { NotifyType, Status, UserRole, Visibility } from "@doxynix/shared";
 import { faker } from "@faker-js/faker";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { type Prisma, PrismaClient } from "@prisma/client";
 import { subDays } from "date-fns";
+import { Pool } from "pg";
 
+import { fieldEncryptionExtension } from "@/server/core/field-encryption";
+import { parseRepoMetrics } from "@/server/modules/analysis/engine/core/metrics.schemas";
 import { getNormalizedHash } from "@/server/utils/hash";
 
 import * as Fake from "./generated/fake-data";
@@ -17,16 +21,27 @@ const NOTIFICATION_BATCH_SIZE = 500;
 const MY_EMAIL = process.env.SEED_ADMIN_EMAIL ?? "admin@example.test";
 const STRESS_USER_EMAIL = "search-benchmark@example.test";
 const STRESS_USER_NAME = "Search Benchmark";
+
+const seededAvatar = () => faker.image.avatarGitHub();
+
 const STRESS_REPO_COUNT = parseSeedNumber(process.env.SEED_STRESS_REPOS, 0);
 const STRESS_NOTIFICATION_COUNT = parseSeedNumber(process.env.SEED_STRESS_NOTIFICATIONS, 0);
 
+const pool = new Pool({ connectionString: DATABASE_URL });
+
+const decryptionKeys = (process.env.PRISMA_FIELD_ENCRYPTION_DECRYPTION_KEYS ?? "")
+  .split(",")
+  .filter(Boolean);
+
 const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: DATABASE_URL,
-    },
-  },
-});
+  adapter: new PrismaPg(pool),
+  log: ["error", "warn"],
+}).$extends(
+  fieldEncryptionExtension({
+    decryptionKeys,
+    encryptionKey: process.env.PRISMA_FIELD_ENCRYPTION_KEY ?? "",
+  }),
+);
 
 function clean<T>(obj: T): T {
   return Object.fromEntries(
@@ -90,7 +105,7 @@ function createStressRepo(index: number, userId: string): Prisma.RepoCreateManyI
     name,
     openIssues: faker.number.int({ max: 200 }),
     owner,
-    ownerAvatarUrl: faker.image.avatar(),
+    ownerAvatarUrl: seededAvatar(),
     pushedAt: faker.date.recent({ days: 30 }),
     size: faker.number.int({ max: 200_000, min: 100 }),
     stars: faker.number.int({ max: 25_000 }),
@@ -142,46 +157,162 @@ const TECH_POOL = [
   "Prisma",
 ];
 
-function generateMetricsJson(_repoName: string, isBad: boolean) {
+function assertMetricsParseable(metrics: Record<string, unknown>): void {
+  const parsed = parseRepoMetrics(metrics);
+  if (parsed == null) {
+    throw new Error(
+      "generateMetricsJson produced metrics the analysis schema rejects; " +
+        "the seed would silently produce unreadable analyses",
+    );
+  }
+}
+
+function generateMetricsJson(repoName: string, isBad: boolean) {
+  const slug = repoName.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-");
   const techStack = faker.helpers.arrayElements(TECH_POOL, { max: 4, min: 2 });
+  const fileCount = faker.number.int({ max: 400, min: 40 });
+  const hot = (n: number) => (isBad ? n : Math.max(2, Math.round(n / 5)));
 
-  const hotspotSignals = [
-    { complexity: 40, path: "src/internal/core.go", score: isBad ? 85 : 20 },
-    { complexity: 30, path: "src/api/handler.go", score: isBad ? 70 : 15 },
-    { complexity: 10, path: "config/settings.yaml", score: isBad ? 95 : 5 },
-  ];
-
-  const changeCoupling = [
-    {
-      commits: faker.number.int({ max: 20, min: 5 }),
-      fromPath: "src/models/user.go",
-      toPath: "src/services/auth.go",
-    },
-    {
-      commits: faker.number.int({ max: 15, min: 3 }),
-      fromPath: "api/routes.ts",
-      toPath: "docs/openapi.yaml",
-    },
+  const paths = [
+    `src/${slug}/service.ts`,
+    `src/${slug}/controller.ts`,
+    `src/${slug}/repository.ts`,
+    `src/${slug}/schema.ts`,
+    `src/${slug}/config.ts`,
   ];
 
   const securityFindings = isBad
     ? [
-        { message: "Hardcoded credentials found", severity: "error" },
-        { message: "Insecure TLS configuration", severity: "warning" },
+        {
+          line: 12,
+          message: "Hardcoded credentials found",
+          path: paths[0] ?? "src/app.ts",
+          severity: "error" as const,
+        },
+        {
+          line: 40,
+          message: "Insecure TLS configuration",
+          path: paths[1] ?? "src/app.ts",
+          severity: "warning" as const,
+        },
       ]
     : [];
 
+  const entrypoints = [`src/${slug}/index.ts`, `src/${slug}/cli.ts`];
+
   return {
+    analysisCoverage: {
+      heuristicFiles: fileCount,
+      languagesByMode: {
+        heuristic: paths,
+        treeSitter: paths,
+        typeScriptAst: paths,
+      },
+      parserCoveragePercent: isBad ? 62 : 98,
+      totalFiles: fileCount,
+      treeSitterFiles: fileCount,
+      typeScriptAstFiles: fileCount,
+    },
+    apiSurface: isBad ? 40 : 12,
     busFactor: isBad ? 1 : faker.number.int({ max: 5, min: 2 }),
-    changeCoupling,
-    hotspotSignals,
-    languages: [
-      { color: "#00ADD8", lines: faker.number.int({ max: 5000, min: 1000 }), name: "Go" },
-      { color: "#3178c6", lines: faker.number.int({ max: 2000, min: 500 }), name: "TypeScript" },
+    changeCoupling: [
+      {
+        commits: faker.number.int({ max: 20, min: 5 }),
+        fromPath: paths[2] ?? "a",
+        toPath: paths[0] ?? "b",
+      },
+      {
+        commits: faker.number.int({ max: 15, min: 3 }),
+        fromPath: "api/routes.ts",
+        toPath: "docs/openapi.yaml",
+      },
     ],
+    churnHotspots: paths.slice(0, 3).map((path) => ({
+      changeCount: hot(30),
+      churnScore: hot(90),
+      path,
+    })),
+    complexityScore: hot(85),
+    configFiles: isBad ? 12 : 3,
+    configInventory: ["config/settings.yaml", "config/database.yml", "docker-compose.yml"],
+    dependencyCycles: isBad ? [["src/a.ts", "src/b.ts", "src/a.ts"]] : [],
+    dependencyHotspots: paths.slice(0, 3).map((path) => ({
+      dependencies: hot(14),
+      dependents: hot(9),
+      path,
+      score: hot(88),
+    })),
+    docDensity: isBad ? 0.04 : 0.31,
+    documentationInput: {
+      readme: `# ${repoName}`,
+      structure: paths,
+    },
+    duplicationReport: {
+      clones: isBad
+        ? [
+            {
+              fragmentPreview: "export function handler() { /* … */ }",
+              lines: 40,
+              primary: { endLine: 140, path: paths[0] ?? "src/a.ts", startLine: 100 },
+              secondary: { endLine: 220, path: paths[1] ?? "src/b.ts", startLine: 180 },
+            },
+          ]
+        : [],
+      duplicationPercentage: isBad ? 14 : 2,
+      totalDuplicatedLines: isBad ? 240 : 18,
+    },
+    entrypointDetails: entrypoints.map((path) => ({ kind: "module", path, symbol: "main" })),
+    entrypoints,
+    factCount: isBad ? 12 : 74,
+    fileCategoryBreakdown: [
+      { category: "src", count: Math.round(fileCount * 0.7) },
+      { category: "test", count: Math.round(fileCount * 0.2) },
+      { category: "config", count: Math.round(fileCount * 0.1) },
+    ],
+    fileCount,
+    findingCount: securityFindings.length + (isBad ? 18 : 3),
+    frameworkFacts: [{ confidence: 0.9, framework: "Next.js", version: "16.3.8" }],
+    hotspotFiles: paths.slice(0, 3),
+    hotspotSignals: paths.slice(0, 3).map((path, i) => ({
+      complexity: hot([40, 30, 10][i] ?? 20),
+      path,
+      score: hot([85, 70, 95][i] ?? 40),
+    })),
+    languages: [
+      { color: "#3178c6", lines: faker.number.int({ max: 12_000, min: 2000 }), name: "TypeScript" },
+      { color: "#00ADD8", lines: faker.number.int({ max: 5000, min: 500 }), name: "Go" },
+      { color: "#e34c26", lines: faker.number.int({ max: 3000, min: 300 }), name: "CSS" },
+    ],
+    maintenanceStatus: isBad ? "stale" : "active",
+    modularityIndex: isBad ? 0.31 : 0.82,
+    mostComplexFiles: paths.slice(0, 2),
+    onboardingScore: isBad ? 24 : 86,
+    openapiInventory: {
+      operations: isBad ? 4 : 18,
+      specPath: "docs/openapi.yaml",
+      version: "3.1.0",
+    },
+    orphanModules: isBad ? ["src/legacy/old.ts"] : [],
+    publicExports: isBad ? 8 : 64,
+    routeInventory: {
+      estimatedOperations: isBad ? 6 : 22,
+      frameworks: ["Next.js"],
+      httpRoutes: [
+        { method: "GET", path: "/api/items", sourcePath: paths[1] ?? "src/a.ts" },
+        { method: "POST", path: "/api/items", sourcePath: paths[1] ?? "src/a.ts" },
+      ],
+    },
     securityFindings,
+    securityScanStatus: isBad ? "partial" : "ok",
+    securityScore: isBad ? 28 : 94,
+    teamRoles: [
+      { login: "karen", role: "maintainer", share: 0.6 },
+      { login: "alex", role: "reviewer", share: 0.4 },
+    ],
+    techDebtScore: isBad ? 78 : 19,
     techStack,
     totalLoc: faker.number.int({ max: 50_000, min: 5000 }),
+    totalSizeKb: faker.number.int({ max: 8000, min: 400 }),
   };
 }
 
@@ -207,13 +338,13 @@ async function seedStressProfile() {
       ...Fake.fakeUser(),
       email: STRESS_USER_EMAIL,
       emailVerified: true,
-      image: faker.image.avatar(),
+      image: seededAvatar(),
       name: STRESS_USER_NAME,
       role: UserRole.USER,
     }),
     update: {
       emailVerified: true,
-      image: faker.image.avatar(),
+      image: seededAvatar(),
       name: STRESS_USER_NAME,
     },
     where: { emailHash: getNormalizedHash(STRESS_USER_EMAIL) },
@@ -266,18 +397,22 @@ async function seedStressProfile() {
 async function main() {
   console.log("Starting seed with auto-generated fake data...");
 
+  // Fail loudly here rather than let every analysis degrade to EMPTY_REPO_METRICS at read time.
+  assertMetricsParseable(generateMetricsJson("selftest-bad", true));
+  assertMetricsParseable(generateMetricsJson("selftest-good", false));
+
   const admin = await prisma.user.upsert({
     create: clean({
       ...Fake.fakeUser(),
       email: MY_EMAIL,
       emailVerified: true,
-      image: faker.image.avatar(),
+      image: seededAvatar(),
       name: "Alice",
       role: UserRole.ADMIN,
     }),
     update: {
       emailVerified: true,
-      image: faker.image.avatar(),
+      image: seededAvatar(),
       name: "Alice",
       role: UserRole.ADMIN,
     },
@@ -337,7 +472,7 @@ async function main() {
           create: [clean(Fake.fakeApiKey()), clean(Fake.fakeApiKey())],
         },
         email: faker.internet.email(),
-        image: faker.image.avatar(),
+        image: seededAvatar(),
         name: faker.person.fullName(),
         repos: {
           create: Array.from({ length: LIGHT_REPOS_PER_USER }).map(() => {

@@ -5,12 +5,16 @@ description: Configure Better Auth server and client, set up database adapters, 
 
 # Better Auth Integration Guide
 
+Better Auth **1.6.30** (root `catalog:`), with `@better-auth/drizzle-adapter` 1.6.30 and
+`@better-auth/passkey` 1.6.30. Bun only — never `npm`, `npx`, `pnpm` or `yarn`.
+
 ## Documentation Version
 
 Use documentation that matches the Better Auth version installed in the project. APIs and plugin names can differ across maintained release lines.
 
 1. Prefer a version explicitly named by the user.
-2. Otherwise, inspect the resolved `better-auth` version in the lockfile, falling back to the package manifest when no lockfile is available.
+2. Otherwise, inspect the resolved `better-auth` version in `bun.lock`, falling back to the root
+   `catalog:` and the workspace `package.json`.
 3. When the Better Auth MCP is available, call `get_doc` with `/llms.txt` to resolve that package version to a documentation identifier. Pass the identifier to every `search_docs` call and pass result paths to `get_doc` unchanged.
 4. Without MCP, start at [better-auth.com/llms.txt](https://better-auth.com/llms.txt) and follow the matching version index.
 5. Use the latest documentation only when the project version cannot be determined or the user explicitly asks about the latest release or an upgrade.
@@ -19,17 +23,38 @@ When planning an upgrade, separate guidance for the currently installed version 
 
 ---
 
+## The two Better Auth instances in this repo
+
+| | `apps/siem-server` | `apps/web` |
+|---|---|---|
+| Config | `src/core/auth/auth.ts` | `src/server/core/auth/index.ts` |
+| Adapter | `@better-auth/drizzle-adapter` → `drizzleAdapter(db, { provider: "pg", usePlural: true })` | **Custom `DBAdapter`** (`auth-adapter.ts`) over Prisma/ZenStack |
+| Schema | Drizzle tables `users`, `sessions`, `accounts`, `verifications` in `src/core/db/schema.ts` | Prisma/ZenStack models |
+| Plugins | `twoFactor` | `admin`, `captcha`, `genericOAuth`, `lastLoginMethod`, `magicLink`, `twoFactor`, `passkey` |
+| Mounted at | `auth.handler(c.req.raw)` in `src/index.ts` | `toNextJsHandler` in `src/app/api/auth/[...all]/route.ts` |
+| Client | — | `createAuthClient` in `src/shared/lib/auth-client.ts` |
+
+**Schema migrations differ per app.** `apps/siem-server` is Drizzle-only — see the
+`drizzle-migration` skill. `apps/web` owns its schema through ZenStack/Prisma — see
+`zenstack-migration`. Never point the Better Auth CLI at `prisma/schema.prisma` in
+`apps/siem-server`, and never hand-edit a generated Drizzle migration.
+
 ## Setup Workflow
 
-1. Install: `npm install better-auth`
+1. Install with Bun: `bun add better-auth @better-auth/drizzle-adapter`
 2. Set env vars: `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL`
-3. Create `auth.ts` with database + config
-4. Create route handler for your framework
-5. Run migrations:
-   - **Built-in adapter:** `npx auth@latest migrate`
-   - **Drizzle:** `npx auth@latest generate --output src/db/auth-schema.ts` then `npx drizzle-kit push` (dev) or `npx drizzle-kit generate && npx drizzle-kit migrate` (prod)
-   - **Prisma:** `npx auth@latest generate --output prisma/schema.prisma` then `npx prisma migrate dev`
-6. Verify: call `GET /api/auth/ok` — should return `{ status: "ok" }`
+3. Create the `betterAuth({ ... })` config next to the app's `db` instance
+4. Mount the handler (`auth.handler(c.req.raw)` in Hono, `toNextJsHandler` in the App Router)
+5. Create/refresh the schema:
+   - **`apps/siem-server` (Drizzle):** add the Better Auth tables to `src/core/db/schema.ts`, then
+     `bun --filter @doxynix/siem-server db:generate` (drizzle-kit) and `db:migrate`.
+     The generated SQL is not hand-editable.
+   - **`apps/web` (Prisma/ZenStack):** edit `prisma/models/*.zmodel` and run
+     `bun --filter @doxynix/web db:generate`.
+6. Verify: call the ok-health route — should return `{ status: "ok" }`
+
+If you need the Better Auth CLI, run it through `bun x auth@latest ...` — `bun x` requires shell
+approval in this session.
 
 ---
 
@@ -39,17 +64,19 @@ When planning an upgrade, separate guidance for the currently installed version 
 - `BETTER_AUTH_SECRET` - Encryption secret (min 32 chars). Generate: `openssl rand -base64 32`
 - `BETTER_AUTH_URL` - Base URL (e.g., `https://example.com`)
 
+In this repo both are read through validated env modules (`@/core/env` in siem-server,
+`@/shared/config/env.server` in apps/web) — never read `process.env` directly.
+
 Only define `baseURL`/`secret` in config if env vars are NOT set.
 
 ### File Location
-CLI looks for `auth.ts` in: `./`, `./lib`, `./utils`, or under `./src`. Use `--config` for custom path.
+The Better Auth CLI looks for `auth.ts` in `./`, `./lib`, `./utils`, or under `./src`. Use `--config` for custom path.
 
 ### CLI Commands
-- `npx auth@latest migrate` - Apply schema (built-in adapter)
-- `npx auth@latest generate` - Generate schema for Prisma/Drizzle
-- `npx auth@latest mcp --cursor` - Add MCP to AI tools
+- `bun x auth@latest generate` - Generate the schema for the configured adapter
+- `bun x auth@latest mcp` - Add MCP to AI tools
 
-**Re-run after adding/changing plugins.**
+**Re-run after adding/changing plugins**, then regenerate the Drizzle/Prisma schema and migrate.
 
 ---
 
@@ -72,13 +99,27 @@ CLI looks for `auth.ts` in: `./`, `./lib`, `./utils`, or under `./src`. Use `--c
 
 ## Database
 
-**Direct connections:** Pass `pg.Pool`, `mysql2` pool, `better-sqlite3`, or `bun:sqlite` instance. For Postgres, also supports `postgres` (postgres.js) and `@neondatabase/serverless`.
+**This repo: Drizzle in `apps/siem-server`, a custom Prisma-backed `DBAdapter` in `apps/web`.**
 
-**ORM adapters:** Import from `better-auth/adapters/drizzle`, `better-auth/adapters/prisma`, `better-auth/adapters/mongodb`.
+- `apps/siem-server` imports `drizzleAdapter` from **`@better-auth/drizzle-adapter`** (a separate
+  package), not from `better-auth/adapters/drizzle`:
+  ```ts
+  import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+  database: drizzleAdapter(db, { provider: "pg", usePlural: true }),
+  ```
+  The tables (`users`, `sessions`, `accounts`, `verifications`) live in
+  `apps/siem-server/src/core/db/schema.ts` with `usePlural: true` matching the plural table names.
+- `apps/web` passes a hand-written `DBAdapter` (see `src/server/core/auth/auth-adapter.ts`) that
+  hashes `email`, `identifier`, `token` and `value` into `*Hash` columns before hitting Prisma.
+  Changing a Better Auth field there means updating `HASH_FIELD_MAP` too.
 
-**Drizzle provider values:** `"pg"` (PostgreSQL), `"mysql"` (MySQL), `"sqlite"` (SQLite). Must match the driver used.
+**Direct connections:** `pg.Pool`, `mysql2` pool, `better-sqlite3`, or `bun:sqlite`. For Postgres also
+`postgres` (postgres.js) and `@neondatabase/serverless`.
 
-**Critical:** Better Auth uses adapter model names, NOT underlying table names. If Prisma model is `User` mapping to table `users`, use `modelName: "user"` (Prisma reference), not `"users"`.
+**Drizzle provider values:** `"pg"`, `"mysql"`, `"sqlite"` — must match the driver used.
+
+**Critical:** Better Auth uses adapter **model names**, not table names. With `usePlural: true` the
+adapter maps model `user` → table `users`; without it, expect a runtime "table not found".
 
 ---
 
@@ -142,23 +183,33 @@ CLI looks for `auth.ts` in: `./`, `./lib`, `./utils`, or under `./src`. Use `--c
 
 ## Plugins
 
-**Import from dedicated paths for tree-shaking:**
-```
-import { twoFactor } from "better-auth/plugins/two-factor"
-```
-NOT `from "better-auth/plugins"`.
+Both configs import from `better-auth/plugins` (the barrel) — that is what the repo does today, so
+follow it rather than switching to per-plugin paths mid-task:
 
-**Popular plugins:** `twoFactor`, `organization`, `passkey`, `magicLink`, `emailOtp`, `username`, `phoneNumber`, `admin`, `apiKey`, `bearer`, `jwt`, `multiSession`, `sso`, `oauthProvider`, `oidcProvider`, `openAPI`, `genericOAuth`.
+```ts
+import { twoFactor } from "better-auth/plugins";
+```
 
-Client plugins go in `createAuthClient({ plugins: [...] })`.
+**In use:** `twoFactor` (siem-server); `admin`, `captcha`, `genericOAuth`, `lastLoginMethod`,
+`magicLink`, `twoFactor`, plus `passkey` from the separate `@better-auth/passkey` package (apps/web).
+
+**Popular plugins:** `twoFactor`, `organization`, `passkey`, `magicLink`, `emailOtp`, `username`,
+`phoneNumber`, `admin`, `apiKey`, `bearer`, `jwt`, `multiSession`, `sso`, `oauthProvider`,
+`oidcProvider`, `openAPI`, `genericOAuth`.
+
+Client plugins go in `createAuthClient({ plugins: [...] })` and live in
+`apps/web/src/shared/lib/auth-client.ts` — the client plugin set must mirror the server's.
 
 ---
 
 ## Client
 
-Import from: `better-auth/client` (vanilla), `better-auth/react`, `better-auth/vue`, `better-auth/svelte`, `better-auth/solid`.
+`apps/web` uses `createAuthClient` from **`better-auth/react`** in
+`src/shared/lib/auth-client.ts`, typed against the server instance with
+`inferAdditionalFields<typeof auth>()`.
 
-Key methods: `signUp.email()`, `signIn.email()`, `signIn.social()`, `signOut()`, `useSession()`, `getSession()`, `revokeSession()`, `revokeSessions()`.
+Key methods: `signUp.email()`, `signIn.email()`, `signIn.social()`, `signOut()`, `useSession()`,
+`getSession()`, `revokeSession()`, `revokeSessions()`.
 
 ---
 
@@ -166,20 +217,25 @@ Key methods: `signUp.email()`, `signIn.email()`, `signIn.social()`, `signOut()`,
 
 Infer types: `typeof auth.$Infer.Session`, `typeof auth.$Infer.Session.user`.
 
-For separate client/server projects: `createAuthClient<typeof auth>()`.
+`apps/web` derives them from the client: `NonNullable<typeof authClient.$Infer.Session>` →
+`Session`, `Session["user"]` → `User`. See the exports at the bottom of `auth-client.ts`.
 
 ---
 
 ## Common Gotchas
 
-1. **Model vs table name** - Config uses ORM model name, not DB table name
-2. **Plugin schema** - Re-run CLI after adding plugins
-3. **Secondary storage** - Sessions go there by default, not DB
-4. **Cookie cache** - Custom session fields NOT cached, always re-fetched
-5. **Stateless mode** - No DB = session in cookie only, logout on cache expiry
-6. **Change email flow** - Sends to current email first, then new email
-7. **Drizzle: db not initialized** - `drizzleAdapter(db, ...)` requires a `db` instance from `drizzle()`. See `create-auth` skill for setup examples (node-postgres, postgres.js, Neon).
-8. **Drizzle: missing drizzle.config.ts** - `drizzle-kit` commands require a `drizzle.config.ts` pointing to the generated schema file and DB credentials.
+1. **Model vs table name** — the adapter maps model `user` → table `users` only when `usePlural: true`
+2. **Plugin schema** — re-run the schema generation after adding a plugin, then migrate
+3. **Secondary storage** — sessions go there by default, not the DB
+4. **Cookie cache** — custom session fields are NOT cached and are always re-fetched
+5. **Stateless mode** — no DB means the session lives only in the cookie
+6. **Change email flow** — sends to the current email first, then the new one
+7. **Drizzle: db not initialized** — `drizzleAdapter(db, ...)` needs a real `drizzle()` instance from
+   `src/core/db/db.ts`
+8. **Drizzle migrations** — run `bun --filter @doxynix/siem-server db:generate`; never hand-edit the
+   generated SQL (see the `drizzle-migration` skill)
+9. **Hashed columns in `apps/web`** — the custom adapter stores `emailHash` / `identifierHash` /
+   `tokenHash` / `valueHash`, so plain equality queries on those columns will not match
 
 ---
 

@@ -6,11 +6,9 @@ description: >
   realtime wire protocol, durable sub-agents (AgentChat, chat.stream.writer), human-in-the-loop,
   steering, actions, background injection (chat.defer / chat.inject), fast starts (preload, Head
   Start via @trigger.dev/sdk/chat-server), context resilience (compaction, recovery boot, OOM, large
-  payloads), chat.local run-scoped state, offline testing with mockChatAgent, or prerelease/version
-  upgrades. For the everyday chat.agent({...}) definition and the useTriggerChatTransport happy path,
-  use the trigger-authoring-chat-agent skill instead.
-type: core
-library: trigger.dev
+  payloads), chat.local run-scoped state, offline testing with mockChatAgent, or prerelease/version upgrades.
+  For the everyday chat.agent({...}) definition and the useTriggerChatTransport happy path, use the
+  trigger-authoring-chat-agent skill instead.
 ---
 
 # chat.agent — advanced & operational

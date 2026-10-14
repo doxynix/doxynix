@@ -28,7 +28,7 @@ import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
-import type { PRImpact, PRNumber } from "@/entities/pr/model/pr.types";
+import type { PRNumber } from "@/entities/pr/model/pr.types";
 import {
   buildRepoCodeHref,
   buildRepoDocsHref,
@@ -39,7 +39,7 @@ import { usePrStage } from "../model/use-pr-stage";
 
 type Props = {
   analysis: PRNumber;
-  impact: PRImpact;
+  impact: PRNumber;
   name: string;
   owner: string;
   repoId: string;

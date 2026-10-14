@@ -119,7 +119,13 @@ describe("prImpactService.listByRepository", () => {
   it("returns an empty list for a repository without analyses", async () => {
     const { db, fixture } = await createRepoFixture("OwnerEmpty");
 
-    await expect(prImpactService.listByRepository(db, fixture.repoId)).resolves.toEqual([]);
+    // Shape matters as much as the values: an empty repo still reports a total, so the client
+    // never has to distinguish "no rows" from "capped to nothing".
+    await expect(prImpactService.listByRepository(db, fixture.repoId)).resolves.toEqual({
+      capped: false,
+      items: [],
+      total: 0,
+    });
   });
 
   it("maps analyses and counts their comments", async () => {
@@ -147,7 +153,8 @@ describe("prImpactService.listByRepository", () => {
       },
     });
 
-    const [listed] = await prImpactService.listByRepository(db, fixture.repoId);
+    const { items } = await prImpactService.listByRepository(db, fixture.repoId);
+    const [listed] = items;
 
     expect(listed).toMatchObject({
       findingCount: 2,
@@ -165,10 +172,15 @@ describe("prImpactService.listByRepository", () => {
     await createPullRequestAnalysis(db, fixture, { prNumber: 1 });
     await createPullRequestAnalysis(db, fixture, { prNumber: 2 });
 
-    const listed = await prImpactService.listByRepository(db, fixture.repoId);
+    const { capped, items, total } = await prImpactService.listByRepository(db, fixture.repoId);
 
-    expect(listed.map((item) => item.prNumber).sort((a, b) => a - b)).toEqual([1, 2]);
-    expect(new Set(listed.map((item) => item.id)).size).toBe(2);
+    expect(items.map((item) => item.prNumber).sort((a: number, b: number) => a - b)).toEqual([
+      1, 2,
+    ]);
+    expect(new Set(items.map((item) => item.id)).size).toBe(2);
+    // Two rows, so the cap must not claim the list was truncated.
+    expect(total).toBe(2);
+    expect(capped).toBe(false);
   });
 
   it("does not leak analyses from another repository", async () => {
@@ -178,10 +190,10 @@ describe("prImpactService.listByRepository", () => {
     await createPullRequestAnalysis(db, mine, { prNumber: 7 });
     await createPullRequestAnalysis(db, other, { prNumber: 8 });
 
-    const listed = await prImpactService.listByRepository(db, mine.repoId);
+    const { items } = await prImpactService.listByRepository(db, mine.repoId);
 
-    expect(listed).toHaveLength(1);
-    expect(listed[0]?.prNumber).toBe(7);
+    expect(items).toHaveLength(1);
+    expect(items[0]?.prNumber).toBe(7);
   });
 
   it("denies a user who does not own the repository", async () => {

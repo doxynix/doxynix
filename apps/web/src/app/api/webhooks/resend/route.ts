@@ -14,6 +14,7 @@ import {
   markWebhookDeliveryFailed,
   toInternalAppError,
 } from "@/server/modules/webhooks/webhook-delivery-failure";
+import { revokeAccessForEmail } from "@/server/utils/access-revocation";
 import { maskEmail, normalizeEmail } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";
@@ -188,6 +189,19 @@ async function handler(req: Request) {
           reason,
           type,
         });
+
+        const revoked = await revokeAccessForEmail(prisma, email).catch((error: unknown) => {
+          appLogger.error({ email: maskEmail(email), error, msg: "Ban landed, revocation failed" });
+          return 0;
+        });
+
+        if (revoked > 0) {
+          appLogger.warn({
+            email: maskEmail(email),
+            msg: "Revoked access of auto-banned email",
+            revoked,
+          });
+        }
       } catch (error) {
         appLogger.error({ email: maskEmail(email), error, msg: "Failed to process transaction" });
 

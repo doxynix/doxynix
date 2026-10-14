@@ -1,7 +1,12 @@
-import { NotifyType } from "@doxynix/shared";
+import { CursorMetaSchema, NotificationSchema, NotifyType } from "@doxynix/shared";
 import * as z from "zod";
 
-import { PaginationSchema } from "@/server/utils/pagination";
+import {
+  CursorSchema,
+  DateRangeSchema,
+  dateRangeMustBeOrdered,
+  PaginationSchema,
+} from "@/server/utils/pagination";
 
 type ValidatePairType = { repoName?: string; repoOwner?: string };
 
@@ -21,9 +26,24 @@ export const NotificationsFilterSchema = PaginationSchema.extend({
   ...repoIdentityFields,
   isRead: z.boolean().optional(),
   type: z.enum(NotifyType).optional(),
-}).superRefine(validateRepoPair);
+  ...DateRangeSchema.shape,
+})
+  .superRefine(validateRepoPair)
+  .superRefine(dateRangeMustBeOrdered);
 
 export type NotificationsFilterInput = z.infer<typeof NotificationsFilterSchema>;
+
+export const NotificationsFeedSchema = CursorSchema.extend({
+  isRead: z.boolean().optional(),
+  type: z.enum(NotifyType).optional(),
+});
+
+export type NotificationsFeedInput = z.infer<typeof NotificationsFeedSchema>;
+
+export const NotificationsFeedOutputSchema = z.object({
+  items: z.array(NotificationSchema),
+  meta: CursorMetaSchema,
+});
 
 export const NotificationsBulkFilterSchema = z
   .object({

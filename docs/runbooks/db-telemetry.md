@@ -1,5 +1,10 @@
 # Reading DB telemetry
 
+For measured baseline numbers — what each query shape costs at 11 GB / ~18M rows, and
+which indexes are worth their write overhead — see [`../db-index-audit.md`](../db-index-audit.md).
+Use this doc for reading production telemetry; use that one for judging whether a number
+is actually a problem.
+
 ## Fields on `db.slow` and `db.write`
 
 - `durationMs` — wall-clock around the Prisma call. Contains pool acquisition,

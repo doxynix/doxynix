@@ -1,0 +1,76 @@
+name: Shared CI
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: ["main", "develop"]
+    paths:
+      - "packages/shared/**"
+      - "package.json"
+      - "bun.lock"
+      - "turbo.json"
+      - ".github/workflows/shared-ci.yml"
+  pull_request:
+    branches: ["main", "develop"]
+    paths:
+      - "packages/shared/**"
+      - "package.json"
+      - "bun.lock"
+      - "turbo.json"
+      - ".github/workflows/shared-ci.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  NODE_ENV: test
+  CI: "true"
+  SKIP_ENV_VALIDATION: "true"
+  NEXT_TELEMETRY_DISABLED: 1
+
+jobs:
+  tests:
+    name: Run Shared Tests
+    if: github.actor != 'ImgBotApp'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version-file: "package.json"
+
+      - name: Cache Bun Dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install Dependencies
+        run: bun install --ignore-scripts
+
+      - name: Run Shared Tests with Coverage
+        run: bun --filter @doxynix/shared test:coverage
+
+      - name: Run Shared Type Check
+        run: bun --filter @doxynix/shared type-check
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./packages/shared/coverage/coverage-final.json
+          flags: shared
+          fail_ci_if_error: false

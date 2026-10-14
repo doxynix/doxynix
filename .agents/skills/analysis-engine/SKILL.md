@@ -23,11 +23,12 @@ analyzeRepoTask (Trigger.dev, ~20min)
   ├─ Phase 1: Sentinel Detection (AST injection & security findings via web-tree-sitter)
   ├─ Phase 2: Mapper (Project structure, dependency metrics, and graph topology)
   └─ Phase 3: Architect (LLM synthesis, Swagger generation, and living documentation)
-         └─ Fallback chain: POWERFUL → ARCHITECT → FALLBACK
+         └─ Model tiers: activeModels.POWERFUL → activeModels.ARCHITECT → activeModels.FALLBACK
 ```
 
 ### Core Principles:
-1. **Dynamic Token Budget**: Never hardcode prompt token limits. Consume `ArchitectConfig { tokenBudget, focusAreas, modelChain }`.
+1. **Dynamic Token Budget**: Never hardcode prompt token limits. Read `tokenBudget` and `focusAreas` from
+   `PRAnalysisConfig` (defined in `logic/pr.types`, persisted via `logic/pr-config.ts`).
 2. **Modular Stages**: Each stage must implement the standard interface and be independently runnable (e.g., Sentinel running standalone for PR diffs).
 3. **Model Fallback Cascade**: If the primary reasoning model hits rate limits or timeouts, gracefully downgrade to fallback models and log the event.
 4. **Context Manager**: Prioritize "hot files" and critical entry points first when assembling context for prompts.
@@ -36,7 +37,9 @@ analyzeRepoTask (Trigger.dev, ~20min)
 
 ## 2. Living Documentation & Graph Synergy
 
-When orchestrating doc writers (`writer_readme`, `writer_api`, `writer_architecture`, `writer_changelog`):
+When orchestrating doc writers (exported from `tasks/writer.tasks.ts`): `readmeTask` (`write-readme`),
+`apiTask` (`write-api`), `architectureTask` (`write-architecture`), `contributingTask`
+(`write-contributing`), `changelogTask` (`write-changelog`):
 
 1. **AST-Driven Facts Only**: Never hallucinate code examples. Every code block must derive from real parsed files.
 2. **Graph Anchoring**: Every generated document section MUST include `graphNodeIds` referencing specific nodes in the dependency graph:
@@ -58,9 +61,10 @@ When running `analyzePrTask`:
 1. **Scope Reduction**: Run Sentinel and AST extractors strictly against the diff range (`git diff target...branch`).
 2. **Impact Analysis**: Mapper checks if changed interfaces break downstream dependencies.
 3. **Comment Posting**:
-   - Batch reviews via Octokit (`octokit.rest.pulls.createReview`).
-   - Limit to maximum 1 review submission per minute to prevent GitHub secondary rate limits.
-   - Cache comment IDs in database to support updating comments on new pushes rather than spamming threads.
+   - Batch reviews via Octokit (`octokit.rest.pulls.createReview` in `logic/comment-poster.ts`).
+     GitHub secondary rate limits apply — if you add a submission loop, throttle it.
+   - Findings are keyed by a stable signature (`generateFindingSignature`) so a re-run updates the existing
+     thread instead of spamming duplicates. Preserve that behaviour.
 
 ---
 
@@ -68,4 +72,7 @@ When running `analyzePrTask`:
 - [ ] New stages implement standard stage interface and register in stage registry.
 - [ ] Prompts are tested with sample repositories for token consumption.
 - [ ] Background tasks compile cleanly with Trigger.dev v4 types.
-- [ ] Run unit tests: `bun with-doppler "bun --filter @doxynix/web test:unit"`.
+- [ ] Run unit tests: `bun --filter @doxynix/web test:unit`. There is no root `with-doppler` script —
+      the per-package scripts already wrap Doppler themselves.
+- [ ] Background tasks are discovered via `dirs: ["./src/server/**/tasks"]` in `trigger.config.ts`;
+      a new task must live at `src/server/modules/<slice>/tasks/<kebab-name>.task.ts`.

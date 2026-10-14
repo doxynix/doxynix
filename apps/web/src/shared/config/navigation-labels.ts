@@ -8,6 +8,10 @@ export function useNavLabels(): Record<NavLabelKey, string> {
 
   return {
     about: t("nav_about"),
+    admin_audit: t("nav_admin_audit"),
+    admin_banned_emails: t("nav_admin_banned_emails"),
+    admin_reviews: t("nav_admin_reviews"),
+    admin_users: t("nav_admin_users"),
     analyze: t("nav_analyze"),
     api_keys: t("nav_api_keys"),
     audit_log: t("nav_audit_log"),

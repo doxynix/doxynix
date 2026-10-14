@@ -140,7 +140,7 @@ jobs:
           python3 .github/scripts/ci-notify.py
 
       - name: Notify Telegram
-        if: github.actor != 'ImgBotApp' && !contains(github.actor, '[bot]')
+        if: false
         uses: appleboy/telegram-action@847a2d3240d33a6137191cc89b3ad7f53e427c06
         with:
           to: ${{ secrets.TELEGRAM_TO }}

@@ -15,11 +15,10 @@ my-monorepo/
 ├── packages/                # Library packages (shared code)
 │   ├── ui/
 │   ├── utils/
-│   └── config-*/           # Shared configs (eslint, typescript, etc.)
-├── package.json            # Root package.json (minimal deps)
+│   └── config/             # Shared configs (tsconfig base, depcruise-base.json)
+├── package.json            # Root package.json (workspaces + minimal deps)
 ├── turbo.json              # Turborepo configuration
-├── pnpm-workspace.yaml     # (pnpm) or workspaces in package.json
-└── pnpm-lock.yaml          # Lockfile (required)
+└── bun.lock                # Lockfile (required)
 ```
 
 ### Key Principles
@@ -43,7 +42,7 @@ my-monorepo/
   "name": "web",
   "private": true,
   "dependencies": {
-    "@repo/ui": "workspace:*",
+    "@doxynix/ui": "workspace:*",
     "next": "latest"
   }
 }
@@ -52,13 +51,13 @@ my-monorepo/
 ### Library Packages (`packages/`)
 
 - **Shared code**: Utilities, components, configs
-- **Namespaced names**: Use `@repo/` or `@yourorg/` prefix
+- **Namespaced names**: Use the `@doxynix/` prefix
 - **Clear exports**: Define what the package exposes
 
 ```json
 // packages/ui/package.json
 {
-  "name": "@repo/ui",
+  "name": "@doxynix/ui",
   "exports": {
     "./button": "./src/button.tsx",
     "./card": "./src/card.tsx"
@@ -74,7 +73,7 @@ Export TypeScript directly; let the app's bundler compile it.
 
 ```json
 {
-  "name": "@repo/ui",
+  "name": "@doxynix/ui",
   "exports": {
     "./button": "./src/button.tsx"
   }
@@ -90,7 +89,7 @@ Package compiles itself with `tsc` or bundler.
 
 ```json
 {
-  "name": "@repo/ui",
+  "name": "@doxynix/ui",
   "exports": {
     "./button": {
       "types": "./src/button.tsx",
@@ -114,10 +113,10 @@ Install dependencies in the package that uses them, not the root.
 
 ```bash
 # Good: Install in the package that needs it
-pnpm add lodash --filter=@repo/utils
+bun add lodash --cwd packages/utils
 
 # Avoid: Installing everything at root
-pnpm add lodash -w  # Only for repo-level tools
+bun add -d lodash  # repo root — repo-level tools only
 ```
 
 ### Root Dependencies
@@ -134,10 +133,10 @@ Use workspace protocol for internal packages:
 
 ```json
 // pnpm/bun
-{ "@repo/ui": "workspace:*" }
+{ "@doxynix/ui": "workspace:*" }
 
 // npm/yarn
-{ "@repo/ui": "*" }
+{ "@doxynix/ui": "*" }
 ```
 
 ## Exports Best Practices
@@ -178,10 +177,10 @@ export * from './modal';
 
 ```json
 // Good
-{ "name": "@repo/ui" }
+{ "name": "@doxynix/ui" }
 { "name": "@acme/utils" }
 
-// Avoid (conflicts with npm registry)
+// Avoid (conflicts with the public registry)
 { "name": "ui" }
 { "name": "utils" }
 ```
@@ -195,7 +194,7 @@ export * from './modal';
 import { Button } from "../../packages/ui/src/button";
 
 // GOOD: Install and import properly
-import { Button } from "@repo/ui/button";
+import { Button } from "@doxynix/ui/button";
 ```
 
 ### Shared Code in Apps

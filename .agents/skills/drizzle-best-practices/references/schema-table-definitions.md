@@ -81,9 +81,11 @@ export * from './posts';
 
 ## Notes
 
-Use `generatedAlwaysAsIdentity()` for primary keys instead of the deprecated `serial()`.
-The `serial` type is a Postgres legacy — identity columns are the modern standard. See
-`engine-postgres.md` for more on identity columns, UUIDs, and other Postgres-specific types.
+Primary keys in this repo are always `uuid("id").primaryKey().default(sql`uuidv7()`)` — Postgres 18
+generates a time-sortable UUID, there is no sequence, and `uuidv7()` being `VOLATILE` means you
+order by `createdAt`, never by the id. Never reach for `serial()` or `generatedAlwaysAsIdentity()`
+for a table's `id`. See `engine-postgres.md` for identity columns (for non-PK counter keys) and the
+other Postgres-specific types.
 
 ## References
 

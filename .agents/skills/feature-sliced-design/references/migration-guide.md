@@ -21,11 +21,12 @@ entities with the `@x` notation. See `references/cross-import-patterns.md`.
 
 ### Step 1. Audit existing slices
 
-Use Steiger to detect slices that are used in only one place:
+Use Steiger to detect slices that are used in only one place. It is already wired as `lint:fsd` in
+this repo:
 
 ```bash
-npm install -D @feature-sliced/steiger
-npx steiger src
+bun --filter @doxynix/web lint:fsd
+bun --filter @doxynix/siem-client lint:fsd
 ```
 
 Look for these rules:
@@ -107,7 +108,7 @@ app/sync/background-sync.ts                  ← Global concern
 
 ### Post-migration verification
 
-1. Run `npx steiger src` and work through what it reports. For each
+1. Run `bun run lint:fsd` in the app you migrated and work through what it reports. For each
    single-reference slice, decide whether the boundary is still
    intentional or whether it survived only because it predates the
    migration.
@@ -115,12 +116,11 @@ app/sync/background-sync.ts                  ← Global concern
 3. Check that no empty layer directories remain.
 4. Update documentation to reflect the new structure.
 
-## Phasing out a small widgets layer (optional)
+## Phasing out a small widgets layer (not applicable in this repo)
 
-The widgets layer is discouraged, but this migration is optional. A project
-with an established widgets layer that works well can keep it as is (see
-`references/layer-structure.md`). This section is for projects with only a
-few widgets that want to align with the recommended structure.
+This section is upstream guidance for projects that want to shrink their widgets layer. **Do not
+apply it in Doxynix** — `widgets/` is a required layer in `apps/web` and `apps/siem-client`. It is
+kept here for reference when reading the upstream FSD material.
 
 Route each widget individually by its actual responsibility:
 
@@ -331,8 +331,8 @@ each consumer is an acceptable choice.
 1. **Extracting too early.** Wait for real reuse, not anticipated reuse.
    The v2.1 philosophy is "pages first, extract later".
 2. **Creating empty layers.** Do not create `features/` or `entities/`
-   directories until there is content for them, and do not actively adopt
-   the discouraged `widgets/` layer.
+   directories until there is content for them. `widgets/` is required in
+   this repo and already populated in both apps.
 3. **Refactoring while migrating.** Separate relocation from refactoring.
    Move files first, improve them in separate commits.
 4. **Ignoring import direction.** Enforce import rules from day one with

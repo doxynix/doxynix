@@ -8,6 +8,8 @@ import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { AppButton, type ButtonProps, buttonVariants } from "@/shared/ui/core/button";
 
+import { Spinner } from "./spinner";
+
 const Pagination = ({ className, ...props }: ComponentProps<"nav">) => {
   const tCommon = useTranslations("Common");
   return (
@@ -109,33 +111,39 @@ const PaginationLink = ({
 };
 PaginationLink.displayName = "PaginationLink";
 
-const PaginationPrevious = ({ className, ...props }: ComponentProps<typeof PaginationLink>) => {
+type PaginationNavProps = ComponentProps<typeof PaginationLink> & {
+  isLoading?: boolean;
+};
+
+const PaginationPrevious = ({ className, disabled, isLoading, ...props }: PaginationNavProps) => {
   const tCommon = useTranslations("Common");
   return (
     <PaginationLink
       aria-label={tCommon("go_to_previous_page")}
       className={cn("gap-1 pl-2.5", className)}
+      disabled={disabled || isLoading}
       size="default"
       {...props}
     >
-      <ChevronLeft />
+      {isLoading ? <Spinner /> : <ChevronLeft />}
       <span>{tCommon("back")}</span>
     </PaginationLink>
   );
 };
 PaginationPrevious.displayName = "PaginationPrevious";
 
-const PaginationNext = ({ className, ...props }: ComponentProps<typeof PaginationLink>) => {
+const PaginationNext = ({ className, disabled, isLoading, ...props }: PaginationNavProps) => {
   const tCommon = useTranslations("Common");
   return (
     <PaginationLink
       aria-label={tCommon("go_to_next_page")}
       className={cn("gap-1 pr-2.5", className)}
+      disabled={disabled || isLoading}
       size="default"
       {...props}
     >
       <span>{tCommon("next")}</span>
-      <ChevronRight />
+      {isLoading ? <Spinner /> : <ChevronRight />}
     </PaginationLink>
   );
 };

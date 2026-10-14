@@ -8,9 +8,9 @@
 
 | Package                   | Client     | Protocol  | Install                                       |
 | ------------------------- | ---------- | --------- | --------------------------------------------- |
-| `@upstash/redis`          | Built-in   | HTTP/REST | `npm install @upstash/redis`                  |
-| `@upstash/search-redis`   | node-redis | TCP       | `npm install @upstash/search-redis redis`     |
-| `@upstash/search-ioredis` | ioredis    | TCP       | `npm install @upstash/search-ioredis ioredis` |
+| `@upstash/redis`          | Built-in   | HTTP/REST | `bun add @upstash/redis`                  |
+| `@upstash/search-redis`   | node-redis | TCP       | `bun add @upstash/search-redis redis`     |
+| `@upstash/search-ioredis` | ioredis    | TCP       | `bun add @upstash/search-ioredis ioredis` |
 
 ## Examples
 

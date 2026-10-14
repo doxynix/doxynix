@@ -1,217 +1,127 @@
 ---
 name: release-please
-description: >
-  Set up and configure Google's release-please for automated versioning, changelog generation,
-  and publishing via GitHub Actions. Covers pipeline creation, Conventional Commits formatting,
-  pre-release workflows, monorepo configuration, and troubleshooting release pipelines.
-  Use this skill whenever the user wants to automate releases, set up CI/CD for publishing,
-  configure version bumping, write release-please-compatible commit messages, tag versions
-  automatically, publish to npm/PyPI/crates.io/Maven/Docker, or troubleshoot why a release PR
-  wasn't created. Activate even if the user doesn't mention "release-please" by name — phrases
-  like "automate my npm releases", "set up GitHub Actions for publishing", "how do I tag versions
-  automatically", "changelog generation", "semver automation", or "pre-release workflow" all
-  indicate this skill. For commit message guidance specifically, this skill focuses on
-  release-please-compatible conventions; for broader multi-repo git operations with submodules,
-  defer to multi-repo-git-ops instead.
+description: release-please as configured in this repo — `release-please-config.json` + `.release-please-manifest.json`, the `node-workspace` plugin, seven tracked packages, a Bun-based CLI publish job, and the Conventional Commits contract enforced by `scripts/check-commit-name.ts`. Use when writing a commit message, bumping or tagging a version, changing the release config, or debugging why a release PR was or was not created.
 ---
 
 # release-please
 
-## Overview
+[release-please](https://github.com/googleapis/release-please) drives releases from Conventional
+Commit messages:
 
-[release-please](https://github.com/googleapis/release-please) automates versioning and releases by analyzing Conventional Commit messages:
+1. Conventional commits land on `main`
+2. release-please opens/updates a **Release PR** with the version bump and changelog
+3. Merging that PR publishes GitHub Releases and tags
+4. A **publish job** runs when a release actually touches a published package
 
-1. **Push** conventional commits to your default branch
-2. **release-please creates/updates a Release PR** with version bump and changelog
-3. **Merge** the Release PR to trigger a GitHub Release
-4. **Publish** step runs when a release is created (npm, PyPI, crates.io, etc.)
+release-please owns versioning, changelogs and tags. You write good commit messages; it does the
+rest.
 
-release-please handles version determination, changelog generation, and git tagging. You write good commit messages; it does the rest.
+## This repo's setup
 
-## Commit Message Assistance
+| File | Role |
+| --- | --- |
+| `release-please-config.json` | package list, release types, plugins |
+| `.release-please-manifest.json` | current version per package |
+| `.github/workflows/release-please.yml` | the bot + the CLI publish job |
+| `.github/workflows/release.yml` | **legacy changesets workflow — do not extend it** |
+| `CHANGELOG.md`, `apps/web/CHANGELOG.md`, `packages/cli/CHANGELOG.md` | generated |
 
-When a user asks for help writing a commit message (not setting up a pipeline):
+> `release.yml` still calls `changesets/action`. There is **no `.changeset/` directory** and no
+> changesets dependency in any `package.json` — that workflow is dead. release-please
+> (`release-please.yml`) is the live pipeline. Do not add changesets config or run `changeset`
+> commands.
 
-1. **Ask what changed** — "What did you change and why?" (skip if already described)
-2. **Suggest the type** — Pick from the type table below, explain why that type fits
-3. **Draft the message** — Write the full commit message (header + body if needed + footers)
-4. **Confirm** — Present it for the user to approve or adjust
+### Tracked packages
 
-If the change is breaking, always include a `BREAKING CHANGE:` footer explaining migration impact.
-
-## Pipeline Setup Flow
-
-When a user wants to set up release-please, follow this interactive protocol.
-
-If `.github/workflows/release.yml` (or similar) already exists, read it first, compare against the templates in `references/workflow-templates.md`, and suggest specific improvements rather than replacing it wholesale. Common improvement opportunities: missing concurrency groups, publish not gated on `release_created`, missing idempotent publish check, overly broad permissions.
-
-### Step 1: Detect Project Type
-
-Scan the repository for package manifests:
-
-| File | Release Type |
-|------|-------------|
-| `package.json` | `node` |
-| `pyproject.toml` / `setup.py` | `python` |
-| `pom.xml` | `java` |
-| `go.mod` | `go` |
-| `Cargo.toml` | `rust` |
-| `*.gemspec` | `ruby` |
-| `composer.json` | `php` |
-| `pubspec.yaml` | `dart` |
-| `mix.exs` | `elixir` |
-| `Chart.yaml` | `helm` |
-
-If multiple manifests exist at the root, ask which is primary. If none found, use `simple`.
-
-### Step 2: Ask Configuration Questions
-
-Ask these questions (skip any already answered or obvious from context):
-
-1. **Is this a monorepo?** (multiple packages in subdirectories)
-2. **What is the default branch?** (default: `main`)
-3. **Do you need pre-release support?** (manual alpha/beta/rc releases)
-4. **Where do you publish?** (npm, GitHub Packages, PyPI, Maven Central, crates.io, Docker, none)
-5. **What is the current version?** (check package manifest, default: `0.0.0`)
-
-### Step 3: Generate Files
-
-Create three files based on the answers:
-
-#### release-please-config.json
-
-```json
+```jsonc
+// release-please-config.json
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "packages": {
-    ".": {
-      "release-type": "node",
-      "changelog-path": "CHANGELOG.md",
-      "bump-minor-pre-major": true,
-      "bump-patch-for-minor-pre-major": false,
-      "draft": false,
-      "prerelease": false,
-      "versioning": "default",
-      "extra-files": []
-    }
-  }
+    ".": { "package-name": "doxynix", "release-type": "node" },
+    "apps/siem-client": { "package-name": "@doxynix/siem-client", "release-type": "node",
+      "bump-minor-pre-major": true, "bump-patch-pre-major": true },
+    "apps/siem-server": { "package-name": "@doxynix/siem-server", "release-type": "node",
+      "bump-minor-pre-major": true, "bump-patch-pre-major": true },
+    "apps/web": { "package-name": "@doxynix/web", "release-type": "node" },
+    "packages/cli": { "package-name": "@doxynix/cli", "release-type": "node" },
+    "packages/config": { "package-name": "@doxynix/config", "release-type": "node" },
+    "packages/shared": { "package-name": "@doxynix/shared", "release-type": "node" }
+  },
+  "plugins": [{ "type": "node-workspace" }]
 }
 ```
 
-Adjust `release-type` based on detected project type. For monorepos, add multiple entries under `packages` with `component` names.
+Notes on what is actually set:
 
-#### .release-please-manifest.json
+- **`node-workspace` plugin.** Keeps the root and workspace versions in sync and updates the
+  inter-workspace `workspace:*` ranges when a package is versioned. This is why you must not
+  hand-edit a `version` field — the bot owns it.
+- **`bump-minor-pre-major` / `bump-patch-pre-major`** are set only for `apps/siem-client` and
+  `apps/siem-server`, which are still pre-1.0 (`0.4.0`, `0.3.2`). A `feat` on them yields a patch,
+  not `0.5.0`. The other five are past 1.0 and use normal semver.
+- **Every workspace is tracked, including private ones.** `packages/config` and `packages/shared`
+  get releases even though they are never published. That is intentional — they are consumed
+  through `workspace:*`.
 
-```json
-{
-  ".": "1.0.0"
-}
-```
+### Publishing
 
-Set to the current released version. Use `"0.0.0"` for new projects.
-
-#### .github/workflows/release.yml
-
-For **Node.js → npm public registry** (most common), use this base template:
+The repo is private and publishes **exactly one** package: `@doxynix/cli`. Everything else gets a
+tag and a changelog entry, nothing more.
 
 ```yaml
-name: Release
-
-on:
-  push:
-    branches: [main]
-
+# .github/workflows/release-please.yml
 permissions:
   contents: write
+  issues: write
   pull-requests: write
-
-concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: false
+  id-token: write
 
 jobs:
   release-please:
-    runs-on: ubuntu-latest
     outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
-      version: ${{ steps.release.outputs.version }}
-    steps:
-      - uses: googleapis/release-please-action@v4
-        id: release
+      cli_released: ${{ steps.release.outputs['packages/cli--release_created'] }}
 
-  publish:
+  publish-cli:
     needs: release-please
-    if: needs.release-please.outputs.release_created == 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    if: ${{ needs.release-please.outputs.cli_released == 'true' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/create-github-app-token@<sha>
         with:
-          node-version: 22
-          registry-url: https://registry.npmjs.org
-      - run: npm ci
-      - run: npm publish --provenance --access public
+          app-id: ${{ secrets.RELEASE_PLEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_PLEASE_PRIVATE_KEY }}
+
+      # release-please job runs with that app token, not GITHUB_TOKEN
+
+      - uses: oven-sh/setup-bun@<sha>
+        with:
+          bun-version-file: "package.json"
+
+      - run: bun install          # NOT --ignore-scripts: the CLI build needs real postinstall
+
+      - name: Build CLI bundle
+        run: cd packages/cli && bun run build
+
+      - name: Publish @doxynix/cli
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: cd packages/cli && bun publish --access public --provenance
 ```
 
-For **other ecosystems**, see `references/workflow-templates.md` for complete templates including:
-- Node.js → GitHub Packages (with idempotent publish check)
-- Python → PyPI (trusted publishers)
-- Java → Maven Central
-- Go (tags only, optional GoReleaser)
-- Rust → crates.io
-- Docker (build + push with semver tags)
-- Monorepo (per-package publish jobs)
-- Pre-release pattern (workflow_dispatch with version resolution)
+Two things to preserve if you touch this workflow:
 
-**Always customize:**
-- Replace `main` with the actual default branch if different
-- Adjust Node version, Python version, Java version, etc.
-- Add registry-specific secrets configuration
-- If pre-release support is needed, use the pre-release template from `references/workflow-templates.md`
+1. **Per-package output gating.** `packages/cli--release_created` is what makes the publish job a
+   no-op for every release that does not touch the CLI. A blanket `release_created == 'true'` gate
+   would republish on every release.
+2. **A GitHub App token, not `GITHUB_TOKEN`.** The bot needs to push to its own release branches.
 
-## Configuration Quick Reference
+`bun publish --provenance` links the publish to the workflow run; `--access public` is required for
+the first publish of a scoped package.
 
-| Option | Default | Purpose |
-|--------|---------|---------|
-| `release-type` | — | Package ecosystem (required) |
-| `bump-minor-pre-major` | `false` | Treat `feat` as patch when < 1.0.0 |
-| `changelog-path` | `CHANGELOG.md` | Where to write the changelog |
-| `include-v-in-tag` | `true` | Tag as `v1.2.3` vs `1.2.3` |
-| `separate-pull-requests` | `false` | One PR per package (monorepo) |
-| `draft` | `false` | Create release PRs as drafts |
-| `extra-files` | `[]` | Additional files with version strings to update |
-| `changelog-sections` | (defaults) | Customize which types appear in changelog |
+## Commit Message Contract
 
-### Monorepo Quick Setup
-
-```json
-// release-please-config.json
-{
-  "packages": {
-    "packages/core": { "release-type": "node", "component": "core" },
-    "packages/cli": { "release-type": "node", "component": "cli" }
-  }
-}
-```
-
-```json
-// .release-please-manifest.json
-{ "packages/core": "0.0.0", "packages/cli": "0.0.0" }
-```
-
-Use component names as commit scopes: `feat(core): add streaming support`
-
-For full configuration options, see `references/config-options.md`.
-
-## Commit Message Guide
-
-release-please reads commit messages to determine version bumps and generate changelogs. Every commit to the default branch must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+This is the part that actually matters day to day. `scripts/check-commit-name.ts` runs from
+Lefthook's `commit-msg` hook and **rejects** anything that does not match.
 
 ### Format
 
@@ -223,146 +133,179 @@ release-please reads commit messages to determine version bumps and generate cha
 [optional footer(s)]
 ```
 
-- Use imperative present tense: "add" not "added"
-- Do not capitalize the first letter of the description
-- Do not end with a period
+Enforced rules:
 
-### Type → Version Bump
+| Rule | Detail |
+| --- | --- |
+| Subject length | **≤ 72 characters** |
+| Trailing period | forbidden |
+| Type | `feat fix docs style refactor perf test build ci chore revert` |
+| Scope | optional, but if present must be in the allowlist |
+| Merges | `Merge branch`, `Rebase`, `fixup!`, `squash!` are exempt |
 
-| Type | Bump | Triggers Release? |
-|------|------|-------------------|
-| `feat` | Minor | Yes |
-| `fix` | Patch | Yes |
-| `deps` | Patch | Yes |
-| `refactor` | — | No |
-| `perf` | — | No |
-| `test` | — | No |
-| `docs` | — | No |
-| `style` | — | No |
-| `chore` | — | No |
-| `build` | — | No |
-| `ci` | — | No |
+### Scope allowlist
 
-**Breaking changes** (any type with `!` or `BREAKING CHANGE:` footer) → **Major** bump.
-
-### Breaking Change Examples
+Copied verbatim from `scripts/check-commit-name.ts`:
 
 ```
-feat(api)!: redesign authentication flow
-
-BREAKING CHANGE: /auth/login now requires OAuth2 tokens instead of API keys.
+ci  cli  config  db  deps  root  security  shared
+siem-client  siem-server  skills  tooling  web
 ```
 
-```
-refactor(database): migrate from MongoDB to PostgreSQL
+Anything else is rejected. Omitting the scope entirely is always valid — `type: description` never
+fails.
 
-BREAKING CHANGE: all database connection strings must be updated.
+### The DXNX ticket is injected, never typed
+
+**Never put the ticket in the subject.** Lefthook's `prepare-commit-msg` hook reads `dxnx-<n>` off
+the current branch and appends `Closes DXNX-NNN` as a footer:
+
+```
+feat(web): add repo selector to the dashboard
 ```
 
-### Special Footers
+becomes
+
+```
+feat(web): add repo selector to the dashboard
+
+Closes DXNX-1234
+```
+
+`scripts/inject-ticket.ts` skips merge/revert/fixup/squash messages and is idempotent (it checks
+for the key first). A hand-written `DXNX-NNN` in the subject duplicates the footer and, worse,
+counts as part of the 72-character budget for no benefit.
+
+### Type → version bump
+
+| Type | Bump | Release? |
+|------|------|-----------|
+| `feat` | minor | yes |
+| `fix` | patch | yes |
+| `perf` | patch | yes (upstream default) |
+| `revert` | patch | yes |
+| `chore`, `ci`, `docs`, `style`, `refactor`, `test`, `build`, `deps` | — | no |
+
+**Breaking changes** — any type with `!` after the scope/type, or a `BREAKING CHANGE:` footer —
+force a major bump.
+
+```
+feat(shared)!: drop the legacy v1 enums
+
+BREAKING CHANGE: import from "@doxynix/shared/enums/v2" instead. The v1 exports are removed.
+```
+
+Two workspaces (`apps/siem-client`, `apps/siem-server`) are pre-1.0 with
+`bump-minor-pre-major: true`, so a breaking change there still lands as a minor bump — expected,
+not a bug.
+
+### Special footers
 
 | Footer | Purpose |
 |--------|---------|
-| `BREAKING CHANGE: <desc>` | Triggers major version bump |
-| `Release-As: x.x.x` | Force a specific version number |
+| `BREAKING CHANGE: <desc>` | forces a major bump |
+| `Closes DXNX-NNN` | added automatically by Lefthook — do not type it |
+| `Release-As: x.y.z` | force a specific version, bypassing the computed bump |
 
-### Quick Examples
+`Release-As` is the escape hatch for a bad bump; prefer fixing the commit type.
+
+### Examples
 
 ```
-feat(booking): add search by date range endpoint
-fix(auth): resolve token refresh race condition
-deps: upgrade @nestjs/core to v11.0.0
-test(scheduler): add unit tests for cron parser
-chore: update .gitignore
+feat(cli): add --json flag to `dxnx analysis run`
+fix(web): resolve token refresh race on 401 replay
+chore(deps): update dependency motion to v14
+test(siem-server): cover the stream-logs router
+refactor(shared): extract the api-error normaliser
+ci: pin the postgres service image by digest
+docs: document the Doppler prerequisite
 ```
 
-### No AI Co-Author Trailers
+### No AI co-author trailers
 
-**NEVER add `Co-Authored-By` trailers for AI agents** in commit messages. These pollute changelogs and git history.
+**Never add `Co-Authored-By` trailers.** They end up in the changelog.
 
-For the complete commit conventions reference with 15+ examples, scopes guide, and anti-patterns, see `references/commit-conventions.md`.
+### Dependency bumps
+
+Renovate opens `chore(deps): ...` / `fix(deps): ... [security]` PRs, which do not trigger a
+release by themselves. That is intentional — a security bump should also carry a `fix` commit
+alongside it if a release is warranted.
+
+## Writing a commit message
+
+When someone asks for help with a message (not with the pipeline):
+
+1. **Ask what changed** — "what did you change and why?" (skip if already described)
+2. **Pick the type** — from the table, and say why
+3. **Pick the scope** — from the allowlist, or omit it
+4. **Draft** — subject ≤ 72 chars, no trailing period, no ticket in the subject
+5. **Confirm** — present it for approval
+
+If the change is breaking, add the `!` and a `BREAKING CHANGE:` footer.
 
 ## Best Practices
 
-### Squash Merges
+### Squash merges
 
-Configure your repository to use **squash merges** for feature branches. This ensures each PR produces a single conventional commit, keeping the changelog clean. Set the squash commit message to use the PR title (which should be a conventional commit message).
+Mergify squash-merges into `main`, so the **PR title becomes the commit subject**. Write the PR
+title as a conventional commit subject (≤ 72 chars, valid type and scope) — it is not a summary,
+it is the changelog line.
 
-### Permissions
+### Never hand-edit versions
 
-The GitHub Action needs `contents: write` and `pull-requests: write` at minimum. Add `packages: write` or `id-token: write` for publish steps as needed. Use the principle of least privilege — grant permissions per-job, not at workflow level.
+`package.json` `version` fields, `.release-please-manifest.json` and the `CHANGELOG.md` files are
+all bot-owned. Edit `release-please-config.json` only for genuine config changes (adding a package,
+changing release type, adding a plugin), and leave versioning to the bot.
 
-### Concurrency
+### Never `--no-verify`
 
-Always set `cancel-in-progress: false` for release workflows. Canceling a release mid-way can leave partial state (tags without releases, PRs in inconsistent state).
+If a hook rejects a commit message, the message is wrong, not the hook. Fix the subject. The same
+applies to the branch-name check.
 
-### Publish Gating
+### Permissions and concurrency
 
-Never publish in the release-please job itself. Use a separate `publish` job gated on `release_created == 'true'`. This separates concerns and makes retries easier.
-
-### Idempotent Publish
-
-Check if the version already exists in the registry before publishing. This prevents failures on workflow re-runs:
-
-```yaml
-- name: Check if version exists
-  id: check
-  run: |
-    PACKAGE_NAME=$(node -p "require('./package.json').name")
-    VERSION=$(node -p "require('./package.json').version")
-    if npm view "${PACKAGE_NAME}@${VERSION}" version 2>/dev/null; then
-      echo "exists=true" >> "$GITHUB_OUTPUT"
-    else
-      echo "exists=false" >> "$GITHUB_OUTPUT"
-    fi
-- if: steps.check.outputs.exists == 'false'
-  run: npm publish
-```
-
-### Bootstrapping Existing Projects
-
-When adding release-please to a project with existing releases:
-
-1. Set `.release-please-manifest.json` to your current version
-2. Merge the setup PR with a `chore:` commit
-3. release-please will create the next release PR based on subsequent commits
-4. Alternatively, use `Release-As: x.x.x` footer to force a starting version
+The release workflow needs `contents: write`, `issues: write`, `pull-requests: write` and
+`id-token: write`. Do not set `cancel-in-progress: true` on a release workflow — cancelling
+mid-flight can leave a tag without a release.
 
 ## Troubleshooting
 
-### No Release PR Created
+### No release PR appeared
 
-- Ensure commits since the last release include at least one releasable type (`feat`, `fix`, `deps`)
-- Check that commits are on the correct branch (must match workflow trigger)
-- Verify `release-please-config.json` and manifest exist and are valid JSON
-- Check Actions logs for permission errors
+- Are there any releasable commits (`feat`, `fix`, `perf`, `revert`, or a `BREAKING CHANGE:`
+  footer) on `main` since the last release? A PR of only `chore`/`ci` produces nothing.
+- Are they on the branch the workflow watches? `release-please.yml` triggers on `push` to `main`.
+- Are the subjects actually conventional? `feat web: thing` (no parens, unlisted scope) parses as
+  type `feat`, no scope — it will release, but the component routing will be wrong.
+- Is `release-please-config.json` valid JSON? A malformed config fails the action outright.
 
-### Wrong Version Bump
+### Wrong bump
 
-- Review commit messages — `chore:` won't trigger a release, `feat:` triggers minor
-- Check for `BREAKING CHANGE:` footers that may trigger an unexpected major bump
-- Use `Release-As: x.x.x` footer to override if needed
+- `chore:` never releases; `feat:` is minor; `perf:` is patch.
+- A `BREAKING CHANGE:` footer you did not intend forces a major.
+- On a pre-1.0 package with `bump-minor-pre-major`, a `feat` is a patch — that is configured
+  behaviour, not a bug.
+- Override a bad bump with a `Release-As: x.y.z` footer.
 
-### Pre-Release Flow
+### The CLI did not publish
 
-- Pre-releases use `workflow_dispatch`, not automatic push triggers
-- The pre-release identifier is appended to the current version: `1.2.3-alpha.1`
-- Use the `next` npm tag (or equivalent) for pre-releases, `latest` for stable
-- See the pre-release template in `references/workflow-templates.md`
+- Did the release actually touch `packages/cli`? Check `packages/cli--release_created`.
+- `NPM_TOKEN` present and not expired?
+- The publish job runs a **full** `bun install` (scripts enabled) — if you change it to
+  `--ignore-scripts`, the build fails because Prisma/ZenStack codegen never ran.
 
-### Token / Permission Issues
+### Version and changelog out of sync
 
-- Default `GITHUB_TOKEN` works for release-please PRs and releases
-- Publishing to external registries requires dedicated secrets (`NPM_TOKEN`, etc.)
-- GitHub Packages publishing uses `GITHUB_TOKEN` with `packages: write` permission
-- For PyPI, use [trusted publishers](https://docs.pypi.org/trusted-publishers/) instead of API tokens
+Almost always a hand-edited `package.json` version. Do not fix it by editing the manifest — merge
+the Release PR as-is, or revert the hand edit so the next release recomputes from the tag.
 
 ## References
 
-| Reference | Description |
-|-----------|-------------|
-| `references/commit-conventions.md` | Full Conventional Commits specification with examples and anti-patterns |
-| `references/workflow-templates.md` | Complete workflow templates for 9 ecosystems |
-| `references/config-options.md` | All configuration options, release types, and Action inputs/outputs |
-| [release-please GitHub](https://github.com/googleapis/release-please) | Official documentation |
+| Reference | Contents |
+|-----------|----------|
+| `references/commit-conventions.md` | Full Conventional Commits spec, examples, anti-patterns |
+| `references/config-options.md` | release-please configuration options |
+| `references/workflow-templates.md` | Workflow shapes: monorepo, per-package publish, pre-release |
+| [release-please](https://github.com/googleapis/release-please) | Upstream docs |
 | [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) | Specification |
+| `.agents/skills/linear-git-workflow/SKILL.md` | Branch naming, PR creation, the DXNX ticket flow |

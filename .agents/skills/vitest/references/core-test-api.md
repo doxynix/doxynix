@@ -74,10 +74,10 @@ test('dynamic skip', ({ skip }) => {
 
 ### Focus Tests
 
+Forbidden in this repo: `vitest/no-focused-tests` is an `error` in `.oxlintrc.json`.
+
 ```ts
-test.only('only this runs', () => {
-  // Other tests in file are skipped
-})
+test.only('only this runs', () => {}) // lint error
 ```
 
 ### Todo Tests
@@ -254,7 +254,10 @@ test('sort', async ({ bench }) => {
 
 - Pass options as the **second argument**; the 3rd-arg options object was removed in v4 (a trailing timeout number is still allowed)
 - Tests with no body are marked as `todo`
-- `test.only` throws in CI unless `allowOnly: true`
+- Every test needs an `expect`-family call (`vitest/expect-expect` is an `error`); allowed names are
+  `expect`, `expectDenied`, `expectValidationFail`, `fc.assert`
+- `.only` is a lint error (`vitest/no-focused-tests`); filter with `-t` instead
+- Prefer `await expect(p).resolves...` over try/catch (`vitest/prefer-expect-resolves` is an `error`)
 - Use context's `expect` for concurrent tests and snapshots
 - Function name is used as test name if passed as first arg
 - `test.sequential` was removed in v5 — use `{ concurrent: false }`

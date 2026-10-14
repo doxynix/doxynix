@@ -28,7 +28,11 @@ export const agentGithubReplyTask = task({
     const activeModels = await getActiveModels();
 
     const installation = await prisma.githubInstallation.findFirst({
-      where: { accountLogin: payload.owner, isSuspended: false },
+      where: {
+        accountLogin: payload.owner,
+        isSuspended: false,
+        userId: payload.userId,
+      },
     });
 
     if (installation == null) {

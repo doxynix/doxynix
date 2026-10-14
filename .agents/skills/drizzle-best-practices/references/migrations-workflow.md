@@ -6,32 +6,53 @@ Drizzle Kit provides multiple commands for managing schema changes. Choosing the
 workflow prevents data loss, keeps your team in sync, and makes deployments predictable.
 The two main approaches are migration files (`generate` + `migrate`) and direct push (`push`).
 
+## In this repo: always go through the package scripts
+
+`drizzle-kit` in `apps/siem-server` is wrapped in `with-doppler` (which injects the DB env vars),
+and **there is no `with-doppler` script at the repo root**. Run the workspace scripts:
+
+| Task | Command |
+|---|---|
+| Generate a migration | `bun --filter @doxynix/siem-server db:generate` |
+| Apply migrations | `bun --filter @doxynix/siem-server db:migrate` |
+| Push schema directly | `bun --filter @doxynix/siem-server db:push` |
+| Studio | `bun --filter @doxynix/siem-server db:studio` |
+| Drop a migration | `bun --filter @doxynix/siem-server db:drop-migration` |
+
+Config lives in `apps/siem-server/drizzle.config.ts`: `dialect: "postgresql"`, `casing:
+"snake_case"`, `schema: "./src/core/db/schema.ts"`, `out: "./src/core/db/migrations"`, `strict: true`,
+`breakpoints: true`.
+
+`bun with-doppler "bun --filter @doxynix/siem-server db:generate"` — the form printed in some
+upstream docs — **fails from the repo root**; `with-doppler` only exists inside `apps/web` and
+`apps/siem-server`. Likewise, `bun x` needs a shell approval in this session; prefer the scripts above.
+
+The full workflow: `.agents/skills/drizzle-migration/SKILL.md`. The short version is below.
+
 ## The Two Approaches
 
 ### Migration Files (recommended for production)
 
 ```bash
-# 1. Make changes to your schema files
-# 2. Generate a migration
-npx drizzle-kit generate
-
-# 3. Review the generated SQL in ./drizzle/
-# 4. Apply the migration
-npx drizzle-kit migrate
+# 1. Make changes to src/core/db/schema.ts
+# 2. Generate a migration (SQL lands in src/core/db/migrations/)
+bun --filter @doxynix/siem-server db:generate
+# 3. Review the generated SQL
+# 4. Apply
+bun --filter @doxynix/siem-server db:migrate
 ```
 
-This creates versioned SQL files in your `out` directory. These files are committed to
-version control and applied in order during deployment.
+The files are committed to version control and applied in order during deployment. **Never
+hand-edit generated migration SQL** — regenerate instead.
 
 ### Direct Push (good for development / prototyping)
 
 ```bash
-npx drizzle-kit push
+bun --filter @doxynix/siem-server db:push
 ```
 
-This applies schema changes directly to the database without generating migration files.
-Fast for development but provides no migration history and isn't suitable for production
-deployments.
+Applies schema changes directly without generating migration files. Fast for development but
+provides no migration history and isn't suitable for production.
 
 ## When to Use Which
 
@@ -41,83 +62,33 @@ deployments.
 | CI/CD pipelines | `migrate` |
 | Local development / prototyping | `push` |
 | Syncing schema to a new database | `push` |
-| Pulling schema from existing DB | `pull` |
 
-## Command Reference
+## Command Reference (generic)
 
-### `generate` — Create migration files
+Run these only outside this repo, where the wrappers above do not apply. Replace `npx` with
+`bun x`:
 
-```bash
-npx drizzle-kit generate
-```
+- `drizzle-kit generate` — diff the schema against the last migration state and write SQL files.
+  Always review the output.
+- `drizzle-kit migrate` — apply all unapplied migrations in order; state is tracked in
+  `__drizzle_migrations`.
+- `drizzle-kit push` — sync the schema with no migration files; prompts on destructive changes
+  when `strict: true`.
+- `drizzle-kit pull` — introspect an existing database into schema TypeScript. Adopting Drizzle on a
+  populated database only.
+- `drizzle-kit studio` — web-based database browser.
+- `drizzle-kit check` — verify the consistency of the migration folder.
 
-Compares your schema files against the previous migration state and generates SQL migration
-files for the diff. Always review generated SQL before applying.
-
-### `migrate` — Apply pending migrations
-
-```bash
-npx drizzle-kit migrate
-```
-
-Runs all unapplied migrations in order. Tracks which migrations have been applied using
-a `__drizzle_migrations` table in your database.
-
-### `push` — Apply schema directly
-
-```bash
-npx drizzle-kit push
-```
-
-Syncs your schema to the database without creating migration files. Prompts for confirmation
-on destructive changes when `strict: true` is set in config.
-
-### `pull` — Introspect existing database
-
-```bash
-npx drizzle-kit pull
-```
-
-Reads your database schema and generates Drizzle schema TypeScript files. Useful when
-adopting Drizzle in an existing project or migrating from another ORM.
-
-### `studio` — Visual database browser
-
-```bash
-npx drizzle-kit studio
-```
-
-Opens Drizzle Studio, a web-based database browser for viewing and editing data.
-
-### `check` — Verify migration state
-
-```bash
-npx drizzle-kit check
-```
-
-Verifies the consistency of your migration folder.
-
-### `up` — Upgrade migration format
-
-```bash
-npx drizzle-kit up
-```
-
-Upgrades your migration folder to the latest format when Drizzle Kit introduces changes.
-
-**Drizzle v1 changed the migration folder format.** When you move a project from 0.45.x to
-`drizzle-kit@rc`, run `drizzle-kit up` once to convert the existing folder. v1:
-
-- removes the top-level `journal.json` (it was a frequent source of merge conflicts),
-- groups each migration's SQL file and snapshot into its own folder, and
-- **removes the `drizzle-kit drop` command** — to drop or fix a conflicted migration you now
-  delete its folder and regenerate.
-
-Commit the converted folder as part of the upgrade.
+`drizzle-kit up` converts a migration folder to a newer on-disk format. **Do not run it here**:
+this repo is on `drizzle-kit@0.31.11`, where the folder already uses the current format (flat SQL
+files plus `meta/journal.json` and `meta/*_snapshot.json`, under
+`apps/siem-server/src/core/db/migrations`). The reworked per-migration folder is a Drizzle v1
+feature.
 
 ## Applying Migrations in Code
 
-For programmatic migration execution (e.g., in a deploy script or serverless function):
+`apps/siem-server` runs migrations through `scripts/migrate.ts` (`db:migrate`), not from the app
+boot path. In a generic project you would call the migrator directly:
 
 ```typescript
 import { drizzle } from 'drizzle-orm/node-postgres';
@@ -136,8 +107,6 @@ import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 // or
 import { migrate } from 'drizzle-orm/neon-http/migrator';
-// or
-import { migrate } from 'drizzle-orm/neon-serverless/migrator';
 ```
 
 ## Incorrect Patterns
@@ -145,14 +114,14 @@ import { migrate } from 'drizzle-orm/neon-serverless/migrator';
 ```typescript
 // Wrong: running push in production
 // push doesn't create migration files and can't be rolled back
-// Use generate + migrate for any environment where you need reproducible deployments
 
 // Wrong: editing generated migration files
 // If you need to modify a migration, delete it and regenerate
-// Editing can desync the migration state
 
 // Wrong: not committing migration files to version control
 // Migration files should be committed so all team members and CI/CD stay in sync
+
+// Wrong: calling `bun with-doppler "…"` from the repo root — that script does not exist there
 ```
 
 ## References

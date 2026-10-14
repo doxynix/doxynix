@@ -79,21 +79,21 @@ const passwordSchema = z.string().superRefine((password, ctx) => {
   // Check multiple rules, report all failures
   if (password.length < 8) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: 'Password must be at least 8 characters',
     })
   }
 
   if (!/[A-Z]/.test(password)) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: 'Password must contain an uppercase letter',
     })
   }
 
   if (!/[0-9]/.test(password)) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: 'Password must contain a number',
     })
   }

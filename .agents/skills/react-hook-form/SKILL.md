@@ -1,6 +1,6 @@
 ---
 name: react-hook-form
-description: React Hook Form performance optimization for client-side form validation using useForm, useWatch, useController, useFieldArray, the subscribe() API, and the Watch / FormStateSubscribe / FieldArray render-prop components. Covers RHF 7.82 additions including resetDefaultValues() and the disabled field-array option. This skill should be used when building client-side controlled forms with React Hook Form library. This skill does NOT cover React 19 Server Actions, useActionState, or server-side form handling (use react-19 skill for those).
+description: React Hook Form performance optimization for client-side form validation using useForm, useWatch, useController, useFieldArray, the subscribe() API, and the Watch / FormStateSubscribe / FieldArray render-prop components. Covers RHF 7.82 additions including resetDefaultValues() and the disabled field-array option. This skill should be used when building client-side controlled forms with React Hook Form library. This skill does NOT cover React 19 Server Actions, useActionState, or server-side form handling (that skill is not installed here; use the React 19 docs).
 ---
 
 # React Hook Form Best Practices by Community
@@ -20,7 +20,7 @@ Reference these guidelines when:
 
 ## When NOT to Use This Skill
 
-- **React 19 Server Actions / `useActionState`** — use the `react-19` skill instead
+- **React 19 Server Actions / `useActionState`** — use the React 19 docs instead
 - **Deeply nested, fully type-safe forms** — TanStack Form may be a better fit for forms with complex nested schemas; this skill assumes you've already chosen RHF
 - **Single-input or trivial forms** — uncontrolled `<form>` + `FormData` is often simpler than pulling in any library
 
@@ -105,7 +105,7 @@ Read individual reference files for detailed explanations and code examples:
 ## Related Skills
 
 - For schema validation with Zod resolver, see `zod` skill
-- For React 19 server actions, see `react-19` skill
+- For React 19 server actions, consult the React 19 docs
 - For UI/UX form design, see `frontend-design` skill
 
 ## Full Compiled Document

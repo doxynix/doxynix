@@ -1,10 +1,6 @@
 ---
 name: vitest
 description: Vitest fast unit testing framework powered by Vite with Jest-compatible API. Use when writing tests, mocking, configuring coverage, or working with test filtering and fixtures.
-metadata:
-  author: Anthony Fu
-  version: "2026.6.22"
-  source: Generated from https://github.com/vitest-dev/vitest, scripts located at https://github.com/antfu/skills
 ---
 
 Vitest is a next-generation testing framework powered by Vite. It provides a Jest-compatible API with native ESM, TypeScript, and JSX support out of the box. Vitest shares the same config, transformers, resolvers, and plugins with your Vite app.
@@ -18,7 +14,53 @@ Vitest is a next-generation testing framework powered by Vite. It provides a Jes
 - Built-in coverage via V8 or Istanbul
 - Snapshot testing, mocking, and spy utilities
 
-> The skill is based on Vitest 5.x (beta), generated at 2026-06-22.
+## Doxynix
+
+Vitest is **5.0.2 (stable, not beta)**, declared in the root `catalog` and pinned per-workspace.
+
+- Tests exist **only in `apps/web`**. `apps/siem-server`, `apps/siem-client`, `packages/cli`, `packages/config`
+  and `packages/shared` have no `test` script and no vitest dependency — do not try to run vitest there.
+- Everything below is executed with Bun. Never `npm`, `npx`, `pnpm` or `yarn`.
+
+| Command | Script |
+|---------|--------|
+| `bun --filter @doxynix/web test` | `cross-env TZ=UTC vitest run --config vitest.config.ts --no-file-parallelism` |
+| `bun --filter @doxynix/web test:unit` | unit run scoped to `src` |
+| `bun --filter @doxynix/web test:coverage` | V8 coverage, same TZ/serial flags |
+| `bun --filter @doxynix/web test:int` | `vitest run --config vitest.integration.config.ts` |
+
+Every `test*` script is wrapped by the workspace's `with-doppler` helper (which runs
+`scripts/doppler.ts`), so the Doppler CLI must be installed and logged in locally; `CI=true` passes
+straight through. Always invoke it through `bun --filter`, never from the repo root — there is no
+root-level `with-doppler` script.
+
+Run a single file through the same wrapper:
+
+```bash
+bun --filter @doxynix/web test src/server/modules/analysis/analysis.mapper.test.ts
+```
+
+Do not reach for `bunx vitest` — it skips the Doppler wrapper, the `TZ=UTC` pin and
+`--no-file-parallelism`.
+
+### Unit vs integration
+
+`vitest.config.ts` sets `exclude: ["src/tests/integration/**/*", ...]` and integration tests need a
+**real** Postgres plus `cleanupDatabase()` that `TRUNCATE`s shared tables between files. A CLI path
+filter cannot override `exclude`, so the two suites are separate scripts by design. See
+`CONTRIBUTING.md` for the `dxnx_web_test` database setup.
+
+### Lint rules that fail the build
+
+`.oxlintrc.json` enables the `vitest` plugin with these severities, so `bun run lint` fails on:
+
+- `vitest/no-focused-tests` — **error**. `.only` is never allowed.
+- `vitest/expect-expect` — **error**. Every test needs an `expect`-family call. The configured
+  `assertFunctionNames` are `expect`, `expectDenied`, `expectValidationFail`, `fc.assert`.
+- `vitest/prefer-expect-resolves` — **error**. Use `await expect(p).resolves` over try/catch.
+
+Test files also get a relaxed `.oxlintrc.json` override (no-non-null-assertion and several
+type-safety rules are `off` there).
 
 ## Core
 

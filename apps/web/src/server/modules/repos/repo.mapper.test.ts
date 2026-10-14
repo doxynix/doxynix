@@ -56,6 +56,7 @@ function makeRepoWithAnalyses(overrides?: Partial<RepoWithAnalyses>): RepoWithAn
 const meta: PaginationMeta = {
   currentPage: 1,
   filteredCount: 25,
+  hasNextPage: true,
   pageSize: 10,
   totalCount: 25,
   totalPages: 3,

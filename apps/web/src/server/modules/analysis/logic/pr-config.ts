@@ -31,8 +31,8 @@ export const PRConfigService = {
   },
 
   async getConfig(repoId: string, db: DbClient): Promise<PRAnalysisConfig> {
-    const config = await db.pullRequestAnalysisConfig.findFirst({
-      where: { repo: { id: repoId } },
+    const config = await db.pullRequestAnalysisConfig.findUnique({
+      where: { repoId },
     });
 
     if (config == null) {

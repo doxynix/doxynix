@@ -1,18 +1,18 @@
-# Types: Schema Validators (Zod / Valibot / Typebox / Arktype)
+# Types: Schema Validators (Zod)
 
 ## Why It Matters
 
 Your Drizzle table already encodes column types, nullability, and which columns are generated.
-Re-declaring that shape by hand in a Zod (or Valibot/Typebox/Arktype) schema for request/response
-validation duplicates the source of truth and drifts over time. Drizzle can derive validation
-schemas directly from a table so an API stays in sync with the database automatically.
+Re-declaring that shape by hand in a Zod schema for request/response validation duplicates the
+source of truth and drifts over time. Drizzle can derive validation schemas directly from a table
+so an API stays in sync with the database automatically.
 
-> **Version note:** In **Drizzle v1**, the validator builders ship *inside* `drizzle-orm` —
-> import from `drizzle-orm/zod`, `drizzle-orm/valibot`, `drizzle-orm/typebox`, or
-> `drizzle-orm/arktype`. On **0.45.x** they live in the separate `drizzle-zod` / `drizzle-valibot`
-> / etc. packages. The function names are the same; only the import path differs.
+> **This repo uses `drizzle-orm@0.45.3` + `drizzle-zod@0.8.3`.** Import from **`drizzle-zod`**.
+> `drizzle-orm@0.45.3` has no `/zod` subpath — `import … from 'drizzle-orm/zod'` is a resolution
+> error, not a style choice. Only Drizzle v1 (RC) ships the builders inside `drizzle-orm`, and this
+> repo is not on v1.
 
-## v1 Usage (`drizzle-orm/zod`)
+## Usage (`drizzle-zod`)
 
 Three builders cover the common cases:
 
@@ -22,24 +22,25 @@ Three builders cover the common cases:
 - `createUpdateSchema(table)` — shape for updates (everything optional; generated columns rejected).
 
 ```typescript
-import { pgTable, text, integer } from 'drizzle-orm/pg-core';
-import { createInsertSchema, createSelectSchema } from 'drizzle-orm/zod';
+import { uuid, text, timestamp } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 
-const users = pgTable('users', {
-  id: integer().generatedAlwaysAsIdentity().primaryKey(),
-  name: text().notNull(),
-  age: integer().notNull(),
+export const users = pgTable('users', {
+  id: uuid('id').primaryKey().default(sql`uuidv7()`),
+  name: text('name').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 const userInsertSchema = createInsertSchema(users);
-// { name: string; age: number }  — `id` is generated, so it's not required
+// { name: string; createdAt?: Date } — `id` is DB-generated, so it is not required
 
-const parsed = userInsertSchema.parse({ name: 'Jane', age: 30 });
+const parsed = userInsertSchema.parse({ name: 'Jane' });
 await db.insert(users).values(parsed);
 
 const userSelectSchema = createSelectSchema(users);
 const rows = await db.select().from(users).limit(1);
-const row = userSelectSchema.parse(rows[0]); // { id: number; name: string; age: number }
+const row = userSelectSchema.parse(rows[0]); // { id: string; name: string; createdAt: Date }
 ```
 
 Enums and views are supported too:
@@ -55,8 +56,8 @@ Pass a second argument to extend or overwrite individual fields. A **callback** 
 schema; a **schema value** replaces the field entirely (including its nullability).
 
 ```typescript
-import { z } from 'zod/v4';
-import { createSelectSchema } from 'drizzle-orm/zod';
+import { z } from 'zod';
+import { createSelectSchema } from 'drizzle-zod';
 
 const userSelectSchema = createSelectSchema(users, {
   name: (schema) => schema.max(20),              // extend
@@ -65,27 +66,22 @@ const userSelectSchema = createSelectSchema(users, {
 });
 ```
 
-## Factory (extended Zod instance, coercion)
+## Where it goes in this repo
 
-Use `createSchemaFactory` when you need an extended Zod instance (e.g. `@hono/zod-openapi`) or
-automatic coercion:
-
-```typescript
-import { createSchemaFactory } from 'drizzle-orm/zod';
-
-const { createInsertSchema } = createSchemaFactory({
-  coerce: { date: true }, // or `coerce: true` for all types
-});
-```
+- Inline reusable shapes next to the table in `apps/siem-server/src/core/db/schema.ts`
+  (`createInsertSchema(table)` re-exported per slice).
+- Per-slice request bodies in `apps/siem-server/src/modules/<slice>/<slice>.schema.ts`, consumed by
+  Hono via `zValidator("json", Schema)` — that is the `hono-rpc-endpoint` flow.
+- The inferred TS types come from the same builders: `typeof userInsertSchema.$inferInput`.
 
 ## Incorrect / Correct
 
 ```typescript
-// Wrong (v1): importing from the standalone package that v1 deprecated
-import { createInsertSchema } from 'drizzle-zod'; // ❌ on @rc — use drizzle-orm/zod
+// Wrong: the v1 import path — this package is not on 0.45.3 and has no such subpath
+import { createInsertSchema } from 'drizzle-orm/zod'; // ❌ in this repo
 
-// Right (v1):
-import { createInsertSchema } from 'drizzle-orm/zod'; // ✅
+// Right:
+import { createInsertSchema } from 'drizzle-zod'; // ✅
 
 // Wrong: hand-writing a Zod schema that mirrors the table — drifts when the table changes
 const manualInsert = z.object({ name: z.string(), age: z.number() }); // ❌ duplicates the schema
@@ -94,21 +90,7 @@ const manualInsert = z.object({ name: z.string(), age: z.number() }); // ❌ dup
 const userInsert = createInsertSchema(users); // ✅
 ```
 
-## Legacy (v0.45.x)
-
-Same API, separate packages and imports:
-
-```typescript
-// Drizzle 0.45.x
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-// or 'drizzle-valibot', 'drizzle-typebox', 'drizzle-arktype'
-```
-
-Note: in v1, `typebox` has two paths — `drizzle-orm/typebox` (using the `typebox` package) and
-`drizzle-orm/typebox-legacy` (using `@sinclair/typebox`).
-
 ## References
 
 - https://orm.drizzle.team/docs/zod
-- https://orm.drizzle.team/docs/valibot
-- https://orm.drizzle.team/docs/upgrade-v1 (validator package consolidation)
+- https://orm.drizzle.team/docs/upgrade-v1 (v1 folds `drizzle-zod` into `drizzle-orm/zod` — not used here)

@@ -3,7 +3,7 @@ import { basename, normalize } from "pathe";
 
 import { hasText } from "@/server/utils/string-utils";
 
-import type { RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
+import type { RepoSnapshot } from "../analysis.repository";
 import type { AIResult } from "../engine/core/analysis-result.schemas";
 import type { RepoMetrics } from "../engine/core/metrics.types";
 import { ProjectPolicy } from "../engine/core/project-policy";
@@ -219,9 +219,7 @@ function buildGraphRelatedPathSet(metrics: RepoMetrics) {
   );
 }
 
-export function buildStructureContext(
-  repo: RepoWithLatestAnalysisAndDocs,
-): null | StructureContext {
+export function buildStructureContext(repo: RepoSnapshot): null | StructureContext {
   const payload = coerceAnalysisPayload(repo.analyses[0]);
   if (payload == null) {
     return null;

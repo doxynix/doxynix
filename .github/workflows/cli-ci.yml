@@ -10,6 +10,7 @@ on:
       - "packages/cli/**"
       - "packages/shared/**"
       - "packages/config/**"
+      - "apps/web/src/server/**"
       - "package.json"
       - "bun.lock"
       - "turbo.json"
@@ -20,6 +21,7 @@ on:
       - "packages/cli/**"
       - "packages/shared/**"
       - "packages/config/**"
+      - "apps/web/src/server/**"
       - "package.json"
       - "bun.lock"
       - "turbo.json"
@@ -80,6 +82,24 @@ jobs:
       # database is needed here — only bun install.
       - name: Run CLI Tests with Coverage
         run: bun --filter @doxynix/cli test:coverage
+
+      - name: Check Formatting
+        run: bun --filter @doxynix/cli format:check
+
+      - name: Lint
+        run: bun --filter @doxynix/cli lint
+
+      - name: Check Architecture Boundaries
+        run: bun --filter @doxynix/cli arch:check
+
+      - name: Type Check
+        run: bun --filter @doxynix/cli type-check
+
+      - name: Build CLI
+        run: bun --filter @doxynix/cli build
+
+      - name: Smoke-run Built Binary
+        run: node packages/cli/dist/index.js --version
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2

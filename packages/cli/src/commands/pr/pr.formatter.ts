@@ -11,7 +11,7 @@ import {
 import { icons } from "@/ui/icons";
 import { createTable } from "@/ui/table";
 
-import type { PRAnalysisDetails, PRCommentItem, PRImpactDetails, PRListItem } from "./pr.types";
+import type { PRAnalysisDetails, PRCommentItem, PRListItem, PRNumberDetails } from "./pr.types";
 
 const PR_STATUS_LABELS: Record<string, string> = {
   COMPLETED: brand.success(`${icons.check} Completed`),
@@ -102,7 +102,7 @@ export function renderPRAnalysisDetails(analysis: PRAnalysisDetails): string {
   return table.toString();
 }
 
-export function renderPRImpactDetails(impact: NonNullable<PRImpactDetails>): string {
+export function renderPRImpactDetails(impact: NonNullable<PRNumberDetails>): string {
   const table = createTable(["Metric", "Assessment"]);
 
   const affectedCount = impact.affectedNodes?.length ?? 0;

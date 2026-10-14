@@ -4,28 +4,24 @@ import type { GithubMentionReply } from "@/server/domain/github-mention-reply";
 
 export async function handleReviewCommentEvent(
   payload: PullRequestReviewCommentPayload,
-): Promise<GithubMentionReply | null> {
+): Promise<GithubMentionReply[]> {
   if (
     payload.action !== "created" ||
     (payload.sender.type === "Bot" && payload.sender.login === "doxynix[bot]")
   ) {
-    return null;
+    return [];
   }
 
   const commentBody = payload.comment.body;
   if (!commentBody.includes("@doxynix")) {
-    return null;
+    return [];
   }
 
-  const repo = await prisma.repo.findFirst({
+  const repos = await prisma.repo.findMany({
     where: { githubId: payload.repository.id },
   });
 
-  if (repo == null) {
-    return null;
-  }
-
-  return {
+  return repos.map((repo) => ({
     branch: repo.defaultBranch,
     commentBody,
     commentId: payload.comment.id,
@@ -35,5 +31,5 @@ export async function handleReviewCommentEvent(
     repoId: repo.id,
     repoName: payload.repository.name,
     userId: repo.userId,
-  };
+  }));
 }

@@ -1,3 +1,4 @@
+import { AuditOperation } from "@doxynix/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { prisma } from "@/server/core/db";
@@ -20,7 +21,7 @@ describe("audit keyset pagination", () => {
           data: {
             createdAt: sameInstant,
             model: "Repo",
-            operation: "update",
+            operation: AuditOperation.UPDATE,
             payload: {},
             userId: user.id,
           },
@@ -37,7 +38,7 @@ describe("audit keyset pagination", () => {
         limit: 10,
       });
       seen.push(...result.items.map((item) => item.id));
-      cursor = result.nextCursor;
+      cursor = result.meta.nextCursor;
       if (cursor == null) {
         break;
       }

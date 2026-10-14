@@ -1,7 +1,6 @@
+import { generateBranchName } from "@doxynix/shared";
 import * as diff from "diff";
 import { groupBy, uniq } from "es-toolkit";
-
-import { generateBranchName } from "@/shared/lib/get-branch-name";
 
 import { getActiveModels, SAFETY_SETTINGS } from "@/server/core/ai/ai-constants";
 import { appLogger } from "@/server/core/app-logger";

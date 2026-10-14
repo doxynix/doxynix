@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { prisma } from "@/server/core/db";
+import { prisma, type TransactionClient } from "@/server/core/db";
 import { userService } from "@/server/modules/users/user.service";
 
 import { cleanupDatabase, createAnon, createTestUser, expectDenied } from "../helpers";
@@ -51,25 +51,25 @@ describe("User Linked Accounts: disconnectAccount inside the enhanced $transacti
     const account = await linkAccount(alice.user.id, "github", "gh_alice_mech");
 
     await expect(
-      alice.db.$transaction((tx) =>
+      alice.db.$transaction((tx: TransactionClient) =>
         tx.user.findUnique({ select: { id: true }, where: { id: alice.user.id } }),
       ),
     ).resolves.toMatchObject({ id: alice.user.id });
 
     await expect(
-      admin.db.$transaction((tx) =>
+      admin.db.$transaction((tx: TransactionClient) =>
         tx.user.findUnique({ select: { id: true }, where: { id: alice.user.id } }),
       ),
     ).resolves.toMatchObject({ id: alice.user.id });
 
     await expect(
-      createAnon().db.$transaction((tx) =>
+      createAnon().db.$transaction((tx: TransactionClient) =>
         tx.user.findUnique({ select: { id: true }, where: { id: alice.user.id } }),
       ),
     ).resolves.toBeNull();
 
     await expect(
-      bob.db.$transaction((tx) =>
+      bob.db.$transaction((tx: TransactionClient) =>
         tx.account.findUnique({
           where: { userId_providerId: { providerId: "github", userId: alice.user.id } },
         }),
@@ -77,7 +77,9 @@ describe("User Linked Accounts: disconnectAccount inside the enhanced $transacti
     ).resolves.toBeNull();
 
     const denied = await captureRejection(
-      bob.db.$transaction((tx) => tx.account.delete({ where: { id: account.id } })),
+      bob.db.$transaction((tx: TransactionClient) =>
+        tx.account.delete({ where: { id: account.id } }),
+      ),
     );
     expect(denied.code).toBe("P2004");
     expect(denied.message).toMatch(/denied by policy/i);

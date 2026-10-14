@@ -1,5 +1,5 @@
 import { analysisMapper } from "../analysis.mapper";
-import type { AnalysisRef, RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
+import type { AnalysisRef, RepoSnapshot } from "../analysis.repository";
 import type { AnalyzeContext, AnalyzeEntityContext } from "./analyze-context.types";
 import {
   buildStructureMapPayloadFromContext,
@@ -23,7 +23,7 @@ class AnalyzeContextBuilder implements AnalyzeContext {
   private structureContext: null | StructureContext | undefined;
   private structureMap: null | StructureMapPayload | undefined;
 
-  constructor(private readonly repo: RepoWithLatestAnalysisAndDocs) {
+  constructor(private readonly repo: RepoSnapshot) {
     this.analysisRef = analysisMapper.toAnalysisRef(repo.analyses[0]);
   }
 
@@ -87,6 +87,6 @@ class AnalyzeContextBuilder implements AnalyzeContext {
   }
 }
 
-export function createAnalyzeContextBuilder(repo: RepoWithLatestAnalysisAndDocs) {
+export function createAnalyzeContextBuilder(repo: RepoSnapshot) {
   return new AnalyzeContextBuilder(repo);
 }

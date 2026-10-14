@@ -22,49 +22,51 @@ my-monorepo/
 
 Package tasks enable parallelization, individual caching, and filtering. Define scripts in each package's `package.json`:
 
-```json
-// packages/web/package.json
+```jsonc
+// apps/web/package.json
 {
   "scripts": {
     "build": "next build",
-    "lint": "eslint .",
+    "lint": "oxlint",
+    "format": "biome check --write .",
     "test": "vitest",
-    "typecheck": "tsc --noEmit"
+    "type-check": "tsc --noEmit"
   }
 }
 
-// packages/api/package.json
+// apps/siem-server/package.json
 {
   "scripts": {
     "build": "tsc",
-    "lint": "eslint .",
-    "test": "vitest",
-    "typecheck": "tsc --noEmit"
+    "lint": "oxlint",
+    "format": "biome check --write .",
+    "type-check": "tsc -b"
   }
 }
 ```
 
-```json
+```jsonc
 // Root package.json - delegates to turbo
 {
   "scripts": {
-    "build": "turbo run build",
-    "lint": "turbo run lint",
-    "test": "turbo run test",
-    "typecheck": "turbo run typecheck"
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "type-check": "turbo type-check"
   }
 }
 ```
 
-When you run `turbo run lint`, Turborepo finds all packages with a `lint` script and runs them **in parallel**.
+When you run `turbo lint`, Turborepo finds every workspace with a `lint` script and runs them
+**in parallel**.
 
 **Root Tasks are a fallback**, not the default. Only use them for tasks that truly cannot run per-package (e.g., repo-level CI scripts, workspace-wide config generation).
 
-```json
+```jsonc
 // AVOID: Task logic in root defeats parallelization
 {
   "scripts": {
-    "lint": "eslint apps/web && eslint apps/api && eslint packages/ui"
+    "lint": "cd apps/web && oxlint && cd ../../apps/siem-server && oxlint"
   }
 }
 ```
@@ -73,7 +75,7 @@ When you run `turbo run lint`, Turborepo finds all packages with a `lint` script
 
 ```json
 {
-  "$schema": "https://v2-10-13-canary-1.turborepo.dev/schema.json",
+  "$schema": "https://turbo.build/schema.json",
   "globalEnv": ["CI"],
   "globalDependencies": ["tsconfig.json"],
   "tasks": {
@@ -97,7 +99,7 @@ When the `globalConfiguration` future flag is enabled, global options move under
 
 ```json
 {
-  "$schema": "https://v2-10-13-canary-1.turborepo.dev/schema.json",
+  "$schema": "https://turbo.build/schema.json",
   "futureFlags": { "globalConfiguration": true },
   "global": {
     "inputs": ["tsconfig.json"],
@@ -159,7 +161,7 @@ You can extend from config packages instead of just root:
 ```json
 // packages/web/turbo.json
 {
-  "extends": ["//", "@repo/turbo-config"]
+  "extends": ["//", "@doxynix/turbo-config"]
 }
 ```
 

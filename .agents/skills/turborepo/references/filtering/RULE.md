@@ -16,7 +16,7 @@ This compares your current branch to `main` (falling back to `master`) and runs 
 
 ### Why Include Dependents?
 
-If you change `@repo/ui`, packages that import `@repo/ui` (like `apps/web`) need to re-run their tasks to verify they still work with the changes.
+If you change `@doxynix/ui`, packages that import `@doxynix/ui` (like `apps/web`) need to re-run their tasks to verify they still work with the changes.
 
 ### Customizing --affected
 

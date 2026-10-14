@@ -2,14 +2,12 @@
 name: trigger-authoring-chat-agent
 description: >
   Author and run a durable AI chat agent with chat.agent from @trigger.dev/sdk/ai: the per-turn
-  run loop, why you MUST take streamText from the run argument rather than importing it from ai, returning a StreamTextResult
-  vs calling chat.pipe(), the two server actions (chat.createStartSessionAction +
+  run loop, why you MUST take streamText from the run argument rather than importing it from ai,
+  returning a StreamTextResult vs calling chat.pipe(), the two server actions (chat.createStartSessionAction +
   auth.createPublicToken), and wiring useChat to useTriggerChatTransport. Load this when building,
   modifying, or debugging a chat backend (the agent task or its lifecycle hooks) or its React
   transport, when declaring typed tools or custom data parts, or when migrating a plain AI SDK
   streamText route to chat.agent.
-type: core
-library: trigger.dev
 ---
 
 # Authoring a chat.agent

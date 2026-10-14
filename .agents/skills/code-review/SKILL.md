@@ -10,7 +10,10 @@ Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
 
 Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
 
-The issue tracker should have been provided to you. If `docs/agents/issue-tracker.md` is missing, tell the user to run `/setup-matt-pocock-skills`.
+The ticket is a Linear issue (`DXNX-NNN`). Read it with `linear_search_issues` (filter by the id in the
+`query`) and treat its description plus acceptance criteria as the spec. If no ticket was given, ask for
+the `DXNX-NNN` id before reviewing; do not guess the spec from the diff alone. For the full branch →
+commit → PR flow see the `linear-git-workflow` skill.
 
 ## Process
 
@@ -26,7 +29,7 @@ Before going further, confirm the fixed point resolves (`git rev-parse <fixed-po
 
 Look for the originating spec, in this order:
 
-1. Issue references in the commit messages (`#123`, `Closes #45`, GitLab `!67`, etc.), fetched via the workflow in `docs/agents/issue-tracker.md`.
+1. The `DXNX-NNN` ticket, read via `linear_search_issues`. The Lefthook `prepare-commit-msg` hook appends `Closes DXNX-NNN` to the commit footer, so `git log` also reveals the id.
 2. A path the user passed as an argument.
 3. A spec file under `docs/`, `specs/`, or `.scratch/` matching the branch name or feature.
 4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip and report "no spec available".

@@ -17,27 +17,27 @@ export const apiKeyRouter = createTRPCRouter({
     .input(z.optional(z.object({})))
     .output(z.object({ active: z.array(ApiKeySchema), archived: z.array(ApiKeySchema) }))
     .query(async ({ ctx }) => {
-      return apiKeyService.list(ctx.db);
+      return apiKeyService.list(ctx.db, ctx.session.user.id);
     }),
 
   revoke: protectedProcedure
     .input(z.object({ id: z.uuid() }))
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      return apiKeyService.revoke(ctx.db, input.id);
+      return apiKeyService.revoke(ctx.db, input.id, ctx.session.user.id);
     }),
 
   touch: protectedProcedure
     .input(z.object({ id: z.uuid() }))
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      return apiKeyService.touch(ctx.db, input.id);
+      return apiKeyService.touch(ctx.db, input.id, ctx.session.user.id);
     }),
 
   update: protectedProcedure
     .input(z.extend(CreateApiKeySchema, { id: z.uuid() }))
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      return apiKeyService.update(ctx.db, input);
+      return apiKeyService.update(ctx.db, input, ctx.session.user.id);
     }),
 });

@@ -1,5 +1,4 @@
 import { createElement } from "react";
-import { headers } from "next/headers";
 import { after } from "next/server";
 import { passkey } from "@better-auth/passkey";
 import { render } from "@react-email/render";
@@ -35,6 +34,7 @@ import { emailSignInLimiter } from "@/server/core/ratelimit";
 import { redisService } from "@/server/core/redis";
 import { maskEmail, normalizeEmail, validateEmailSafety } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
+import { getIp } from "@/server/utils/request-context";
 
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // TIME: 30 days
 const SESSION_UPDATE_AGE = 24 * 60 * 60; // TIME: 24 hours
@@ -60,12 +60,14 @@ async function assertEmailNotBanned(
   dbUser: { email: null | string; emailHash: null | string; id: string },
   action: string,
 ): Promise<void> {
-  if (dbUser.emailHash == null) {
+  const hash = dbUser.emailHash ?? (dbUser.email == null ? null : getNormalizedHash(dbUser.email));
+
+  if (hash == null) {
     return;
   }
 
   const isBanned = await prisma.bannedEmail.findUnique({
-    where: { emailHash: dbUser.emailHash },
+    where: { emailHash: hash },
   });
 
   if (isBanned == null) {
@@ -78,6 +80,43 @@ async function assertEmailNotBanned(
     userId: String(dbUser.id),
   });
   throw new APIError("FORBIDDEN", { message: "EmailBanned" });
+}
+
+async function assertNotBannedOnSignIn(normalizedEmail: string, action: string): Promise<void> {
+  const emailHash = getNormalizedHash(normalizedEmail);
+
+  const [blockedAddress, account] = await Promise.all([
+    prisma.bannedEmail.findUnique({ select: { id: true }, where: { emailHash } }),
+    prisma.user.findUnique({
+      select: { banExpires: true, banned: true, id: true },
+      where: { emailHash },
+    }),
+  ]);
+
+  if (blockedAddress != null) {
+    appLogger.warn({
+      email: maskEmail(normalizedEmail),
+      msg: `Blocked address tried to ${action}`,
+    });
+    throw new APIError("FORBIDDEN", { message: "EmailBanned" });
+  }
+
+  if (account?.banned !== true) {
+    return;
+  }
+
+  const expires = account.banExpires == null ? null : new Date(account.banExpires);
+
+  if (expires != null && expires.getTime() <= Date.now()) {
+    return;
+  }
+
+  appLogger.warn({
+    email: maskEmail(normalizedEmail),
+    msg: `Banned account tried to ${action}`,
+    userId: String(account.id),
+  });
+  throw new APIError("FORBIDDEN", { message: "BANNED_USER" });
 }
 
 export const auth = betterAuth({
@@ -203,7 +242,7 @@ export const auth = betterAuth({
             where: { id: session.userId },
           });
 
-          if (dbUser?.emailHash != null) {
+          if (dbUser != null) {
             await assertEmailNotBanned(dbUser, "initiate a session (OAuth sign-in blocked)");
 
             const latestAccount = await prisma.account.findFirst({
@@ -237,29 +276,6 @@ export const auth = betterAuth({
                   userId: String(dbUser.id),
                 });
               }
-            }
-          }
-
-          return { data: session };
-        },
-      },
-      update: {
-        before: async (session) => {
-          if (session.id == null) {
-            return { data: session };
-          }
-
-          const dbSession = await prisma.session.findUnique({
-            where: { id: session.id },
-          });
-
-          if (dbSession != null) {
-            const dbUser = await prisma.user.findUnique({
-              where: { id: dbSession.userId },
-            });
-
-            if (dbUser != null) {
-              await assertEmailNotBanned(dbUser, "refresh session");
             }
           }
 
@@ -315,7 +331,7 @@ export const auth = betterAuth({
   },
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
-      if (ctx.path.startsWith("/sign-in/email") || ctx.path.startsWith("/magic-link/send")) {
+      if (ctx.path.startsWith("/sign-in/email") || ctx.path.startsWith("/sign-in/magic-link")) {
         // Parsed rather than cast: the body is unauthenticated, so a non-string `email` must not reach `normalizeEmail` unchecked.
         const body = EmailRequestBody.safeParse(ctx.body);
 
@@ -325,23 +341,7 @@ export const auth = betterAuth({
 
         const normalizedEmail = normalizeEmail(body.data.email);
 
-        const isBanned = await prisma.bannedEmail.findUnique({
-          where: { emailHash: getNormalizedHash(normalizedEmail) },
-        });
-
-        if (isBanned != null) {
-          appLogger.warn({
-            email: maskEmail(normalizedEmail),
-            msg: "Banned user tried to sign in",
-          });
-          throw new APIError("FORBIDDEN", { message: "EmailBanned" });
-        }
-
-        const headerList = await headers();
-        const ip =
-          headerList.get("x-forwarded-for")?.split(",")[0] ??
-          headerList.get("x-real-ip") ??
-          "127.0.0.1";
+        const ip = ctx.request == null ? "127.0.0.1" : getIp(ctx.request);
 
         const { reason: limitReason, success } = await emailSignInLimiter.limit(
           `${normalizedEmail}:${ip}`,
@@ -356,6 +356,8 @@ export const auth = betterAuth({
           });
           throw new APIError("TOO_MANY_REQUESTS", { message: "RateLimitExceeded" });
         }
+
+        await assertNotBannedOnSignIn(normalizedEmail, "request a sign-in email");
 
         const { reason: safetyReason, safe } = await validateEmailSafety(normalizedEmail);
         if (!safe) {
@@ -378,6 +380,10 @@ export const auth = betterAuth({
         });
       }
     }),
+  },
+
+  onAPIError: {
+    errorURL: "/auth/error",
   },
 
   plugins: [
@@ -432,7 +438,7 @@ export const auth = betterAuth({
     }),
 
     captcha({
-      endpoints: ["/magic-link/send", "/sign-in/email"],
+      endpoints: ["/sign-in/magic-link", "/sign-in/email"],
       provider: "cloudflare-turnstile",
       secretKey: TURNSTILE_SECRET_KEY,
     }),
@@ -518,9 +524,9 @@ export const auth = betterAuth({
 
   rateLimit: {
     customRules: {
-      "/magic-link/send": { max: 3, window: 60 },
       "/passkey/register": { max: 5, window: 60 },
       "/sign-in/email": { max: 5, window: 60 },
+      "/sign-in/magic-link": { max: 3, window: 60 },
       "/sign-up/email": { max: 5, window: 60 },
       "/two-factor/verify": { max: 5, window: 30 },
     },

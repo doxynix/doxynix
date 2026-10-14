@@ -197,9 +197,10 @@ export const ApiKeySchema = z.object({
 export type ApiKey = z.infer<typeof ApiKeySchema>;
 
 export const PaginationMetaSchema = z.object({
+  capped: z.optional(z.boolean()),
   currentPage: z.number().check(z.int(), z.gte(1)),
   filteredCount: z.number().check(z.int(), z.gte(0)),
-  nextCursor: z.optional(z.number().check(z.int())),
+  hasNextPage: z.boolean(),
   pageSize: z.number().check(z.int(), z.gt(0)),
   searchQuery: z.optional(z.string()),
   totalCount: z.number().check(z.int(), z.gte(0)),
@@ -207,3 +208,10 @@ export const PaginationMetaSchema = z.object({
 });
 
 export type PaginationMeta = z.infer<typeof PaginationMetaSchema>;
+
+export const CursorMetaSchema = z.object({
+  hasNextPage: z.boolean(),
+  nextCursor: z.optional(z.uuid()),
+});
+
+export type CursorMeta = z.infer<typeof CursorMetaSchema>;

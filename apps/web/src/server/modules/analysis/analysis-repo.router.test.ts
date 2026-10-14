@@ -7,7 +7,6 @@ const EXPECTED = [
   "getAnalysis",
   "getByPRNumber",
   "getComments",
-  "getImpactByPRNumber",
   "getNodeContext",
   "getStructureMap",
   "getStructureNode",
@@ -26,11 +25,9 @@ describe("analysisRepoRouter", () => {
     expect(new Set(keys).size).toBe(keys.length);
   });
 
-  it("keeps both PR-number lookups that share one service call", () => {
-    // Intentionally differ: the former accepts z.string() and the latter z.uuid(); both must survive.
+  it("exposes exactly one PR-number lookup", () => {
     const keys = Object.keys(analysisRepoRouter);
 
-    expect(keys).toContain("getByPRNumber");
-    expect(keys).toContain("getImpactByPRNumber");
+    expect(keys.filter((k) => k.toLowerCase().includes("prnumber"))).toEqual(["getByPRNumber"]);
   });
 });

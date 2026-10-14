@@ -58,7 +58,6 @@ export const redisService = {
           fallback: null,
           meta: { key },
           msg: "Redis secondaryStorage get error",
-          rethrow: true,
         },
       ),
 
@@ -75,8 +74,19 @@ export const redisService = {
           fallback: null,
           meta: { key },
           msg: "Redis secondaryStorage getAndDelete error",
-          rethrow: true,
         },
+      ),
+
+    increment: (key: string, ttl: number): Promise<number> =>
+      safeRedis(
+        async () => {
+          const pipeline = redisClient.pipeline();
+          pipeline.incr(key);
+          pipeline.expire(key, ttl);
+          const results = await pipeline.exec();
+          return Number(results[0]);
+        },
+        { fallback: 0, meta: { key }, msg: "Redis secondaryStorage increment error" },
       ),
 
     set: (key: string, value: unknown, ttl?: number): Promise<void> =>
@@ -141,9 +151,12 @@ export const redisService = {
       safeRedis(
         async () => {
           const key = REDIS_CONFIG.keys.prStaging(userId, repoId);
-          await redisClient.hset(key, entries);
-          await redisClient.expire(key, REDIS_CONFIG.ttl.prStaging);
-          return redisClient.hlen(key);
+          const pipeline = redisClient.pipeline();
+          pipeline.hset(key, entries);
+          pipeline.expire(key, REDIS_CONFIG.ttl.prStaging);
+          pipeline.hlen(key);
+          const results = await pipeline.exec();
+          return results.at(-1) as number;
         },
         {
           fallback: 0,
@@ -177,8 +190,11 @@ export const redisService = {
       safeRedis(
         async () => {
           const key = REDIS_CONFIG.keys.prStaging(userId, repoId);
-          await redisClient.hdel(key, filePath);
-          return redisClient.hlen(key);
+          const pipeline = redisClient.pipeline();
+          pipeline.hdel(key, filePath);
+          pipeline.hlen(key);
+          const results = await pipeline.exec();
+          return results.at(-1) as number;
         },
         {
           fallback: 0,

@@ -111,6 +111,7 @@ model PullRequestAnalysis {
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
   @@index([status])
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "pull_request_analyses_created_at_id_idx")
   @@map("pull_request_analyses")
 }
 
@@ -160,6 +161,7 @@ model PullRequestComment {
   @@allow('all', analysis.repo.user == auth() || auth().role == 'ADMIN')
 
   @@index([analysisId, filePath])
+  @@unique([analysisId, githubCommentId])
   @@map("pull_request_comments")
 }
 

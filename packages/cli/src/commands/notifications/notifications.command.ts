@@ -46,23 +46,23 @@ export function registerNotificationsCommand(program: Command) {
     .command("list", { isDefault: true })
     .description("List recent notifications with page pagination")
     .option("-a, --all", "Include all notifications (including read)", false)
-    .option("-c, --cursor <page>", "Page number for pagination", "1")
+    .option("-p, --page <number>", "Page number for pagination", "1")
     .option("-l, --limit <number>", "Number of notifications per page", "15")
     .option("--json", "Output in JSON format")
-    .action(async (options: { all?: boolean; cursor?: string; json?: boolean; limit?: string }) => {
+    .action(async (options: { all?: boolean; json?: boolean; limit?: string; page?: string }) => {
       const parsedLimit = Number(options.limit);
       const limit =
         Number.isFinite(parsedLimit) && parsedLimit > 0 ? Math.min(100, parsedLimit) : 15;
-      const parsedCursor = Number(options.cursor);
-      const cursor = Number.isFinite(parsedCursor) && parsedCursor > 0 ? parsedCursor : 1;
+      const parsedPage = Number(options.page);
+      const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
 
       const result = await withTaskSpinner(
         {
           silent: options.json,
-          start: `Fetching notifications (page ${cursor})...`,
+          start: `Fetching notifications (page ${page})...`,
           stop: "Notifications loaded",
         },
-        () => notificationsService.list(limit, options.all ? undefined : false, cursor),
+        () => notificationsService.list(limit, options.all ? undefined : false, page),
       );
 
       if (output.json(result, options.json)) {
@@ -81,14 +81,14 @@ export function registerNotificationsCommand(program: Command) {
         ),
       );
 
-      const hasNextPage = result.items.length === limit;
-      let footer = brand.muted(`Page ${cursor} (showing ${result.items.length} items).`);
+      const hasNextPage = result.meta.hasNextPage;
+      let footer = brand.muted(`Page ${page} (showing ${result.items.length} items).`);
 
       if (hasNextPage) {
         footer +=
           brand.muted("\nNext page: ") +
           brand.highlight(
-            `dxnx notifications list -c ${cursor + 1} -l ${limit}${options.all ? " -a" : ""}`,
+            `dxnx notifications list -p ${page + 1} -l ${limit}${options.all ? " -a" : ""}`,
           ) +
           brand.muted("\nMark current as read: ") +
           brand.highlight("dxnx notifications clear");
@@ -117,7 +117,7 @@ export function registerNotificationsCommand(program: Command) {
         p.outro(
           brand.warning(
             `Notification ${brand.highlight(targetId.slice(0, 8))} is not in recent 50 items.\n` +
-              `To locate older notifications, use: ${brand.highlight("dxnx notifications list -c <page> -a")}`,
+              `To locate older notifications, use: ${brand.highlight("dxnx notifications list -p <page> -a")}`,
           ),
         );
         return;

@@ -30,10 +30,12 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
     return <Skeleton className="h-9 w-60" />;
   }
 
+  const { capped, items, total } = history;
+
   return (
     <Select
       onValueChange={(e) => void setAid(e)}
-      value={selectedAid || history[0]?.id}
+      value={selectedAid || items[0]?.id}
     >
       <SelectTrigger
         aria-label={t("repo_version_placeholder")}
@@ -41,9 +43,14 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
       >
         <GitCommit />
         <SelectValue placeholder={t("repo_version_placeholder")} />
+        {capped && (
+          <span className="ml-auto text-muted-foreground text-xs">
+            {t("repo_version_capped", { shown: items.length, total })}
+          </span>
+        )}
       </SelectTrigger>
       <SelectContent>
-        {history.map((item) => (
+        {items.map((item) => (
           <SelectItem
             disabled={item.status === "FAILED"}
             key={item.id}

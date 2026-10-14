@@ -22,7 +22,7 @@
     "lint:fix": "oxlint --fix",
     "test": "TZ=UTC vitest run --config vitest.config.ts",
     "test:coverage": "TZ=UTC vitest run --coverage --config vitest.config.ts",
-    "type-check": "tsc --noEmit",
+    "type-check": "bun check",
     "validate": "biome check . && oxlint && bun run arch:check && bun type-check"
   },
   "dependencies": {
@@ -43,7 +43,7 @@
     "@vitest/coverage-v8": "5.0.2",
     "dependency-cruiser": "18.4.0",
     "tsup": "8.5.1",
-    "vitest": "5.0.2"
+    "vitest": "catalog:"
   },
   "publishConfig": {
     "access": "public"

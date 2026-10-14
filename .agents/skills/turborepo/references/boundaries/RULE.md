@@ -111,7 +111,7 @@ Package names work in place of tags:
     "tags": {
       "private": {
         "dependents": {
-          "deny": ["@repo/my-pkg"]
+          "deny": ["@doxynix/my-pkg"]
         }
       }
     }
