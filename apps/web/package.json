@@ -182,7 +182,7 @@
     "posthog-node": "5.54.1",
     "qrcode.react": "4.2.0",
     "react": "catalog:",
-    "react-arborist": "3.16.0",
+    "react-arborist": "4.0.1",
     "react-codemirror-merge": "4.25.12",
     "react-day-picker": "catalog:",
     "react-dom": "catalog:",
