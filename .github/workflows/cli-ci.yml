@@ -40,6 +40,10 @@ env:
   CI: "true"
   SKIP_ENV_VALIDATION: "true"
   NEXT_TELEMETRY_DISABLED: 1
+  # prisma.config.ts refuses to load without both. They must match the postgres service below,
+  # because the SQL generator resolves prisma/sql/*.sql against a live connection.
+  DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+  DIRECT_URL: postgresql://user:password@localhost:5432/test_db
 
 jobs:
   tests:
@@ -47,6 +51,19 @@ jobs:
     if: github.actor != 'ImgBotApp'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+
+    # `prisma generate --sql` reads prisma/sql/*.sql against a live connection, so the type
+    # check needs a real database, not just the env vars.
+    services:
+      postgres:
+        image: postgres:18@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -93,7 +110,11 @@ jobs:
         run: bun --filter @doxynix/cli arch:check
 
       # cli type-checks against apps/web sources via @doxynix/web/trpc, which re-exports the
-      # generated Prisma client. This step bypasses turbo, so generate it explicitly.
+      # generated Prisma client. This step bypasses turbo, so set it up explicitly: the SQL
+      # generator resolves prisma/sql/*.sql against real tables, hence push before generate.
+      - name: Push Database Schema
+        run: bun --filter @doxynix/web db:push
+
       - name: Prisma Generate
         run: bun --filter @doxynix/web db:generate
 
