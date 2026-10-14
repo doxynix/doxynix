@@ -138,7 +138,7 @@ export function registerAnalyzeCommand(program: Command) {
             const history = await withTaskSpinner("Fetching active analysis runs...", () =>
               analyzeService.getHistory(repoContext.repo.id),
             );
-            return history.filter((h: AnalysisHistoryItem) => h.status === "PENDING");
+            return history.items.filter((h: AnalysisHistoryItem) => h.status === "PENDING");
           },
           getLabel: (r: AnalysisHistoryItem) =>
             `Run ${r.id.slice(0, 8)} (${r.status}) - ${formatRelativeTime(r.createdAt)}`,
@@ -196,13 +196,13 @@ export function registerAnalyzeCommand(program: Command) {
         return;
       }
 
-      if (history.length === 0) {
+      if (history.items.length === 0) {
         p.outro(brand.muted(`No previous analysis runs found for ${repoContext.target}.`));
         return;
       }
 
       const table = createTable(["Run ID", "Status", "Date", "Score", "Commit"]);
-      for (const run of history) {
+      for (const run of history.items) {
         table.push([
           brand.muted(`${run.id.slice(0, 8)}...`),
           formatStatus(run.status),
@@ -215,7 +215,13 @@ export function registerAnalyzeCommand(program: Command) {
       console.log(
         renderSection(brand.logo(`Run History: ${brand.highlight(repoContext.target)}`), table),
       );
-      p.outro(brand.muted(`Total runs: ${history.length}`));
+      p.outro(
+        brand.muted(
+          history.capped
+            ? `Total runs: ${history.total} (showing the ${history.items.length} most recent)`
+            : `Total runs: ${history.total}`,
+        ),
+      );
     });
 
   analyze

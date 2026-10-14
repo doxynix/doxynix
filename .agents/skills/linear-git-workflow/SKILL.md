@@ -167,7 +167,7 @@ and the PR body.
 
 | Item | Accepted pattern | Rejected example |
 | --- | --- | --- |
-| Branch | `feat/dxnx-225-add-thing` | `feature/225/thing`, `add-thing`, `dxnx/225` (missing ticket in path form is allowed but off-standard) |
+| Branch | `feat/dxnx-225-add-thing` | `feature/225/thing`, `add-thing` (no `dxnx` token at all) |
 | Commit subject | `feat(cli): add scan verb` | `add scan verb`, `feat: add scan verb DXNX-225` (ticket in subject) |
 | Commit footer | `Closes DXNX-225` (auto-injected) | — |
 | Issue identifier | `DXNX-225` (always uppercase when referencing) | `dxnx-225` in prose/title |

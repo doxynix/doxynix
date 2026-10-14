@@ -22,6 +22,7 @@ import { ConfirmationField, phraseMatches } from "./confirmation-field";
 
 type Props = {
   children?: ReactNode;
+  confirmEnabled?: boolean;
   confirmLabel: string;
   confirmationPhrase?: string;
   description: string;
@@ -38,6 +39,7 @@ type Props = {
 
 export function DangerActionDialog({
   children,
+  confirmEnabled = true,
   confirmLabel,
   confirmationPhrase,
   description,
@@ -53,7 +55,9 @@ export function DangerActionDialog({
 }: Readonly<Props>) {
   const tCommon = useTranslations("Common");
   const [phraseInput, setPhraseInput] = useState("");
-  const isConfirmed = confirmationPhrase == null || phraseMatches(phraseInput, confirmationPhrase);
+  const isConfirmed =
+    (confirmationPhrase == null || phraseMatches(phraseInput, confirmationPhrase)) &&
+    confirmEnabled;
 
   // Radix unmounts the content on close, but `phraseInput` lives here, so it needs clearing
   // explicitly or reopening the dialog would leave the confirm button armed.

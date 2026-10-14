@@ -1,5 +1,6 @@
 "use client";
 
+import { MAX_PAGE, MAX_PAGE_SIZE } from "@doxynix/shared";
 import { useQueryStates } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
@@ -16,8 +17,12 @@ import { NotificationsList } from "./notifications-list";
 export function NotificationsListContainer() {
   const [params] = useQueryStates(notificationsParsers);
   const debouncedSearch = useDebounce(params.search, 500);
-  const safePage = clampIntegerParam(params.page, { fallback: 1, max: 1_000_000, min: 1 });
-  const safeLimit = clampIntegerParam(params.limit, { fallback: 20, max: 100, min: 1 });
+  const safePage = clampIntegerParam(params.page, { fallback: 1, max: MAX_PAGE, min: 1 });
+  const safeLimit = clampIntegerParam(params.limit, {
+    fallback: 20,
+    max: MAX_PAGE_SIZE,
+    min: 1,
+  });
 
   const {
     data,
@@ -25,12 +30,14 @@ export function NotificationsListContainer() {
     isLoading: isListLoading,
   } = trpc.notification.getAll.useQuery(
     {
-      cursor: safePage,
+      from: params.from ?? undefined,
       isRead: params.isRead ?? undefined,
       limit: safeLimit,
+      page: safePage,
       repoName: params.repo ?? undefined,
       repoOwner: params.owner ?? undefined,
       search: debouncedSearch || undefined,
+      to: params.to ?? undefined,
       type: params.type ?? undefined,
     },
     { placeholderData: (previousData) => previousData },

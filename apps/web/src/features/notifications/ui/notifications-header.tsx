@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/shared/ui/core/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
+import { AppListDateFilter } from "@/shared/ui/kit/app-list-date-filter";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
 import {
@@ -96,6 +97,7 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
         </Tabs>
 
         <AppSearch placeholder={t("search_placeholder")} />
+        <AppListDateFilter parsers={notificationsParsers} />
 
         <NotificationsRepoFilter />
 

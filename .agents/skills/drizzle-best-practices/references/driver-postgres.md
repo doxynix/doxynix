@@ -90,22 +90,21 @@ const db = drizzle({ client });
 
 ## Passing Schema / Relations for Relational Queries
 
-To use the relational query API (`db.query`), pass relations (v1) or your schema (0.45.x) at init:
+To use the relational query API (`db.query`), pass the whole schema module at init. On
+`drizzle-orm@0.45.x` (this repo) that module contains the `relations()` helpers:
 
 ```typescript
-// Drizzle v1 — pass the defineRelations object; this is what populates db.query
-import { relations } from './relations';
-const db = drizzle({ client: pool, relations });
-
-// Drizzle 0.45.x (legacy) — pass the entire schema, including relations() helpers
+// 0.45.x — this repo
 import * as schema from './schema';
 const db = drizzle({ client: pool, schema });
 ```
 
 Without this, `db.query` is empty or has no type information.
 
-On Drizzle **v1**, `db.query` is driven solely by `relations` (defineRelations) — passing a legacy
-`schema` does *not* populate it, and there is no `db._query`. See `relations-defining.md`.
+`apps/siem-server/src/core/db/db.ts` does exactly this with `drizzle(client, { schema })`.
+
+On Drizzle **v1** the option is named `relations` and takes a `defineRelations` object instead —
+not this repo's API. See `relations-defining.md`.
 
 ## Logging and Debugging
 

@@ -50,10 +50,8 @@ webhooks.on("issue_comment.created", async ({ payload }) => {
 });
 
 webhooks.on("pull_request_review_comment", async ({ payload }) => {
-  const mention = await handleReviewCommentEvent(payload);
-  if (mention != null) {
-    await agentGithubReplyTask.trigger(mention);
-  }
+  const mentions = await handleReviewCommentEvent(payload);
+  await Promise.all(mentions.map((mention) => agentGithubReplyTask.trigger(mention)));
 });
 
 async function handler(req: Request) {

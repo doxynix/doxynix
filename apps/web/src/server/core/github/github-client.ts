@@ -92,7 +92,7 @@ export class GitHubAuthRequiredError extends Error {
   }
 }
 
-type GitHubClientContext = (
+export type GitHubClientContext = (
   | { githubInstallationId: number; hasUserToken: false; type: "installation" }
   | { hasUserToken: false; type: "app" }
   | { hasUserToken: false; type: "public" }

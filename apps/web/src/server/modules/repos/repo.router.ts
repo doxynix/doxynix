@@ -1,5 +1,6 @@
 import {
   CreateRepoSchema,
+  CursorMetaSchema,
   PaginationMetaSchema,
   PublicRepoSchema,
   StatusSchema,
@@ -9,7 +10,7 @@ import * as z from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 
 import { repoMapper } from "./repo.mapper";
-import { RepoFilterSchema } from "./repo.schemas";
+import { RepoFilterSchema, RepoSlimFilterSchema } from "./repo.schemas";
 import { repoService } from "./repo.service";
 
 const RepoWithMetricsSchema = z.object({
@@ -46,14 +47,14 @@ export const repoRouter = createTRPCRouter({
     .input(z.object({ id: z.uuid() }))
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      return repoService.delete(ctx.db, input.id);
+      return repoService.delete(ctx.db, input.id, ctx.session.user.id);
     }),
 
   deleteAll: protectedProcedure
     .input(z.object({}).optional())
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx }) => {
-      return repoService.deleteAll(ctx.db);
+      return repoService.deleteAll(ctx.db, ctx.session.user.id);
     }),
 
   deleteByOwner: protectedProcedure
@@ -69,7 +70,7 @@ export const repoRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return repoService.deleteByOwner(ctx.db, input.owner);
+      return repoService.deleteByOwner(ctx.db, input.owner, ctx.session.user.id);
     }),
 
   getAll: protectedProcedure
@@ -81,7 +82,7 @@ export const repoRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      return repoService.getAll(ctx.db, input);
+      return repoService.getAll(ctx.db, input, ctx.session.user.id);
     }),
 
   getByName: protectedProcedure
@@ -108,7 +109,7 @@ export const repoRouter = createTRPCRouter({
     }),
 
   getSlim: protectedProcedure
-    .input(RepoFilterSchema)
+    .input(RepoSlimFilterSchema)
     .output(
       z.object({
         items: z.array(
@@ -119,13 +120,10 @@ export const repoRouter = createTRPCRouter({
             owner: z.string(),
           }),
         ),
-        meta: z.object({
-          nextCursor: z.number().nullable(),
-          totalCount: z.number(),
-        }),
+        meta: CursorMetaSchema,
       }),
     )
     .query(async ({ ctx, input }) => {
-      return repoService.getSlim(ctx.db, input);
+      return repoService.getSlim(ctx.db, input, ctx.session.user.id);
     }),
 });

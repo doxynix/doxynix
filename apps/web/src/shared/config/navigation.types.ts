@@ -3,6 +3,10 @@ import type { ComponentType } from "react";
 // An explicit union (not inline strings) so the resolver in navigation-labels.ts is checked for completeness against it.
 export type NavLabelKey =
   | "about"
+  | "admin_audit"
+  | "admin_banned_emails"
+  | "admin_reviews"
+  | "admin_users"
   | "analyze"
   | "api_keys"
   | "audit_log"

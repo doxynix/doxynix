@@ -1,87 +1,61 @@
 # GitHub Actions
 
-Complete setup guide for Turborepo with GitHub Actions.
+How this repo runs turbo in CI. The package-manager setup is **Bun**; `actions/setup-node`,
+`npm ci`, `pnpm` and `yarn` are not used anywhere in `.github/workflows/`.
 
-## Basic Workflow Structure
+See `.agents/skills/github-actions-templates/` for the full workflow conventions (SHA pinning,
+permissions, path filters, notification). This file covers only the turbo-specific parts.
+
+## Basic job
 
 ```yaml
-name: CI
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
 jobs:
-  build:
+  quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
+      - uses: actions/checkout@<sha-pinned>
 
-      - uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@<sha-pinned>
         with:
-          node-version: 20
+          bun-version-file: "package.json"
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --ignore-scripts
 
-      - name: Build and Test
-        run: turbo run build test lint
+      - name: Clean tree-sitter symlinks
+        run: bun run clean:symlinks
+
+      - name: Linting
+        run: bun --filter @doxynix/web lint
 ```
 
-## Package Manager Setup
+`bun-version-file: "package.json"` reads `packageManager: "bun@1.4.0"`. Never hardcode a version —
+bumping Bun is a one-line edit and every workflow follows.
 
-### pnpm
+`--ignore-scripts` skips untrusted postinstall code; `bun run clean:symlinks` is what
+`postinstall` would have done (it deletes the circular `tree-sitter-wasms` symlink that breaks
+WASM grammar loading). Any install that needs real scripts — the CLI publish job — uses plain
+`bun install`.
 
-```yaml
-- uses: pnpm/action-setup@v3
-  with:
-    version: 9
+`fetch-depth: 2` is enough for `--affected` and for diff-based path filters. A full history is
+only needed by the workflows that shell out to git log (`codeql`, `sonar`, `global-ci`'s
+trufflehog job) — those pass `fetch-depth: 0`.
 
-- uses: actions/setup-node@v4
-  with:
-    node-version: 20
-    cache: "pnpm"
+## Remote Cache
 
-- run: pnpm install --frozen-lockfile
-```
+Two ways to authenticate to Vercel Remote Cache from GitHub Actions:
 
-### Yarn
+- **OpenID Connect (recommended)** — exchange the runner's OIDC token for a short-lived
+  Turborepo access token.
+- **Personal Access Token** — a long-lived, team-scoped secret.
 
-```yaml
-- uses: actions/setup-node@v4
-  with:
-    node-version: 20
-    cache: "yarn"
+Either way, `TURBO_TOKEN` and `TURBO_TEAM` must reach the job; both are already declared in
+`turbo.json`'s `globalEnv`, so turbo picks them up automatically once they exist in the
+environment.
 
-- run: yarn install --frozen-lockfile
-```
-
-### Bun
-
-```yaml
-- uses: oven-sh/setup-bun@v1
-  with:
-    bun-version: latest
-
-- run: bun install --frozen-lockfile
-```
-
-## Remote Cache Setup
-
-There are two ways to authenticate to [Vercel Remote Cache](https://vercel.com/docs/monorepos/remote-caching) from GitHub Actions:
-
-- **OpenID Connect (OIDC)**: configure a policy that allows exchanging the CI/CD provider's OIDC tokens for short-lived Turborepo access tokens that grant access to Remote Cache (recommended).
-- **Personal Access Token (PAT)**: configure a long-lived, team-scoped PAT as a secret in your CI/CD provider (use when OIDC is not an option).
-
-For the full setup, see [Use Remote Caching from external CI/CD](https://vercel.com/docs/monorepos/remote-caching/external-ci-cd). The GitHub Actions workflow configuration is shown below.
-
-### Option A: OpenID Connect (recommended)
-
-Follow [these instructions](https://vercel.com/docs/monorepos/remote-caching/external-ci-cd#openid-connect-oidc) to create an OIDC policy on your Vercel team and configure your `TURBO_TEAM` variable. Then add [`vercel/setup-turborepo-remote-cache-action`](https://github.com/vercel/setup-turborepo-remote-cache-action) before any step that runs `turbo`. It requests a GitHub OIDC token, exchanges it for a short-lived Turborepo access token, and sets `TURBO_TOKEN` and `TURBO_TEAM` environment variables for later steps that run `turbo`:
+### Option A: OpenID Connect
 
 ```yaml
 jobs:
@@ -89,21 +63,20 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
-
+      id-token: write      # required for the OIDC exchange
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@<sha-pinned>
         with:
           fetch-depth: 2
 
-      - uses: vercel/setup-turborepo-remote-cache-action@v1.1.0
+      - uses: vercel/setup-turborepo-remote-cache-action@<sha-pinned>
         with:
           team: ${{ vars.TURBO_TEAM }}
 ```
 
-### Option B: Personal Access Token
+The action runs before any `turbo` step and exports `TURBO_TOKEN` / `TURBO_TEAM` for them.
 
-Follow [these instructions](https://vercel.com/docs/monorepos/remote-caching/external-ci-cd#personal-access-token-pat) to create a Personal Access Token, configure your `TURBO_TOKEN` secret, and configure your `TURBO_TEAM` variable. Then provide them to jobs that run `turbo`:
+### Option B: Personal Access Token
 
 ```yaml
 jobs:
@@ -116,29 +89,70 @@ jobs:
 
 ## Alternative: actions/cache
 
-If you can't use remote cache, cache Turborepo's local cache directory:
+If remote cache is unavailable, cache the local cache directory:
 
 ```yaml
-- uses: actions/cache@v4
+- uses: actions/cache@<sha-pinned>
   with:
     path: .turbo
-    key: turbo-${{ runner.os }}-${{ hashFiles('**/turbo.json', '**/package-lock.json') }}
+    key: turbo-${{ runner.os }}-${{ hashFiles('**/turbo.json', 'bun.lock') }}
     restore-keys: |
       turbo-${{ runner.os }}-
 ```
 
-Note: This is less effective than remote cache since it's per-branch.
+Hash **`bun.lock`**, not `package-lock.json` — this repo has no npm lockfile. Note this is
+per-branch and less effective than remote cache.
 
-## Complete Example
+## Running affected packages
+
+```bash
+turbo build test lint --affected
+```
+
+`--affected` needs a git base. Set it explicitly when the default is wrong:
+
+```bash
+TURBO_SCM_BASE=origin/main turbo build --affected
+TURBO_SCM_HEAD=HEAD turbo build --affected
+```
+
+This repo's workflows mostly avoid `--affected` and instead use **workflow-level `paths:`
+filters** (`web-ci.yml` triggers on `apps/web/**`, `packages/**`, `package.json`, `bun.lock`,
+`turbo.json`), which is cheaper than letting turbo compute a diff. Both are legitimate; pick the
+path filter for a per-app workflow and `--affected` when one workflow spans several areas.
+
+## Database-backed tasks in CI
+
+`type-check`, `test`, `test:int` and `db:generate` all reach the database. `postgres:18` runs as a
+digest-pinned service, and `DATABASE_URL` / `DIRECT_URL` are passed at **step** level:
 
 ```yaml
-name: CI
+- name: Type Checking
+  run: bun --filter @doxynix/web type-check
+  env:
+    DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+    DIRECT_URL: postgresql://user:password@localhost:5432/test_db
+```
+
+`scripts/doppler.ts` passes straight through when `CI=true`, so CI steps never invoke Doppler.
+
+## Complete example
+
+```yaml
+name: Turbo CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -146,34 +160,31 @@ jobs:
     permissions:
       contents: read
       id-token: write
-
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@<sha-pinned>
         with:
           fetch-depth: 2
 
-      - uses: pnpm/action-setup@v3
+      - uses: oven-sh/setup-bun@<sha-pinned>
         with:
-          version: 9
+          bun-version-file: "package.json"
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
-
-      - uses: vercel/setup-turborepo-remote-cache-action@v1.1.0
+      - uses: vercel/setup-turborepo-remote-cache-action@<sha-pinned>
         with:
           team: ${{ vars.TURBO_TEAM }}
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --ignore-scripts
+
+      - name: Clean tree-sitter symlinks
+        run: bun run clean:symlinks
 
       - name: Build
-        run: turbo run build --affected
-
-      - name: Test
-        run: turbo run test --affected
+        run: bun run build
 
       - name: Lint
-        run: turbo run lint --affected
+        run: bun run lint
+
+      - name: Type check
+        run: bun run type-check
 ```

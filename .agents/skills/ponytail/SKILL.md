@@ -12,9 +12,7 @@ description: >
   solution", "yagni", "do less", or "shortest path", or complains about
   over-engineering, bloat, boilerplate, or unnecessary dependencies. Do NOT
   use for non-coding requests (general knowledge, prose, translation,
-  summaries, recipes).
-argument-hint: "[lite|full|ultra]"
-license: MIT
+  summaries, recipes). Supports intensity levels passed by the user: lite, full (default), ultra.
 ---
 
 # Ponytail

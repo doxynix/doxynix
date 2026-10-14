@@ -66,7 +66,8 @@ describe("auditService.getActivityLogs pagination", () => {
     const result = await auditService.getActivityLogs(db, USER_ID, { limit: 20 });
 
     expect(result.items).toHaveLength(2);
-    expect(result.nextCursor).toBeUndefined();
+    expect(result.meta.hasNextPage).toBe(false);
+    expect(result.meta.nextCursor).toBeUndefined();
   });
 
   it("should emit the extra row id as the nextCursor on a full page", async () => {
@@ -75,6 +76,7 @@ describe("auditService.getActivityLogs pagination", () => {
     const result = await auditService.getActivityLogs(db, USER_ID, { limit: 2 });
 
     expect(result.items).toHaveLength(2);
-    expect(result.nextCursor).toBe("c");
+    expect(result.meta.hasNextPage).toBe(true);
+    expect(result.meta.nextCursor).toBe("c");
   });
 });

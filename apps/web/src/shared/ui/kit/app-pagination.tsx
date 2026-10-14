@@ -2,20 +2,19 @@
 
 import { useState, useTransition } from "react";
 import type { PaginationMeta } from "@doxynix/shared";
-import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { parseAsInteger, useQueryState } from "nuqs";
 
 import { cn } from "@/shared/lib/cn";
-import { getPaginationItems } from "@/shared/lib/pagination";
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
-  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
 } from "@/shared/ui/core/pagination";
-import { Spinner } from "@/shared/ui/core/spinner";
+
+import { Input } from "../core/input";
 
 type Props = {
   className?: string;
@@ -31,8 +30,15 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
   const [isPending, startTransition] = useTransition();
   const [clickedButton, setClickedButton] = useState<"next" | "prev" | null | number>(null);
 
-  const isAnyLoading = isPending || (isLoading ?? false);
+  const [inputValue, setInputValue] = useState(String(meta.currentPage));
 
+  const [prevCurrentPage, setPrevCurrentPage] = useState(meta.currentPage);
+  if (prevCurrentPage !== meta.currentPage) {
+    setPrevCurrentPage(meta.currentPage);
+    setInputValue(String(meta.currentPage));
+  }
+
+  const isAnyLoading = isPending || (isLoading ?? false);
   const [prevIsLoading, setPrevIsLoading] = useState(isAnyLoading);
 
   if (isAnyLoading !== prevIsLoading) {
@@ -53,78 +59,96 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
     });
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const target = Number.parseInt(inputValue, 10);
+
+      if (!Number.isNaN(target) && target >= 1 && target <= meta.totalPages) {
+        if (target !== meta.currentPage) {
+          handlePageChange(target, target);
+        }
+        e.currentTarget.blur();
+      } else {
+        setInputValue(String(meta.currentPage));
+      }
+    } else if (e.key === "Escape") {
+      setInputValue(String(meta.currentPage));
+      e.currentTarget.blur();
+    }
+  };
+
+  const handleBlur = () => {
+    const target = Number.parseInt(inputValue, 10);
+
+    setInputValue(String(target));
+  };
+
   const isPrevDisabled = isAnyLoading || meta.currentPage <= 1;
   const isNextDisabled = isAnyLoading || meta.currentPage >= meta.totalPages;
 
   const isPrevLoading = isAnyLoading && clickedButton === "prev";
   const isNextLoading = isAnyLoading && clickedButton === "next";
 
-  const navBtnClass = "gap-1 pl-2.5 pr-4 min-w-[100px] flex items-center justify-center";
+  const navBtnClass = "gap-1 pl-2.5 pr-4 flex items-center justify-center";
 
   return (
     <Pagination
       className={cn(
         className,
-        isAnyLoading && "opacity-60 transition-opacity",
+        isAnyLoading && "opacity-50 transition-opacity",
         meta.totalCount === 0 && "hidden",
       )}
     >
-      <PaginationContent>
+      <PaginationContent className="gap-2">
         <PaginationItem>
-          <PaginationLink
-            aria-disabled={isPrevDisabled}
+          <PaginationPrevious
             className={cn(navBtnClass, isPrevDisabled && "opacity-50")}
             disabled={isPrevDisabled}
+            isLoading={isPrevLoading}
             onClick={() => !isPrevDisabled && handlePageChange(meta.currentPage - 1, "prev")}
-            tabIndex={isPrevDisabled ? -1 : undefined}
-          >
-            {isPrevLoading ? <Spinner /> : <ChevronLeft />}
-            <span className="ml-1">{t("back")}</span>
-          </PaginationLink>
+          />
         </PaginationItem>
 
-        {getPaginationItems(meta.totalPages, meta.currentPage).map((item) => {
-          if (item.kind === "ellipsis") {
-            return (
-              <PaginationItem key={item.key}>
-                <PaginationEllipsis />
-              </PaginationItem>
-            );
-          }
-
-          const { page } = item;
-          const isCurrentPageLoading = isAnyLoading && clickedButton === page;
-          const isPageDisabled = isAnyLoading || page === meta.currentPage;
-
-          return (
-            <PaginationItem key={page}>
-              <PaginationLink
-                aria-disabled={isPageDisabled}
-                className={cn(page === meta.currentPage && "text-foreground opacity-100!")}
-                disabled={isPageDisabled}
-                isActive={page === meta.currentPage}
-                onClick={() => !isPageDisabled && handlePageChange(page, page)}
-                tabIndex={isPageDisabled ? -1 : undefined}
-              >
-                {isCurrentPageLoading ? <Spinner /> : page}
-              </PaginationLink>
-            </PaginationItem>
-          );
-        })}
+        <PaginationItem className="flex items-center gap-1.5 px-1 text-sm text-muted-foreground select-none">
+          <span>{t("page")}</span>
+          <Input
+            aria-label={t("page")}
+            className="size-8 px-1 text-center font-medium text-foreground"
+            disabled={isAnyLoading}
+            inputMode="numeric"
+            max={meta.totalPages}
+            min={1}
+            onBlur={handleBlur}
+            onChange={(e) => {
+              const digitsOnly = e.target.value.replaceAll(/\D/g, "");
+              setInputValue(digitsOnly);
+            }}
+            onFocus={(e) => e.target.select()}
+            onKeyDown={handleKeyDown}
+            pattern="[0-9]*"
+            value={inputValue}
+          />
+          <span>
+            {t("of")} {meta.totalPages}
+          </span>
+        </PaginationItem>
 
         <PaginationItem>
-          <PaginationLink
-            aria-disabled={isNextDisabled}
-            className={cn(navBtnClass, "pr-2.5 pl-4", isNextDisabled && "opacity-50")}
+          <PaginationNext
+            className={cn(navBtnClass, isNextDisabled && "opacity-50")}
             disabled={isNextDisabled}
+            isLoading={isNextLoading}
             onClick={() => !isNextDisabled && handlePageChange(meta.currentPage + 1, "next")}
-            tabIndex={isNextDisabled ? -1 : undefined}
-          >
-            <span className="mr-1">{t("next")}</span>
-            {isNextLoading ? <Spinner /> : <ChevronLeft className="rotate-180" />}
-          </PaginationLink>
+          />
         </PaginationItem>
       </PaginationContent>
+
+      {meta.capped && (
+        <p className="mt-2 text-center text-muted-foreground text-xs">
+          {t("capped_hint", { count: meta.filteredCount })}
+        </p>
+      )}
     </Pagination>
   );
 }

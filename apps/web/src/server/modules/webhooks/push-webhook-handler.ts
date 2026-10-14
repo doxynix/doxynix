@@ -1,5 +1,4 @@
 import { appLogger } from "@/server/core/app-logger";
-import { prisma } from "@/server/core/db";
 import type { PushPayload } from "@/server/core/github/github-webhook.types";
 
 export async function handlePushEvent(payload: PushPayload): Promise<void> {
@@ -22,23 +21,11 @@ export async function handlePushEvent(payload: PushPayload): Promise<void> {
     repoName: repository.full_name,
   });
 
-  try {
-    const repo = await prisma.repo.findFirst({
-      where: { githubId: repository.id },
-    });
-
-    if (repo == null) {
-      return undefined;
-    }
-
-    // TODO: Trigger the analysis task for the entire repository here, or
-    // for partial changes for the vector DB/docs
-    // await generateDocsTask.trigger({
-    //   repoId: repo.id,
-    //   sha: payload.after // SHA of the last commit in the push
-    // });
-  } catch (error) {
-    appLogger.error({ error, msg: "push_webhook_error" });
-    throw error;
-  }
+  // The repo lookup that used to sit here cost one query per push webhook and changed nothing:
+  // its result was read only for a `length === 0` early return, and the code after it is still a
+  // TODO. Wiring the analysis task means re-adding it — and fanning out over every connected
+  // account, not picking one, which is the class of bug this handler already had once (C11).
+  //
+  // TODO(dxnx): trigger the analysis task for the entire repository here, or for partial
+  // changes for the vector DB/docs.
 }

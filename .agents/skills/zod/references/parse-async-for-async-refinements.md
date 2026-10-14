@@ -90,7 +90,7 @@ const registerSchema = z.object({
   const existingUser = await db.users.findByEmail(data.email)
   if (existingUser) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       path: ['email'],
       message: 'Email already registered',
     })

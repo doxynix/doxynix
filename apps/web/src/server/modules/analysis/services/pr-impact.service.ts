@@ -9,6 +9,8 @@ import { buildTopLevelNodes } from "../logic/graph-navigator";
 import { mapChangedFilesToImpactNodes } from "../logic/impact-file-mapper";
 import type { PRImpactPayload } from "../logic/pr.types";
 
+const PULL_LIST_LIMIT = 500;
+
 export const prImpactService = {
   async getAnalysis(db: DbClient, analysisId: string) {
     const analysis = await db.pullRequestAnalysis.findUnique({
@@ -127,34 +129,42 @@ export const prImpactService = {
   },
 
   async listByRepository(db: DbClient, repoId: string) {
-    const items = await db.pullRequestAnalysis.findMany({
-      orderBy: { createdAt: "desc" },
-      select: {
-        _count: {
-          select: { comments: true },
+    const [items, total] = await Promise.all([
+      db.pullRequestAnalysis.findMany({
+        orderBy: { createdAt: "desc" },
+        select: {
+          _count: {
+            select: { comments: true },
+          },
+          createdAt: true,
+          headSha: true,
+          id: true,
+          prNumber: true,
+          riskScore: true,
+          status: true,
         },
-        createdAt: true,
-        headSha: true,
-        id: true,
-        prNumber: true,
-        riskScore: true,
-        status: true,
-      },
-      where: {
-        repo: {
-          id: repoId,
+        take: PULL_LIST_LIMIT,
+        where: {
+          repo: {
+            id: repoId,
+          },
         },
-      },
-    });
+      }),
+      db.pullRequestAnalysis.count({ where: { repo: { id: repoId } } }),
+    ]);
 
-    return items.map((item) => ({
-      createdAt: item.createdAt,
-      findingCount: item._count.comments,
-      headSha: item.headSha,
-      id: item.id,
-      prNumber: item.prNumber,
-      riskScore: item.riskScore,
-      status: item.status,
-    }));
+    return {
+      capped: total > PULL_LIST_LIMIT,
+      items: items.map((item) => ({
+        createdAt: item.createdAt,
+        findingCount: item._count.comments,
+        headSha: item.headSha,
+        id: item.id,
+        prNumber: item.prNumber,
+        riskScore: item.riskScore,
+        status: item.status,
+      })),
+      total,
+    };
   },
 };

@@ -1,18 +1,14 @@
 import * as z from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
+import { CursorSchema } from "@/server/utils/pagination";
 
 import { auditService } from "./audit.service";
 import { ActivityLogsOutputSchema } from "./audit-logs.schemas";
 
 export const auditRouter = createTRPCRouter({
   getActivityLogs: protectedProcedure
-    .input(
-      z.object({
-        cursor: z.string().nullish(),
-        limit: z.number().min(1).max(100).default(20),
-      }),
-    )
+    .input(CursorSchema.extend({ limit: z.number().min(1).max(100).default(20) }))
     .output(ActivityLogsOutputSchema)
     .query(async ({ ctx, input }) => {
       return auditService.getActivityLogs(ctx.db, ctx.session.user.id, input);

@@ -1,4 +1,6 @@
-export const AUDIT_BUSINESS_MODELS = [
+import type { AuditModel } from "@doxynix/shared";
+
+export const AUDIT_BUSINESS_MODELS: AuditModel[] = [
   "Repo",
   "ApiKey",
   "User",

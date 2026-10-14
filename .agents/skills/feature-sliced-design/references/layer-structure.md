@@ -133,29 +133,30 @@ export const AboutPage = () => (
 );
 ```
 
-## Widgets layer (discouraged)
+## Widgets layer (required in this repo)
 
 Widgets are a layer for placing reusable UI blocks. They can be composed from
 multiple UI elements into a meaningful section of a screen and then used in
 upper layers such as Pages or App.
 
-> **The official layer reference discourages using the Widgets layer**, and
-> this skill follows it. The reasoning, and where each kind of UI block
-> goes instead, is in `SKILL.md`, Section 1.
+> **In this repo the widgets layer is a load-bearing part of the architecture, not something to
+> phase out.** `apps/web/src/widgets` and `apps/siem-client/src/widgets` both exist, and both are
+> enforced by `bun run lint:fsd` (Steiger). The upstream reference notes that a widget can blur
+> into a feature because both may carry data fetching and state; the fix here is composition, not
+> removal — a widget imports features and entities and owns no user flow of its own. In
+> `apps/siem-client` the routes are thin TanStack Router files, so a widget is routinely the home
+> of a screen's composition.
 
-One edge case: multiple flows from the Features layer may need to be composed
-together, the kind of case that previously would have been placed in Widgets.
-In most cases this can be resolved by taking a different approach to
-composition. The parent (`pages` or `app`) imports the features and connects
-them, which is Strategy C in `references/cross-import-patterns.md`. Still,
-there may be edge cases that are genuinely hard to resolve. When that happens,
-document the situation in
-[feature-sliced/skills#7](https://github.com/feature-sliced/skills/issues/7).
+A widget is the right home when:
 
-Discouraging the layer does not mean removing it entirely. It means
-recommending against actively adopting it. Projects already using widgets can
-keep using them as before, and the standard slice/segment and public API rules
-apply just as on any other layer:
+- the block combines two or more features (which may not import each other),
+- the same block appears on more than one route,
+- the block carries its own data/state but no user intent of its own.
+
+A widget is the wrong home when the code is one feature's own flow (that is a feature), one
+route's composition (that is the page), or context-free infrastructure (that is `shared`).
+
+The standard slice/segment and public API rules apply exactly as on any other layer:
 
 ```text
 widgets/

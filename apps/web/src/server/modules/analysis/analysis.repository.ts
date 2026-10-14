@@ -38,7 +38,7 @@ export type LatestCompletedAnalysis = Prisma.AnalysisGetPayload<{
   select: typeof latestCompletedAnalysisSelect;
 }>;
 
-export const repoWithLatestAnalysisAndDocsSelect = {
+export const repoWithLatestAnalysisSelect = {
   analyses: {
     orderBy: { createdAt: "desc" },
     select: latestCompletedAnalysisSelect,
@@ -47,22 +47,6 @@ export const repoWithLatestAnalysisAndDocsSelect = {
   },
   defaultBranch: true,
   description: true,
-  documents: {
-    orderBy: { updatedAt: "desc" },
-    select: {
-      analysis: {
-        select: {
-          id: true,
-        },
-      },
-      createdAt: true,
-      id: true,
-      path: true,
-      type: true,
-      updatedAt: true,
-      version: true,
-    },
-  },
   forks: true,
   id: true,
   language: true,
@@ -79,8 +63,34 @@ export const repoWithLatestAnalysisAndDocsSelect = {
   visibility: true,
 } satisfies Prisma.RepoSelect;
 
+export const repoDocumentsSelect = {
+  analysis: {
+    select: {
+      id: true,
+    },
+  },
+  createdAt: true,
+  id: true,
+  path: true,
+  type: true,
+  updatedAt: true,
+  version: true,
+} satisfies Prisma.DocumentSelect;
+
+export const repoWithLatestAnalysisAndDocsSelect = {
+  ...repoWithLatestAnalysisSelect,
+  documents: {
+    orderBy: { updatedAt: "desc" },
+    select: repoDocumentsSelect,
+  },
+} satisfies Prisma.RepoSelect;
+
 export type RepoWithLatestAnalysisAndDocs = Prisma.RepoGetPayload<{
   select: typeof repoWithLatestAnalysisAndDocsSelect;
+}>;
+
+export type RepoSnapshot = Prisma.RepoGetPayload<{
+  select: typeof repoWithLatestAnalysisSelect;
 }>;
 
 export type AnalysisRef = {
@@ -226,6 +236,7 @@ export const analysisRepo = {
       select: {
         ...repoWithLatestAnalysisAndDocsSelect,
         analyses: {
+          orderBy: { createdAt: "desc" },
           select: latestCompletedAnalysisSelect,
           take: 1,
           where: { commitSha, status: "DONE" },
@@ -237,6 +248,28 @@ export const analysisRepo = {
 
   async getRepoSnapshot(db: DbClient, repoId: string, aid?: string) {
     const repo = await db.repo.findUnique({
+      select: repoWithLatestAnalysisSelect,
+      where: { id: repoId },
+    });
+
+    if (repo == null) {
+      return null;
+    }
+
+    const target = await this.resolveTargetAnalysis(db, aid);
+    if (target != null) {
+      return { ...repo, analyses: [target] };
+    }
+
+    if (repo.analyses.length === 0) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "No completed analysis found" });
+    }
+
+    return repo;
+  },
+
+  async getRepoSnapshotWithDocuments(db: DbClient, repoId: string, aid?: string) {
+    const repo = await db.repo.findUnique({
       select: repoWithLatestAnalysisAndDocsSelect,
       where: { id: repoId },
     });
@@ -245,19 +278,11 @@ export const analysisRepo = {
       return null;
     }
 
-    if (aid != null) {
-      const targetAnalysis = await db.analysis.findFirst({
-        select: latestCompletedAnalysisSelect,
-        where: { id: aid, status: "DONE" },
-      });
-
-      if (targetAnalysis == null) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Analysis version not found" });
-      }
-
+    const target = await this.resolveTargetAnalysis(db, aid);
+    if (target != null) {
       return {
         ...repo,
-        analyses: [targetAnalysis],
+        analyses: [target],
         documents: repo.documents.filter((d) => d.analysis?.id === aid),
       };
     }
@@ -396,6 +421,23 @@ export const analysisRepo = {
       prNumber: comment.analysis.prNumber,
       riskLevel: comment.riskLevel,
     }));
+  },
+
+  async resolveTargetAnalysis(db: DbClient, aid: string | undefined) {
+    if (aid == null) {
+      return null;
+    }
+
+    const target = await db.analysis.findFirst({
+      select: latestCompletedAnalysisSelect,
+      where: { id: aid, status: "DONE" },
+    });
+
+    if (target == null) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Analysis version not found" });
+    }
+
+    return target;
   },
 
   async storeChangedFilesSnapshot(db: DbClient, id: string, changedFiles: PRChangedFileSnapshot[]) {

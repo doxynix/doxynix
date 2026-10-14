@@ -118,14 +118,14 @@ const orderSchema = z.object({
     // If sameAsBilling but addresses differ, show errors on shipping
     if (data.shippingAddress.street !== data.billingAddress.street) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: 'Must match billing address',
         path: ['shippingAddress', 'street'],  // Nested path
       })
     }
     if (data.shippingAddress.city !== data.billingAddress.city) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: 'Must match billing address',
         path: ['shippingAddress', 'city'],
       })

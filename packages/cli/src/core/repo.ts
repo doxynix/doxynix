@@ -31,8 +31,8 @@ export async function resolveRepository(
 
     const result = await withTaskSpinner("Loading recent repositories...", () =>
       repoApi.list({
-        cursor: 1,
         limit: RECENT_LIMIT,
+        page: 1,
         sortBy: "createdAt",
         sortOrder: "desc",
       }),

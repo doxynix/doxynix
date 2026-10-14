@@ -1,3 +1,5 @@
+import { after } from "next/server";
+
 import { IS_PROD } from "@/shared/config/env.flags";
 
 import { appLogger } from "@/server/core/app-logger";
@@ -58,7 +60,7 @@ export function withApiHandler<Req extends Request = Request>(
         reportError(normalized, options.scope);
 
         if (IS_PROD && normalized.isUnexpected) {
-          await appLogger.flush();
+          after(async () => appLogger.flush());
         }
 
         return toErrorResponse(normalized);

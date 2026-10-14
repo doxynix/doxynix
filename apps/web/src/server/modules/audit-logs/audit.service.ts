@@ -28,14 +28,18 @@ export const auditService = {
     });
 
     let nextCursor: string | undefined;
-    if (items.length > limit) {
+    const hasNextPage = items.length > limit;
+    if (hasNextPage) {
       const nextItem = items.pop();
       nextCursor = nextItem?.id;
     }
 
     return {
       items: items.map((item) => auditMapper.toDto(item)),
-      nextCursor,
+      meta: {
+        hasNextPage,
+        nextCursor,
+      },
     };
   },
 

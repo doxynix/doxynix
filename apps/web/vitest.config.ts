@@ -65,7 +65,11 @@ export default defineConfig({
     environment: "node",
     exclude: ["src/tests/integration/**/*", "src/tests/e2e/**/*", "node_modules/**/*"],
     globals: true,
-    include: ["prisma/**/*.{test,spec}.ts", "src/**/*.{test,spec}.ts"],
+    include: [
+      "prisma/**/*.{test,spec}.ts",
+      "scripts/**/*.{test,spec}.ts",
+      "src/**/*.{test,spec}.ts",
+    ],
     setupFiles: ["./src/tests/setup-env.ts"],
     testTimeout: 15_000,
   },

@@ -95,46 +95,67 @@ Is it anything else (configs, tooling, etc.)?   → chore
 
 ## Scopes
 
-Scopes describe which code section is affected. They help organize changelogs and, in monorepo setups, route changes to the correct package.
+Scopes name the affected area. In a monorepo they also **route the change to the right package**,
+so the value here is not cosmetic.
 
-### When to Use Scopes
+### The allowlist is enforced
 
-- **Use** when the change is clearly within a specific module, domain, or package
-- **Omit** when the change spans multiple areas or is project-wide
-
-### Naming Conventions
-
-- Use lowercase, hyphenated names: `user-auth`, `api-gateway`, `data-layer`
-- Use the domain or module name, not file paths
-- Keep consistent within a project
-
-### Good Scopes
+`scripts/check-commit-name.ts` runs from Lefthook's `commit-msg` hook and **rejects** any scope
+outside this list:
 
 ```
-feat(auth): add JWT validation
-fix(scheduler): correct cron expression parsing
-refactor(booking): extract date utility
-docs(api): update endpoint descriptions
+ci  cli  config  db  deps  root  security  shared
+siem-client  siem-server  skills  tooling  web
 ```
 
-### Bad Scopes (Anti-patterns)
+Thirteen values. A scope outside the list fails the commit — this is not advisory.
+
+### Omitting the scope is always valid
+
+`type: description` with no scope never fails the check. Use that for genuinely repo-wide changes:
 
 ```
-fix(PROJ-1234): ...          ← ticket IDs are not scopes
-feat(john): ...               ← people are not scopes
-chore(src/utils/helper.ts):  ← file paths are not scopes
-feat(minor): ...              ← semver labels are not scopes
+chore: bump the bun version
+refactor: extract the api-error normaliser
 ```
 
-### Monorepo Scopes
+### Which scope for which area
 
-In monorepos, use the package/component name as the scope so release-please routes changes correctly:
+| Scope | Meaning |
+|-------|---------|
+| `web` | `apps/web` — Next.js, tRPC, ZenStack, Trigger.dev |
+| `siem-server` | `apps/siem-server` — Hono + Drizzle |
+| `siem-client` | `apps/siem-client` — Vite SPA |
+| `cli` | `packages/cli` — the `dxnx` binary |
+| `shared` | `packages/shared` — types, Zod schemas, auth contracts |
+| `config` | `packages/config`, tsconfig, dep-cruiser base |
+| `db` | schema, migrations, Prisma/ZenStack models |
+| `deps` | dependency bumps |
+| `ci` | `.github/workflows/` |
+| `security` | auth, permissions, secrets, crypto |
+| `tooling` | repo tooling: Biome, Oxlint, turbo, Lefthook |
+| `skills` | `.agents/skills/` |
+| `root` | repo-level files with no single package home |
+
+### Bad scopes
 
 ```
-feat(core): add streaming support
-fix(cli): resolve argument parsing
-docs(utils): update API reference
+fix(DXNX-1234): ...               <- ticket IDs are not scopes (and Lefthook injects the ticket)
+feat(karen): ...                  <- people are not scopes
+chore(src/utils/helper.ts): ...   <- file paths are not scopes
+feat(minor): ...                  <- semver labels are not scopes
+fix(ui): ...                      <- not in the allowlist
 ```
+
+The hook's scope regex is `[a-zA-Z0-9_.-]+`, so a path-like scope parses but then fails the
+allowlist check.
+
+### Ticket IDs go in a footer, never a scope
+
+Do **not** write the ticket in the subject or the scope. Lefthook's `prepare-commit-msg` hook runs
+`scripts/inject-ticket.ts`, which reads `dxnx-<n>` off the current branch and appends
+`Closes DXNX-NNN` automatically. A hand-written ticket is redundant and eats the 72-character
+budget.
 
 ## Breaking Changes
 
@@ -250,7 +271,7 @@ handlers into a reusable NestJS guard.
 
 ### CI change (no release)
 ```
-ci(release): add npm provenance to publish step
+ci(release): add provenance to the CLI publish step
 ```
 
 ### Multi-scope breaking change (major bump)

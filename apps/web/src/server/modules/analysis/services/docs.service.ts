@@ -53,7 +53,7 @@ export type PinAuditToDocsOutput = z.infer<typeof PinAuditToDocsOutput>;
 
 export const docsService = {
   async getAvailableDocs(db: DbClient, repoId: string, aid?: string) {
-    const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    const repo = await analysisRepo.getRepoSnapshotWithDocuments(db, repoId, aid);
     if (repo == null) {
       return [];
     }

@@ -4,12 +4,14 @@ import { mapFiltersToInput } from "./notification-filters.utils";
 import type { NotificationsParsersState } from "./notifications-parsers";
 
 const makeFilters = (overrides: Partial<NotificationsParsersState>): NotificationsParsersState => ({
+  from: null,
   isRead: null,
   limit: 20,
   owner: null,
   page: 1,
   repo: null,
   search: "",
+  to: null,
   type: null,
   ...overrides,
 });

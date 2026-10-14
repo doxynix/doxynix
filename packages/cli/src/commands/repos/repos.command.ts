@@ -20,35 +20,35 @@ export function registerReposCommand(program: Command) {
     .command("list", { isDefault: true })
     .description("List connected repositories with pagination support")
     .option("-l, --limit <number>", "Number of repositories to return per page", "20")
-    .option("-c, --cursor <page>", "Page number", "1")
+    .option("-p, --page <number>", "Page number", "1")
     .option("-s, --search <query>", "Search repositories by name (server-side)")
     .option("-o, --owner <owner>", "Filter repositories by owner / organization")
     .option("--json", "Output response in JSON format")
     .action(
       async (options: {
-        cursor?: string;
         json?: boolean;
         limit: string;
         owner?: string;
+        page?: string;
         search?: string;
       }) => {
         const parsedLimit = Number(options.limit);
         const limit =
           Number.isFinite(parsedLimit) && parsedLimit > 0 ? Math.min(100, parsedLimit) : 20;
-        const parsedCursor = Number(options.cursor);
-        const cursor = Number.isFinite(parsedCursor) && parsedCursor > 0 ? parsedCursor : 1;
+        const parsedPage = Number(options.page);
+        const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
 
         const result = await withTaskSpinner(
           {
             silent: options.json,
-            start: `Fetching repositories (page ${cursor})...`,
+            start: `Fetching repositories (page ${page})...`,
             stop: "Repositories loaded",
           },
           () =>
             repoApi.list({
-              cursor,
               limit,
               owner: options.owner,
+              page,
               search: options.search,
             }),
         );
@@ -72,13 +72,13 @@ export function registerReposCommand(program: Command) {
 
         const total = result.meta?.totalCount ?? result.items.length;
         const totalPages = Math.ceil(total / limit);
-        const hasNextPage = cursor < totalPages;
+        const hasNextPage = page < totalPages;
 
         let footer = brand.muted(
-          `Showing page ${cursor} of ${totalPages} (${result.items.length} of ${total} total).`,
+          `Showing page ${page} of ${totalPages} (${result.items.length} of ${total} total).`,
         );
         if (hasNextPage) {
-          const nextArgs = [`-c ${cursor + 1}`, `-l ${limit}`];
+          const nextArgs = [`-p ${page + 1}`, `-l ${limit}`];
           if (options.owner) {
             nextArgs.push(`-o ${options.owner}`);
           }
@@ -166,7 +166,7 @@ export function registerReposCommand(program: Command) {
         cancelMessage: "Deletion cancelled.",
         emptyMessage: "No connected repositories found.",
         fetchItems: async () => {
-          const list = await repoApi.list({ cursor: 1, limit: 25 });
+          const list = await repoApi.list({ limit: 25, page: 1 });
           return list.items;
         },
         getLabel: (r: RepoListItem) => `${r.owner}/${r.name} (${r.id.slice(0, 8)})`,
@@ -293,7 +293,7 @@ export function registerReposCommand(program: Command) {
     .option("-l, --limit <number>", "Number of repositories to return", "50")
     .option("-s, --search <query>", "Filter repositories by name")
     .option("-o, --owner <owner>", "Filter repositories by owner / organization")
-    .option("-c, --cursor <page>", "Pagination page number", "1")
+    .option("-c, --cursor <cursorId>", "Cursor from a previous page (see `nextCursor` in --json)")
     .option("--json", "Output response in JSON format")
     .action(
       async (options: {
@@ -311,7 +311,7 @@ export function registerReposCommand(program: Command) {
           },
           () =>
             repoApi.getSlim({
-              cursor: options.cursor ? Number(options.cursor) : 1,
+              cursor: options.cursor,
               limit: options.limit ? Number(options.limit) : 50,
               owner: options.owner,
               search: options.search,
@@ -334,7 +334,14 @@ export function registerReposCommand(program: Command) {
           ),
         );
         p.outro(
-          brand.muted(`Found ${result.items.length} of ${result.meta.totalCount} repositories.`),
+          result.meta.hasNextPage
+            ? brand.muted(
+                `Showing ${result.items.length} repositories. Next page: ` +
+                  brand.highlight(
+                    `dxnx repos slim -c ${result.meta.nextCursor} -l ${options.limit ?? 50}`,
+                  ),
+              )
+            : brand.muted(`Showing ${result.items.length} repositories.`),
         );
       },
     );

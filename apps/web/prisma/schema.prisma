@@ -7,7 +7,7 @@ datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
   directUrl  = env("DIRECT_URL")
-  extensions = [pg_trgm, unaccent, citext, fuzzystrmatch, btree_gin, pg_stat_statements, uuidOssp(map: "uuid-ossp")]
+  extensions = [pg_trgm, unaccent, citext, fuzzystrmatch, btree_gin, pg_stat_statements, uuidOssp(map: "uuid-ossp"), pgstattuple]
 }
 
 generator client {
@@ -105,6 +105,41 @@ enum PRFocusArea {
   STYLE
 }
 
+enum AuditOperation {
+  CREATE                 @map("create")
+  CREATE_MANY            @map("createMany")
+  CREATE_MANY_AND_RETURN @map("createManyAndReturn")
+  UPDATE                 @map("update")
+  UPDATE_MANY            @map("updateMany")
+  UPDATE_MANY_AND_RETURN @map("updateManyAndReturn")
+  UPSERT                 @map("upsert")
+  DELETE                 @map("delete")
+  DELETE_MANY            @map("deleteMany")
+}
+
+enum AuditModel {
+  Account
+  Analysis
+  ApiKey
+  BannedEmail
+  ChatMessage
+  ChatSession
+  Document
+  GeneratedFix
+  GithubInstallation
+  Notification
+  Passkey
+  PullRequestAnalysis
+  PullRequestAnalysisConfig
+  PullRequestComment
+  Repo
+  Session
+  TwoFactor
+  User
+  Verification
+  WebhookDelivery
+}
+
 enum NotifyType {
   ERROR
   WARNING
@@ -159,6 +194,7 @@ model User {
   passkeys            Passkey[]
   twoFactors          TwoFactor[]
 
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "users_created_at_id_idx")
   @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "users_name_trgm_idx")
   @@map("users")
 }
@@ -228,6 +264,7 @@ model Passkey {
   updatedAt    DateTime? @updatedAt() @map("updated_at")
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("passkeys")
 }
 
@@ -350,11 +387,11 @@ model Repo {
 
   @@unique([owner, name, userId])
   @@unique([githubId, userId])
-  @@index([topics], type: Gin)
   @@index([userId, owner])
   @@index([userId, name])
   @@index([userId, visibility, createdAt(sort: Desc)])
-  @@index([userId, updatedAt(sort: Desc)])
+  @@index([userId, updatedAt(sort: Desc), id(sort: Desc)], map: "repos_user_id_updated_at_id_idx")
+  @@index([updatedAt(sort: Desc), id(sort: Desc)], map: "repos_updated_at_id_idx")
   @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_name_trgm_idx")
   @@index([owner(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_owner_trgm_idx")
   @@index([description(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_description_trgm_idx")
@@ -468,6 +505,7 @@ model PullRequestAnalysis {
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
   @@index([status])
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "pull_request_analyses_created_at_id_idx")
   @@map("pull_request_analyses")
 }
 
@@ -506,6 +544,7 @@ model PullRequestComment {
   analysisId      String              @map("analysis_id") @db.Uuid()
   analysis        PullRequestAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 
+  @@unique([analysisId, githubCommentId])
   @@index([analysisId, filePath])
   @@map("pull_request_comments")
 }
@@ -556,10 +595,11 @@ model Notification {
   repoId    String?    @map("repo_id") @db.Uuid()
   repo      Repo?      @relation(fields: [repoId], references: [id], onDelete: SetNull)
 
-  @@index([userId, createdAt(sort: Desc)])
-  @@index([userId, isRead, createdAt(sort: Desc)])
-  @@index([userId, type, createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc), id(sort: Desc)])
+  @@index([userId, isRead, createdAt(sort: Desc), id(sort: Desc)])
+  @@index([userId, type, createdAt(sort: Desc), id(sort: Desc)])
   @@index([repoId])
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "notifications_created_at_id_idx")
   @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, map: "notifications_title_trgm_idx")
   @@index([body(ops: raw("gin_trgm_ops"))], type: Gin, map: "notifications_body_trgm_idx")
   @@map("notifications")
@@ -602,21 +642,21 @@ model WebhookDelivery {
 }
 
 model AuditLog {
-  id        String   @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
-  requestId String?  @map("request_id")
-  model     String
-  operation String
+  id        String         @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
+  requestId String?        @map("request_id")
+  model     AuditModel
+  operation AuditOperation
   payload   Json
   /// @zod.custom.omit(["model"])
-  userId    String?  @map("user_id") @db.Uuid()
-  ip        String?  @db.Inet()
-  userAgent String?  @map("user_agent")
-  createdAt DateTime @default(now()) @map("created_at")
+  userId    String?        @map("user_id") @db.Uuid()
+  ip        String?        @db.Inet()
+  userAgent String?        @map("user_agent")
+  createdAt DateTime       @default(now()) @map("created_at")
 
   @@index([requestId])
-  @@index([createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "audit_logs_created_at_id_idx")
   @@index([userId, operation])
-  @@index([model, requestId])
+  @@index([operation, createdAt(sort: Desc)])
   @@map("audit_logs")
 }
 
@@ -631,7 +671,6 @@ model ChatSession {
   repo      Repo?         @relation(fields: [repoId], references: [id], onDelete: Cascade)
   messages  ChatMessage[]
 
-  @@index([userId])
   @@index([repoId])
   @@index([userId, updatedAt(sort: Desc)])
   @@map("chat_sessions")

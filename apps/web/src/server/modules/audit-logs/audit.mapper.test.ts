@@ -1,3 +1,4 @@
+import { AuditOperation } from "@doxynix/shared";
 import type { AuditLog } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -20,7 +21,7 @@ function makeAuditLog(overrides: Partial<AuditLog> = {}): AuditLog {
     id: "test-id-123",
     ip: "127.0.0.1",
     model: "Repo",
-    operation: "create",
+    operation: AuditOperation.CREATE,
     payload: {},
     requestId: "req-1",
     userAgent: null,
@@ -36,12 +37,13 @@ describe("auditMapper.toDto", () => {
 
   describe("OP_MAP / severity", () => {
     it.each([
-      ["create", "Created", "success"],
-      ["delete", "Deleted", "error"],
-      ["deleteMany", "Bulk Deleted", "error"],
-      ["update", "Updated", "info"],
-      ["upsert", "Modified", "info"],
-      ["unknown", "unknown", "info"],
+      [AuditOperation.CREATE, "Created", "success"],
+      [AuditOperation.DELETE, "Deleted", "error"],
+      [AuditOperation.DELETE_MANY, "Bulk Deleted", "error"],
+      [AuditOperation.UPDATE, "Updated", "info"],
+      [AuditOperation.UPSERT, "Modified", "info"],
+      // The enum column cannot store this, but the mapper keeps a fallback and this pins it.
+      ["unknown" as AuditOperation, "unknown", "info"],
     ] as const)(
       'operation "%s" → actionTitle "%s", severity "%s"',
       (operation, expectedTitle, expectedSeverity) => {
@@ -98,6 +100,28 @@ describe("auditMapper.toDto", () => {
         payload: { data: {} },
       });
       expect(auditMapper.toDto(log).targetName).toBe("Personal Profile");
+    });
+
+    it("names a ban by the id in where, since a ban carries no name", () => {
+      const log = makeAuditLog({
+        model: "User",
+        payload: { data: { banned: true, banReason: "spam" }, where: { id: "01a12a4c-6405" } },
+      });
+      expect(auditMapper.toDto(log).targetName).toBe("User 01a12a4c");
+    });
+
+    it("puts the ban reason first, ahead of the booleans a moderator does not read", () => {
+      const log = makeAuditLog({
+        model: "User",
+        payload: {
+          data: { banExpires: null, banned: true, banReason: "spam reports" },
+        },
+      });
+
+      expect(auditMapper.toDto(log).details?.map((detail) => detail.label)).toEqual([
+        "ban reason",
+        "banned",
+      ]);
     });
 
     it('Account with data.provider "github" → "github login"', () => {

@@ -3,7 +3,7 @@ import type { RouterInput, RouterOutput } from "@/core/client";
 export type RepoConfig = NonNullable<RouterOutput["analysis"]["getRepoConfig"]>;
 export type ConfigureRepositoryInput = RouterInput["analysis"]["configureRepository"];
 export type AnalysisItem = NonNullable<RouterOutput["analysis"]["getLatest"]>;
-export type AnalysisHistoryItem = RouterOutput["analysis"]["getHistory"][number];
+export type AnalysisHistoryItem = RouterOutput["analysis"]["getHistory"]["items"][number];
 export type DetailedMetrics = RouterOutput["analysis"]["getDetailedMetrics"];
 export type StructureMap = RouterOutput["analysis"]["getStructureMap"];
 export type WorkspaceSearchResult = RouterOutput["analysis"]["searchWorkspace"];

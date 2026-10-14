@@ -131,7 +131,7 @@ await db.transaction(async (tx) => {
     .returning();
 
   const inventory = await tx.query.inventory.findFirst({
-    where: { productId }, // v1 object syntax; on 0.45.x: where: eq(inventoryTable.productId, productId)
+    where: (inventory, { eq }) => eq(inventory.productId, productId),
   });
 
   if (!inventory || inventory.quantity < 1) {

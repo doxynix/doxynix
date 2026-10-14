@@ -51,3 +51,73 @@ describe("userMapper.toSession", () => {
     expect(mapped.userAgent).toBe("System");
   });
 });
+
+type AdminUserSummaryRecord = Parameters<typeof userMapper.toAdminSummary>[0];
+
+function makeAdminUser(overrides?: Partial<AdminUserSummaryRecord>): AdminUserSummaryRecord {
+  return {
+    banExpires: null,
+    banned: false,
+    banReason: null,
+    createdAt: new Date("2026-03-01T12:00:00Z"),
+    email: "karen@example.com",
+    emailHash: "0".repeat(64),
+    emailVerified: true,
+    id: "018f0000-0000-7000-8000-0000000000b2",
+    image: null,
+    imageKey: "avatars/karen.png",
+    lastLoginMethod: "github",
+    name: "Karen",
+    role: "USER",
+    twoFactorEnabled: false,
+    updatedAt: new Date("2026-03-02T12:00:00Z"),
+    ...overrides,
+  } as AdminUserSummaryRecord;
+}
+
+describe("userMapper.toAdminSummary", () => {
+  it("emits exactly the moderation fields, so a column cannot leak in later", () => {
+    expect(Object.keys(userMapper.toAdminSummary(makeAdminUser())).sort()).toEqual([
+      "banExpires",
+      "banReason",
+      "banned",
+      "createdAt",
+      "email",
+      "emailVerified",
+      "id",
+      "image",
+      "lastLoginMethod",
+      "name",
+      "role",
+      "twoFactorEnabled",
+      "updatedAt",
+    ]);
+  });
+
+  it("never emits the email hash or the blob key, even though the record carries them", () => {
+    const mapped = userMapper.toAdminSummary(makeAdminUser());
+    const serialized = Object.values(mapped).map((value) => JSON.stringify(value));
+
+    expect(serialized).not.toContain(JSON.stringify("0".repeat(64)));
+    expect(serialized).not.toContain(JSON.stringify("avatars/karen.png"));
+  });
+});
+
+describe("userMapper.toAdminDetail", () => {
+  it("lifts the relation counts out of `_count` and keeps the summary fields", () => {
+    const mapped = userMapper.toAdminDetail({
+      ...makeAdminUser(),
+      _count: { apiKeys: 2, chatSession: 1, notifications: 7, repos: 3, sessions: 4 },
+    });
+
+    expect(mapped.counts).toEqual({
+      apiKeys: 2,
+      chatSessions: 1,
+      notifications: 7,
+      repos: 3,
+      sessions: 4,
+    });
+    expect(mapped).not.toHaveProperty("_count");
+    expect(mapped.id).toBe("018f0000-0000-7000-8000-0000000000b2");
+  });
+});

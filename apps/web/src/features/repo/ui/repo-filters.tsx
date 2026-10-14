@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/core/select";
+import { AppListDateFilter } from "@/shared/ui/kit/app-list-date-filter";
 
 import { repoParsers } from "@/entities/repo/model/repo-parsers";
 
@@ -23,7 +24,11 @@ export function RepoFilters() {
   const [filters, setFilters] = useQueryStates(repoParsers);
 
   const hasFilters =
-    filters.status !== null || filters.visibility !== null || filters.sortBy !== "updatedAt";
+    filters.status !== null ||
+    filters.visibility !== null ||
+    filters.sortBy !== "updatedAt" ||
+    filters.from !== null ||
+    filters.to !== null;
 
   const handleUpdate = (key: keyof typeof repoParsers, value: null | number | string) => {
     void setFilters({
@@ -34,9 +39,11 @@ export function RepoFilters() {
 
   const handleReset = () => {
     void setFilters({
+      from: null,
       page: null,
       sortBy: null,
       status: null,
+      to: null,
       visibility: null,
     });
   };
@@ -96,6 +103,8 @@ export function RepoFilters() {
             <SelectItem value="name">{tCommon("name")}</SelectItem>
           </SelectContent>
         </Select>
+
+        <AppListDateFilter parsers={repoParsers} />
 
         <AppButton
           className="px-2"

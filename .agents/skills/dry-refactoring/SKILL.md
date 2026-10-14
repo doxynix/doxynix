@@ -9,48 +9,55 @@ Guided workflow to eliminate copy-paste duplication in source code. Use after ru
 
 ## Prerequisites
 
-First, run jscpd to identify duplications:
+First, detect the duplications. In this repo the detector is the root `dup` script (Bun only —
+`npm`/`npx`/`pnpm`/`yarn` are rejected by the agent hook):
 
 ```bash
-npx jscpd --reporters ai <path>
+bun run dup
 ```
+
+It runs `jscpd . --skip-isolated "apps/web|apps/siem-server|apps/siem-client|packages/cli|packages/config|packages/shared"` against `.jscpd.json` (`mode: strict`, `threshold: 5`) and **exits non-zero over 5%**, so it doubles as the gate. For a narrower scope or extra flags, call the binary directly with `bun x jscpd`.
 
 In codebases that mix related formats (e.g. JavaScript and TypeScript), add `--cross-formats` so clones spanning both are detected too:
 
 ```bash
-npx jscpd --reporters ai --cross-formats "js-ts" <path>
+bun x jscpd --reporters ai --cross-formats "js-ts" <path>
 ```
 
 On larger codebases, add `--summary` to get a refactoring-hotspot overview alongside the clone list — top files and folders with a `dup%` column showing how much of each file is duplicated:
 
 ```bash
-npx jscpd --reporters ai --summary <path>
+bun x jscpd --reporters ai --summary <path>
 ```
+
+Note that `.jscpd.json` already excludes tests, generated files, migrations and the shared-UI
+icon/visual/core directories, so the usual "duplicate test setup" and "duplicate icon component"
+hits will not appear in this repo.
 
 The default scan reports only **exact** copies, and those are the ones to refactor first: an exact clone is almost always a real copy-paste. Two more passes find copies that were edited after pasting. They are **noisier**: they ignore names, values or a few statements on purpose, so they also surface blocks that merely look alike (models and DTOs, config tables, test setup, generated code, shared idioms). Run them only after the exact clones are dealt with, one family at a time, with tight settings, and treat what they report as leads to read rather than defects to fix:
 
 ```bash
 # Type-2: renamed copies (other variable names, other constants), reported as "(renamed)".
 # Raise --min-tokens: with identifiers ignored, a short block is mostly placeholders.
-npx jscpd --reporters ai --ignore-identifiers --min-tokens 70 <path>
+bun x jscpd --reporters ai --ignore-identifiers --min-tokens 70 <path>
 
 # Type-3: near-miss copies (one or two edited lines, or JS/TS functions with the same structure),
 # reported as "[~0.91 gap]" and "[~0.85 ast]". Widen only if the tight run finds nothing.
-npx jscpd --reporters ai --max-gap-lines 1 --similarity 0.85 <path>
+bun x jscpd --reporters ai --max-gap-lines 1 --similarity 0.85 <path>
 ```
 
 See the **[jscpd](../jscpd/SKILL.md)** skill for full option reference, including cross-format group syntax, the clone-kind suffixes and how to read the summary.
 
 ## Workflow
 
-1. Run jscpd with `--reporters ai` on the target path (add `--summary` on larger codebases to pick a starting point: files with high `dup%` and high token counts pay off most)
+1. Run `bun run dup` (or `bun x jscpd --reporters ai` on the target path; add `--summary` on larger codebases to pick a starting point: files with high `dup%` and high token counts pay off most)
 2. Parse each clone line to identify the two duplicated locations (file + line range) and its kind: no suffix is an exact copy, `(renamed)` differs only in names or values, `[~N gap]` has a few edited lines in the middle, `[~N ast]` is a function pair with the same structure
 3. Read both code fragments from the source files
 4. Understand what the duplicated code does, and for renamed and similar clones list exactly what differs between the two sides
 5. **Triage renamed and similar clones before touching them.** Skip the pair, and say so, when any of these holds: the two sides do different things despite the same shape (a `switch` over different enums, two reducers with unrelated semantics); the sameness is intentional boilerplate (models, DTOs, config, route tables, test fixtures); the code is generated; a shared abstraction would need a vague name like `processData`; or the pair is under about 10 lines. Only a pair that would let you delete code and give the extraction a precise name goes on to the next step
 6. Design a refactoring: extract a shared function, class, module, or constant; the kind decides the strategy (below)
 7. Apply the refactoring — update both locations and all other usages
-8. Re-run jscpd **with the same flags** to confirm the clone is eliminated and the `dup%` of the touched files went down; a clone that was `(renamed)` will not show in a default run, so check with `--ignore-identifiers` again
+8. Re-run **with the same flags** (`bun run dup` for the exact pass) to confirm the clone is eliminated and the `dup%` of the touched files went down; a clone that was `(renamed)` will not show in a default run, so check with `--ignore-identifiers` again
 9. Repeat for remaining clones, highest-impact first: exact clones, then renamed, then similar. Report the skipped candidates separately from the refactored ones, with the reason, so nobody mistakes a normalized run's count for real duplication
 
 ## Refactoring Strategies

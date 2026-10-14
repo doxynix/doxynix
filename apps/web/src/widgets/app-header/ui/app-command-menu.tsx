@@ -75,7 +75,7 @@ export function AppCommandMenu() {
       {
         enabled: open,
         getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
-        initialCursor: 1,
+        initialCursor: undefined,
       },
     );
 
@@ -289,7 +289,7 @@ export function AppCommandMenu() {
             )}
           </CommandGroup>
 
-          {!isLoading && data?.pages[0]?.meta.totalCount === 0 && (
+          {!isLoading && data?.pages[0]?.items.length === 0 && (
             <div className="p-4 text-center text-muted-foreground text-xs">
               {t("repo_empty_title")}
             </div>

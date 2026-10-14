@@ -267,6 +267,12 @@ export const githubAppService = {
         return;
       }
 
+      const installed = await prisma.githubInstallation.findMany({
+        select: { id: true, userId: true },
+        where: { id: { in: ourInstallations.map((inst) => BigInt(inst.id)) } },
+      });
+      const existingOwners = new Map(installed.map((row) => [row.id.toString(), row.userId]));
+
       for (const inst of ourInstallations) {
         const instIdBigInt = BigInt(inst.id);
         const account = inst.account;
@@ -277,27 +283,37 @@ export const githubAppService = {
         const targetType = inst.target_type.toUpperCase() as InstallationTargetType;
         const targetId = account != null && "id" in account ? BigInt(account.id) : BigInt(0);
 
-        await prisma.githubInstallation.upsert({
-          create: {
-            accountAvatar,
-            accountLogin,
-            appId: inst.app_id,
-            htmlUrl: inst.html_url,
-            id: instIdBigInt,
-            repositorySelection: repoSelection,
-            targetId,
-            targetType,
+        const shared = {
+          accountAvatar,
+          accountLogin,
+          htmlUrl: inst.html_url,
+          isSuspended: false,
+          repositorySelection: repoSelection,
+        };
+
+        const owner = existingOwners.get(instIdBigInt.toString());
+        const isNew = owner === undefined;
+
+        if (owner != null && owner !== userId) {
+          appLogger.warn({
+            installationId: instIdBigInt.toString(),
+            msg: "Skipped GitHub installation sync: already linked to another workspace",
+            ownerUserId: owner,
             userId,
-          },
-          update: {
-            accountAvatar,
-            accountLogin,
-            htmlUrl: inst.html_url,
-            isSuspended: false,
-            repositorySelection: repoSelection,
-            userId,
-          },
-          where: { id: instIdBigInt },
+          });
+          continue;
+        }
+
+        if (isNew) {
+          await prisma.githubInstallation.create({
+            data: { ...shared, appId: inst.app_id, id: instIdBigInt, targetId, targetType, userId },
+          });
+          continue;
+        }
+
+        await prisma.githubInstallation.updateMany({
+          data: shared,
+          where: { id: instIdBigInt, OR: [{ userId: null }, { userId }] },
         });
       }
     } catch (error) {

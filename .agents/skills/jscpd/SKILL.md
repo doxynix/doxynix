@@ -7,31 +7,78 @@ description: Copy-paste detector for 220+ languages. Detect exact, renamed and n
 
 Copy-paste detector for programming source code, supports 220+ languages. Use this skill to run jscpd and understand its output.
 
-## Quick Start
+## Running it in this repo
+
+jscpd `5.3.2` is a root devDependency and the root `dup` script already wraps the flag set and
+reads `.jscpd.json`:
+
+```bash
+bun run dup
+```
+
+That is `jscpd . --skip-isolated "apps/web|apps/siem-server|apps/siem-client|packages/cli|packages/config|packages/shared"`,
+and it **fails over the 5% threshold**, so it is the same command CI runs.
+
+`.jscpd.json` (repo root) is the source of truth for what gets scanned:
+
+```json
+{
+  "format": ["typescript", "tsx", "javascript"],
+  "mode": "strict",
+  "pattern": "**/*.{ts,tsx,js,jsx}",
+  "reporters": ["console"],
+  "threshold": 5,
+  "ignore": ["**/node_modules/**", "**/.next/**", "**/dist/**", "**/build/**", "**/*.d.ts",
+    "**/.dependency-cruiser.ts", "**/*.test.ts", "**/*.spec.ts", "**/routeTree.gen.ts",
+    "**/prisma/migrations/**", "**/src/shared/ui/icons/**", "**/src/shared/ui/visuals/**",
+    "**/src/shared/ui/core/**", "**/messages/*.json", "**/.agents/**", "**/.continue/**", "**/.claude/**"]
+}
+```
+
+Consequences worth knowing before you chase a clone:
+
+- Tests are ignored (`*.test.ts`, `*.spec.ts`), as are `routeTree.gen.ts`, Prisma migrations, and
+  the shared-UI icon/visual/core directories. A "missing test helper" clone will therefore never
+  show up.
+- `mode: "strict"` compares normalized token sequences, so formatting and comments do not create
+  clones; genuinely different identifiers and literals do.
+- `skip-isolated` drops clones whose files have no incoming reference — output stays focused.
+
+To scan a narrower area or add flags, call the binary directly. **Bun only** — the other package
+managers are rejected by the agent hook, so use `bun x`:
+
+```bash
+bun x jscpd --reporters ai --summary apps/siem-server/src
+```
+
+## Quick Start (generic flags)
+
+All examples below are jscpd's flag vocabulary, not repo commands; `bun x jscpd` is how you invoke
+the binary under Bun anywhere. In this repo, prefer `bun run dup`.
 
 ```bash
 # Run with ai reporter (compact output optimized for agents)
-npx jscpd --reporters ai <path>
+bun x jscpd --reporters ai <path>
 
 # With ignore patterns
-npx jscpd --reporters ai --ignore "**/node_modules/**,**/dist/**" <path>
+bun x jscpd --reporters ai --ignore "**/node_modules/**,**/dist/**" <path>
 
 # Scope to specific formats
-npx jscpd --reporters ai --format "javascript,typescript" <path>
+bun x jscpd --reporters ai --format "javascript,typescript" <path>
 
 # Second pass, noisier: copies that only differ in names and values (Type-2, "renamed").
 # Review each hit before acting on it.
-npx jscpd --reporters ai --ignore-identifiers --min-tokens 70 <path>
+bun x jscpd --reporters ai --ignore-identifiers --min-tokens 70 <path>
 
 # Third pass, noisier still: copies with a few edited lines or the same function
 # structure (Type-3, "similar"). Keep the settings tight.
-npx jscpd --reporters ai --max-gap-lines 1 --similarity 0.85 <path>
+bun x jscpd --reporters ai --max-gap-lines 1 --similarity 0.85 <path>
 
 # Where to refactor first: clone list plus a hotspot summary
-npx jscpd --reporters ai --summary <path>
+bun x jscpd --reporters ai --summary <path>
 
 # Most complex files only, without clone detection
-npx jscpd --complexity --reporters ai <path>
+bun x jscpd --complexity --reporters ai <path>
 ```
 
 ## AI Reporter Output Format
@@ -117,9 +164,9 @@ Rules that keep the noise manageable:
 Copies where someone renamed the variables or changed the constants:
 
 ```bash
-npx jscpd --reporters ai --ignore-identifiers <path>                      # function a(x) {…} matches function b(y) {…}
-npx jscpd --reporters ai --ignore-identifiers --ignore-literals <path>    # …and 10 matches 25, 'dev' matches 'prod'
-npx jscpd --reporters ai --ignore-annotations <path>                      # @Override / @Deprecated no longer split a clone
+bun x jscpd --reporters ai --ignore-identifiers <path>                      # function a(x) {…} matches function b(y) {…}
+bun x jscpd --reporters ai --ignore-identifiers --ignore-literals <path>    # …and 10 matches 25, 'dev' matches 'prod'
+bun x jscpd --reporters ai --ignore-annotations <path>                      # @Override / @Deprecated no longer split a clone
 ```
 
 ```
@@ -139,8 +186,8 @@ limits-dev.js:1-13 ~ limits-prod.js:1-13 (renamed)
 Copies with a few edited lines, or functions rewritten with the same shape:
 
 ```bash
-npx jscpd --reporters ai --max-gap-lines 2 <path>      # a copy with up to 2 inserted/changed lines becomes one clone
-npx jscpd --reporters ai --similarity 0.8 <path>       # JS/TS functions with ≥80% shared syntax-tree structure
+bun x jscpd --reporters ai --max-gap-lines 2 <path>      # a copy with up to 2 inserted/changed lines becomes one clone
+bun x jscpd --reporters ai --similarity 0.8 <path>       # JS/TS functions with ≥80% shared syntax-tree structure
 ```
 
 ```
@@ -169,10 +216,10 @@ credit-note.js:1-19 ~ invoice.js:1-17 [~0.75 ast]
 
 ```bash
 # Compact clone list + compact summary, optimized for agents
-npx jscpd --reporters ai --summary --no-tips <path>
+bun x jscpd --reporters ai --summary --no-tips <path>
 
 # Rank by complexity instead of tokens, top 5 lists
-npx jscpd --reporters ai --summary --summary-by complexity --summary-top 5 <path>
+bun x jscpd --reporters ai --summary --summary-by complexity --summary-top 5 <path>
 ```
 
 With the `ai` reporter the summary is one line per entry:
@@ -203,13 +250,13 @@ By default each format is compared only against itself. `--cross-formats` define
 
 ```bash
 # One group: compare JavaScript and TypeScript files together
-npx jscpd --reporters ai --cross-formats "javascript,typescript" <path>
+bun x jscpd --reporters ai --cross-formats "javascript,typescript" <path>
 
 # Preset covering javascript, jsx, typescript, tsx
-npx jscpd --reporters ai --cross-formats "js-ts" <path>
+bun x jscpd --reporters ai --cross-formats "js-ts" <path>
 
 # Multiple groups are separated by ";"
-npx jscpd --reporters ai --cross-formats "javascript,typescript;css,scss" <path>
+bun x jscpd --reporters ai --cross-formats "javascript,typescript;css,scss" <path>
 ```
 
 Notes:
@@ -220,7 +267,11 @@ Notes:
 
 ## Configuration File
 
-Create a `.jscpd.json` in your project root:
+**This repo already has `.jscpd.json` at the root** (quoted at the top of this skill) — read it and
+extend it rather than creating a second config. jscpd picks up `.jscpd.json` from the working
+directory automatically, so `bun run dup` and `bun x jscpd …` both use it.
+
+The full option set, for reference:
 
 ```json
 {
@@ -243,7 +294,6 @@ Create a `.jscpd.json` in your project root:
 
 Once you've detected clones, use the **dry-refactoring** skill for a guided workflow to eliminate them, with a strategy per clone kind:
 
-→ **dry-refactoring** — step-by-step refactoring strategies and workflow for removing duplication. Install with:
-  ```bash
-  npx skills add https://github.com/kucherenko/jscpd --skill dry-refactoring
-  ```
+→ **dry-refactoring** — step-by-step refactoring strategies and workflow for removing duplication.
+  It is already installed in this repo at `.agents/skills/dry-refactoring/SKILL.md`; no install
+  command is needed.

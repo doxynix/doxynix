@@ -21,6 +21,8 @@ type UseResizableOptions = {
 
 const KEYBOARD_STEP = 16;
 
+const VIEWPORT_GUTTER = 32;
+
 const noopSubscribe = () => () => {};
 
 function clamp(value: number, min: number, max: number) {
@@ -45,6 +47,7 @@ export function useResizable({
 }: UseResizableOptions = {}) {
   const [liveWidth, setLiveWidth] = useState<null | number>(null);
   const [isResizing, setIsResizing] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState<null | number>(null);
 
   const panelRef = useRef<HTMLDivElement | null>(null);
   const frameRef = useRef<number | null>(null);
@@ -66,17 +69,35 @@ export function useResizable({
   };
 
   const getPersistedWidth = () => {
-    snapshotRef.current ??= readWidth(storageKey, initialWidth ?? defaultWidth, minWidth, maxWidth);
+    // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- compiler cannot lower `??=`
+    if (snapshotRef.current == null) {
+      snapshotRef.current = readWidth(storageKey, initialWidth ?? defaultWidth, minWidth, maxWidth);
+    }
     return snapshotRef.current;
   };
   const getServerWidth = () => clamp(initialWidth ?? defaultWidth, minWidth, maxWidth);
 
   const width = useSyncExternalStore(noopSubscribe, getPersistedWidth, getServerWidth);
-  const currentWidth = liveWidth ?? width;
+
+  useEffect(() => {
+    const measure = () => setViewportWidth(window.innerWidth);
+    measure();
+    window.addEventListener("resize", measure);
+
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  const maxBound = Math.min(
+    maxWidth,
+    viewportWidth == null ? maxWidth : Math.max(0, viewportWidth - VIEWPORT_GUTTER),
+  );
+  const minBound = Math.min(minWidth, maxBound);
+
+  const currentWidth = Math.min(Math.max(liveWidth ?? width, minBound), maxBound);
 
   // Discrete changes (keyboard, double-click reset, reopen drag) still go through state.
   const applyWidth = (next: number) => {
-    const clamped = clamp(next, minWidth, maxWidth);
+    const clamped = clamp(next, minBound, maxBound);
     lastWidthRef.current = clamped;
     writeWidth(clamped);
     setLiveWidth(clamped);
@@ -117,8 +138,8 @@ export function useResizable({
       const delta = pointerXRef.current - originRef.current.startX;
       const clamped = clamp(
         originRef.current.startWidth + (side === "left" ? delta : -delta),
-        minWidth,
-        maxWidth,
+        minBound,
+        maxBound,
       );
       lastWidthRef.current = clamped;
       writeWidthRef.current(clamped);
@@ -168,7 +189,7 @@ export function useResizable({
       body.style.cursor = previousCursor;
       body.style.userSelect = previousUserSelect;
     };
-  }, [cssVar, isResizing, maxWidth, minWidth, side]);
+  }, [cssVar, isResizing, maxBound, minBound, side]);
 
   const startResizing = (event: PointerEvent<HTMLElement>) => {
     if (event.button !== 0) {
@@ -212,8 +233,8 @@ export function useResizable({
   return {
     handleProps: {
       "aria-orientation": "vertical" as const,
-      "aria-valuemax": maxWidth,
-      "aria-valuemin": minWidth,
+      "aria-valuemax": maxBound,
+      "aria-valuemin": minBound,
       "aria-valuenow": Math.round(currentWidth),
       onDoubleClick: resetWidth,
       onKeyDown: handleKeyDown,

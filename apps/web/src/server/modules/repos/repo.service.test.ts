@@ -1,9 +1,9 @@
-import { PublicRepoSchema, Status, Visibility } from "@doxynix/shared";
+import { MAX_PAGE, PublicRepoSchema, Status, Visibility } from "@doxynix/shared";
 import { describe, expect, it, vi } from "vitest";
 
 import type { DbClient } from "@/server/core/db";
 import { repoService } from "@/server/modules/repos/repo.service";
-import { clampPage, PaginationSchema } from "@/server/utils/pagination";
+import { clampPage, getPaginationMeta, PaginationSchema } from "@/server/utils/pagination";
 
 function buildSearchClause(term: string) {
   return {
@@ -228,8 +228,6 @@ describe("repoService.buildWhereClause", () => {
   });
 });
 
-const MAX_PAGE = 1_000_000;
-
 function createRepoDbMock(rows: unknown[] = [], first: unknown = null) {
   const count = vi.fn().mockResolvedValue(0);
   const findFirst = vi.fn().mockResolvedValue(first);
@@ -299,36 +297,50 @@ describe("clampPage", () => {
     expect(clampPage(Number.MAX_SAFE_INTEGER)).toBe(MAX_PAGE);
   });
 
-  it("should share its cap with PaginationSchema", () => {
+  it("should never advertise a page that clampPage would refuse", () => {
+    // The count is capped at MAX_PAGE * limit, so totalPages must land exactly on MAX_PAGE.
+    // With a `+ 1` in the cap it came out at 101 and the pager rendered a dead link.
+    const limit = 20;
+    const meta = getPaginationMeta({
+      filteredCount: MAX_PAGE * limit,
+      limit,
+      page: 1,
+      totalCount: MAX_PAGE * limit,
+    });
+
+    expect(meta.totalPages).toBe(MAX_PAGE);
+    expect(clampPage(meta.totalPages)).toBe(meta.totalPages);
+  });
+
+  it("should accept an out-of-range page and leave the clamping to clampPage", () => {
     expect(PaginationSchema.safeParse({ cursor: MAX_PAGE }).success).toBe(true);
-    expect(PaginationSchema.safeParse({ cursor: MAX_PAGE + 1 }).success).toBe(false);
+
+    const far = PaginationSchema.parse({ page: Number.MAX_SAFE_INTEGER });
+    expect(clampPage(far.page)).toBe(MAX_PAGE);
   });
 });
 
 describe("repoService.getAll page clamping", () => {
   it.each([
-    { cursor: 0, expectedSkip: 0, label: "zero" },
-    { cursor: 1, expectedSkip: 0, label: "one" },
-    { cursor: -5, expectedSkip: 0, label: "negative" },
-    { cursor: undefined, expectedSkip: 0, label: "missing" },
-    { cursor: 3, expectedSkip: 20, label: "in range" },
-  ])(
-    "should translate a $label cursor into skip $expectedSkip",
-    async ({ cursor, expectedSkip }) => {
-      const { db, findMany } = createRepoDbMock();
-
-      await repoService.getAll(db, { ...REPO_INPUT, cursor, limit: 10 });
-
-      expect(findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ skip: expectedSkip, take: 10 }),
-      );
-    },
-  );
-
-  it("should cap a cursor above the maximum so skip cannot explode", async () => {
+    { expectedSkip: 0, label: "zero", page: 0 },
+    { expectedSkip: 0, label: "one", page: 1 },
+    { expectedSkip: 0, label: "negative", page: -5 },
+    { expectedSkip: 0, label: "missing", page: undefined },
+    { expectedSkip: 20, label: "in range", page: 3 },
+  ])("should translate a $label page into skip $expectedSkip", async ({ expectedSkip, page }) => {
     const { db, findMany } = createRepoDbMock();
 
-    await repoService.getAll(db, { ...REPO_INPUT, cursor: MAX_PAGE + 1, limit: 100 });
+    await repoService.getAll(db, { ...REPO_INPUT, limit: 10, page }, "user-1");
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: expectedSkip, take: 10 }),
+    );
+  });
+
+  it("should cap a page above the maximum so skip cannot explode", async () => {
+    const { db, findMany } = createRepoDbMock();
+
+    await repoService.getAll(db, { ...REPO_INPUT, limit: 100, page: MAX_PAGE + 1 }, "user-1");
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({ skip: (MAX_PAGE - 1) * 100, take: 100 }),
@@ -338,50 +350,59 @@ describe("repoService.getAll page clamping", () => {
   it("should report the clamped page in the meta", async () => {
     const { db } = createRepoDbMock();
 
-    const result = await repoService.getAll(db, { ...REPO_INPUT, cursor: 0 });
+    const result = await repoService.getAll(db, { ...REPO_INPUT, page: 0 }, "user-1");
 
     expect(result.meta.currentPage).toBe(1);
     expect(result.meta.pageSize).toBe(10);
   });
 });
 
-describe("repoService.getSlim page clamping", () => {
-  it.each([
-    { cursor: 0, expectedSkip: 0, label: "zero" },
-    { cursor: -5, expectedSkip: 0, label: "negative" },
-    { cursor: undefined, expectedSkip: 0, label: "missing" },
-    { cursor: 4, expectedSkip: 30, label: "in range" },
-  ])(
-    "should translate a $label cursor into skip $expectedSkip",
-    async ({ cursor, expectedSkip }) => {
-      const { db, findMany } = createRepoDbMock();
-
-      await repoService.getSlim(db, { ...REPO_INPUT, cursor, limit: 10 });
-
-      expect(findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ skip: expectedSkip, take: 10 }),
-      );
-    },
-  );
-
-  it("should cap a cursor above the maximum so skip cannot explode", async () => {
+describe("repoService.getSlim keyset", () => {
+  it("should page by cursor and not by skip", async () => {
     const { db, findMany } = createRepoDbMock();
 
-    await repoService.getSlim(db, { ...REPO_INPUT, cursor: MAX_PAGE + 1, limit: 100 });
+    await repoService.getSlim(
+      db,
+      {
+        ...REPO_INPUT,
+        cursor: "0192f0c1-0000-7000-8000-000000000001",
+        limit: 10,
+      },
+      "user-1",
+    );
 
     expect(findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ skip: (MAX_PAGE - 1) * 100, take: 100 }),
+      expect.objectContaining({
+        cursor: { id: "0192f0c1-0000-7000-8000-000000000001" },
+        take: 11,
+      }),
     );
+    expect(findMany.mock.calls[0]?.[0]).not.toHaveProperty("skip");
   });
 
-  it("should return the next cursor relative to the clamped page", async () => {
-    const { count, db } = createRepoDbMock();
-    count.mockResolvedValue(1000);
+  it("should report a cursor and hasNextPage on a full page", async () => {
+    const { db, findMany } = createRepoDbMock();
+    findMany.mockResolvedValueOnce(
+      Array.from({ length: 11 }, (_, i) => ({ id: `r${i}`, name: "n", owner: "o" })),
+    );
 
-    const result = await repoService.getSlim(db, { ...REPO_INPUT, cursor: 0, limit: 10 });
+    const result = await repoService.getSlim(db, { ...REPO_INPUT, limit: 10 }, "user-1");
 
-    expect(result.meta.nextCursor).toBe(2);
-    expect(result.meta.totalCount).toBe(1000);
+    expect(result.items).toHaveLength(10);
+    expect(result.meta.hasNextPage).toBe(true);
+    expect(result.meta.nextCursor).toBe("r9");
+  });
+
+  it("should close the page when the extra probe row is absent", async () => {
+    const { db, findMany } = createRepoDbMock();
+    findMany.mockResolvedValueOnce(
+      Array.from({ length: 3 }, (_, i) => ({ id: `r${i}`, name: "n", owner: "o" })),
+    );
+
+    const result = await repoService.getSlim(db, { ...REPO_INPUT, limit: 10 }, "user-1");
+
+    expect(result.meta.hasNextPage).toBe(false);
+    expect(result.meta.nextCursor).toBe("r2");
   });
 });
 
@@ -492,9 +513,23 @@ describe("repoService.deleteAll", () => {
   it("returns success when there is nothing to delete", async () => {
     const { db, deleteMany } = createDeleteAllDbMock();
 
-    const result = await repoService.deleteAll(db);
+    const result = await repoService.deleteAll(db, "user-1");
 
     expect(result).toStrictEqual({ success: true });
     expect(deleteMany).toHaveBeenCalledTimes(1);
+  });
+
+  // The ZenStack policy is `auth() == user || role == ADMIN`, so an unfiltered `deleteMany()`
+  // meant "every repository on the platform" for an admin — reachable from their own settings
+  // danger zone by pressing "delete all repos". The scope is stated in the query now, so this
+  // fails if anyone removes it again.
+  it("never issues an unfiltered delete, even for an admin", async () => {
+    const { db, deleteMany } = createDeleteAllDbMock();
+
+    await repoService.deleteAll(db, "admin-1");
+
+    expect(deleteMany).toHaveBeenCalledWith({ where: { userId: "admin-1" } });
+    const args = deleteMany.mock.calls[0]?.[0] as { where?: unknown } | undefined;
+    expect(args?.where).toBeDefined();
   });
 });

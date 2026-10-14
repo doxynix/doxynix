@@ -11,18 +11,32 @@ description: >
   show live run progress, status badges, token streams, trigger buttons, or
   wait-token approval UIs. NOT for writing the backend task itself (streams.define
   / metadata.set is trigger-authoring-tasks territory); this is the consumer side.
-type: core
-library: trigger.dev
 ---
 
 # Realtime and Frontend
 
-The full, version-pinned reference ships **inside your installed `@trigger.dev/sdk`**. Read it before writing code — it always matches the SDK version in this project, so it never drifts:
+The full, version-pinned reference ships **inside your installed `@trigger.dev/sdk`**. Read it before writing code — it always matches the SDK version in this project, so it never drifts.
 
-- **Skill:** `node_modules/@trigger.dev/sdk/skills/trigger-realtime-and-frontend/SKILL.md` — run subscriptions, `@trigger.dev/react-hooks`, streams, frontend triggering, and scoped tokens.
-- **Docs:** the full, version-pinned docs ship bundled at `node_modules/@trigger.dev/sdk/docs/realtime/`; the skill above lists the exact pages it draws from in its `sources:` frontmatter. Grep for a hook, e.g. `grep -rl "useRealtimeRun" node_modules/@trigger.dev/sdk/docs/`.
+Bun installs per workspace, so there is **no root `node_modules/@trigger.dev`**. The real paths are
+relative to `apps/web`:
 
-If those paths don't exist, `@trigger.dev/sdk` isn't installed yet — install it first. In a non-hoisted layout, resolve the package with `node -p "require.resolve('@trigger.dev/sdk/package.json')"` and read `skills/` + `docs/` beside it.
+- **Skill:** `apps/web/node_modules/@trigger.dev/sdk/skills/trigger-realtime-and-frontend/SKILL.md` —
+  run subscriptions, `@trigger.dev/react-hooks`, streams, frontend triggering, and scoped tokens.
+- **Docs:** `apps/web/node_modules/@trigger.dev/sdk/docs/realtime/`; the skill's frontmatter lists
+  the exact pages it draws from. Grep for a hook, e.g.
+  `grep -rl "useRealtimeRun" apps/web/node_modules/@trigger.dev/sdk/docs/`.
+
+## Repo notes
+
+- Trigger.dev lives only in `apps/web` (`@trigger.dev/sdk`, `@trigger.dev/build` and
+  `@trigger.dev/react-hooks` all `4.6.4`). There is no Trigger setup in `apps/siem-client`.
+- `apps/web` is Next.js App Router, so every component using these hooks needs `"use client"` at the
+  top; a server component cannot subscribe.
+- Frontend code lives under the FSD layers (`app/`, `widgets/`, `features/`, `entities/`, `shared/`)
+  and is gated by `bun run lint:fsd` — a run-status widget composed from a feature belongs in
+  `widgets/`, not inside the feature. See the `feature-sliced-design` skill.
+- Tasks themselves live in `apps/web/src/server/modules/<slice>/tasks/*.task.ts` — see
+  trigger-authoring-tasks.
 
 ## Common mistakes
 

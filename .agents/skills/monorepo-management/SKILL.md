@@ -1,217 +1,235 @@
 ---
 name: monorepo-management
-description: Master monorepo management with Turborepo, Nx, and pnpm workspaces to build efficient, scalable multi-package repositories with optimized builds and dependency management. Use when setting up monorepos, optimizing builds, or managing shared dependencies.
+description: Bun-workspaces + Turborepo monorepo practices for this repo — workspace layout, `catalog:` version pinning, `bun --filter` / `turbo` task running, turbo.json `tasks` configuration, cache hygiene and CI wiring. Use when adding a workspace, touching turbo.json, wiring a build/lint/type-check task, or debugging task-graph and cache behaviour.
 ---
 
 # Monorepo Management
 
-Build efficient, scalable monorepos that enable code sharing, consistent tooling, and atomic changes across multiple packages and applications.
+The repo is a **Bun workspaces + Turborepo** monorepo. `npm`, `yarn` and `pnpm` are forbidden —
+the agent hook rejects them with *"Package manager npm is forbidden"*. Every install and script
+invocation goes through `bun install` / `bun run` / `bun add` / `bun --filter`.
 
-## When to Use This Skill
+Nx, Lerna and pnpm workspaces are **not** used here. Do not introduce them.
 
-- Setting up new monorepo projects
-- Migrating from multi-repo to monorepo
-- Optimizing build and test performance
-- Managing shared dependencies
-- Implementing code sharing strategies
-- Setting up CI/CD for monorepos
-- Versioning and publishing packages
-- Debugging monorepo-specific issues
+## When to Use
 
-## Core Concepts
+- Adding or removing a workspace (`apps/*`, `packages/*`)
+- Adding a turbo task, or changing `dependsOn` / `outputs` / `inputs`
+- Introducing a dependency that must resolve to a single version
+- Debugging "task ran when it should have been cached" or "cache miss" issues
+- Deciding what belongs in `packages/shared` vs an app
 
-### 1. Why Monorepos?
+## Actual Layout
 
-**Advantages:**
+```
+package.json          # private, workspaces: ["apps/*", "packages/*"]
+turbo.json            # turbo 2.11.4 — key is `tasks`, NOT `pipeline`
+biome.json            # single root config, no per-package biome.json
+.oxlintrc.json        # single root config, type-aware
+lefthook.yml          # pre-commit / commit-msg / pre-push gates
+bun.lock              # the only lockfile
+```
 
-- Shared code and dependencies
-- Atomic commits across projects
-- Consistent tooling and standards
-- Easier refactoring
-- Simplified dependency management
-- Better code visibility
+| Workspace | Name | Notes |
+| --- | --- | --- |
+| `apps/web` | `@doxynix/web` | Next.js App Router, tRPC, ZenStack/Prisma, Trigger.dev |
+| `apps/siem-server` | `@doxynix/siem-server` | Hono + Drizzle, ships `dist/` consumed via `exports` |
+| `apps/siem-client` | `@doxynix/siem-client` | Vite + React + TanStack Router (FSD) |
+| `packages/cli` | `@doxynix/cli` | `dxnx` binary; built `dist` is consumed by apps |
+| `packages/config` | `@doxynix/config` | shared tsconfig / dep-cruiser base config |
+| `packages/shared` | `@doxynix/shared` | pure types + Zod schemas; only runtime dep is `zod` |
 
-**Challenges:**
+Turbo cannot run `packages/cli` scripts before `packages/config` is built, and
+`apps/siem-client` / `packages/cli` type-check against **`apps/siem-server`'s built `dist/`** —
+that is why `build`, `type-check` and `test` all declare `dependsOn: ["^build"]`.
 
-- Build performance at scale
-- CI/CD complexity
-- Access control
-- Large Git repository
+## Running Tasks
 
-### 2. Monorepo Tools
-
-**Package Managers:**
-
-- pnpm workspaces (recommended)
-- npm workspaces
-- Yarn workspaces
-
-**Build Systems:**
-
-- Turborepo (recommended for most)
-- Nx (feature-rich, complex)
-- Lerna (older, maintenance mode)
-
-## Turborepo Setup
-
-### Initial Setup
+Root `package.json` scripts already call `turbo <task>` (not `turbo run <task>` — both work, but
+keep the existing form so diffs stay small):
 
 ```bash
-# Create new monorepo
-npx create-turbo@latest my-monorepo
-cd my-monorepo
-
-# Structure:
-# apps/
-#   web/          - Next.js app
-#   docs/         - Documentation site
-# packages/
-#   ui/           - Shared UI components
-#   config/       - Shared configurations
-#   tsconfig/     - Shared TypeScript configs
-# turbo.json      - Turborepo configuration
-# package.json    - Root package.json
+bun run build            # turbo build
+bun run lint             # turbo lint
+bun run dev              # turbo dev --filter=!@doxynix/cli
+bun run test             # turbo test
+bun run type-check       # turbo type-check
+bun run validate         # turbo validate — the gate to run before claiming done
 ```
 
-### Configuration
+Scope to one workspace with `bun --filter`:
 
-```json
-// turbo.json
+```bash
+bun --filter @doxynix/web lint
+bun --filter @doxynix/siem-client type-check
+bun --filter '@doxynix/*' build
+bun --filter @doxynix/siem-server... build    # siem-server and everything it depends on
+```
+
+Prefer `bun run <script>` over an ad-hoc `bun x <binary>`: `lint` transitively runs
+`db:generate`, which is what gives type-aware Oxlint the generated Prisma client. `bun x oxlint`
+skips that and reports phantom errors.
+
+> `with-doppler` only exists **inside** `apps/web` and `apps/siem-server`. There is no such script
+> at the repo root, so `bun with-doppler "..."` from the root fails. Use
+> `bun --filter @doxynix/web db:generate` — that script already wraps Doppler itself.
+
+## Dependency Management
+
+### One version per dependency, via `catalog:`
+
+Root `package.json` has a `catalog` block. Workspaces reference `"catalog:"` instead of a literal
+range, so a transitive version bump is a single edit:
+
+```jsonc
+// root package.json
+"catalog": {
+  "@trpc/client": "11.18.0",
+  "react": "19.2.8",
+  "zod": "4.5.4"
+}
+```
+
+```jsonc
+// apps/web/package.json
+"dependencies": {
+  "@trpc/client": "catalog:",
+  "react": "catalog:"
+}
+```
+
+For security pins that must apply even to transitive dependencies, use root `overrides`
+(the repo already overrides `hono`, `ws`, `cookie`, `uuid`, `esbuild`, …).
+
+### Install / add / remove
+
+```bash
+bun add zod --cwd apps/web                    # or: cd apps/web && bun add zod
+bun add -d lefthook                           # root devDependency
+bun remove pkg
+bun install                                   # resolve everything
+bun install --frozen-lockfile                 # what Lefthook pre-commit runs
+```
+
+After any `bun install`, run `bun run clean:symlinks`. `postinstall` does it, but
+`bun install --ignore-scripts` (what CI uses) does not, and the stale circular
+`tree-sitter-wasms` symlink breaks WASM grammar loading.
+
+### Workspace-internal deps
+
+Internal packages use `workspace:*`. The single deliberate cross-app import is
+`packages/cli` importing `type { AppRouter } from "@doxynix/web/trpc"` — a devDependency, types
+only, exposed through the `"./trpc"` export that maps to `src/server/modules/index.ts`. Do not
+extend it to a runtime import; `apps/*` must never import each other.
+
+## turbo.json
+
+Turbo 2.x: the task key is **`tasks`**. `pipeline` is the 1.x name and is ignored.
+
+```jsonc
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local"],
-  "pipeline": {
+  "cacheDir": ".turbo/cache",
+  "concurrency": "4",
+  "globalDependencies": [".gitignore", "biome.json", ".oxlintrc.json", "lefthook.yml", "turbo.json"],
+  "globalEnv": ["NODE_ENV", "CI", "SKIP_ENV_VALIDATION"],
+  "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "dependsOn": ["^build", "db:generate"],
+      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**", "dist/**"]
     },
-    "test": {
-      "dependsOn": ["build"],
-      "outputs": ["coverage/**"]
-    },
-    "lint": {
-      "outputs": []
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    },
-    "type-check": {
-      "dependsOn": ["^build"],
-      "outputs": []
-    }
+    "dev": { "cache": false, "persistent": true },
+    "lint": { "dependsOn": ["db:generate"] }
   }
 }
 ```
 
-```json
-// package.json (root)
-{
-  "name": "my-monorepo",
-  "private": true,
-  "workspaces": ["apps/*", "packages/*"],
-  "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "test": "turbo run test",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "clean": "turbo run clean && rm -rf node_modules"
-  },
-  "devDependencies": {
-    "turbo": "^1.10.0",
-    "prettier": "^3.0.0",
-    "typescript": "^5.0.0"
-  },
-  "packageManager": "pnpm@8.0.0"
-}
-```
+Task-graph conventions this repo relies on:
 
-### Package Structure
+- **`db:generate` is a hub.** `build`, `lint`, `type-check`, `test`, `arch:baseline`, `validate`
+  and `dev` all `dependsOn` it. It has an explicit `inputs`/`outputs` list (ZenStack `.zmodel`,
+  Prisma schema, Drizzle `schema.ts`, generated output paths) — extend those lists when you add a
+  generator, otherwise the cache goes stale silently.
+- **`db:*` tasks are `cache: false`** except `db:generate`. Migrations and pushes are side-effecting.
+- **`dev` is `persistent: true` and uncached** — a cached `dev` is an infinite "task never
+  finishes" hang.
+- **`test` outputs** must list every artifact you want restored: `coverage/**`,
+  `test-results/**`, `reports/**`.
+- **`globalDependencies`** is for files outside any workspace that still invalidate everything
+  (`lefthook.yml`, `biome.json`, `packages/config/depcruise-base.json`, `**/.env.*local`). Adding a
+  root config file there invalidates the entire graph — that is the intent, not a bug.
 
-```json
-// packages/ui/package.json
-{
-  "name": "@repo/ui",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./button": {
-      "import": "./dist/button.js",
-      "types": "./dist/button.d.ts"
-    }
-  },
-  "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts",
-    "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
-    "lint": "eslint src/",
-    "type-check": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "@repo/tsconfig": "workspace:*",
-    "tsup": "^7.0.0",
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "react": "^18.2.0"
-  }
-}
-```
+### Env vars
 
-## Detailed patterns and worked examples
+Turbo hashes only the env vars a task declares. A secret read inside a task but missing from that
+task's `env` array is a cache-poisoning bug: the cached result replays with a stale secret.
+`globalEnv` covers cross-cutting ones (`CI`, `NODE_ENV`, `SKIP_ENV_VALIDATION`).
 
-Detailed pattern documentation lives in `references/details.md`. Read that file when the navigation tier above is insufficient.
+## Architecture Boundaries
+
+The monorepo is a modular monolith per app plus FSD on the clients. These are enforced by
+`dep-cruiser` (`bun run arch:check`), not by convention:
+
+- `apps/*` must not import each other.
+- Client FSD (`apps/web/src/{app,entities,features,widgets,shared}`, `apps/siem-client`):
+  imports flow **downward only**; no cross-slice imports. Gate: `bun --filter @doxynix/web lint:fsd`
+  (steiger).
+- Server modules (`apps/web/src/server/modules`, `apps/siem-server/src/modules`,
+  `packages/cli/src/commands`): one folder per feature, imports flow **downward only**. `core`,
+  `utils` and `ui` sit *below* slices and must never import up into one.
+- Shared domain code goes in `packages/shared`, never in an app.
+
+`arch:check` compares against a known-violations baseline — new violations fail, old ones do not.
+After a deliberate refactor, refresh it with `bun --filter @doxynix/<app> arch:baseline` and read
+the diff before committing.
+
+See `.agents/skills/architecture/SKILL.md` for the full rule set.
+
+## Tooling: Bun only
+
+| Concern | Tool | Where |
+| --- | --- | --- |
+| Package manager | Bun 1.4.0 | `bun.lock` |
+| Task runner / cache | Turborepo 2.11.4 | `turbo.json` |
+| Formatter + assists | Biome 2.5.14 | `biome.json` (root only) |
+| Linter | Oxlint 1.85.0, type-aware | `.oxlintrc.json` (root only) |
+| Architecture gate | dependency-cruiser | `packages/config/depcruise-base.json` |
+| Hooks | Lefthook 2.1.14 | `lefthook.yml` |
+| Duplication | jscpd 5.3.2 | `bun run dup` |
+| Dead code | knip 6.38.0 | `bun run knip` |
+| Spelling / secrets | cspell 10.3.4 / secretlint 13.0.6 | `cspell.json` |
+
+ESLint and Prettier are banned. If a workspace needs a lint rule, add it to the root
+`.oxlintrc.json`; if it needs formatting config, extend the root `biome.json` via `overrides`.
 
 ## Best Practices
 
-1. **Consistent Versioning**: Lock dependency versions across workspace
-2. **Shared Configs**: Centralize ESLint, TypeScript, Prettier configs
-3. **Dependency Graph**: Keep it acyclic, avoid circular dependencies
-4. **Cache Effectively**: Configure inputs/outputs correctly
-5. **Type Safety**: Share types between frontend/backend
-6. **Testing Strategy**: Unit tests in packages, E2E in apps
-7. **Documentation**: README in each package
-8. **Release Strategy**: Use changesets for versioning
+1. **One version per dep.** Use `catalog:` for anything with more than one consumer; use root
+   `overrides` only for transitive pins.
+2. **Never hand-edit a lockfile entry** that `bun install` produces — run the install.
+3. **Keep `dependsOn: ["^build"]`** on anything that consumes a workspace's `dist/`.
+4. **Declare every secret in `env`/`globalEnv`** for the task that reads it.
+5. **Put shared code in `packages/shared`**; if only one app needs it, it belongs in that app.
+6. **Run `bun run validate`** before declaring work done.
+7. **Refresh `arch:baseline` deliberately**, never as a reflex, and review the diff.
 
 ## Common Pitfalls
 
-- **Circular Dependencies**: A depends on B, B depends on A
-- **Phantom Dependencies**: Using deps not in package.json
-- **Incorrect Cache Inputs**: Missing files in Turborepo inputs
-- **Over-Sharing**: Sharing code that should be separate
-- **Under-Sharing**: Duplicating code across packages
-- **Large Monorepos**: Without proper tooling, builds slow down
+- **Phantom dependency.** Importing a package that is in the root `node_modules` but not in your
+  workspace's `package.json`. It works locally and breaks on a clean install.
+- **Cache that misses constantly.** A missing `inputs` entry, or a file that should be in
+  `globalDependencies`.
+- **Cache that hits when it shouldn't.** A secret or generated file read by the task but absent
+  from `env`/`inputs`.
+- **Importing a sibling app.** Works in dev because Bun hoists; fails the `arch:check` gate.
+- **Running `bun with-doppler` from the repo root.** The script does not exist there.
+- **Forgetting `bun run clean:symlinks`** after an `--ignore-scripts` install.
+- **Adding a workspace with no `build` script** that dependents import from — they will read a
+  stale `dist/`.
 
-## Publishing Packages
+## Publishing
 
-```bash
-# Using Changesets
-pnpm add -Dw @changesets/cli
-pnpm changeset init
-
-# Create changeset
-pnpm changeset
-
-# Version packages
-pnpm changeset version
-
-# Publish
-pnpm changeset publish
-```
-
-```yaml
-# .github/workflows/release.yml
-- name: Create Release Pull Request or Publish
-  uses: changesets/action@v1
-  with:
-    publish: pnpm release
-  env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-```
+The repo is private and publishes **only** `packages/cli` (`@doxynix/cli`) to npm. Versioning is
+driven by **release-please**, not changesets — see `.agents/skills/release-please/SKILL.md` and
+`release-please-config.json` / `.release-please-manifest.json`. Do not add changesets config or
+hand-edit versions.

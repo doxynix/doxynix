@@ -10,7 +10,10 @@ description: Configure environments like jsdom, happy-dom for browser APIs
 - `node` (default) - Node.js environment
 - `jsdom` - Browser-like with DOM APIs
 - `happy-dom` - Faster alternative to jsdom
-- `edge-runtime` - Vercel Edge Runtime
+
+`apps/web` pins `environment: "node"` in both vitest configs. Reach for `jsdom` only in a file-level
+`@vitest-environment jsdom` docblock (e.g. `src/shared/ui/core/sidebar.rail.test.ts`), after
+`bun add -d jsdom`.
 
 ## Configuration
 
@@ -34,10 +37,10 @@ defineConfig({
 
 ```bash
 # jsdom
-npm i -D jsdom
+bun add -d jsdom
 
 # happy-dom (faster, fewer APIs)
-npm i -D happy-dom
+bun add -d happy-dom
 ```
 
 ## Per-File Environment

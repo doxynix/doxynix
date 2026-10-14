@@ -153,4 +153,38 @@ describe("tRPC Error Formatting & Security Boundaries", () => {
       message: "You are not logged in",
     });
   });
+
+  it("blocks a banned account on an API-key session, which never reaches better-auth", async () => {
+    const router = createTRPCRouter({ ping: protectedProcedure.query(() => "pong") });
+    const caller = createCallerFactory(router)(ctxFor({ banned: true }));
+
+    await expect(caller.ping()).rejects.toMatchObject({
+      code: "FORBIDDEN",
+      message: "This account is banned and cannot use the API.",
+    });
+  });
+
+  it("lets a banned account through once the ban has expired", async () => {
+    const router = createTRPCRouter({ ping: protectedProcedure.query(() => "pong") });
+    const caller = createCallerFactory(router)(
+      ctxFor({ banExpires: new Date(Date.now() - 60_000), banned: true }),
+    );
+
+    await expect(caller.ping()).resolves.toBe("pong");
+  });
+
+  it("still lets an unbanned API-key caller through", async () => {
+    const router = createTRPCRouter({ ping: protectedProcedure.query(() => "pong") });
+    const caller = createCallerFactory(router)(ctxFor({ banned: false }));
+
+    await expect(caller.ping()).resolves.toBe("pong");
+  });
 });
+
+function ctxFor(user: { banned: boolean; banExpires?: Date }) {
+  return {
+    prisma: {},
+    req: {} as any,
+    session: { session: { id: "api-key" }, user },
+  } as any;
+}

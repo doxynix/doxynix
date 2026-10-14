@@ -39,28 +39,28 @@ import { z } from 'zod'
 const passwordSchema = z.string().superRefine((password, ctx) => {
   if (password.length < 8) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: 'Password must be at least 8 characters',
     })
   }
 
   if (!/[A-Z]/.test(password)) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: 'Password must contain an uppercase letter',
     })
   }
 
   if (!/[0-9]/.test(password)) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: 'Password must contain a number',
     })
   }
 
   if (!/[!@#$%^&*]/.test(password)) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: 'Password must contain a special character',
     })
   }
@@ -124,7 +124,7 @@ const orderSchema = z.object({
 
     if (!available) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ['items', i, 'quantity'],  // Specific path
         message: `Only ${available} units available`,
       })
@@ -136,7 +136,7 @@ const orderSchema = z.object({
     const valid = await validatePromoCode(order.promoCode)
     if (!valid) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ['promoCode'],
         message: 'Invalid or expired promo code',
       })

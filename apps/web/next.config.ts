@@ -267,12 +267,13 @@ const nextConfig: NextConfig = {
   },
   poweredByHeader: false,
   productionBrowserSourceMaps: false, // Ensures clients cannot fetch raw sourcemaps from browser
-  reactCompiler: true,
+  // Every component compiles today; failing the build keeps a future bailout from hiding.
+  reactCompiler: { panicThreshold: "all_errors" },
   // cacheComponents: true, // disable if bugs appear (// NOTE: bug #418 with hydration discovered — turns out everything must be wrapped in Suspense and the 'use cache' directive used everywhere, since caching is now manual; too much rewriting while PPR is deferred indefinitely)
   reactStrictMode: true,
   async redirects() {
     const shortcuts = [
-      { d: "/dashboard", s: "/o" },
+      { d: "/dashboard", s: "/d" },
       { d: "/dashboard", s: "/dash" },
       { d: "/dashboard", s: "/home" },
 
@@ -299,7 +300,9 @@ const nextConfig: NextConfig = {
       { d: "/dashboard/notifications", s: "/inbox" },
       { d: "/dashboard/notifications", s: "/alerts" },
 
-      { d: "/dashboard/settings/danger-zone", s: "/d" },
+      { d: "/admin/users", s: "/au" },
+
+      { d: "/dashboard/settings/danger-zone", s: "/dz" },
       { d: "/dashboard/settings/danger-zone", s: "/danger" },
       { d: "/dashboard/settings/danger-zone", s: "/rip" },
 

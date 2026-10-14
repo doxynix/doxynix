@@ -1,101 +1,100 @@
 ---
 name: turborepo
-description: |
-  Turborepo monorepo build system guidance. Triggers on: turbo.json, task pipelines,
-  dependsOn, caching, remote cache, the "turbo" CLI, --filter, --affected, CI optimization, environment
-  variables, internal packages, monorepo structure/best practices, and boundaries.
-
-  Use when user: configures tasks/workflows/pipelines, creates packages, sets up
-  monorepo, shares code between apps, runs changed/affected packages, debugs cache,
-  or has apps/packages directories.
-metadata:
-  version: 2.10.13-canary.1
+description: Turborepo 2.11 in this repo — turbo.json `tasks` (not `pipeline`), `dependsOn` and outputs, local and remote caching, env hashing, `--filter` / `--affected`, CI wiring with Bun, and monorepo structure/boundaries. Use when configuring tasks, debugging a cache miss or a stale cache hit, wiring CI, or deciding what belongs in `packages/*` vs an app.
 ---
 
 # Turborepo Skill
 
-Build system for JavaScript/TypeScript monorepos. Turborepo caches task outputs and runs tasks in parallel based on dependency graph.
+Turborepo **2.11.4** over **Bun workspaces** in this repo. It caches task outputs and runs tasks
+in parallel based on the dependency graph declared in `turbo.json`.
+
+> **`turbo.json` uses `tasks`.** The 1.x key was `pipeline`; Turbo 2 ignores `pipeline` entirely.
+> Any config snippet that says `"pipeline": { ... }` is wrong for this repo.
 
 ## IMPORTANT: Package Tasks, Not Root Tasks
 
 **Prefer package tasks over Root Tasks.**
 
-When creating tasks/scripts/pipelines, you MUST default to package tasks:
+When creating tasks, you MUST default to package tasks:
 
-1. Add the script to each relevant package's `package.json`
+1. Add the script to each relevant workspace's `package.json`
 2. Register the task in root `turbo.json`
-3. Root `package.json` only delegates via `turbo run <task>`
+3. Root `package.json` only delegates via `turbo <task>`
 
-**DO NOT** put task logic in root `package.json` when it can live in packages. This defeats Turborepo's parallelization.
+**DO NOT** put task logic in root `package.json` when it can live in a workspace. This defeats
+Turborepo's parallelization.
 
-```json
-// DO THIS: Scripts in each package
+```jsonc
+// DO THIS: scripts in each workspace
 // apps/web/package.json
-{ "scripts": { "build": "next build", "lint": "eslint .", "test": "vitest" } }
+{ "scripts": { "build": "next build", "lint": "oxlint", "format": "biome check --write ." } }
 
-// apps/api/package.json
-{ "scripts": { "build": "tsc", "lint": "eslint .", "test": "vitest" } }
-
-// packages/ui/package.json
-{ "scripts": { "build": "tsc", "lint": "eslint .", "test": "vitest" } }
+// apps/siem-server/package.json
+{ "scripts": { "build": "tsc", "lint": "oxlint", "format": "biome check --write ." } }
 ```
 
-```json
-// turbo.json - register tasks
+```jsonc
+// turbo.json — register the task
 {
   "tasks": {
-    "build": { "dependsOn": ["^build"], "outputs": ["dist/**"] },
-    "lint": {},
-    "test": { "dependsOn": ["build"] }
+    "build": { "dependsOn": ["^build", "db:generate"], "outputs": [".next/**", "dist/**"] },
+    "lint": { "dependsOn": ["db:generate"] },
+    "format": { "cache": false }
   }
 }
 ```
 
-```json
-// Root package.json - ONLY delegates, no task logic
+```jsonc
+// Root package.json — ONLY delegates, no task logic.
+// Note the existing repo form: `turbo build`, not `turbo run build`.
 {
   "scripts": {
-    "build": "turbo run build",
-    "lint": "turbo run lint",
-    "test": "turbo run test"
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "dev": "turbo dev --filter=!@doxynix/cli",
+    "test": "turbo test",
+    "validate": "turbo validate"
   }
 }
 ```
 
-```json
-// DO NOT DO THIS - defeats parallelization
+```jsonc
+// DO NOT DO THIS — defeats parallelization
 // Root package.json
 {
   "scripts": {
-    "build": "cd apps/web && next build && cd ../api && tsc",
-    "lint": "eslint apps/ packages/",
+    "build": "cd apps/web && next build && cd ../siem-server && tsc",
+    "lint": "oxlint apps/ packages/",
     "test": "vitest"
   }
 }
 ```
 
-Root Tasks (`//#taskname`) are ONLY for tasks that truly cannot exist in packages, such as Vitest Projects' `//#test`, repo-wide release scripts, or tooling that does not invoke `turbo` itself.
+Root Tasks (`//#taskname`) are ONLY for tasks that truly cannot exist in a workspace, such as
+Vitest Projects' `//#test`, repo-wide release scripts, or tooling that does not invoke `turbo`
+itself.
 
-## Secondary Rule: `turbo run` vs `turbo`
+## `turbo run` vs `turbo`
 
-**Always use `turbo run` when the command is written into code:**
+Both forms are valid in Turbo 2 — `turbo run build` and `turbo build` are the same invocation.
+**This repo's root `package.json` uses the short form**: `turbo build`, `turbo lint`,
+`turbo dev --filter=!@doxynix/cli`. Keep it that way. Do not "fix" the existing scripts to
+`turbo run`, and do not demand that a contributor change them. In ad-hoc terminal work either form
+is fine.
 
-```json
-// package.json - ALWAYS "turbo run"
-{
-  "scripts": {
-    "build": "turbo run build"
-  }
-}
-```
+## Repo-specific conventions
 
-```yaml
-# CI workflows - ALWAYS "turbo run"
-- run: turbo run build --affected
-```
+| Concern | What this repo does |
+| --- | --- |
+| Package manager | Bun only — `bun install`, `bun --filter`, `bun x`. `npm` / `pnpm` / `yarn` are forbidden |
+| `db:generate` | A hub task; `build`, `lint`, `lint:fix`, `type-check`, `test`, `dev`, `arch:baseline` and `validate` all `dependsOn` it |
+| Other `db:*` | `cache: false` (side-effecting), except `db:generate` |
+| `dev` | `cache: false`, `persistent: true` |
+| Built-artifact deps | `build`, `type-check` and `test` all `dependsOn: ["^build"]` — `apps/siem-client` and `packages/cli` type-check against `apps/siem-server`'s built `dist/` |
+| UI | `"ui": "tui"` |
+| Concurrency / cache | `concurrency: "4"`, `cacheDir: ".turbo/cache"`, `cacheMaxAge: "14d"`, `cacheMaxSize: "5GB"` |
 
-**The shorthand `turbo <tasks>` is ONLY for one-off terminal commands** typed directly by humans or agents. Never write `turbo build` into package.json, CI, or scripts.
-
+## Quick Decision Trees
 ## Quick Decision Trees
 
 ### "I need to configure a task"
@@ -200,7 +199,7 @@ Monorepo structure?
 ├─ Package types (apps vs libraries) → references/best-practices/RULE.md#package-types
 ├─ Creating internal packages → references/best-practices/packages.md
 ├─ TypeScript configuration → references/best-practices/structure.md#typescript-configuration
-├─ ESLint configuration → references/best-practices/structure.md#eslint-configuration
+├─ Lint config (Oxlint + Biome) → references/best-practices/structure.md#lint-and-format-configuration
 ├─ Dependency management → references/best-practices/dependencies.md
 └─ Enforce package boundaries → references/boundaries/RULE.md
 ```
@@ -217,41 +216,20 @@ Enforce boundaries?
 
 ## Critical Anti-Patterns
 
-### Using `turbo` Shorthand in Code
+### Chasing the `turbo run` vs `turbo` Style Debate
 
-**`turbo run` is recommended in package.json scripts and CI pipelines.** The shorthand `turbo <task>` is intended for interactive terminal use.
-
-```json
-// WRONG - using shorthand in package.json
-{
-  "scripts": {
-    "build": "turbo build",
-    "dev": "turbo dev"
-  }
-}
-
-// CORRECT
-{
-  "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev"
-  }
-}
-```
-
-```yaml
-# WRONG - using shorthand in CI
-- run: turbo build --affected
-
-# CORRECT
-- run: turbo run build --affected
-```
+Both forms are valid in Turbo 2 and behave identically. **Do not "fix" this repo's existing root
+scripts.** They read `"build": "turbo build"`, `"dev": "turbo dev --filter=!@doxynix/cli"`, and that
+is the house style. Writing `turbo run build` into a new script is fine; rewriting the existing ones
+to match an imagined rule is churn.
 
 ### Root Scripts Bypassing Turbo
 
-Root `package.json` scripts MUST delegate to `turbo run`, not run tasks directly.
+Root `package.json` scripts MUST delegate to turbo, not run tasks directly. The repo has a real
+`bun run nuke` that legitimately shells out (`rm -rf ...`) — that is a maintenance script, not a
+graph task, and it is fine.
 
-```json
+```jsonc
 // WRONG - bypasses turbo entirely
 {
   "scripts": {
@@ -263,8 +241,8 @@ Root `package.json` scripts MUST delegate to `turbo run`, not run tasks directly
 // CORRECT - delegates to turbo
 {
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev"
+    "build": "turbo build",
+    "dev": "turbo dev --filter=!@doxynix/cli"
   }
 }
 ```
@@ -274,17 +252,17 @@ Root `package.json` scripts MUST delegate to `turbo run`, not run tasks directly
 Don't chain turbo tasks with `&&`. Let turbo orchestrate.
 
 ```json
-// WRONG - turbo task not using turbo run
+// WRONG - reaches past the task graph
 {
   "scripts": {
-    "changeset:publish": "bun build && changeset publish"
+    "release:build": "bun build && bun run publish:cli"
   }
 }
 
 // CORRECT
 {
   "scripts": {
-    "changeset:publish": "turbo run build && changeset publish"
+    "release:build": "turbo build && bun run publish:cli"
   }
 }
 ```
@@ -305,10 +283,10 @@ Scripts like `prebuild` that manually build other packages bypass Turborepo's de
 
 **However, the fix depends on whether workspace dependencies are declared:**
 
-1. **If dependencies ARE declared** (e.g., `"@repo/types": "workspace:*"` in package.json), remove the `prebuild` script. Turbo's `dependsOn: ["^build"]` handles this automatically.
+1. **If dependencies ARE declared** (e.g., `"@doxynix/types": "workspace:*"` in package.json), remove the `prebuild` script. Turbo's `dependsOn: ["^build"]` handles this automatically.
 
 2. **If dependencies are NOT declared**, the `prebuild` exists because `^build` won't trigger without a dependency relationship. The fix is to:
-   - Add the dependency to package.json: `"@repo/types": "workspace:*"`
+   - Add the dependency to package.json: `"@doxynix/types": "workspace:*"`
    - Then remove the `prebuild` script
 
 ```json
@@ -316,8 +294,8 @@ Scripts like `prebuild` that manually build other packages bypass Turborepo's de
 // package.json
 {
   "dependencies": {
-    "@repo/types": "workspace:*",
-    "@repo/utils": "workspace:*"
+    "@doxynix/types": "workspace:*",
+    "@doxynix/utils": "workspace:*"
   },
   "scripts": {
     "build": "next build"
@@ -447,11 +425,11 @@ When multiple packages need different task configurations, use **Package Configu
 {
   "tasks": {
     "test": { "dependsOn": ["build"] },
-    "@repo/web#test": { "outputs": ["coverage/**"] },
-    "@repo/api#test": { "outputs": ["coverage/**"] },
-    "@repo/utils#test": { "outputs": [] },
-    "@repo/cli#test": { "outputs": [] },
-    "@repo/core#test": { "outputs": [] }
+    "@doxynix/web#test": { "outputs": ["coverage/**"] },
+    "@doxynix/api#test": { "outputs": ["coverage/**"] },
+    "@doxynix/utils#test": { "outputs": [] },
+    "@doxynix/cli#test": { "outputs": [] },
+    "@doxynix/core#test": { "outputs": [] }
   }
 }
 
@@ -712,7 +690,7 @@ packages/
 import { Button } from "../../packages/ui/src/button";
 
 // CORRECT: Install and import properly
-import { Button } from "@repo/ui/button";
+import { Button } from "@doxynix/ui/button";
 ```
 
 ### Too Many Root Dependencies
@@ -740,7 +718,7 @@ import { Button } from "@repo/ui/button";
 
 ```json
 {
-  "$schema": "https://v2-10-13-canary-1.turborepo.dev/schema.json",
+  "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -927,7 +905,7 @@ With `futureFlags.globalConfiguration`, the same config moves global settings un
 | File                                                                          | Purpose                                                         |
 | ----------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | [best-practices/RULE.md](./references/best-practices/RULE.md)                 | Monorepo best practices overview                                |
-| [best-practices/structure.md](./references/best-practices/structure.md)       | Repository structure, workspace config, TypeScript/ESLint setup |
+| [best-practices/structure.md](./references/best-practices/structure.md)       | Repository structure, workspace config, TypeScript and Oxlint/Biome setup |
 | [best-practices/packages.md](./references/best-practices/packages.md)         | Creating internal packages, JIT vs Compiled, exports            |
 | [best-practices/dependencies.md](./references/best-practices/dependencies.md) | Dependency management, installing, version sync                 |
 

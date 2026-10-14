@@ -13,11 +13,11 @@ export const notificationsService = {
     return trpc.notification.getStats.query({});
   },
 
-  async list(limit = 15, isRead?: boolean, cursor = 1) {
+  async list(limit = 15, isRead?: boolean, page = 1) {
     return trpc.notification.getAll.query({
-      cursor,
       isRead,
       limit,
+      page,
     });
   },
 

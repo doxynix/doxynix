@@ -68,10 +68,10 @@ describe.runIf(!process.env.CI)('only local', () => {})
 
 ### Focus Suites
 
+Forbidden in this repo: `vitest/no-focused-tests` is an `error` in `.oxlintrc.json`.
+
 ```ts
-describe.only('only this suite runs', () => {
-  test('runs', () => {})
-})
+describe.only('only this suite runs', () => {}) // lint error
 ```
 
 ### Todo Suites
@@ -177,7 +177,7 @@ Modifiers can be chained:
 
 ```ts
 describe.skip.concurrent('skipped concurrent', () => {})
-describe.only.shuffle('only and shuffled', () => {})
+describe.shuffle('shuffled order', () => {})
 ```
 
 ## Key Points

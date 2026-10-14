@@ -67,22 +67,20 @@ export default {
 
 ## Focus Tests (.only)
 
-```ts
-test.only('only this runs', () => {})
+**Not allowed in Doxynix.** `.oxlintrc.json` sets `vitest/no-focused-tests` to `error`, so `bun run lint`
+fails on any `.only` — do not enable `allowOnly`.
 
-describe.only('only this suite', () => {
-  test('runs', () => {})
-})
+```ts
+test.only('only this runs', () => {}) // lint error
+
+describe.only('only this suite', () => {}) // lint error
 ```
 
-In CI, `.only` throws error unless configured:
+To run a subset locally, pass a name filter instead:
 
-```ts
-defineConfig({
-  test: {
-    allowOnly: true, // Allow .only in CI
-  },
-})
+```bash
+bun --filter @doxynix/web test -t "name pattern"
+bun --filter @doxynix/web test src/path/to/file.test.ts
 ```
 
 ## Skip Tests
@@ -202,7 +200,7 @@ vitest list --json          # JSON output
 - `--changed` runs only tests affected by changes
 - `--related` runs tests importing specific files
 - Tags provide semantic test grouping
-- Use `.only` for debugging, but configure CI to reject it
+- Never use `.only` here — `vitest/no-focused-tests` is an error; filter with `-t` instead
 - Watch mode has interactive filtering
 
 <!-- 

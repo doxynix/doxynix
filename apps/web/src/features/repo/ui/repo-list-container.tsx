@@ -1,5 +1,6 @@
 "use client";
 
+import { MAX_PAGE, MAX_PAGE_SIZE } from "@doxynix/shared";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
@@ -36,15 +37,21 @@ export function RepoListContainer({ config }: Readonly<Props>) {
 
   const debouncedSearch = useDebounce(filters.search, 500);
 
-  const safeLimit = clampIntegerParam(config?.limit, { fallback: 5, max: 100, min: 1 });
-  const safePage = clampIntegerParam(filters.page, { fallback: 1, max: 1_000_000, min: 1 });
+  const safeLimit = clampIntegerParam(config?.limit, {
+    fallback: 5,
+    max: MAX_PAGE_SIZE,
+    min: 1,
+  });
+  const safePage = clampIntegerParam(filters.page, { fallback: 1, max: MAX_PAGE, min: 1 });
 
   const queryParams = {
-    cursor: safePage,
+    from: filters.from ?? undefined,
     limit: safeLimit,
+    page: safePage,
     search: debouncedSearch || undefined,
     sortBy: filters.sortBy,
     status: filters.status ?? undefined,
+    to: filters.to ?? undefined,
     visibility: filters.visibility ?? undefined,
     ...config?.forcedFilters,
   };

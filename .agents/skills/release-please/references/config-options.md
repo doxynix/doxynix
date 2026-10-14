@@ -69,26 +69,15 @@ Set `"hidden": true` to exclude a commit type from the changelog entirely.
 
 ### Release Types
 
-| Type | Ecosystem | Version File(s) |
-|------|-----------|-----------------|
-| `node` | Node.js | `package.json` |
-| `python` | Python | `setup.py`, `setup.cfg`, `pyproject.toml` |
-| `java` | Java (Maven) | `pom.xml` |
-| `maven` | Java (Maven) | `pom.xml` (alias) |
-| `go` | Go | Tags only (no version file) |
-| `rust` | Rust | `Cargo.toml` |
-| `ruby` | Ruby | `*.gemspec`, `lib/**/version.rb` |
-| `php` | PHP | `composer.json` |
-| `dart` | Dart/Flutter | `pubspec.yaml` |
-| `elixir` | Elixir | `mix.exs` |
-| `helm` | Helm charts | `Chart.yaml` |
-| `terraform-module` | Terraform | Tags only |
-| `ocaml` | OCaml | `dune-project`, `*.opam` |
-| `krm-blueprint` | KRM | `*.yaml` |
-| `simple` | Generic | Version file only (no ecosystem logic) |
-| `github-pages` | GitHub Pages | Tags only |
-| `expo` | Expo (React Native) | `app.json` |
-| `salesforce` | Salesforce | `sfdx-project.json` |
+This repo is **Node/Bun only**. Every entry in `release-please-config.json` is `"release-type": "node"`,
+which reads and writes the `version` field in `package.json`.
+
+| Type | Ecosystem | Version file |
+|------|-----------|--------------|
+| `node` | Node / Bun | `package.json` |
+
+Other release types (`python`, `java`, `go`, `rust`, `ruby`, `helm`, …) exist upstream but have no
+place here — adding one means adding a non-JS package to a Bun workspace.
 
 ---
 
@@ -136,7 +125,7 @@ Alternatively, use the `Release-As: x.x.x` footer in a commit to force a specifi
 |-------|------|---------|-------------|
 | `config-file` | string | `"release-please-config.json"` | Path to config file |
 | `manifest-file` | string | `".release-please-manifest.json"` | Path to manifest file |
-| `token` | string | `${{ secrets.GITHUB_TOKEN }}` | GitHub token for API access |
+| `token` | string | `${{ secrets.GITHUB_TOKEN }}` | GitHub token for API access — **this repo passes a GitHub App token** so the bot can push to its release branch |
 | `target-branch` | string | default branch | Branch to target for release PRs |
 | `skip-github-release` | boolean | `false` | Skip creating GitHub releases |
 | `skip-github-pull-request` | boolean | `false` | Skip creating release PRs |
@@ -173,28 +162,33 @@ steps.release.outputs['packages/core--version']
 
 ---
 
-## Monorepo Configuration Example
+## This repo's Configuration
 
 **release-please-config.json:**
 
-```json
+```jsonc
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
-  "separate-pull-requests": false,
   "packages": {
-    "packages/core": {
+    ".": { "package-name": "doxynix", "release-type": "node" },
+    "apps/siem-client": {
+      "package-name": "@doxynix/siem-client",
       "release-type": "node",
-      "component": "core"
+      "bump-minor-pre-major": true,
+      "bump-patch-pre-major": true
     },
-    "packages/cli": {
+    "apps/siem-server": {
+      "package-name": "@doxynix/siem-server",
       "release-type": "node",
-      "component": "cli"
+      "bump-minor-pre-major": true,
+      "bump-patch-pre-major": true
     },
-    "packages/utils": {
-      "release-type": "node",
-      "component": "utils"
-    }
-  }
+    "apps/web": { "package-name": "@doxynix/web", "release-type": "node" },
+    "packages/cli": { "package-name": "@doxynix/cli", "release-type": "node" },
+    "packages/config": { "package-name": "@doxynix/config", "release-type": "node" },
+    "packages/shared": { "package-name": "@doxynix/shared", "release-type": "node" }
+  },
+  "plugins": [{ "type": "node-workspace" }]
 }
 ```
 
@@ -202,19 +196,56 @@ steps.release.outputs['packages/core--version']
 
 ```json
 {
-  "packages/core": "2.1.0",
-  "packages/cli": "1.3.2",
-  "packages/utils": "0.5.1"
+  ".": "6.2.0",
+  "apps/siem-client": "0.4.0",
+  "apps/siem-server": "0.3.2",
+  "apps/web": "5.2.0",
+  "packages/cli": "5.1.0",
+  "packages/config": "1.2.0",
+  "packages/shared": "0.3.0"
 }
 ```
 
-With `separate-pull-requests: false` (default), all package releases are grouped into a single PR. Set to `true` for independent release PRs per package.
+`separate-pull-requests` is not set, so it defaults to `false` and all package releases are grouped
+into a single Release PR. Setting it to `true` gives each package an independent PR — noisier, and
+it would conflict with the single-PR convention the repo has.
 
-### Monorepo Commit Scopes
+### The `node-workspace` plugin
 
-Use the component name as the commit scope so release-please routes the change correctly:
+Keeps the root package version and the inter-workspace `workspace:*` ranges consistent when a
+package is versioned. Without it, bumping `packages/shared` leaves every dependent workspace
+pointing at a range that no longer matches the release.
 
-```
-feat(core): add streaming support
-fix(cli): resolve argument parsing for --verbose flag
-```
+Practical consequences:
+
+- You cannot hand-edit a `version` field and expect the next release to build on it — the plugin
+  reconciles from the tag.
+- `bun install` must run after the bot's PR lands, or `bun.lock` will not match the bumped ranges.
+  The bot's Release PR is the place where that lockfile update belongs.
+
+### Pre-1.0 packages
+
+`apps/siem-client` (0.4.0) and `apps/siem-server` (0.3.2) set both `bump-minor-pre-major` and
+`bump-patch-pre-major`. A `feat` on either is a **patch**, not a minor — so `feat(siem-client): ...`
+produces `0.4.1`, not `0.5.0`. That is intended: the public contract has not stabilised.
+
+The other five packages are past 1.0 and use normal semver.
+
+### Commit scopes
+
+release-please routes a commit to a package by the commit scope matching the package path
+(`packages/cli` ← `cli`). The scope allowlist in `scripts/check-commit-name.ts` and the release
+paths are aligned deliberately:
+
+| Scope | Routed to |
+|-------|-----------|
+| `cli` | `packages/cli` |
+| `shared` | `packages/shared` |
+| `config` | `packages/config` |
+| `siem-client` | `apps/siem-client` |
+| `siem-server` | `apps/siem-server` |
+| `web` | `apps/web` |
+| `ci`, `deps`, `db`, `root`, `security`, `skills`, `tooling` | repo-wide |
+
+A scope that is in the allowlist but does not map to a package (`tooling`, say) still bumps the
+root `"."` package.

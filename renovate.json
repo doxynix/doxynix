@@ -3,6 +3,7 @@
   "dependencyDashboard": true,
   "extends": ["config:best-practices", "monorepo:react", "monorepo:nextjs", "group:monorepos"],
   "gitAuthor": "doxynix-deps-bot <273657142+doxynix-deps-bot[bot]@users.noreply.github.com>",
+  "ignorePaths": [".agents/**"],
   "labels": ["dependencies"],
   "minimumReleaseAge": "3 days",
   "packageRules": [

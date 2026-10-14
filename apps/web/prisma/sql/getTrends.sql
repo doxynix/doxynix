@@ -3,6 +3,8 @@
 -- @param {DateTime} $3:end_date
 -- @param {String} $4:repo_id?
 
+-- `@prisma/adapter-pg` sends Date params as a zone-less UTC string, so `$2`/`$3` below are
+-- session-TimeZone independent; casting either to `::timestamptz` would re-add that dependency.
 WITH daily_latest AS (
     SELECT DISTINCT ON (a.repo_id, DATE(a.created_at))
         a.score,
@@ -18,7 +20,7 @@ WITH daily_latest AS (
       AND a.status = 'DONE'
       AND a.created_at >= $2
       AND a.created_at < ($3::date + interval '1 day')
-    ORDER BY a.repo_id, DATE(a.created_at), a.created_at DESC
+    ORDER BY a.repo_id, DATE(a.created_at), a.created_at DESC, a.id DESC
 )
 SELECT
     DATE(created_at) AS "dateKey",

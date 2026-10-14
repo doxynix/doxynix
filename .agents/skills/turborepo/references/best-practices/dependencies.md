@@ -1,246 +1,281 @@
 # Dependency Management
 
-Best practices for managing dependencies in a Turborepo monorepo.
+Best practices for managing dependencies in the Doxynix monorepo. Bun only — `npm`, `pnpm` and
+`yarn` are forbidden here.
 
 ## Core Principle: Install Where Used
 
-Dependencies belong in the package that uses them, not the root.
+Dependencies belong in the workspace that uses them, not in the root.
 
 ```bash
-# Good: Install in specific package
-pnpm add react --filter=@repo/ui
-pnpm add next --filter=web
+# Good: install into the consuming workspace
+bun add zod --cwd apps/web
 
-# Avoid: Installing in root
-pnpm add react -w  # Only for repo-level tools!
+# Avoid: hoisting an application dependency to the root
+bun add zod            # at the repo root — only for repo-level tooling
 ```
+
+Bun's hoisted root `node_modules` makes phantom dependencies *work* locally and fail on a clean
+install or in CI. Installing where used is what keeps the manifest honest.
 
 ## Benefits of Local Installation
 
 ### 1. Clarity
 
-Each package's `package.json` lists exactly what it needs:
+Each workspace's `package.json` lists exactly what it needs:
 
-```json
-// packages/ui/package.json
+```jsonc
+// apps/web/package.json
 {
   "dependencies": {
-    "react": "^18.0.0",
-    "class-variance-authority": "^0.7.0"
+    "react": "catalog:",
+    "zod": "catalog:"
   }
 }
 ```
 
 ### 2. Flexibility
 
-Different packages can use different versions when needed:
-
-```json
-// packages/legacy-ui/package.json
-{ "dependencies": { "react": "^17.0.0" } }
-
-// packages/ui/package.json
-{ "dependencies": { "react": "^18.0.0" } }
-```
+Different workspaces may use different versions when there is a real reason (see "Version
+Conflicts" below).
 
 ### 3. Better Caching
 
-Installing in root changes workspace lockfile, invalidating all caches.
+Changing a dependency rewrites `bun.lock`, which invalidates the whole graph. Editing one
+workspace's `package.json` invalidates that workspace and its dependents only. **Keep the blast
+radius small.**
 
 ### 4. Pruning Support
 
-`turbo prune` can remove unused dependencies for Docker images.
+`turbo prune` can remove unused dependencies for container builds.
 
 ## What Belongs in Root
 
-Only repository-level tools:
+Only repository-level tooling:
 
-```json
+```jsonc
 // Root package.json
 {
   "devDependencies": {
-    "turbo": "latest",
-    "husky": "^8.0.0",
-    "lint-staged": "^15.0.0"
-  }
+    "@biomejs/biome": "2.5.14",
+    "cspell": "10.3.4",
+    "jscpd": "5.3.2",
+    "knip": "6.38.0",
+    "lefthook": "2.1.14",
+    "oxlint": "1.85.0",
+    "secretlint": "13.0.6",
+    "turbo": "2.11.4",
+    "typescript": "7.0.2"
+  },
+  "overrides": { "hono": "4.13.9", "ws": "8.22.0" },
+  "trustedDependencies": ["prisma", "zenstack", "esbuild", "sharp"]
 }
 ```
 
-**NOT** application dependencies:
+**NOT** application dependencies: `react`, `next`, `zod`, `es-toolkit`, testing libraries.
 
-- react, next, express
-- lodash, axios, zod
-- Testing libraries (unless truly repo-wide)
+Three root-only blocks, and they are not interchangeable:
+
+| Block | Purpose |
+| --- | --- |
+| `devDependencies` | tools that run at the repo root |
+| `overrides` | pins for **transitive** dependencies (security) — force one version repo-wide |
+| `trustedDependencies` | packages Bun may run install scripts for |
 
 ## Installing Dependencies
 
-### Single Package
+### One workspace
 
 ```bash
-# pnpm
-pnpm add lodash --filter=@repo/utils
-
-# npm
-npm install lodash --workspace=@repo/utils
-
-# yarn
-yarn workspace @repo/utils add lodash
-
-# bun
-cd packages/utils && bun add lodash
+bun add zod --cwd apps/web
+bun add -d lefthook --cwd packages/cli
 ```
 
-### Multiple Packages
+or from inside the directory:
 
 ```bash
-# pnpm
-pnpm add jest --save-dev --filter=web --filter=@repo/ui
-
-# npm
-npm install jest --save-dev --workspace=web --workspace=@repo/ui
-
-# yarn (v2+)
-yarn workspaces foreach -R --from '{web,@repo/ui}' add jest --dev
+cd apps/web && bun add zod
 ```
 
-### Internal Packages
+### Root only
 
 ```bash
-# pnpm
-pnpm add @repo/ui --filter=web
+bun add -d turbo
+```
 
-# This updates package.json:
+### Remove
+
+```bash
+bun remove pkg --cwd apps/web
+```
+
+### After any install
+
+```bash
+bun run clean:symlinks
+```
+
+`postinstall` does this, but `bun install --ignore-scripts` (what CI runs) does not, and the stale
+circular `tree-sitter-wasms` symlink breaks WASM grammar loading.
+
+## Internal Packages
+
+Use `workspace:*`:
+
+```jsonc
 {
   "dependencies": {
-    "@repo/ui": "workspace:*"
+    "@doxynix/shared": "workspace:*"
   }
 }
 ```
+
+Bun resolves it to the workspace directory. Turborepo reads the workspace graph from this and
+orders builds accordingly. **Never** point an internal dep at a `file:` path, a tarball or a git
+URL — the graph silently stops reflecting reality and `dependsOn: ["^build"]` stops ordering.
+
+### The one cross-app import
+
+```jsonc
+// packages/cli/package.json — devDependency, types only
+{
+  "devDependencies": { "@doxynix/web": "workspace:*" }
+}
+```
+
+```ts
+import type { AppRouter } from "@doxynix/web/trpc";
+```
+
+`apps/web` exposes it through the `"./trpc"` export mapping to
+`src/server/modules/index.ts`. This is the only permitted cross-app import and it is types-only.
+A runtime import fails `bun run arch:check`.
 
 ## Keeping Versions in Sync
 
-### Option 1: Tooling
+### The catalog (what this repo uses)
 
-```bash
-# syncpack - Check and fix version mismatches
-npx syncpack list-mismatches
-npx syncpack fix-mismatches
+Root `package.json` holds a `catalog` block; workspaces reference `"catalog:"`.
 
-# manypkg - Similar functionality
-npx @manypkg/cli check
-npx @manypkg/cli fix
-
-# sherif - Rust-based, very fast
-npx sherif
-```
-
-### Option 2: Package Manager Commands
-
-```bash
-# pnpm - Update everywhere
-pnpm up --recursive typescript@latest
-
-# npm - Update in all workspaces
-npm install typescript@latest --workspaces
-```
-
-### Option 3: pnpm Catalogs (pnpm 9.5+)
-
-```yaml
-# pnpm-workspace.yaml
-packages:
-  - "apps/*"
-  - "packages/*"
-
-catalog:
-  react: ^18.2.0
-  typescript: ^5.3.0
-```
-
-```json
-// Any package.json
+```jsonc
+// package.json
 {
-  "dependencies": {
-    "react": "catalog:" // Uses version from catalog
+  "catalog": {
+    "@tanstack/react-query": "5.102.2",
+    "@trpc/client": "11.18.0",
+    "@trpc/server": "11.18.0",
+    "react": "19.2.8",
+    "zod": "4.5.4"
   }
 }
 ```
 
+```jsonc
+// apps/web/package.json
+{
+  "dependencies": {
+    "@tanstack/react-query": "catalog:",
+    "@trpc/client": "catalog:",
+    "react": "catalog:",
+    "zod": "catalog:"
+  }
+}
+```
+
+Bumping a shared dep is a **single edit to the catalog** plus `bun install`. That is the whole
+point — do not hand-edit the version in six `package.json` files.
+
+**Not every dep goes in the catalog.** Put a package there when more than one workspace consumes
+it. A dep used by exactly one workspace gets a literal version in that workspace.
+
+### Updating
+
+```bash
+# Change the catalog entry, then:
+bun install
+
+# See what drifted:
+bun outdated
+```
+
+Renovate handles the bump itself (`renovate.yml`, `.github/workflows/renovate.yml`) — it
+understands both `catalog:` and `overrides`. Do not fight it by pinning a literal version in a
+workspace.
+
+### Auditing mismatches
+
+`bun run knip` finds unused dependencies; `bun run lint` (type-aware Oxlint) catches a lot of
+phantom-import cases. There is no syncpack/manypkg equivalent in this repo — the catalog is the
+mechanism.
+
 ## Internal vs External Dependencies
 
-### Internal (Workspace)
+```jsonc
+// Internal
+{ "@doxynix/shared": "workspace:*" }
 
-```json
-// pnpm/bun
-{ "@repo/ui": "workspace:*" }
-
-// npm/yarn
-{ "@repo/ui": "*" }
+// External — literal version, or "catalog:" when shared
+{ "zod": "4.5.4" }
 ```
-
-Turborepo understands these relationships and orders builds accordingly.
-
-### External (npm Registry)
-
-```json
-{ "lodash": "^4.17.21" }
-```
-
-Standard semver versioning from npm.
 
 ## Peer Dependencies
 
-For library packages that expect the consumer to provide dependencies:
+For `packages/*` that expect the consumer to supply a framework:
 
-```json
-// packages/ui/package.json
+```jsonc
 {
   "peerDependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react": "catalog:"
   },
   "devDependencies": {
-    "react": "^18.0.0", // For development/testing
-    "react-dom": "^18.0.0"
+    "react": "catalog:"   // for local dev/test
   }
 }
 ```
 
 ## Common Issues
 
-### "Module not found"
+### "Module not found" that works locally
 
-1. Check the dependency is installed in the right package
-2. Run `pnpm install` / `npm install` to update lockfile
-3. Check exports are defined in the package
+1. Is the dep declared in the importing workspace's `package.json`, or only hoisted at the root?
+2. Did you run `bun install` after editing the manifest?
+3. Does the target package define the subpath in its `exports` map?
+4. Are you importing through a `"./trpc"`-style export that only declares `types`?
 
-### Version Conflicts
+### Version conflicts
 
-Packages can use different versions - this is a feature, not a bug. But if you need consistency:
+Different workspaces *can* use different versions, and that is sometimes correct (e.g. a legacy
+consumer). But accidental divergence is a bug:
 
-1. Use tooling (syncpack, manypkg)
-2. Use pnpm catalogs
-3. Create a lint rule
+1. Move the dependency into the `catalog` — that forces one resolution.
+2. Or, if it is genuinely transitive, add a root `overrides` entry.
+3. `bun why <pkg>` shows who pulled it in and from where.
 
-### Hoisting Issues
+### "Installed but the binary is missing"
 
-Some tools expect dependencies in specific locations. Use package manager config:
+A native dependency (Prisma engines, sharp, esbuild) whose postinstall did not run. Two causes:
 
-```yaml
-# .npmrc (pnpm)
-public-hoist-pattern[]=*eslint*
-public-hoist-pattern[]=*prettier*
-```
+- it is missing from root `trustedDependencies`, or
+- the install ran with `--ignore-scripts` and something needed the script anyway.
+
+Add it to `trustedDependencies`; do not work around it by hand-copying binaries.
+
+### Stale `dist/` type errors
+
+`apps/siem-client` and `packages/cli` type-check against `apps/siem-server`'s **built** `dist/`.
+A stale `dist/` produces phantom errors. Run through Turbo (`bun run type-check`) or build
+siem-server first.
 
 ## Lockfile
 
-**Required** for:
+**Required** for reproducible builds, Turborepo dependency analysis, and cache correctness.
 
-- Reproducible builds
-- Turborepo dependency analysis
-- Cache correctness
+The only lockfile is **`bun.lock`** (text format — the binary `bun.lockb` is not supported by
+Turborepo; use `bun install --save-text-lockfile`). Lefthook pre-commit runs
+`bun install --frozen-lockfile`, so an out-of-date lockfile fails the commit.
 
 ```bash
-# Commit your lockfile!
-git add pnpm-lock.yaml  # or package-lock.json, yarn.lock
+git add bun.lock
 ```
+
+Never hand-edit it — run `bun install`.

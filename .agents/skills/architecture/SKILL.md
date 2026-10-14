@@ -50,7 +50,7 @@ Applies to: `apps/siem-server/src/modules`, `apps/web/src/server/modules`, and `
 One folder per feature; imports flow **downward only**:
 
 ```
-app/api  ->  modules  ->  core / utils
+server  ->  modules  ->  core / domain / utils
 ```
 
 > Historically labelled "VSA" (Vertical Slice Architecture). Dropped deliberately: VSA is a
@@ -71,8 +71,8 @@ app/api  ->  modules  ->  core / utils
 
 | Place | FSD/module methodology lint (warn) | Dependency gate (error + baseline) |
 |---|---|---|
-| `apps/web` | steiger (`lint:fsd`) | dep-cruiser: server modules + layering direction + FSD boundaries + shared-reuse + cycles + orphans |
-| `apps/siem-client` | steiger (`lint:fsd`) | dep-cruiser: FSD layer order + cross-feature + shared-reuse + cycles + orphans |
+| `apps/web` | steiger (`lint:fsd`) | dep-cruiser: `no-orphans`, `no-cross-slice-imports`, `no-lower-layer-to-module-imports`, `infra-must-not-import-domain`, `domain-must-not-reach-slices` + shared cycles/dev-dep rules |
+| `apps/siem-client` | steiger (`lint:fsd`) | dep-cruiser: `no-orphans`, `fsd-no-cross-feature-imports`, `fsd-layer-order` + shared cycles/dev-dep rules |
 | `apps/siem-server` | — (no FSD) | dep-cruiser: module slices + entry-reachability + cycles + orphans |
 | `packages/cli` | — (no FSD) | dep-cruiser: command slices + layering + entry-reachability + cycles + orphans |
 | `packages/shared`, `packages/config` | — | — (leaf packages: pure types / configs, no meaningful graph) |

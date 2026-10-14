@@ -1,216 +1,178 @@
 ---
 name: trigger-getting-started
 description: >
-  Bootstrap Trigger.dev into an existing project from scratch: authenticate the
-  CLI, install @trigger.dev/sdk and @trigger.dev/build, write trigger.config.ts
-  with the project ref and task dirs, scaffold a /trigger directory with a first
-  task, wire tsconfig and .gitignore, set TRIGGER_SECRET_KEY, and run the dev
-  server. Load this when a project has no trigger.config.ts yet and the user
-  asks to "add Trigger.dev", "set up Trigger.dev", "initialize Trigger.dev", or
-  get a first task running, including in a monorepo. Once the project is set up
-  and you are writing task code, switch to the trigger-authoring-tasks skill.
-type: core
-library: trigger.dev
-library_version: "4.6.4"
-sources:
-  - docs/quick-start.mdx
-  - docs/manual-setup.mdx
-  - docs/config/config-file.mdx
-  - docs/triggering.mdx
+  Bootstrap Trigger.dev into an existing project: authenticate the CLI, install
+  @trigger.dev/sdk and @trigger.dev/build, write trigger.config.ts with the project
+  ref and task dirs, scaffold a first task, set TRIGGER_SECRET_KEY, and run the dev
+  server. Load when a project has no trigger.config.ts yet and the user asks to "add
+  Trigger.dev", "set up Trigger.dev", or get a first task running. In this repo
+  Trigger.dev already lives in apps/web, so this skill is mainly reference for adding a
+  new app or re-deriving the existing setup — see the "Already set up in this repo"
+  section first.
 ---
 
 # Getting started with Trigger.dev
 
-Set up Trigger.dev in an existing project. The end state is: the SDK installed, a
-`trigger.config.ts` pointing at a project ref, a `/trigger` directory with at least
-one exported task, and `trigger dev` running so the task shows up in the dashboard.
+**Read the "Already set up in this repo" section before doing anything.** In Doxynix, Trigger.dev
+is configured and running; bootstrapping it again would break working config.
 
-The fastest path is the CLI's own wizard, which performs every mechanical step below
-and also offers to install the MCP server and these agent skills:
+## Already set up in this repo
+
+| Fact | Value |
+|---|---|
+| Workspace | `apps/web` only |
+| SDK / build / react-hooks | `@trigger.dev/sdk`, `@trigger.dev/build`, `@trigger.dev/react-hooks` — all pinned to `4.6.4` |
+| Config | `apps/web/trigger.config.ts` |
+| `dirs` | `["./src/server/**/tasks"]` |
+| Runtime | `runtime: "node-22"` (not `"bun"`) |
+| Task files | `apps/web/src/server/modules/<slice>/tasks/*.task.ts` (kebab-case) |
+| Project ref | `proj_whmkduzdqfzcgoyuhdyp` |
+
+There is **no `trigger/` directory in this repo and none is needed.** A `/trigger` directory is the
+upstream convention; Doxynix puts tasks inside the server module that owns them, because the
+modular-monolith layout (`src/server/modules/<slice>/`) is what `dep-cruiser` enforces. Keep every
+task under the slice it belongs to.
+
+The full, version-pinned reference ships inside the installed SDK. Bun hoists it per workspace, so
+the path is relative to `apps/web`:
+
+- **Skills:** `apps/web/node_modules/@trigger.dev/sdk/skills/<name>/SKILL.md` — there is no
+  root `node_modules/@trigger.dev`, so a bare `node_modules/@trigger.dev/...` path does not resolve.
+  Available: `trigger-authoring-tasks`, `trigger-authoring-chat-agent`,
+  `trigger-chat-agent-advanced`, `trigger-realtime-and-frontend`, `trigger-cost-savings`.
+- **Docs:** `apps/web/node_modules/@trigger.dev/sdk/docs/` — e.g.
+  `grep -rl "schemaTask" apps/web/node_modules/@trigger.dev/sdk/docs/`.
+
+## Running the CLI
+
+Bun only — the other package managers are rejected by the agent hook, and `bun x` needs a shell
+approval, so invoke the CLI as:
 
 ```bash
-npx trigger.dev@latest init
+bun x trigger.dev@latest login
+bun x trigger.dev@latest dev      # run from apps/web, the dir holding trigger.config.ts
 ```
 
-Prefer `init` when you can. Do the manual steps further down when `init` does not fit
-(monorepos, an existing config to extend, or a non-interactive environment).
+There is no root `with-doppler` script, so commands like
+`bun with-doppler "bun --filter @doxynix/web …"` fail from the repo root. Use
+`bun --filter @doxynix/web <script>` where a script exists.
 
-## Two steps need the human
+## Adding Trigger.dev to another workspace
 
-Most of setup is automatable, but two steps require a person and cannot be done
-headlessly. When you reach them, stop and ask the user to do them, then continue:
+Only if the user actually wants a second Trigger app.
 
-1. **Authenticating the CLI.** `npx trigger.dev@latest login` opens a browser for the
-   user to sign in. If they have no account, point them to https://cloud.trigger.dev
-   (or a self-hosted instance) first. You cannot complete this for them.
-2. **The environment API key and project ref.** `TRIGGER_SECRET_KEY` and the project ref
-   (`proj_...`) come from the dashboard. Ask the user to create a named API key with
-   **Trigger only** access in their Development environment, and to pick or create the
-   project so you have its ref. `trigger init` can select the project interactively once
-   the user is logged in.
+### 1. Authenticate (human step — you cannot do this)
 
-Treat these as handoffs: state exactly what you need, wait for the user, then resume.
-
-## Manual setup
-
-### 1. Authenticate (human step)
-
-```bash
-npx trigger.dev@latest login
-# self-hosted:
-npx trigger.dev@latest login --api-url https://your-trigger-instance.com
-```
+`bun x trigger.dev@latest login` opens a browser. Ask the user to do it, then wait. Same for
+creating the environment API key in step 6 — state exactly what you need and resume after.
 
 ### 2. Install the packages
 
-`@trigger.dev/sdk` is a runtime dependency; `@trigger.dev/build` is a dev dependency.
-Pin both to the same version as the `trigger.dev` CLI you run; the CLI warns on a
-mismatch during `dev`/`deploy`.
+`@trigger.dev/sdk` is a runtime dependency; `@trigger.dev/build` is a dev dependency. Pin both to
+the same version as the `trigger.dev` CLI you run; a mismatch on a different major breaks
+dev/deploy.
 
 ```bash
-npm add @trigger.dev/sdk@latest
-npm add --save-dev @trigger.dev/build@latest
+bun add @trigger.dev/sdk@latest
+bun add --save-dev @trigger.dev/build@latest
 ```
 
 ### 3. Write `trigger.config.ts`
 
-Create it in the project root (or `trigger.config.mjs` for JavaScript). The `project`
-ref and `dirs` are the only required fields.
+`project` (the `proj_…` ref from the dashboard) and `dirs` are the only required fields:
 
 ```ts
 import { defineConfig } from "@trigger.dev/sdk";
 
 export default defineConfig({
-  project: "<project ref>", // e.g. "proj_abc123", from the dashboard
-  dirs: ["./src/trigger"], // where your tasks live
-  maxDuration: 3600,
-  retries: {
-    enabledInDev: false,
-    default: { maxAttempts: 3, factor: 2, minTimeoutInMs: 1000, maxTimeoutInMs: 10000, randomize: true },
-  },
+  project: "<project ref>",
+  dirs: ["./src/server/modules/**/tasks"],
+  runtime: "node-22",
+  maxDuration: 1_000_000,
 });
 ```
 
-Use the Bun runtime by adding `runtime: "bun"`. Build extensions (`prismaExtension`,
-`puppeteer`, `additionalFiles`, etc.) come from `@trigger.dev/build` and go in
-`build.extensions`.
+Build extensions (`prismaExtension`, `additionalFiles`, `additionalPackages`) come from
+`@trigger.dev/build` and go in `build.extensions`. `apps/web/trigger.config.ts` is the worked
+example — it generates the ZenStack/Prisma client in a `onBuildStart` extension, packages the
+tree-sitter WASM grammars, and lists the native-ish deps under `build.external`.
 
 ### 4. Add a first task
 
-Create the directory that matches `dirs` and export a task from it. Every task must be
-a named export with a project-unique `id`.
+Tasks must be **named exports** inside a configured directory, with a project-unique `id`:
 
 ```ts
-// src/trigger/example.ts
+// src/server/modules/<slice>/tasks/example.task.ts
 import { task } from "@trigger.dev/sdk";
 
 export const helloWorld = task({
   id: "hello-world",
-  run: async (payload: { name: string }) => {
-    return { message: `Hello ${payload.name}!` };
-  },
+  run: async (payload: { name: string }) => ({ message: `Hello ${payload.name}!` }),
 });
 ```
 
+Filename convention here is kebab-case `*.task.ts` — Oxlint's `unicorn/filename-case` and the
+slice layout both expect it.
+
 ### 5. Wire tsconfig and gitignore
 
-Add `trigger.config.ts` to the `include` array in `tsconfig.json`, and add `.trigger`
-to `.gitignore` (the CLI writes local dev state there).
-
-```jsonc
-// tsconfig.json
-{ "include": ["trigger.config.ts" /* ...existing */] }
-```
-
-```bash
-# .gitignore
-.trigger
-```
+Add `trigger.config.ts` to `include` in `tsconfig.json`, and `.trigger` to `.gitignore` (the CLI
+writes local dev state there).
 
 ### 6. Create an environment API key (human step)
 
-For triggering from your own code, create a named API key with **Trigger only** access in
-your Development environment and set it as `TRIGGER_SECRET_KEY`. Self-hosted users also
-set `TRIGGER_API_URL`.
+Ask the user for a named key with **Trigger only** access in the Development environment, then set:
 
 ```bash
-# .env (or .env.local for Next.js)
+# .env.local (Next.js)
 TRIGGER_SECRET_KEY=tr_dev_sk_xxxxxxxx
 ```
+
+Self-hosted also needs `TRIGGER_API_URL`.
 
 ### 7. Run the dev server
 
 ```bash
-npx trigger.dev@latest dev
+bun --filter @doxynix/web exec trigger.dev dev   # or `bun x trigger.dev dev` from apps/web
 ```
 
-Leave it running. Tasks register with the dashboard, where the user can fire a test run
-from the task's test page. On first run the CLI offers to install the MCP server and
-agent skills; recommend both.
+Leave it running; tasks register with the dashboard and can be fired from their test page.
 
 ## Triggering from your app
 
-Once a task exists, trigger it from backend code with a **type-only** import so the
-task code is never bundled into your app. Trigger by id, not by calling the task object.
+Use a **type-only** import so task code is never bundled into the app, and trigger by id rather
+than by calling the task object:
 
 ```ts
 import { tasks } from "@trigger.dev/sdk";
-import type { helloWorld } from "@/trigger/example"; // type-only
+import type { helloWorld } from "@/server/modules/example/tasks/example.task";
 
 const handle = await tasks.trigger<typeof helloWorld>("hello-world", { name: "Ada" });
 ```
 
-`TRIGGER_SECRET_KEY` must be set wherever this runs. Framework specifics live in the
-Next.js / Remix / Node.js guides.
-
-## Monorepos
-
-Two layouts, both supported: put tasks in a shared package (`@repo/tasks` with its own
-`trigger.config.ts`, consumed via `workspace:*`), or install Trigger.dev directly in the
-app that needs it. Run `trigger dev` from the directory that holds `trigger.config.ts`.
-See the manual setup docs for full Turborepo examples before scaffolding either.
-
 ## Common mistakes
 
-1. **Trying to do the human-only steps headlessly.** You cannot complete `trigger login`
-   or create and copy an environment API key for the user.
-   - Wrong: spawning `trigger login` and waiting on it to finish in an agent session.
-   - Correct: ask the user to log in, create a named Development environment API key, and paste it, then continue.
-
-2. **Mismatched CLI and SDK versions.** A `trigger.dev` CLI on a different major than
-   `@trigger.dev/sdk` breaks dev/deploy.
-   - Wrong: `npx trigger.dev@latest dev` against an old pinned SDK.
-   - Correct: keep `trigger.dev`, `@trigger.dev/sdk`, and `@trigger.dev/build` on the same version.
-
-3. **Importing from `@trigger.dev/sdk/v3` or using `client.defineJob()`.** Both are old.
-   - Correct: always import from `@trigger.dev/sdk`; define work with `task()`.
-
-4. **Tasks not exported, or outside `dirs`.** A task that is not a named export inside a
-   configured directory will not be picked up.
-   - Correct: `export const ... = task({ ... })` in a file under a `dirs` path.
-
-5. **Importing the task instance into backend code.** This bundles the task.
-   - Wrong: `import { helloWorld } from "@/trigger/example"` in a route handler.
-   - Correct: `import type { helloWorld }` plus `tasks.trigger<typeof helloWorld>("hello-world", payload)`.
-
-6. **Forgetting `TRIGGER_SECRET_KEY`.** Triggering from your app fails without it; the
-   `dev` server itself works once the CLI is logged in.
+1. **Trying to do the human-only steps headlessly.** `trigger login` and creating the API key both
+   need a person. Ask, wait, resume.
+2. **Mismatched CLI and SDK versions** on a different major breaks dev/deploy. In this repo all
+   three are `4.6.4`; keep them aligned.
+3. **Importing from `@trigger.dev/sdk/v3` or calling `client.defineJob()`.** Both are old — import
+   from `@trigger.dev/sdk` and define work with `task()`.
+4. **Tasks not exported, or outside `dirs`.** A task that is not a named export under
+   `src/server/**/tasks` is never picked up.
+5. **Importing the task instance (not its type) into app code.** That bundles the task; use
+   `import type` + `tasks.trigger<typeof …>(id, payload)`.
+6. **Forgetting `TRIGGER_SECRET_KEY`.** Triggering from the app fails; the dev server still works.
 
 ## References
 
-Sibling skills:
-
-- **trigger-authoring-tasks** for writing the tasks themselves once setup is done: retries, waits,
-  queues, scheduled tasks, triggering, and the full `trigger.config.ts`.
-- **trigger-realtime-and-frontend** for showing live run status in a frontend.
-- **trigger-authoring-chat-agent** and **trigger-chat-agent-advanced** for building AI chat agents.
-
-Docs:
-
-- [Quick start](https://trigger.dev/docs/quick-start)
-- [Manual setup](https://trigger.dev/docs/manual-setup)
-- [Configuration file](https://trigger.dev/docs/config/config-file)
+- `apps/web/trigger.config.ts` — the real, working config
+- `.agents/skills/analysis-engine/SKILL.md` — repo rules for the analysis tasks themselves
+- **trigger-authoring-tasks** — writing the tasks once setup is done
+- **trigger-realtime-and-frontend** — live run status in a frontend
+- **trigger-authoring-chat-agent** / **trigger-chat-agent-advanced** — AI chat agents
 
 ## Version
 
-Generated for @trigger.dev/sdk 4.6.4. Re-run the trigger.dev skills installer after upgrading.
+Pinned to `@trigger.dev/sdk` 4.6.4 as installed in `apps/web`. Re-read
+`apps/web/node_modules/@trigger.dev/sdk/skills/` after upgrading.

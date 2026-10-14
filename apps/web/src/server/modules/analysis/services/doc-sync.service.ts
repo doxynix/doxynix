@@ -1,6 +1,5 @@
+import { generateBranchName } from "@doxynix/shared";
 import type { Repo } from "@prisma/client";
-
-import { generateBranchName } from "@/shared/lib/get-branch-name";
 
 import { appLogger } from "@/server/core/app-logger";
 import type { DbClient } from "@/server/core/db";

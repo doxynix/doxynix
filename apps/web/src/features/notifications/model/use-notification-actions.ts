@@ -10,8 +10,10 @@ export function useNotificationActions() {
     await Promise.all([
       utils.notification.getStats.invalidate(),
       utils.notification.getAll.invalidate(),
+      utils.notification.getFeed.invalidate(),
     ]);
   };
+
   const markAllAsRead = trpc.notification.markAllAsRead.useMutation({
     onSuccess: invalidateAll,
   });

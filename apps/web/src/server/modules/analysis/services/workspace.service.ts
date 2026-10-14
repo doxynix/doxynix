@@ -100,7 +100,7 @@ export const workspaceService = {
     repoId: string,
     aid?: string,
   ): Promise<null | RepoWorkspacePayload> {
-    const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    const repo = await analysisRepo.getRepoSnapshotWithDocuments(db, repoId, aid);
     if (repo == null) {
       return null;
     }
