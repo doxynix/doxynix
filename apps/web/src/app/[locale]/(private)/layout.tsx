@@ -15,6 +15,7 @@ import { GithubConnectionFeedback } from "@/widgets/dashboard/ui/github-connecti
 import { HotkeyListeners } from "@/widgets/hotkey-manager/ui/hotkey-listeners";
 
 import { auth } from "@/server/core/auth";
+import { HydrateClient, prefetch, trpcProxy } from "@/server/core/trpc/prefetch";
 
 export default async function PrivateLayout({ children }: Readonly<{ children: ReactNode }>) {
   const session = await auth.api.getSession({
@@ -25,6 +26,16 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
     unauthorized();
   }
 
+  await Promise.all([
+    prefetch(trpcProxy.notification.getStats.queryOptions()),
+    prefetch(
+      trpcProxy.repo.getSlim.infiniteQueryOptions(
+        { limit: 5 },
+        { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
+      ),
+    ),
+  ]);
+
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
   const sidebarWidth = Number(cookieStore.get("sidebar_width")?.value);
@@ -32,35 +43,37 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
   return (
     <>
       <SentryUserIdentificator user={session.user} />
-      <SidebarProvider
-        className="flex h-dvh w-full flex-col overflow-hidden"
-        defaultOpen={defaultOpen}
-        defaultWidth={sidebarWidth > 0 ? sidebarWidth : undefined}
-      >
-        <div className="z-50 w-full shrink-0 border-b">
-          <AppHeader />
-        </div>
+      <HydrateClient>
+        <SidebarProvider
+          className="flex h-dvh w-full flex-col overflow-hidden"
+          defaultOpen={defaultOpen}
+          defaultWidth={sidebarWidth > 0 ? sidebarWidth : undefined}
+        >
+          <div className="z-50 w-full shrink-0 border-b">
+            <AppHeader />
+          </div>
 
-        <div className="flex flex-1 overflow-hidden">
-          <AppSidebar />
-          <div className="relative flex flex-1 flex-col overflow-y-auto">
-            {/* <ScrollArea className="flex-1"> */}
-            <SidebarInset
-              className="mx-auto max-w-400 p-4"
-              id="main-content"
-              tabIndex={-1}
-            >
-              {children}
-            </SidebarInset>
-            {/* </ScrollArea> */}
-            <div className="z-50 w-full shrink-0 border-t">
-              <AppFooter />
+          <div className="flex flex-1 overflow-hidden">
+            <AppSidebar />
+            <div className="relative flex flex-1 flex-col overflow-y-auto">
+              {/* <ScrollArea className="flex-1"> */}
+              <SidebarInset
+                className="mx-auto max-w-400 p-4"
+                id="main-content"
+                tabIndex={-1}
+              >
+                {children}
+              </SidebarInset>
+              {/* </ScrollArea> */}
+              <div className="z-50 w-full shrink-0 border-t">
+                <AppFooter />
+              </div>
             </div>
           </div>
-        </div>
-        <HotkeyListeners />
-        <Agent />
-      </SidebarProvider>
+          <HotkeyListeners />
+          <Agent />
+        </SidebarProvider>
+      </HydrateClient>
       <GithubConnectionFeedback />
       <CreateRepoDialog />
     </>

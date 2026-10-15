@@ -1,8 +1,8 @@
 "use client";
-
 import { type ComponentType, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import type { DocType } from "@doxynix/shared";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { uniqBy } from "es-toolkit";
 import {
   BookOpen,
@@ -18,7 +18,7 @@ import { useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 import { toast } from "sonner";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { formatFullDate } from "@/shared/lib/date-utils";
 import { saveFile } from "@/shared/lib/file-saver";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
@@ -94,33 +94,40 @@ export function RepoDocs({
   onTabChange,
   repoId,
 }: Readonly<Props>) {
+  const trpc = useTRPC();
   const t = useTranslations("Dashboard");
   const [apiMode, setApiMode] = useState<"md" | "swagger">("md");
   const [activePath] = useQueryState("path", parseAsString);
   const { aid } = useRepoParams();
-  const { data: metrics } = trpc.analysis.getDetailedMetrics.useQuery({
-    aid: aid ?? undefined,
-    repoId,
-  });
+  const { data: metrics } = useQuery(
+    trpc.analysis.getDetailedMetrics.queryOptions({
+      aid: aid ?? undefined,
+      repoId,
+    }),
+  );
 
-  const { data: docContent, isLoading: isDocLoading } = trpc.analysis.getDocumentContent.useQuery({
-    aid: aid ?? undefined,
-    path: activeTab === "CODE_DOC" ? (activePath ?? undefined) : undefined,
-    repoId,
-    type: activeTab,
-  });
+  const { data: docContent, isLoading: isDocLoading } = useQuery(
+    trpc.analysis.getDocumentContent.queryOptions({
+      aid: aid ?? undefined,
+      path: activeTab === "CODE_DOC" ? (activePath ?? undefined) : undefined,
+      repoId,
+      type: activeTab,
+    }),
+  );
 
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const stageMutation = trpc.analysis.stageFile.useMutation({
-    onError: (error) => {
-      toast.error(t("repo_docs_stage_failed", { error: error.message }));
-    },
-    onSuccess: (data) => {
-      void utils.analysis.getStagedFiles.invalidate();
-      toast.success(t("repo_docs_staged", { count: data.stagedCount }));
-    },
-  });
+  const stageMutation = useMutation(
+    trpc.analysis.stageFile.mutationOptions({
+      onError: (error) => {
+        toast.error(t("repo_docs_stage_failed", { error: error.message }));
+      },
+      onSuccess: (data) => {
+        void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
+        toast.success(t("repo_docs_staged", { count: data.stagedCount }));
+      },
+    }),
+  );
 
   const headings = (() => {
     if (typeof window === "undefined" || docContent?.html == null) {

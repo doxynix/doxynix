@@ -1,12 +1,16 @@
 import type { IConfiguration } from "dependency-cruiser";
 
 /**
- * The one place in the server that is allowed to reach every slice: it builds the
- * tRPC caller out of the assembled routers, so importing modules is its purpose.
- * Kept as a named constant because two rules below must exempt the same file, and
+ * The places in the server that are allowed to reach every slice: both build a
+ * procedure caller out of the assembled routers — `server.ts` for server-side
+ * calls, `prefetch.tsx` for the RSC options proxy — so importing modules is their
+ * purpose. `prefetch.tsx` needs the static import: `dehydrate()` runs in the same
+ * tick as the component, so a lazily awaited router would miss the pending-query
+ * dehydration entirely.
+ * Kept as a named constant because two rules below must exempt the same files, and
  * an inline `pathNot` copy in each of them would silently rot on a rename.
  */
-const CALLER_FACTORY = "^src/server/core/trpc/server[.]ts$";
+const CALLER_FACTORY = "^src/server/core/trpc/(?:server[.]ts|prefetch[.]tsx)$";
 
 const SERVER_SOURCE_ONLY = ["[.](?:spec|test)[.](?:ts|tsx)$"];
 

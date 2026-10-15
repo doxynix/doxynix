@@ -1,7 +1,7 @@
 "use client";
-
 import { useRef, useState } from "react";
 import type { RepoSearchResult } from "@doxynix/shared";
+import { useQuery } from "@tanstack/react-query";
 import {
   BookOpen,
   Code2,
@@ -13,7 +13,7 @@ import {
 import { useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { useRouter } from "@/shared/i18n/navigation";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { AppButton } from "@/shared/ui/core/button";
@@ -36,6 +36,7 @@ type Props = {
 };
 
 export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
+  const trpc = useTRPC();
   const t = useTranslations("Dashboard");
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -55,11 +56,13 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
   const trimmedSearch = debouncedSearch.trim();
   const isQueryEnabled = trimmedSearch.length >= 2;
 
-  const { data, isFetching } = trpc.analysis.searchWorkspace.useQuery(
-    { aid: aid ?? undefined, repoId, search: trimmedSearch },
-    {
-      enabled: isQueryEnabled,
-    },
+  const { data, isFetching } = useQuery(
+    trpc.analysis.searchWorkspace.queryOptions(
+      { aid: aid ?? undefined, repoId, search: trimmedSearch },
+      {
+        enabled: isQueryEnabled,
+      },
+    ),
   );
 
   const getEmptyLabel = () => {

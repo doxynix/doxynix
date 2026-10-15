@@ -1,9 +1,9 @@
 "use client";
-
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { BookText, ChevronDown, CircleQuestionMark } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { sidebarMenu } from "@/shared/config/navigation";
 import { useNavLabels } from "@/shared/config/navigation-labels";
 import { cn } from "@/shared/lib/cn";
@@ -29,15 +29,18 @@ import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
+import { useNotificationStats } from "@/features/notifications/model/use-notification-stats";
+
 import { SidebarLink } from "./sidebar-link";
 
 export function AppSidebar() {
+  const trpc = useTRPC();
   const t = useTranslations("Dashboard");
   const tCommon = useTranslations("Common");
   const navLabels = useNavLabels();
   const { state } = useSidebar();
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    trpc.repo.getSlim.useInfiniteQuery(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
+    trpc.repo.getSlim.infiniteQueryOptions(
       {
         limit: 5,
       },
@@ -45,9 +48,10 @@ export function AppSidebar() {
         getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
         initialCursor: undefined,
       },
-    );
+    ),
+  );
 
-  const { data: stats } = trpc.notification.getStats.useQuery();
+  const { data: stats } = useNotificationStats();
 
   const { name, owner } = useRepoParams();
 

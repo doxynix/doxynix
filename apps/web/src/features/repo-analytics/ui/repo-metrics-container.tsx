@@ -1,6 +1,7 @@
 "use client";
+import { useQuery } from "@tanstack/react-query";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 
 import { RepoMetrics } from "./repo-metrics";
@@ -10,9 +11,12 @@ type Props = {
 };
 
 export function RepoMetricsContainer({ repoId }: Readonly<Props>) {
-  const { data, isLoading } = trpc.analysis.getDetailedMetrics.useQuery({
-    repoId,
-  });
+  const trpc = useTRPC();
+  const { data, isLoading } = useQuery(
+    trpc.analysis.getDetailedMetrics.queryOptions({
+      repoId,
+    }),
+  );
 
   if (isLoading) {
     return (

@@ -23,6 +23,8 @@ import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { ConnectionCard } from "@/entities/connection/ui/connection-card";
 
+const PASSKEYS_QUERY_KEY = ["passkeys"] as const;
+
 export function PasskeysList() {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
@@ -48,7 +50,7 @@ export function PasskeysList() {
       }
       return res.data;
     },
-    queryKey: ["passkeys"],
+    queryKey: PASSKEYS_QUERY_KEY,
   });
 
   const createPasskey = useMutation({

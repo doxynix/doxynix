@@ -1,10 +1,10 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { ChevronDown, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { commandMenuItems } from "@/shared/config/navigation";
 import type { MenuItem } from "@/shared/config/navigation.types";
 import { useNavLabels } from "@/shared/config/navigation-labels";
@@ -34,6 +34,7 @@ import {
 } from "@/features/command-menu/model/use-command-menu.store";
 
 export function AppCommandMenu() {
+  const trpc = useTRPC();
   const t = useTranslations("Dashboard");
   const navLabels = useNavLabels();
   const open = useCommandMenuIsOpen();
@@ -66,8 +67,8 @@ export function AppCommandMenu() {
   const repoSearch =
     isOpening || search.trim().length === 0 ? undefined : debouncedSearch || undefined;
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    trpc.repo.getSlim.useInfiniteQuery(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
+    trpc.repo.getSlim.infiniteQueryOptions(
       {
         limit: 5,
         search: repoSearch,
@@ -77,7 +78,8 @@ export function AppCommandMenu() {
         getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
         initialCursor: undefined,
       },
-    );
+    ),
+  );
 
   const observerTarget = useRef<HTMLDivElement>(null);
 

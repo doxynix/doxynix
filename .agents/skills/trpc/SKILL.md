@@ -1,11 +1,11 @@
 ---
 name: trpc
-description: tRPC 11 in apps/web — router/procedure authoring, `superjson` transformer, the custom `errorFormatter` and ZenStack `enhance` middleware in `core/trpc/init.ts`, the App Router `fetchRequestHandler` route, `@trpc/react-query` hooks (`useUtils`, React Query v5 `gcTime`), server-side callers, and Ably-backed realtime invalidation. Use when adding or changing a router, procedure, middleware, context field or client hook.
+description: tRPC 11 in apps/web — router/procedure authoring, `superjson` transformer, the custom `errorFormatter` and ZenStack `enhance` middleware in `core/trpc/init.ts`, the App Router `fetchRequestHandler` route, the `@trpc/tanstack-react-query` client (`useTRPC`, `queryOptions`/`mutationOptions`, `queryClient.invalidateQueries` with `queryFilter`/`pathFilter`), server-side callers, and Ably-backed realtime invalidation. Use when adding or changing a router, procedure, middleware, context field or client hook.
 ---
 
 # tRPC
 
-tRPC **11.18** (`@trpc/server`, `@trpc/client`) with **@trpc/react-query 11.19** and
+tRPC **11.19** (`@trpc/server`, `@trpc/client`, `@trpc/tanstack-react-query`) with
 **@tanstack/react-query 5**, wired into **Next.js App Router** in `apps/web`. ZenStack 2.22
 supplies the policy-aware database client.
 
@@ -13,31 +13,69 @@ supplies the policy-aware database client.
 
 | Package | Version |
 | --- | --- |
-| `@trpc/server`, `@trpc/client` | `catalog:` → 11.18.0 |
-| `@trpc/react-query` | 11.19.0 |
+| `@trpc/server`, `@trpc/client` | `catalog:` → 11.19.0 |
+| `@trpc/tanstack-react-query` | 11.19.0 |
 | `@tanstack/react-query` | `catalog:` → 5.102.2 |
 | `superjson` | `catalog:` → 2.2.6 |
 | `@zenstackhq/runtime` / `zenstack` | 2.22.3 |
 
-## API migration table (v9/v10 → v11)
+`@trpc/tanstack-react-query` peers on **exact** `@trpc/client` / `@trpc/server` versions. Bump all
+three together or the install breaks. `@trpc/react-query` (the classic client) is gone — do not
+reintroduce it.
+
+## Client API: classic → options factory
+
+The client moved off `createTRPCReact` hooks. Anything in the left column is **wrong** in this repo.
+
+| Classic (removed) | Current |
+| --- | --- |
+| `createTRPCReact<AppRouter>()` | `createTRPCContext<AppRouter>()` |
+| `trpc.createClient({...})` | `createTRPCClient<AppRouter>({...})` |
+| `<trpc.Provider client qc>` | `<QueryClientProvider>` → `<TRPCProvider trpcClient qc>` |
+| `trpc.foo.useQuery(input, opts)` | `useQuery(trpc.foo.queryOptions(input, opts))` |
+| `trpc.foo.useMutation(opts)` | `useMutation(trpc.foo.mutationOptions(opts))` |
+| `trpc.foo.useInfiniteQuery(input, opts)` | `useInfiniteQuery(trpc.foo.infiniteQueryOptions(input, opts))` |
+| `const utils = trpc.useUtils()` | `const trpc = useTRPC()` + `const queryClient = useQueryClient()` |
+| `utils.foo.invalidate(input)` | `queryClient.invalidateQueries(trpc.foo.queryFilter(input))` |
+| `utils.foo.invalidate()` | `queryClient.invalidateQueries(trpc.foo.pathFilter())` |
+| `utils.foo.setData(input, fn)` | `queryClient.setQueryData(trpc.foo.queryKey(input), fn)` |
+| `utils.foo.getData(input)` | `queryClient.getQueryData(trpc.foo.queryKey(input))` |
+
+Both clients produce **identical query keys**, so migration could be done incrementally. That
+window has closed — do not mix the two.
+
+### Invalidating every variant of a procedure
+
+`queryFilter()` with no input builds a key **without** the `input` field, which TanStack's partial
+key matching treats as "any input" — so both of these hit every input variant:
+
+```ts
+queryClient.invalidateQueries(trpc.foo.pathFilter()); // also matches mutations + plain useQuery
+queryClient.invalidateQueries(trpc.foo.queryFilter()); // queries only
+```
+
+This repo uses `pathFilter()` for whole-procedure invalidation because that is what the classic
+`utils.foo.invalidate()` did. Reach for `queryFilter()` only when you want to spare mutations.
+
+## Server API migration table (v9/v10 → v11)
 
 Anything below is **wrong** in v11. If you see it in this repo, it is a bug.
 
 | Old | v11 | Notes |
 | --- | --- | --- |
-| `trpc.useContext()` | `trpc.useUtils()` | renamed in v10 |
 | `router.mergeRouters(a, b)` | `t.router({ a, b })` | removed in v11 |
 | `appRouter.createCaller(ctx)` | `createCallerFactory(appRouter)(ctx)` | `createCaller` is gone |
 | `cacheTime: 30_000` | `gcTime: 30_000` | React Query v4 → v5 rename |
-| `trpc.useContext().xyz.invalidate()` | `const utils = trpc.useUtils(); utils.xyz.invalidate()` | |
 | `keepPreviousData` | `placeholderData: prev => prev` | React Query v5 |
 | `onError` returning `void` + `refetch` | `onSuccess` | v5 removed recovery-by-refetch |
 | `status === 'loading'` | `status === 'pending'` | v5 |
 | `@trpc/server/observable` | `httpSubscriptionLink` | WS transport reworked |
 | `applyWSSHandler` | `httpSubscriptionLink` | |
-| `trpc.path.useSubscription()` | `trpc.path.useSubscription()` on `httpSubscriptionLink` | link must be wired |
 | `createNextApiHandler`, `pages/api/**` | `fetchRequestHandler` in a `route.ts` | Pages Router is **not** used |
 | `_app.tsx`, `_document.tsx` | `composition-root.tsx` providers | App Router only |
+
+The `useQuery` result object is unchanged from the classic client — it was already a thin wrapper
+over TanStack Query v5. `isPending` / `isLoading` / `isFetching` mean exactly what they did before.
 
 ## File map
 
@@ -52,8 +90,8 @@ apps/web/src/
 │   ├── index.ts         # createTRPCRouter({...}) -> appRouter + AppRouter type
 │   └── <slice>/<name>.router.ts
 ├── app/api/trpc/[trpc]/route.ts   # fetchRequestHandler (GET + POST)
-├── app/composition-root.tsx        # trpc.createClient, httpBatchLink, providers
-└── shared/api/trpc.ts              # createTRPCReact<AppRouter>()
+├── app/composition-root.tsx        # createTRPCClient, httpBatchLink, QueryClientProvider + TRPCProvider
+└── shared/api/trpc.ts              # createTRPCContext<AppRouter>() -> TRPCProvider, useTRPC
 ```
 
 ## Server: `init.ts`
@@ -282,25 +320,28 @@ is why `packages/cli` can import the `AppRouter` type and reuse the same server 
 
 ## Client
 
-`shared/api/trpc.ts`:
+`shared/api/trpc.ts` — the only module that creates the React context:
 
 ```ts
-import { createTRPCReact } from "@trpc/react-query";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import { createTRPCContext } from "@trpc/tanstack-react-query";
 
 import type { AppRouter } from "@/server/modules";
 
-export const trpc = createTRPCReact<AppRouter>();
+export const { TRPCProvider, useTRPC } = createTRPCContext<AppRouter>();
 
 export type RouterInput = inferRouterInputs<AppRouter>;
 export type RouterOutput = inferRouterOutputs<AppRouter>;
 ```
 
-`app/composition-root.tsx` builds the client:
+`RouterInput` / `RouterOutput` are the type contract for the `entities` layer — six model files
+derive their types from them. Keep re-exporting them when you touch this file.
+
+`app/composition-root.tsx` builds the client and the provider stack:
 
 ```tsx
 const [trpcClient] = useState(() =>
-  trpc.createClient({
+  createTRPCClient<AppRouter>({
     links: [
       loggerLink({
         enabled: (opts) => IS_DEV || (opts.direction === "down" && opts.result instanceof Error),
@@ -311,10 +352,26 @@ const [trpcClient] = useState(() =>
 );
 ```
 
-Note: the client is created in `useState`, and `httpBatchLink` carries `transformer: superjson` —
-matching the server. `trpc.Provider` wraps `QueryClientProvider` (same `QueryClient` instance
-passed to both), and the client is memoised across renders (`browserQueryClient ??=`) so a
-re-render does not throw away the cache.
+```tsx
+<QueryClientProvider client={queryClient}>
+  <TRPCProvider queryClient={queryClient} trpcClient={trpcClient}>
+    ...
+  </TRPCProvider>
+</QueryClientProvider>
+```
+
+Three things that are easy to get wrong here:
+
+- **The `<AppRouter>` generic on `createTRPCClient` is not optional.** Omit it and the client
+  silently degrades to an untyped one — no error, just no inference downstream.
+- **`httpBatchLink` must keep `transformer: superjson`** to match the server, or every rich type
+  (`Date`, `Map`) arrives as a stringified blob.
+- **`QueryClientProvider` wraps `TRPCProvider`.** `TRPCProvider` takes the `QueryClient` as a prop
+  and never reads it from context, so the order is cosmetic today — but keep it canonical so code
+  added directly under the provider keeps working.
+
+The client is created in `useState` and the `QueryClient` is memoised across renders
+(`browserQueryClient ??=`) so a re-render never throws away the cache.
 
 QueryClient defaults: `staleTime: 30_000`, `retry: 1`, `refetchOnWindowFocus: false`. Change them
 in `makeQueryClient()`, not per component.
@@ -345,15 +402,28 @@ is the required export shape. Omitting `POST` breaks every mutation with a confu
 ## React Query integration
 
 ```ts
-const utils = trpc.useUtils();
+const trpc = useTRPC();
+const queryClient = useQueryClient();
 
-const { data, isPending } = trpc.repo.list.useQuery({ limit: 20 });
+const { data, isPending } = useQuery(trpc.repo.list.queryOptions({ limit: 20 }));
 
-const create = trpc.repo.create.useMutation({
-  onSuccess: async () => {
-    await utils.repo.list.invalidate();
-  },
-});
+const create = useMutation(
+  trpc.repo.create.mutationOptions({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries(trpc.repo.list.pathFilter());
+    },
+  }),
+);
+```
+
+`useTRPC()` **must be called inside the component**. A component that reads `trpc.` without it is a
+compile error, not a silent bug — good.
+
+`queryOptions(input, options)` takes the procedure input first and TanStack options second. The
+`enabled` flag moves from a separate hook argument into the second argument:
+
+```ts
+useQuery(trpc.agent.listSessions.queryOptions({ currentRepo }, { enabled: isOpen }));
 ```
 
 React Query v5 names in use across this codebase:
@@ -366,13 +436,73 @@ React Query v5 names in use across this codebase:
 | `status === 'loading'` | `status === 'pending'` |
 | `onError` + `refetch` for rollback | `onMutate` / `onError` / `onSettled` optimistic trio |
 
-Invalidation goes through `utils`, never a hand-rolled `queryClient.invalidateQueries` with a
-string key — the proxy knows the exact keys.
+**Never hand-roll a `queryClient.invalidateQueries({ queryKey: [...] })` with a string key.** Use
+`queryFilter(input)` when you know the input and `pathFilter()` when you do not — the proxy derives
+the exact key shape, and a string key that does not match silently invalidates nothing. This is not
+hypothetical: `two-factor-card.tsx` carried a `["active-sessions"]` key that never matched the real
+`["user","getActiveSessions"]` key, so the invalidation was a no-op.
 
-### Server components
+### Server components and prefetch
 
 Server components are **not** in the client React Query tree. Reach for the router directly or use
 the server caller; `useQuery` hooks require the `"use client"` boundary.
+
+Prefetching **is** wired up, via `core/trpc/prefetch.tsx`:
+
+```tsx
+import { HydrateClient, prefetch, trpcProxy } from "@/server/core/trpc/prefetch";
+
+// in a page / layout
+await prefetch(trpcProxy.apikey.list.queryOptions());
+
+return <HydrateClient>{/* everything that reads that query */}</HydrateClient>;
+```
+
+Covered today (17 pages): the private layout (`notification.getStats`, `repo.getSlim`), the dashboard
+(`analytics.getDashboardStats`, `analytics.getTrends`), repo overview / docs / map / pulls /
+pull detail / settings (`analysis.getWorkspace`, `getDetailedMetrics`, `getAvailableDocs`,
+`getStructureMap`, `listByRepository`, `getByPRNumber`, `getRepoConfig`), `/repos` (`repo.getAll`),
+`/dashboard/notifications` (`notification.getAll`), and settings (`apikey.list`,
+`user.getActiveSessions`, `user.getLinkedAccounts`, `audit.getActivityLogs`).
+
+Not covered, deliberately: the four admin lists (5–8 URL filters plus debounced search each — the
+input builders would have to be extracted from the containers first, and a mistake there breaks a
+filter rather than merely losing a prefetch), and every query that sits behind `enabled` or behind
+user input.
+
+`/repos` and `/dashboard/notifications` show the pattern for filtered lists: prefetch **only the
+untouched default state**, guarded by `hasAnySearchParam` from `shared/lib/url-state.ts`, so a filtered
+visit skips the prefetch instead of guessing a filter set. Undefined-valued input keys are dropped
+when TanStack hashes the key, so a minimal server-side input matches the full one the client builds —
+but the constants behind it (`REPO_LIST_DEFAULT_LIMIT`, `NOTIFICATIONS_DEFAULT_LIMIT`) live next to
+the parsers and are read by both the container and the page, so the two cannot drift apart.
+
+Rules that are not obvious and were each learned the hard way:
+
+- **`await` the prefetch.** A fire-and-forget prefetch dehydrates as a still-pending promise, so SSR
+  renders without the data while the client hydrates with it. Any component that branches on the
+  value then throws a hydration mismatch. tRPC's docs warn about this; the cost is TTFB.
+- **`HydrateClient` must wrap the consumers**, at the level that owns them. A layout's
+  `HydrateClient` does not cover a page added by client-side navigation, because the layout does not
+  re-render.
+- **The prefetched key must match the one the browser builds**, or the prefetch silently does nothing
+  and nothing errors. For URL-driven input that means parsing `searchParams` server-side through the
+  same nuqs parsers — see `shared/lib/url-state.ts` and the per-feature input builders
+  (`dashboardRangeInput` is the reference).
+- **Parse parsers from `nuqs/server`, not `nuqs`**, in any module a server component imports. The
+  client entry does not resolve its parser helpers server-side and throws at module evaluation;
+  `type-check` and the unit suite both pass while the page 500s.
+- **`.withDefault` lives on `useQueryStates`, not on `parse()`.** `parse(undefined)` returns
+  `undefined` or `null`, never the default. The input builders re-apply defaults; without that the
+  server key carries `undefined` while the client carries the default.
+- **Never prefetch what is behind `enabled` or behind user input** — dropdown feeds, dialogs, the
+  agent panel, and debounced search. The trigger is client intent the server cannot know, and a
+  prefetch there pays for data that may never be displayed.
+- **Check the gate before prefetching, not just the input.** `repo-map` gates `getStructureMap` on
+  `?view=` being absent, so the prefetch there is conditional; the page shows a single node instead of
+  the map when a view is selected.
+- **Cascading queries are not prefetchable.** `pull/[n]` reads `getByPRNumber`, then derives an
+  `analysisId` from its result to read `getComments`. Only the first hop can be prefetched.
 
 ## Server-side callers
 
@@ -396,6 +526,17 @@ Two subtleties in `server.ts`:
 - `cache()` from React dedupes per-`userId`, so `apiForUser` is safe to call from several server
   slices in one render.
 
+`server.ts` also exports `ctxForUser(userId)` and `ctxForRequest()`, which build the context and
+leave the caller to the caller. `api()` and `apiForUser()` are thin wrappers over them. Use the
+`ctxFor*` functions directly when you need a context but not a caller — that is what the RSC
+prefetch proxy does.
+
+`core/trpc/prefetch.tsx` is the **second** file allowed to reach into `modules/`. Unlike
+`server.ts` its `import { appRouter }` is **static and must stay that way**: `HydrateClient` calls
+`dehydrate()` in the same tick as the component that calls `prefetch()`, so awaiting a dynamic
+import would let the dehydration run before the query even started and silently ship nothing. Both
+files are exempted by `CALLER_FACTORY` in `.dependency-cruiser.ts`.
+
 In tests, build a caller the same way:
 
 ```ts
@@ -409,9 +550,11 @@ holds an `Ably.Realtime` client (`ably` 2.29.0, auth via `/api/realtime/auth`) a
 payloads that invalidate tRPC queries:
 
 ```ts
-const utils = trpc.useUtils();
-void utils.analysis.getById.invalidate({ fixId: payload.fixId });
-utils.analytics.getDashboardStats.setData({}, (oldData) => /* patch */);
+const trpc = useTRPC();
+const queryClient = useQueryClient();
+
+void queryClient.invalidateQueries(trpc.analysis.getById.queryFilter({ fixId: payload.fixId }));
+queryClient.setQueryData(trpc.analytics.getDashboardStats.queryKey({}), (oldData) => /* patch */);
 ```
 
 If you genuinely need tRPC streaming, the v11 path is `httpSubscriptionLink` on the client plus a
@@ -444,6 +587,34 @@ const router = createTRPCRouter(analysisRepoRouter);
 const caller = createCallerFactory(router)(makeCtx());
 ```
 
+## Testing components
+
+Client components now call `useTRPC()` and a real `useQuery`, so a component test needs two mocks
+plus a real `QueryClient`. `features/admin/ui/admin-user-sheet.test.ts` is the reference:
+
+```ts
+vi.mock("@/shared/api/trpc", () => ({
+  useTRPC: () => ({
+    adminUser: {
+      getDetail: {
+        queryOptions: (input: unknown, options: { enabled?: boolean } | undefined) => ({
+          enabled: options?.enabled,
+          queryFn: () => getDetail(input),
+          queryKey: ["adminUser", "getDetail", input],
+        }),
+      },
+    },
+  }),
+}));
+```
+
+Then wrap the tree in a fresh `QueryClientProvider` with `retry: false`, and assert with
+`findBy*` instead of `getBy*` — the fetch is now async, so the old synchronous assertions on
+rendered output would race.
+
+A mock shaped like the classic client (`trpc: { adminUser: { getDetail: { useQuery: ... } } }`) is
+wrong: `useTRPC` is not exported any more, so the component throws on the first render.
+
 ## OpenAPI
 
 `server/modules/openapi.spec.test.ts` reads `public/openapi.json` and asserts it still matches the
@@ -461,7 +632,11 @@ fails. It is a gate, not documentation.
 | `superjson` on only one side | both, or neither |
 | Omitting `.output()` | declare the response schema |
 | `createCaller(ctx)` | `createCallerFactory(appRouter)(ctx)` |
-| `trpc.useContext()` | `trpc.useUtils()` |
+| `trpc.useUtils()` / `useContext()` | `useTRPC()` + `useQueryClient()` |
+| `utils.foo.invalidate(input)` | `queryClient.invalidateQueries(trpc.foo.queryFilter(input))` |
+| `invalidateQueries({ queryKey: ["foo"] })` | `queryFilter(input)` / `pathFilter()` — never a string key |
+| `createTRPCClient({...})` without a generic | `createTRPCClient<AppRouter>({...})` |
+| Reading `trpc.` without calling `useTRPC()` | call it inside the component |
 | `cacheTime` | `gcTime` |
 | `pages/api` handler | `fetchRequestHandler` in `route.ts` |
 | Importing a sibling slice's internals | `core`/`utils`, checked by `arch:check` |

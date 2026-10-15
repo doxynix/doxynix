@@ -1,13 +1,13 @@
 "use client";
-
 import { type ReactNode, useEffect, useState } from "react";
 import Image from "next/image";
+import { useQueryClient } from "@tanstack/react-query";
 import * as Ably from "ably";
 import { AblyProvider, ChannelProvider, useChannel } from "ably/react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { IS_PROD } from "@/shared/config/env.flags";
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 import { useRouter } from "@/shared/i18n/navigation";
@@ -16,6 +16,8 @@ import { authClient } from "@/shared/lib/auth-client";
 import { useRepoActions } from "@/entities/repo/model/use-repo-actions";
 
 import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";
+
+import type { DashboardStats } from "@/widgets/dashboard/model/dashboard.types";
 
 import { parseRealtimePayload, RealtimeUserPayloads } from "./realtime-payloads";
 
@@ -79,12 +81,13 @@ function RealtimeBridge({ userId }: { userId: string | undefined }) {
 }
 
 function RealtimeSubscriptions({ userId }: { userId: string }) {
+  const trpc = useTRPC();
   const router = useRouter();
   const t = useTranslations("Dashboard");
 
   const { invalidateAll } = useNotificationActions();
   const { invalidate } = useRepoActions();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
   useChannel(REALTIME_CONFIG.channels.system, (message: Ably.Message) => {
     if (message.name === REALTIME_CONFIG.events.system.maintenance) {
@@ -109,11 +112,15 @@ function RealtimeSubscriptions({ userId }: { userId: string }) {
       }
 
       if (payload.type === "FIX_GENERATED" && payload.fixId != null) {
-        void utils.analysis.getById.invalidate({ fixId: payload.fixId });
+        void queryClient.invalidateQueries(
+          trpc.analysis.getById.queryFilter({ fixId: payload.fixId }),
+        );
         toast.success(t("realtime_fix_ready"));
       } else if (payload.path != null) {
         const action = payload.type === "AUDIT" ? "quick-file-audit" : "document-file-preview";
-        void utils.analysis.getFileActionResult.invalidate({ action, path: payload.path });
+        void queryClient.invalidateQueries(
+          trpc.analysis.getFileActionResult.queryFilter({ action, path: payload.path }),
+        );
         toast.success(
           payload.type === "AUDIT"
             ? t("realtime_file_audit_done")
@@ -131,7 +138,7 @@ function RealtimeSubscriptions({ userId }: { userId: string }) {
         return;
       }
 
-      void utils.analysis.getComments.invalidate();
+      void queryClient.invalidateQueries(trpc.analysis.getComments.pathFilter());
 
       toast.info(t("realtime_pr_comment_title", { number: payload.prNumber }), {
         action: {
@@ -167,34 +174,37 @@ function RealtimeSubscriptions({ userId }: { userId: string }) {
         return;
       }
 
-      utils.analytics.getDashboardStats.setData({}, (oldData) => {
-        if (oldData == null) {
-          return oldData;
-        }
+      queryClient.setQueriesData(
+        trpc.analytics.getDashboardStats.pathFilter(),
+        (oldData: DashboardStats | undefined) => {
+          if (oldData == null) {
+            return oldData;
+          }
 
-        return {
-          ...oldData,
-          recentActivity: oldData.recentActivity.map((activity) =>
-            activity.id === payload.analysisId
-              ? { ...activity, progress: payload.progress, status: payload.status }
-              : activity,
-          ),
-        };
-      });
+          return {
+            ...oldData,
+            recentActivity: oldData.recentActivity.map((activity) =>
+              activity.id === payload.analysisId
+                ? { ...activity, progress: payload.progress, status: payload.status }
+                : activity,
+            ),
+          };
+        },
+      );
 
       if (payload.status === "DONE" || payload.status === "FAILED") {
         invalidate();
 
-        void utils.analysis.getLatest.invalidate();
-        void utils.analysis.getHistory.invalidate();
+        void queryClient.invalidateQueries(trpc.analysis.getLatest.pathFilter());
+        void queryClient.invalidateQueries(trpc.analysis.getHistory.pathFilter());
       }
     }
 
     if (message.name === REALTIME_CONFIG.events.user.auditUpdated) {
-      void utils.audit.getActivityLogs.invalidate();
+      void queryClient.invalidateQueries(trpc.audit.getActivityLogs.pathFilter());
     }
     if (message.name === REALTIME_CONFIG.events.user.sessionUpdated) {
-      void utils.agent.listSessions.invalidate();
+      void queryClient.invalidateQueries(trpc.agent.listSessions.pathFilter());
     }
   });
 

@@ -8,10 +8,12 @@ import {
   parseAsStringLiteral,
 } from "nuqs/server";
 
+export const NOTIFICATIONS_DEFAULT_LIMIT = 20;
+
 export const notificationsParsers = {
   from: parseAsIsoDate,
   isRead: parseAsBoolean,
-  limit: parseAsInteger.withDefault(20),
+  limit: parseAsInteger.withDefault(NOTIFICATIONS_DEFAULT_LIMIT),
   owner: parseAsString,
   page: parseAsInteger.withDefault(1),
   repo: parseAsString,

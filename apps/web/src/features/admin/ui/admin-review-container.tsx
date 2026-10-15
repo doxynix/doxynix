@@ -1,10 +1,10 @@
 "use client";
-
 import { MAX_PAGE } from "@doxynix/shared";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
@@ -17,6 +17,7 @@ import { AdminReviewToolbar } from "./admin-review-toolbar";
 const PAGE_SIZE = 20;
 
 export function AdminReviewContainer() {
+  const trpc = useTRPC();
   const t = useTranslations("AdminReview");
 
   const [filters] = useQueryStates(adminReviewParsers);
@@ -24,19 +25,21 @@ export function AdminReviewContainer() {
 
   const safePage = clampIntegerParam(filters.page, { fallback: 1, max: MAX_PAGE, min: 1 });
 
-  const { data, isFetching, isLoading } = trpc.adminReview.list.useQuery(
-    {
-      fixStatus: filters.fixStatus ?? undefined,
-      from: filters.from ?? undefined,
-      limit: PAGE_SIZE,
-      minRiskScore:
-        filters.minRiskScore == null ? undefined : Number.parseInt(filters.minRiskScore, 10),
-      page: safePage,
-      search: debouncedSearch || undefined,
-      status: filters.status ?? undefined,
-      to: filters.to ?? undefined,
-    },
-    { placeholderData: (previousData) => previousData },
+  const { data, isFetching, isLoading } = useQuery(
+    trpc.adminReview.list.queryOptions(
+      {
+        fixStatus: filters.fixStatus ?? undefined,
+        from: filters.from ?? undefined,
+        limit: PAGE_SIZE,
+        minRiskScore:
+          filters.minRiskScore == null ? undefined : Number.parseInt(filters.minRiskScore, 10),
+        page: safePage,
+        search: debouncedSearch || undefined,
+        status: filters.status ?? undefined,
+        to: filters.to ?? undefined,
+      },
+      { placeholderData: (previousData) => previousData },
+    ),
   );
 
   if (isLoading || data == null) {

@@ -1,13 +1,13 @@
 "use client";
-
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import { useQuery } from "@tanstack/react-query";
 import { ReactFlowProvider } from "@xyflow/react";
 import { FileText } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
@@ -25,6 +25,7 @@ const RepoMap = dynamic(() => import("./repo-map").then((m) => m.RepoMap), {
 });
 
 export function RepoMapContainer({ id }: Readonly<Props>) {
+  const trpc = useTRPC();
   const t = useTranslations("Dashboard");
   const { aid, name, owner } = useRepoParams();
 
@@ -35,14 +36,18 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
 
   const [displayData, setDisplayData] = useState<null | RepoMapDisplayData>(null);
 
-  const { data: mapData, isFetching: isMapFetching } = trpc.analysis.getStructureMap.useQuery(
-    { aid: aid ?? undefined, repoId: id },
-    { enabled: viewId == null },
+  const { data: mapData, isFetching: isMapFetching } = useQuery(
+    trpc.analysis.getStructureMap.queryOptions(
+      { aid: aid ?? undefined, repoId: id },
+      { enabled: viewId == null },
+    ),
   );
 
-  const { data: nodeData, isFetching: isNodeFetching } = trpc.analysis.getStructureNode.useQuery(
-    { nodeId: viewId ?? "", repoId: id },
-    { enabled: viewId != null },
+  const { data: nodeData, isFetching: isNodeFetching } = useQuery(
+    trpc.analysis.getStructureNode.queryOptions(
+      { nodeId: viewId ?? "", repoId: id },
+      { enabled: viewId != null },
+    ),
   );
 
   function navigateMap(nextId: null | string) {

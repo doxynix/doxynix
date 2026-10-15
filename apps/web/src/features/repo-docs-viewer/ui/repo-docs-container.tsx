@@ -1,16 +1,17 @@
 "use client";
-
 import { useEffect, useRef } from "react";
 import { DocType } from "@doxynix/shared";
+import { useQuery } from "@tanstack/react-query";
 import { FileText } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
 import type { AvailableDocs } from "@/entities/repo/model/repo.types";
+import { useNodeContext } from "@/entities/repo/model/use-node-context";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 import { RepoAnalyzeButton } from "@/entities/repo/ui/repo-analyze-button";
 
@@ -21,6 +22,7 @@ type Props = { id: string };
 const EMPTY_DOCS: AvailableDocs = [];
 
 export function RepoDocsContainer({ id }: Readonly<Props>) {
+  const trpc = useTRPC();
   const t = useTranslations("Dashboard");
   const { aid, name, owner } = useRepoParams();
   const [node] = useQueryState("node", parseAsString);
@@ -31,15 +33,14 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
     parseAsStringEnum<DocType>(Object.values(DocType)).withDefault(DocType.README),
   );
 
-  const { data: availableDocs, isLoading } = trpc.analysis.getAvailableDocs.useQuery({
-    aid: aid ?? undefined,
-    repoId: id,
-  });
-
-  const { data: nodeContext } = trpc.analysis.getNodeContext.useQuery(
-    { aid: aid ?? undefined, nodeId: node ?? "", repoId: id },
-    { enabled: node != null && node.length > 0 },
+  const { data: availableDocs, isLoading } = useQuery(
+    trpc.analysis.getAvailableDocs.queryOptions({
+      aid: aid ?? undefined,
+      repoId: id,
+    }),
   );
+
+  const { data: nodeContext } = useNodeContext({ aid: aid ?? undefined, nodeId: node, repoId: id });
 
   const docs = availableDocs ?? EMPTY_DOCS;
   const resolvedActiveTab = docs.some((doc) => doc.type === activeTab) ? activeTab : docs[0]?.type;

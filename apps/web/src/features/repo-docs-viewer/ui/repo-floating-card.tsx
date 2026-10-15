@@ -1,7 +1,7 @@
 "use client";
-
 import { useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useQuery } from "@tanstack/react-query";
 import {
   AlertCircle,
   AlertTriangle,
@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { Skeleton } from "@/shared/ui/core/skeleton";
@@ -89,6 +89,7 @@ type Props = {
 };
 
 export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Props>) {
+  const trpc = useTRPC();
   const { aid } = useRepoParams();
   const [coords, setCoords] = useState<null | { x: number; y: number }>(null);
   const t = useTranslations("Dashboard");
@@ -116,13 +117,15 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
 
   const nodeId = hoveredFile != null ? `file:${hoveredFile}` : "";
 
-  const { data: payload, isLoading } = trpc.analysis.getStructureNode.useQuery(
-    {
-      aid: aid ?? undefined,
-      nodeId,
-      repoId,
-    },
-    { enabled: hoveredFile !== null },
+  const { data: payload, isLoading } = useQuery(
+    trpc.analysis.getStructureNode.queryOptions(
+      {
+        aid: aid ?? undefined,
+        nodeId,
+        repoId,
+      },
+      { enabled: hoveredFile !== null },
+    ),
   );
 
   if (coords == null || hoveredFile == null) {

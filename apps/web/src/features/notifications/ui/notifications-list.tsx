@@ -60,7 +60,7 @@ export function NotificationsList({ meta, notifications }: Readonly<Props>) {
               <NotificationActionButton
                 disabled={isPending}
                 icon={n.isRead ? EyeOff : Eye}
-                isPending={markAs.isPending}
+                isPending={markAs.pendingIds.includes(n.id)}
                 onClick={() => markAs.mutate(n.id, !n.isRead)}
                 tooltip={n.isRead ? t("mark_as_unread") : t("mark_as_read")}
               />
@@ -68,7 +68,7 @@ export function NotificationsList({ meta, notifications }: Readonly<Props>) {
                 className="hover:text-destructive"
                 disabled={isPending}
                 icon={Trash2}
-                isPending={deleteOne.isPending}
+                isPending={deleteOne.pendingIds.includes(n.id)}
                 onClick={() => deleteOne.mutate(n.id)}
                 tooltip={t("delete_notification")}
               />

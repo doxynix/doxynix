@@ -1,11 +1,11 @@
 "use client";
-
 import { MAX_PAGE } from "@doxynix/shared";
+import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { AppButton } from "@/shared/ui/core/button";
@@ -21,6 +21,7 @@ import { AdminBannedEmailsToolbar } from "./admin-banned-emails-toolbar";
 const PAGE_SIZE = 20;
 
 export function AdminBannedEmailsContainer() {
+  const trpc = useTRPC();
   const t = useTranslations("AdminBannedEmails");
   const actions = useBannedEmailActions();
 
@@ -29,16 +30,18 @@ export function AdminBannedEmailsContainer() {
 
   const safePage = clampIntegerParam(filters.page, { fallback: 1, max: MAX_PAGE, min: 1 });
 
-  const { data, isFetching, isLoading } = trpc.bannedEmail.list.useQuery(
-    {
-      from: filters.from ?? undefined,
-      limit: PAGE_SIZE,
-      page: safePage,
-      reason: filters.reason ?? undefined,
-      search: debouncedSearch || undefined,
-      to: filters.to ?? undefined,
-    },
-    { placeholderData: (previousData) => previousData },
+  const { data, isFetching, isLoading } = useQuery(
+    trpc.bannedEmail.list.queryOptions(
+      {
+        from: filters.from ?? undefined,
+        limit: PAGE_SIZE,
+        page: safePage,
+        reason: filters.reason ?? undefined,
+        search: debouncedSearch || undefined,
+        to: filters.to ?? undefined,
+      },
+      { placeholderData: (previousData) => previousData },
+    ),
   );
 
   if (isLoading || data == null) {

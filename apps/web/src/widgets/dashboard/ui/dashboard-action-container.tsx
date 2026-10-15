@@ -1,22 +1,11 @@
 "use client";
 
-import { useQueryStates } from "nuqs";
-
-import { trpc } from "@/shared/api/trpc";
-
-import { dashboardParsers } from "@/features/repo-analytics/model/dashboard-parsers";
-
+import { useDashboardStats } from "../model/use-dashboard-stats";
 import { RefactoringTargetsWidget } from "./analytics-widgets";
 import { RefactoringTargetsSkeleton } from "./analytics-widgets-skeleton";
 
 export function DashboardActionContainer() {
-  const [urlParams] = useQueryStates(dashboardParsers);
-
-  const { data, isLoading } = trpc.analytics.getDashboardStats.useQuery({
-    from: urlParams.from ?? undefined,
-    period: urlParams.period,
-    to: urlParams.to ?? undefined,
-  });
+  const { data, isLoading } = useDashboardStats();
 
   if (isLoading || data == null) {
     return <RefactoringTargetsSkeleton />;

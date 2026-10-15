@@ -1,10 +1,10 @@
 "use client";
-
 import { MAX_PAGE } from "@doxynix/shared";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
@@ -19,6 +19,7 @@ import { AdminUsersToolbar } from "./admin-users-toolbar";
 const PAGE_SIZE = 20;
 
 export function AdminUsersContainer() {
+  const trpc = useTRPC();
   const t = useTranslations("AdminUsers");
   const actions = useAdminUserActions();
 
@@ -27,17 +28,19 @@ export function AdminUsersContainer() {
 
   const safePage = clampIntegerParam(filters.page, { fallback: 1, max: MAX_PAGE, min: 1 });
 
-  const { data, isFetching, isLoading } = trpc.adminUser.list.useQuery(
-    {
-      banned: filters.banned ?? undefined,
-      from: filters.from ?? undefined,
-      limit: PAGE_SIZE,
-      page: safePage,
-      role: filters.role ?? undefined,
-      search: debouncedSearch || undefined,
-      to: filters.to ?? undefined,
-    },
-    { placeholderData: (previousData) => previousData },
+  const { data, isFetching, isLoading } = useQuery(
+    trpc.adminUser.list.queryOptions(
+      {
+        banned: filters.banned ?? undefined,
+        from: filters.from ?? undefined,
+        limit: PAGE_SIZE,
+        page: safePage,
+        role: filters.role ?? undefined,
+        search: debouncedSearch || undefined,
+        to: filters.to ?? undefined,
+      },
+      { placeholderData: (previousData) => previousData },
+    ),
   );
 
   if (isLoading || data == null) {

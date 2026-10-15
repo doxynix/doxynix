@@ -6,12 +6,15 @@ const REPO_DEFAULTS = {
   SEARCH: "",
 };
 
+export const REPO_LIST_DEFAULT_LIMIT = 5;
+export const REPO_LIST_DEFAULT_SORT_BY = "updatedAt";
+
 export const repoParsers = {
   from: parseAsIsoDate,
   page: parseAsInteger.withDefault(REPO_DEFAULTS.PAGE),
   search: parseAsString.withDefault(REPO_DEFAULTS.SEARCH),
   sortBy: parseAsStringLiteral(["updatedAt", "createdAt", "name"] as const).withDefault(
-    "updatedAt",
+    REPO_LIST_DEFAULT_SORT_BY,
   ),
   status: parseAsStringLiteral(StatusSchema.options),
   to: parseAsIsoDate,

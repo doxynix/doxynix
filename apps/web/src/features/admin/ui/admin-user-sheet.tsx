@@ -1,9 +1,9 @@
 "use client";
-
 import { UserRole } from "@doxynix/shared";
+import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { formatFullDate } from "@/shared/lib/date-utils";
 import { AppBadge } from "@/shared/ui/core/badge";
 import {
@@ -28,10 +28,13 @@ type Props = {
 };
 
 export function AdminUserSheet({ actions, onOpenChange, open, userId }: Readonly<Props>) {
+  const trpc = useTRPC();
   const t = useTranslations("AdminUsers");
   const locale = useLocale();
 
-  const { data, isLoading } = trpc.adminUser.getDetail.useQuery({ id: userId }, { enabled: open });
+  const { data, isLoading } = useQuery(
+    trpc.adminUser.getDetail.queryOptions({ id: userId }, { enabled: open }),
+  );
 
   return (
     <Sheet

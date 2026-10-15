@@ -1,33 +1,38 @@
 "use client";
-
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 
 export function useBannedEmailActions() {
+  const trpc = useTRPC();
   const t = useTranslations("AdminBannedEmails");
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const invalidate = () => void utils.bannedEmail.list.invalidate();
+  const invalidate = () => void queryClient.invalidateQueries(trpc.bannedEmail.list.pathFilter());
 
   const onError = (error: { message: string }) => toast.error(error.message);
 
-  const create = trpc.bannedEmail.create.useMutation({
-    onError,
-    onSuccess: (entry) => {
-      invalidate();
-      toast.success(t("toast_created", { email: entry.email }));
-    },
-  });
+  const create = useMutation(
+    trpc.bannedEmail.create.mutationOptions({
+      onError,
+      onSuccess: (entry) => {
+        invalidate();
+        toast.success(t("toast_created", { email: entry.email }));
+      },
+    }),
+  );
 
-  const remove = trpc.bannedEmail.remove.useMutation({
-    onError,
-    onSuccess: () => {
-      invalidate();
-      toast.success(t("toast_removed"));
-    },
-  });
+  const remove = useMutation(
+    trpc.bannedEmail.remove.mutationOptions({
+      onError,
+      onSuccess: () => {
+        invalidate();
+        toast.success(t("toast_removed"));
+      },
+    }),
+  );
 
   return { create, remove };
 }

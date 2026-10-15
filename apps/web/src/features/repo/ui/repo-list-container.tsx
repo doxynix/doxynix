@@ -1,17 +1,17 @@
 "use client";
-
 import { MAX_PAGE, MAX_PAGE_SIZE } from "@doxynix/shared";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
 
 import type { RepoStatus } from "@/entities/repo/model/repo.types";
-import { repoParsers } from "@/entities/repo/model/repo-parsers";
+import { REPO_LIST_DEFAULT_LIMIT, repoParsers } from "@/entities/repo/model/repo-parsers";
 import { RepoCardSkeleton } from "@/entities/repo/ui/repo-card-skeleton";
 
 import { RepoList } from "./repo-list";
@@ -31,6 +31,7 @@ type Props = {
 };
 
 export function RepoListContainer({ config }: Readonly<Props>) {
+  const trpc = useTRPC();
   const t = useTranslations("Dashboard");
 
   const [filters] = useQueryStates(repoParsers);
@@ -38,7 +39,7 @@ export function RepoListContainer({ config }: Readonly<Props>) {
   const debouncedSearch = useDebounce(filters.search, 500);
 
   const safeLimit = clampIntegerParam(config?.limit, {
-    fallback: 5,
+    fallback: REPO_LIST_DEFAULT_LIMIT,
     max: MAX_PAGE_SIZE,
     min: 1,
   });
@@ -56,9 +57,11 @@ export function RepoListContainer({ config }: Readonly<Props>) {
     ...config?.forcedFilters,
   };
 
-  const { data, isFetching, isLoading } = trpc.repo.getAll.useQuery(queryParams, {
-    placeholderData: (previousData) => previousData,
-  });
+  const { data, isFetching, isLoading } = useQuery(
+    trpc.repo.getAll.queryOptions(queryParams, {
+      placeholderData: (previousData) => previousData,
+    }),
+  );
 
   if (isLoading || data == null) {
     return (

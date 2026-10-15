@@ -109,6 +109,7 @@ const loggerMiddleware = t.middleware(async ({ next, path, type }) => {
     kind: normalized.kind,
     message: result.error.message,
     source: normalized.source,
+    zodIssues: normalized.zodIssues ?? undefined,
   };
 
   if (normalized.isUnexpected) {

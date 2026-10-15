@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 
+import { useTRPC } from "@/shared/api/trpc";
 import { authClient } from "@/shared/lib/auth-client";
 import { AppButton } from "@/shared/ui/core/button";
 import {
@@ -33,6 +34,7 @@ export function TwoFactorCard() {
   const { data: sessionContext, refetch: refetchSession } = authClient.useSession();
   const user = sessionContext?.user;
   const queryClient = useQueryClient();
+  const trpc = useTRPC();
 
   const [isSetupOpen, setIsSetupOpen] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
@@ -85,7 +87,7 @@ export function TwoFactorCard() {
     onSuccess: () => {
       toast.success(t("settings_2fa_activated_success"));
       void refetchSession();
-      void queryClient.invalidateQueries({ queryKey: ["active-sessions"] });
+      void queryClient.invalidateQueries(trpc.user.getActiveSessions.pathFilter());
     },
   });
 

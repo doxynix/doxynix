@@ -1,13 +1,15 @@
 "use client";
+import { useQuery } from "@tanstack/react-query";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 
 import { ApiKeyCardSkeleton } from "@/entities/api-key/ui/api-key-card-skeleton";
 
 import { ApiKeysList } from "./api-keys-list";
 
 export function ApiKeysListContainer() {
-  const { data, isLoading } = trpc.apikey.list.useQuery();
+  const trpc = useTRPC();
+  const { data, isLoading } = useQuery(trpc.apikey.list.queryOptions());
 
   if (isLoading || data == null) {
     return (

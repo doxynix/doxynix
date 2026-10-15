@@ -1,7 +1,7 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type { EditorView } from "@uiw/react-codemirror";
 import {
   Check,
@@ -19,7 +19,7 @@ import { useTranslations } from "next-intl";
 import type { TreeApi } from "react-arborist";
 import { toast } from "sonner";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { authClient } from "@/shared/lib/auth-client";
 import { saveFile } from "@/shared/lib/file-saver";
 import { useTypewriter } from "@/shared/lib/hooks/use-typewriter";
@@ -57,6 +57,7 @@ type Props = {
 };
 
 export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Readonly<Props>) {
+  const trpc = useTRPC();
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
   const { data: session } = authClient.useSession();
@@ -86,14 +87,18 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
     totalMatches: 0,
   });
 
-  const { data: auditResult } = trpc.analysis.getFileActionResult.useQuery(
-    { action: "quick-file-audit", path },
-    { enabled: !!path && userId != null },
+  const { data: auditResult } = useQuery(
+    trpc.analysis.getFileActionResult.queryOptions(
+      { action: "quick-file-audit", path },
+      { enabled: !!path && userId != null },
+    ),
   );
 
-  const { data: documentResult } = trpc.analysis.getFileActionResult.useQuery(
-    { action: "document-file-preview", path },
-    { enabled: !!path && userId != null },
+  const { data: documentResult } = useQuery(
+    trpc.analysis.getFileActionResult.queryOptions(
+      { action: "document-file-preview", path },
+      { enabled: !!path && userId != null },
+    ),
   );
 
   const typedAuditHtml = useTypewriter(auditResult?.html ?? "", 3);
@@ -121,26 +126,32 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
     setShowDiff(true);
   }
 
-  const auditMutation = trpc.analysis.quickFileAudit.useMutation({
-    onError: () => setIsAiLoading(false),
-    onMutate: () => setIsAiLoading(true),
-    onSuccess: () => toast.info(t("repo_code_audit_started")),
-  });
+  const auditMutation = useMutation(
+    trpc.analysis.quickFileAudit.mutationOptions({
+      onError: () => setIsAiLoading(false),
+      onMutate: () => setIsAiLoading(true),
+      onSuccess: () => toast.info(t("repo_code_audit_started")),
+    }),
+  );
 
-  const documentMutation = trpc.analysis.documentFile.useMutation({
-    onError: () => setIsAiLoading(false),
-    onMutate: () => setIsAiLoading(true),
-    onSuccess: () => toast.info(t("repo_code_docgen_started")),
-  });
+  const documentMutation = useMutation(
+    trpc.analysis.documentFile.mutationOptions({
+      onError: () => setIsAiLoading(false),
+      onMutate: () => setIsAiLoading(true),
+      onSuccess: () => toast.info(t("repo_code_docgen_started")),
+    }),
+  );
 
-  const stageMutation = trpc.analysis.stageFile.useMutation({
-    onError: (error) => {
-      toast.error(t("repo_code_stage_failed", { message: error.message }));
-    },
-    onSuccess: (data) => {
-      toast.success(t("repo_code_stage_success", { count: data.stagedCount }));
-    },
-  });
+  const stageMutation = useMutation(
+    trpc.analysis.stageFile.mutationOptions({
+      onError: (error) => {
+        toast.error(t("repo_code_stage_failed", { message: error.message }));
+      },
+      onSuccess: (data) => {
+        toast.success(t("repo_code_stage_success", { count: data.stagedCount }));
+      },
+    }),
+  );
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -217,12 +228,14 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
     setShowDiff(false);
   };
 
-  const pinMutation = trpc.analysis.pinAuditToDocs.useMutation({
-    onError: (err) => toast.error(tCommon("save_failed", { message: err.message })),
-    onSuccess: () => {
-      toast.success(t("repo_code_pin_success"));
-    },
-  });
+  const pinMutation = useMutation(
+    trpc.analysis.pinAuditToDocs.mutationOptions({
+      onError: (err) => toast.error(tCommon("save_failed", { message: err.message })),
+      onSuccess: () => {
+        toast.success(t("repo_code_pin_success"));
+      },
+    }),
+  );
 
   const VIEW_ACTIONS = [
     {

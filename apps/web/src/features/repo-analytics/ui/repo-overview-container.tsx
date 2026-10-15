@@ -1,9 +1,9 @@
 "use client";
-
+import { useQuery } from "@tanstack/react-query";
 import { BarChart3 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
@@ -15,12 +15,15 @@ import { RepoOverview } from "./repo-overview";
 type Props = { repoId: string };
 
 export function RepoOverviewContainer({ repoId }: Readonly<Props>) {
+  const trpc = useTRPC();
   const t = useTranslations("Dashboard");
   const { aid, name, owner } = useRepoParams();
-  const { data, isLoading } = trpc.analysis.getWorkspace.useQuery({
-    aid: aid ?? undefined,
-    repoId,
-  });
+  const { data, isLoading } = useQuery(
+    trpc.analysis.getWorkspace.queryOptions({
+      aid: aid ?? undefined,
+      repoId,
+    }),
+  );
 
   if (isLoading) {
     return <Skeleton className="mb-4 ml-auto h-150 w-full text-sm" />;

@@ -1,14 +1,14 @@
 "use client";
-
 import { useRef, useState } from "react";
 import { type CreateRepoInput, CreateRepoSchema } from "@doxynix/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { Book, Plus, RefreshCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
 import { useForm, useWatch } from "react-hook-form";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { authClient } from "@/shared/lib/auth-client";
 import { isGitHubUrl } from "@/shared/lib/github-url";
 import { useClickOutside } from "@/shared/lib/hooks/use-click-outside";
@@ -44,13 +44,16 @@ import { RepoItem } from "@/entities/repo/ui/repo-item";
 const STALE_TIME = 1000 * 60 * 5; // TIME: 5 minutes
 
 export function CreateRepoDialog() {
+  const trpc = useTRPC();
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
-  const { refetch: getInstallUrl } = trpc.githubApp.getGithubInstallUrl.useQuery(
-    {},
-    {
-      enabled: false,
-    },
+  const { refetch: getInstallUrl } = useQuery(
+    trpc.githubApp.getGithubInstallUrl.queryOptions(
+      {},
+      {
+        enabled: false,
+      },
+    ),
   );
 
   const open = useCreateRepoOpen();
@@ -97,24 +100,28 @@ export function CreateRepoDialog() {
   }
 
   const isUrl = isGitHubUrl(debouncedValue);
-  const { data: suggestions, isFetching } = trpc.githubBrowse.searchGithub.useQuery(
-    { query: debouncedValue },
-    {
-      enabled: debouncedValue.length >= 2 && !isUrl,
-      staleTime: STALE_TIME,
-    },
+  const { data: suggestions, isFetching } = useQuery(
+    trpc.githubBrowse.searchGithub.queryOptions(
+      { query: debouncedValue },
+      {
+        enabled: debouncedValue.length >= 2 && !isUrl,
+        staleTime: STALE_TIME,
+      },
+    ),
   );
 
   const {
     data: myGithubData,
     isFetching: isFetchingMyRepos,
     refetch: refetchMyRepos,
-  } = trpc.githubApp.getMyGithubRepos.useQuery(
-    {},
-    {
-      enabled: open,
-      staleTime: STALE_TIME,
-    },
+  } = useQuery(
+    trpc.githubApp.getMyGithubRepos.queryOptions(
+      {},
+      {
+        enabled: open,
+        staleTime: STALE_TIME,
+      },
+    ),
   );
 
   const closeDialog = () => {

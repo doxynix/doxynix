@@ -1,6 +1,6 @@
 ---
 name: tanstack-query-best-practices
-description: TanStack Query 5 best practices for query keys, caching, mutations, error handling and prefetching, as used in apps/web (tRPC + @trpc/react-query) and apps/siem-client (Hono RPC). Use when writing or reviewing useQuery/useSuspenseQuery/useMutation calls, query key factories, staleTime/gcTime defaults, invalidation, or optimistic updates.
+description: TanStack Query 5 best practices for query keys, caching, mutations, error handling and prefetching, as used in apps/web (tRPC via @trpc/tanstack-react-query) and apps/siem-client (Hono RPC). Use when writing or reviewing useQuery/useSuspenseQuery/useMutation calls, query key factories, staleTime/gcTime defaults, invalidation, or optimistic updates.
 ---
 
 # TanStack Query Best Practices
@@ -12,7 +12,7 @@ Guidelines for `@tanstack/react-query` **5.102.2**, as used in `apps/web` and `a
 | Fact | Value |
 |------|-------|
 | Version | `@tanstack/react-query` 5.102.2 (root `catalog:`) |
-| `apps/web` | Data flows through **tRPC** — `@trpc/react-query` 11.19.0 with `superjson` 2.2.6 |
+| `apps/web` | Data flows through **tRPC** — `@trpc/tanstack-react-query` 11.19.0 with `superjson` 2.2.6 |
 | `apps/siem-client` | Data flows through **Hono RPC** via `hcWithType` from `@doxynix/siem-server/client` |
 | Devtools | `@tanstack/react-query-devtools` 5.104.0 (dev only) |
 | QueryClient | created in `apps/web/src/app/composition-root.tsx` |
@@ -110,9 +110,12 @@ Counts below match the files that actually exist in `rules/`.
 
 ## Repo notes
 
-- **tRPC in `apps/web`.** Query keys are managed by `@trpc/react-query`; never hand-write a key for a
-  tRPC procedure. Mutate through `trpc.<router>.<proc>.useMutation(...)` and invalidate with
-  `utils.<router>.invalidate(...)`.
+- **tRPC in `apps/web`.** Query keys come from `@trpc/tanstack-react-query`'s factories; never
+  hand-write a key for a tRPC procedure. Call `useTRPC()` inside the component, read with
+  `useQuery(trpc.<router>.<proc>.queryOptions(input, opts))`, write with
+  `useMutation(trpc.<router>.<proc>.mutationOptions(opts))`, and invalidate with
+  `queryClient.invalidateQueries(trpc.<router>.<proc>.queryFilter(input))` — or `pathFilter()`
+  when you do not know the input.
 - **Hono RPC in `apps/siem-client`.** Calls go through `hcWithType` from `@doxynix/siem-server/client`
   inside `queryFn` — never raw `fetch`. Because the client types come from the **built**
   `apps/siem-server/dist`, rebuild the server before expecting a new field to type-check.

@@ -1,10 +1,10 @@
 "use client";
-
+import { useQuery } from "@tanstack/react-query";
 import { GitCommit } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { AppBadge } from "@/shared/ui/core/badge";
 import {
   Select,
@@ -19,12 +19,13 @@ import { TimeAgo } from "@/shared/ui/kit/time-ago";
 type Props = { repoId: string };
 
 export function RepoVersionSelector({ repoId }: Readonly<Props>) {
+  const trpc = useTRPC();
   const locale = useLocale();
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
   const [selectedAid, setAid] = useQueryState("aid", parseAsString.withDefault(""));
 
-  const { data: history, isLoading } = trpc.analysis.getHistory.useQuery({ repoId });
+  const { data: history, isLoading } = useQuery(trpc.analysis.getHistory.queryOptions({ repoId }));
 
   if (isLoading || history == null) {
     return <Skeleton className="h-9 w-60" />;
