@@ -1,8 +1,8 @@
 "use client";
-
+import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import {
@@ -22,11 +22,11 @@ type Props = {
 };
 
 export function AdminAuditPayloadSheet({ logId, onOpenChange, open }: Readonly<Props>) {
+  const trpc = useTRPC();
   const t = useTranslations("AdminAudit");
 
-  const { data: html, isLoading } = trpc.adminAudit.payloadHtml.useQuery(
-    { id: logId },
-    { enabled: open },
+  const { data: html, isLoading } = useQuery(
+    trpc.adminAudit.payloadHtml.queryOptions({ id: logId }, { enabled: open }),
   );
 
   return (

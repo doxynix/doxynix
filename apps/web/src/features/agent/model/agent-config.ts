@@ -1,4 +1,6 @@
-import type { trpc } from "@/shared/api/trpc";
+import type { QueryClient } from "@tanstack/react-query";
+
+import type { useTRPC } from "@/shared/api/trpc";
 import { authClient } from "@/shared/lib/auth-client";
 
 export type AgentToolLabelKey =
@@ -74,48 +76,59 @@ export const toolLabelKeys: Record<string, AgentToolLabelKey> = {
   updateUserProfile: "tool_update_user_profile",
 };
 
-type TrpcUtils = ReturnType<typeof trpc.useUtils>;
+type InvalidationContext = { queryClient: QueryClient; trpc: ReturnType<typeof useTRPC> };
 
 // The promise return is deliberate: every entry awaits invalidate() calls, so the linter can see a floating promise.
-export const TOOL_INVALIDATIONS: Record<string, (utils: TrpcUtils) => Promise<void>> = {
-  applyFix: (utils) => utils.analysis.listByRepository.invalidate(),
-  clearReadNotifications: (utils) =>
+export const TOOL_INVALIDATIONS: Record<string, (context: InvalidationContext) => Promise<void>> = {
+  applyFix: ({ queryClient, trpc }) =>
+    queryClient.invalidateQueries(trpc.analysis.listByRepository.pathFilter()),
+  clearReadNotifications: ({ queryClient, trpc }) =>
     Promise.all([
-      utils.notification.getAll.invalidate(),
-      utils.notification.getStats.invalidate(),
+      queryClient.invalidateQueries(trpc.notification.getAll.pathFilter()),
+      queryClient.invalidateQueries(trpc.notification.getStats.pathFilter()),
     ]).then(() => undefined),
-  clearStaging: (utils) => utils.analysis.getStagedFiles.invalidate(),
-  createApiKey: (utils) => utils.apikey.list.invalidate(),
-  deleteRepository: (utils) =>
+  clearStaging: ({ queryClient, trpc }) =>
+    queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter()),
+  createApiKey: ({ queryClient, trpc }) =>
+    queryClient.invalidateQueries(trpc.apikey.list.pathFilter()),
+  deleteRepository: ({ queryClient, trpc }) =>
     Promise.all([
-      utils.repo.getAll.invalidate(),
-      utils.repo.getSlim.invalidate(),
-      utils.agent.listSessions.invalidate(),
+      queryClient.invalidateQueries(trpc.repo.getAll.pathFilter()),
+      queryClient.invalidateQueries(trpc.repo.getSlim.pathFilter()),
+      queryClient.invalidateQueries(trpc.agent.listSessions.pathFilter()),
     ]).then(() => undefined),
-  markAllNotificationsAsRead: (utils) =>
+  markAllNotificationsAsRead: ({ queryClient, trpc }) =>
     Promise.all([
-      utils.notification.getAll.invalidate(),
-      utils.notification.getStats.invalidate(),
+      queryClient.invalidateQueries(trpc.notification.getAll.pathFilter()),
+      queryClient.invalidateQueries(trpc.notification.getStats.pathFilter()),
     ]).then(() => undefined),
-  markNotificationAsRead: (utils) =>
+  markNotificationAsRead: ({ queryClient, trpc }) =>
     Promise.all([
-      utils.notification.getAll.invalidate(),
-      utils.notification.getStats.invalidate(),
+      queryClient.invalidateQueries(trpc.notification.getAll.pathFilter()),
+      queryClient.invalidateQueries(trpc.notification.getStats.pathFilter()),
     ]).then(() => undefined),
-  openPullRequest: (utils) => utils.analysis.listByRepository.invalidate(),
-  registerRepository: (utils) =>
-    Promise.all([utils.repo.getAll.invalidate(), utils.repo.getSlim.invalidate()]).then(
-      () => undefined,
-    ),
-  revokeApiKey: (utils) => utils.apikey.list.invalidate(),
-  stageFile: (utils) => utils.analysis.getStagedFiles.invalidate(),
-  stageGeneratedFix: (utils) => utils.analysis.getStagedFiles.invalidate(),
-  triggerRepositoryAnalysis: (utils) => utils.analysis.getLatest.invalidate(),
-  unstageFile: (utils) => utils.analysis.getStagedFiles.invalidate(),
-  updateApiKey: (utils) => utils.apikey.list.invalidate(),
+  openPullRequest: ({ queryClient, trpc }) =>
+    queryClient.invalidateQueries(trpc.analysis.listByRepository.pathFilter()),
+  registerRepository: ({ queryClient, trpc }) =>
+    Promise.all([
+      queryClient.invalidateQueries(trpc.repo.getAll.pathFilter()),
+      queryClient.invalidateQueries(trpc.repo.getSlim.pathFilter()),
+    ]).then(() => undefined),
+  revokeApiKey: ({ queryClient, trpc }) =>
+    queryClient.invalidateQueries(trpc.apikey.list.pathFilter()),
+  stageFile: ({ queryClient, trpc }) =>
+    queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter()),
+  stageGeneratedFix: ({ queryClient, trpc }) =>
+    queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter()),
+  triggerRepositoryAnalysis: ({ queryClient, trpc }) =>
+    queryClient.invalidateQueries(trpc.analysis.getLatest.pathFilter()),
+  unstageFile: ({ queryClient, trpc }) =>
+    queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter()),
+  updateApiKey: ({ queryClient, trpc }) =>
+    queryClient.invalidateQueries(trpc.apikey.list.pathFilter()),
 
-  updateUserProfile: async (utils) => {
-    await utils.user.me.invalidate();
+  updateUserProfile: async ({ queryClient, trpc }) => {
+    await queryClient.invalidateQueries(trpc.user.me.pathFilter());
     if (typeof window !== "undefined") {
       await authClient.getSession({
         query: {

@@ -1,10 +1,10 @@
 "use client";
-
 import { type ComponentType, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Clock, Download, Eye, Globe, Hash, Shield } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { formatFullDate } from "@/shared/lib/date-utils";
 import { saveFile } from "@/shared/lib/file-saver";
@@ -29,15 +29,15 @@ type Props = {
 };
 
 export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
+  const trpc = useTRPC();
   const [open, setOpen] = useState(false);
   const locale = useLocale();
   const t = useTranslations("Dashboard");
 
   const formattedJson = JSON.stringify(log.rawPayload, null, 2);
 
-  const { data: html, isLoading } = trpc.audit.getLogPayloadHtml.useQuery(
-    { logId: log.id },
-    { enabled: open },
+  const { data: html, isLoading } = useQuery(
+    trpc.audit.getLogPayloadHtml.queryOptions({ logId: log.id }, { enabled: open }),
   );
 
   const handleExportJson = () => {

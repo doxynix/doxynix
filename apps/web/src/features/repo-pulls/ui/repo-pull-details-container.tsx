@@ -1,9 +1,9 @@
 "use client";
-
+import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
@@ -20,11 +20,14 @@ type Props = {
 };
 
 export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Readonly<Props>) {
+  const trpc = useTRPC();
   const t = useTranslations("Dashboard");
-  const { data: analysis, isLoading: isAnalysisLoading } = trpc.analysis.getByPRNumber.useQuery({
-    prNumber,
-    repoId,
-  });
+  const { data: analysis, isLoading: isAnalysisLoading } = useQuery(
+    trpc.analysis.getByPRNumber.queryOptions({
+      prNumber,
+      repoId,
+    }),
+  );
 
   if (isAnalysisLoading) {
     return (

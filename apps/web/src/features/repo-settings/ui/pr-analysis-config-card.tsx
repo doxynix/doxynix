@@ -7,12 +7,13 @@ import {
   type UpdatePRConfigInputValues,
 } from "@doxynix/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Layout, Loader2, Palette, ShieldCheck, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Checkbox } from "@/shared/ui/core/checkbox";
@@ -40,8 +41,9 @@ type Area = {
 };
 
 export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
+  const trpc = useTRPC();
   const t = useTranslations("Dashboard");
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
   const AREAS: readonly Area[] = [
     {
@@ -70,14 +72,18 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
     },
   ] as const;
 
-  const { data: config, isLoading } = trpc.analysis.getRepoConfig.useQuery({ repoId });
+  const { data: config, isLoading } = useQuery(
+    trpc.analysis.getRepoConfig.queryOptions({ repoId }),
+  );
 
-  const updateConfig = trpc.analysis.configureRepository.useMutation({
-    onError: (error) => toast.error(error.message),
-    onSuccess: () => {
-      void utils.analysis.getRepoConfig.invalidate({ repoId });
-    },
-  });
+  const updateConfig = useMutation(
+    trpc.analysis.configureRepository.mutationOptions({
+      onError: (error) => toast.error(error.message),
+      onSuccess: () => {
+        void queryClient.invalidateQueries(trpc.analysis.getRepoConfig.queryFilter({ repoId }));
+      },
+    }),
+  );
 
   const form = useForm<UpdatePRConfigInputValues>({
     resetOptions: {

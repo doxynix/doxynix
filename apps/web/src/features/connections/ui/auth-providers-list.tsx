@@ -1,11 +1,11 @@
 "use client";
-
 import { type JSX, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ExternalLinkIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { authClient } from "@/shared/lib/auth-client";
 import { AppButton } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
@@ -33,6 +33,7 @@ type OAuthProvider = {
 };
 
 export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
+  const trpc = useTRPC();
   const t = useTranslations("Dashboard");
   const [disconnectingProvider, setDisconnectingProvider] = useState<null | string>(null);
   const [loadingProvider, setLoadingProvider] = useState<null | string>(null);
@@ -56,15 +57,17 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
     },
   ] as const;
 
-  const utils = trpc.useUtils();
-  const disconnect = trpc.user.disconnectAccount.useMutation({
-    onError: (err) => toast.error(err.message),
-    onSuccess: () => {
-      toast.success(t("settings_auth_unlink_success"));
-      void utils.user.getLinkedAccounts.invalidate();
-      setDisconnectingProvider(null);
-    },
-  });
+  const queryClient = useQueryClient();
+  const disconnect = useMutation(
+    trpc.user.disconnectAccount.mutationOptions({
+      onError: (err) => toast.error(err.message),
+      onSuccess: () => {
+        toast.success(t("settings_auth_unlink_success"));
+        void queryClient.invalidateQueries(trpc.user.getLinkedAccounts.pathFilter());
+        setDisconnectingProvider(null);
+      },
+    }),
+  );
 
   const handleConnect = async (provider: "github" | "yandex") => {
     setLoadingProvider(provider);

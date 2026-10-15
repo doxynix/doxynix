@@ -1,9 +1,9 @@
 "use client";
-
+import { useQuery } from "@tanstack/react-query";
 import { GitPullRequest } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { Link } from "@/shared/i18n/navigation";
 import { AppButton } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
@@ -15,11 +15,14 @@ import { RepoPullsList } from "./repo-pulls-list";
 type Props = { name: string; owner: string; repoId: string };
 
 export function RepoPullsListContainer({ name, owner, repoId }: Readonly<Props>) {
+  const trpc = useTRPC();
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
-  const { data: pulls, isLoading } = trpc.analysis.listByRepository.useQuery({
-    repoId,
-  });
+  const { data: pulls, isLoading } = useQuery(
+    trpc.analysis.listByRepository.queryOptions({
+      repoId,
+    }),
+  );
 
   if (isLoading) {
     return <div>{tCommon("loading")}</div>;

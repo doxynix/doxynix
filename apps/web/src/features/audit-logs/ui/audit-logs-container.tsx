@@ -1,21 +1,24 @@
 "use client";
-
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
+import { AUDIT_LOGS_PAGE_SIZE } from "../model/audit-logs-input";
 import { AuditLogList } from "./audit-logs-list";
 
 export function AuditLogsContainer() {
+  const trpc = useTRPC();
   const t = useTranslations("AuditLogs");
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    trpc.audit.getActivityLogs.useInfiniteQuery(
-      { limit: 20 },
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
+    trpc.audit.getActivityLogs.infiniteQueryOptions(
+      { limit: AUDIT_LOGS_PAGE_SIZE },
       { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
-    );
+    ),
+  );
 
   if (isLoading) {
     return (

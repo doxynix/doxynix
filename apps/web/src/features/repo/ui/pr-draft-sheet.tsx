@@ -1,14 +1,14 @@
 "use client";
-
 import { useState } from "react";
 import { CreatePrSchema, type CreatePrValues, generateBranchName } from "@doxynix/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileIcon, GitPullRequest, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
@@ -40,46 +40,53 @@ type Props = {
 };
 
 export function PrDraftSheet({ repoId }: Readonly<Props>) {
+  const trpc = useTRPC();
   const t = useTranslations("Dashboard");
   const [open, setOpen] = useState(false);
   const [removingFiles, setRemovingFiles] = useState<Set<string>>(new Set());
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const { data: stagedFiles, isLoading: isFilesLoading } = trpc.analysis.getStagedFiles.useQuery({
-    repoId,
-  });
+  const { data: stagedFiles, isLoading: isFilesLoading } = useQuery(
+    trpc.analysis.getStagedFiles.queryOptions({
+      repoId,
+    }),
+  );
 
-  const openPrMutation = trpc.analysis.openPullRequest.useMutation({
-    onError: (err) => toast.error(t("repo_pr_draft_create_error", { message: err.message })),
-    onSuccess: (data) => {
-      if (data.success) {
-        toast.success(t("repo_pr_draft_created"), {
-          action: {
-            label: t("repo_pr_draft_view"),
-            onClick: () => {
-              window.open(data.prUrl, "_blank", "noopener,noreferrer");
+  const openPrMutation = useMutation(
+    trpc.analysis.openPullRequest.mutationOptions({
+      onError: (err) => toast.error(t("repo_pr_draft_create_error", { message: err.message })),
+      onSuccess: (data) => {
+        if (data.success) {
+          toast.success(t("repo_pr_draft_created"), {
+            action: {
+              label: t("repo_pr_draft_view"),
+              onClick: () => {
+                window.open(data.prUrl, "_blank", "noopener,noreferrer");
+              },
             },
-          },
-        });
+          });
 
-        trackClientEvent("pr_opened", {
-          repo_id: repoId,
-          staged_files: filesCount,
-        });
+          trackClientEvent("pr_opened", {
+            repo_id: repoId,
+            staged_files: filesCount,
+          });
 
-        void utils.analysis.getStagedFiles.invalidate();
-        void utils.analysis.getByRepository.invalidate();
-        setOpen(false);
-      }
-    },
-  });
+          void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
+          void queryClient.invalidateQueries(trpc.analysis.getByRepository.pathFilter());
+          setOpen(false);
+        }
+      },
+    }),
+  );
 
-  const unstageMutation = trpc.analysis.unstageFile.useMutation({
-    onError: (err) => toast.error(t("repo_pr_draft_unstage_error", { message: err.message })),
-    onSuccess: () => {
-      void utils.analysis.getStagedFiles.invalidate();
-    },
-  });
+  const unstageMutation = useMutation(
+    trpc.analysis.unstageFile.mutationOptions({
+      onError: (err) => toast.error(t("repo_pr_draft_unstage_error", { message: err.message })),
+      onSuccess: () => {
+        void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
+      },
+    }),
+  );
 
   const form = useForm<CreatePrValues>({
     defaultValues: {

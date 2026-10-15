@@ -20,6 +20,10 @@ export const apiForUser = cache(async (userId: string) => {
   const { appRouter } = await import("@/server/modules");
   const createCaller = createCallerFactory(appRouter);
 
+  return createCaller(await ctxForUser(userId));
+});
+
+export const ctxForUser = cache(async (userId: string) => {
   const user = await prisma.user.findUnique({
     select: {
       banned: true,
@@ -81,17 +85,21 @@ export const apiForUser = cache(async (userId: string) => {
           },
   };
 
-  return createCaller(ctx);
+  return ctx;
 });
 
 export const api = cache(async () => {
-  const store = requestContext.getStore();
-  if (store?.userId != null) {
-    return apiForUser(store.userId);
-  }
-
   const { appRouter } = await import("@/server/modules");
   const createCaller = createCallerFactory(appRouter);
+
+  return createCaller(await ctxForRequest());
+});
+
+export const ctxForRequest = cache(async () => {
+  const store = requestContext.getStore();
+  if (store?.userId != null) {
+    return ctxForUser(store.userId);
+  }
 
   const heads = new Headers();
   try {
@@ -104,9 +112,7 @@ export const api = cache(async () => {
   const protocol = IS_DEV ? "http" : "https";
   const host = heads.get("host") ?? "localhost:3000";
 
-  const ctx = await createContext({
+  return createContext({
     req: new NextRequest(`${protocol}://${host}${TRPC_PREFIX}`, { headers: heads }),
   });
-
-  return createCaller(ctx);
 });

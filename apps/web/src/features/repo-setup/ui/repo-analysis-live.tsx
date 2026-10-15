@@ -1,10 +1,10 @@
 "use client";
-
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { TRIGGER_CONFIG } from "@/shared/config/trigger";
 import { useRouter } from "@/shared/i18n/navigation";
 import { AppBadge } from "@/shared/ui/core/badge";
@@ -33,15 +33,16 @@ export function RepoAnalysisLive({
   owner,
   repoId,
 }: Readonly<Props>) {
+  const trpc = useTRPC();
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
   const router = useRouter();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
   const { run } = useRealtimeRun(jobId, { accessToken });
 
-  const { data: latestAnalysis } = trpc.analysis.getLatest.useQuery({ repoId });
+  const { data: latestAnalysis } = useQuery(trpc.analysis.getLatest.queryOptions({ repoId }));
 
-  const cancelMutation = trpc.analysis.cancel.useMutation();
+  const cancelMutation = useMutation(trpc.analysis.cancel.mutationOptions());
 
   const metadata = run?.metadata ?? {};
 
@@ -64,9 +65,11 @@ export function RepoAnalysisLive({
       { analysisId },
       {
         onSuccess: () => {
-          void utils.analysis.getLatest.invalidate({ repoId }).then(() => {
-            router.refresh();
-          });
+          void queryClient
+            .invalidateQueries(trpc.analysis.getLatest.queryFilter({ repoId }))
+            .then(() => {
+              router.refresh();
+            });
         },
       },
     );

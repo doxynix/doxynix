@@ -1,6 +1,6 @@
 "use client";
-
 import { useEffect } from "react";
+import { skipToken, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
   FileCode,
@@ -17,7 +17,7 @@ import {
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
@@ -59,10 +59,11 @@ type ImpactStat = {
 };
 
 export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }: Readonly<Props>) {
+  const trpc = useTRPC();
   const locale = useLocale();
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
   const STATUS_CONFIG: Record<StatusConfigKey, { className: string; label: string }> = {
     ANALYZING: { className: "text-foreground", label: t("repo_pull_status_analyzing") },
@@ -71,9 +72,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
     PENDING: { className: "text-warning", label: t("repo_pull_status_pending") },
   } as const;
 
-  const { data: comments, isLoading: isCommentsLoading } = trpc.analysis.getComments.useQuery(
-    { analysisId: analysis?.analysis.id ?? "" },
-    { enabled: analysis?.analysis.id != null },
+  const { data: comments, isLoading: isCommentsLoading } = useQuery(
+    trpc.analysis.getComments.queryOptions(
+      analysis?.analysis.id ? { analysisId: analysis.analysis.id } : skipToken,
+    ),
   );
 
   const { isStaging, stageFix } = usePrStage(repoId);
@@ -96,26 +98,28 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
     });
   }, [analysis?.analysis.prNumber, findingsCount, prAnalysisId, repoId, riskScore]);
 
-  const createFixMutation = trpc.analysis.createFix.useMutation({
-    onError: (err) => {
-      toast.error(t("repo_pull_fix_error"), {
-        description: err.message,
-      });
-    },
-    onSuccess: (data) => {
-      if (data.success === true && data.fixId != null) {
-        toast.success(t("repo_pull_fix_queued"), {
-          description: t("repo_pull_fix_queued_desc"),
+  const createFixMutation = useMutation(
+    trpc.analysis.createFix.mutationOptions({
+      onError: (err) => {
+        toast.error(t("repo_pull_fix_error"), {
+          description: err.message,
         });
-        trackClientEvent("fix_requested", {
-          findings_count: findingsCount,
-          fix_id: data.fixId,
-          repo_id: repoId,
-        });
-        void utils.analysis.getByRepository.invalidate({ repoId });
-      }
-    },
-  });
+      },
+      onSuccess: (data) => {
+        if (data.success === true && data.fixId != null) {
+          toast.success(t("repo_pull_fix_queued"), {
+            description: t("repo_pull_fix_queued_desc"),
+          });
+          trackClientEvent("fix_requested", {
+            findings_count: findingsCount,
+            fix_id: data.fixId,
+            repo_id: repoId,
+          });
+          void queryClient.invalidateQueries(trpc.analysis.getByRepository.queryFilter({ repoId }));
+        }
+      },
+    }),
+  );
 
   const changedFiles = impact?.changedFiles ?? [];
   const affectedZones = impact?.affectedZones ?? [];

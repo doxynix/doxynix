@@ -1,7 +1,9 @@
 "use client";
+import { useQuery } from "@tanstack/react-query";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 
+import { useNodeContext } from "@/entities/repo/model/use-node-context";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { RepoMapOverview } from "./repo-map-overview";
@@ -16,20 +18,22 @@ type Props = {
 };
 
 export function RepoMapSidebar({ nodeId, onClose, onNavigate, repoId }: Readonly<Props>) {
+  const trpc = useTRPC();
   const shouldLoadWorkspace = nodeId == null || nodeId.length === 0;
-  const shouldLoadNodeContext = nodeId != null && nodeId.length > 0;
   const { aid } = useRepoParams();
 
-  const { data: workspace, isLoading: isWorkspaceLoading } = trpc.analysis.getWorkspace.useQuery(
-    { aid: aid ?? undefined, repoId },
-    { enabled: shouldLoadWorkspace },
+  const { data: workspace, isLoading: isWorkspaceLoading } = useQuery(
+    trpc.analysis.getWorkspace.queryOptions(
+      { aid: aid ?? undefined, repoId },
+      { enabled: shouldLoadWorkspace },
+    ),
   );
 
-  const { data: nodeContext, isLoading: isNodeContextLoading } =
-    trpc.analysis.getNodeContext.useQuery(
-      { aid: aid ?? undefined, nodeId: nodeId ?? "", repoId },
-      { enabled: shouldLoadNodeContext },
-    );
+  const { data: nodeContext, isLoading: isNodeContextLoading } = useNodeContext({
+    aid: aid ?? undefined,
+    nodeId,
+    repoId,
+  });
 
   return (
     <aside className="flex h-full flex-col overflow-hidden bg-card">

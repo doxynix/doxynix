@@ -1,17 +1,21 @@
 "use client";
 
 import { type ReactNode, useState } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { httpBatchLink, loggerLink } from "@trpc/client";
+import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
 import { LucideProvider } from "lucide-react";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import superjson from "superjson";
 
-import { trpc } from "@/shared/api/trpc";
+import { makeQueryClient } from "@/shared/api/query-client";
+import { TRPCProvider } from "@/shared/api/trpc";
 import { APP_URL, TRPC_PREFIX } from "@/shared/config/env.client";
 import { IS_DEV } from "@/shared/config/env.flags";
 import { TooltipProvider } from "@/shared/ui/core/tooltip";
+
+import type { AppRouter } from "@/server/modules";
 
 import { AnalyticsSync } from "./_components/analytics-sync";
 import { RealtimeProvider } from "./_components/realtime-provider";
@@ -25,18 +29,6 @@ function getBaseUrl() {
     return "";
   }
   return APP_URL;
-}
-
-function makeQueryClient() {
-  return new QueryClient({
-    defaultOptions: {
-      queries: {
-        refetchOnWindowFocus: false,
-        retry: 1,
-        staleTime: 30_000,
-      },
-    },
-  });
 }
 
 let browserQueryClient: QueryClient | undefined;
@@ -54,7 +46,7 @@ export function Providers({ children }: Readonly<Props>) {
   const queryClient = getQueryClient();
 
   const [trpcClient] = useState(() =>
-    trpc.createClient({
+    createTRPCClient<AppRouter>({
       links: [
         loggerLink({
           enabled: (opts) => IS_DEV || (opts.direction === "down" && opts.result instanceof Error),
@@ -68,11 +60,11 @@ export function Providers({ children }: Readonly<Props>) {
   );
 
   return (
-    <trpc.Provider
-      client={trpcClient}
-      queryClient={queryClient}
-    >
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <TRPCProvider
+        queryClient={queryClient}
+        trpcClient={trpcClient}
+      >
         <RealtimeProvider>
           <InnerProviders>{children}</InnerProviders>
         </RealtimeProvider>
@@ -82,8 +74,8 @@ export function Providers({ children }: Readonly<Props>) {
             theme="dark"
           />
         )}
-      </QueryClientProvider>
-    </trpc.Provider>
+      </TRPCProvider>
+    </QueryClientProvider>
   );
 }
 

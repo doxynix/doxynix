@@ -1,16 +1,17 @@
 "use client";
-
+import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 
 import { DeleteAllReposDialog } from "./delete-all-repos-dialog";
 
 export function DeleteAllReposCard() {
+  const trpc = useTRPC();
   const t = useTranslations("Dashboard");
-  const { data, isLoading } = trpc.repo.getSlim.useQuery({ limit: 1 });
+  const { data, isLoading } = useQuery(trpc.repo.getSlim.queryOptions({ limit: 1 }));
   const hasRepos = data != null && data.items.length > 0;
 
   if (isLoading || !data) {

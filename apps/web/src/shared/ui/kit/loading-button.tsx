@@ -42,7 +42,7 @@ export function LoadingButton({
 
       <span
         className={cn(
-          "transition-opacity",
+          "inline-flex items-center gap-2 transition-opacity",
           showSpinner && "pointer-events-none opacity-0 select-none",
         )}
       >

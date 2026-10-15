@@ -156,7 +156,7 @@ export function RefactoringTargetsWidget({ data }: Readonly<Props>) {
                 {data.risks.topCoupling.map((c) => (
                   <div
                     className="flex items-center gap-2 rounded-xl border border-border p-2 text-xs"
-                    key={`${c.from_path}->${c.to_path}`}
+                    key={`${c.repo_name}:${c.from_path}->${c.to_path}`}
                   >
                     <span className="truncate">{c.from_path.split("/").pop()}</span>
                     <ArrowLeftRight />

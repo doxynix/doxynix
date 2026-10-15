@@ -1,8 +1,8 @@
 "use client";
-
+import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { formatFullDate } from "@/shared/lib/date-utils";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
@@ -23,10 +23,13 @@ type Props = {
 };
 
 export function AdminReviewSheet({ onOpenChange, open, reviewId }: Readonly<Props>) {
+  const trpc = useTRPC();
   const t = useTranslations("AdminReview");
   const locale = useLocale();
 
-  const { data, isLoading } = trpc.adminReview.detail.useQuery({ id: reviewId }, { enabled: open });
+  const { data, isLoading } = useQuery(
+    trpc.adminReview.detail.queryOptions({ id: reviewId }, { enabled: open }),
+  );
 
   return (
     <Sheet

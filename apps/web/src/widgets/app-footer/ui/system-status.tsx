@@ -25,12 +25,13 @@ const fetchSystemStatus = async (): Promise<StatusType> => {
 
 const STALE_TIME = 4 * 60 * 1000; // TIME: 4 minutes
 const REFETCH_INTERVAL = 5 * 60 * 1000; // TIME: 5 minutes
+const SYSTEM_STATUS_QUERY_KEY = ["system-status"] as const;
 
 export function SystemStatus({ className }: Readonly<{ className?: string }>) {
   const t = useTranslations("Dashboard");
   const { data: status = "unknown", isLoading } = useQuery({
     queryFn: fetchSystemStatus,
-    queryKey: ["system-status"],
+    queryKey: SYSTEM_STATUS_QUERY_KEY,
     refetchInterval: REFETCH_INTERVAL,
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: true,

@@ -1,11 +1,11 @@
 "use client";
-
 import type { ReactNode } from "react";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { LogOut } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { formatFullDate } from "@/shared/lib/date-utils";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
@@ -30,10 +30,11 @@ type Props = {
 };
 
 export function AdminUserSessions({ actions, userId }: Readonly<Props>) {
+  const trpc = useTRPC();
   const t = useTranslations("AdminUsers");
   const locale = useLocale();
 
-  const { data, isLoading } = trpc.adminUser.listSessions.useQuery({ id: userId });
+  const { data, isLoading } = useQuery(trpc.adminUser.listSessions.queryOptions({ id: userId }));
 
   return (
     <div className="flex flex-col gap-2">

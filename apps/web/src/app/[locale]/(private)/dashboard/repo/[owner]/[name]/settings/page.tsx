@@ -6,6 +6,7 @@ import { createRepoMetadata } from "@/shared/lib/metadata";
 import { DeleteRepoCard } from "@/features/repo-settings/ui/delete-repo-card";
 import { PRAnalysisConfigCard } from "@/features/repo-settings/ui/pr-analysis-config-card";
 
+import { HydrateClient, prefetch, trpcProxy } from "@/server/core/trpc/prefetch";
 import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 
 type Props = {
@@ -21,14 +22,16 @@ export default async function RepoSettingsPage({ params }: Readonly<Props>) {
 
   const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 
+  await prefetch(trpcProxy.analysis.getRepoConfig.queryOptions({ repoId: repo.id }));
+
   return (
-    <>
+    <HydrateClient>
       <PRAnalysisConfigCard repoId={repo.id} />
       <h2 className="font-bold text-2xl text-destructive">{t("settings_danger_title")}</h2>
       <DeleteRepoCard
         id={repo.id}
         name={repo.name}
       />
-    </>
+    </HydrateClient>
   );
 }

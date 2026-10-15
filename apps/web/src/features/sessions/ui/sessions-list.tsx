@@ -1,12 +1,11 @@
 "use client";
-
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LogOut, Monitor, RefreshCw, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { authClient } from "@/shared/lib/auth-client";
 import { formatFullDate } from "@/shared/lib/date-utils";
 import { AppButton } from "@/shared/ui/core/button";
@@ -16,24 +15,27 @@ import { LoadingButton } from "@/shared/ui/kit/loading-button";
 import { ConnectionCard } from "@/entities/connection/ui/connection-card";
 
 export function SessionsList() {
+  const trpc = useTRPC();
   const { data: currentSessionContext } = authClient.useSession();
   const currentSessionId = currentSessionContext?.session.id;
   const t = useTranslations("Sessions");
 
   const [revokingSessionId, setRevokingSessionId] = useState<null | string>(null);
 
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const { data: sessions = [], isLoading } = trpc.user.getActiveSessions.useQuery();
+  const { data: sessions = [], isLoading } = useQuery(trpc.user.getActiveSessions.queryOptions());
 
-  const revokeSession = trpc.user.revokeSession.useMutation({
-    onError: (err) => toast.error(err.message),
-    onSuccess: () => {
-      toast.success(t("device_session_revoked"));
-      setRevokingSessionId(null);
-      void utils.user.getActiveSessions.invalidate();
-    },
-  });
+  const revokeSession = useMutation(
+    trpc.user.revokeSession.mutationOptions({
+      onError: (err) => toast.error(err.message),
+      onSuccess: () => {
+        toast.success(t("device_session_revoked"));
+        setRevokingSessionId(null);
+        void queryClient.invalidateQueries(trpc.user.getActiveSessions.pathFilter());
+      },
+    }),
+  );
 
   const revokeOtherSessions = useMutation({
     mutationFn: async () => {
@@ -45,7 +47,7 @@ export function SessionsList() {
     onError: (err) => toast.error(err.message),
     onSuccess: () => {
       toast.success(t("logged_out_all_devices"));
-      void utils.user.getActiveSessions.invalidate();
+      void queryClient.invalidateQueries(trpc.user.getActiveSessions.pathFilter());
     },
   });
 

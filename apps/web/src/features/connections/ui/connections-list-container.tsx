@@ -1,9 +1,9 @@
 "use client";
-
+import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
@@ -13,16 +13,20 @@ import { PasskeysList } from "./passkeys-list";
 import { TwoFactorCard } from "./two-factor-card";
 
 export function ConnectionsListContainer() {
+  const trpc = useTRPC();
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
-  const { data: githubData, isLoading: isGithubLoading } =
-    trpc.githubApp.getMyGithubRepos.useQuery();
+  const { data: githubData, isLoading: isGithubLoading } = useQuery(
+    trpc.githubApp.getMyGithubRepos.queryOptions(),
+  );
 
-  const { isFetching, refetch: getUrl } = trpc.githubApp.getGithubInstallUrl.useQuery(
-    {},
-    {
-      enabled: false,
-    },
+  const { isFetching, refetch: getUrl } = useQuery(
+    trpc.githubApp.getGithubInstallUrl.queryOptions(
+      {},
+      {
+        enabled: false,
+      },
+    ),
   );
 
   const handleInstall = async () => {
@@ -32,7 +36,7 @@ export function ConnectionsListContainer() {
     }
   };
 
-  const { data, isLoading: isAuthLoading } = trpc.user.getLinkedAccounts.useQuery();
+  const { data, isLoading: isAuthLoading } = useQuery(trpc.user.getLinkedAccounts.queryOptions());
 
   if (isGithubLoading || isAuthLoading) {
     return (

@@ -1,16 +1,17 @@
 "use client";
-
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 import type { TreeApi } from "react-arborist";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { usePanelLayout } from "@/shared/lib/hooks/use-panel-layout";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ui/core/resizable";
 
 import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
 import type { FileNode } from "@/entities/repo/model/repo-setup.types";
+import { useNodeContext } from "@/entities/repo/model/use-node-context";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { RepoCodeBrowser } from "./repo-code-browser";
@@ -22,20 +23,24 @@ type Props = {
 };
 
 export function RepoCodeContainer({ repo }: Readonly<Props>) {
+  const trpc = useTRPC();
   const t = useTranslations("Dashboard");
   const [path, setPath] = useQueryState("path", parseAsString);
   const [node, setNode] = useQueryState("node", parseAsString);
   const [treeApi, setTreeApi] = useState<TreeApi<FileNode> | undefined>();
   const { aid } = useRepoParams();
 
-  const { data: nodeContext } = trpc.analysis.getNodeContext.useQuery(
-    { aid: aid ?? undefined, nodeId: node ?? "", repoId: repo.id },
-    { enabled: node != null && node.length > 0 },
-  );
+  const { data: nodeContext } = useNodeContext({
+    aid: aid ?? undefined,
+    nodeId: node,
+    repoId: repo.id,
+  });
 
-  const { data, isLoading } = trpc.githubBrowse.getFileContent.useQuery(
-    { path: path ?? "", repoId: repo.id },
-    { enabled: path != null && path !== "" },
+  const { data, isLoading } = useQuery(
+    trpc.githubBrowse.getFileContent.queryOptions(
+      { path: path ?? "", repoId: repo.id },
+      { enabled: path != null && path !== "" },
+    ),
   );
 
   useEffect(() => {

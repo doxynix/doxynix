@@ -1,11 +1,11 @@
 "use client";
-
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Book, Check, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
 import {
@@ -23,6 +23,7 @@ import { notificationsParsers } from "@/entities/notification/model/notification
 import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dialog.store";
 
 export function NotificationsRepoFilter() {
+  const trpc = useTRPC();
   const [filters, setFilters] = useQueryStates(notificationsParsers);
   const { setOpen: setOpenCreateDialog } = useCreateRepoActions();
   const t = useTranslations("Notifications");
@@ -30,11 +31,13 @@ export function NotificationsRepoFilter() {
 
   const [open, setOpen] = useState(false);
 
-  const { data: repos, isLoading } = trpc.repo.getSlim.useQuery(
-    {},
-    {
-      enabled: open || (filters.owner != null && filters.repo != null),
-    },
+  const { data: repos, isLoading } = useQuery(
+    trpc.repo.getSlim.queryOptions(
+      {},
+      {
+        enabled: open || (filters.owner != null && filters.repo != null),
+      },
+    ),
   );
 
   const handleRepoSelect = (r: null | { name: string; owner: string }) => {

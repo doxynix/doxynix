@@ -1,10 +1,10 @@
 "use client";
-
 import { useEffect, useState } from "react";
+import { skipToken, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 
 import type { RepoMetricsItem } from "@/entities/repo/model/repo.types";
 import {
@@ -24,51 +24,54 @@ import {
 type Props = { data: NonNullable<RepoMetricsItem>; repoId: string };
 
 export function RepoMetrics({ data, repoId }: Readonly<Props>) {
+  const trpc = useTRPC();
   const { architecture, domain, onboarding, quality, recommendations, reference, risks, security } =
     data;
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
   const t = useTranslations("Dashboard");
 
   const [runningFixId, setRunningFixId] = useState<null | string>(null);
 
-  const createFixMutation = trpc.analysis.createFix.useMutation({
-    onError: (err) => {
-      toast.error(t("repo_fix_trigger_failed", { error: err.message }));
-    },
-    onSuccess: (res) => {
-      if (res.success === true && res.fixId != null) {
-        toast.info(t("repo_fix_started"));
-        setRunningFixId(res.fixId);
-      }
-    },
-  });
+  const createFixMutation = useMutation(
+    trpc.analysis.createFix.mutationOptions({
+      onError: (err) => {
+        toast.error(t("repo_fix_trigger_failed", { error: err.message }));
+      },
+      onSuccess: (res) => {
+        if (res.success === true && res.fixId != null) {
+          toast.info(t("repo_fix_started"));
+          setRunningFixId(res.fixId);
+        }
+      },
+    }),
+  );
 
-  const { data: fixStatus } = trpc.analysis.getById.useQuery(
-    { fixId: runningFixId ?? "" },
-    {
-      enabled: runningFixId != null,
+  const { data: fixStatus } = useQuery(
+    trpc.analysis.getById.queryOptions(runningFixId ? { fixId: runningFixId } : skipToken, {
       refetchInterval: (query) => {
         if (query.state.data?.resultJson == null) {
           return 2000;
         }
         return false;
       },
-    },
+    }),
   );
 
-  const stageGeneratedFixMutation = trpc.analysis.stageGeneratedFix.useMutation({
-    onError: (err) => {
-      toast.error(t("repo_fix_staging_failed", { error: err.message }));
-      setRunningFixId(null);
-    },
-    onSuccess: (res) => {
-      if (res.success) {
-        toast.success(t("repo_fix_staged", { count: res.stagedCount }));
+  const stageGeneratedFixMutation = useMutation(
+    trpc.analysis.stageGeneratedFix.mutationOptions({
+      onError: (err) => {
+        toast.error(t("repo_fix_staging_failed", { error: err.message }));
         setRunningFixId(null);
-        void utils.analysis.getStagedFiles.invalidate();
-      }
-    },
-  });
+      },
+      onSuccess: (res) => {
+        if (res.success) {
+          toast.success(t("repo_fix_staged", { count: res.stagedCount }));
+          setRunningFixId(null);
+          void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
+        }
+      },
+    }),
+  );
 
   useEffect(() => {
     if (runningFixId != null && fixStatus?.resultJson != null) {

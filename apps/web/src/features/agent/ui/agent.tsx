@@ -1,16 +1,16 @@
 "use client";
-
 import { type ChangeEvent, type SyntheticEvent, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useChat } from "@ai-sdk/react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ToolUIPart, UIDataTypes, UIMessagePart, UITools } from "ai";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
 import { ArrowDown, Bot, ChevronDown, FileText, Pencil, RotateCw, UserRound } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { useAutoScroll } from "@/shared/lib/hooks/use-auto-scroll";
 import { usePanelLayout } from "@/shared/lib/hooks/use-panel-layout";
@@ -55,6 +55,7 @@ const MarkdownRenderer = dynamic(() => import("./agent-text-message").then((mod)
 });
 
 export function Agent() {
+  const trpc = useTRPC();
   const t = useTranslations("Agent");
   const tCommon = useTranslations("Common");
   const isOpen = useAgentIsOpen();
@@ -74,15 +75,19 @@ export function Agent() {
 
   const lastLoadedSessionIdRef = useRef<null | string>(sessionId);
 
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const { data: sessions } = trpc.agent.listSessions.useQuery({ currentRepo }, { enabled: isOpen });
+  const { data: sessions } = useQuery(
+    trpc.agent.listSessions.queryOptions({ currentRepo }, { enabled: isOpen }),
+  );
 
   const isSessionSaved = sessions?.some((s) => s.id === sessionId);
 
-  const { data: history, isLoading: isHistoryLoading } = trpc.agent.getSessionHistory.useQuery(
-    { sessionId: sessionId ?? "" },
-    { enabled: sessionId !== null && isOpen },
+  const { data: history, isLoading: isHistoryLoading } = useQuery(
+    trpc.agent.getSessionHistory.queryOptions(
+      { sessionId: sessionId ?? "" },
+      { enabled: sessionId !== null && isOpen },
+    ),
   );
 
   const { addToolApprovalResponse, messages, regenerate, sendMessage, setMessages, status } =
@@ -96,8 +101,10 @@ export function Agent() {
           role: msg.role as "assistant" | "system" | "user",
         })) ?? [],
       onFinish: () => {
-        void utils.agent.listSessions.invalidate();
-        void utils.agent.getSessionHistory.invalidate({ sessionId: sessionId ?? "" });
+        void queryClient.invalidateQueries(trpc.agent.listSessions.pathFilter());
+        void queryClient.invalidateQueries(
+          trpc.agent.getSessionHistory.queryFilter({ sessionId: sessionId ?? "" }),
+        );
       },
       sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
       throttle: 32,
@@ -141,11 +148,11 @@ export function Agent() {
         const toolPart = part as { state?: string; type: string };
         if (toolPart.state === "output-available") {
           const toolName = part.type.slice(5);
-          void TOOL_INVALIDATIONS[toolName]?.(utils);
+          void TOOL_INVALIDATIONS[toolName]?.({ queryClient, trpc });
         }
       }
     });
-  }, [messages, utils]);
+  }, [messages, queryClient, trpc]);
 
   const { scrollRef, scrollToBottom, showScrollButton } = useAutoScroll<HTMLDivElement>([messages]);
   const { open } = useSidebar();

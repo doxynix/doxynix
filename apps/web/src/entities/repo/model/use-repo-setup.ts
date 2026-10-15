@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { DocType } from "@doxynix/shared";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
 import { useQueryState } from "nuqs";
 import type { TreeApi } from "react-arborist";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { useRouter } from "@/shared/i18n/navigation";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { searchTextParam } from "@/shared/lib/search-params";
@@ -27,9 +28,10 @@ export type StateType = RepoSetupReturn["state"];
 export type ActionsType = RepoSetupReturn["actions"];
 
 export function useRepoSetup(repo: UiRepoDetailed) {
+  const trpc = useTRPC();
   const locale = useLocale();
   const router = useRouter();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
   const [selectedBranch, setSelectedBranch] = useQueryState("branch", {
     defaultValue: repo.defaultBranch,
@@ -46,23 +48,28 @@ export function useRepoSetup(repo: UiRepoDetailed) {
 
   const { name, owner } = repo;
 
-  const { data: branches, isLoading: isBranchesLoading } = trpc.githubBrowse.getBranches.useQuery(
-    { name, owner },
-    { enabled: open },
+  const { data: branches, isLoading: isBranchesLoading } = useQuery(
+    trpc.githubBrowse.getBranches.queryOptions({ name, owner }, { enabled: open }),
   );
-  const { data: apiFilesRaw, isLoading } = trpc.githubBrowse.getRepoFiles.useQuery({
-    branch: selectedBranch,
-    name,
-    owner,
-  });
+  const { data: apiFilesRaw, isLoading } = useQuery(
+    trpc.githubBrowse.getRepoFiles.queryOptions({
+      branch: selectedBranch,
+      name,
+      owner,
+    }),
+  );
 
-  const analyzeMutation = trpc.analysis.analyze.useMutation({
-    onSuccess: async () => {
-      await utils.analysis.getLatest.invalidate({ repoId: repo.id });
+  const analyzeMutation = useMutation(
+    trpc.analysis.analyze.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.analysis.getLatest.queryFilter({ repoId: repo.id }),
+        );
 
-      router.refresh();
-    },
-  });
+        router.refresh();
+      },
+    }),
+  );
   const apiFiles = apiFilesRaw as FileTuple[] | undefined;
 
   const [prevBranch, setPrevBranch] = useState(selectedBranch);

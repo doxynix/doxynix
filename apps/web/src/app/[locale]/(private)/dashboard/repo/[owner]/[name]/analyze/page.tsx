@@ -4,7 +4,7 @@ import type { RepoPageProps } from "@/shared/lib/next.types";
 import { RepoAnalysisLive } from "@/features/repo-setup/ui/repo-analysis-live";
 import { RepoSetup } from "@/features/repo-setup/ui/repo-setup";
 
-import { api } from "@/server/core/trpc/server";
+import { getQueryClient, HydrateClient, trpcProxy } from "@/server/core/trpc/prefetch";
 import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 
 export const generateMetadata = createRepoMetadata("analyze");
@@ -14,28 +14,30 @@ export default async function AnalyzePage({ params }: Readonly<RepoPageProps>) {
 
   const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 
-  const serverApi = await api();
-  const lastAnalysis = await serverApi.analysis.getLatest({ repoId: repo.id });
-
+  const lastAnalysis = await getQueryClient().query(
+    trpcProxy.analysis.getLatest.queryOptions({ repoId: repo.id }),
+  );
   const isRunning =
     lastAnalysis?.status === "PENDING" &&
     lastAnalysis.jobId != null &&
     lastAnalysis.publicAccessToken != null;
 
   return (
-    <div className="mx-auto px-4 py-6">
-      {isRunning ? (
-        <RepoAnalysisLive
-          accessToken={lastAnalysis.publicAccessToken ?? ""}
-          analysisId={lastAnalysis.id}
-          jobId={lastAnalysis.jobId ?? ""}
-          name={name}
-          owner={owner}
-          repoId={repo.id}
-        />
-      ) : (
-        <RepoSetup repo={repo} />
-      )}
-    </div>
+    <HydrateClient>
+      <div className="mx-auto px-4 py-6">
+        {isRunning ? (
+          <RepoAnalysisLive
+            accessToken={lastAnalysis.publicAccessToken ?? ""}
+            analysisId={lastAnalysis.id}
+            jobId={lastAnalysis.jobId ?? ""}
+            name={name}
+            owner={owner}
+            repoId={repo.id}
+          />
+        ) : (
+          <RepoSetup repo={repo} />
+        )}
+      </div>
+    </HydrateClient>
   );
 }

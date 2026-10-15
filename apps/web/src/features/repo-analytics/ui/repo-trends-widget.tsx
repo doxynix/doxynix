@@ -1,16 +1,16 @@
 "use client";
-
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
-import { trpc } from "@/shared/api/trpc";
+import { useTRPC } from "@/shared/api/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import type { ChartConfig } from "@/shared/ui/core/chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 
-import { dashboardParsers } from "../model/dashboard-parsers";
+import { dashboardParsers, dashboardRangeInput } from "../model/dashboard-parsers";
 import { TrendsWidgetsSkeleton } from "./repo-trends-widget-skeleton";
 
 const TrendsChart = dynamic(() => import("./repo-trends-chart").then((m) => m.TrendsChart), {
@@ -21,14 +21,15 @@ const TrendsChart = dynamic(() => import("./repo-trends-chart").then((m) => m.Tr
 type Props = { className?: string; repoId?: string };
 
 export function TrendsWidget({ className, repoId }: Readonly<Props>) {
+  const trpc = useTRPC();
   const [urlParams] = useQueryStates(dashboardParsers);
 
-  const { data, isLoading } = trpc.analytics.getTrends.useQuery({
-    from: urlParams.from ?? undefined,
-    period: urlParams.period,
-    repoId: repoId ?? undefined,
-    to: urlParams.to ?? undefined,
-  });
+  const { data, isLoading } = useQuery(
+    trpc.analytics.getTrends.queryOptions({
+      ...dashboardRangeInput(urlParams),
+      repoId: repoId ?? undefined,
+    }),
+  );
 
   const t = useTranslations("Dashboard");
   const [activeTab, setActiveTab] = useState("overview");
