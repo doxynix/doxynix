@@ -5,7 +5,6 @@ type TriggerTaskOptions = Parameters<typeof task>[0];
 export type TaskInfraConfig = Omit<TriggerTaskOptions, "id" | "run">;
 
 export const writersQueue = queue({
-  concurrencyLimit: 2,
   name: "ai-documentation-writers",
 });
 
@@ -85,6 +84,7 @@ export const TASK_CONFIGS = {
   },
 
   writers: {
+    concurrency: { total: 2 },
     machine: { preset: "small-2x" },
     maxDuration: 60 * 15, // TIME: 15 minutes
     queue: writersQueue,
