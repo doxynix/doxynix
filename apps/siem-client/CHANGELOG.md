@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.1](https://github.com/doxynix/doxynix/compare/siem-client-v0.5.0...siem-client-v0.5.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2268](https://github.com/doxynix/doxynix/issues/2268)) ([f3dcac0](https://github.com/doxynix/doxynix/commit/f3dcac0c2b025f6d0d49f1ef6c0495caebbd7723))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @doxynix/siem-server bumped to 0.4.1
+
 ## [0.5.0](https://github.com/doxynix/doxynix/compare/siem-client-v0.4.0...siem-client-v0.5.0) (2026-10-14)
 
 
