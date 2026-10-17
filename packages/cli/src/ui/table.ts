@@ -15,6 +15,15 @@ export type Table = {
 
 const DEFAULT_MAX_WIDTH = 120;
 
+// TableCell is `unknown`, so a bare String() would render "[object Object]".
+function cellText(value: unknown): string {
+  if (value == null) {
+    return "";
+  }
+
+  return typeof value === "object" ? (JSON.stringify(value) ?? "") : String(value);
+}
+
 // Water-fill: cut every column tied at the widest width until the budget is met.
 // Caller guarantees budget >= column count, so the widest column is > 1 while overflowing.
 function fitColumnWidths(natural: number[], budget: number): number[] {
@@ -58,8 +67,7 @@ export function createTable(head: string[], options: TableOptions = {}): Table {
 
       for (const row of rows) {
         for (let i = 0; i < colCount; i++) {
-          const val = row[i] ?? "";
-          const lines = String(val).split(/\r?\n/);
+          const lines = cellText(row[i]).split(/\r?\n/);
           for (const line of lines) {
             naturalWidths[i] = Math.max(naturalWidths[i] ?? 0, getStringWidth(line));
           }
@@ -75,12 +83,7 @@ export function createTable(head: string[], options: TableOptions = {}): Table {
           Math.floor((maxWidth - gap.length * (colCount - 1)) / colCount),
         );
         const flat = (value: unknown) =>
-          truncateToWidth(
-            String(value ?? "")
-              .split(/\r?\n/)
-              .join(" "),
-            cellWidth,
-          );
+          truncateToWidth(cellText(value).replaceAll(/\r?\n/g, " "), cellWidth);
 
         return [
           head.map((cell) => pc.cyan(pc.bold(flat(cell)))).join(gap),
@@ -91,14 +94,14 @@ export function createTable(head: string[], options: TableOptions = {}): Table {
       const colWidths = fitColumnWidths(naturalWidths, maxWidth - (colCount * 3 + 1));
 
       const headRow = head.map((cell, i) =>
-        String(cell ?? "")
+        cellText(cell)
           .split(/\r?\n/)
           .map((line) => truncateToWidth(line, colWidths[i] ?? 0))
           .join("\n"),
       );
       const bodyRows = rows.map((row) =>
         colWidths.map((width, i) =>
-          String(row[i] ?? "")
+          cellText(row[i])
             .split(/\r?\n/)
             .map((line) => truncateToWidth(line, width))
             .join("\n"),
@@ -140,16 +143,13 @@ export function createTable(head: string[], options: TableOptions = {}): Table {
         return renderedOutputLines.join("\n");
       };
 
-      const output: string[] = [];
-      output.push(hLine("┌", "┬", "┐"));
-      output.push(renderRow(headRow, true));
-      output.push(hLine("├", "┼", "┤"));
-
-      for (const row of bodyRows) {
-        output.push(renderRow(row, false));
-      }
-
-      output.push(hLine("└", "┴", "┘"));
+      const output: string[] = [
+        hLine("┌", "┬", "┐"),
+        renderRow(headRow, true),
+        hLine("├", "┼", "┤"),
+        ...bodyRows.map((row) => renderRow(row, false)),
+        hLine("└", "┴", "┘"),
+      ];
       return output.join("\n");
     },
   };

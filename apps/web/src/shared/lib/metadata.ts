@@ -51,6 +51,7 @@ function buildMetadata(
       title,
       type: "website",
     },
+    title,
     twitter: {
       card: "summary_large_image",
       description,

@@ -36,7 +36,7 @@ export function PasskeysList() {
   const mounted = useMounted();
   const isSupported =
     mounted &&
-    typeof window.PublicKeyCredential !== "undefined" &&
+    "PublicKeyCredential" in window &&
     typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === "function";
 
   const {
