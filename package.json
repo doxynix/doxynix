@@ -1,6 +1,6 @@
 {
   "name": "doxynix",
-  "version": "6.3.6",
+  "version": "6.3.7",
   "private": true,
   "workspaces": [
     "apps/*",

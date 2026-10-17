@@ -1,6 +1,6 @@
 {
   "name": "@doxynix/cli",
-  "version": "5.2.6",
+  "version": "5.2.7",
   "type": "module",
   "bin": {
     "doxynix": "./dist/index.js",
