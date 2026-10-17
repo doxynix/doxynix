@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.3.0](https://github.com/doxynix/doxynix/compare/cli-v5.2.8...cli-v5.3.0) (2026-10-17)
+
+
+### Features
+
+* add appearance settings, auth resolver, and CLI test coverage ([#2306](https://github.com/doxynix/doxynix/issues/2306)) ([f2c7694](https://github.com/doxynix/doxynix/commit/f2c76948228e6ffa687d8b3cf6da28575a69ecfc))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 5.4.0
+
 ## [5.2.8](https://github.com/doxynix/doxynix/compare/cli-v5.2.7...cli-v5.2.8) (2026-10-17)
 
 

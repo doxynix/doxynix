@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.4.0](https://github.com/doxynix/doxynix/compare/web-v5.3.8...web-v5.4.0) (2026-10-17)
+
+
+### Features
+
+* add appearance settings, auth resolver, and CLI test coverage ([#2306](https://github.com/doxynix/doxynix/issues/2306)) ([f2c7694](https://github.com/doxynix/doxynix/commit/f2c76948228e6ffa687d8b3cf6da28575a69ecfc))
+
 ## [5.3.8](https://github.com/doxynix/doxynix/compare/web-v5.3.7...web-v5.3.8) (2026-10-17)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.4.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.3.8...doxynix-v6.4.0) (2026-10-17)
+
+
+### Features
+
+* add appearance settings, auth resolver, and CLI test coverage ([#2306](https://github.com/doxynix/doxynix/issues/2306)) ([f2c7694](https://github.com/doxynix/doxynix/commit/f2c76948228e6ffa687d8b3cf6da28575a69ecfc))
+
 ## [6.3.8](https://github.com/doxynix/doxynix/compare/doxynix-v6.3.7...doxynix-v6.3.8) (2026-10-17)
 
 
