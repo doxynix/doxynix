@@ -9,6 +9,7 @@ export type NavLabelKey =
   | "admin_users"
   | "analyze"
   | "api_keys"
+  | "appearance"
   | "audit_log"
   | "code"
   | "connections"

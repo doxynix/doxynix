@@ -45,7 +45,7 @@ export function registerAnalyticsCommand(program: Command) {
 
       const built = buildAnalyticsInput(options, repoId);
       if (!built.ok) {
-        p.outro(brand.error(built.message));
+        output.fail(built.message, { code: "BAD_REQUEST", json: options.json });
         return;
       }
 
@@ -96,7 +96,7 @@ export function registerAnalyticsCommand(program: Command) {
 
       const built = buildAnalyticsInput(options, repoId);
       if (!built.ok) {
-        p.outro(brand.error(built.message));
+        output.fail(built.message, { code: "BAD_REQUEST", json: options.json });
         return;
       }
 
@@ -126,6 +126,6 @@ export function registerAnalyticsCommand(program: Command) {
           renderTrendsTable(trendsData),
         ),
       );
-      p.outro(brand.success("Done!"));
+      p.outro(brand.success("Trend table ready."));
     });
 }

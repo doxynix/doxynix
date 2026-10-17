@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { renderStagedFilesTable } from "./staging.formatter";
+import { stripAnsi } from "@/ui/formatters";
+
+import { renderStagedFilesTable, renderStagingOutcome } from "./staging.formatter";
 
 describe("staging formatter", () => {
   it("renders a staged files table from object data", () => {
@@ -19,5 +21,14 @@ describe("staging formatter", () => {
     expect(output).toContain("README.md");
     expect(output).toContain("2 lines");
     expect(output).toContain("File Path");
+  });
+});
+
+describe("renderStagingOutcome", () => {
+  it("reports the resulting state rather than claiming a removal", () => {
+    const text = stripAnsi(renderStagingOutcome("src/a.ts", 2, "doxynix/doxynix"));
+
+    expect(text).toContain("2 file(s)");
+    expect(text).not.toContain("Removed");
   });
 });

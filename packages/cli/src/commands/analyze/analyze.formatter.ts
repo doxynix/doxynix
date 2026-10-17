@@ -1,6 +1,7 @@
 import { brand, pc } from "@/ui/colors";
-import { formatScore, getScoreLabel } from "@/ui/formatters";
+import { formatScore, getScoreLabel, truncateToWidth } from "@/ui/formatters";
 import { icons } from "@/ui/icons";
+import { renderBlock } from "@/ui/layout";
 import { createTable } from "@/ui/table";
 
 import type {
@@ -79,35 +80,92 @@ export function renderRepoConfigTable(config: Partial<RepoConfig>): string {
   return table.toString();
 }
 
-export function renderDetailedMetricsTable(metrics: DetailedMetrics): string {
-  const table = createTable(["Category / Dimension", "Value", "Notes"]);
+const MAX_METRIC_DEPTH = 3;
 
-  if (!metrics || typeof metrics !== "object") {
-    return brand.muted("No detailed metrics available.");
+function isScoreKey(key: string): boolean {
+  return key.toLowerCase().includes("score");
+}
+
+function describeValue(key: string, value: unknown): [string, string] {
+  if (value === null || value === undefined) {
+    return ["—", "Empty"];
   }
+
+  if (typeof value === "number") {
+    return isScoreKey(key) ? [formatScore(value), getScoreLabel(value)] : [String(value), "Number"];
+  }
+
+  if (typeof value === "boolean") {
+    return [value ? "yes" : "no", "Flag"];
+  }
+
+  if (typeof value === "string") {
+    return [truncateToWidth(value, 60), "Text"];
+  }
+
+  if (Array.isArray(value)) {
+    return [`${value.length} ${value.length === 1 ? "item" : "items"}`, "Array"];
+  }
+
+  return [`${Object.keys(value).length} fields`, "Group"];
+}
+
+export function flattenMetricRows(
+  metrics: unknown,
+  prefix = "",
+  depth = 0,
+): Array<[string, string, string]> {
+  if (metrics === null || typeof metrics !== "object") {
+    return [];
+  }
+
+  const rows: Array<[string, string, string]> = [];
 
   for (const [key, value] of Object.entries(metrics)) {
-    if (typeof value === "number") {
-      table.push([
-        brand.highlight(key),
-        key.toLowerCase().includes("score") ? formatScore(value) : String(value),
-        getScoreLabel(value),
-      ]);
-    } else if (typeof value === "string") {
-      table.push([brand.highlight(key), pc.cyan(value), "—"]);
-    } else if (Array.isArray(value)) {
-      table.push([brand.highlight(key), `${value.length} items`, "Array collection"]);
-    } else if (typeof value === "object" && value !== null) {
-      table.push([brand.highlight(key), `${Object.keys(value).length} sub-metrics`, "Group"]);
+    const path = prefix ? `${prefix}.${key}` : key;
+    const isGroup = value !== null && typeof value === "object" && !Array.isArray(value);
+
+    if (isGroup && depth < MAX_METRIC_DEPTH) {
+      const nested = flattenMetricRows(value, path, depth + 1);
+      if (nested.length === 0) {
+        rows.push([path, "—", "Empty"]);
+        continue;
+      }
+      rows.push(...nested);
+      continue;
     }
+
+    const [display, note] = describeValue(key, value);
+    rows.push([path, display, note]);
   }
 
+  return rows;
+}
+
+export function renderDetailedMetricsTable(metrics: DetailedMetrics): string {
+  if (!metrics || typeof metrics !== "object") {
+    return brand.muted("No detailed metrics available for this repository yet.");
+  }
+
+  const rows = flattenMetricRows(metrics);
+  if (rows.length === 0) {
+    return brand.muted("No detailed metrics available for this repository yet.");
+  }
+
+  const table = createTable(["Metric", "Value", "Notes"]);
+  for (const [path, value, note] of rows) {
+    table.push([brand.highlight(path), pc.cyan(value), brand.muted(note)]);
+  }
   return table.toString();
 }
 
 export function renderStructureMap(structure: StructureMap): string {
-  if (!structure || typeof structure !== "object") {
-    return brand.muted("No structure map generated.");
+  if (
+    !structure ||
+    typeof structure !== "object" ||
+    (Array.isArray(structure) && structure.length === 0)
+  ) {
+    return brand.muted("No structure map generated yet. Run `dxnx analyze start` first.");
   }
 
   const table = createTable(["Component / Node", "Type / Entry", "Details"]);
@@ -135,8 +193,10 @@ export function renderStructureMap(structure: StructureMap): string {
 }
 
 export function renderSearchResultsTable(results: WorkspaceSearchResult): string {
-  if (!results || (Array.isArray(results) && results.length === 0)) {
-    return brand.muted("No matching workspace symbols or files found.");
+  if (!results || typeof results !== "object" || (Array.isArray(results) && results.length === 0)) {
+    return brand.muted(
+      "No workspace matches. Try a different query, or run `dxnx analyze start` to refresh the index.",
+    );
   }
 
   const table = createTable(["Target Node / Path", "Type / Kind", "Match Context"]);
@@ -156,4 +216,20 @@ export function renderSearchResultsTable(results: WorkspaceSearchResult): string
   }
 
   return table.toString();
+}
+
+export function renderAuditResult(result: { jobId: string }, target: string, repo: string): string {
+  const table = createTable(["Property", "Value"]);
+  table.push(
+    ["File", brand.highlight(target)],
+    ["Repository", pc.cyan(repo)],
+    ["Job ID", brand.highlight(result.jobId)],
+  );
+
+  const hints = brand.muted(
+    `Poll for the report with: dxnx analyze status ${repo}\n` +
+      `Pin the report into docs with: dxnx docs pin ${target} -r ${repo}`,
+  );
+
+  return renderBlock(brand.logo("Single-File Audit Queued"), `${table.toString()}\n\n${hints}`);
 }

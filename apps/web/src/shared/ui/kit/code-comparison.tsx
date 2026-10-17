@@ -1,8 +1,9 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
+
+import { useMounted } from "@/shared/lib/hooks/use-mounted";
 
 import { AppBadge } from "../core/badge";
 import { CodeWindow } from "./code-window";
@@ -17,20 +18,6 @@ type Props = {
   goodCode: string;
 };
 
-function noop() {}
-
-function subscribe() {
-  return noop;
-}
-
-function getClientSnapshot() {
-  return true;
-}
-
-function getServerSnapshot() {
-  return false;
-}
-
 export function CodeComparison({
   afterHtmlDark,
   afterHtmlLight,
@@ -42,7 +29,7 @@ export function CodeComparison({
 }: Readonly<Props>) {
   const tCommon = useTranslations("Common");
   const { resolvedTheme } = useTheme();
-  const isMounted = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
+  const isMounted = useMounted();
 
   const isDark = isMounted && resolvedTheme === "dark";
 

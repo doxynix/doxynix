@@ -13,10 +13,8 @@ import "../globals.css";
 
 import { APP_URL } from "@/shared/config/env.client";
 import { IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/config/env.flags";
-import { DEFAULT_LOCALE, LOCALES } from "@/shared/config/locales";
 import { routing } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
-import { getSitemapUrl } from "@/shared/lib/sitemap.utils";
 import { Toaster } from "@/shared/ui/core/sonner";
 import { A11yProvider } from "@/shared/ui/kit/a11y-provider";
 import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
@@ -70,23 +68,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const t = await getTranslations("Metadata");
 
-  const languageAlternates: Record<string, string> = {};
-  LOCALES.forEach((loc) => {
-    languageAlternates[loc] = getSitemapUrl(APP_URL, "", loc, DEFAULT_LOCALE);
-  });
-  languageAlternates["x-default"] = getSitemapUrl(APP_URL, "", DEFAULT_LOCALE, DEFAULT_LOCALE);
-
-  const currentCanonicalUrl = getSitemapUrl(APP_URL, "", locale, DEFAULT_LOCALE);
-
   const title = t("landing_title");
   const description = t("landing_desc");
 
   return {
-    alternates: {
-      canonical: currentCanonicalUrl,
-      languages: languageAlternates,
-    },
-
     authors: [{ name: "Kramarich", url: "https://github.com/Kramarich0" }],
     creator: "Doxynix Team",
     description,
@@ -113,7 +98,6 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: "Doxynix",
       title,
       type: "website",
-      url: currentCanonicalUrl,
     },
 
     robots: {

@@ -116,7 +116,7 @@ export async function DocModesSection() {
         className="mx-auto flex min-h-140 items-center gap-8"
         defaultValue="readme"
       >
-        <TabsList className="flex h-auto flex-wrap items-center justify-start gap-2 bg-transparent">
+        <TabsList className="grid sm:grid-cols-2 xl:grid-cols-4 h-auto items-center justify-center gap-2 bg-transparent">
           {DOCS.map((item) => (
             <TabsTriggerItem
               key={item.title}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { pc } from "./colors";
 import {
   formatScore,
   getScoreLabel,
@@ -7,6 +8,7 @@ import {
   parseDateArg,
   stripAnsi,
   stripHtml,
+  truncateToWidth,
 } from "./formatters";
 
 describe("stripAnsi", () => {
@@ -102,5 +104,25 @@ describe("parseDateArg", () => {
   it("returns undefined for an empty or absent value", () => {
     expect(parseDateArg(undefined)).toBeUndefined();
     expect(parseDateArg("   ")).toBeUndefined();
+  });
+});
+
+describe("truncateToWidth", () => {
+  it("leaves short text untouched", () => {
+    expect(truncateToWidth("short", 10)).toBe("short");
+  });
+
+  it("cuts text that exceeds the width and marks it with an ellipsis", () => {
+    expect(truncateToWidth("abcdefghijkl", 8)).toBe("abcdefg…");
+  });
+
+  it("measures visible width, so ANSI colour codes do not count", () => {
+    const coloured = pc.green("abcdefghijkl");
+    expect(truncateToWidth(coloured, 8)).toContain("abcdefg");
+  });
+
+  it("returns an empty string when the width is zero or negative", () => {
+    expect(truncateToWidth("abc", 0)).toBe("");
+    expect(truncateToWidth("abc", -1)).toBe("");
   });
 });

@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { authClient } from "@/shared/lib/auth-client";
+import { useMounted } from "@/shared/lib/hooks/use-mounted";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,
@@ -28,15 +29,15 @@ const PASSKEYS_QUERY_KEY = ["passkeys"] as const;
 export function PasskeysList() {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
-  const [isSupported] = useState(
-    () =>
-      typeof window.PublicKeyCredential !== "undefined" &&
-      typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable ===
-        "function",
-  );
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [deviceName, setDeviceName] = useState("");
   const [deletingKeyId, setDeletingKeyId] = useState<null | string>(null);
+
+  const mounted = useMounted();
+  const isSupported =
+    mounted &&
+    "PublicKeyCredential" in window &&
+    typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === "function";
 
   const {
     data: passkeys = [],

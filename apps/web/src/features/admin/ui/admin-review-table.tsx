@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { GitPullRequest, Wrench } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import type { RouterOutput } from "@/shared/api/trpc";
+import { formatShortDate } from "@/shared/lib/date-utils";
 import { AppBadge } from "@/shared/ui/core/badge";
 import {
   Table,
@@ -66,6 +67,7 @@ type RowProps = {
 
 function AdminReviewRow({ review }: Readonly<RowProps>) {
   const t = useTranslations("AdminReview");
+  const locale = useLocale();
   const [sheetOpen, setSheetOpen] = useState(false);
 
   return (
@@ -102,7 +104,7 @@ function AdminReviewRow({ review }: Readonly<RowProps>) {
       </TableCell>
 
       <TableCell className="text-muted-foreground text-sm">
-        {new Date(review.createdAt).toLocaleDateString()}
+        {formatShortDate(review.createdAt, locale)}
       </TableCell>
 
       <AdminReviewSheet

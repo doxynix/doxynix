@@ -1,7 +1,14 @@
 import { execSync } from "node:child_process";
 
+const EXEMPT_BRANCHES = new Set(["main", "master", "dev", "development"]);
+const BOT_BRANCH_PREFIXES = ["renovate/", "dependabot/", "automerge/", "mergify/"];
+
 export function validateBranchName(branchName: string): boolean {
-  if (!branchName || ["main", "master", "dev", "development"].includes(branchName)) {
+  if (!branchName || EXEMPT_BRANCHES.has(branchName)) {
+    return true;
+  }
+
+  if (BOT_BRANCH_PREFIXES.some((prefix) => branchName.startsWith(prefix))) {
     return true;
   }
 

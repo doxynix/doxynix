@@ -9,7 +9,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Layout, Loader2, Palette, ShieldCheck, Zap } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -43,6 +43,7 @@ type Area = {
 export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
   const trpc = useTRPC();
   const t = useTranslations("Dashboard");
+  const locale = useLocale();
   const queryClient = useQueryClient();
 
   const AREAS: readonly Area[] = [
@@ -234,7 +235,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
             <div className="flex justify-between text-sm">
               <Label htmlFor={tokenBudgetId}>{t("settings_pr_token_budget_label")}</Label>
               <span className="font-mono text-muted-foreground">
-                {tokenBudget?.toLocaleString()}
+                {tokenBudget?.toLocaleString(locale)}
               </span>
             </div>
             <Slider

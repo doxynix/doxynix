@@ -120,17 +120,21 @@ describe("coerceAnalysisPayload", () => {
     );
   });
 
-  it("invalid resultJson logs warn and returns raw data as-is", () => {
+  it("invalid resultJson logs warn and returns null instead of an unchecked cast", () => {
     const invalid = { ...aiResult, refactoring_targets: "oops" };
-    const analysis = makeAnalysis(invalid);
 
-    const result = coerceAnalysisPayload(analysis);
+    const result = coerceAnalysisPayload(makeAnalysis(invalid));
 
-    expect(result?.aiResult).toBe(invalid);
-    expect(result?.analysis).toBe(analysis);
+    expect(result).toBeNull();
     expect(appLogger.warn).toHaveBeenCalledWith(
       expect.objectContaining({ id: "an-1", msg: "Zod mismatch" }),
     );
+  });
+
+  it("resultJson missing the sections object returns null", () => {
+    const { sections: _sections, ...withoutSections } = aiResult;
+
+    expect(coerceAnalysisPayload(makeAnalysis(withoutSections))).toBeNull();
   });
 });
 

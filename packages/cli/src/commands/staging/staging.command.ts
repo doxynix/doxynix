@@ -12,7 +12,7 @@ import { renderSection } from "@/ui/layout";
 import { output } from "@/ui/output";
 import { withTaskSpinner } from "@/ui/spinner";
 
-import { renderStagedFilesTable } from "./staging.formatter";
+import { renderStagedFilesTable, renderStagingOutcome } from "./staging.formatter";
 import { stagingService } from "./staging.service";
 
 export function registerStagingCommand(program: Command) {
@@ -113,16 +113,12 @@ export function registerStagingCommand(program: Command) {
       const result = await withTaskSpinner(
         {
           start: `Unstaging ${filePath}...`,
-          stop: "File removed from staging",
+          stop: "Staging updated",
         },
         () => stagingService.unstageFile(repoContext.repo.id, filePath),
       );
 
-      p.outro(
-        brand.success(
-          ` Removed ${brand.highlight(filePath)} from staging (${result.stagedCount} remaining).`,
-        ),
-      );
+      p.outro(renderStagingOutcome(filePath, result.stagedCount, repoContext.target));
     });
 
   staging

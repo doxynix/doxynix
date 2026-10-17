@@ -5,6 +5,12 @@ import { createTable } from "@/ui/table";
 
 import type { NotificationItem } from "./notifications.types";
 
+export function renderNotificationListEmptyState(includeAll: boolean): string {
+  return includeAll
+    ? "No notifications found."
+    : "Nothing unread. Run `dxnx notifications list -a` to include read notifications.";
+}
+
 export function formatNotificationType(type: string): string {
   switch (type) {
     case "ERROR": {

@@ -70,4 +70,15 @@ describe("getCurrentGitBranch", () => {
 
     expect(getCurrentGitBranch()).toBe("main");
   });
+
+  it("resolves gitdir: files used by worktrees instead of defaulting to main", () => {
+    // A worktree's `.git` is a pointer file, so reading `.git/HEAD` throws and the old catch
+    // returned "main".
+    const realGitDir = join(tempDir, "real-git");
+    mkdirSync(realGitDir, { recursive: true });
+    writeFileSync(join(realGitDir, "HEAD"), "ref: refs/heads/worktree-branch\n", "utf-8");
+    writeFileSync(join(tempDir, ".git"), `gitdir: ${realGitDir}\n`, "utf-8");
+
+    expect(getCurrentGitBranch()).toBe("worktree-branch");
+  });
 });

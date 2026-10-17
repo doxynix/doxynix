@@ -319,7 +319,7 @@ export function Agent() {
                       className="h-full min-h-0 flex-1"
                       ref={scrollRef}
                     >
-                      {messages.length === 0 && !isHistoryLoading && (
+                      {messages.length === 0 && (
                         <div className="fade-in pointer-events-none flex animate-in select-none flex-col items-center gap-3 pt-24">
                           <DxnxLogo className="size-64" />
                           <p className="text-muted-foreground text-sm">

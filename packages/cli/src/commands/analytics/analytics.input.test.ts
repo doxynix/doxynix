@@ -66,6 +66,24 @@ describe("buildAnalyticsInput", () => {
   });
 });
 
+describe("date range flags reach the server", () => {
+  it("marks the period custom when --from is supplied", () => {
+    const result = buildAnalyticsInput({ from: "2026-10-01" });
+
+    expect(result.ok).toBe(true);
+    expect(result).toHaveProperty("input.period", "custom");
+    expect(result).toHaveProperty("input.from", new Date("2026-10-01"));
+  });
+
+  it("marks the period custom when only --to is supplied", () => {
+    expect(buildAnalyticsInput({ to: "2026-10-02" })).toHaveProperty("input.period", "custom");
+  });
+
+  it("leaves the period alone when neither flag is supplied", () => {
+    expect(buildAnalyticsInput({})).not.toHaveProperty("input.period");
+  });
+});
+
 describe("buildTrendsInput", () => {
   it("returns an empty input when no filters are given", () => {
     expect(buildTrendsInput({})).toEqual({ input: {}, ok: true });

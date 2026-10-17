@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const prompts = vi.hoisted(() => {
   const CANCEL_SYMBOL = Symbol("cancel");
@@ -26,9 +26,28 @@ vi.mock("@clack/prompts", () => ({
 
 import { stripAnsi } from "@/ui/formatters";
 
-import { confirmOrAbort, guardPrompt, PromptCancelledError, resolveEntityOrPick } from "./prompts";
+import {
+  confirmOrAbort,
+  guardPrompt,
+  isInteractiveSession,
+  NonInteractiveError,
+  PromptCancelledError,
+  resolveEntityOrPick,
+} from "./prompts";
+
+const originalStdinIsTTY = process.stdin.isTTY;
+const originalStdoutIsTTY = process.stdout.isTTY;
+
+beforeEach(() => {
+  // The vitest worker has no controlling terminal, so force one for the
+  // interactive-path tests; the non-interactive tests override it per test.
+  process.stdin.isTTY = true;
+  process.stdout.isTTY = true;
+});
 
 afterEach(() => {
+  process.stdin.isTTY = originalStdinIsTTY;
+  process.stdout.isTTY = originalStdoutIsTTY;
   vi.clearAllMocks();
 });
 
@@ -103,6 +122,49 @@ describe("confirmOrAbort", () => {
 
     await expect(confirmOrAbort("Delete all?")).resolves.toBe(false);
     expect(prompts.outro).toHaveBeenCalled();
+
+    if (ci === undefined) {
+      delete process.env.CI;
+    } else {
+      process.env.CI = ci;
+    }
+  });
+});
+
+describe("non-interactive sessions", () => {
+  const originalIsTTY = process.stdin.isTTY;
+
+  afterEach(() => {
+    process.stdin.isTTY = originalIsTTY;
+    vi.clearAllMocks();
+  });
+
+  it("isInteractiveSession is false when stdin is not a TTY", () => {
+    process.stdin.isTTY = false;
+
+    expect(isInteractiveSession()).toBe(false);
+  });
+
+  it("guardPrompt refuses to prompt when stdin is not a TTY", async () => {
+    process.stdin.isTTY = false;
+    prompts.select.mockReturnValue(new Promise(() => {}));
+
+    await expect(
+      guardPrompt(prompts.select({ message: "Pick", options: [] }) as never, "cancelled"),
+    ).rejects.toBeInstanceOf(NonInteractiveError);
+    expect(prompts.outro).not.toHaveBeenCalled();
+  });
+
+  it("confirmOrAbort throws with a --yes hint instead of hanging", async () => {
+    process.stdin.isTTY = false;
+    const ci = process.env.CI;
+    process.env.CI = "";
+
+    await expect(
+      confirmOrAbort({ danger: true, message: "Delete everything?" }),
+    ).rejects.toBeInstanceOf(NonInteractiveError);
+
+    expect(prompts.confirm).not.toHaveBeenCalled();
 
     if (ci === undefined) {
       delete process.env.CI;

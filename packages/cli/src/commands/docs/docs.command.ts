@@ -1,4 +1,5 @@
 import * as p from "@clack/prompts";
+import { DocTypeSchema } from "@doxynix/shared";
 import type { Command } from "commander";
 import { join, resolve } from "pathe";
 
@@ -15,6 +16,18 @@ import { withTaskSpinner } from "@/ui/spinner";
 import { renderDocsListTable } from "./docs.formatter";
 import { docsService } from "./docs.service";
 import type { DocListItem, DocType } from "./docs.types";
+
+const DOC_TYPES: DocType[] = [...DocTypeSchema.options];
+
+// Exhaustive by construction: a new generated DocType will not type-check until it gets a label.
+const DOC_TYPE_LABELS: Record<DocType, string> = {
+  API: "API (Endpoint Reference)",
+  ARCHITECTURE: "ARCHITECTURE (Architecture & Data Flow)",
+  CHANGELOG: "CHANGELOG (Release History)",
+  CODE_DOC: "CODE_DOC (Individual Source File Doc)",
+  CONTRIBUTING: "CONTRIBUTING (Contribution Guide)",
+  README: "README (Repository Overview)",
+};
 
 export function registerDocsCommand(program: Command) {
   const docs = program
@@ -76,7 +89,7 @@ export function registerDocsCommand(program: Command) {
     .command("view [target]")
     .alias("cat")
     .description("View or export markdown content of a generated document")
-    .option("-t, --type <type>", "Document type: README, ARCHITECTURE, or CODE_DOC")
+    .option("-t, --type <type>", `Document type: ${DOC_TYPES.join(", ")}`)
     .option("-p, --path <path>", "File path (for CODE_DOC items)")
     .option("-a, --aid <analysisId>", "Analysis run ID")
     .option("-o, --output <file>", "Save markdown output directly to a local file")
@@ -90,13 +103,14 @@ export function registerDocsCommand(program: Command) {
           return;
         }
 
-        const DOC_TYPES: DocType[] = ["README", "ARCHITECTURE", "CODE_DOC"];
         let docType: DocType | undefined;
 
         if (options?.type) {
           const rawType = options.type.toUpperCase();
           if (!DOC_TYPES.includes(rawType as DocType)) {
-            p.outro(brand.error(`Unknown --type '${options.type}'. Use: ${DOC_TYPES.join(", ")}`));
+            output.fail(`Unknown --type '${options.type}'. Use: ${DOC_TYPES.join(", ")}`, {
+              code: "BAD_REQUEST",
+            });
             return;
           }
           docType = rawType as DocType;
@@ -106,11 +120,10 @@ export function registerDocsCommand(program: Command) {
           docType = await guardPrompt(
             p.select({
               message: "Select document type to read:",
-              options: [
-                { label: " README (Repository Overview)", value: "README" },
-                { label: " ARCHITECTURE (Architecture & Data Flow)", value: "ARCHITECTURE" },
-                { label: " CODE_DOC (Individual Source File Doc)", value: "CODE_DOC" },
-              ],
+              options: DOC_TYPES.map((type) => ({
+                label: ` ${DOC_TYPE_LABELS[type]}`,
+                value: type,
+              })),
             }),
             "Cancelled.",
           );
@@ -264,7 +277,7 @@ export function registerDocsCommand(program: Command) {
   docs
     .command("export [target]")
     .description("Export all generated documentation for repository into a local folder")
-    .option("-d, --dir <directory>", "Local directory path to save docs", "./docs/doxynix")
+    .option("-d, --dir <directory>", "Local directory path to save docs", "./docs")
     .action(async (target?: string, options?: { dir?: string }) => {
       p.intro(brand.logo("  Export Project Documentation "));
 
@@ -284,7 +297,9 @@ export function registerDocsCommand(program: Command) {
         return;
       }
 
-      const baseDir = resolve(process.cwd(), options?.dir ?? "./docs/doxynix");
+      const baseDir = resolve(process.cwd(), options?.dir ?? "./docs");
+      // Two owners can share a repo name, so the owner has to be part of the path.
+      const targetDir = join(baseDir, `${repoContext.repo.owner}-${repoContext.repo.name}`);
 
       let exportedCount = 0;
       const failed: string[] = [];
@@ -312,7 +327,7 @@ export function registerDocsCommand(program: Command) {
               const content = result.raw;
 
               if (content) {
-                const fullFilePath = join(baseDir, filename);
+                const fullFilePath = join(targetDir, filename);
                 writeLocalFile(fullFilePath, content);
                 exportedCount++;
               } else {
@@ -335,7 +350,7 @@ export function registerDocsCommand(program: Command) {
 
       p.outro(
         brand.success(
-          ` Successfully exported ${exportedCount} documentation files to ${brand.highlight(baseDir)}`,
+          ` Successfully exported ${exportedCount} documentation files to ${brand.highlight(targetDir)}`,
         ),
       );
     });

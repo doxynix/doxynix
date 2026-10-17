@@ -1,6 +1,7 @@
 import * as p from "@clack/prompts";
 import type { Command } from "commander";
 
+import { parseBoundedInt } from "@/core/options";
 import { resolveEntityOrPick } from "@/core/prompts";
 
 import { brand } from "@/ui/colors";
@@ -26,11 +27,7 @@ export function registerAuditCommand(program: Command) {
     .option("-c, --cursor <cursorId>", "Pagination cursor ID")
     .option("--json", "Output log records in raw JSON format")
     .action(async (options: { cursor?: string; json?: boolean; limit: string }) => {
-      const parsedLimit = Number(options.limit);
-      const limit =
-        Number.isFinite(parsedLimit) && parsedLimit > 0
-          ? Math.max(1, Math.min(100, Math.floor(parsedLimit)))
-          : 20;
+      const limit = parseBoundedInt(options.limit, 20, { max: 100 }, "--limit");
 
       const result = await withTaskSpinner(
         {

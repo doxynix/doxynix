@@ -6,7 +6,7 @@ import { Link } from "@/shared/i18n/navigation";
 import { createMetadata } from "@/shared/lib/metadata";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 
-export const generateMetadata = createMetadata("about_title", "about_desc");
+export const generateMetadata = createMetadata("about_title", "about_desc", "about");
 
 type FeatureItem = {
   description: string;
@@ -108,7 +108,7 @@ export default async function AboutPage() {
             <p className="text-lg text-text-secondary">{t("cta_desc")}</p>
           </div>
           <Link
-            className="inline-flex items-center gap-3 rounded-xl bg-foreground px-5 py-4 font-semibold whitespace-nowrap text-background transition-standard hover:opacity-90 active:scale-95 sm:px-8"
+            className="inline-flex justify-center items-center gap-3 rounded-xl bg-foreground px-5 py-4 font-semibold whitespace-nowrap text-background transition-standard hover:opacity-90 active:scale-95 sm:px-8"
             href="/auth"
           >
             {tCommon("get_started_free")}

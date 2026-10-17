@@ -1,8 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { stripAnsi } from "@/ui/formatters";
+
 import {
   formatNotificationType,
   renderNotificationDetails,
+  renderNotificationListEmptyState,
   renderNotificationStatsTable,
   renderNotificationsTable,
 } from "./notifications.formatter";
@@ -53,5 +56,15 @@ describe("notifications formatter", () => {
     expect(stats).toContain("3");
 
     logSpy.mockRestore();
+  });
+});
+
+describe("renderNotificationListEmptyState", () => {
+  it("tells an all-caught-up user how to see read notifications", () => {
+    expect(stripAnsi(renderNotificationListEmptyState(false))).toContain("-a");
+  });
+
+  it("stays terse when the user explicitly asked for everything", () => {
+    expect(stripAnsi(renderNotificationListEmptyState(true))).toBe("No notifications found.");
   });
 });

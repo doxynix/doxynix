@@ -26,7 +26,7 @@ export default function ErrorPage({
 
   const [techInfo, setTechInfo] = useState(() => ({
     screen: "N/A",
-    time: new Date().toISOString(),
+    time: "",
     ua: "",
     url: "",
   }));

@@ -357,8 +357,9 @@ export function registerPrCommand(program: Command) {
           }
 
           const rawPrNumber = Number(identifier);
-          const { items: prList } = await withTaskSpinner("Loading PR list for selection...", () =>
-            prService.listByRepository(repoContext.repo.id),
+          const { items: prList } = await withTaskSpinner(
+            `Locating analysis for PR #${rawPrNumber}...`,
+            () => prService.listByRepository(repoContext.repo.id),
           );
 
           const foundPR = prList.find((item) => item.prNumber === rawPrNumber);
@@ -405,11 +406,15 @@ export function registerPrCommand(program: Command) {
           return;
         }
         const targetId = analysisId;
+        const findingsLabel =
+          identifier != null && /^\d+$/.test(identifier)
+            ? `PR #${identifier}`
+            : brand.highlight(targetId.slice(0, 8));
 
         const result = await withTaskSpinner(
           {
             silent: options?.json,
-            start: `Fetching AI review findings for ${brand.highlight(targetId.slice(0, 8))}...`,
+            start: `Fetching AI review findings for ${findingsLabel}...`,
             stop: "Comments retrieved",
           },
           () => prService.getComments(targetId),
