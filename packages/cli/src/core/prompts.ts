@@ -9,12 +9,32 @@ export class PromptCancelledError extends Error {
   }
 }
 
+export class NonInteractiveError extends Error {
+  constructor(readonly hint: string) {
+    super(hint);
+    this.name = "NonInteractiveError";
+  }
+}
+
+export function isInteractiveSession(): boolean {
+  return process.stdin.isTTY && process.stdout.isTTY;
+}
+
 type WithoutCancel<T> = T extends symbol ? never : T;
 
 export async function guardPrompt<T>(
   promptPromise: Promise<T | typeof p.CANCEL_SYMBOL>,
   cancelMessage = "Operation cancelled.",
 ): Promise<WithoutCancel<T>> {
+  if (!isInteractiveSession()) {
+    // The prompt would block forever on a closed or redirected stdin; swallow it so it
+    // never surfaces as an unhandled rejection.
+    promptPromise.catch(() => {});
+    throw new NonInteractiveError(
+      "This command needs an interactive terminal. Pass the target explicitly (an ID, owner/name, or a file path), or add --json and parse the output in a script.",
+    );
+  }
+
   const result = await promptPromise;
   if (p.isCancel(result)) {
     p.cancel(cancelMessage);
@@ -103,6 +123,14 @@ export async function confirmOrAbort(options: string | ConfirmOrAbortOptions): P
 
   if (isAutoConfirmed) {
     return true;
+  }
+
+  if (!isInteractiveSession()) {
+    throw new NonInteractiveError(
+      `Confirmation is required but stdin is not a TTY. Re-run with --yes${
+        opts.danger ? " or --force" : ""
+      } to confirm without a prompt.`,
+    );
   }
 
   const confirmed = await p.confirm({

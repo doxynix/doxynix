@@ -14,6 +14,7 @@ export function useNavLabels(): Record<NavLabelKey, string> {
     admin_users: t("nav_admin_users"),
     analyze: t("nav_analyze"),
     api_keys: t("nav_api_keys"),
+    appearance: t("nav_appearance"),
     audit_log: t("nav_audit_log"),
     code: t("nav_code"),
     connections: t("nav_connections"),

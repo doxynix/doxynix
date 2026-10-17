@@ -55,6 +55,33 @@ export function getStringWidth(text: string): number {
   return width;
 }
 
+export function truncateToWidth(text: string, maxWidth: number): string {
+  if (maxWidth <= 0) {
+    return "";
+  }
+
+  const clean = stripAnsi(text);
+  if (getStringWidth(clean) <= maxWidth) {
+    return text;
+  }
+
+  let width = 0;
+  let result = "";
+
+  for (const { segment } of segmenter.segment(clean)) {
+    const next = width + getStringWidth(segment);
+
+    if (next > maxWidth - 1) {
+      break;
+    }
+
+    result += segment;
+    width = next;
+  }
+
+  return `${result}…`;
+}
+
 const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
 
 export function formatRelativeTime(dateInput: DateInput): string {

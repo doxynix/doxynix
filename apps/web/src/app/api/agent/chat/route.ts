@@ -17,7 +17,7 @@ import { getActiveModels } from "@/server/core/ai/ai-constants";
 import { google } from "@/server/core/ai/google";
 import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
-import { auth } from "@/server/core/auth";
+import { resolveRequestUserId } from "@/server/core/auth/resolve-session";
 import { prisma } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
 import {
@@ -44,10 +44,7 @@ async function handler(req: Request) {
     });
   }
 
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  const userId = session?.user.id ?? null;
+  const userId = await resolveRequestUserId(await headers());
 
   if (userId == null) {
     throw new AppError({ code: "UNAUTHORIZED", publicMessage: "Sign in to use the agent" });

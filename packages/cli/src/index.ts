@@ -16,12 +16,14 @@ import { registerProfileCommand } from "./commands/profile/profile.command";
 import { registerReposCommand } from "./commands/repos/repos.command";
 import { registerStagingCommand } from "./commands/staging/staging.command";
 import { registerSystemCommands } from "./commands/system/system.command";
+import { resolveBinName } from "./core/bin-name";
 import { handleCliError } from "./core/errors";
+import { registerConfirmFlagsRecursively } from "./core/flags";
 import { checkCliUpdate } from "./core/updater";
 
 const program = new Command();
 
-const binName = process.argv[1]?.includes("doxynix") ? "doxynix" : "dxnx";
+const binName = resolveBinName(process.argv);
 
 program
   .name(binName)
@@ -51,6 +53,8 @@ process.on("SIGINT", () => {
   p.cancel("Process terminated by user.");
   process.exit(130);
 });
+
+registerConfirmFlagsRecursively(program);
 
 try {
   await program.parseAsync(process.argv);

@@ -27,7 +27,7 @@ Export TypeScript directly. The consuming app's bundler compiles it.
   },
   "scripts": {
     "lint": "oxlint",
-    "type-check": "tsc --noEmit"
+    "type-check": "bun check"
   }
 }
 ```

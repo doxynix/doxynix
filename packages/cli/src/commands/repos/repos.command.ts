@@ -1,7 +1,9 @@
 import * as p from "@clack/prompts";
 import type { Command } from "commander";
 
+import { parseBoundedInt } from "@/core/options";
 import { confirmOrAbort, resolveEntityOrPick } from "@/core/prompts";
+import { parseRepoTarget } from "@/core/repo";
 import { repoApi } from "@/core/repo.api";
 import type { RepoListItem } from "@/core/repo.types";
 
@@ -32,11 +34,8 @@ export function registerReposCommand(program: Command) {
         page?: string;
         search?: string;
       }) => {
-        const parsedLimit = Number(options.limit);
-        const limit =
-          Number.isFinite(parsedLimit) && parsedLimit > 0 ? Math.min(100, parsedLimit) : 20;
-        const parsedPage = Number(options.page);
-        const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+        const limit = parseBoundedInt(options.limit, 20, { max: 100 }, "--limit");
+        const page = parseBoundedInt(options.page, 1, { max: 100 }, "--page");
 
         const result = await withTaskSpinner(
           {
@@ -125,11 +124,16 @@ export function registerReposCommand(program: Command) {
     .description("View repository summary and metadata (e.g. dxnx repos view owner/name)")
     .option("--json", "Output response in JSON format")
     .action(async (target: string, options: { json?: boolean }) => {
-      const [owner, name] = target.split("/");
-      if (!owner || !name) {
-        p.outro(brand.error("Invalid format. Use: owner/name (e.g. doxynix/core)"));
+      const parsedTarget = parseRepoTarget(target);
+      if (parsedTarget == null) {
+        output.fail(`Invalid repository target '${target}'. Use: owner/name (e.g. doxynix/core)`, {
+          code: "BAD_REQUEST",
+          json: options.json,
+        });
         return;
       }
+
+      const { name, owner } = parsedTarget;
 
       const repo = await withTaskSpinner(
         {
@@ -141,11 +145,10 @@ export function registerReposCommand(program: Command) {
       );
 
       if (!repo) {
-        if (options.json) {
-          output.json({ error: `Repository ${target} was not found`, success: false }, true);
-          return;
-        }
-        p.outro(brand.error(`Repository ${target} was not found.`));
+        output.fail(`Repository ${target} was not found.`, {
+          code: "NOT_FOUND",
+          json: options.json,
+        });
         return;
       }
 
@@ -312,7 +315,7 @@ export function registerReposCommand(program: Command) {
           () =>
             repoApi.getSlim({
               cursor: options.cursor,
-              limit: options.limit ? Number(options.limit) : 50,
+              limit: parseBoundedInt(options.limit, 50, { max: 100 }, "--limit"),
               owner: options.owner,
               search: options.search,
             }),

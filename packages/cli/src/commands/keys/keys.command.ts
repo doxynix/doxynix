@@ -93,15 +93,19 @@ export function registerKeysCommand(program: Command) {
         );
       }
 
-      const descInput = await guardPrompt(
-        p.text({
-          message: "Description (optional):",
-          placeholder: "Key for automated CI/CD runners",
-        }),
-        "Creation cancelled.",
-      );
+      // An empty `-d ""` stays an empty string instead of being treated as "not supplied".
+      let description = options.description?.trim();
 
-      const description = descInput.trim().length > 0 ? descInput.trim() : undefined;
+      if (description === undefined) {
+        const descInput = await guardPrompt(
+          p.text({
+            message: "Description (optional):",
+            placeholder: "Key for automated CI/CD runners",
+          }),
+          "Creation cancelled.",
+        );
+        description = descInput.trim();
+      }
 
       const result = await withTaskSpinner(
         {

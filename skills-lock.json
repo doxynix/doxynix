@@ -1,5 +1,4 @@
 {
-  "version": 1,
   "skills": {
     "ai-sdk": {
       "computedHash": "0883204d11b055e968dee697c5858e68064c27dfd4deb6310212895daa65c5ad",
@@ -32,10 +31,10 @@
       "sourceType": "github"
     },
     "brainstorming": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
+      "computedHash": "fc6339f0e5b48c63279bd4f6c6340db55301b69ccc37a13e1e52bd5b3062746c",
       "skillPath": "skills/brainstorming/SKILL.md",
-      "computedHash": "fc6339f0e5b48c63279bd4f6c6340db55301b69ccc37a13e1e52bd5b3062746c"
+      "source": "obra/superpowers",
+      "sourceType": "github"
     },
     "documentation-writer": {
       "computedHash": "ee53d65b163cd7eb953a930c95841cfe398cc2c0bd24c06508bbaa07c432be35",
@@ -146,10 +145,10 @@
       "sourceType": "github"
     },
     "requesting-code-review": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
+      "computedHash": "b095ac8c980339436b41de9989328f3f288f2e2a70452df28452bbeb6531d604",
       "skillPath": "skills/requesting-code-review/SKILL.md",
-      "computedHash": "b095ac8c980339436b41de9989328f3f288f2e2a70452df28452bbeb6531d604"
+      "source": "obra/superpowers",
+      "sourceType": "github"
     },
     "sentry-fix-issues": {
       "computedHash": "0ef2103f20d698acc56d856a07a372a0a68cb02bad654d0dacb4e2ffe87e98b5",
@@ -241,5 +240,6 @@
       "source": "antfu/skills",
       "sourceType": "github"
     }
-  }
+  },
+  "version": 1
 }

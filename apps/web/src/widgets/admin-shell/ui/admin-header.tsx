@@ -3,7 +3,6 @@
 import { useNavLabels } from "@/shared/config/navigation-labels";
 import { Logo } from "@/shared/ui/branding/doxynix-logo";
 import { SidebarTrigger } from "@/shared/ui/core/sidebar";
-import { ThemeToggle } from "@/shared/ui/kit/theme-toggle";
 
 import { AdminUserNav } from "./admin-user-nav";
 
@@ -20,7 +19,6 @@ export function AdminHeader() {
         </div>
 
         <div className="flex items-center gap-2">
-          <ThemeToggle />
           <AdminUserNav />
         </div>
       </div>

@@ -14,10 +14,10 @@ let exitCodes: (number | undefined)[];
 
 // tRPC 11 reads the payload from `result.error.data`; a bare `data` option is
 // silently ignored and leaves `error.data` undefined.
-function trpcError(message: string, code?: string): TRPCClientError<never> {
+function trpcError(message: string, code?: string, kind?: string): TRPCClientError<never> {
   const errorShape = {
     code: "BAD_REQUEST",
-    data: code === undefined ? null : { code },
+    data: code === undefined ? null : { code, kind },
     message,
   };
 
@@ -129,6 +129,22 @@ describe("handleCliError", () => {
 
       expect(result.code).toBe(1);
       expect(result.outroText).toContain("Authorization failed");
+      expect(result.outroText).toContain("dxnx login");
+    });
+
+    // Both arrive as UNAUTHORIZED; only `kind` separates an expired GitHub App token from a
+    // missing platform login.
+    it("points a GitHub-scoped failure at `dxnx github install` instead of `dxnx login`", () => {
+      const result = run(trpcError("GitHub token expired", "UNAUTHORIZED", "octokit"));
+
+      expect(result.code).toBe(1);
+      expect(result.outroText).toContain("dxnx github install");
+      expect(result.outroText).not.toContain("dxnx login");
+    });
+
+    it("still points a platform failure at `dxnx login`", () => {
+      const result = run(trpcError("You are not logged in", "UNAUTHORIZED", "trpc"));
+
       expect(result.outroText).toContain("dxnx login");
     });
 

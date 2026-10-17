@@ -278,7 +278,8 @@
   }
 }
 
-:root {
+:root,
+.light {
   /* Base surfaces */
   --radius: 0.875rem;
   --surface-page: oklch(0.982 0.002 255);

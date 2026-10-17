@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { createMetadata } from "@/shared/lib/metadata";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 
-export const generateMetadata = createMetadata("terms_title", "terms_desc");
+export const generateMetadata = createMetadata("terms_title", "terms_desc", "terms");
 
 const SECTION_TITLE = "mb-3 text-lg font-bold text-foreground flex items-center gap-2";
 const LIST_STYLES = "list-disc flex flex-col gap-2 pl-5 marker:text-foreground";

@@ -46,7 +46,7 @@ export async function withTaskSpinner<T>(
     s.stopAndPersist({ symbol: icons.check, text: stopMsg ?? startMsg });
     return result;
   } catch (error) {
-    s.stopAndPersist({ symbol: icons.cross, text: startMsg });
+    s.stopAndPersist({ symbol: icons.cross, text: `${startMsg} failed` });
     throw error;
   }
 }

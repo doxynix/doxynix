@@ -9,6 +9,13 @@ type StagedArrayItem = {
   path?: string;
 };
 
+export function renderStagingOutcome(filePath: string, stagedCount: number, repo: string): string {
+  // `analysis.unstageFile` always reports success, so the CLI must not claim the file was removed.
+  return brand.success(
+    ` Staging for ${pc.cyan(repo)} now holds ${stagedCount} file(s) after touching ${brand.highlight(filePath)}.`,
+  );
+}
+
 export function renderStagedFilesTable(staged: StagedFilesMap): string {
   const table = createTable(["File Path", "Size", "Lines Count"]);
 

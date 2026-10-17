@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 import type { Route } from "next";
 import { LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -10,6 +10,7 @@ import { userNavMenu } from "@/shared/config/navigation";
 import { useNavLabels } from "@/shared/config/navigation-labels";
 import { Link, useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
+import { useMounted } from "@/shared/lib/hooks/use-mounted";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   DropdownMenu,
@@ -25,17 +26,9 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 
-const noopSubscribe = () => () => {};
-const getHydratedSnapshot = () => true;
-const getServerHydratedSnapshot = () => false;
-
 export function UserNav() {
   const { data: session, isPending } = authClient.useSession();
-  const isHydrated = useSyncExternalStore(
-    noopSubscribe,
-    getHydratedSnapshot,
-    getServerHydratedSnapshot,
-  );
+  const isHydrated = useMounted();
   const router = useRouter();
   const user = session?.user ?? null;
   const tCommon = useTranslations("Common");

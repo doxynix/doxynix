@@ -33,6 +33,7 @@ const t = initTRPC.context<Context>().create({
         ...shape.data,
         code: normalized.code,
         httpStatus: normalized.status,
+        kind: normalized.kind,
         requestId,
         stack: IS_PROD ? undefined : error.stack,
         zodError: normalized.code === "BAD_REQUEST" ? (normalized.zodIssues ?? null) : null,

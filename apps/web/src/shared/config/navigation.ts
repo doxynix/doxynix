@@ -15,6 +15,7 @@ import {
   Logs,
   MailX,
   Map,
+  Palette,
   ScanSearch,
   ScrollText,
   Settings,
@@ -70,6 +71,14 @@ const SETTINGS_PAGES: MenuItems = [
     labelKey: "profile",
     shortcut: "G then P",
     url: "/me",
+  },
+  {
+    href: "/dashboard/settings/appearance",
+    icon: Palette,
+    id: "appearance",
+    labelKey: "appearance",
+    shortcut: "G then A",
+    url: "/a",
   },
   {
     href: "/dashboard/settings/connections",

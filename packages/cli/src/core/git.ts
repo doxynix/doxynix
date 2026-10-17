@@ -1,6 +1,6 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 
-import { join } from "pathe";
+import { join, resolve } from "pathe";
 
 export function getCurrentGitBranch(): string {
   const ciBranch =
@@ -24,8 +24,19 @@ export function getCurrentGitBranch(): string {
   }
 
   try {
-    const gitHeadPath = join(currentDir, ".git", "HEAD");
-    const headContent = readFileSync(gitHeadPath, "utf-8").trim();
+    const dotGitPath = join(currentDir, ".git");
+    // A worktree's `.git` is a `gitdir:` pointer file holding an absolute path, so `join` would
+    // nest it.
+    const gitDirPath = statSync(dotGitPath).isDirectory()
+      ? dotGitPath
+      : resolve(
+          currentDir,
+          readFileSync(dotGitPath, "utf-8")
+            .replace(/^gitdir:\s*/, "")
+            .trim(),
+        );
+
+    const headContent = readFileSync(join(gitDirPath, "HEAD"), "utf-8").trim();
 
     if (headContent.startsWith("ref:")) {
       return headContent.split("/").pop() || "main";

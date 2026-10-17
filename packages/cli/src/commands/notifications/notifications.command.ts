@@ -1,6 +1,7 @@
 import * as p from "@clack/prompts";
 import type { Command } from "commander";
 
+import { parseBoundedInt } from "@/core/options";
 import { confirmOrAbort, resolveEntityOrPick } from "@/core/prompts";
 
 import { brand } from "@/ui/colors";
@@ -12,6 +13,7 @@ import { withTaskSpinner } from "@/ui/spinner";
 
 import {
   renderNotificationDetails,
+  renderNotificationListEmptyState,
   renderNotificationStatsTable,
   renderNotificationsTable,
 } from "./notifications.formatter";
@@ -50,11 +52,8 @@ export function registerNotificationsCommand(program: Command) {
     .option("-l, --limit <number>", "Number of notifications per page", "15")
     .option("--json", "Output in JSON format")
     .action(async (options: { all?: boolean; json?: boolean; limit?: string; page?: string }) => {
-      const parsedLimit = Number(options.limit);
-      const limit =
-        Number.isFinite(parsedLimit) && parsedLimit > 0 ? Math.min(100, parsedLimit) : 15;
-      const parsedPage = Number(options.page);
-      const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+      const limit = parseBoundedInt(options.limit, 15, { max: 100 }, "--limit");
+      const page = parseBoundedInt(options.page, 1, { max: 100 }, "--page");
 
       const result = await withTaskSpinner(
         {
@@ -70,7 +69,7 @@ export function registerNotificationsCommand(program: Command) {
       }
 
       if (result.items.length === 0) {
-        p.outro(brand.success("No notifications found on this page."));
+        p.outro(brand.muted(renderNotificationListEmptyState(Boolean(options.all))));
         return;
       }
 

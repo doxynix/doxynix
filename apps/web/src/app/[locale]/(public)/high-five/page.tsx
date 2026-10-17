@@ -8,7 +8,7 @@ import type { AuthorGroup } from "@/entities/high-five/model/high-five.types";
 import rawLicenses from "@/features/high-five/model/licenses.json";
 import { HighFiveList } from "@/features/high-five/ui/high-five-list";
 
-export const generateMetadata = createMetadata("high_five_title", "high_five_desc");
+export const generateMetadata = createMetadata("high_five_title", "high_five_desc", "high-five");
 
 export default async function HighFivePage() {
   const tCommon = await getTranslations("Common");

@@ -41,7 +41,14 @@ export function renderDashboardStats(stats: DashboardStats): string {
 }
 
 export function renderTrendsTable(trends: TrendItem[]): string {
-  const table = createTable(["Period / Date", "Security", "Tech Debt", "Complexity"]);
+  const table = createTable([
+    "Period / Date",
+    "Security",
+    "Tech Debt",
+    "Complexity",
+    "Health",
+    "Onboarding",
+  ]);
 
   for (const item of trends) {
     table.push([
@@ -49,6 +56,8 @@ export function renderTrendsTable(trends: TrendItem[]): string {
       formatScore(item.security),
       formatScore(item.techDebt),
       formatScore(item.complexity),
+      formatScore(item.health),
+      formatScore(item.onboarding),
     ]);
   }
 

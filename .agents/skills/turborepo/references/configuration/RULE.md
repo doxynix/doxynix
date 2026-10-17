@@ -30,7 +30,7 @@ Package tasks enable parallelization, individual caching, and filtering. Define 
     "lint": "oxlint",
     "format": "biome check --write .",
     "test": "vitest",
-    "type-check": "tsc --noEmit"
+    "type-check": "bun check"
   }
 }
 
@@ -40,7 +40,7 @@ Package tasks enable parallelization, individual caching, and filtering. Define 
     "build": "tsc",
     "lint": "oxlint",
     "format": "biome check --write .",
-    "type-check": "tsc -b"
+    "type-check": "bun check -b"
   }
 }
 ```

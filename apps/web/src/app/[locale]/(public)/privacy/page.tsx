@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { createMetadata } from "@/shared/lib/metadata";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 
-export const generateMetadata = createMetadata("privacy_title", "privacy_desc");
+export const generateMetadata = createMetadata("privacy_title", "privacy_desc", "privacy");
 
 type Props = { descKey: string; name: string };
 

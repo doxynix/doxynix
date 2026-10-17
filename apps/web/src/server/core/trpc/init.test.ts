@@ -82,6 +82,28 @@ function formatCause(cause: unknown) {
   });
 }
 
+// Mirrors formatCause, but reaches the formatter itself instead of tRPC's shape builder.
+function runErrorFormatter(cause: unknown) {
+  const config = buildConfig();
+  const error = new TRPCError({ cause, code: "INTERNAL_SERVER_ERROR" });
+
+  return config.errorFormatter({
+    ctx: undefined,
+    error,
+    input: undefined,
+    path: "test",
+    shape: getErrorShape({
+      config,
+      ctx: undefined,
+      error,
+      input: undefined,
+      path: "test",
+      type: "query",
+    }),
+    type: "query",
+  });
+}
+
 describe("tRPC Error Formatting & Security Boundaries", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -138,6 +160,12 @@ describe("tRPC Error Formatting & Security Boundaries", () => {
 
     expect(shape.message).toBe("An unexpected error occurred, please try again later.");
     expect(shape.data.requestId).toBe("req-123");
+  });
+
+  it("forwards the normalized error kind to the client so the CLI can route GitHub failures", () => {
+    // `kind` is what separates an expired GitHub App token from a missing platform login, both
+    // of which arrive as UNAUTHORIZED.
+    expect(runErrorFormatter(prismaError("P2025")).data.kind).toBe("prisma");
   });
 
   it("blocks unauthenticated callers on protectedProcedure with UNAUTHORIZED", async () => {

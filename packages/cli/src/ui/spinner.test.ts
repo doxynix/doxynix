@@ -41,4 +41,27 @@ describe("withTaskSpinner", () => {
     expect(spinner.stopAndPersist).toHaveBeenCalledTimes(1);
     expect(spinner.text).toBe("Still working");
   });
+
+  it("labels the failure line distinctly from the start line", async () => {
+    const spinner = {
+      start: vi.fn(),
+      stop: vi.fn(),
+      stopAndPersist: vi.fn(),
+      text: "",
+    };
+    oraMock.mockReturnValue(spinner);
+
+    const task = vi.fn(async () => {
+      throw new Error("boom");
+    });
+
+    await expect(
+      withTaskSpinner({ start: "Loading keys...", stop: "Keys retrieved" }, task),
+    ).rejects.toThrow("boom");
+
+    expect(spinner.stopAndPersist).toHaveBeenCalledWith({
+      symbol: expect.any(String),
+      text: "Loading keys... failed",
+    });
+  });
 });

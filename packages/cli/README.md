@@ -73,7 +73,7 @@ dxnx --help
 dxnx --help
 
 # Authenticate with the Doxynix platform
-dxnx auth login
+dxnx login --token <your-api-key>
 
 # Check authenticated profile status
 dxnx profile
@@ -90,7 +90,7 @@ dxnx agent
 
 ### Available Command Domains
 
-* `auth`: Login, logout, session management, and credential status.
+* `login` / `logout` / `me`: Authenticate, sign out, and inspect the current API key.
 * `analyze`: Trigger and stream codebase AST analysis.
 * `repos`: List, inspect, and link connected repositories.
 * `pr`: Pull Request analysis, review feedback, and automated fixes.

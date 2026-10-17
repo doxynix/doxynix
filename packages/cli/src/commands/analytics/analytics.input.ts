@@ -52,6 +52,11 @@ export function buildAnalyticsInput(
     };
   }
 
+  // The server ignores from/to unless the period is explicit, defaulting it to 30d.
+  if (input.from != null || input.to != null) {
+    input.period = "custom";
+  }
+
   return { input, ok: true };
 }
 
@@ -70,6 +75,7 @@ export function buildTrendsInput(
   }
   if (to) {
     input.to = to;
+    input.period = "custom";
   }
 
   return { input, ok: true };

@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   getApiUrl,
   getConfigDir,
+  getConfigFilePath,
   getToken,
   removeToken,
   saveToken,
@@ -78,6 +79,23 @@ afterEach(() => {
 describe("config paths", () => {
   it("respects XDG_CONFIG_HOME for the config directory", () => {
     expect(getConfigDir()).toBe(join(tempHome, "dxnx"));
+  });
+});
+
+describe("getConfigFilePath", () => {
+  it("honours XDG_CONFIG_HOME instead of assuming ~/.config", () => {
+    const original = process.env.XDG_CONFIG_HOME;
+    process.env.XDG_CONFIG_HOME = "/tmp/dxnx-config-test";
+
+    try {
+      expect(getConfigFilePath()).toBe("/tmp/dxnx-config-test/dxnx/config.json");
+    } finally {
+      if (original === undefined) {
+        Reflect.deleteProperty(process.env, "XDG_CONFIG_HOME");
+      } else {
+        process.env.XDG_CONFIG_HOME = original;
+      }
+    }
   });
 });
 

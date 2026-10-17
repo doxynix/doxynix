@@ -24,7 +24,7 @@ export function registerProfileCommand(program: Command) {
 
   profile.action(async () => {
     if (!getToken()) {
-      p.outro(
+      output.fail(
         brand.warning("You are not authenticated.\n") +
           brand.muted("Run ") +
           brand.highlight("dxnx login") +

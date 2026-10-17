@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { MESSAGES } from "./messages";
 import { output } from "./output";
@@ -29,6 +29,41 @@ describe("output", () => {
 
     expect(stderr).toHaveBeenCalledWith("err\n");
     expect(stdout).toHaveBeenCalledWith("log\n");
+  });
+});
+
+describe("output.fail", () => {
+  afterEach(() => {
+    process.exitCode = 0;
+  });
+
+  it("sets a non-zero exit code and writes a JSON envelope in json mode", () => {
+    const written: string[] = [];
+    vi.spyOn(process.stdout, "write").mockImplementation((chunk: unknown) => {
+      written.push(String(chunk));
+      return true;
+    });
+
+    output.fail("Repository not found", { code: "NOT_FOUND", json: true });
+
+    expect(process.exitCode).toBe(1);
+    expect(JSON.parse(written.join(""))).toEqual({
+      code: "NOT_FOUND",
+      error: "Repository not found",
+      success: false,
+    });
+  });
+
+  it("defaults the envelope code to ERROR", () => {
+    const written: string[] = [];
+    vi.spyOn(process.stdout, "write").mockImplementation((chunk: unknown) => {
+      written.push(String(chunk));
+      return true;
+    });
+
+    output.fail("Nope", { json: true });
+
+    expect(JSON.parse(written.join("")).code).toBe("ERROR");
   });
 });
 

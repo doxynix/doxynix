@@ -246,13 +246,13 @@ describe("coerceAnalysisPayload", () => {
     expect(mocks.appLogger.warn).not.toHaveBeenCalled();
   });
 
-  it("invalid resultJson → warn + raw passthrough", () => {
+  it("invalid resultJson → warn + null instead of raw passthrough", () => {
     const invalid = { ...makeAiResult(), refactoring_targets: "oops" } as unknown as AIResult;
     const analysis = makeAnalysis(invalid);
 
     const result = coerceAnalysisPayload(analysis);
 
-    expect(result?.aiResult).toBe(invalid);
+    expect(result).toBeNull();
     expect(mocks.appLogger.warn).toHaveBeenCalledWith(
       expect.objectContaining({ id: "an-1", msg: "Zod mismatch" }),
     );

@@ -1,9 +1,10 @@
 "use client";
 
 import { MailX, Trash2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import type { RouterOutput } from "@/shared/api/trpc";
+import { formatShortDate } from "@/shared/lib/date-utils";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import {
@@ -28,6 +29,7 @@ type Props = {
 
 export function AdminBannedEmailsTable({ actions, entries }: Readonly<Props>) {
   const t = useTranslations("AdminBannedEmails");
+  const locale = useLocale();
 
   if (entries.length === 0) {
     return (
@@ -66,7 +68,7 @@ export function AdminBannedEmailsTable({ actions, entries }: Readonly<Props>) {
             </TableCell>
 
             <TableCell className="text-muted-foreground text-sm">
-              {new Date(entry.createdAt).toLocaleDateString()}
+              {formatShortDate(entry.createdAt, locale)}
             </TableCell>
 
             <TableCell className="text-right">

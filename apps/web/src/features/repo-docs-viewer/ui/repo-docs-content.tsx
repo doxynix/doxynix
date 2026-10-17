@@ -1,6 +1,6 @@
 "use client";
 
-import { type JSX, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { type JSX, useEffect, useRef, useState } from "react";
 import parse, {
   type DOMNode,
   domToReact,
@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl";
 
 import { Link, useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
+import { useMounted } from "@/shared/lib/hooks/use-mounted";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
 import { AppMermaid } from "@/shared/ui/core/mermaid";
 import { Skeleton } from "@/shared/ui/core/skeleton";
@@ -38,8 +39,6 @@ const isTextNode = (node: DOMNode): node is DOMNode & { data: string } => {
   return "data" in node && typeof node.data === "string";
 };
 
-const EMPTY_SUBSCRIBE = () => () => {};
-
 const cleanTextNodes = (nodes: DOMNode[]): DOMNode[] => {
   return nodes.map((node) => {
     if (isTextNode(node)) {
@@ -56,11 +55,7 @@ const cleanTextNodes = (nodes: DOMNode[]): DOMNode[] => {
 };
 
 export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
-  const mounted = useSyncExternalStore(
-    EMPTY_SUBSCRIBE,
-    () => true,
-    () => false,
-  );
+  const mounted = useMounted();
   const router = useRouter();
 
   const { name, owner } = useRepoParams();

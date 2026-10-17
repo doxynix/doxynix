@@ -22,7 +22,7 @@ export function getConfigDir(): string {
   return join(os.homedir(), ".config", "dxnx");
 }
 
-function getConfigFilePath(): string {
+export function getConfigFilePath(): string {
   return join(getConfigDir(), "config.json");
 }
 

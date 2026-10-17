@@ -75,7 +75,7 @@ Look up the current agent, tool, and type-safety APIs in the bundled docs (`node
 ## After Making Changes
 
 Run `bun run type-check` (Turbo, covers every workspace) — `apps/web` type-check is memory-heavy and
-needs the generated Prisma/ZenStack client, so go through Turbo rather than invoking `tsc` directly.
+needs the generated Prisma/ZenStack client, so go through Turbo rather than invoking `bun check` directly.
 Be minimal: only set options that differ from the defaults, checking docs or source for the defaults
 rather than over-specifying. Most type errors come from remembered, now-changed APIs.
 

@@ -44,11 +44,9 @@ export function coerceAnalysisPayload(
       id: analysis.id,
       msg: "Zod mismatch",
     });
-    return {
-      aiResult: analysis.resultJson as AIResult,
-      analysis,
-      metrics,
-    };
+    // A cast here would let mappers dereference `aiResult.sections.*` on a payload that never
+    // had them, turning a stale row into a 500.
+    return null;
   }
 
   return {

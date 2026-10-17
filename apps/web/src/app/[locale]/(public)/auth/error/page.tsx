@@ -42,10 +42,7 @@ export default async function AuthErrorPage({ searchParams }: Readonly<Props>) {
           >
             <Link href="/auth">{t("back_to_sign_in")}</Link>
           </AppButton>
-          <AppButton
-            asChild
-            variant="ghost"
-          >
+          <AppButton asChild>
             <a href={`mailto:${t("support_email")}`}>{t("contact_support")}</a>
           </AppButton>
         </div>

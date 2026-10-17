@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { UserRole } from "@doxynix/shared";
 import { Ban, ShieldCheck, ShieldOff, Trash2, Undo2, Users } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
+import { formatFullDate, formatShortDate } from "@/shared/lib/date-utils";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import {
@@ -33,6 +34,7 @@ type Props = {
 
 export function AdminUsersTable({ actions, users }: Readonly<Props>) {
   const t = useTranslations("AdminUsers");
+  const locale = useLocale();
   const [detailId, setDetailId] = useState<string | null>(null);
 
   if (users.length === 0) {
@@ -84,14 +86,14 @@ export function AdminUsersTable({ actions, users }: Readonly<Props>) {
                 {user.banned && user.banExpires != null && (
                   <span className="mt-1 block text-muted-foreground text-xs">
                     {t("ban_until", {
-                      date: new Date(user.banExpires).toLocaleString(),
+                      date: formatFullDate(user.banExpires, locale),
                     })}
                   </span>
                 )}
               </TableCell>
 
               <TableCell className="text-muted-foreground text-sm">
-                {new Date(user.createdAt).toLocaleDateString()}
+                {formatShortDate(user.createdAt, locale)}
               </TableCell>
 
               <TableCell

@@ -134,7 +134,10 @@ export function registerGithubCommand(program: Command) {
     .action(async (target: string, options: { json?: boolean }) => {
       const parsed = parseRepoTarget(target);
       if (!parsed) {
-        p.outro(brand.error("Format must be: owner/name (e.g. facebook/react)"));
+        output.fail("Format must be: owner/name (e.g. facebook/react)", {
+          code: "BAD_REQUEST",
+          json: options.json,
+        });
         return;
       }
 
@@ -173,7 +176,10 @@ export function registerGithubCommand(program: Command) {
     .action(async (target: string, branch?: string, options?: { json?: boolean }) => {
       const parsed = parseRepoTarget(target);
       if (!parsed) {
-        p.outro(brand.error("Format must be: owner/name (e.g. facebook/react)"));
+        output.fail("Format must be: owner/name (e.g. facebook/react)", {
+          code: "BAD_REQUEST",
+          json: options?.json,
+        });
         return;
       }
 

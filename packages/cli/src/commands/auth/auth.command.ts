@@ -1,6 +1,7 @@
 import * as p from "@clack/prompts";
 import type { Command } from "commander";
 
+import { getConfigFilePath } from "@/core/config";
 import { guardPrompt } from "@/core/prompts";
 
 import { brand } from "@/ui/colors";
@@ -55,7 +56,9 @@ export function registerAuthCommands(program: Command) {
         "Successfully Authenticated",
       );
 
-      p.outro(brand.success("Token securely stored in ~/.config/dxnx/config.json (0o600)."));
+      p.outro(
+        brand.success(`Token securely stored in ${brand.highlight(getConfigFilePath())} (0o600).`),
+      );
     });
 
   program
@@ -94,10 +97,14 @@ export function registerAuthCommands(program: Command) {
     .action(async (options: { json?: boolean }) => {
       const token = authService.getToken();
       if (!token) {
-        if (output.json({ authenticated: false }, options.json)) {
+        if (options.json) {
+          output.fail("Not authenticated. Run `dxnx login` first.", {
+            code: "UNAUTHORIZED",
+            json: true,
+          });
           return;
         }
-        p.outro(
+        output.fail(
           brand.warning("You are not authenticated.\n") +
             brand.muted("Run ") +
             brand.highlight("dxnx login") +

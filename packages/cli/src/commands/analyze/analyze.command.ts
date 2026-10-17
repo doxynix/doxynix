@@ -2,7 +2,7 @@ import * as p from "@clack/prompts";
 import { UpdatePRConfigInput } from "@doxynix/shared";
 import type { Command } from "commander";
 
-import { describeLocalFileError, readLocalFile } from "@/core/fs";
+import { describeLocalFileError, readLocalFile, writeLocalFile } from "@/core/fs";
 import { getCurrentGitBranch } from "@/core/git";
 import { confirmOrAbort, guardPrompt, resolveEntityOrPick } from "@/core/prompts";
 import { resolveRepository } from "@/core/repo";
@@ -10,13 +10,14 @@ import { validateField } from "@/core/validation";
 
 import { brand, pc } from "@/ui/colors";
 import { formatDateTime, formatRelativeTime, formatScore, formatStatus } from "@/ui/formatters";
-import { renderBlock, renderCard, renderSection } from "@/ui/layout";
+import { renderCard, renderSection } from "@/ui/layout";
 import { output } from "@/ui/output";
 import { withTaskSpinner } from "@/ui/spinner";
 import { createTable } from "@/ui/table";
 
 import {
   renderAnalysisTable,
+  renderAuditResult,
   renderDetailedMetricsTable,
   renderRepoConfigTable,
   renderSearchResultsTable,
@@ -228,10 +229,14 @@ export function registerAnalyzeCommand(program: Command) {
     .command("audit <filePath>")
     .description("Run a fast on-demand AI security and code-quality audit for a single file")
     .option("-r, --repo <target>", "Repository context (owner/name)")
+    .option("-o, --output <file>", "Write the audit job payload to this file instead of stdout")
     .option("-b, --branch <branch>", "Git branch name")
     .option("--json", "Output raw JSON result")
     .action(
-      async (filePath: string, options: { branch?: string; json?: boolean; repo?: string }) => {
+      async (
+        filePath: string,
+        options: { branch?: string; json?: boolean; output?: string; repo?: string },
+      ) => {
         p.intro(brand.logo("Single-File Security Audit "));
 
         const repoContext = await resolveRepository(
@@ -244,7 +249,10 @@ export function registerAnalyzeCommand(program: Command) {
 
         const file = readLocalFile(filePath);
         if (!file.ok) {
-          p.outro(brand.error(describeLocalFileError(filePath, file.error)));
+          output.fail(describeLocalFileError(filePath, file.error), {
+            code: "NOT_FOUND",
+            json: options.json,
+          });
           return;
         }
         const content = file.content;
@@ -270,9 +278,15 @@ export function registerAnalyzeCommand(program: Command) {
           return;
         }
 
-        const report = JSON.stringify(result, null, 2);
-        console.log(renderBlock(`Audit Report: ${filePath}`, report));
+        const rendered = renderAuditResult(result, filePath, repoContext.target);
 
+        if (options.output) {
+          writeLocalFile(options.output, rendered);
+          p.outro(brand.success(`Audit payload written to ${brand.highlight(options.output)}`));
+          return;
+        }
+
+        output.write(rendered);
         p.outro(brand.success("File audit finished!"));
       },
     );
@@ -415,13 +429,16 @@ export function registerAnalyzeCommand(program: Command) {
         return;
       }
 
-      console.log(
-        renderSection(
-          brand.logo(`Detailed AST & Quality Metrics [${repoContext.target}]:`),
-          renderDetailedMetricsTable(metrics),
-        ),
+      const body = metrics
+        ? renderDetailedMetricsTable(metrics)
+        : brand.muted(
+            "No metrics available — the stored analysis payload is incomplete. Re-run `dxnx analyze start`.",
+          );
+
+      output.write(
+        renderSection(brand.logo(`Detailed AST & Quality Metrics [${repoContext.target}]:`), body),
       );
-      p.outro(brand.success("Metrics inspection complete!"));
+      p.outro(brand.muted("Metrics inspection complete!"));
     });
 
   analyze
@@ -457,13 +474,14 @@ export function registerAnalyzeCommand(program: Command) {
         return;
       }
 
-      console.log(
-        renderSection(
-          brand.logo(`Repository Architecture & Structural Map [${repoContext.target}]:`),
-          renderStructureMap(structure),
-        ),
-      );
-      p.outro(brand.success("Structural inspection ready."));
+      const body = structure
+        ? renderStructureMap(structure)
+        : brand.muted(
+            "No structure map available — the stored analysis payload is incomplete. Re-run `dxnx analyze start`.",
+          );
+
+      output.write(renderSection(brand.logo(`Architecture Map [${repoContext.target}]:`), body));
+      p.outro(brand.muted("Structure inspection complete!"));
     });
 
   analyze
@@ -504,13 +522,16 @@ export function registerAnalyzeCommand(program: Command) {
           return;
         }
 
-        console.log(
-          renderSection(
-            brand.logo(`Workspace Search Results for '${query}' [${repoContext.target}]:`),
-            renderSearchResultsTable(results),
-          ),
+        const body = results
+          ? renderSearchResultsTable(results)
+          : brand.muted(
+              "No matches. Try a different query, or re-run `dxnx analyze start` to refresh the index.",
+            );
+
+        output.write(
+          renderSection(brand.logo(`Workspace Search: '${query}' in ${repoContext.target}`), body),
         );
-        p.outro(brand.success("Search finished."));
+        p.outro(brand.muted("Search complete!"));
       },
     );
 }
