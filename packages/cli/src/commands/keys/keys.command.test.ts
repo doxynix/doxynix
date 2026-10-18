@@ -33,11 +33,11 @@ describe("keys create", () => {
   });
 
   it("never reaches the API when the description flag is absent and no TTY is available", async () => {
-    // Without a TTY the prompt throws NonInteractiveError rather than hanging.
+    // Without a TTY the description prompt throws NonInteractiveError.
     await expect(
       runCreate(["keys", "create", "-n", "ci-test", "-s", "FULL"]),
-    ).resolves.toBeDefined();
+    ).rejects.toBeInstanceOf(Error);
 
-    expect(keysService.create).toHaveBeenCalled();
+    expect(keysService.create).not.toHaveBeenCalled();
   });
 });
