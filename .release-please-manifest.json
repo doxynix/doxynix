@@ -1,9 +1,9 @@
 {
-  ".": "6.5.1",
+  ".": "6.5.2",
   "apps/siem-client": "0.5.5",
   "apps/siem-server": "0.4.2",
-  "apps/web": "5.5.1",
-  "packages/cli": "5.4.1",
+  "apps/web": "5.5.2",
+  "packages/cli": "5.4.2",
   "packages/config": "1.2.0",
   "packages/shared": "0.5.0"
 }
