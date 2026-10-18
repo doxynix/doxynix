@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.5.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.4.4...doxynix-v6.5.0) (2026-10-18)
+
+
+### Features
+
+* **web:** add API key scopes, expiry and rotation ([#2317](https://github.com/doxynix/doxynix/issues/2317)) ([27496b3](https://github.com/doxynix/doxynix/commit/27496b32a40f3b2670b21c26d704c6d1670879c7))
+
 ## [6.4.4](https://github.com/doxynix/doxynix/compare/doxynix-v6.4.3...doxynix-v6.4.4) (2026-10-18)
 
 

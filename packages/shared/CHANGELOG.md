@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/doxynix/doxynix/compare/shared-v0.4.0...shared-v0.5.0) (2026-10-18)
+
+
+### Features
+
+* **web:** add API key scopes, expiry and rotation ([#2317](https://github.com/doxynix/doxynix/issues/2317)) ([27496b3](https://github.com/doxynix/doxynix/commit/27496b32a40f3b2670b21c26d704c6d1670879c7))
+
 ## [0.4.0](https://github.com/doxynix/doxynix/compare/shared-v0.3.0...shared-v0.4.0) (2026-10-14)
 
 
