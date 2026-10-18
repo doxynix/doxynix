@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.5.0](https://github.com/doxynix/doxynix/compare/web-v5.4.4...web-v5.5.0) (2026-10-18)
+
+
+### Features
+
+* **web:** add API key scopes, expiry and rotation ([#2317](https://github.com/doxynix/doxynix/issues/2317)) ([27496b3](https://github.com/doxynix/doxynix/commit/27496b32a40f3b2670b21c26d704c6d1670879c7))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @doxynix/shared bumped to 0.5.0
+
 ## [5.4.4](https://github.com/doxynix/doxynix/compare/web-v5.4.3...web-v5.4.4) (2026-10-18)
 
 
