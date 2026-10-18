@@ -16,6 +16,9 @@ vi.mock("@/server/core/github/github-client", () => ({
     },
   }),
 }));
+vi.mock("@/server/core/realtime", () => ({
+  realtimeService: { user: () => ({ publish: vi.fn() }) },
+}));
 
 const { githubAppService } = await import("./github-app.service");
 

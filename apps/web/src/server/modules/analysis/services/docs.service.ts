@@ -5,9 +5,11 @@ import type { Redis } from "@upstash/redis";
 import { extname } from "pathe";
 import * as z from "zod";
 
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
 import { highlightCode } from "@/shared/lib/shiki";
 
 import type { DbClient } from "@/server/core/db";
+import { realtimeService } from "@/server/core/realtime";
 import type { FileActionPreviewResult } from "@/server/core/redis.types";
 import { resolveDocumentMaterializedPath } from "@/server/modules/analysis/services/document-materialization";
 import { markdownToHtml } from "@/server/modules/analysis/services/markdown-to-html";
@@ -210,6 +212,8 @@ export const docsService = {
       },
       select: { id: true },
     });
+
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
 
     return { documentId: document.id };
   },

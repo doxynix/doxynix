@@ -132,10 +132,10 @@ model Passkey {
 model TwoFactor {
   /// @zod.custom.omit(["model"])
   id          String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  // NOTE: Better-auth encrypts on its own (AES-256-GCM), so encrypting again makes no sense
+  // NOTE: Better-auth encrypts the TOTP secret itself (XChaCha20-Poly1305, not AES-GCM), so re-encrypting is pointless
   /// @zod.custom.omit(["model"])
   secret      String   @omit
-  // NOTE: Better-auth encrypts on its own (AES-256-GCM), so encrypting again makes no sense
+  // NOTE: Backup codes are a second factor; the plugin leaves them as plain JSON unless `storeBackupCodes: "encrypted"` is set
   /// @zod.custom.omit(["model"])
   backupCodes String   @map("backup_codes") @omit
   verified    Boolean  @default(false)

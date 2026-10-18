@@ -1,9 +1,11 @@
+import { ApiKeyScope } from "@doxynix/shared";
 import type { ToolExecutionOptions } from "ai";
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
 
 import { APP_VERSION } from "@/shared/config/env.server";
 
 import { appLogger } from "@/server/core/app-logger";
+import { hasApiKeyScope } from "@/server/core/auth/api-key-scopes";
 import { verifyAndUseApiKey } from "@/server/core/auth/verify-api-key";
 import { AGENT_SYSTEM_PROMPT } from "@/server/modules/agent/agent.prompts";
 import { getAgentTools } from "@/server/modules/agent/agent.tools";
@@ -80,7 +82,10 @@ const withMcpAuthHandler = withMcpAuth(
     if (keyRecord == null) {
       throw new Error("Unauthorized: Invalid or revoked Doxynix API Key.");
     }
-    return { clientId: String(keyRecord.userId), scopes: [], token: bearer };
+    if (!hasApiKeyScope(keyRecord.scopes, ApiKeyScope.MCP)) {
+      throw new Error("Unauthorized: This API key lacks the required scope.");
+    }
+    return { clientId: String(keyRecord.userId), scopes: keyRecord.scopes, token: bearer };
   },
   { required: true },
 );

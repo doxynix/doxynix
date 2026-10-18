@@ -104,6 +104,8 @@ export const analysisLifecycleService = {
       userId,
     );
 
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
+
     return { jobId: handle.id, publicAccessToken: handle.publicAccessToken, status: "QUEUED" };
   },
 
@@ -121,6 +123,7 @@ export const analysisLifecycleService = {
 
   async cancel(db: DbClient, analysisId: string) {
     const analysis = await db.analysis.findUnique({
+      include: { repo: { select: { userId: true } } },
       where: { id: analysisId },
     });
 
@@ -140,6 +143,10 @@ export const analysisLifecycleService = {
         },
         where: { id: analysis.id },
       });
+
+      void realtimeService
+        .user(analysis.repo.userId)
+        .publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
 
       if (analysis.jobId != null) {
         try {
@@ -385,6 +392,8 @@ export const analysisLifecycleService = {
           repoId: repo.id,
         });
       });
+
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
 
     return finalHealthScore;
   },

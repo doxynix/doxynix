@@ -4,12 +4,14 @@ import type { InstallationTargetType, RepositorySelection } from "@doxynix/share
 import { TRPCError } from "@trpc/server";
 
 import { GITHUB_APP_ID } from "@/shared/config/env.server";
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import type { DbClient, PrismaClientExtended } from "@/server/core/db";
 import { githubTokenService } from "@/server/core/github/github-access-token";
 import { getMyRepos } from "@/server/core/github/github-api";
 import { getInstallationInfo, getPublicClient } from "@/server/core/github/github-client";
+import { realtimeService } from "@/server/core/realtime";
 import { isOctokitError } from "@/server/utils/handle-error";
 import { getNormalizedHash, getRawHash } from "@/server/utils/hash";
 
@@ -241,6 +243,8 @@ export const githubAppService = {
         message: "Failed to securely claim installation.",
       });
     }
+
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.repoUpdated, {});
 
     return { success: true };
   },

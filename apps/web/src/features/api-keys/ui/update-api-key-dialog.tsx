@@ -40,7 +40,9 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
   const form = useForm<CreateApiKeyInput>({
     defaultValues: {
       description: apiKey.description ?? "",
+      expiresAt: apiKey.expiresAt,
       name: apiKey.name,
+      scopes: apiKey.scopes.length > 0 ? apiKey.scopes : [],
     },
     resolver: zodResolver(CreateApiKeySchema),
   });
@@ -58,7 +60,9 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
     if (value) {
       form.reset({
         description: apiKey.description ?? "",
+        expiresAt: apiKey.expiresAt,
         name: apiKey.name,
+        scopes: apiKey.scopes.length > 0 ? apiKey.scopes : [],
       });
     }
     setOpen(value);

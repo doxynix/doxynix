@@ -40,11 +40,45 @@ export function ApiKeyCard({
                 locale={locale}
               />
             </p>
+            <p>
+              {t("settings_api_keys_expires")}:{" "}
+              {active.expiresAt != null ? (
+                <TimeAgo
+                  date={active.expiresAt}
+                  locale={locale}
+                />
+              ) : (
+                t("settings_api_keys_never_expires")
+              )}
+            </p>
+            {active.revokedAfter != null && (
+              <p className="text-warning-foreground">
+                {t("settings_api_keys_grace_active")}:{" "}
+                <TimeAgo
+                  date={active.revokedAfter}
+                  locale={locale}
+                />
+              </p>
+            )}
             {active.description != null && (
               <p className="line-clamp-4 text-muted-foreground leading-relaxed">
                 {active.description}
               </p>
             )}
+            <p className="flex flex-wrap gap-1">
+              {active.scopes.map((scope) => (
+                <span
+                  className="rounded-md bg-surface-hover px-1.5 py-0.5 text-muted-foreground text-xs"
+                  key={scope}
+                >
+                  {scope === "MCP"
+                    ? t("settings_api_keys_scope_mcp")
+                    : scope === "CLI"
+                      ? t("settings_api_keys_scope_cli")
+                      : t("settings_api_keys_scope_full")}
+                </span>
+              ))}
+            </p>
           </CardDescription>
         </div>
         <div className="flex shrink-0 flex-col items-center gap-1">{actions}</div>

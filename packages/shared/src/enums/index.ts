@@ -229,3 +229,12 @@ export const ChatRole = {
   system: "system",
   user: "user",
 } as const;
+
+// ------------------- ApiKeyScope -------------------
+export const ApiKeyScopeSchema = z.enum(["CLI", "FULL", "MCP"]);
+export type ApiKeyScope = z.infer<typeof ApiKeyScopeSchema>;
+export const ApiKeyScope = {
+  CLI: "CLI",
+  FULL: "FULL",
+  MCP: "MCP",
+} as const;

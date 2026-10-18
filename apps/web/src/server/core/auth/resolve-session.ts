@@ -1,8 +1,15 @@
+import type { ApiKeyScope } from "@doxynix/shared";
+
 import { auth } from "@/server/core/auth";
+import { hasApiKeyScope } from "@/server/core/auth/api-key-scopes";
 import { verifyAndUseApiKey } from "@/server/core/auth/verify-api-key";
 
 // Mirrors the tRPC context's order: an explicit bearer credential wins over an ambient cookie session.
-export async function resolveRequestUserId(headers: Headers): Promise<null | string> {
+// `requiredScope` guards the bearer branch only; a cookie session is already bound to a user and skips it.
+export async function resolveRequestUserId(
+  headers: Headers,
+  requiredScope: ApiKeyScope,
+): Promise<null | string> {
   const authHeader = headers.get("authorization");
 
   if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
@@ -12,7 +19,7 @@ export async function resolveRequestUserId(headers: Headers): Promise<null | str
       const keyRecord = await verifyAndUseApiKey(token);
 
       if (keyRecord != null) {
-        return keyRecord.user.id;
+        return hasApiKeyScope(keyRecord.scopes, requiredScope) ? keyRecord.user.id : null;
       }
     }
   }

@@ -24,7 +24,7 @@ import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { useApiKeyActions } from "../model/use-api-key-actions";
-import { ApiKeyFormFields } from "./api-key-form-fields";
+import { ApiKeyFormFields, defaultExpiry } from "./api-key-form-fields";
 
 export function CreateApiKeyDialog() {
   const [open, setOpen] = useState(false);
@@ -35,7 +35,12 @@ export function CreateApiKeyDialog() {
   const t = useTranslations("Dashboard");
 
   const form = useForm<CreateApiKeyInput>({
-    defaultValues: { description: "", name: "" },
+    defaultValues: {
+      description: "",
+      expiresAt: defaultExpiry(),
+      name: "",
+      scopes: [],
+    },
     resolver: zodResolver(CreateApiKeySchema),
   });
 

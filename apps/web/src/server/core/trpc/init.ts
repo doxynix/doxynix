@@ -1,5 +1,5 @@
 import { after } from "next/server";
-import type { UserRole } from "@doxynix/shared";
+import { ApiKeyScope, type UserRole } from "@doxynix/shared";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { enhance } from "@zenstackhq/runtime";
 import superjson from "superjson";
@@ -7,6 +7,7 @@ import superjson from "superjson";
 import { IS_PROD } from "@/shared/config/env.flags";
 
 import { normalizeError } from "@/server/core/api-error";
+import { hasApiKeyScope } from "@/server/core/auth/api-key-scopes";
 import { assertAdminSecondFactor, assertNotBanned } from "@/server/utils/admin-access";
 import {
   buildRequestStore,
@@ -150,6 +151,10 @@ const isAuthed = t.middleware(({ ctx, next }) => {
     banExpires: ctx.session.user.banExpires,
     banned: ctx.session.user.banned,
   });
+
+  if (!hasApiKeyScope(ctx.apiKeyScopes, ApiKeyScope.CLI)) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "This API key lacks the required scope" });
+  }
 
   return next({
     ctx: {

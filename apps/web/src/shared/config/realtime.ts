@@ -9,12 +9,18 @@ export const REALTIME_CONFIG = {
       maintenance: "maintenance",
     },
     user: {
+      agentSessionUpdated: "agent-session-updated",
       analysisProgress: "analysis-progress",
+      analysisUpdated: "analysis-updated",
+      apiKeyUpdated: "api-key-updated",
       auditUpdated: "audit-updated",
       fileActionCompleted: "fileActionCompleted",
       notification: "notification",
+      notificationUpdated: "notification-updated",
       prCommentReceived: "pr-comment-received",
+      repoUpdated: "repo-updated",
       sessionUpdated: "session-updated",
+      userUpdated: "user-updated",
     },
   },
 } as const;

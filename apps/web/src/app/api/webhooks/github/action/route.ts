@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { ApiKeyScope } from "@doxynix/shared";
 import * as z from "zod";
 
 import { AppError } from "@/server/core/api-error";
+import { hasApiKeyScope } from "@/server/core/auth/api-key-scopes";
 import { verifyAndUseApiKey } from "@/server/core/auth/verify-api-key";
 import { prisma } from "@/server/core/db";
 import { analysisLifecycleService } from "@/server/modules/analysis/services/analysis-lifecycle.service";
@@ -22,6 +24,13 @@ async function handler(req: Request) {
 
   if (keyRecord == null) {
     throw new AppError({ code: "UNAUTHORIZED", publicMessage: "Invalid API Key" });
+  }
+
+  if (!hasApiKeyScope(keyRecord.scopes, ApiKeyScope.CLI)) {
+    throw new AppError({
+      code: "FORBIDDEN",
+      publicMessage: "This API key lacks the required scope",
+    });
   }
 
   let body: unknown;

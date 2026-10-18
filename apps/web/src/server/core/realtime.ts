@@ -21,12 +21,15 @@ if (!IS_PROD) {
 }
 
 export type UserEventPayloads = {
+  [REALTIME_CONFIG.events.user.agentSessionUpdated]: Record<string, never>;
   [REALTIME_CONFIG.events.user.analysisProgress]: {
     analysisId: string;
     message: string;
     progress?: number;
     status: Status;
   };
+  [REALTIME_CONFIG.events.user.analysisUpdated]: Record<string, never>;
+  [REALTIME_CONFIG.events.user.apiKeyUpdated]: Record<string, never>;
   [REALTIME_CONFIG.events.user.auditUpdated]: Record<string, never>;
   [REALTIME_CONFIG.events.user.fileActionCompleted]: {
     path: string;
@@ -36,6 +39,8 @@ export type UserEventPayloads = {
     id: string;
     title: string;
   };
+  [REALTIME_CONFIG.events.user.notificationUpdated]: Record<string, never>;
+  [REALTIME_CONFIG.events.user.userUpdated]: Record<string, never>;
   [REALTIME_CONFIG.events.user.prCommentReceived]: {
     author: string;
     authorAvatarUrl?: null | string;
@@ -45,6 +50,7 @@ export type UserEventPayloads = {
     repoName: string;
     repoOwner: string;
   };
+  [REALTIME_CONFIG.events.user.repoUpdated]: Record<string, never>;
   [REALTIME_CONFIG.events.user.sessionUpdated]: {
     sessionId: string;
     title: string;

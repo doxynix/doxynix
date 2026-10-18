@@ -9,6 +9,7 @@ import { ApiKeyCard } from "@/entities/api-key/ui/api-key-card";
 
 import { ApiKeyArchivedTable } from "./api-key-archived-table";
 import { RevokeApiKeyDialog } from "./revoke-api-key-dialog";
+import { RotateApiKeyDialog } from "./rotate-api-key-dialog";
 import { UpdateApiKeyDialog } from "./update-api-key-dialog";
 
 type Props = {
@@ -33,6 +34,7 @@ export function ApiKeysList({ active, archived }: Readonly<Props>) {
               actions={
                 <>
                   <UpdateApiKeyDialog apiKey={key} />
+                  <RotateApiKeyDialog apiKey={key} />
                   <RevokeApiKeyDialog apiKey={key} />
                 </>
               }

@@ -1,7 +1,10 @@
 import { MAX_PAGE } from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
 
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
+
 import type { DbClient } from "@/server/core/db";
+import { realtimeService } from "@/server/core/realtime";
 import { handlePrismaError } from "@/server/utils/handle-error";
 import {
   buildDateRangeWhere,
@@ -91,6 +94,10 @@ export const notificationsService = {
     try {
       await db.notification.delete({ where: { id, userId } });
 
+      void realtimeService
+        .user(userId)
+        .publish(REALTIME_CONFIG.events.user.notificationUpdated, {});
+
       return { success: true };
     } catch (error) {
       handlePrismaError(error, { notFound: "Notification not found" });
@@ -102,6 +109,10 @@ export const notificationsService = {
 
     try {
       const result = await db.notification.deleteMany({ where: { ...where, isRead: true } });
+
+      void realtimeService
+        .user(userId)
+        .publish(REALTIME_CONFIG.events.user.notificationUpdated, {});
 
       return { deletedCount: result.count, success: true };
     } catch (error) {
@@ -198,6 +209,10 @@ export const notificationsService = {
 
       const updatedCount = result.count;
 
+      void realtimeService
+        .user(userId)
+        .publish(REALTIME_CONFIG.events.user.notificationUpdated, {});
+
       return { success: true, updatedCount };
     } catch (error) {
       handlePrismaError(error);
@@ -207,6 +222,10 @@ export const notificationsService = {
   async markAs(db: DbClient, id: string, isRead: boolean, userId: string) {
     try {
       await db.notification.update({ data: { isRead }, where: { id, userId } });
+
+      void realtimeService
+        .user(userId)
+        .publish(REALTIME_CONFIG.events.user.notificationUpdated, {});
 
       return { success: true };
     } catch (error) {
