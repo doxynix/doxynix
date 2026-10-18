@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.4.4](https://github.com/doxynix/doxynix/compare/doxynix-v6.4.3...doxynix-v6.4.4) (2026-10-18)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2315](https://github.com/doxynix/doxynix/issues/2315)) ([84537e7](https://github.com/doxynix/doxynix/commit/84537e7cbacd64ef020671ec3291da312d33cb16))
+
 ## [6.4.3](https://github.com/doxynix/doxynix/compare/doxynix-v6.4.2...doxynix-v6.4.3) (2026-10-18)
 
 

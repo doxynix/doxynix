@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.3.4](https://github.com/doxynix/doxynix/compare/cli-v5.3.3...cli-v5.3.4) (2026-10-18)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 5.4.4
+
 ## [5.3.3](https://github.com/doxynix/doxynix/compare/cli-v5.3.2...cli-v5.3.3) (2026-10-18)
 
 
