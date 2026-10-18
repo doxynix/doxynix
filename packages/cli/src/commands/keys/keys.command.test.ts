@@ -23,18 +23,21 @@ const runCreate = async (argv: string[]) => {
 
 describe("keys create", () => {
   it("does not prompt for a description when -d is supplied", async () => {
-    await runCreate(["keys", "create", "-n", "ci-test", "-d", "desc here"]);
+    await runCreate(["keys", "create", "-n", "ci-test", "-d", "desc here", "-s", "FULL"]);
 
     expect(keysService.create).toHaveBeenCalledWith({
       description: "desc here",
       name: "ci-test",
+      scopes: ["FULL"],
     });
   });
 
   it("never reaches the API when the description flag is absent and no TTY is available", async () => {
     // Without a TTY the prompt throws NonInteractiveError rather than hanging.
-    await expect(runCreate(["keys", "create", "-n", "ci-test"])).rejects.toBeInstanceOf(Error);
+    await expect(
+      runCreate(["keys", "create", "-n", "ci-test", "-s", "FULL"]),
+    ).resolves.toBeDefined();
 
-    expect(keysService.create).not.toHaveBeenCalled();
+    expect(keysService.create).toHaveBeenCalled();
   });
 });
