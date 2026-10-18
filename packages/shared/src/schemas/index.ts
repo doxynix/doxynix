@@ -1,6 +1,7 @@
 import * as z from "zod/mini";
 
 import {
+  ApiKeyScopeSchema,
   NotifyTypeSchema,
   PRCommentStyleSchema,
   PRFocusAreaSchema,
@@ -31,6 +32,7 @@ export const CreateApiKeySchema = z.object({
       }),
     ),
   ),
+  expiresAt: z.optional(z.nullable(z.date())),
   name: z.string().check(
     z.trim(),
     z.minLength(1, {
@@ -40,9 +42,21 @@ export const CreateApiKeySchema = z.object({
       error: "Name cannot exceed 50 characters",
     }),
   ),
+  scopes: z
+    .array(ApiKeyScopeSchema)
+    .check(z.minLength(1, { error: "Select at least one permission" })),
 });
 
 export type CreateApiKeyInput = z.infer<typeof CreateApiKeySchema>;
+
+export const UpdateApiKeySchema = z.object({
+  description: CreateApiKeySchema.shape.description,
+  expiresAt: CreateApiKeySchema.shape.expiresAt,
+  name: CreateApiKeySchema.shape.name,
+  scopes: z.optional(z.array(ApiKeyScopeSchema)),
+});
+
+export type UpdateApiKeyInput = z.infer<typeof UpdateApiKeySchema>;
 
 export const UpdatePRConfigInput = z.object({
   ciSkip: z.optional(z.boolean()),
@@ -187,11 +201,14 @@ export type Notification = z.infer<typeof NotificationSchema>;
 export const ApiKeySchema = z.object({
   createdAt: z.coerce.date(),
   description: z.nullable(z.string()),
+  expiresAt: z.nullable(z.coerce.date()),
   id: z.uuid(),
   lastUsed: z.nullable(z.coerce.date()),
   name: z.string(),
   prefix: z.string(),
   revoked: z.boolean(),
+  revokedAfter: z.nullable(z.coerce.date()),
+  scopes: z.array(ApiKeyScopeSchema),
   updatedAt: z.coerce.date(),
 });
 export type ApiKey = z.infer<typeof ApiKeySchema>;

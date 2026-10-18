@@ -8,10 +8,16 @@ describe("realtime user payloads", () => {
   it("keys the record by the event names the config uses", () => {
     expect(Object.keys(RealtimeUserPayloads).sort()).toEqual(
       [
+        REALTIME_CONFIG.events.user.agentSessionUpdated,
         REALTIME_CONFIG.events.user.analysisProgress,
+        REALTIME_CONFIG.events.user.analysisUpdated,
+        REALTIME_CONFIG.events.user.apiKeyUpdated,
         REALTIME_CONFIG.events.user.fileActionCompleted,
         REALTIME_CONFIG.events.user.notification,
+        REALTIME_CONFIG.events.user.notificationUpdated,
         REALTIME_CONFIG.events.user.prCommentReceived,
+        REALTIME_CONFIG.events.user.repoUpdated,
+        REALTIME_CONFIG.events.user.userUpdated,
       ].sort(),
     );
   });

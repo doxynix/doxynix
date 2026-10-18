@@ -52,6 +52,7 @@
     "lint:fix": "oxlint --fix",
     "lint:fsd": "steiger ./src",
     "lint:i18n": "eloqnt lint",
+    "lint:i18n-usage": "bun run scripts/check-i18n-usage.ts",
     "lint:locales": "bun run scripts/check-locales.ts",
     "repair:seed-drift": "bun scripts/benchmarks/repair-seed-drift.ts",
     "start": "bun with-doppler \"next start\"",
@@ -63,7 +64,7 @@
     "test:unit": "bun with-doppler \"cross-env TZ=UTC vitest run src --config vitest.config.ts\"",
     "type-check": "bun check -b",
     "type-check:coverage": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" type-coverage --detail",
-    "validate": "biome check . && oxlint && bun run lint:fsd && bun run lint:i18n && bun run lint:locales && bun run arch:check && bun run check:index-parity && bun type-check",
+    "validate": "biome check . && oxlint && bun run lint:fsd && bun run lint:i18n && bun run lint:locales && bun run lint:i18n-usage && bun run arch:check && bun run check:index-parity && bun type-check",
     "with-doppler": "bun ../../scripts/doppler.ts"
   },
   "dependencies": {

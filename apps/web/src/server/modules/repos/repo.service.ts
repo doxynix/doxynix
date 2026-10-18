@@ -2,9 +2,12 @@ import { MAX_PAGE, Status, Visibility } from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
+
 import type { DbClient } from "@/server/core/db";
 import { getRepoInfo } from "@/server/core/github/github-api";
 import { GitHubAuthRequiredError, parseUrl } from "@/server/core/github/github-client";
+import { realtimeService } from "@/server/core/realtime";
 import { handlePrismaError, toOctokitTrpcError } from "@/server/utils/handle-error";
 import {
   buildDateRangeWhere,
@@ -105,7 +108,7 @@ export const repoService = {
     }
 
     try {
-      return await db.repo.create({
+      const repo = await db.repo.create({
         data: {
           defaultBranch: githubData.default_branch,
           description: githubData.description,
@@ -127,6 +130,10 @@ export const repoService = {
           visibility: githubData.private ? Visibility.PRIVATE : Visibility.PUBLIC,
         },
       });
+
+      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.repoUpdated, {});
+
+      return repo;
     } catch (error) {
       handlePrismaError(error, {
         defaultConflict: "You have already added this repository",
@@ -143,6 +150,8 @@ export const repoService = {
         where: { id, userId },
       });
 
+      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.repoUpdated, {});
+
       return { success: true };
     } catch (error) {
       handlePrismaError(error, { notFound: "Repository not found" });
@@ -152,6 +161,8 @@ export const repoService = {
   async deleteAll(db: DbClient, userId: string) {
     try {
       await db.repo.deleteMany({ where: { userId } });
+
+      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.repoUpdated, {});
 
       return { success: true };
     } catch (error) {
@@ -166,6 +177,8 @@ export const repoService = {
         userId,
       },
     });
+
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.repoUpdated, {});
 
     return { count: result.count, success: true };
   },

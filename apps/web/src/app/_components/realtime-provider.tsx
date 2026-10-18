@@ -96,6 +96,35 @@ function RealtimeSubscriptions({ userId }: { userId: string }) {
   });
 
   useChannel(REALTIME_CONFIG.channels.user(userId), (message: Ably.Message) => {
+    if (message.name === REALTIME_CONFIG.events.user.apiKeyUpdated) {
+      void queryClient.invalidateQueries(trpc.apikey.list.pathFilter());
+    }
+
+    if (message.name === REALTIME_CONFIG.events.user.repoUpdated) {
+      invalidate();
+      void queryClient.invalidateQueries(trpc.repo.getByOwner.pathFilter());
+    }
+
+    if (message.name === REALTIME_CONFIG.events.user.notificationUpdated) {
+      void invalidateAll();
+    }
+
+    if (message.name === REALTIME_CONFIG.events.user.userUpdated) {
+      void queryClient.invalidateQueries(trpc.user.me.pathFilter());
+      void queryClient.invalidateQueries(trpc.user.getActiveSessions.pathFilter());
+    }
+
+    if (message.name === REALTIME_CONFIG.events.user.agentSessionUpdated) {
+      void queryClient.invalidateQueries(trpc.agent.listSessions.pathFilter());
+    }
+
+    if (message.name === REALTIME_CONFIG.events.user.analysisUpdated) {
+      void queryClient.invalidateQueries(trpc.analysis.getLatest.pathFilter());
+      void queryClient.invalidateQueries(trpc.analysis.getHistory.pathFilter());
+      void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
+      void queryClient.invalidateQueries(trpc.analysis.getByRepository.pathFilter());
+    }
+
     if (message.name === REALTIME_CONFIG.events.user.notification) {
       const data = parseRealtimePayload(RealtimeUserPayloads.notification, message.data);
       if (data == null) {

@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { ChatRole } from "@doxynix/shared";
+import { ApiKeyScope, ChatRole } from "@doxynix/shared";
 import {
   convertToModelMessages,
   createUIMessageStreamResponse,
@@ -44,7 +44,7 @@ async function handler(req: Request) {
     });
   }
 
-  const userId = await resolveRequestUserId(await headers());
+  const userId = await resolveRequestUserId(await headers(), ApiKeyScope.CLI);
 
   if (userId == null) {
     throw new AppError({ code: "UNAUTHORIZED", publicMessage: "Sign in to use the agent" });

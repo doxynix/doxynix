@@ -38,4 +38,20 @@ describe("filterAndPrepareTools", () => {
     expect(result).toHaveLength(1);
     expect(result[0]!.name).toBe("applyFixPreview");
   });
+
+  // An MCP-scoped key that could mint a FULL key would reach the CLI surface through it.
+  it("should withhold every key-management tool from MCP", () => {
+    const keyTools = ["createApiKey", "listApiKeys", "revokeApiKey", "updateApiKey"];
+    const exposed = filterAndPrepareTools(
+      Object.fromEntries(
+        keyTools.map((name) => [name, { execute: () => {}, inputSchema: z.object({}) }]),
+      ),
+    );
+
+    for (const name of ["createApiKey", "updateApiKey"]) {
+      expect(MUTATION_TOOLS).toContain(name);
+    }
+    expect(exposed.map((tool) => tool.name)).not.toContain("createApiKey");
+    expect(exposed.map((tool) => tool.name)).not.toContain("updateApiKey");
+  });
 });

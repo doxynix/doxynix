@@ -23,7 +23,7 @@ export const apiForUser = cache(async (userId: string) => {
   return createCaller(await ctxForUser(userId));
 });
 
-export const ctxForUser = cache(async (userId: string) => {
+export const ctxForUser = cache(async (userId: string, apiKeyScopes?: string[]) => {
   const user = await prisma.user.findUnique({
     select: {
       banned: true,
@@ -45,6 +45,7 @@ export const ctxForUser = cache(async (userId: string) => {
   heads.set("x-trpc-source", "task");
 
   const ctx = {
+    ...(apiKeyScopes != null && { apiKeyScopes }),
     prisma,
     redis: redisClient,
     req: new NextRequest(`${protocol}://${host}${TRPC_PREFIX}`, { headers: heads }),
@@ -98,7 +99,7 @@ export const api = cache(async () => {
 export const ctxForRequest = cache(async () => {
   const store = requestContext.getStore();
   if (store?.userId != null) {
-    return ctxForUser(store.userId);
+    return ctxForUser(store.userId, store.apiKeyScopes);
   }
 
   const heads = new Headers();

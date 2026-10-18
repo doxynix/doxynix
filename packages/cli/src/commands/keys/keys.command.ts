@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts";
-import { CreateApiKeySchema } from "@doxynix/shared";
+import { ApiKeyScope, CreateApiKeySchema } from "@doxynix/shared";
 import type { Command } from "commander";
 
 import { confirmOrAbort, guardPrompt, resolveEntityOrPick } from "@/core/prompts";
@@ -78,7 +78,11 @@ export function registerKeysCommand(program: Command) {
     .description("Generate a new platform API key")
     .option("-n, --name <name>", "Key identifier name")
     .option("-d, --description <desc>", "Key description")
-    .action(async (options: { description?: string; name?: string }) => {
+    .option(
+      "-s, --scopes <scopes>",
+      `Comma-separated permissions (${ApiKeyScope.CLI}, ${ApiKeyScope.MCP}, ${ApiKeyScope.FULL})`,
+    )
+    .action(async (options: { description?: string; name?: string; scopes?: string }) => {
       p.intro(brand.logo("Generate API Key"));
 
       let name = options.name?.trim();
@@ -107,6 +111,36 @@ export function registerKeysCommand(program: Command) {
         description = descInput.trim();
       }
 
+      let scopes = (options.scopes ?? "")
+        .split(",")
+        .map((scope) => scope.trim().toUpperCase())
+        .filter((scope): scope is ApiKeyScope =>
+          Object.values(ApiKeyScope).includes(scope as ApiKeyScope),
+        );
+
+      if (scopes.length === 0) {
+        scopes = await guardPrompt(
+          p.multiselect({
+            message: "Permissions for this key:",
+            options: [
+              {
+                hint: "tRPC endpoints and the CLI",
+                label: ApiKeyScope.CLI,
+                value: ApiKeyScope.CLI,
+              },
+              { hint: "MCP tools", label: ApiKeyScope.MCP, value: ApiKeyScope.MCP },
+              {
+                hint: "Everything (superset of both)",
+                label: ApiKeyScope.FULL,
+                value: ApiKeyScope.FULL,
+              },
+            ],
+            required: true,
+          }),
+          "Creation cancelled.",
+        );
+      }
+
       const result = await withTaskSpinner(
         {
           start: "Generating secret key...",
@@ -116,6 +150,7 @@ export function registerKeysCommand(program: Command) {
           keysService.create({
             description,
             name,
+            scopes,
           }),
       );
 

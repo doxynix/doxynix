@@ -7,6 +7,7 @@ import { IS_PROD } from "@/shared/config/env.flags";
 import { APP_VERSION } from "@/shared/config/env.server";
 
 type RequestStore = {
+  apiKeyScopes?: string[];
   appVersion?: string;
   country: string;
   ip: null | string;
@@ -105,6 +106,7 @@ export function getCountry(request: Request): string {
 }
 
 type RequestContextInput = {
+  apiKeyScopes?: string[];
   method: string;
   path: string;
   req: Request;
@@ -155,6 +157,7 @@ function ensureRequestId(request: Request, existing?: string): string {
 export function buildRequestStore(input: RequestContextInput): RequestStore {
   const requestId = ensureRequestId(input.req, input.requestId);
   return {
+    apiKeyScopes: input.apiKeyScopes,
     appVersion: APP_VERSION,
     country: getCountry(input.req),
     ip: anonymizeIp(getIp(input.req)),

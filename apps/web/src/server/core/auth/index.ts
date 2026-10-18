@@ -39,6 +39,7 @@ import { getIp } from "@/server/utils/request-context";
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // TIME: 30 days
 const SESSION_UPDATE_AGE = 24 * 60 * 60; // TIME: 24 hours
 const MAGIC_LINK_MAX_AGE = 10 * 60; // TIME: 10 minutes
+export const IPV6_SUBNET = 56;
 
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
@@ -143,6 +144,10 @@ export const auth = betterAuth({
     cookiePrefix: "doxynix",
     database: {
       generateId: false,
+    },
+    ipAddress: {
+      ipAddressHeaders: ["x-forwarded-for", "x-vercel-forwarded-for"],
+      ipv6Subnet: IPV6_SUBNET,
     },
     useSecureCookies: IS_PROD,
   },
@@ -467,8 +472,9 @@ export const auth = betterAuth({
 
     twoFactor({
       allowPasswordless: true,
+      backupCodes: { storeBackupCodes: "encrypted" },
       issuer: "Doxynix",
-      trustDeviceMaxAge: 30 * 24 * 60 * 60,
+      trustDeviceMaxAge: 7 * 24 * 60 * 60,
     }),
 
     genericOAuth({
@@ -545,6 +551,7 @@ export const auth = betterAuth({
       enabled: true,
       maxAge: 5 * 60,
       strategy: "compact",
+      version: "1",
     },
     expiresIn: SESSION_MAX_AGE,
     preserveSessionInDatabase: true,
@@ -561,6 +568,8 @@ export const auth = betterAuth({
 
   telemetry: { enabled: false },
 
+  trustedOrigins: [BETTER_AUTH_URL, "http://localhost:3000"],
+
   user: {
     additionalFields: {
       role: { defaultValue: "USER", type: "string" },
@@ -568,6 +577,7 @@ export const auth = betterAuth({
   },
 
   verification: {
+    disableCleanup: true,
     storeInDatabase: false,
   },
 });

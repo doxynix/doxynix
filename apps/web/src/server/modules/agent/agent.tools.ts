@@ -15,11 +15,15 @@ export const AgentFixFindingSchema: z.ZodType<CreateFixFindings[number]> = z.obj
   type: z.string(),
 });
 
+// Anything that mutates state is withheld from MCP. Key management belongs here too: an MCP-scoped key
+// must not be able to mint or rewrite a FULL-scoped key and use it to reach the CLI surface.
 export const MUTATION_TOOLS = [
   "applyFix",
+  "createApiKey",
   "deleteRepository",
   "openPullRequest",
   "revokeApiKey",
+  "updateApiKey",
 ] as const;
 
 export const getAgentTools = (currentRepoId?: string) => ({
@@ -83,13 +87,19 @@ export const getAgentTools = (currentRepoId?: string) => ({
 
   createApiKey: tool({
     description: "Generate a new secure API key for the user's account.",
-    execute: async ({ description, name }) => {
+    execute: async ({ description, name, scopes }) => {
       const trpc = await api();
-      return trpc.apikey.create({ description, name });
+      return trpc.apikey.create({ description, name, scopes });
     },
     inputSchema: z.object({
       description: z.string().optional().describe("Optional description of the key's purpose"),
       name: z.string().min(1).describe("Friendly name for the key (e.g., 'CI-CD-key')"),
+      scopes: z
+        .array(z.enum(["CLI", "FULL", "MCP"]))
+        .min(1)
+        .describe(
+          "Permissions for the key: CLI for tRPC/CLI access, MCP for MCP tools, FULL for both",
+        ),
     }),
   }),
 

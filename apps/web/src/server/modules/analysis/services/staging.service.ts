@@ -2,7 +2,10 @@ import { TRPCError } from "@trpc/server";
 import type { Redis } from "@upstash/redis";
 import * as z from "zod";
 
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
+
 import type { DbClient } from "@/server/core/db";
+import { realtimeService } from "@/server/core/realtime";
 import { redisService } from "@/server/core/redis";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 
@@ -16,6 +19,9 @@ const StagedFixResultSchema = z.object({
 export const stagingService = {
   async clearStaging(userId: string, repoId: string) {
     await redisService.staging.clear(userId, repoId);
+
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
+
     return { success: true };
   },
 
@@ -27,6 +33,9 @@ export const stagingService = {
     const stagedCount = await redisService.staging.addFiles(userId, repoId, {
       [filePath]: content,
     });
+
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
+
     return { stagedCount, success: true };
   },
 
@@ -79,6 +88,8 @@ export const stagingService = {
 
     const stagedCount = await redis.hlen(cacheKey);
 
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
+
     return {
       stagedCount,
       stagedFilesAdded: parsed.data.fixedFiles.length,
@@ -88,6 +99,9 @@ export const stagingService = {
 
   async unstageFile(userId: string, repoId: string, filePath: string) {
     const stagedCount = await redisService.staging.removeFile(userId, repoId, filePath);
+
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
+
     return { stagedCount, success: true };
   },
 };

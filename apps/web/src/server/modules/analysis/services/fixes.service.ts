@@ -3,9 +3,12 @@ import { TRPCError } from "@trpc/server";
 import type { Redis } from "@upstash/redis";
 import type * as z from "zod";
 
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
+
 import { appLogger } from "@/server/core/app-logger";
 import type { DbClient } from "@/server/core/db";
 import { getClientContext, getInstallationClient } from "@/server/core/github/github-client";
+import { realtimeService } from "@/server/core/realtime";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 
 import { analysisRepo } from "../analysis.repository";
@@ -71,6 +74,8 @@ export const fixesService = {
       });
 
       await redis.del(REDIS_CONFIG.keys.prStaging(userId, input.repoId));
+
+      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
 
       return {
         prNumber: result.prNumber,
@@ -159,6 +164,8 @@ export const fixesService = {
           ttl: "30m",
         },
       );
+
+      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
 
       return {
         fixId: fix.id,
@@ -288,6 +295,8 @@ export const fixesService = {
       });
 
       await redis.del(cacheKey);
+
+      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
 
       return {
         fixId: fix.id,

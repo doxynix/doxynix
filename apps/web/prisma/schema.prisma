@@ -160,6 +160,12 @@ enum ChatRole {
   data
 }
 
+enum ApiKeyScope {
+  CLI
+  FULL
+  MCP
+}
+
 model User {
   /// @zod.custom.omit(["model"])
   id                  String               @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
@@ -606,23 +612,28 @@ model Notification {
 }
 
 model ApiKey {
-  id          String    @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
-  prefix      String
+  id           String        @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
+  prefix       String
   /// @zod.custom.omit(["model"])
-  hashedKey   String    @unique() @map("hashed_key")
+  hashedKey    String        @unique() @map("hashed_key")
   /// @zod.string.trim().min(1, { message: "The name must be between 1 and 50 characters long" }).max(50)
-  name        String
+  name         String
   /// @zod.string.trim().max(1000, { message: "The description must be less than 1000 characters" })
-  description String?   @db.Text()
-  lastUsed    DateTime? @map("last_used")
-  revoked     Boolean   @default(false)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @default(now()) @updatedAt() @map("updated_at")
+  description  String?       @db.Text()
+  lastUsed     DateTime?     @map("last_used")
+  expiresAt    DateTime?     @map("expires_at")
+  scopes       ApiKeyScope[] @default([])
+  revoked      Boolean       @default(false)
+  revokedAfter DateTime?     @map("revoked_after")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @default(now()) @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
-  userId      String    @map("user_id") @db.Uuid()
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String        @map("user_id") @db.Uuid()
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([expiresAt])
+  @@index([revokedAfter])
   @@map("api_keys")
 }
 

@@ -33,6 +33,17 @@ export function useApiKeyActions() {
     }),
   );
 
+  const rotate = useMutation(
+    trpc.apikey.rotate.mutationOptions({
+      onError: (err) => toast.error(err.message),
+      onSuccess: (data) => {
+        toast.success(t("settings_api_keys_rotated_toast_success", { days: data.gracePeriodDays }));
+        invalidate();
+        trackClientEvent("api_key_rotated");
+      },
+    }),
+  );
+
   const update = useMutation(
     trpc.apikey.update.mutationOptions({
       onError: (err) => toast.error(err.message),
@@ -43,5 +54,5 @@ export function useApiKeyActions() {
     }),
   );
 
-  return { create, revoke, update };
+  return { create, revoke, rotate, update };
 }

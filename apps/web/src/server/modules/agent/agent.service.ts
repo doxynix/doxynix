@@ -1,6 +1,9 @@
 import { TRPCError } from "@trpc/server";
 
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
+
 import type { DbClient } from "@/server/core/db";
+import { realtimeService } from "@/server/core/realtime";
 
 import { agentMapper } from "./agent.mapper";
 
@@ -33,9 +36,13 @@ export const agentService = {
       internalRepoId = repo.id;
     }
 
-    return db.chatSession.create({
+    const session = await db.chatSession.create({
       data: { repoId: internalRepoId, title: input.title, userId },
     });
+
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.agentSessionUpdated, {});
+
+    return session;
   },
 
   async getSessionHistory(db: DbClient, userId: string, sessionId: string) {

@@ -1,3 +1,4 @@
+import { ApiKeyScope } from "@doxynix/shared";
 import { getErrorShape, TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -207,10 +208,54 @@ describe("tRPC Error Formatting & Security Boundaries", () => {
 
     await expect(caller.ping()).resolves.toBe("pong");
   });
+
+  describe("api key scopes", () => {
+    const pingRouter = () => createTRPCRouter({ ping: protectedProcedure.query(() => "pong") });
+
+    it("blocks a key scoped MCP-only from tRPC", async () => {
+      const caller = createCallerFactory(pingRouter())(
+        ctxFor({ banned: false }, [ApiKeyScope.MCP]),
+      );
+
+      await expect(caller.ping()).rejects.toMatchObject({
+        code: "FORBIDDEN",
+        message: "This API key lacks the required scope",
+      });
+    });
+
+    it("lets a CLI-scoped key through", async () => {
+      const caller = createCallerFactory(pingRouter())(
+        ctxFor({ banned: false }, [ApiKeyScope.CLI]),
+      );
+
+      await expect(caller.ping()).resolves.toBe("pong");
+    });
+
+    it("lets a full-scoped key through", async () => {
+      const caller = createCallerFactory(pingRouter())(
+        ctxFor({ banned: false }, [ApiKeyScope.FULL]),
+      );
+
+      await expect(caller.ping()).resolves.toBe("pong");
+    });
+
+    it("grandfathers a key with no scopes as full access", async () => {
+      const caller = createCallerFactory(pingRouter())(ctxFor({ banned: false }, []));
+
+      await expect(caller.ping()).resolves.toBe("pong");
+    });
+
+    it("does not apply scope checks to a cookie session", async () => {
+      const caller = createCallerFactory(pingRouter())({ ...ctxFor({ banned: false }) });
+
+      await expect(caller.ping()).resolves.toBe("pong");
+    });
+  });
 });
 
-function ctxFor(user: { banned: boolean; banExpires?: Date }) {
+function ctxFor(user: { banned: boolean; banExpires?: Date }, apiKeyScopes?: string[]) {
   return {
+    ...(apiKeyScopes != null && { apiKeyScopes }),
     prisma: {},
     req: {} as any,
     session: { session: { id: "api-key" }, user },

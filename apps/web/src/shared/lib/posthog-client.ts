@@ -5,6 +5,7 @@ export type ClientAnalyticsEvent =
   | "all_repos_deleted"
   | "api_key_created"
   | "api_key_revoked"
+  | "api_key_rotated"
   | "doc_copied"
   | "doc_downloaded"
   | "doc_viewed"

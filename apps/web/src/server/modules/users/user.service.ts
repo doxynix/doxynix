@@ -4,6 +4,8 @@ import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { del } from "@vercel/blob";
 
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
+
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
 import {
@@ -12,6 +14,7 @@ import {
   prisma,
   type TransactionClient,
 } from "@/server/core/db";
+import { realtimeService } from "@/server/core/realtime";
 import { handlePrismaError } from "@/server/utils/handle-error";
 
 import { userMapper } from "./user.mapper";
@@ -216,6 +219,8 @@ export const userService = {
       });
     }
 
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.userUpdated, {});
+
     return { success: true };
   },
   async revokeSession(headers: Headers, sessionId: string) {
@@ -228,6 +233,8 @@ export const userService = {
 
     await auth.api.revokeSession({ body: { token: target.token }, headers });
 
+    void realtimeService.user(target.userId).publish(REALTIME_CONFIG.events.user.userUpdated, {});
+
     return { success: true };
   },
 
@@ -236,6 +243,8 @@ export const userService = {
       data: { name: input.name },
       where: { id: userId },
     });
+
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.userUpdated, {});
 
     return { user: userMapper.toPublic(updatedUser) };
   },

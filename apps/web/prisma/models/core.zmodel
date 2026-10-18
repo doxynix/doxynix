@@ -43,7 +43,10 @@ model ApiKey {
   /// @zod.string.trim().max(1000, { message: "The description must be less than 1000 characters" })
   description String?   @db.Text @length(max: 1000, message: "The description must be less than 1000 characters")
   lastUsed    DateTime? @map("last_used")
+  expiresAt   DateTime? @map("expires_at")
+  scopes      ApiKeyScope[] @default([])
   revoked     Boolean   @default(false)
+  revokedAfter DateTime? @map("revoked_after")
 
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
@@ -59,6 +62,8 @@ model ApiKey {
   @@deny('delete', true)
 
   @@index([userId])
+  @@index([expiresAt])
+  @@index([revokedAfter])
   @@map("api_keys")
 }
 
@@ -202,4 +207,10 @@ enum ChatRole {
   assistant
   system
   data
+}
+
+enum ApiKeyScope {
+  CLI
+  FULL
+  MCP
 }
