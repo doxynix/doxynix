@@ -247,7 +247,7 @@
     "@stryker-mutator/vitest-runner": "10.0.0",
     "@tailwindcss/postcss": "4.3.3",
     "@tailwindcss/typography": "0.5.20",
-    "@tanstack/react-query-devtools": "5.104.3",
+    "@tanstack/react-query-devtools": "5.104.4",
     "@testing-library/dom": "10.4.2",
     "@testing-library/react": "16.3.3",
     "@trigger.dev/build": "4.7.4",
