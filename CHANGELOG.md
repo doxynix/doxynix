@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.5.6](https://github.com/doxynix/doxynix/compare/doxynix-v6.5.5...doxynix-v6.5.6) (2026-10-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency lucide-react to v1.59.0 ([#2330](https://github.com/doxynix/doxynix/issues/2330)) ([57c5773](https://github.com/doxynix/doxynix/commit/57c5773ad057730a1860d03d47918fabfa7d413a))
+
 ## [6.5.5](https://github.com/doxynix/doxynix/compare/doxynix-v6.5.4...doxynix-v6.5.5) (2026-10-20)
 
 
