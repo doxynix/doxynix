@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.5.8](https://github.com/doxynix/doxynix/compare/doxynix-v6.5.7...doxynix-v6.5.8) (2026-10-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency motion to v14.3.1 ([#2338](https://github.com/doxynix/doxynix/issues/2338)) ([4f21cfc](https://github.com/doxynix/doxynix/commit/4f21cfcc67e1f30141469d6c493315e22db36ebc))
+
 ## [6.5.7](https://github.com/doxynix/doxynix/compare/doxynix-v6.5.6...doxynix-v6.5.7) (2026-10-22)
 
 
