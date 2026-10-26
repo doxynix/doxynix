@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.6.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.5.9...doxynix-v6.6.0) (2026-10-26)
+
+
+### Features
+
+* **web:** onboarding, appearance preferences, deploy hardening ([#2346](https://github.com/doxynix/doxynix/issues/2346)) ([9d813f2](https://github.com/doxynix/doxynix/commit/9d813f2de98d8c25c3873546980de9015967731a))
+
 ## [6.5.9](https://github.com/doxynix/doxynix/compare/doxynix-v6.5.8...doxynix-v6.5.9) (2026-10-22)
 
 

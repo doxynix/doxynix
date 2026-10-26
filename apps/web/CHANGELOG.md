@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.6.0](https://github.com/doxynix/doxynix/compare/web-v5.5.9...web-v5.6.0) (2026-10-26)
+
+
+### Features
+
+* **web:** onboarding, appearance preferences, deploy hardening ([#2346](https://github.com/doxynix/doxynix/issues/2346)) ([9d813f2](https://github.com/doxynix/doxynix/commit/9d813f2de98d8c25c3873546980de9015967731a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @doxynix/shared bumped to 0.6.0
+
 ## [5.5.9](https://github.com/doxynix/doxynix/compare/web-v5.5.8...web-v5.5.9) (2026-10-22)
 
 
