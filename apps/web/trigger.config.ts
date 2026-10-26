@@ -74,5 +74,6 @@ export default defineConfig({
   maxDuration: 1_000_000,
 
   project: "proj_whmkduzdqfzcgoyuhdyp",
+  // TODO(DXNX-290): switch to "bun-1.4" once Trigger 4.8.2 ships and workspace installs work.
   runtime: "node-22",
 });
