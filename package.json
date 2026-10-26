@@ -2,6 +2,20 @@
   "name": "doxynix",
   "version": "6.6.0",
   "private": true,
+  "description": "AI-powered repository analysis and documentation platform.",
+  "homepage": "https://doxynix.space",
+  "bugs": {
+    "url": "https://github.com/doxynix/doxynix/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/doxynix/doxynix.git"
+  },
+  "license": "AGPL-3.0-only",
+  "author": {
+    "name": "Doxynix",
+    "url": "https://doxynix.space"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"

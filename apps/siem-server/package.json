@@ -1,6 +1,7 @@
 {
   "name": "@doxynix/siem-server",
   "version": "0.4.3",
+  "private": true,
   "exports": {
     ".": {
       "types": "./dist/src/index.d.ts",
