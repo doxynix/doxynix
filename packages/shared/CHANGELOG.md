@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/doxynix/doxynix/compare/shared-v0.5.0...shared-v0.6.0) (2026-10-26)
+
+
+### Features
+
+* **web:** onboarding, appearance preferences, deploy hardening ([#2346](https://github.com/doxynix/doxynix/issues/2346)) ([9d813f2](https://github.com/doxynix/doxynix/commit/9d813f2de98d8c25c3873546980de9015967731a))
+
 ## [0.5.0](https://github.com/doxynix/doxynix/compare/shared-v0.4.0...shared-v0.5.0) (2026-10-18)
 
 
