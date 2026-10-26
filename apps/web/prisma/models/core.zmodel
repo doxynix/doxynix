@@ -33,6 +33,21 @@ model Notification {
   @@map("notifications")
 }
 
+model UserAppearance {
+  /// @zod.custom.omit(["model"])
+  id          String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  /// @zod.custom.omit(["model"])
+  userId      String   @unique @map("user_id") @db.Uuid @omit
+  preferences Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@allow('all', auth() == user)
+  @@map("user_appearances")
+}
+
 model ApiKey {
   id          String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   prefix      String

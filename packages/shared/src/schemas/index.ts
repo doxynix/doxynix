@@ -3,6 +3,7 @@ import * as z from "zod/mini";
 import {
   ApiKeyScopeSchema,
   NotifyTypeSchema,
+  OnboardingIntentSchema,
   PRCommentStyleSchema,
   PRFocusAreaSchema,
   StatusSchema,
@@ -116,6 +117,16 @@ export const GitHubQuerySchema = z.object({
 
 export type CreateRepoInput = z.infer<typeof CreateRepoSchema>;
 
+const ProfileNameSchema = z.string().check(
+  z.trim(),
+  z.minLength(1, {
+    error: "Name must be at least 1 character",
+  }),
+  z.maxLength(50, {
+    error: "Name cannot exceed 50 characters",
+  }),
+);
+
 export const UpdateProfileSchema = z.object({
   email: z.optional(
     z
@@ -128,18 +139,17 @@ export const UpdateProfileSchema = z.object({
         }),
       ),
   ),
-  name: z.string().check(
-    z.trim(),
-    z.minLength(1, {
-      error: "Name must be at least 1 character",
-    }),
-    z.maxLength(50, {
-      error: "Name cannot exceed 50 characters",
-    }),
-  ),
+  name: ProfileNameSchema,
 });
 
 export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;
+
+export const SaveOnboardingIdentitySchema = z.object({
+  intent: OnboardingIntentSchema,
+  name: ProfileNameSchema,
+});
+
+export type SaveOnboardingIdentityInput = z.infer<typeof SaveOnboardingIdentitySchema>;
 
 export const PublicUserSchema = z.object({
   createdAt: z.coerce.date(),

@@ -2,6 +2,7 @@
 
 import { Card, CardContent } from "@/shared/ui/core/card";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 
 export function RepoCardSkeleton() {
   return (
@@ -10,32 +11,61 @@ export function RepoCardSkeleton() {
         <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
           <Skeleton className="size-9 shrink-0 rounded-full" />
 
-          <div className="flex flex-1 flex-col justify-between gap-1">
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-4 w-48" />
-              <Skeleton className="h-5 w-16 rounded-full" />
+          <div className="flex min-w-0 flex-1 flex-col justify-between gap-1">
+            <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-2">
+              <div className="flex min-w-0 items-center gap-2">
+                <SkeletonText
+                  lines={1}
+                  widths={["w-40"]}
+                />
+                <SkeletonText
+                  lines={1}
+                  widths={["w-16"]}
+                />
+              </div>
             </div>
 
-            <div className="flex flex-col gap-1.5 py-1">
-              <Skeleton className="h-3 w-full" />
-              <Skeleton className="h-3 w-3/4" />
+            <SkeletonText
+              lines={2}
+              widths={["w-full", "w-3/4"]}
+            />
+
+            <div className="mt-1 flex flex-wrap gap-1">
+              <SkeletonText
+                lines={1}
+                widths={["w-16"]}
+              />
+              <SkeletonText
+                lines={1}
+                widths={["w-16"]}
+              />
+              <SkeletonText
+                lines={1}
+                widths={["w-16"]}
+              />
             </div>
 
-            <div className="flex flex-wrap gap-1.5 py-1">
-              <Skeleton className="h-5 w-12 rounded-md" />
-              <Skeleton className="h-5 w-16 rounded-md" />
-              <Skeleton className="h-5 w-14 rounded-md" />
-            </div>
-
-            <div className="mt-1 flex items-center gap-3">
-              <Skeleton className="h-3 w-10" />
-              <Skeleton className="h-3 w-10" />
-              <Skeleton className="h-3 w-12" />
+            <div className="mt-1 flex flex-wrap items-center gap-3">
+              <SkeletonText
+                lines={1}
+                size="sm"
+                widths={["w-10"]}
+              />
+              <SkeletonText
+                lines={1}
+                size="sm"
+                widths={["w-10"]}
+              />
+              <SkeletonText
+                lines={1}
+                size="sm"
+                widths={["w-12"]}
+              />
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between sm:flex-col md:items-end">
+        <div className="flex items-center justify-between not-sm:gap-2 sm:flex-col md:items-end">
           <div className="flex items-center gap-4">
             <Skeleton className="size-8 rounded-full" />
             <Skeleton className="size-8 rounded-full" />
@@ -43,8 +73,15 @@ export function RepoCardSkeleton() {
           </div>
 
           <div className="flex flex-col items-end gap-1.5">
-            <Skeleton className="h-5 w-20 rounded-full" />
-            <Skeleton className="h-3 w-24" />
+            <SkeletonText
+              lines={1}
+              widths={["w-20"]}
+            />
+            <SkeletonText
+              lines={1}
+              size="sm"
+              widths={["w-24"]}
+            />
           </div>
         </div>
       </CardContent>

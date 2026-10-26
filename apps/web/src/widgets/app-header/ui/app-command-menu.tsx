@@ -11,6 +11,7 @@ import { useNavLabels } from "@/shared/config/navigation-labels";
 import { useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
+import { useIntersectionObserver } from "@/shared/lib/hooks/use-intersection-observer";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   CommandDialog,
@@ -32,6 +33,8 @@ import {
   useCommandMenuActions,
   useCommandMenuIsOpen,
 } from "@/features/command-menu/model/use-command-menu.store";
+
+const COMMAND_SHORTCUT = "Ctrl+K";
 
 export function AppCommandMenu() {
   const trpc = useTRPC();
@@ -83,32 +86,32 @@ export function AppCommandMenu() {
 
   const observerTarget = useRef<HTMLDivElement>(null);
 
+  const { observe, unobserve } = useIntersectionObserver(
+    (entries) => {
+      const entry = entries[0];
+      if (entry?.isIntersecting) {
+        void fetchNextPage();
+      }
+    },
+    { threshold: 0.1 },
+  );
+
   useEffect(() => {
     if (!hasNextPage || isFetchingNextPage || !isReposExpanded) {
       return;
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry?.isIntersecting) {
-          void fetchNextPage();
-        }
-      },
-      { threshold: 0.1 },
-    );
-
     const currentTarget = observerTarget.current;
     if (currentTarget) {
-      observer.observe(currentTarget);
+      observe(currentTarget);
     }
 
     return () => {
       if (currentTarget) {
-        observer.unobserve(currentTarget);
+        unobserve(currentTarget);
       }
     };
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage, isReposExpanded]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, isReposExpanded, observe, unobserve]);
 
   const navigate = (path: string) => {
     setOpen(false);
@@ -161,7 +164,7 @@ export function AppCommandMenu() {
         content={t("command_search")}
       >
         <AppButton
-          aria-label={t("command_search")}
+          aria-label={`${t("command_search")} ${COMMAND_SHORTCUT}`}
           className={cn(
             "relative size-9 justify-start rounded-xl not-lg:border-0 not-lg:p-0 font-normal text-muted-foreground text-sm lg:w-64 lg:border-border lg:bg-surface-hover lg:pr-12",
           )}
@@ -172,7 +175,7 @@ export function AppCommandMenu() {
 
           <span className="hidden lg:inline-flex lg:pl-4">{t("command_search")}</span>
           <CommandShortcut className="absolute top-1.5 right-3 hidden text-xs lg:flex">
-            {"Ctrl+K"}
+            {COMMAND_SHORTCUT}
           </CommandShortcut>
         </AppButton>
       </AppTooltip>

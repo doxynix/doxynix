@@ -1,8 +1,6 @@
-import { CircleOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/shared/ui/core/table";
-import { EmptyState } from "@/shared/ui/kit/empty-state";
 
 import type { UiAuditLog } from "@/entities/audit-log/model/audit-log.types";
 import { AuditLogRow } from "@/entities/audit-log/ui/audit-log-row";
@@ -13,16 +11,6 @@ type Props = {
 
 export function AuditLogList({ logs }: Readonly<Props>) {
   const t = useTranslations("AuditLogs");
-
-  if (logs.length === 0) {
-    return (
-      <EmptyState
-        description={t("empty_desc")}
-        icon={CircleOff}
-        title={t("empty_title")}
-      />
-    );
-  }
 
   return (
     <Table>

@@ -309,7 +309,7 @@ export const analysisLifecycleService = {
       repoId: repo.id,
     });
 
-    const note = await prisma.$transaction(async (tx) => {
+    const { activated, notification } = await prisma.$transaction(async (tx) => {
       const analysis = await tx.analysis.update({
         data: {
           commitSha: currentSha,
@@ -327,6 +327,12 @@ export const analysisLifecycleService = {
         },
         where: { id: analysisId },
       });
+
+      const activation = await tx.user.updateMany({
+        data: { activatedAt: new Date() },
+        where: { activatedAt: null, id: userId },
+      });
+      const activated = activation.count > 0;
 
       const rawDocs: Array<{ content?: string; type: DocType }> = [
         { content: generatedDocsData.generatedReadme, type: DocType.README },
@@ -365,7 +371,7 @@ export const analysisLifecycleService = {
         ),
       );
 
-      return tx.notification.create({
+      const notification = await tx.notification.create({
         data: {
           body: `Health Score: ${finalHealthScore}/100`,
           repoId: repo.id,
@@ -374,11 +380,22 @@ export const analysisLifecycleService = {
           userId,
         },
       });
+
+      return { activated, notification };
     });
 
+    if (activated) {
+      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.userUpdated, {});
+      trackServerEvent(
+        "onboarding_activated",
+        { analysis_id: analysisId, repo_id: repo.id },
+        userId,
+      );
+    }
+
     await realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.notification, {
-      id: note.id,
-      title: note.title,
+      id: notification.id,
+      title: notification.title,
     });
 
     appLogger.info({ analysisId, commitSha: currentSha, msg: "Results saved", repoId: repo.id });

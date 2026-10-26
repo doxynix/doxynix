@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { SkeletonList } from "@/shared/ui/kit/app-skeleton";
 
 import { ApiKeyCardSkeleton } from "@/entities/api-key/ui/api-key-card-skeleton";
 
@@ -13,11 +14,11 @@ export function ApiKeysListContainer() {
 
   if (isLoading || data == null) {
     return (
-      <div className="grid grid-cols-2 gap-2">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <ApiKeyCardSkeleton key={i} />
-        ))}
-      </div>
+      <SkeletonList
+        className="grid grid-cols-2 gap-2"
+        count={4}
+        renderItem={() => <ApiKeyCardSkeleton />}
+      />
     );
   }
 

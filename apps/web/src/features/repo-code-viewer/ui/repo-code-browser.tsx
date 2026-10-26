@@ -10,7 +10,6 @@ import {
   FileChartLine,
   FileIcon,
   FileText,
-  Loader2,
   Save,
   Sparkles,
   X,
@@ -28,7 +27,9 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
+import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
+import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import type { EditorStats } from "@/entities/repo/model/editor-stats.types";
 import type { FileContent, UiRepoDetailed } from "@/entities/repo/model/repo.types";
@@ -383,18 +384,27 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
 
           {isAiLoading ? (
             <div className="flex flex-col gap-3 py-2">
-              <Skeleton className="h-3 w-1/3" />
-              <div className="flex flex-col gap-2">
-                <Skeleton className="h-2 w-full" />
-                <Skeleton className="h-2 w-5/6" />
-                <Skeleton className="h-2 w-4/5" />
-              </div>
+              <SkeletonText
+                lines={1}
+                widths={["w-1/3"]}
+              />
+              <SkeletonText
+                lines={3}
+                widths={["w-full", "w-5/6", "w-4/5"]}
+              />
               <div className="pt-2">
-                <Skeleton className="h-3 w-1/4" />
-                <div className="mt-2 flex flex-col gap-2">
-                  <Skeleton className="h-2 w-11/12" />
-                  <Skeleton className="h-2 w-9/12" />
-                </div>
+                <SkeletonText
+                  lines={1}
+                  widths={["w-1/4"]}
+                />
+                <SkeletonText
+                  className="mt-2"
+                  lines={2}
+                  widths={["w-11/12", "w-9/12"]}
+                />
+              </div>
+              <div className="mt-4 flex items-center gap-1 border-t pt-3">
+                <Skeleton className="h-8 w-full rounded-xl" />
               </div>
             </div>
           ) : (
@@ -443,19 +453,15 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
               <X className="mr-1 h-3 w-3" />
               {tCommon("discard")}
             </AppButton>
-            <AppButton
-              disabled={stageMutation.isPending}
+            <LoadingButton
+              aria-label={tCommon("accept_changes")}
+              isLoading={stageMutation.isPending}
               onClick={handleAcceptDiff}
               size="sm"
               variant="default"
             >
-              {stageMutation.isPending ? (
-                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-              ) : (
-                <Check className="mr-1 h-3 w-3" />
-              )}
-              {tCommon("accept_changes")}
-            </AppButton>
+              <Check className="size-3.5" />
+            </LoadingButton>
           </div>
         </div>
       )}

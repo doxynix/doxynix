@@ -18,7 +18,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/shared/ui/core/sheet";
-import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
@@ -134,7 +134,20 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
             <ScrollArea className="h-full w-full">
               <div className="p-6">
                 {isLoading ? (
-                  <Skeleton className="h-40 w-full" />
+                  <SkeletonText
+                    lines={8}
+                    size="md"
+                    widths={[
+                      "w-full",
+                      "w-3/4",
+                      "w-1/2",
+                      "w-5/6",
+                      "w-2/3",
+                      "w-3/4",
+                      "w-1/4",
+                      "w-1/2",
+                    ]}
+                  />
                 ) : (
                   <div
                     className={cn(

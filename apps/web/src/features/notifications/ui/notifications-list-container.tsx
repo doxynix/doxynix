@@ -7,6 +7,7 @@ import { useTRPC } from "@/shared/api/trpc";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
+import { SkeletonList } from "@/shared/ui/kit/app-skeleton";
 
 import {
   NOTIFICATIONS_DEFAULT_LIMIT,
@@ -57,11 +58,11 @@ export function NotificationsListContainer() {
       <NotificationsHeader stats={stats} />
 
       {isListLoading || data == null ? (
-        <div className="flex flex-col gap-3">
-          {Array.from({ length: safeLimit }).map((_, i) => (
-            <NotificationCardSkeleton key={i} />
-          ))}
-        </div>
+        <SkeletonList
+          className="flex flex-col gap-3"
+          count={safeLimit}
+          renderItem={() => <NotificationCardSkeleton />}
+        />
       ) : (
         <>
           <div className="flex-1">

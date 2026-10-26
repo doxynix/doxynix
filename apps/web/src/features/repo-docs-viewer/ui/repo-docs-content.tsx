@@ -15,7 +15,7 @@ import { cn } from "@/shared/lib/cn";
 import { useMounted } from "@/shared/lib/hooks/use-mounted";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
 import { AppMermaid } from "@/shared/ui/core/mermaid";
-import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 
@@ -130,9 +130,24 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-4">
-        <Skeleton className="h-8 w-1/3" />
-        <Skeleton className="h-100 w-full" />
+      <div className="flex flex-col gap-6">
+        <SkeletonText
+          lines={1}
+          size="xxl"
+          widths={["w-1/3"]}
+        />
+
+        <div className="flex flex-col gap-5">
+          <SkeletonText
+            lines={6}
+            widths={["w-full", "w-full", "w-11/12", "w-full", "w-4/5", "w-full"]}
+          />
+
+          <SkeletonText
+            lines={4}
+            widths={["w-full", "w-11/12", "w-4/5", "w-full"]}
+          />
+        </div>
       </div>
     );
   }

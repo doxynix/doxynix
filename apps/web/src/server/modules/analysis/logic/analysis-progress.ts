@@ -4,6 +4,7 @@ import { REALTIME_CONFIG } from "@/shared/config/realtime";
 import { TRIGGER_CONFIG } from "@/shared/config/trigger";
 
 import { prisma } from "@/server/core/db";
+import { trackServerEvent } from "@/server/core/posthog-events";
 import { realtimeService } from "@/server/core/realtime";
 import { currentTaskMetadata, taskLogger } from "@/server/utils/task-logger";
 
@@ -46,6 +47,20 @@ export const analysisProgress = {
       select: { repo: { select: { userId: true } } },
       where: { id: analysisId },
     });
+
+    if (status === Status.DONE) {
+      const activation = await prisma.user.updateMany({
+        data: { activatedAt: new Date() },
+        where: { activatedAt: null, id: analysis.repo.userId },
+      });
+
+      if (activation.count > 0) {
+        void realtimeService
+          .user(analysis.repo.userId)
+          .publish(REALTIME_CONFIG.events.user.userUpdated, {});
+        trackServerEvent("onboarding_activated", { analysis_id: analysisId }, analysis.repo.userId);
+      }
+    }
 
     await publishAnalysisProgress({
       analysisId,

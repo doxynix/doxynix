@@ -119,7 +119,7 @@ const PaginationPrevious = ({ className, disabled, isLoading, ...props }: Pagina
   const tCommon = useTranslations("Common");
   return (
     <PaginationLink
-      aria-label={tCommon("go_to_previous_page")}
+      aria-label={`${tCommon("back")} (${tCommon("go_to_previous_page")})`}
       className={cn("gap-1 pl-2.5", className)}
       disabled={disabled || isLoading}
       size="default"
@@ -136,7 +136,7 @@ const PaginationNext = ({ className, disabled, isLoading, ...props }: Pagination
   const tCommon = useTranslations("Common");
   return (
     <PaginationLink
-      aria-label={tCommon("go_to_next_page")}
+      aria-label={`${tCommon("next")} (${tCommon("go_to_next_page")})`}
       className={cn("gap-1 pr-2.5", className)}
       disabled={disabled || isLoading}
       size="default"

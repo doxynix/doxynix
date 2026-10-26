@@ -10,11 +10,13 @@ const MAX_DEPTH = 3;
 const SECTION_RE = /^[A-Z][a-zA-Z0-9]*$/;
 const LEAF_RE = /^[a-z0-9]+(?:_[a-z0-9]+)*$/;
 const INVISIBLE_RE = /[\u200b\u200e\u200f\ufeff]/;
+const PLACEHOLDER_RE = /\{\s*([a-zA-Z0-9_]+)\s*[,}]/g;
 
 type Leaf = {
   path: string;
   value: string;
   depth: number;
+  placeholders: string[];
 };
 
 type Report = {
@@ -49,6 +51,20 @@ function isCopyPlaceholder(key: string, value: string): boolean {
   return false;
 }
 
+function placeholdersOf(value: string): string[] {
+  const found: string[] = [];
+  const pattern = new RegExp(PLACEHOLDER_RE.source, "g");
+  let match = pattern.exec(value);
+  while (match != null) {
+    const start = match.index;
+    if (!(start > 0 && value[start - 1] === "{")) {
+      found.push(match[1]);
+    }
+    match = pattern.exec(value);
+  }
+  return [...new Set(found)].toSorted();
+}
+
 function walk(data: unknown, prefix: string, depth: number, report: Report, leaves: Leaf[]): void {
   if (typeof data === "object" && data !== null && !Array.isArray(data)) {
     for (const [key, child] of Object.entries(data as Record<string, unknown>)) {
@@ -72,14 +88,18 @@ function walk(data: unknown, prefix: string, depth: number, report: Report, leav
     report.errors.push(`"${path}": value must be a string`);
     return;
   }
-  leaves.push({ depth, path, value: data });
+  leaves.push({ depth, path, placeholders: placeholdersOf(data), value: data });
 }
 
-function checkLocale(filePath: string, fileStem: string, report: Report): Set<string> {
+function checkLocale(
+  filePath: string,
+  fileStem: string,
+  report: Report,
+): { keys: Set<string>; placeholders: Map<string, string[]> } {
   const data: unknown = JSON.parse(readFileSync(filePath, "utf-8")) as unknown;
   if (typeof data !== "object" || data === null || Array.isArray(data)) {
     report.errors.push(`${fileStem}.json: top level must be a JSON object`);
-    return new Set<string>();
+    return { keys: new Set<string>(), placeholders: new Map<string, string[]>() };
   }
 
   const leaves: Leaf[] = [];
@@ -102,7 +122,10 @@ function checkLocale(filePath: string, fileStem: string, report: Report): Set<st
       report.placeholders.push(`${leaf.path}: ${JSON.stringify(leaf.value)}`);
     }
   }
-  return new Set(leaves.map((leaf) => leaf.path));
+  return {
+    keys: new Set(leaves.map((leaf) => leaf.path)),
+    placeholders: new Map(leaves.map((leaf) => [leaf.path, leaf.placeholders])),
+  };
 }
 
 async function main(): Promise<number> {
@@ -116,11 +139,13 @@ async function main(): Promise<number> {
   }
 
   const keySets = new Map<string, Set<string>>();
+  const placeholderSets = new Map<string, Map<string, string[]>>();
   let totalKeys = 0;
   for (const file of files) {
     const stem = file.endsWith(".json") ? file.slice(0, -".json".length) : file;
-    const keys = checkLocale(join(MESSAGES_DIR, file), stem, report);
+    const { keys, placeholders } = checkLocale(join(MESSAGES_DIR, file), stem, report);
     keySets.set(stem, keys);
+    placeholderSets.set(stem, placeholders);
     totalKeys += keys.size;
   }
 
@@ -136,6 +161,26 @@ async function main(): Promise<number> {
     for (const key of sourceKeys) {
       if (!keys.has(key)) {
         report.errors.push(`${stem}.json: missing key "${key}" (present in ${SOURCE_LOCALE}.json)`);
+      }
+    }
+  }
+
+  const sourcePlaceholders = placeholderSets.get(SOURCE_LOCALE);
+  if (sourcePlaceholders != null) {
+    for (const [stem, placeholders] of placeholderSets) {
+      if (stem === SOURCE_LOCALE) {
+        continue;
+      }
+      for (const [key, expected] of sourcePlaceholders) {
+        const actual = placeholders.get(key);
+        if (actual == null) {
+          continue;
+        }
+        if (actual.join(",") !== expected.join(",")) {
+          report.errors.push(
+            `${stem}.json: placeholders for "${key}" are {${actual.join("}, {")}} but ${SOURCE_LOCALE}.json uses {${expected.join("}, {")}}`,
+          );
+        }
       }
     }
   }

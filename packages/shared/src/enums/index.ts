@@ -9,6 +9,15 @@ export const UserRole = {
   USER: "USER",
 } as const;
 
+// ------------------- OnboardingIntent -------------------
+export const OnboardingIntentSchema = z.enum(["ARCHITECTURE", "DOCUMENTATION", "RISKS"]);
+export type OnboardingIntent = z.infer<typeof OnboardingIntentSchema>;
+export const OnboardingIntent = {
+  ARCHITECTURE: "ARCHITECTURE",
+  DOCUMENTATION: "DOCUMENTATION",
+  RISKS: "RISKS",
+} as const;
+
 // ------------------- BannedEmailReason -------------------
 export const BannedEmailReasonSchema = z.enum([
   "BOUNCED",

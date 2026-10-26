@@ -1,25 +1,35 @@
 import { Card, CardContent, CardHeader } from "@/shared/ui/core/card";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 
 export function ApiKeyCardSkeleton() {
   return (
-    <Card>
+    <Card className="justify-between">
       <CardHeader className="flex flex-row items-start justify-between pb-2">
-        <div className="flex w-full max-w-[70%] flex-col gap-1">
-          <Skeleton className="h-6 w-32" />
+        <div className="flex w-full max-w-[70%] flex-col gap-1 overflow-hidden">
+          <SkeletonText
+            lines={1}
+            widths={["w-32"]}
+          />
 
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-4 w-28" />
-          </div>
+          <SkeletonText
+            lines={3}
+            size="sm"
+            widths={["w-2/3", "w-1/2", "w-3/5"]}
+          />
+
+          <SkeletonText
+            className="mt-1"
+            lines={1}
+            widths={["w-24"]}
+          />
         </div>
 
         <Skeleton className="size-9 rounded-xl" />
       </CardHeader>
 
       <CardContent>
-        <Skeleton className="mb-2 h-5 w-3/4" />
-        <Skeleton className="h-8 w-full rounded-xl" />
+        <Skeleton className="h-9 w-full rounded-xl" />
       </CardContent>
     </Card>
   );

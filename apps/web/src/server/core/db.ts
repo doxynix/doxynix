@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 
 import type { after as NextAfterFn } from "next/server";
-import { AuditModel, AuditOperation } from "@doxynix/shared";
+import { AuditModel } from "@doxynix/shared";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { type Prisma, PrismaClient } from "@prisma/client";
@@ -19,6 +19,7 @@ import { AUDIT_BUSINESS_MODELS } from "../utils/constants";
 import { requestContext } from "../utils/request-context";
 import { maskSensitiveFields, sanitizePayload } from "../utils/sanitize-payload";
 import { appLogger } from "./app-logger";
+import { AUDIT_OPERATION_BY_WIRE_NAME } from "./audit-operations";
 import { fieldEncryptionExtension } from "./field-encryption";
 import { realtimeService } from "./realtime";
 
@@ -108,6 +109,11 @@ export function poolQueueSnapshot(pool: Pick<Pool, "idleCount" | "totalCount" | 
   };
 }
 
+// Not every Prisma model is audited; `AuditModel` is the explicit allow-list.
+function isAuditedModel(model: string): model is AuditModel {
+  return model in AuditModel;
+}
+
 // Lazy singleton: PrismaPg over TCP on Node runtimes, PrismaNeon over WebSocket on Edge.
 function createPrismaInstance() {
   let baseClient: PrismaClient;
@@ -175,21 +181,9 @@ function createPrismaInstance() {
           }
 
           const duration = performance.now() - start;
-          const mutationOps: readonly AuditOperation[] = [
-            AuditOperation.CREATE,
-            AuditOperation.CREATE_MANY,
-            AuditOperation.CREATE_MANY_AND_RETURN,
-            AuditOperation.UPDATE,
-            AuditOperation.UPDATE_MANY,
-            AuditOperation.UPDATE_MANY_AND_RETURN,
-            AuditOperation.UPSERT,
-            AuditOperation.DELETE,
-            AuditOperation.DELETE_MANY,
-          ];
+          const auditOperation = AUDIT_OPERATION_BY_WIRE_NAME[operation];
 
-          const auditOperation = operation as AuditOperation;
-
-          if (mutationOps.includes(auditOperation) && model !== "AuditLog" && model in AuditModel) {
+          if (auditOperation != null && model !== "AuditLog" && isAuditedModel(model)) {
             const auditModel = model;
             const ctxStore = requestContext.getStore();
             const userId = ctxStore?.userId ?? null;

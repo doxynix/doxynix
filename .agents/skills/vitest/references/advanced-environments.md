@@ -12,7 +12,7 @@ description: Configure environments like jsdom, happy-dom for browser APIs
 - `happy-dom` - Faster alternative to jsdom
 
 `apps/web` pins `environment: "node"` in both vitest configs. Reach for `jsdom` only in a file-level
-`@vitest-environment jsdom` docblock (e.g. `src/shared/ui/core/sidebar.rail.test.ts`), after
+`@vitest-environment jsdom` docblock (e.g. `src/shared/lib/cookies.test.ts`), after
 `bun add -d jsdom`.
 
 ## Configuration

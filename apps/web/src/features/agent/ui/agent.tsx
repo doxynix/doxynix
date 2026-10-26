@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl";
 
 import { useTRPC } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
+import { useAppearancePreferences } from "@/shared/lib/hooks/use-appearance-preferences";
 import { useAutoScroll } from "@/shared/lib/hooks/use-auto-scroll";
 import { usePanelLayout } from "@/shared/lib/hooks/use-panel-layout";
 import { DxnxLogo } from "@/shared/ui/branding/dxnx-logo";
@@ -156,6 +157,7 @@ export function Agent() {
 
   const { scrollRef, scrollToBottom, showScrollButton } = useAutoScroll<HTMLDivElement>([messages]);
   const { open } = useSidebar();
+  const { preferences } = useAppearancePreferences();
 
   useEffect(() => {
     const element = scrollRef.current;
@@ -230,17 +232,29 @@ export function Agent() {
     lastLoadedSessionIdRef.current = newId;
   };
 
+  const handleSessionDeleted = (deletedSessionId: string) => {
+    if (deletedSessionId === sessionId) {
+      handleNewChat();
+    }
+  };
+
   const isLoading = status === "submitted" || status === "streaming" || isHistoryLoading;
   const isRepoOwnerPage = owner !== "" && name !== "";
+  const openLeft =
+    preferences.sidebarVariant === "floating"
+      ? "left-[calc(var(--sidebar-width)+0.5rem)]"
+      : "left-[calc(var(--sidebar-width)+1rem)]";
+  const collapsedLeft =
+    preferences.collapsible === "icon"
+      ? preferences.sidebarVariant === "floating"
+        ? "left-[calc(var(--sidebar-width-icon)+1.5rem+2px)]"
+        : "left-[calc(var(--sidebar-width-icon)+1rem)]"
+      : "left-4";
   const wrapperClasses = cn(
     "fixed z-50 flex overflow-hidden",
     "transition-[left] duration-300 ease-out-expo",
     "group-data-[resizing]/sidebar-wrapper:transition-none",
-    expanded
-      ? open
-        ? "left-[calc(var(--sidebar-width)+1rem)]"
-        : "left-4"
-      : "left-[calc(100vw-450px)]",
+    expanded ? (open ? openLeft : collapsedLeft) : "left-[calc(100vw-450px)]",
   );
 
   return (
@@ -295,6 +309,7 @@ export function Agent() {
                     >
                       <AgentSidebar
                         onNewChat={handleNewChat}
+                        onSessionDeleted={handleSessionDeleted}
                         sessionId={sessionId}
                         sessions={sessions}
                         setSessionId={setSessionId}

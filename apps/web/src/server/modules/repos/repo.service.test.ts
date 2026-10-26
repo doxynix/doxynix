@@ -390,7 +390,7 @@ describe("repoService.getSlim keyset", () => {
 
     expect(result.items).toHaveLength(10);
     expect(result.meta.hasNextPage).toBe(true);
-    expect(result.meta.nextCursor).toBe("r9");
+    expect(result.meta.nextCursor).toBe("r10");
   });
 
   it("should close the page when the extra probe row is absent", async () => {
@@ -402,7 +402,30 @@ describe("repoService.getSlim keyset", () => {
     const result = await repoService.getSlim(db, { ...REPO_INPUT, limit: 10 }, "user-1");
 
     expect(result.meta.hasNextPage).toBe(false);
-    expect(result.meta.nextCursor).toBe("r2");
+    expect(result.meta.nextCursor).toBeUndefined();
+  });
+
+  it("should serve every row exactly once across pages", async () => {
+    const rows = Array.from({ length: 7 }, (_, i) => ({ id: `r${i}`, name: "n", owner: "o" }));
+    const findMany = vi.fn(async (args: { cursor?: { id: string }; take: number }) => {
+      const start = args.cursor == null ? 0 : rows.findIndex((row) => row.id === args.cursor?.id);
+      return rows.slice(start, start + args.take);
+    });
+    const db = { repo: { findMany } } as unknown as DbClient;
+
+    const seen: string[] = [];
+    let cursor: string | undefined;
+
+    for (let page = 0; page < 5; page += 1) {
+      const result = await repoService.getSlim(db, { ...REPO_INPUT, cursor, limit: 3 }, "user-1");
+      seen.push(...result.items.map((item) => item.id));
+      cursor = result.meta.nextCursor;
+      if (cursor == null) {
+        break;
+      }
+    }
+
+    expect(seen).toStrictEqual(rows.map((row) => row.id));
   });
 });
 

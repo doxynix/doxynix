@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 
 export function TrendsWidgetsSkeleton() {
   const t = useTranslations("Dashboard");
@@ -23,12 +24,17 @@ export function TrendsWidgetsSkeleton() {
       <CardContent className="px-6 pt-6">
         <div className="relative h-75">
           <div className="absolute top-0 left-0 flex h-full w-8 flex-col justify-between py-2 text-[10px]">
-            {[100, 75, 50, 25, 0].map((v) => (
-              <Skeleton
-                className="h-3 w-6"
-                key={v}
-              />
-            ))}
+            <SkeletonList
+              className="flex h-full flex-col justify-between"
+              count={5}
+              renderItem={() => (
+                <SkeletonText
+                  lines={1}
+                  size="sm"
+                  widths={["w-6"]}
+                />
+              )}
+            />
           </div>
 
           <div className="ml-10 h-full overflow-hidden">
@@ -78,9 +84,17 @@ export function TrendsWidgetsSkeleton() {
             </svg>
           </div>
 
-          <div className="mt-2 ml-10 flex justify-between">
-            <Skeleton className="h-3 w-12" />
-            <Skeleton className="h-3 w-12" />
+          <div className="absolute bottom-0 left-10 right-0 flex justify-between">
+            <SkeletonText
+              lines={1}
+              size="sm"
+              widths={["w-12"]}
+            />
+            <SkeletonText
+              lines={1}
+              size="sm"
+              widths={["w-12"]}
+            />
           </div>
         </div>
       </CardContent>

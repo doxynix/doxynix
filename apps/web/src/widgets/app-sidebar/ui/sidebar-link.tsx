@@ -36,7 +36,7 @@ export function SidebarLink({
         "group/link flex cursor-pointer transition-colors",
         isActive
           ? "bg-sidebar-accent font-bold text-sidebar-accent-foreground hover:bg-sidebar-accent"
-          : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+          : "text-muted-foreground hover:bg-accent! hover:text-foreground",
       )}
       tooltip={title}
     >
@@ -54,9 +54,11 @@ export function SidebarLink({
             src={avatar}
           />
         )}
-        <span className="min-w-0 flex-1 truncate">{title}</span>
+        <span className="min-w-0 flex-1 truncate group-data-[collapsible=icon]:hidden">
+          {title}
+        </span>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2 group-data-[collapsible=icon]:hidden">
           {notificationsCount != null && notificationsCount > 0 && (
             <SidebarMenuBadge>
               {notificationsCount > 9 ? "9+" : notificationsCount}
@@ -68,7 +70,9 @@ export function SidebarLink({
             </SidebarMenuShortcut>
           )}
         </div>
-        {blank && <SquareArrowOutUpRight className="ml-auto size-3.5" />}
+        {blank && (
+          <SquareArrowOutUpRight className="ml-auto size-3.5 group-data-[collapsible=icon]:hidden" />
+        )}
       </Link>
     </SidebarMenuButton>
   );

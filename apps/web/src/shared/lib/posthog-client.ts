@@ -17,6 +17,8 @@ export type ClientAnalyticsEvent =
   | "github_integration_success"
   | "github_oauth_failed"
   | "github_oauth_started"
+  | "onboarding_checklist_step_clicked"
+  | "onboarding_checklist_toggled"
   | "pr_findings_viewed"
   | "pr_opened"
   | "pricing_plan_clicked"
@@ -26,7 +28,11 @@ export type ClientAnalyticsEvent =
   | "repo_deleted"
   | "repos_by_owner_deleted"
   | "sign_in_attempted"
-  | "sign_in_email_sent";
+  | "sign_in_email_sent"
+  | "welcome_intent_selected"
+  | "welcome_repo_selected"
+  | "welcome_step_viewed"
+  | "welcome_viewed";
 
 export type IdentifyUserInput = {
   createdAt: Date;

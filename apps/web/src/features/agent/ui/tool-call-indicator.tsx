@@ -3,9 +3,17 @@
 import { AlertTriangle, Check, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { Spinner } from "@/shared/ui/core/spinner";
+import {
+  Trace,
+  TraceCollapsible,
+  TraceCollapsibleContent,
+  TraceCollapsibleTrigger,
+  TraceIcon,
+  TraceLine,
+  TraceTitle,
+} from "@/shared/ui/core/trace";
 
 import type { AgentToolLabelKey } from "../model/agent-config";
 import { getDynamicToolContext, getToolBaseLabel, prettifyToolName } from "../model/tool-context";
@@ -62,107 +70,106 @@ export function ToolCallIndicator({
 
   if (isApprovalRequested) {
     return (
-      <div className="fade-in my-2 w-full animate-in text-left duration-200">
-        <div className="flex max-w-[95%] flex-col gap-2 rounded-xl border border-warning/30 bg-warning/5 p-3">
-          <div className="flex items-center gap-1.5 font-semibold text-warning text-xs">
-            <AlertTriangle className="size-3.5" />
-            <span>{t("action_requires_confirmation")}</span>
-          </div>
-          <p className="text-muted-foreground text-xs leading-normal">
-            {t("agent_requesting_approval_to")}{" "}
-            <strong className="text-foreground">{`${baseLabel}.`}</strong>
-          </p>
-          {part.args != null && (
-            <pre className="no-scrollbar max-h-24 overflow-x-auto rounded-lg border bg-background p-2 font-mono text-[10px] text-muted-foreground">
-              {JSON.stringify(part.args, null, 2)}
-            </pre>
-          )}
-          <div className="mt-1 flex items-center gap-2">
-            <AppButton
-              className="bg-warning text-xs hover:bg-warning/90"
-              onClick={() => addToolApprovalResponse({ approved: true, id: part.approval.id })}
-              size="sm"
-            >
-              {t("approve")}
-            </AppButton>
-            <AppButton
-              className="text-xs"
-              onClick={() =>
-                addToolApprovalResponse({
-                  approved: false,
-                  id: part.approval.id,
-                  reason: t("denied_by_user"),
-                })
-              }
-              size="sm"
-              variant="ghost"
-            >
-              {t("deny")}
-            </AppButton>
-          </div>
-        </div>
-      </div>
+      <Trace className="my-2 w-full animate-in text-left duration-200">
+        <TraceCollapsible defaultOpen>
+          <TraceCollapsibleTrigger>
+            <TraceLine>
+              <TraceIcon>
+                <AlertTriangle className="size-3.5 text-warning" />
+              </TraceIcon>
+              <TraceTitle className="font-semibold text-warning text-xs">
+                {t("action_requires_confirmation")}
+              </TraceTitle>
+            </TraceLine>
+          </TraceCollapsibleTrigger>
+          <TraceCollapsibleContent className="flex flex-col gap-2 rounded-xl border border-warning/30 bg-warning/5 p-3">
+            <p className="text-muted-foreground text-xs leading-normal">
+              {t("agent_requesting_approval_to")}{" "}
+              <strong className="text-foreground">{`${baseLabel}.`}</strong>
+            </p>
+            {part.args != null && (
+              <pre className="no-scrollbar max-h-24 overflow-x-auto rounded-lg border bg-background p-2 font-mono text-[10px] text-muted-foreground">
+                {JSON.stringify(part.args, null, 2)}
+              </pre>
+            )}
+            <div className="mt-1 flex items-center gap-2">
+              <AppButton
+                className="bg-warning text-xs hover:bg-warning/90"
+                onClick={() => addToolApprovalResponse({ approved: true, id: part.approval.id })}
+                size="sm"
+              >
+                {t("approve")}
+              </AppButton>
+              <AppButton
+                className="text-xs"
+                onClick={() =>
+                  addToolApprovalResponse({
+                    approved: false,
+                    id: part.approval.id,
+                    reason: t("denied_by_user"),
+                  })
+                }
+                size="sm"
+                variant="ghost"
+              >
+                {t("deny")}
+              </AppButton>
+            </div>
+          </TraceCollapsibleContent>
+        </TraceCollapsible>
+      </Trace>
     );
   }
 
   if (isResponded) {
     const wasApproved = part.approval.approved;
     return (
-      <div className="fade-in my-1 w-full animate-in text-left duration-200">
-        <AppBadge
-          className="flex items-center gap-2 text-muted-foreground text-xs"
-          variant="outline"
-        >
-          {wasApproved ? (
-            <>
-              <span className="font-bold text-success text-xs">
-                <Check className="text-success" />
-              </span>
-              <span className="max-w-[320px] truncate text-foreground">
-                {`${fullLabel} (${t("approved")})`}
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="font-bold text-destructive text-xs">
-                <X className="text-destructive" />
-              </span>
-              <span className="max-w-[320px] truncate text-foreground">
-                {`${fullLabel} (${t("denied")})`}
-              </span>
-            </>
-          )}
-        </AppBadge>
-      </div>
+      <Trace className="my-1 w-full animate-in text-left duration-200">
+        <TraceLine>
+          <TraceIcon>
+            {wasApproved ? (
+              <Check className="size-3.5 text-success" />
+            ) : (
+              <X className="size-3.5 text-destructive" />
+            )}
+          </TraceIcon>
+          <TraceTitle className="max-w-[320px] truncate text-xs text-foreground">
+            {`${fullLabel} (${wasApproved ? t("approved") : t("denied")})`}
+          </TraceTitle>
+        </TraceLine>
+      </Trace>
     );
   }
 
   if (isCompleted) {
     const isError = part.state === "output-error";
     return (
-      <div className="fade-in my-1 w-full animate-in text-left duration-200">
-        <AppBadge
-          className="flex items-center gap-2 text-muted-foreground text-xs"
-          variant="outline"
-        >
-          {isError ? <X className="text-destructive" /> : <Check className="text-success" />}
-          <span className="max-w-[320px] truncate text-foreground">
+      <Trace className="my-1 w-full animate-in text-left duration-200">
+        <TraceLine>
+          <TraceIcon>
+            {isError ? (
+              <X className="size-3.5 text-destructive" />
+            ) : (
+              <Check className="size-3.5 text-success" />
+            )}
+          </TraceIcon>
+          <TraceTitle className="max-w-[320px] truncate text-xs text-foreground">
             {`${fullLabel} ${isError ? `(${tCommon("failed")})` : `(${t("completed")})`}`}
-          </span>
-        </AppBadge>
-      </div>
+          </TraceTitle>
+        </TraceLine>
+      </Trace>
     );
   }
 
+  const isRunning = part.state === "input-streaming";
   return (
-    <div className="fade-in my-1 w-full animate-in text-left duration-200">
-      <AppBadge
-        className="flex items-center gap-2 text-muted-foreground text-xs"
-        variant="outline"
-      >
-        <Spinner />
-        <span className="max-w-[320px] truncate text-foreground">{fullLabel}</span>
-      </AppBadge>
-    </div>
+    <Trace className="my-1 w-full animate-in text-left duration-200">
+      <TraceLine status={isRunning ? "running" : "pending"}>
+        <TraceIcon>{isRunning ? <Spinner className="size-3.5" /> : null}</TraceIcon>
+        <TraceTitle className="max-w-[320px] truncate text-xs text-foreground">
+          {fullLabel}
+        </TraceTitle>
+      </TraceLine>
+    </Trace>
   );
 }

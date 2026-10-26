@@ -28,6 +28,7 @@ import { useTRPC } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
@@ -163,18 +164,40 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
     >
       {isLoading || !node ? (
         <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-4 w-1/2" />
+          <div className="flex items-center justify-between gap-2 border-b pb-2">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <Skeleton className="size-6" />
+              <SkeletonText
+                className="min-w-0 flex-1"
+                lines={1}
+                widths={["w-32"]}
+              />
+            </div>
+            <Skeleton className="h-4 w-14" />
+          </div>
+
+          <SkeletonText
+            lines={1}
+            widths={["w-full"]}
+          />
+
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+            <Skeleton className="h-4 w-20" />
             <Skeleton className="h-4 w-16" />
           </div>
-          <Skeleton className="h-10 w-full" />
-          <div className="flex gap-2">
-            <Skeleton className="h-3 w-14" />
-            <Skeleton className="h-3 w-14" />
-          </div>
-          <div className="flex gap-3 border-t pt-2">
-            <Skeleton className="h-3 w-10" />
-            <Skeleton className="h-3 w-10" />
+
+          <div className="flex flex-col gap-2 border-t pt-2.5">
+            <SkeletonText
+              lines={1}
+              widths={["w-32"]}
+            />
+
+            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border">
+              <Skeleton className="h-9 rounded-none" />
+              <Skeleton className="h-9 rounded-none" />
+              <Skeleton className="h-9 rounded-none" />
+              <Skeleton className="h-9 rounded-none" />
+            </div>
           </div>
         </div>
       ) : (

@@ -8,9 +8,9 @@ import { useAutoScroll } from "@/shared/lib/hooks/use-auto-scroll";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
-import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 import { AppSearch } from "@/shared/ui/kit/app-search";
+import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 import type { LogEntry } from "../model/terminal-logs";
@@ -126,10 +126,26 @@ export function AnalysisTerminal({ logs, maxHeight = "h-75", title }: Readonly<P
             </div>
           )}
           {logs.length === 0 && (
-            <div className="flex flex-col gap-1">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-            </div>
+            <SkeletonList
+              className="flex flex-col gap-1"
+              count={6}
+              itemClassName="flex items-start gap-3 rounded-xl p-2"
+              renderItem={() => (
+                <>
+                  <SkeletonText
+                    lines={1}
+                    size="sm"
+                    widths={["w-16"]}
+                  />
+                  <SkeletonText
+                    className="min-w-0 flex-1"
+                    lines={1}
+                    size="sm"
+                    widths={["w-full"]}
+                  />
+                </>
+              )}
+            />
           )}
 
           <div className="flex flex-col gap-1">

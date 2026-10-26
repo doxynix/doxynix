@@ -42,6 +42,12 @@ describe("clientShiki", () => {
     expect(html).toContain("github-light");
   });
 
+  it("renders a named code theme", async () => {
+    const html = await clientShiki.highlight("const a = 1;", "typescript", "nord");
+
+    expect(html).toContain("nord");
+  });
+
   it("renders plain text pseudo-languages without a grammar", async () => {
     const html = await clientShiki.highlight("just text", "text", "dark");
 

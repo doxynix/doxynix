@@ -590,7 +590,7 @@ const caller = createCallerFactory(router)(makeCtx());
 ## Testing components
 
 Client components now call `useTRPC()` and a real `useQuery`, so a component test needs two mocks
-plus a real `QueryClient`. `features/admin/ui/admin-user-sheet.test.ts` is the reference:
+plus a real `QueryClient`. The mock is shaped like this:
 
 ```ts
 vi.mock("@/shared/api/trpc", () => ({

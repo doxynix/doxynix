@@ -18,6 +18,7 @@ import {
 } from "@/shared/ui/core/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/core/popover";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 
 import { notificationsParsers } from "@/entities/notification/model/notifications-parsers";
 import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dialog.store";
@@ -96,14 +97,21 @@ export function NotificationsRepoFilter() {
                 {t("all_repos")}
               </CommandItem>
               {isLoading && (
-                <div className="flex flex-col gap-2 p-2">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton
-                      className="h-6 w-full"
-                      key={i}
-                    />
-                  ))}
-                </div>
+                <SkeletonList
+                  className="flex flex-col"
+                  count={5}
+                  itemClassName="flex items-center gap-2 px-2 py-1.5"
+                  renderItem={() => (
+                    <>
+                      <Skeleton className="size-4 shrink-0" />
+                      <SkeletonText
+                        className="min-w-0 flex-1"
+                        lines={1}
+                        widths={["w-full"]}
+                      />
+                    </>
+                  )}
+                />
               )}
               {(repos?.items.length === 0 || repos == null) && !isLoading ? (
                 <div className="flex flex-col items-center gap-4 p-4 text-center text-sm">

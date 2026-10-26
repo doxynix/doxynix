@@ -1098,10 +1098,6 @@
       {
         "license": "MIT",
         "name": "@scalar/api-reference-react"
-      },
-      {
-        "license": "MIT",
-        "name": "@scalar/nextjs-api-reference"
       }
     ]
   },
@@ -1532,17 +1528,6 @@
       {
         "license": "MPL-2.0",
         "name": "nextjs-bundle-analysis"
-      }
-    ]
-  },
-  {
-    "author": "Hey API",
-    "authorLink": "https://heyapi.dev/docs/openapi/typescript/get-started",
-    "avatar": null,
-    "packages": [
-      {
-        "license": "MIT",
-        "name": "@hey-api/openapi-ts"
       }
     ]
   },

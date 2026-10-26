@@ -361,7 +361,7 @@ function Sidebar({
         {...props}
       >
         <div
-          className="group-data-[variant=floating]:glass-panel flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm"
+          className="group-data-[variant=floating]:glass-panel flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border"
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
         >
@@ -429,7 +429,7 @@ function SidebarInset({ className, ...props }: ComponentProps<"main">) {
     <main
       className={cn(
         "relative flex w-full flex-1 flex-col bg-background",
-        "md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2 md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm",
+        "md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2 md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl",
         className,
       )}
       data-slot="sidebar-inset"
@@ -565,7 +565,7 @@ function SidebarGroupContent({ className, ...props }: ComponentProps<"div">) {
 function SidebarMenu({ className, ...props }: ComponentProps<"ul">) {
   return (
     <ul
-      className={cn("flex w-full min-w-0 flex-col gap-1", className)}
+      className={cn("flex w-full min-w-0 flex-col gap-0.25", className)}
       data-sidebar="menu"
       data-slot="sidebar-menu"
       {...props}
@@ -585,7 +585,7 @@ function SidebarMenuItem({ className, ...props }: ComponentProps<"li">) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-xl border border-transparent p-2 text-left text-sm outline-hidden transition-colors disabled:pointer-events-none disabled:opacity-50",
+  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-xl border border-transparent p-2 text-left text-sm outline-hidden transition-colors group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-0 disabled:pointer-events-none disabled:opacity-50",
   {
     defaultVariants: {
       size: "default",
@@ -730,20 +730,24 @@ function SidebarMenuSkeleton({
 }) {
   return (
     <div
-      className={cn("flex h-8 items-center gap-2 rounded-xl px-2", className)}
+      className={cn(
+        "flex h-8 items-center gap-2 rounded-xl p-2",
+        "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-0",
+        className,
+      )}
       data-sidebar="menu-skeleton"
       data-slot="sidebar-menu-skeleton"
       {...props}
     >
       {showIcon && (
         <Skeleton
-          className="size-4 shrink-0 rounded-xl"
+          className="size-6 shrink-0 rounded-full"
           data-sidebar="menu-skeleton-icon"
         />
       )}
 
       <Skeleton
-        className="h-4 w-full flex-1"
+        className="h-5 flex-1 group-data-[collapsible=icon]:hidden"
         data-sidebar="menu-skeleton-text"
       />
     </div>
@@ -811,7 +815,10 @@ function SidebarMenuSubButton({
 function SidebarMenuShortcut({ className, ...props }: ComponentProps<"kbd">) {
   return (
     <kbd
-      className={cn("ml-auto text-muted-foreground text-xs tracking-widest", className)}
+      className={cn(
+        "ml-auto text-muted-foreground text-xs tracking-widest group-data-[collapsible=icon]:hidden",
+        className,
+      )}
       data-slot="sidebar-menu-shortcut"
       {...props}
     />

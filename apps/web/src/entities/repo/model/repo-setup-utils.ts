@@ -3,8 +3,8 @@ import type { FileNode, FileTuple } from "./repo-setup.types";
 export const sortNodes = (nodes: FileNode[]): FileNode[] => {
   return nodes
     .toSorted((a, b) => {
-      const aIsFolder = !a.children;
-      const bIsFolder = !b.children;
+      const aIsFolder = Array.isArray(a.children);
+      const bIsFolder = Array.isArray(b.children);
 
       if (aIsFolder !== bIsFolder) {
         return aIsFolder ? -1 : 1;

@@ -41,6 +41,20 @@ describe("field-encryption cipher", () => {
     expect(decryptString(encryptString(plaintext, RAW_KEY, "deadbeef"), RAW_KEY)).toBe(plaintext);
   });
 
+  it("round-trips an empty string", () => {
+    const envelope = encryptString("", RAW_KEY, "deadbeef");
+
+    expect(looksEncrypted(envelope)).toBe(true);
+    expect(decryptString(envelope, RAW_KEY)).toBe("");
+  });
+
+  it("round-trips a single-byte payload", () => {
+    const envelope = encryptString("a", RAW_KEY, "deadbeef");
+
+    expect(looksEncrypted(envelope)).toBe(true);
+    expect(decryptString(envelope, RAW_KEY)).toBe("a");
+  });
+
   it("produces a distinct ciphertext each call (random IV)", () => {
     const a = encryptString("same", RAW_KEY, "deadbeef");
     const b = encryptString("same", RAW_KEY, "deadbeef");

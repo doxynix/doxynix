@@ -24,6 +24,11 @@ model User {
   twoFactorEnabled    Boolean              @default(false) @map("two_factor_enabled")
   lastLoginMethod     String?              @map("last_login_method")
 
+  onboardingIntent               OnboardingIntent? @map("onboarding_intent")
+  onboardingCompletedAt          DateTime?         @map("onboarding_completed_at")
+  onboardingChecklistDismissedAt DateTime?         @map("onboarding_checklist_dismissed_at")
+  activatedAt                    DateTime?         @map("activated_at")
+
   createdAt           DateTime             @default(now()) @map("created_at")
   updatedAt           DateTime             @default(now()) @updatedAt @map("updated_at")
 
@@ -36,6 +41,7 @@ model User {
   chatSession         ChatSession[]
   passkeys            Passkey[]
   twoFactors          TwoFactor[]
+  appearance          UserAppearance?
 
   @@allow('create', role == USER || auth().role == 'ADMIN')
   @@allow('read,delete', auth() == this || auth().role == 'ADMIN')
@@ -222,6 +228,12 @@ model BannedEmail {
 enum UserRole {
   USER
   ADMIN
+}
+
+enum OnboardingIntent {
+  ARCHITECTURE
+  DOCUMENTATION
+  RISKS
 }
 
 enum BannedEmailReason {

@@ -19,6 +19,8 @@ import { AnalysisTerminal } from "./repo-analysis-terminal";
 type Props = {
   accessToken: string;
   analysisId: string;
+  completionHref?: string;
+  completionLabel?: string;
   jobId: string;
   name: string;
   owner: string;
@@ -28,6 +30,8 @@ type Props = {
 export function RepoAnalysisLive({
   accessToken,
   analysisId,
+  completionHref,
+  completionLabel,
   jobId,
   name,
   owner,
@@ -126,8 +130,10 @@ export function RepoAnalysisLive({
 
       <div className="flex justify-center gap-4">
         {isFinished && (
-          <AppButton onClick={() => router.push(`/dashboard/repo/${owner}/${name}`)}>
-            {t("repo_analysis_view_results")}
+          <AppButton
+            onClick={() => router.push(completionHref ?? `/dashboard/repo/${owner}/${name}`)}
+          >
+            {completionLabel ?? t("repo_analysis_view_results")}
           </AppButton>
         )}
         {(isFinished || isFailed) && (

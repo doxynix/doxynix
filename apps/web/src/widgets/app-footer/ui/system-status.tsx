@@ -7,6 +7,7 @@ import * as z from "zod/mini";
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 
 type StatusType = "down" | "maintenance" | "unknown" | "up";
@@ -71,7 +72,13 @@ export function SystemStatus({ className }: Readonly<{ className?: string }>) {
   return (
     <div className={cn("flex items-center gap-2 font-medium text-xs", className)}>
       {isLoading ? (
-        <Skeleton className="h-8 w-45" />
+        <div className="flex h-8 items-center gap-2 rounded-xl border border-input px-3">
+          <Skeleton className="size-2 rounded-full" />
+          <SkeletonText
+            lines={1}
+            widths={["w-28"]}
+          />
+        </div>
       ) : (
         <AppButton
           asChild

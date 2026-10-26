@@ -8,6 +8,7 @@ import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 
 import { useTRPC } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
 import type { AvailableDocs } from "@/entities/repo/model/repo.types";
@@ -65,9 +66,70 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-6">
-        <Skeleton className="h-10 w-100" />
-        <Skeleton className="h-125 w-full" />
+      <div className="flex h-[calc(100dvh-250px)] w-full flex-row gap-10">
+        <div className="flex w-72 shrink-0 flex-col gap-4">
+          <SkeletonText
+            lines={1}
+            widths={["w-40"]}
+          />
+
+          <SkeletonList
+            className="flex flex-col gap-1"
+            count={5}
+            itemClassName="flex w-full items-center justify-start gap-3 p-3"
+            renderItem={() => (
+              <>
+                <Skeleton className="size-6" />
+                <SkeletonText
+                  lines={1}
+                  widths={["w-28"]}
+                />
+              </>
+            )}
+          />
+        </div>
+
+        <div className="relative flex flex-1 flex-col rounded-xl border bg-card">
+          <div className="flex-none px-8 pt-8 md:px-12">
+            <div className="mb-6 flex items-center justify-between border-b pb-6">
+              <div className="flex items-center gap-4">
+                <Skeleton className="size-10 rounded-md" />
+                <div className="flex flex-col gap-1">
+                  <SkeletonText
+                    lines={1}
+                    widths={["w-56"]}
+                  />
+                  <div className="flex flex-wrap items-center gap-3">
+                    <SkeletonText
+                      lines={1}
+                      widths={["w-32"]}
+                    />
+                    <SkeletonText
+                      lines={1}
+                      widths={["w-40"]}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Skeleton className="size-9 rounded-xl" />
+                <Skeleton className="size-8 rounded-xl" />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex w-full flex-1 flex-col gap-6 px-8 pb-12 md:px-12">
+            <SkeletonText
+              lines={1}
+              widths={["w-1/3"]}
+            />
+            <SkeletonText
+              className="gap-2"
+              lines={8}
+              widths={["w-full"]}
+            />
+          </div>
+        </div>
       </div>
     );
   }

@@ -8,7 +8,6 @@ import {
   FileText,
   FolderTree,
   Inspect,
-  Loader2,
   Map,
   Search,
   ShieldCheck,
@@ -24,8 +23,11 @@ import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
+import { LoadingButton } from "@/shared/ui/kit/loading-button";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
 import type { PRNumber } from "@/entities/pr/model/pr.types";
@@ -379,24 +381,53 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
               {t("repo_pull_detected_issues")} ({comments?.renderedComments.length ?? 0})
             </CardTitle>
             {comments != null && comments.renderedComments.length > 0 && (
-              <AppButton
-                className="flex items-center gap-1.5 bg-success font-semibold text-success-foreground text-xs hover:bg-success/90"
-                disabled={createFixMutation.isPending}
+              <LoadingButton
+                aria-label={t("repo_pull_autofix_all")}
+                className="bg-success font-semibold text-success-foreground hover:bg-success/90"
+                isLoading={createFixMutation.isPending}
                 onClick={handleFixAll}
                 size="sm"
               >
-                {createFixMutation.isPending ? (
-                  <Loader2 className="size-3.5 animate-spin" />
-                ) : (
-                  <Wand2 className="size-3.5" />
-                )}
-                {t("repo_pull_autofix_all")}
-              </AppButton>
+                <Wand2 className="size-3.5" />
+              </LoadingButton>
             )}
           </CardHeader>
           <CardContent>
             {isCommentsLoading ? (
-              <Loader2 className="mx-auto animate-spin" />
+              <SkeletonList
+                className="flex flex-col gap-4"
+                count={3}
+                itemClassName="group relative overflow-hidden rounded-xl border p-4"
+                renderItem={() => (
+                  <>
+                    <div className="mb-2 flex items-center justify-between">
+                      <SkeletonText
+                        lines={1}
+                        widths={["w-56"]}
+                      />
+                      <div className="flex items-center gap-3">
+                        <SkeletonText
+                          lines={1}
+                          widths={["w-16"]}
+                        />
+                        <SkeletonText
+                          lines={1}
+                          widths={["w-16"]}
+                        />
+                      </div>
+                    </div>
+                    <div className="mb-4">
+                      <SkeletonText
+                        lines={3}
+                        widths={["w-full", "w-full", "w-2/3"]}
+                      />
+                    </div>
+                    <div className="flex justify-end border-border border-t pt-3">
+                      <Skeleton className="h-8 w-32 rounded-xl" />
+                    </div>
+                  </>
+                )}
+              />
             ) : comments != null && comments.renderedComments.length > 0 ? (
               <div className="flex flex-col gap-4">
                 {comments.renderedComments.map((comment) => (
@@ -422,21 +453,17 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                       dangerouslySetInnerHTML={{ __html: comment.bodyHtml }}
                     />
 
-                    <div className="flex justify-end border-border/40 border-t pt-3">
-                      <AppButton
-                        className="flex items-center gap-1.5 font-medium text-xs transition-standard hover:border-success/30 hover:bg-success/5 hover:text-success"
-                        disabled={createFixMutation.isPending}
+                    <div className="flex justify-end border-border border-t pt-3">
+                      <LoadingButton
+                        aria-label={t("repo_pull_autofix_single")}
+                        className="font-medium text-xs transition-standard hover:border-success/30 hover:bg-success/5 hover:text-success"
+                        isLoading={createFixMutation.isPending}
                         onClick={() => handleFixSingle(comment)}
                         size="sm"
                         variant="outline"
                       >
-                        {createFixMutation.isPending ? (
-                          <Loader2 className="size-3.5 animate-spin" />
-                        ) : (
-                          <Wand2 className="size-3.5" />
-                        )}
-                        {t("repo_pull_autofix_single")}
-                      </AppButton>
+                        <Wand2 className="size-3.5" />
+                      </LoadingButton>
                     </div>
                   </div>
                 ))}
@@ -558,19 +585,15 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
               <Search />
               {t("repo_pull_top_findings")}
             </CardTitle>
-            <AppButton
-              className="flex items-center gap-1.5 bg-success font-semibold text-success-foreground text-xs hover:bg-success/90"
-              disabled={createFixMutation.isPending}
+            <LoadingButton
+              aria-label={t("repo_pull_autofix_all")}
+              className="bg-success font-semibold text-success-foreground hover:bg-success/90"
+              isLoading={createFixMutation.isPending}
               onClick={handleFixAll}
               size="sm"
             >
-              {createFixMutation.isPending ? (
-                <Loader2 className="size-3.5 animate-spin" />
-              ) : (
-                <Wand2 className="size-3.5" />
-              )}
-              {t("repo_pull_autofix_all")}
-            </AppButton>
+              <Wand2 className="size-3.5" />
+            </LoadingButton>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             {topFindings.length > 0 ? (

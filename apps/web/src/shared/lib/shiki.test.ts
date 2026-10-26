@@ -14,12 +14,12 @@ describe("highlightCode", () => {
     expect(html).toContain("shiki");
   });
 
-  it("maps dark/light themes to github themes", async () => {
+  it("maps dark/light tones to the auto code themes", async () => {
     const dark = await highlightCode("const a = 1;");
     const light = await highlightCode("const a = 1;", "typescript", "light");
 
-    expect(dark).toContain("github-dark-dimmed");
-    expect(light).toContain("github-light");
+    expect(dark).toContain("github-dark-default");
+    expect(light).toContain("github-light-default");
   });
 
   it("resolves aliases like py -> python and golang -> go", async () => {
@@ -52,7 +52,7 @@ describe("highlightCode", () => {
 
     expect(unstableCacheMock).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.arrayContaining(["light", "typescript"]),
+      expect.arrayContaining(["github-light-default", "typescript"]),
       expect.any(Object),
     );
   });

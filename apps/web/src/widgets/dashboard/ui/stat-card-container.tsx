@@ -1,6 +1,8 @@
 "use client";
 import { useLocale, useTranslations } from "next-intl";
 
+import { SkeletonList } from "@/shared/ui/kit/app-skeleton";
+
 import { StatCard } from "@/entities/repo/ui/stat-card";
 import { StatCardSkeleton } from "@/entities/repo/ui/stat-card-skeleton";
 
@@ -15,11 +17,11 @@ export function StatCardContainer() {
 
   if (isLoading || data == null) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <StatCardSkeleton key={i} />
-        ))}
-      </div>
+      <SkeletonList
+        className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+        count={8}
+        renderItem={() => <StatCardSkeleton />}
+      />
     );
   }
 

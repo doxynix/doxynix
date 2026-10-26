@@ -13,7 +13,9 @@ import {
   buildDateRangeWhere,
   cappedCount,
   getPaginatedList,
+  keysetArgs,
   orderWithTiebreak,
+  splitKeysetPage,
 } from "@/server/utils/pagination";
 import { normalizeSearchInput, tokenizeSearchInput } from "@/server/utils/search";
 
@@ -268,29 +270,25 @@ export const repoService = {
 
     const where = { userId, ...this.buildWhereClause({ owner, search, status, visibility }) };
 
-    const items = await db.repo.findMany({
-      cursor: cursor != null ? { id: cursor } : undefined,
-      orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+    const rows = await db.repo.findMany({
+      ...keysetArgs(cursor, limit),
+      orderBy: orderWithTiebreak("updatedAt", "desc"),
       select: {
         id: true,
         name: true,
         owner: true,
         ownerAvatarUrl: true,
       },
-      take: limit + 1,
       where,
     });
 
-    const hasNextPage = items.length > limit;
-    if (hasNextPage) {
-      items.pop();
-    }
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
 
     return {
       items: items.map((item) => repoMapper.toSlim(item)),
       meta: {
         hasNextPage,
-        nextCursor: items.at(-1)?.id,
+        nextCursor,
       },
     };
   },

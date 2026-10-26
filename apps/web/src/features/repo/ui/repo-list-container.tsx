@@ -7,8 +7,8 @@ import { useQueryStates } from "nuqs";
 import { useTRPC } from "@/shared/api/trpc";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { clampIntegerParam } from "@/shared/lib/number-utils";
-import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
+import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 
 import type { RepoStatus } from "@/entities/repo/model/repo.types";
 import { REPO_LIST_DEFAULT_LIMIT, repoParsers } from "@/entities/repo/model/repo-parsers";
@@ -66,12 +66,20 @@ export function RepoListContainer({ config }: Readonly<Props>) {
   if (isLoading || data == null) {
     return (
       <>
-        {config?.showTotalCount !== false && <Skeleton className="mb-4 ml-auto h-5 w-24 text-sm" />}
-        <div className="flex flex-col gap-3">
-          {Array.from({ length: safeLimit }).map((_, i) => (
-            <RepoCardSkeleton key={i} />
-          ))}
-        </div>
+        {config?.showTotalCount !== false && (
+          <div className="mb-4">
+            <SkeletonText
+              lines={1}
+              size="lg"
+              widths={["w-24"]}
+            />
+          </div>
+        )}
+        <SkeletonList
+          className="flex flex-col gap-3"
+          count={safeLimit}
+          renderItem={() => <RepoCardSkeleton />}
+        />
       </>
     );
   }

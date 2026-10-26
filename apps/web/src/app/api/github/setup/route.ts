@@ -6,6 +6,10 @@ import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
 import { prisma } from "@/server/core/db";
 import { githubAppService } from "@/server/modules/repos/github-app.service";
+import {
+  type GithubSetupOutcome,
+  resolveGithubSetupRedirect,
+} from "@/server/modules/repos/github-setup-redirect";
 import { withApiHandler } from "@/server/utils/with-api-handler";
 
 async function handler(request: NextRequest) {
@@ -22,23 +26,33 @@ async function handler(request: NextRequest) {
   }
 
   const userId = session.user.id;
+  const user = await prisma.user.findUnique({
+    select: { onboardingCompletedAt: true },
+    where: { id: userId },
+  });
+
+  const onboardingCompleted = user?.onboardingCompletedAt != null;
+
+  const finish = (outcome: GithubSetupOutcome) => {
+    return redirect(resolveGithubSetupRedirect(outcome, onboardingCompleted));
+  };
 
   if (state == null) {
     if (installationId == null) {
-      return redirect("/dashboard?error=setup_params_missing");
+      return finish("missing_params");
     }
 
     appLogger.info({
       installationId,
-      msg: "GitHub App installed, redirecting to dashboard for background sync",
+      msg: "GitHub App installed, returning to the surface that started the install",
       userId,
     });
 
-    return redirect("/dashboard?success=github_connected");
+    return finish("success");
   }
 
   if (installationId == null) {
-    return redirect("/dashboard?error=setup_params_missing");
+    return finish("missing_params");
   }
 
   try {
@@ -48,10 +62,10 @@ async function handler(request: NextRequest) {
       error: error instanceof Error ? error.message : String(error),
       msg: "GitHub Setup Error:",
     });
-    return redirect("/dashboard?error=setup_failed");
+    return finish("error");
   }
 
-  return redirect("/dashboard?success=github_connected");
+  return finish("success");
 }
 
 // redirect()/unauthorized() throw; withApiHandler recognizes Next's control-flow digests and re-throws them, so the local catch only covers saveInstallation failures.

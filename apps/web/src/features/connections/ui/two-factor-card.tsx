@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
+import { ShieldAlert, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
@@ -24,6 +24,10 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/shared/ui/core/input-otp";
+import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
+import { CopyButton } from "@/shared/ui/kit/copy-button";
+import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { ConnectionCard } from "@/entities/connection/ui/connection-card";
@@ -213,22 +217,51 @@ export function TwoFactorCard() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-6 py-4">
+            <div className="flex min-w-0 flex-col items-center gap-6 py-4">
               {isGenerating ? (
-                <div className="flex size-48 items-center justify-center">
-                  <RefreshCw className="animate-spin text-muted-foreground" />
-                </div>
+                <>
+                  <Skeleton className="size-49" />
+                  <div className="flex w-full min-w-0 flex-col gap-2 rounded-xl border p-2">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <SkeletonText
+                        className="min-w-0 flex-1"
+                        lines={1}
+                        size="sm"
+                        widths={["w-full"]}
+                      />
+                      <Skeleton className="-my-1 size-6 shrink-0" />
+                    </div>
+                  </div>
+                </>
               ) : (
                 totpUri && (
-                  <div className="rounded-xl bg-white p-2">
-                    <QRCodeSVG
-                      level="M"
-                      marginSize={4}
-                      size={180}
-                      title={t("settings_2fa_title")}
-                      value={totpUri}
-                    />
-                  </div>
+                  <>
+                    <div className="rounded-xl bg-white p-2">
+                      <QRCodeSVG
+                        level="M"
+                        marginSize={4}
+                        size={180}
+                        value={totpUri}
+                      />
+                    </div>
+                    <div className="flex w-full min-w-0 flex-col gap-2 rounded-xl border p-2">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <ExternalLink
+                          className="min-w-0 flex-1 truncate font-mono text-xs"
+                          href={totpUri}
+                          target="_self"
+                        >
+                          {totpUri}
+                        </ExternalLink>
+                        <CopyButton
+                          alwaysVisible={true}
+                          className="-my-1 size-6 shrink-0"
+                          tooltipText={tCommon("copy")}
+                          value={totpUri}
+                        />
+                      </div>
+                    </div>
+                  </>
                 )
               )}
 

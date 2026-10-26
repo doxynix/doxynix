@@ -16,6 +16,7 @@ export function useRepoActions() {
     void queryClient.invalidateQueries(trpc.repo.getAll.pathFilter());
     void queryClient.invalidateQueries(trpc.repo.getSlim.pathFilter());
     void queryClient.invalidateQueries(trpc.analytics.getDashboardStats.pathFilter());
+    void queryClient.invalidateQueries(trpc.user.getOnboardingState.pathFilter());
   };
 
   const create = useMutation(

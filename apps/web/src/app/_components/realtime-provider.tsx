@@ -103,6 +103,7 @@ function RealtimeSubscriptions({ userId }: { userId: string }) {
     if (message.name === REALTIME_CONFIG.events.user.repoUpdated) {
       invalidate();
       void queryClient.invalidateQueries(trpc.repo.getByOwner.pathFilter());
+      void queryClient.invalidateQueries(trpc.user.getOnboardingState.pathFilter());
     }
 
     if (message.name === REALTIME_CONFIG.events.user.notificationUpdated) {
@@ -112,6 +113,7 @@ function RealtimeSubscriptions({ userId }: { userId: string }) {
     if (message.name === REALTIME_CONFIG.events.user.userUpdated) {
       void queryClient.invalidateQueries(trpc.user.me.pathFilter());
       void queryClient.invalidateQueries(trpc.user.getActiveSessions.pathFilter());
+      void queryClient.invalidateQueries(trpc.user.getOnboardingState.pathFilter());
     }
 
     if (message.name === REALTIME_CONFIG.events.user.agentSessionUpdated) {
@@ -123,6 +125,7 @@ function RealtimeSubscriptions({ userId }: { userId: string }) {
       void queryClient.invalidateQueries(trpc.analysis.getHistory.pathFilter());
       void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
       void queryClient.invalidateQueries(trpc.analysis.getByRepository.pathFilter());
+      void queryClient.invalidateQueries(trpc.user.getOnboardingState.pathFilter());
     }
 
     if (message.name === REALTIME_CONFIG.events.user.notification) {
@@ -202,6 +205,8 @@ function RealtimeSubscriptions({ userId }: { userId: string }) {
       if (payload == null) {
         return;
       }
+
+      void queryClient.invalidateQueries(trpc.user.getOnboardingState.pathFilter());
 
       queryClient.setQueriesData(
         trpc.analytics.getDashboardStats.pathFilter(),

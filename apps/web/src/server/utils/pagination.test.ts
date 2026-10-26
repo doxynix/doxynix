@@ -8,9 +8,11 @@ import { describe, expect, it } from "vitest";
 import {
   clampPage,
   getPaginationMeta,
+  keysetArgs,
   ORDER_CREATED_AT_DESC,
   orderWithTiebreak,
   PaginationSchema,
+  splitKeysetPage,
 } from "./pagination";
 
 // Every offset-paginated list in the app, by the service that owns it. A new one is not covered
@@ -193,5 +195,53 @@ describe("list ordering", () => {
     // `repo.getAll` lets the caller pick `name | updatedAt | createdAt` and the direction, which
     // is six combinations; an inline object per branch is exactly how the tiebreaker got lost.
     expect(readService("repos/repo.service.ts")).toContain("orderWithTiebreak(sortBy, sortOrder)");
+  });
+});
+
+/**
+ * Prisma's cursor is inclusive: the row it points at comes back with the next page. A cursor
+ * pointing at the last row already returned therefore repeats it, once per page boundary, and a
+ * cursor handed out on the last page keeps a "load more" affordance alive forever. Both were live
+ * bugs, so the two halves of the contract live here and the services only supply the query.
+ */
+describe("keyset pagination", () => {
+  it("omits the cursor on the first page and over-fetches one probe row", () => {
+    expect(keysetArgs(undefined, 10)).toEqual({ cursor: undefined, take: 11 });
+    expect(keysetArgs(null, 10)).toEqual({ cursor: undefined, take: 11 });
+  });
+
+  it("points the cursor at the id of the row the next page starts from", () => {
+    expect(keysetArgs("0192f0c1-0000-7000-8000-000000000001", 10)).toEqual({
+      cursor: { id: "0192f0c1-0000-7000-8000-000000000001" },
+      take: 11,
+    });
+  });
+
+  it("drops the probe row and hands its id back as the next cursor", () => {
+    const rows = Array.from({ length: 3 }, (_, i) => ({ id: `r${i}` }));
+
+    expect(splitKeysetPage(rows, 2)).toEqual({
+      hasNextPage: true,
+      items: [{ id: "r0" }, { id: "r1" }],
+      nextCursor: "r2",
+    });
+  });
+
+  it("keeps a short page whole and hands back no cursor", () => {
+    const rows = Array.from({ length: 2 }, (_, i) => ({ id: `r${i}` }));
+
+    expect(splitKeysetPage(rows, 2)).toEqual({
+      hasNextPage: false,
+      items: [{ id: "r0" }, { id: "r1" }],
+      nextCursor: undefined,
+    });
+  });
+
+  it("leaves the caller's rows untouched", () => {
+    const rows = Array.from({ length: 3 }, (_, i) => ({ id: `r${i}` }));
+
+    splitKeysetPage(rows, 2);
+
+    expect(rows).toHaveLength(3);
   });
 });

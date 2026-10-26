@@ -133,13 +133,13 @@ describe("notificationsService.getFeed keyset", () => {
     expect(result.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
   });
 
-  it("drops the probe row and hands back the last kept id", async () => {
+  it("drops the probe row and hands back its id as the next cursor", async () => {
     const { db } = createNotificationDbMock([row("a"), row("b"), row("c")]);
 
     const result = await notificationsService.getFeed(db, { limit: 2 }, "user-1");
 
     expect(result.items.map((item) => item.id)).toStrictEqual(["a", "b"]);
-    expect(result.meta).toStrictEqual({ hasNextPage: true, nextCursor: "b" });
+    expect(result.meta).toStrictEqual({ hasNextPage: true, nextCursor: "c" });
   });
 
   it("scopes to the owner and passes the optional filters through", async () => {

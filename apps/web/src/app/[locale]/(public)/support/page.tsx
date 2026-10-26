@@ -7,6 +7,7 @@ import { Accordion } from "@/shared/ui/core/accordion";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AccordionListItem } from "@/shared/ui/kit/accordion-list-item";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
+import { ExternalLink } from "@/shared/ui/kit/external-link";
 
 export const generateMetadata = createMetadata("support_title", "support_desc", "support");
 
@@ -106,15 +107,10 @@ export default async function SupportPage() {
         <div className="grid gap-6 md:grid-cols-2">
           {supportChannels.map((channel) => {
             const isExternal = channel.href.startsWith("http");
-
-            return (
-              <a
-                className="group relative flex cursor-pointer flex-col gap-5 overflow-hidden rounded-2xl border bg-landing-bg-light/50 p-8 transition-standard hover:border-border-accent hover:bg-surface-panel"
-                href={channel.href}
-                key={channel.title}
-                rel={isExternal ? "noopener noreferrer" : undefined}
-                target={isExternal ? "_blank" : undefined}
-              >
+            const className =
+              "group relative flex cursor-pointer flex-col gap-5 overflow-hidden rounded-2xl border bg-landing-bg-light/50 p-8 transition-standard hover:border-border-accent hover:bg-surface-panel";
+            const content = (
+              <>
                 <div className="flex size-14 items-center justify-center rounded-xl border bg-surface-hover transition-standard group-hover:border-border-accent">
                   <channel.icon className="size-7 text-foreground" />
                 </div>
@@ -124,6 +120,24 @@ export default async function SupportPage() {
                   {channel.action}
                   <MoveLeft className="rotate-180" />
                 </div>
+              </>
+            );
+
+            return isExternal ? (
+              <ExternalLink
+                className={className}
+                href={channel.href}
+                key={channel.title}
+              >
+                {content}
+              </ExternalLink>
+            ) : (
+              <a
+                className={className}
+                href={channel.href}
+                key={channel.title}
+              >
+                {content}
               </a>
             );
           })}

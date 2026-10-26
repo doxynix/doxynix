@@ -1,22 +1,30 @@
 import { getTranslations } from "next-intl/server";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 
 export async function ProfileSkeleton() {
   const t = await getTranslations("Dashboard");
   return (
-    <>
+    <div className="flex w-full flex-col gap-6">
       <Card>
         <CardHeader>
           <CardTitle>{t("settings_profile_picture_title")}</CardTitle>
-          <div className="text-muted-foreground text-sm">{t("settings_profile_picture_desc")}</div>
+          <CardDescription>{t("settings_profile_picture_desc")}</CardDescription>
         </CardHeader>
         <CardContent className="flex items-center gap-6">
-          <Skeleton className="h-24 w-24 rounded-full" />
+          <Skeleton className="size-24 rounded-full" />
           <div className="flex flex-col gap-2">
-            <Skeleton className="h-8.5 w-40" />
-            <Skeleton className="h-4 w-40" />
+            <SkeletonText
+              lines={1}
+              widths={["w-48"]}
+            />
+            <SkeletonText
+              lines={1}
+              size="sm"
+              widths={["w-40"]}
+            />
           </div>
         </CardContent>
       </Card>
@@ -24,27 +32,30 @@ export async function ProfileSkeleton() {
       <Card>
         <CardHeader>
           <CardTitle>{t("settings_profile_personal_information_title")}</CardTitle>
-          {/* <div className="text-muted-foreground text-sm">Update your name or email.</div> */}
-          <div className="text-muted-foreground text-sm">
-            {t("settings_profile_personal_information_desc")}
-          </div>
+          <CardDescription>{t("settings_profile_personal_information_desc")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div className="flex flex-col gap-0.5">
-            <div className="text-muted-foreground text-sm">
-              {t("settings_profile_personal_information_label")}
-            </div>
-            <Skeleton className="h-9 w-full" />
+          <div className="flex flex-col gap-2">
+            <SkeletonText
+              lines={1}
+              size="sm"
+              widths={["w-40"]}
+            />
+            <Skeleton className="h-9 w-full rounded-xl" />
           </div>
-          {/* <div className="flex flex-col gap-0.5">
-            <div className="text-muted-foreground text-sm">Email</div>
-            <Skeleton className="h-9 w-full" />
-          </div> */}
+          <div className="flex flex-col gap-2">
+            <SkeletonText
+              lines={1}
+              size="sm"
+              widths={["w-40"]}
+            />
+            <Skeleton className="h-9 w-full rounded-xl" />
+          </div>
           <div className="flex justify-end">
-            <Skeleton className="h-9 w-36" />
+            <Skeleton className="h-9 w-36 rounded-xl" />
           </div>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 }

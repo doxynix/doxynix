@@ -7,7 +7,6 @@ import {
   GitBranch,
   HistoryIcon,
   LayoutTemplate,
-  Loader2,
   Network,
   Sparkles,
   Users,
@@ -15,8 +14,8 @@ import {
 import { useTranslations } from "next-intl";
 
 import { AppBadge } from "@/shared/ui/core/badge";
-import { AppButton } from "@/shared/ui/core/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import type { RepoMetricsItem } from "../model/repo.types";
 import { ComplexityScatterChart } from "./repo-complexity-scatter-chart";
@@ -202,7 +201,7 @@ export function TechDebtAndComplexitySection({
       <Card className="lg:col-span-1">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <HistoryIcon className="size-4 text-zinc-400" /> {t("tech_debt_inventory")}
+            <HistoryIcon className="text-zinc-400" /> {t("tech_debt_inventory")}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
@@ -307,9 +306,10 @@ export function RefactoringBacklogSection({
               )}
 
               <div className="mt-4 border-t pt-2">
-                <AppButton
-                  className="w-full gap-2 border-emerald-500/30 font-semibold text-emerald-400 text-xs hover:bg-emerald-500/10"
-                  disabled={runningFixId !== null}
+                <LoadingButton
+                  aria-label={t("auto_refactor")}
+                  className="border-emerald-500/30 font-semibold text-emerald-400 hover:bg-emerald-500/10"
+                  isLoading={runningFixId !== null}
                   onClick={() =>
                     onTriggerFix(item.file, {
                       line: 1,
@@ -320,13 +320,8 @@ export function RefactoringBacklogSection({
                   size="sm"
                   variant="outline"
                 >
-                  {runningFixId !== null ? (
-                    <Loader2 className="size-3.5 animate-spin" />
-                  ) : (
-                    <Sparkles className="size-3.5" />
-                  )}
-                  {t("auto_refactor")}
-                </AppButton>
+                  <Sparkles className="size-3.5" />
+                </LoadingButton>
               </div>
             </CardContent>
           </Card>
@@ -352,7 +347,7 @@ export function PerformanceAndScalingSection({
       <Card className="border-orange-500/20 bg-orange-500/5 lg:col-span-2">
         <CardHeader className="py-4">
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Cpu className="size-4 text-orange-400" /> {t("performance_audit")}
+            <Cpu className="text-orange-400" /> {t("performance_audit")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -378,9 +373,10 @@ export function PerformanceAndScalingSection({
                     </td>
                     <td className="p-2 text-zinc-400">{item.optimization_strategy}</td>
                     <td className="p-2 text-center">
-                      <AppButton
+                      <LoadingButton
+                        aria-label={t("fix")}
                         className="gap-1 border-orange-500/20 font-bold text-[10px] text-orange-400 hover:bg-orange-500/10"
-                        disabled={runningFixId !== null}
+                        isLoading={runningFixId !== null}
                         onClick={() =>
                           onTriggerFix(item.location, {
                             line: 1,
@@ -391,13 +387,8 @@ export function PerformanceAndScalingSection({
                         size="icon"
                         variant="outline"
                       >
-                        {runningFixId !== null ? (
-                          <Loader2 className="size-3 animate-spin" />
-                        ) : (
-                          <Sparkles className="size-3" />
-                        )}
-                        {t("fix")}
-                      </AppButton>
+                        <Sparkles className="size-3" />
+                      </LoadingButton>
                     </td>
                   </tr>
                 ))}
@@ -410,7 +401,7 @@ export function PerformanceAndScalingSection({
       <Card className="border-blue-500/20">
         <CardHeader className="py-4">
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Database className="size-4 text-blue-400" /> {t("scaling_and_state")}
+            <Database className="text-blue-400" /> {t("scaling_and_state")}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">

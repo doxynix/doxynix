@@ -25,11 +25,11 @@ import {
 } from "@/shared/ui/core/dialog";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/shared/ui/core/form";
 import { Input } from "@/shared/ui/core/input";
-import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
+import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
@@ -285,19 +285,47 @@ export function CreateRepoDialog() {
               <div className="flex flex-col gap-0.5">
                 {isFetchingMyRepos ? (
                   <div className="h-70 rounded-xl border p-1">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <div
-                        className="flex flex-col gap-1 p-3"
-                        key={i}
-                      >
-                        <div className="flex items-center justify-between">
-                          <Skeleton className="h-3.5 w-32" />
-                          <Skeleton className="h-4 w-24" />
-                        </div>
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="h-4 w-48" />
-                      </div>
-                    ))}
+                    <SkeletonList
+                      count={3}
+                      itemClassName="flex flex-col gap-1 px-3 py-2"
+                      renderItem={() => (
+                        <>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex min-w-0 items-center gap-1">
+                              <SkeletonText
+                                lines={1}
+                                size="lg"
+                                widths={["w-32"]}
+                              />
+                              <SkeletonText
+                                lines={1}
+                                widths={["w-12"]}
+                              />
+                            </div>
+                            <div className="flex shrink-0 items-center gap-1">
+                              <Skeleton className="size-3" />
+                              <SkeletonText
+                                lines={1}
+                                widths={["w-8"]}
+                              />
+                              <Skeleton className="size-2.5 rounded-full" />
+                              <SkeletonText
+                                lines={1}
+                                widths={["w-10"]}
+                              />
+                            </div>
+                          </div>
+                          <SkeletonText
+                            lines={1}
+                            widths={["w-48"]}
+                          />
+                          <SkeletonText
+                            lines={1}
+                            widths={["w-24"]}
+                          />
+                        </>
+                      )}
+                    />
                   </div>
                 ) : myGithubData == null ? (
                   <div className="h-70 rounded-xl border p-1">
@@ -347,10 +375,7 @@ export function CreateRepoDialog() {
                     </div>
                   </div>
                 ) : (
-                  <ScrollArea
-                    className="h-70 rounded-xl border p-1"
-                    type="always"
-                  >
+                  <div className="h-70 overflow-y-auto rounded-xl border p-1">
                     {myGithubData.items.length > 0 && myGithubData.installations?.length === 0 && (
                       <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
                         <p className="mb-3 text-muted-foreground text-sm">
@@ -401,7 +426,7 @@ export function CreateRepoDialog() {
                         />
                       ))
                     )}
-                  </ScrollArea>
+                  </div>
                 )}
               </div>
             </div>

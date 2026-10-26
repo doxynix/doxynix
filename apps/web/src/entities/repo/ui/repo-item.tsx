@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { Check, Star } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import type { RepoItemFields } from "@/shared/api/repo.types";
@@ -9,9 +9,21 @@ import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
 import { repoVisibilityConfig } from "../model/repo-visibility-config";
 
-type Props = { disabled?: boolean; onClick: () => void; repo: RepoItemFields };
+type Props = {
+  className?: string;
+  disabled?: boolean;
+  onClick: () => void;
+  repo: RepoItemFields;
+  selected?: boolean;
+};
 
-export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
+export function RepoItem({
+  className,
+  disabled,
+  onClick,
+  repo,
+  selected = false,
+}: Readonly<Props>) {
   const langColor = repo.languageColor ?? "#ccc";
   const visibility = repoVisibilityConfig[repo.visibility];
   const t = useTranslations("Dashboard");
@@ -19,7 +31,12 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
 
   return (
     <AppButton
-      className="h-auto w-full max-w-md justify-start px-3 py-2 text-left"
+      aria-pressed={selected}
+      className={cn(
+        "h-auto w-full max-w-md justify-start px-3 py-2 text-left",
+        selected && "border-border-strong bg-surface-selected",
+        className,
+      )}
       disabled={disabled}
       onClick={onClick}
       type="button"
@@ -39,6 +56,7 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
             </div>
           </div>
           <div className={cn("flex shrink-0 items-center gap-1 text-muted-foreground text-xs")}>
+            {selected && <Check className="size-3.5 text-success" />}
             <Star className="size-3 fill-current text-warning" />
             {repo.stars.toLocaleString(locale)}
             <span

@@ -36,6 +36,12 @@ enum UserRole {
   ADMIN
 }
 
+enum OnboardingIntent {
+  ARCHITECTURE
+  DOCUMENTATION
+  RISKS
+}
+
 enum BannedEmailReason {
   BOUNCED
   COMPLAINED
@@ -168,37 +174,42 @@ enum ApiKeyScope {
 
 model User {
   /// @zod.custom.omit(["model"])
-  id                  String               @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
+  id                             String               @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   /// @encrypted
   /// @zod.string.email({ message: "Incorrect email" })
-  email               String?              @db.Citext()
+  email                          String?              @db.Citext()
   /// @encryption:hash(email)?normalize=lowercase&normalize=trim
   /// @zod.custom.omit(["model"])
-  emailHash           String?              @unique() @map("email_hash")
+  emailHash                      String?              @unique() @map("email_hash")
   /// @zod.string.trim().min(1, { message: "Name required" }).max(50, { message: "Name cannot exceed 50 characters" })
-  name                String?
-  emailVerified       Boolean              @default(false) @map("email_verified")
+  name                           String?
+  emailVerified                  Boolean              @default(false) @map("email_verified")
   /// @zod.string.url({ message: "Incorrect link to avatar" })
-  image               String?
+  image                          String?
   /// @zod.custom.omit(["model"])
-  imageKey            String?              @unique() @map("image_key")
-  role                UserRole             @default(USER)
-  banned              Boolean              @default(false) @map("banned")
-  banReason           String?              @map("ban_reason")
-  banExpires          DateTime?            @map("ban_expires")
-  twoFactorEnabled    Boolean              @default(false) @map("two_factor_enabled")
-  lastLoginMethod     String?              @map("last_login_method")
-  createdAt           DateTime             @default(now()) @map("created_at")
-  updatedAt           DateTime             @default(now()) @updatedAt() @map("updated_at")
-  accounts            Account[]
-  sessions            Session[]
-  repos               Repo[]
-  apiKeys             ApiKey[]
-  notifications       Notification[]
-  githubInstallations GithubInstallation[]
-  chatSession         ChatSession[]
-  passkeys            Passkey[]
-  twoFactors          TwoFactor[]
+  imageKey                       String?              @unique() @map("image_key")
+  role                           UserRole             @default(USER)
+  banned                         Boolean              @default(false) @map("banned")
+  banReason                      String?              @map("ban_reason")
+  banExpires                     DateTime?            @map("ban_expires")
+  twoFactorEnabled               Boolean              @default(false) @map("two_factor_enabled")
+  lastLoginMethod                String?              @map("last_login_method")
+  onboardingIntent               OnboardingIntent?    @map("onboarding_intent")
+  onboardingCompletedAt          DateTime?            @map("onboarding_completed_at")
+  onboardingChecklistDismissedAt DateTime?            @map("onboarding_checklist_dismissed_at")
+  activatedAt                    DateTime?            @map("activated_at")
+  createdAt                      DateTime             @default(now()) @map("created_at")
+  updatedAt                      DateTime             @default(now()) @updatedAt() @map("updated_at")
+  accounts                       Account[]
+  sessions                       Session[]
+  repos                          Repo[]
+  apiKeys                        ApiKey[]
+  notifications                  Notification[]
+  githubInstallations            GithubInstallation[]
+  chatSession                    ChatSession[]
+  passkeys                       Passkey[]
+  twoFactors                     TwoFactor[]
+  appearance                     UserAppearance?
 
   @@index([createdAt(sort: Desc), id(sort: Desc)], map: "users_created_at_id_idx")
   @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "users_name_trgm_idx")
@@ -609,6 +620,19 @@ model Notification {
   @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, map: "notifications_title_trgm_idx")
   @@index([body(ops: raw("gin_trgm_ops"))], type: Gin, map: "notifications_body_trgm_idx")
   @@map("notifications")
+}
+
+model UserAppearance {
+  /// @zod.custom.omit(["model"])
+  id          String   @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
+  /// @zod.custom.omit(["model"])
+  userId      String   @unique() @map("user_id") @db.Uuid()
+  preferences Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt() @map("updated_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_appearances")
 }
 
 model ApiKey {

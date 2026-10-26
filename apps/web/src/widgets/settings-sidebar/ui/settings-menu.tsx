@@ -13,7 +13,7 @@ export function SettingsMenu() {
   const navLabels = useNavLabels();
 
   return (
-    <div className="sticky top-2 flex flex-col gap-1">
+    <div className="sticky top-2 flex flex-col gap-0.25">
       {settingsMenu.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
         const isDestructive = item.variant === "destructive";
@@ -25,7 +25,7 @@ export function SettingsMenu() {
               "justify-start transition-colors",
               isDestructive &&
                 isActive &&
-                "bg-destructive/10 text-destructive hover:bg-destructive/10 hover:text-destructive",
+                "bg-destructive/20 text-destructive hover:bg-destructive/20 hover:text-destructive",
 
               isDestructive &&
                 !isActive &&
@@ -33,7 +33,7 @@ export function SettingsMenu() {
 
               !isDestructive &&
                 isActive &&
-                "bg-accent font-bold text-accent-foreground hover:bg-accent hover:text-accent-foreground",
+                "bg-sidebar-accent font-bold text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
 
               !isDestructive &&
                 !isActive &&

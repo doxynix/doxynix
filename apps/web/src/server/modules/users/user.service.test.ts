@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import type { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type * as DbModule from "@/server/core/db";
 import type { DbClient } from "@/server/core/db";
 import { assertCanDisconnectAccount, userService } from "@/server/modules/users/user.service";
 
@@ -16,16 +17,32 @@ const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 
 const { sleepCalls } = vi.hoisted(() => ({ sleepCalls: [] as number[] }));
 
-const { authMock } = vi.hoisted(() => ({
+const { authMock, prismaMock } = vi.hoisted(() => ({
   authMock: {
+    deleteSession: vi.fn(),
     listSessions: vi.fn(),
     revokeSession: vi.fn(),
+  },
+  prismaMock: {
+    session: {
+      findFirst: vi.fn(),
+      findMany: vi.fn(),
+    },
   },
 }));
 
 vi.mock("@/server/core/auth", () => ({
-  auth: { api: authMock },
+  auth: {
+    $context: Promise.resolve({ internalAdapter: { deleteSession: authMock.deleteSession } }),
+    api: authMock,
+  },
 }));
+
+vi.mock("@/server/core/db", async (importOriginal) => {
+  const actual = await importOriginal<typeof DbModule>();
+
+  return { ...actual, prisma: prismaMock };
+});
 
 vi.mock("node:timers/promises", async (importOriginal) => {
   const actual = await importOriginal<typeof TimersPromises>();
@@ -170,49 +187,121 @@ describe("disconnectAccount: P2034 backoff", () => {
 });
 
 describe("revokeSession", () => {
-  const HEADERS = new Headers({ cookie: "session=whatever" });
+  const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 
   const OWN_SESSION = {
-    createdAt: new Date("2026-03-01T12:00:00Z"),
     id: "018f0000-0000-7000-8000-0000000000a1",
     token: "own-token-value",
   };
   const OTHER_SESSION = {
-    createdAt: new Date("2026-03-02T12:00:00Z"),
     id: "018f0000-0000-7000-8000-0000000000a2",
     token: "other-token-value",
   };
-
-  function mockAuth(sessions: unknown[]) {
-    authMock.listSessions.mockResolvedValue(sessions);
-    authMock.revokeSession.mockResolvedValue({ success: true });
-  }
-
   beforeEach(() => {
-    authMock.listSessions.mockReset();
-    authMock.revokeSession.mockReset();
+    authMock.deleteSession.mockReset();
+    prismaMock.session.findFirst.mockReset();
   });
 
-  it("resolves the token server-side and revokes the matching session", async () => {
-    mockAuth([OWN_SESSION, OTHER_SESSION]);
+  it("deletes the matching session so it leaves the sessions list", async () => {
+    prismaMock.session.findFirst.mockResolvedValue(OTHER_SESSION);
 
-    await expect(userService.revokeSession(HEADERS, OTHER_SESSION.id)).resolves.toEqual({
+    await expect(userService.revokeSession(USER_ID, OTHER_SESSION.id)).resolves.toEqual({
       success: true,
     });
 
-    expect(authMock.revokeSession).toHaveBeenCalledWith({
-      body: { token: OTHER_SESSION.token },
-      headers: HEADERS,
-    });
+    expect(prismaMock.session.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: OTHER_SESSION.id, userId: USER_ID } }),
+    );
+    expect(authMock.deleteSession).toHaveBeenCalledWith(OTHER_SESSION.token);
   });
 
-  it("refuses an unknown session id and never reaches the revoke call", async () => {
-    mockAuth([OWN_SESSION]);
+  it("scopes the lookup to the caller, so another user's session is never revoked", async () => {
+    prismaMock.session.findFirst.mockResolvedValue(null);
+
+    await expect(userService.revokeSession(USER_ID, OWN_SESSION.id)).rejects.toMatchObject({
+      code: "NOT_FOUND",
+    });
+
+    expect(authMock.deleteSession).not.toHaveBeenCalled();
+  });
+
+  it("refuses an unknown session id and never reaches the delete call", async () => {
+    prismaMock.session.findFirst.mockResolvedValue(null);
 
     await expect(
-      userService.revokeSession(HEADERS, "018f0000-0000-7000-8000-00000000dead"),
+      userService.revokeSession(USER_ID, "018f0000-0000-7000-8000-00000000dead"),
     ).rejects.toMatchObject({ code: "NOT_FOUND" });
 
-    expect(authMock.revokeSession).not.toHaveBeenCalled();
+    expect(authMock.deleteSession).not.toHaveBeenCalled();
+  });
+});
+
+describe("revokeOtherSessions", () => {
+  const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
+  const CURRENT_SESSION_ID = "018f0000-0000-7000-8000-0000000000a1";
+
+  it("deletes every session except the current one", async () => {
+    const other = { id: "018f0000-0000-7000-8000-0000000000a2", token: "other-token" };
+    prismaMock.session.findMany.mockResolvedValue([other]);
+
+    await expect(userService.revokeOtherSessions(USER_ID, CURRENT_SESSION_ID)).resolves.toEqual({
+      success: true,
+    });
+
+    expect(prismaMock.session.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: { not: CURRENT_SESSION_ID }, userId: USER_ID },
+      }),
+    );
+    expect(authMock.deleteSession).toHaveBeenCalledWith(other.token);
+  });
+});
+
+describe("getActiveSessions", () => {
+  const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
+
+  function mockDb(sessions: unknown[]) {
+    const findMany = vi.fn().mockResolvedValue(sessions);
+
+    return { db: { session: { findMany } } as unknown as DbClient, findMany };
+  }
+
+  it("reads the sessions of the user from the database", async () => {
+    const createdAt = new Date("2026-03-01T12:00:00Z");
+    const { db, findMany } = mockDb([
+      { createdAt, id: "session-1", ipAddress: "127.0.0.1", userAgent: "internal" },
+    ]);
+
+    await expect(userService.getActiveSessions(db, USER_ID, false)).resolves.toEqual([
+      {
+        createdAt,
+        id: "session-1",
+        ipAddress: "127.0.0.1",
+        userAgent: "System",
+      },
+    ]);
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        where: { expiresAt: { gt: expect.any(Date) }, userId: USER_ID },
+      }),
+    );
+  });
+
+  it("excludes expired sessions", async () => {
+    const { db, findMany } = mockDb([]);
+
+    await userService.getActiveSessions(db, USER_ID, false);
+
+    const where = findMany.mock.calls[0]?.[0]?.where as { expiresAt: { gt: Date } };
+    expect(where.expiresAt.gt).toBeInstanceOf(Date);
+  });
+
+  it("returns nothing for an API-key session, which has no session row", async () => {
+    const { db, findMany } = mockDb([]);
+
+    await expect(userService.getActiveSessions(db, USER_ID, true)).resolves.toEqual([]);
+    expect(findMany).not.toHaveBeenCalled();
   });
 });

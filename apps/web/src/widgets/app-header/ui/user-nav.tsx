@@ -72,8 +72,9 @@ export function UserNav() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <AppButton
-            className="flex items-center gap-3"
+            className="rounded-full"
             size="icon"
+            variant="ghost"
           >
             <AppAvatar
               alt={user?.name ?? tCommon("user")}

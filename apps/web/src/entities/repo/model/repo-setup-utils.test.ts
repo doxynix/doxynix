@@ -16,10 +16,16 @@ function file(id: string, children?: FileNode[]): FileNode {
 }
 
 describe("sortNodes", () => {
-  it("puts nodes without children arrays first, then sorts by name", () => {
+  it("puts folders first, then sorts by name", () => {
     const nodes = sortNodes([file("file10.ts"), file("folder", [file("b.ts")]), file("file2.ts")]);
 
-    expect(nodes.map((n) => n.name)).toEqual(["file2.ts", "file10.ts", "folder"]);
+    expect(nodes.map((n) => n.name)).toEqual(["folder", "file2.ts", "file10.ts"]);
+  });
+
+  it("treats an empty folder as a folder", () => {
+    const nodes = sortNodes([file("file.ts"), file("empty", [])]);
+
+    expect(nodes.map((n) => n.name)).toEqual(["empty", "file.ts"]);
   });
 
   it("sorts recursively into children", () => {

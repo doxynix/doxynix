@@ -10,6 +10,7 @@ type Props = {
   codeHtml: string;
   copyButtonVisible?: boolean;
   title: string;
+  tone?: "dark" | "light";
 };
 
 export function CodeWindow({
@@ -19,17 +20,26 @@ export function CodeWindow({
   codeHtml,
   copyButtonVisible = true,
   title,
+  tone = "dark",
 }: Readonly<Props>) {
   const t = useTranslations("Common");
 
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-xl border border-landing-bg-light bg-landing-bg-dark",
+        "overflow-hidden rounded-xl border",
+        tone === "light"
+          ? "border-border bg-background"
+          : "border-landing-bg-light bg-landing-bg-dark",
         className,
       )}
     >
-      <div className="flex items-center justify-between border-border border-b bg-landing-bg-light/50 p-3">
+      <div
+        className={cn(
+          "flex items-center justify-between border-border border-b p-3",
+          tone === "light" ? "bg-muted/40" : "bg-landing-bg-light/50",
+        )}
+      >
         <div className="flex items-center">
           <div className="flex gap-1.5">
             <div className="size-3 rounded-full bg-destructive/80" />
