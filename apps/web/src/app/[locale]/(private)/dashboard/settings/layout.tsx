@@ -13,7 +13,7 @@ export default async function SettingsLayout({ children }: Readonly<{ children: 
         <div className="flex flex-col gap-4">
           <SettingsMenu />
         </div>
-        <div className="w-full">{children}</div>
+        <div className="min-w-0 flex-1">{children}</div>
       </div>
     </div>
   );

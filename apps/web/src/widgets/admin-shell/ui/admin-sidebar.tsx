@@ -2,6 +2,7 @@
 
 import { ADMIN_SIDEBAR_MENU } from "@/shared/config/navigation";
 import { useNavLabels } from "@/shared/config/navigation-labels";
+import { useAppearancePreferences } from "@/shared/lib/hooks/use-appearance-preferences";
 import {
   Sidebar,
   SidebarHeader,
@@ -15,12 +16,13 @@ import { AdminSidebarLink } from "./admin-sidebar-link";
 
 export function AdminSidebar() {
   const navLabels = useNavLabels();
+  const { preferences } = useAppearancePreferences();
 
   return (
     <Sidebar
       className="top-16 h-[calc(100dvh-4rem)]"
-      collapsible="offcanvas"
-      variant="sidebar"
+      collapsible={preferences.collapsible}
+      variant={preferences.sidebarVariant}
     >
       <SidebarHeader>
         <SidebarMenu>

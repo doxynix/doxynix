@@ -4,6 +4,7 @@ import { highlightCode } from "@/shared/lib/shiki";
 
 import type { DbClient } from "@/server/core/db";
 import { AUDIT_BUSINESS_MODELS } from "@/server/utils/constants";
+import { keysetArgs, ORDER_CREATED_AT_DESC, splitKeysetPage } from "@/server/utils/pagination";
 import { sanitizeObject } from "@/server/utils/sanitize-payload";
 
 import { auditMapper } from "./audit.mapper";
@@ -17,22 +18,16 @@ export const auditService = {
   async getActivityLogs(db: DbClient, userId: string, input: ActivityLogsInput) {
     const { cursor, limit } = input;
 
-    const items = await db.auditLog.findMany({
-      cursor: cursor != null ? { id: cursor } : undefined,
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: limit + 1,
+    const rows = await db.auditLog.findMany({
+      ...keysetArgs(cursor, limit),
+      orderBy: ORDER_CREATED_AT_DESC,
       where: {
         model: { in: AUDIT_BUSINESS_MODELS },
         userId,
       },
     });
 
-    let nextCursor: string | undefined;
-    const hasNextPage = items.length > limit;
-    if (hasNextPage) {
-      const nextItem = items.pop();
-      nextCursor = nextItem?.id;
-    }
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
 
     return {
       items: items.map((item) => auditMapper.toDto(item)),

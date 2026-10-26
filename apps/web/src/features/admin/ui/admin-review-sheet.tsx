@@ -14,6 +14,7 @@ import {
   SheetTitle,
 } from "@/shared/ui/core/sheet";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 type Props = {
@@ -61,10 +62,58 @@ export function AdminReviewSheet({ onOpenChange, open, reviewId }: Readonly<Prop
         </SheetHeader>
 
         {isLoading || data == null ? (
-          <div className="flex flex-col gap-4">
-            <Skeleton className="h-6 w-1/3" />
-            <Skeleton className="h-32 w-full" />
-          </div>
+          <ScrollArea className="flex-1">
+            <div className="flex flex-col gap-6 pr-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <Skeleton className="h-5 w-20 rounded-xl" />
+                <Skeleton className="h-5 w-28 rounded-xl" />
+              </div>
+
+              <dl className="grid grid-cols-2 gap-4 text-sm">
+                {Array.from({ length: 4 }, (_, index) => (
+                  <div
+                    className="flex flex-col gap-1"
+                    key={index}
+                  >
+                    <dt className="flex items-center gap-1 text-muted-foreground text-xs">
+                      <SkeletonText
+                        lines={1}
+                        widths={["w-24"]}
+                      />
+                      {index < 3 && <Skeleton className="ml-auto rounded-xl size-6" />}
+                    </dt>
+                    <dd className="truncate font-mono text-xs">
+                      <SkeletonText
+                        lines={1}
+                        widths={[index === 3 ? "w-8" : "w-40"]}
+                      />
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+
+              <div className="flex flex-col gap-2">
+                <SkeletonText
+                  lines={1}
+                  widths={["w-40"]}
+                />
+                <ul className="flex flex-col gap-2">
+                  <li className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border p-3 text-sm">
+                    <div className="flex flex-col">
+                      <SkeletonText
+                        lines={2}
+                        widths={["w-48", "w-32"]}
+                      />
+                    </div>
+                    <SkeletonText
+                      lines={1}
+                      widths={["w-24"]}
+                    />
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </ScrollArea>
         ) : (
           <ScrollArea className="flex-1">
             <div className="flex flex-col gap-6 pr-4">

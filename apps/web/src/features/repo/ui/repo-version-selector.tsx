@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/shared/ui/core/select";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
 type Props = { repoId: string };
@@ -28,10 +29,26 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
   const { data: history, isLoading } = useQuery(trpc.analysis.getHistory.queryOptions({ repoId }));
 
   if (isLoading || history == null) {
-    return <Skeleton className="h-9 w-60" />;
+    return (
+      <div className="flex h-9 w-60 items-center justify-between gap-2 rounded-xl border border-input bg-background/80 px-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <Skeleton className="size-4 shrink-0" />
+          <SkeletonText
+            className="min-w-0 flex-1"
+            lines={1}
+            widths={["w-24"]}
+          />
+        </div>
+        <Skeleton className="size-4 shrink-0" />
+      </div>
+    );
   }
 
   const { capped, items, total } = history;
+
+  if (items.length === 0) {
+    return null;
+  }
 
   return (
     <Select

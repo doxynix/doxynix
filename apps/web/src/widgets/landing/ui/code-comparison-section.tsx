@@ -6,12 +6,11 @@ import { CodeComparison } from "@/shared/ui/kit/code-comparison";
 export async function CodeComparisonSection() {
   const t = await getTranslations("Landing");
 
-  const [badDark, badLight, goodDark, goodLight] = await Promise.all([
+  const [badHtml, goodHtml] = await Promise.all([
     highlightCode(BAD_CODE, "typescript", "dark"),
-    highlightCode(BAD_CODE, "typescript", "light"),
     highlightCode(GOOD_CODE, "typescript", "dark"),
-    highlightCode(GOOD_CODE, "typescript", "light"),
   ]);
+
   return (
     <section className="border-border border-y bg-landing-bg-light/20 py-32">
       <div className="container mx-auto px-4">
@@ -21,11 +20,11 @@ export async function CodeComparisonSection() {
         </h2>
         <div className="mx-auto max-w-6xl overflow-hidden rounded-xl border border-border">
           <CodeComparison
-            afterHtmlDark={goodDark}
-            afterHtmlLight={goodLight}
+            afterHtmlDark={goodHtml}
+            afterHtmlLight={goodHtml}
             badCode={BAD_CODE}
-            beforeHtmlDark={badDark}
-            beforeHtmlLight={badLight}
+            beforeHtmlDark={badHtml}
+            beforeHtmlLight={badHtml}
             filename="services/billing.ts"
             goodCode={GOOD_CODE}
           />

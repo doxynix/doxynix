@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
 import type { User } from "@/shared/lib/auth-client";
+import { deriveDefaultName } from "@/shared/lib/default-name";
 import {
   Form,
   FormControl,
@@ -22,25 +23,19 @@ import { LoadingButton } from "@/shared/ui/kit/loading-button";
 import { useProfileActions } from "../model/use-profile-actions";
 
 type Props = {
-  buttonText?: string;
-  isWelcome?: boolean;
-  onSuccess?: () => void;
   user: User;
 };
 
-export function ProfileDetailsForm({
-  buttonText,
-  isWelcome = false,
-  onSuccess,
-  user,
-}: Readonly<Props>) {
+export function ProfileDetailsForm({ user }: Readonly<Props>) {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
+
+  const initialName = user.name.trim() || deriveDefaultName(user.email);
 
   const form = useForm<UpdateProfileInput>({
     defaultValues: {
       email: user.email,
-      name: user.name,
+      name: initialName,
     },
     mode: "onChange",
     resolver: zodResolver(UpdateProfileSchema),
@@ -49,9 +44,9 @@ export function ProfileDetailsForm({
   useEffect(() => {
     form.reset({
       email: user.email,
-      name: user.name,
+      name: initialName,
     });
-  }, [user, form]);
+  }, [initialName, user.email, form]);
 
   const { updateProfile } = useProfileActions({
     onProfileUpdateSuccess: (data) => {
@@ -59,7 +54,6 @@ export function ProfileDetailsForm({
         email: data.email ?? "",
         name: data.name ?? "",
       });
-      onSuccess?.();
     },
   });
 
@@ -124,10 +118,10 @@ export function ProfileDetailsForm({
         />
         <div className="flex justify-end">
           <LoadingButton
-            disabled={(!isWelcome && !isDirty) || !isValid || updateProfile.isPending}
+            disabled={!isDirty || !isValid || updateProfile.isPending}
             isLoading={updateProfile.isPending}
           >
-            {buttonText ?? tCommon("save")}
+            {tCommon("save")}
           </LoadingButton>
         </div>
       </form>

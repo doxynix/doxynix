@@ -151,16 +151,18 @@ export const userService = {
 
     return { success: true };
   },
-  async getActiveSessions(headers: Headers, isApiKeySession: boolean) {
+  async getActiveSessions(db: DbClient, userId: string, isApiKeySession: boolean) {
     if (isApiKeySession) {
       return [];
     }
 
-    const sessions = await auth.api.listSessions({ headers });
+    const sessions = await db.session.findMany({
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      select: { createdAt: true, id: true, ipAddress: true, userAgent: true },
+      where: { expiresAt: { gt: new Date() }, userId },
+    });
 
-    return sessions
-      .toSorted((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .map((session) => userMapper.toSession(session));
+    return sessions.map((session) => userMapper.toSession(session));
   },
 
   async getLinkedAccounts(db: DbClient, userId: string) {
@@ -223,17 +225,38 @@ export const userService = {
 
     return { success: true };
   },
-  async revokeSession(headers: Headers, sessionId: string) {
-    const sessions = await auth.api.listSessions({ headers });
-    const target = sessions.find((session) => session.id === sessionId);
+
+  async revokeOtherSessions(userId: string, currentSessionId: string) {
+    const others = await prisma.session.findMany({
+      select: { token: true },
+      where: { id: { not: currentSessionId }, userId },
+    });
+
+    const authContext = await auth.$context;
+
+    await Promise.all(
+      others.map((session) => authContext.internalAdapter.deleteSession(session.token)),
+    );
+
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.userUpdated, {});
+
+    return { success: true };
+  },
+  async revokeSession(userId: string, sessionId: string) {
+    const target = await prisma.session.findFirst({
+      select: { token: true },
+      where: { id: sessionId, userId },
+    });
 
     if (target == null) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Session not found" });
     }
 
-    await auth.api.revokeSession({ body: { token: target.token }, headers });
+    const authContext = await auth.$context;
 
-    void realtimeService.user(target.userId).publish(REALTIME_CONFIG.events.user.userUpdated, {});
+    await authContext.internalAdapter.deleteSession(target.token);
+
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.userUpdated, {});
 
     return { success: true };
   },

@@ -33,6 +33,7 @@ import {
   SheetTrigger,
 } from "@/shared/ui/core/sheet";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 type Props = {
@@ -154,14 +155,23 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
             </Label>
             <ScrollArea className="h-75 rounded-xl border p-2">
               {isFilesLoading ? (
-                <div className="flex flex-col gap-2 p-2">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton
-                      className="h-10 w-full"
-                      key={i}
-                    />
-                  ))}
-                </div>
+                <SkeletonList
+                  className="flex flex-col gap-2"
+                  count={5}
+                  itemClassName="flex items-center justify-between rounded-xl border p-1"
+                  renderItem={() => (
+                    <>
+                      <div className="flex items-center gap-2 p-1">
+                        <Skeleton className="size-6" />
+                        <SkeletonText
+                          lines={1}
+                          widths={["w-40"]}
+                        />
+                      </div>
+                      <Skeleton className="size-9 rounded-xl" />
+                    </>
+                  )}
+                />
               ) : filesCount === 0 ? (
                 <div className="flex h-20 items-center justify-center text-muted-foreground text-xs italic">
                   {t("repo_pr_draft_empty_staged")}

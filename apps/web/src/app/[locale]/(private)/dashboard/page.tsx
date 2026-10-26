@@ -15,6 +15,7 @@ import { TrendsWidget } from "@/features/repo-analytics/ui/repo-trends-widget";
 import { DashboardActionContainer } from "@/widgets/dashboard/ui/dashboard-action-container";
 import { DashboardDatePeriod } from "@/widgets/dashboard/ui/dashboard-date-range";
 import { DashboardInsightsContainer } from "@/widgets/dashboard/ui/dashboard-insights-container";
+import { GettingStartedChecklist } from "@/widgets/dashboard/ui/getting-started-checklist";
 import { StatCardContainer } from "@/widgets/dashboard/ui/stat-card-container";
 
 import { HydrateClient, prefetch, trpcProxy } from "@/server/core/trpc/prefetch";
@@ -29,6 +30,7 @@ export default async function DashboardPage({ searchParams }: Readonly<PageProps
   await Promise.all([
     prefetch(trpcProxy.analytics.getDashboardStats.queryOptions(range)),
     prefetch(trpcProxy.analytics.getTrends.queryOptions({ ...range, repoId: undefined })),
+    prefetch(trpcProxy.user.getOnboardingState.queryOptions()),
   ]);
 
   return (
@@ -39,6 +41,7 @@ export default async function DashboardPage({ searchParams }: Readonly<PageProps
         </div>
 
         <div className="flex flex-col gap-4">
+          <GettingStartedChecklist />
           <div className="flex items-center justify-between">
             <h1 className="font-bold text-2xl">{t("title")}</h1>
           </div>

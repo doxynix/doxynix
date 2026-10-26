@@ -194,7 +194,7 @@ export function PasskeysList() {
                 />
               }
               description={""}
-              icon={<Fingerprint className="size-5 text-primary" />}
+              icon={<Fingerprint className="size-5" />}
               key={key.id}
               status={tCommon("status_active")}
               title={key.name ?? t("settings_passkey_unnamed_device")}

@@ -38,8 +38,6 @@ export default defineConfig({
 
         "src/app/api/auth/**",
         "src/app/api/trpc/**",
-        "src/app/api/docs/**",
-        "src/app/api/openapi/**",
 
         "**/*.store.ts",
         "**/*parser*.ts",

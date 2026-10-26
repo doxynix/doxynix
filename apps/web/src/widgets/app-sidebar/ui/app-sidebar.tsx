@@ -6,7 +6,9 @@ import { useTranslations } from "next-intl";
 import { useTRPC } from "@/shared/api/trpc";
 import { sidebarMenu } from "@/shared/config/navigation";
 import { useNavLabels } from "@/shared/config/navigation-labels";
+import { REPO_LIST_PAGE_SIZE } from "@/shared/config/repos";
 import { cn } from "@/shared/lib/cn";
+import { useAppearancePreferences } from "@/shared/lib/hooks/use-appearance-preferences";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/core/collapsible";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import {
@@ -38,11 +40,12 @@ export function AppSidebar() {
   const t = useTranslations("Dashboard");
   const tCommon = useTranslations("Common");
   const navLabels = useNavLabels();
+  const { preferences } = useAppearancePreferences();
   const { state } = useSidebar();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
     trpc.repo.getSlim.infiniteQueryOptions(
       {
-        limit: 5,
+        limit: REPO_LIST_PAGE_SIZE,
       },
       {
         getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
@@ -62,8 +65,8 @@ export function AppSidebar() {
       className={cn(
         isRepoOwnerPage ? "top-29 h-[calc(100dvh-7rem)]" : "top-16 h-[calc(100dvh-4rem)]",
       )}
-      collapsible="offcanvas"
-      variant="sidebar"
+      collapsible={preferences.collapsible}
+      variant={preferences.sidebarVariant}
     >
       <nav aria-label={tCommon("main_navigation")}>
         <SidebarHeader>
@@ -114,7 +117,7 @@ export function AppSidebar() {
                   <SidebarGroupContent>
                     <SidebarMenu>
                       {isLoading &&
-                        Array.from({ length: 5 }).map((_, i) => (
+                        Array.from({ length: REPO_LIST_PAGE_SIZE }).map((_, i) => (
                           <SidebarMenuItem key={i}>
                             <SidebarMenuSkeleton showIcon />
                           </SidebarMenuItem>
@@ -149,13 +152,16 @@ export function AppSidebar() {
                         >
                           <SidebarMenuItem className="truncate">
                             <LoadingButton
-                              className="flex h-8 w-full items-center justify-start text-muted-foreground text-xs"
+                              className="flex h-8 w-full items-center justify-start text-muted-foreground text-xs group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
                               disabled={isFetchingNextPage}
                               isLoading={isFetchingNextPage}
                               onClick={() => void fetchNextPage()}
                               variant="ghost"
                             >
-                              <ChevronDown /> {t("sidebar_show_more")}
+                              <ChevronDown />
+                              <span className="truncate group-data-[collapsible=icon]:hidden">
+                                {t("sidebar_show_more")}
+                              </span>
                             </LoadingButton>
                           </SidebarMenuItem>
                         </AppTooltip>

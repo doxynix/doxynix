@@ -89,6 +89,26 @@ export const CursorSchema = z.object({
 
 export const ORDER_CREATED_AT_DESC = [{ createdAt: "desc" as const }, { id: "desc" as const }];
 
+export function keysetArgs(cursor: null | string | undefined, limit: number) {
+  return {
+    cursor: cursor != null ? { id: cursor } : undefined,
+    take: limit + 1,
+  };
+}
+
+export function splitKeysetPage<TItem extends { id: string }>(rows: TItem[], limit: number) {
+  const hasNextPage = rows.length > limit;
+  const probe = hasNextPage ? rows.at(-1) : undefined;
+
+  // The probe row is not returned: it becomes the next cursor, and since the cursor is
+  // inclusive it comes back as the first row of the next page.
+  return {
+    hasNextPage,
+    items: hasNextPage ? rows.slice(0, -1) : rows,
+    nextCursor: probe?.id,
+  };
+}
+
 export const orderWithTiebreak = <TColumn extends string>(
   column: TColumn,
   direction: "asc" | "desc",

@@ -136,7 +136,7 @@ function ExpiryField({ field, isPending }: Readonly<ExpiryFieldProps>) {
                 type="button"
                 variant="outline"
               >
-                <CalendarIcon className="size-4" />
+                <CalendarIcon />
                 {field.value != null
                   ? formatShortDate(field.value)
                   : t("settings_api_keys_never_expires")}

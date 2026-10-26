@@ -34,7 +34,7 @@ export function AdminSidebarLink({
         "group/link flex cursor-pointer transition-colors",
         isActive
           ? "bg-sidebar-accent font-bold text-sidebar-accent-foreground hover:bg-sidebar-accent"
-          : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+          : "text-muted-foreground hover:bg-accent! hover:text-foreground",
       )}
       isActive={isActive}
     >

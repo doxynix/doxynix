@@ -24,6 +24,8 @@ import remarkWikiLink from "remark-wiki-link";
 import { unified } from "unified";
 import { visit } from "unist-util-visit";
 
+import { AUTO_CODE_THEMES } from "@/shared/lib/appearance-preferences";
+
 const trackRawCode = (node: HastElement) => {
   if (node.tagName === "pre") {
     const codeNode = node.children[0] as HastElement | undefined;
@@ -155,7 +157,7 @@ export async function markdownToHtml({
     })
     .use(rehypeShiki, {
       defaultLanguage: "plaintext",
-      themes: { dark: "github-dark-dimmed", light: "github-light" },
+      themes: AUTO_CODE_THEMES,
       transformers: [
         transformerNotationHighlight(),
         transformerNotationDiff(),

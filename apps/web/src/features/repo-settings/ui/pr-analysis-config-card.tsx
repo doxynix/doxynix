@@ -8,7 +8,7 @@ import {
 } from "@doxynix/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Layout, Loader2, Palette, ShieldCheck, Zap } from "lucide-react";
+import { Layout, Palette, ShieldCheck, Zap } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
@@ -25,8 +25,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/core/select";
+import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Slider } from "@/shared/ui/core/slider";
 import { Switch } from "@/shared/ui/core/switch";
+import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 type Props = {
@@ -113,9 +115,106 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center p-8">
-        <Loader2 className="animate-spin" />
-      </div>
+      <Card className="w-full">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2">
+              <SkeletonText
+                lines={1}
+                size="xl"
+                widths={["w-56"]}
+              />
+              <SkeletonText
+                lines={1}
+                widths={["w-full"]}
+              />
+            </div>
+            <Skeleton className="h-5 w-9 shrink-0 rounded-full" />
+          </div>
+        </CardHeader>
+
+        <CardContent className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <SkeletonText
+              lines={1}
+              widths={["w-40"]}
+            />
+            <div className="flex h-9 w-full items-center justify-between gap-2 rounded-xl border border-input bg-background/80 px-3">
+              <SkeletonText
+                className="min-w-0 flex-1"
+                lines={1}
+                widths={["w-32"]}
+              />
+              <Skeleton className="size-4 shrink-0" />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <SkeletonText
+              lines={1}
+              widths={["w-40"]}
+            />
+            <SkeletonList
+              className="grid grid-cols-2 gap-4"
+              count={4}
+              itemClassName="flex flex-col gap-2 rounded-xl border p-3"
+              renderItem={() => (
+                <>
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="size-8 rounded-lg" />
+                    <Skeleton className="size-4 rounded-full" />
+                  </div>
+                  <SkeletonText
+                    lines={1}
+                    widths={["w-28"]}
+                  />
+                  <SkeletonText
+                    lines={1}
+                    size="sm"
+                    widths={["w-full"]}
+                  />
+                </>
+              )}
+            />
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <SkeletonText
+                lines={1}
+                widths={["w-40"]}
+              />
+              <SkeletonText
+                lines={1}
+                widths={["w-20"]}
+              />
+            </div>
+            <Skeleton className="h-2 w-full rounded-full" />
+            <SkeletonText
+              lines={1}
+              size="sm"
+              widths={["w-72"]}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-1.5">
+              <SkeletonText
+                lines={1}
+                widths={["w-40"]}
+              />
+              <SkeletonText
+                lines={1}
+                size="sm"
+                widths={["w-64"]}
+              />
+            </div>
+            <Skeleton className="h-5 w-9 shrink-0 rounded-full" />
+          </div>
+
+          <Skeleton className="h-9 w-40 rounded-xl" />
+        </CardContent>
+      </Card>
     );
   }
 
@@ -132,7 +231,6 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
           <Switch
             aria-label={t("settings_pr_card_title")}
             checked={isEnabled}
-            className="data-[state=checked]:bg-foreground"
             onCheckedChange={(checked) => {
               form.setValue("enabled", checked, { shouldDirty: true });
               updateConfig.mutate({ ...form.getValues(), enabled: checked, repoId });
@@ -266,7 +364,6 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
             </div>
             <Switch
               checked={ciSkip}
-              className="data-[state=checked]:bg-foreground"
               id={ciTriggersId}
               onCheckedChange={(value) => form.setValue("ciSkip", value, { shouldDirty: true })}
             />

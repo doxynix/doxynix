@@ -8,7 +8,6 @@ import { useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 
 import { useTRPC } from "@/shared/api/trpc";
-import { Skeleton } from "@/shared/ui/core/skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
@@ -16,11 +15,12 @@ import { RepoAnalyzeButton } from "@/entities/repo/ui/repo-analyze-button";
 
 import type { RepoMapDisplayData } from "../model/repo-map.types";
 import { RepoMapHotkeyListeners } from "./repo-map-hotkey-listeners";
+import { RepoMapSkeleton } from "./repo-map-skeleton";
 
 type Props = { id: string };
 
 const RepoMap = dynamic(() => import("./repo-map").then((m) => m.RepoMap), {
-  loading: () => <Skeleton className="h-180 w-full" />,
+  loading: () => <RepoMapSkeleton />,
   ssr: false,
 });
 
@@ -105,7 +105,7 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
   }
 
   if (displayData == null && isFetching) {
-    return <Skeleton className="h-180 w-full" />;
+    return <RepoMapSkeleton />;
   }
 
   if (displayData == null && !isFetching) {

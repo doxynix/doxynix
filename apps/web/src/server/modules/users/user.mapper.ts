@@ -1,7 +1,6 @@
 import type { PublicUser } from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
 
-import type { auth } from "@/server/core/auth";
 import { formatUserAgent } from "@/server/utils/ua-parser";
 
 import type { AdminUserDetail, AdminUserSummary } from "./admin-user.schemas";
@@ -17,7 +16,12 @@ type UserRecord = {
   updatedAt: Date;
 };
 
-type SessionRecord = Awaited<ReturnType<typeof auth.api.listSessions>>[number];
+type SessionRecord = {
+  createdAt: Date;
+  id: string;
+  ipAddress: null | string;
+  userAgent: null | string;
+};
 
 type AdminUserSummaryRecord = {
   banExpires: Date | null;

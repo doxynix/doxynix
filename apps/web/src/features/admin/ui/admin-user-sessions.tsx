@@ -19,6 +19,7 @@ import {
   DialogTrigger,
 } from "@/shared/ui/core/dialog";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
@@ -41,7 +42,24 @@ export function AdminUserSessions({ actions, userId }: Readonly<Props>) {
       <span className="font-medium text-sm">{t("sessions_title")}</span>
 
       {isLoading || data == null ? (
-        <Skeleton className="h-20 w-full" />
+        <ul className="flex flex-col gap-2">
+          <li className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border p-3 text-sm">
+            <div className="flex flex-col">
+              <SkeletonText
+                lines={2}
+                size="sm"
+                widths={["w-48", "w-64"]}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <SkeletonText
+                lines={1}
+                widths={["w-20"]}
+              />
+              <Skeleton className="rounded-xl size-9" />
+            </div>
+          </li>
+        </ul>
       ) : data.items.length === 0 ? (
         <span className="text-muted-foreground text-sm">{t("sessions_empty")}</span>
       ) : (

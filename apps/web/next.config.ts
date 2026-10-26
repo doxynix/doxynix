@@ -372,6 +372,9 @@ const nextConfig: NextConfig = {
     "web-tree-sitter",
   ],
   skipTrailingSlashRedirect: true,
+  turbopack: {
+    debugIds: true,
+  },
   typedRoutes: false,
   typescript: { ignoreBuildErrors: false },
 
@@ -416,9 +419,8 @@ const sentryOptions: SentryBuildOptions = {
 
   silent: process.env.CI == null,
 
-  // Do NOT delete source maps after upload to preserve Debug ID integrity during SSG
   sourcemaps: {
-    deleteSourcemapsAfterUpload: false,
+    disable: true,
   },
 
   telemetry: false,

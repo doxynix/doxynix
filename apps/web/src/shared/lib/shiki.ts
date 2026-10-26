@@ -5,6 +5,8 @@ import { createHash } from "node:crypto";
 import { unstable_cache } from "next/cache";
 import { bundledLanguages, bundledLanguagesAlias, codeToHtml } from "shiki";
 
+import { AUTO_CODE_THEMES } from "@/shared/lib/appearance-preferences";
+
 const ALIASES: Record<string, string> = {
   fortran: "fortran-free-form",
   golang: "go",
@@ -19,7 +21,7 @@ function isKnownLang(lang: string): boolean {
 }
 
 async function highlight(code: string, lang: string, theme: "dark" | "light") {
-  const shikiTheme = theme === "dark" ? "github-dark-dimmed" : "github-light";
+  const shikiTheme = AUTO_CODE_THEMES[theme];
   const requested = normalizeLang(lang);
   const resolved = isKnownLang(requested) ? requested : "text";
 
@@ -40,7 +42,7 @@ export const highlightCode = async (
 
   return unstable_cache(
     async () => highlight(code, lang, theme),
-    ["shiki-highlight", key, normalizeLang(lang), theme],
+    ["shiki-highlight", key, normalizeLang(lang), AUTO_CODE_THEMES[theme]],
     {
       revalidate: false,
       tags: ["shiki"],

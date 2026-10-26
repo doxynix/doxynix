@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useTRPC } from "@/shared/api/trpc";
 import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
+import { useIntersectionObserver } from "@/shared/lib/hooks/use-intersection-observer";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   DropdownMenu,
@@ -17,6 +18,7 @@ import {
 } from "@/shared/ui/core/dropdown-menu";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Spinner } from "@/shared/ui/core/spinner";
+import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
@@ -63,27 +65,27 @@ export function NotificationsNav() {
     markAllAsRead.mutate(undefined, { onSettled: () => setAllReadPending(false) });
   }
 
+  const { observe, unobserve } = useIntersectionObserver(
+    (entries) => {
+      if (entries[0]?.isIntersecting) {
+        void fetchNextPage();
+      }
+    },
+    { threshold: 0.1 },
+  );
+
   useEffect(() => {
     const target = sentinelRef.current;
     if (!hasNextPage || isFetchingNextPage || target == null) {
       return;
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          void fetchNextPage();
-        }
-      },
-      { threshold: 0.1 },
-    );
-
-    observer.observe(target);
+    observe(target);
 
     return () => {
-      observer.disconnect();
+      unobserve(target);
     };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, observe, unobserve]);
 
   return (
     <DropdownMenu
@@ -119,20 +121,25 @@ export function NotificationsNav() {
         </div>
         <DropdownMenuSeparator />
         {isLoading && notifications.length === 0 ? (
-          <div className="flex flex-col gap-3 px-3 py-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                className="flex items-center gap-3"
-                key={i}
-              >
-                <Skeleton className="size-5 rounded-full" />
-                <div className="flex flex-1 flex-col gap-2">
-                  <Skeleton className="h-3.5 w-3/4" />
-                  <Skeleton className="h-2.5 w-1/3" />
+          <SkeletonList
+            className="flex max-h-[min(70vh,32rem)] flex-col gap-1 overflow-y-auto py-1"
+            count={4}
+            itemClassName="flex w-full items-center gap-2 border border-transparent px-2 py-1.5"
+            renderItem={() => (
+              <>
+                <Skeleton className="size-5 rounded" />
+                <div className="flex w-full items-center justify-between gap-2">
+                  <SkeletonText
+                    className="min-w-0 flex-1"
+                    lines={3}
+                    size="sm"
+                    widths={["w-40", "w-32", "w-16"]}
+                  />
+                  <Skeleton className="mt-1 size-2 shrink-0 rounded-full" />
                 </div>
-              </div>
-            ))}
-          </div>
+              </>
+            )}
+          />
         ) : (
           <div className="flex max-h-[min(70vh,32rem)] flex-col gap-1 overflow-y-auto py-1">
             {notifications.length === 0 && !isLoading ? (

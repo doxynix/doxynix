@@ -2,6 +2,7 @@
 
 import {
   type ComponentType,
+  type RefObject,
   type SubmitEvent,
   useEffect,
   useRef,
@@ -10,15 +11,7 @@ import {
 } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import {
-  ArrowRight,
-  CheckCircle2,
-  Fingerprint,
-  KeyRound,
-  ShieldCheck,
-  Sparkles,
-  X,
-} from "lucide-react";
+import { ArrowRight, CheckCircle2, KeyRound, ShieldCheck, Sparkles, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
 import { useForm } from "react-hook-form";
@@ -80,12 +73,37 @@ const noopSubscribe = () => () => undefined;
 const getLastUsedLoginMethod = () => authClient.getLastUsedLoginMethod();
 const getNoLastUsedLogin = () => null;
 
+function armPasskeyAutofill(pending: RefObject<boolean>, router: ReturnType<typeof useRouter>) {
+  if (pending.current) {
+    return;
+  }
+
+  pending.current = true;
+
+  void authClient.signIn
+    .passkey({ autoFill: true })
+    .then(({ error }) => {
+      if (error) {
+        return;
+      }
+      trackClientEvent("sign_in_attempted", { provider: "passkey" });
+      router.replace("/dashboard");
+    })
+    .catch(() => {
+      // An autofill attempt that finds no credential (or is dismissed) is not an error.
+    })
+    .finally(() => {
+      pending.current = false;
+    });
+}
+
 export function AuthForm() {
   const router = useRouter();
   const tCommon = useTranslations("Common");
   const t = useTranslations("Auth");
   const turnstileRef = useRef<TurnstileInstance>(null);
   const pendingDataRef = useRef<MagicLinkSchemaValue | null>(null);
+  const passkeyPendingRef = useRef(false);
   const [turnstileToken, setTurnstileToken] = useState<null | string>(null);
 
   const MagicLinkSchema = createMagicLinkSchema(
@@ -130,14 +148,7 @@ export function AuthForm() {
   const [isTwoFactorVerifying, setIsTwoFactorVerifying] = useState(false);
 
   useEffect(() => {
-    void authClient.signIn.passkey({
-      autoFill: true,
-      fetchOptions: {
-        onSuccess: () => {
-          router.replace("/dashboard");
-        },
-      },
-    });
+    armPasskeyAutofill(passkeyPendingRef, router);
   }, [router]);
 
   const form = useForm<MagicLinkSchemaValue>({
@@ -257,35 +268,6 @@ export function AuthForm() {
       })
       .finally(() => {
         setIsTwoFactorVerifying(false);
-      });
-  };
-
-  const handlePasskeySignIn = async () => {
-    setLoadingProvider("passkey");
-    trackClientEvent("sign_in_attempted", { provider: "passkey" });
-
-    await authClient.signIn
-      .passkey({
-        fetchOptions: {
-          onSuccess: () => {
-            router.replace("/dashboard");
-          },
-        },
-      })
-      .then(({ error }) => {
-        if (error) {
-          if ("code" in error && error.code === "NO_CREDENTIALS") {
-            toast.error(t("error_no_security_keys"));
-          } else {
-            toast.error(error.message ?? t("error_authentication_failed"));
-          }
-        }
-      })
-      .catch(() => {
-        toast.error(t("error_passkey_failed"));
-      })
-      .finally(() => {
-        setLoadingProvider(null);
       });
   };
 
@@ -431,30 +413,6 @@ export function AuthForm() {
                   </LoadingButton>
                 );
               })}
-              <LoadingButton
-                className="relative w-full rounded-2xl border-border bg-background px-3 py-5 text-foreground transition-colors hover:bg-surface-hover"
-                disabled={disabled}
-                isLoading={loadingProvider === "passkey"}
-                onClick={() => void handlePasskeySignIn()}
-                type="button"
-                variant="outline"
-              >
-                <div className="flex w-full items-center justify-center gap-3">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <span className="flex shrink-0 items-center justify-center">
-                      <Fingerprint className="size-4 text-muted-foreground" />
-                    </span>
-                    <span className="truncate font-medium text-sm">
-                      {t("continue_with_passkey")}
-                    </span>
-                  </div>
-                  {lastLogin === "passkey" && (
-                    <AppBadge className="absolute -top-2 -right-2 text-xs">
-                      {t("last_used")}
-                    </AppBadge>
-                  )}
-                </div>
-              </LoadingButton>
             </div>
 
             <div className="relative w-full">
@@ -491,6 +449,9 @@ export function AuthForm() {
                             inputMode="email"
                             placeholder="doxynix@example.com"
                             {...field}
+                            onFocus={() => {
+                              armPasskeyAutofill(passkeyPendingRef, router);
+                            }}
                           />
                         </FormControl>
                         <div className="min-h-5 px-1">
@@ -545,7 +506,7 @@ export function AuthForm() {
           >
             <div className="flex w-full items-center justify-between border-b pb-4">
               <div className="flex items-center gap-2">
-                <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-muted-foreground">
                   {isBackupMode ? <KeyRound size={20} /> : <ShieldCheck size={20} />}
                 </div>
                 <div className="text-left">

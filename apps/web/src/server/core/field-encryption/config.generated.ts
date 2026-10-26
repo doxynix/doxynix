@@ -144,6 +144,7 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
     connections: {
       accounts: "Account",
       apiKeys: "ApiKey",
+      appearance: "UserAppearance",
       chatSession: "ChatSession",
       githubInstallations: "GithubInstallation",
       notifications: "Notification",
@@ -155,6 +156,12 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
     fields: {
       email: { hash: { normalize: ["lowercase", "trim"] } },
     },
+  },
+  UserAppearance: {
+    connections: {
+      user: "User",
+    },
+    fields: {},
   },
   Verification: {
     connections: {},

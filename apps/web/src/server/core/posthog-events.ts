@@ -4,6 +4,9 @@ import { requestContext } from "@/server/utils/request-context";
 export type ServerAnalyticsEvent =
   | "fix_generated"
   | "fix_generation_failed"
+  | "onboarding_activated"
+  | "onboarding_completed"
+  | "onboarding_skipped"
   | "pr_analysis_completed"
   | "pr_analysis_failed"
   | "repo_analysis_completed"

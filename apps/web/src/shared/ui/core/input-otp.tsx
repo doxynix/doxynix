@@ -50,7 +50,7 @@ const InputOTPSlot = forwardRef<
   return (
     <div
       className={cn(
-        "relative flex h-9 w-9 items-center justify-center border-input border-y border-r text-sm shadow-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md",
+        "relative flex h-9 w-9 items-center justify-center border-input border-y border-r text-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md",
         isActive && "z-10 ring-1 ring-ring",
         className,
       )}

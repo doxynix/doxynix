@@ -3,8 +3,11 @@
 import { AlertTriangle, BookOpenCheck, Clock, FileCode2, Flame, HeartPulse } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
+
+const LANGUAGE_FILLS = ["w-3/5", "w-2/5", "w-4/5", "w-1/2"];
 
 export function LanguagesSkeleton() {
   const t = useTranslations("Dashboard");
@@ -18,20 +21,36 @@ export function LanguagesSkeleton() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              className="flex flex-col gap-1"
-              key={i}
-            >
+        <SkeletonList
+          className="flex flex-col gap-4"
+          count={4}
+          itemClassName="flex flex-col gap-1"
+          renderItem={(index) => (
+            <>
               <div className="flex justify-between text-xs">
-                <Skeleton className="h-3 w-12" />
-                <Skeleton className="h-3 w-20" />
+                <div className="flex items-center gap-1">
+                  <Skeleton className="size-2.5 rounded-full" />
+                  <SkeletonText
+                    lines={1}
+                    size="sm"
+                    widths={["w-12"]}
+                  />
+                </div>
+                <SkeletonText
+                  lines={1}
+                  size="sm"
+                  widths={["w-8"]}
+                />
               </div>
-              <Skeleton className="h-2 w-full" />
-            </div>
-          ))}
-        </div>
+
+              <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
+                <Skeleton
+                  className={`absolute inset-y-0 left-0 rounded-full ${LANGUAGE_FILLS[index % LANGUAGE_FILLS.length]}`}
+                />
+              </div>
+            </>
+          )}
+        />
       </CardContent>
     </Card>
   );
@@ -49,18 +68,27 @@ export function HealthExtremesSkeleton() {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
-        {Array.from({ length: 2 }).map((_, i) => (
-          <div
-            className="flex items-center justify-between rounded-xl border border-border p-2"
-            key={i}
-          >
-            <div className="flex items-center gap-2">
-              <Skeleton className="size-4 rounded-full" />
-              <Skeleton className="h-4 w-28" />
-            </div>
-            <Skeleton className="h-4 w-8 rounded" />
-          </div>
-        ))}
+        <SkeletonList
+          className="flex flex-col gap-2"
+          count={2}
+          itemClassName="flex items-center justify-between rounded-xl border border-border p-2"
+          renderItem={() => (
+            <>
+              <div className="flex items-center gap-2">
+                <Skeleton className="size-6 rounded-full" />
+                <SkeletonText
+                  lines={1}
+                  widths={["w-28"]}
+                />
+              </div>
+              <SkeletonText
+                lines={1}
+                size="lg"
+                widths={["w-8"]}
+              />
+            </>
+          )}
+        />
       </CardContent>
     </Card>
   );
@@ -77,7 +105,10 @@ export function EcosystemStatusSkeleton() {
             <BookOpenCheck className="text-muted-foreground" />
             {t("ecosystem_status")}
           </span>
-          <Skeleton className="h-6 w-24 rounded-full" />
+          <SkeletonText
+            lines={1}
+            widths={["w-24"]}
+          />
         </CardTitle>
       </CardHeader>
       <CardContent className="flex items-center justify-center pt-4">
@@ -85,7 +116,7 @@ export function EcosystemStatusSkeleton() {
           <div className="absolute size-full rounded-full border border-accent/20 border-dashed" />
           <div className="absolute size-2/3 rounded-full border border-accent/20 border-dashed" />
           <div className="absolute size-1/3 rounded-full border border-accent/20 border-dashed" />
-          <Skeleton className="size-40 rounded-full" />
+          <Skeleton className="size-24 rotate-45 rounded-lg" />
         </div>
       </CardContent>
     </Card>
@@ -104,28 +135,60 @@ export function RefactoringTargetsSkeleton() {
         </CardTitle>
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-6 pt-4 md:grid-cols-2">
-        {Array.from({ length: 2 }).map((_, idx) => (
-          <div
-            className="flex flex-col gap-3"
-            key={idx}
-          >
-            <div className="flex items-center gap-2">
-              <Skeleton className="size-4" />
-              <Skeleton className="h-4 w-32" />
-            </div>
-            <div className="flex flex-col gap-2">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div
-                  className="flex items-center justify-between rounded-xl border border-border p-2"
-                  key={i}
-                >
-                  <Skeleton className="h-3 w-40" />
-                  <Skeleton className="h-4 w-10 rounded-md" />
-                </div>
-              ))}
-            </div>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <Skeleton className="size-6" />
+            <SkeletonText
+              lines={1}
+              widths={["w-32"]}
+            />
           </div>
-        ))}
+          <SkeletonList
+            className="flex flex-col gap-2"
+            count={3}
+            itemClassName="flex items-center justify-between rounded-xl border border-border p-2"
+            renderItem={() => (
+              <>
+                <SkeletonText
+                  lines={1}
+                  size="sm"
+                  widths={["w-40"]}
+                />
+                <Skeleton className="h-5 w-10" />
+              </>
+            )}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <Skeleton className="size-6" />
+            <SkeletonText
+              lines={1}
+              widths={["w-32"]}
+            />
+          </div>
+          <SkeletonList
+            className="flex flex-col gap-2"
+            count={3}
+            itemClassName="flex items-center gap-2 rounded-xl border border-border p-2"
+            renderItem={() => (
+              <>
+                <SkeletonText
+                  lines={1}
+                  size="sm"
+                  widths={["w-16"]}
+                />
+                <Skeleton className="size-6" />
+                <SkeletonText
+                  lines={1}
+                  size="sm"
+                  widths={["w-16"]}
+                />
+              </>
+            )}
+          />
+        </div>
       </CardContent>
     </Card>
   );
@@ -143,58 +206,27 @@ export function RecentActivitySkeleton() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col gap-4">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div
-              className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
-              key={i}
-            >
-              <div className="flex flex-1 items-center gap-3">
-                <Skeleton className="size-5 rounded-full" />
-                <div className="flex flex-1 flex-col gap-1.5">
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-3 w-1/2" />
-                </div>
+        <SkeletonList
+          className="flex flex-col gap-4"
+          count={5}
+          itemClassName="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
+          renderItem={() => (
+            <div className="flex flex-1 items-center gap-3">
+              <Skeleton className="size-6 rounded-full" />
+              <div className="flex flex-1 flex-col">
+                <SkeletonText
+                  lines={1}
+                  widths={["w-3/4"]}
+                />
+                <SkeletonText
+                  lines={1}
+                  size="sm"
+                  widths={["w-1/2"]}
+                />
               </div>
             </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-export function TrendsWidgetsSkeleton() {
-  const t = useTranslations("Dashboard");
-
-  return (
-    <Card>
-      <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
-        <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-          <CardTitle className="text-xl">{t("trends_title")}</CardTitle>
-          <CardDescription>{t("trends_desc")}</CardDescription>
-        </div>
-        <div className="flex items-center px-6 py-4 sm:py-0">
-          <Skeleton className="h-9 w-42 rounded-lg" />
-        </div>
-      </CardHeader>
-      <CardContent className="pt-6">
-        <div className="relative h-75 w-full">
-          <div className="absolute inset-0 flex flex-col justify-between py-2">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div
-                className="flex items-center gap-4"
-                key={i}
-              >
-                <Skeleton className="h-3 w-8" />
-                <div className="h-px flex-1 bg-border" />
-              </div>
-            ))}
-          </div>
-          <div className="absolute inset-0 left-12 flex items-end">
-            <Skeleton className="h-1/2 w-full rounded-t-3xl" />
-          </div>
-        </div>
+          )}
+        />
       </CardContent>
     </Card>
   );
@@ -213,13 +245,18 @@ export function SystemRisksSkeleton() {
       </CardHeader>
       <CardContent>
         <div className="flex gap-3">
-          <Skeleton className="size-5 shrink-0 rounded-full" />
-          <div className="flex flex-1 flex-col gap-2">
-            <Skeleton className="h-4 w-44" />
-            <div className="flex flex-col gap-1.5 pt-1">
-              <Skeleton className="h-3 w-full" />
-              <Skeleton className="h-3 w-2/3" />
-            </div>
+          <Skeleton className="size-6 shrink-0 rounded" />
+          <div className="flex flex-1 flex-col">
+            <SkeletonText
+              lines={1}
+              widths={["w-44"]}
+            />
+            <SkeletonText
+              className="mt-1"
+              lines={1}
+              size="sm"
+              widths={["w-40"]}
+            />
           </div>
         </div>
       </CardContent>

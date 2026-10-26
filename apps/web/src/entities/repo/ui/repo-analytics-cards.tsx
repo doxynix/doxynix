@@ -348,7 +348,7 @@ export function SecurityOverviewCard({
           </div>
         ) : (
           <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 font-medium text-emerald-500 text-xs">
-            <CheckCircle2 className="size-4 shrink-0" />
+            <CheckCircle2 />
             <span>{t("repo_analytics_no_critical_vulns")}</span>
           </div>
         )}

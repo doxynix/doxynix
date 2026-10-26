@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { useTRPC } from "@/shared/api/trpc";
 import { formatFullDate } from "@/shared/lib/date-utils";
 import { saveFile } from "@/shared/lib/file-saver";
+import { useIntersectionObserver } from "@/shared/lib/hooks/use-intersection-observer";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
@@ -157,31 +158,27 @@ export function RepoDocs({
 
   const [activeHeadingId, setActiveHeadingId] = useState<string>("");
 
-  useEffect(() => {
-    if (headings.length === 0) {
-      return;
-    }
+  const { observe, unobserve } = useIntersectionObserver(
+    (entries) => {
+      const visibleEntry = entries.find((entry) => entry.isIntersecting);
+      if (visibleEntry) {
+        setActiveHeadingId(visibleEntry.target.id);
+      }
+    },
+    {
+      rootMargin: "-40px 0px -75% 0px",
+      threshold: 0,
+    },
+  );
 
+  useEffect(() => {
     const headingElements = headings
       .map((h) => document.getElementById(h.id))
       .filter((el): el is HTMLElement => el !== null);
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntry = entries.find((entry) => entry.isIntersecting);
-        if (visibleEntry) {
-          setActiveHeadingId(visibleEntry.target.id);
-        }
-      },
-      {
-        rootMargin: "-40px 0px -75% 0px",
-        threshold: 0,
-      },
-    );
-
-    headingElements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [headings]);
+    headingElements.forEach(observe);
+    return () => headingElements.forEach(unobserve);
+  }, [headings, observe, unobserve]);
 
   const handleDownload = () => {
     if (docContent?.raw == null) {
@@ -230,7 +227,7 @@ export function RepoDocs({
         items={tabItems}
       />
 
-      <div className="relative flex flex-1 flex-col rounded-xl border bg-card">
+      <div className="relative flex min-h-0 flex-1 flex-col rounded-xl border bg-card">
         {uniqueDocsToRender.map((doc) => {
           const isCurrentApiSwagger = Boolean(
             doc.type === "API" && apiMode === "swagger" && metrics?.reference.swagger != null,

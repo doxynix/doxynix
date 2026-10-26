@@ -16,6 +16,15 @@ export type ListSessionsInput = {
   currentRepo?: { name: string; owner: string };
 };
 
+export type UpdateSessionInput = {
+  sessionId: string;
+  title: string;
+};
+
+export type DeleteSessionInput = {
+  sessionId: string;
+};
+
 export const agentService = {
   async createSession(db: DbClient, userId: string, input: CreateSessionInput) {
     let internalRepoId: string | undefined;
@@ -38,6 +47,17 @@ export const agentService = {
 
     const session = await db.chatSession.create({
       data: { repoId: internalRepoId, title: input.title, userId },
+    });
+
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.agentSessionUpdated, {});
+
+    return session;
+  },
+
+  async deleteSession(db: DbClient, userId: string, input: DeleteSessionInput) {
+    const session = await db.chatSession.delete({
+      select: { id: true },
+      where: { id: input.sessionId, userId },
     });
 
     void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.agentSessionUpdated, {});
@@ -78,5 +98,16 @@ export const agentService = {
       orderBy: { updatedAt: "desc" },
       where: { repoId: internalRepoId, userId },
     });
+  },
+
+  async updateSession(db: DbClient, userId: string, input: UpdateSessionInput) {
+    const session = await db.chatSession.update({
+      data: { title: input.title },
+      where: { id: input.sessionId, userId },
+    });
+
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.agentSessionUpdated, {});
+
+    return session;
   },
 };

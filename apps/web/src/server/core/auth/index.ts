@@ -25,6 +25,7 @@ import {
   TURNSTILE_SECRET_KEY,
 } from "@/shared/config/env.server";
 import { resolveRequestLocale } from "@/shared/i18n/resolve-request-locale";
+import { deriveDefaultName, isPlaceholderName } from "@/shared/lib/default-name";
 
 import { appLogger } from "@/server/core/app-logger";
 import { customAuthAdapter } from "@/server/core/auth/auth-adapter";
@@ -194,8 +195,7 @@ export const auth = betterAuth({
             payload.image ??= dbUser.image;
             payload.name ??= dbUser.name;
 
-            const isDefaultName =
-              dbUser.name == null || dbUser.name === dbUser.email?.split("@")[0];
+            const isDefaultName = isPlaceholderName(dbUser.name, dbUser.email);
             if (isDefaultName && payload.name != null) {
               await prisma.user.update({
                 data: { name: payload.name as string },
@@ -263,8 +263,7 @@ export const auth = betterAuth({
               const freshImage = latestAccount.image;
               const freshName = latestAccount.name;
 
-              const isDefaultName =
-                dbUser.name == null || dbUser.name === dbUser.email?.split("@")[0];
+              const isDefaultName = isPlaceholderName(dbUser.name, dbUser.email);
               const shouldUpdateImage = freshImage != null && freshImage !== dbUser.image;
               const shouldUpdateName = freshName != null && isDefaultName;
 
@@ -317,8 +316,8 @@ export const auth = betterAuth({
             payload.email = cleanEmail;
           }
 
-          if (payload.name == null && typeof payload.email === "string") {
-            payload.name = payload.email.split("@")[0] ?? "User";
+          if ((payload.name == null || payload.name === "") && typeof payload.email === "string") {
+            payload.name = deriveDefaultName(payload.email);
           }
           return { data: payload as typeof user };
         },
@@ -554,7 +553,7 @@ export const auth = betterAuth({
       version: "1",
     },
     expiresIn: SESSION_MAX_AGE,
-    preserveSessionInDatabase: true,
+    preserveSessionInDatabase: false,
     storeSessionInDatabase: true,
     updateAge: SESSION_UPDATE_AGE,
   },

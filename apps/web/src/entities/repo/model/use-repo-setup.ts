@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DocType } from "@doxynix/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
@@ -27,7 +27,13 @@ export type RepoSetupReturn = ReturnType<typeof useRepoSetup>;
 export type StateType = RepoSetupReturn["state"];
 export type ActionsType = RepoSetupReturn["actions"];
 
-export function useRepoSetup(repo: UiRepoDetailed) {
+export function useRepoSetup(
+  repo: UiRepoDetailed,
+  options?: {
+    initialDocTypes?: DocType[];
+    selectRecommendedOnLoad?: boolean;
+  },
+) {
   const trpc = useTRPC();
   const locale = useLocale();
   const router = useRouter();
@@ -43,7 +49,9 @@ export function useRepoSetup(repo: UiRepoDetailed) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [analysisLocale, setAnalysisLocale] = useState(locale);
   const [instructions, setInstructions] = useState("");
-  const [selectedDocs, setSelectedDocs] = useState<DocType[]>([DocType.README]);
+  const [selectedDocs, setSelectedDocs] = useState<DocType[]>(
+    options?.initialDocTypes ?? [DocType.README],
+  );
   const open = useRepoBranchOpen();
 
   const { name, owner } = repo;
@@ -78,6 +86,17 @@ export function useRepoSetup(repo: UiRepoDetailed) {
     setSelectedIds(new Set(getRecommendedPaths(apiFiles)));
     setPrevBranch(selectedBranch);
   }
+
+  const initializedRef = useRef(false);
+
+  useEffect(() => {
+    if (options?.selectRecommendedOnLoad !== true || initializedRef.current || apiFiles == null) {
+      return;
+    }
+
+    initializedRef.current = true;
+    setSelectedIds(new Set(getRecommendedPaths(apiFiles)));
+  }, [apiFiles, options?.selectRecommendedOnLoad]);
 
   const treeData = buildFileTree(apiFiles);
 

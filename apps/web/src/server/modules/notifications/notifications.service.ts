@@ -10,7 +10,9 @@ import {
   buildDateRangeWhere,
   cappedCount,
   getPaginatedList,
+  keysetArgs,
   ORDER_CREATED_AT_DESC,
+  splitKeysetPage,
 } from "@/server/utils/pagination";
 import { normalizeSearchInput, tokenizeSearchInput } from "@/server/utils/search";
 
@@ -155,11 +157,10 @@ export const notificationsService = {
     const { cursor, isRead, limit, type } = input;
 
     try {
-      const items = await db.notification.findMany({
-        cursor: cursor != null ? { id: cursor } : undefined,
+      const rows = await db.notification.findMany({
+        ...keysetArgs(cursor, limit),
         include: { repo: { select: { name: true, owner: true } } },
         orderBy: ORDER_CREATED_AT_DESC,
-        take: limit + 1,
         where: {
           userId,
           ...(isRead == null ? {} : { isRead }),
@@ -167,14 +168,11 @@ export const notificationsService = {
         },
       });
 
-      const hasNextPage = items.length > limit;
-      if (hasNextPage) {
-        items.pop();
-      }
+      const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
 
       return {
         items: items.map((item) => notificationMapper.toPublic(item)),
-        meta: { hasNextPage, nextCursor: hasNextPage ? items.at(-1)?.id : undefined },
+        meta: { hasNextPage, nextCursor },
       };
     } catch (error) {
       handlePrismaError(error);

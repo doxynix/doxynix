@@ -6,7 +6,9 @@ type SessionRecord = Parameters<typeof userMapper.toSession>[0];
 
 const RAW_TOKEN = "kQ7h2vXrT9wLmZ4pB6yN0cJ8sD1fG5aH3eU7iO2lP4rS";
 
-function makeSession(overrides?: Partial<SessionRecord>): SessionRecord {
+// The row carries more columns than the mapper reads, so the "no credential leaks"
+// assertions stay meaningful.
+function makeSession(overrides?: Record<string, unknown>): SessionRecord {
   return {
     createdAt: new Date("2026-03-01T12:00:00Z"),
     expiresAt: new Date("2026-04-01T12:00:00Z"),
@@ -17,7 +19,7 @@ function makeSession(overrides?: Partial<SessionRecord>): SessionRecord {
     userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
     userId: "7",
     ...overrides,
-  };
+  } as SessionRecord;
 }
 
 describe("userMapper.toSession", () => {

@@ -14,6 +14,7 @@ import "../globals.css";
 import { APP_URL } from "@/shared/config/env.client";
 import { IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/config/env.flags";
 import { routing } from "@/shared/i18n/routing";
+import { appearanceBootstrapScript } from "@/shared/lib/appearance-preferences";
 import { cn } from "@/shared/lib/cn";
 import { Toaster } from "@/shared/ui/core/sonner";
 import { A11yProvider } from "@/shared/ui/kit/a11y-provider";
@@ -148,6 +149,11 @@ export default async function LocaleLayout({
           "antialiased",
         )}
       >
+        <script
+          dangerouslySetInnerHTML={{
+            __html: appearanceBootstrapScript(),
+          }}
+        />
         <NextIntlClientProvider
           locale={locale}
           messages={messages}

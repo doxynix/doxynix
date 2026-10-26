@@ -1,82 +1,73 @@
 "use client";
 
-import type { ComponentType } from "react";
-import { Book, ChartNoAxesColumn } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
-import { useRouter } from "@/shared/i18n/navigation";
+import type { RouterOutput } from "@/shared/api/trpc";
 import type { User } from "@/shared/lib/auth-client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
-import { GitHubIcon } from "@/shared/ui/icons/github-icon";
+import { useAppearancePreferences } from "@/shared/lib/hooks/use-appearance-preferences";
 
-import { ProfileDetailsForm } from "@/features/profile/ui/profile-details-form";
+import { useWelcomeFlow } from "../model/use-welcome-flow";
+import { GithubStep } from "./github-step";
+import { RepoStep } from "./repo-step";
+import { WelcomeProgress } from "./welcome-progress";
+import { WelcomeStep } from "./welcome-step";
 
 type Props = {
+  initialState: RouterOutput["user"]["getOnboardingState"];
   user: User;
 };
 
-type FeatureCard = { desc: string; icon: ComponentType<{ className?: string }>; title: string };
-
-export function WelcomeFlow({ user }: Readonly<Props>) {
-  const t = useTranslations("Welcome");
-  const router = useRouter();
-  const locale = useLocale();
-
-  const FEATURE_CARDS = [
-    {
-      desc: t("feature_autodocs_desc"),
-      icon: Book,
-      title: t("feature_autodocs_title"),
-    },
-    {
-      desc: t("feature_metrics_desc"),
-      icon: ChartNoAxesColumn,
-      title: t("feature_metrics_title"),
-    },
-    {
-      desc: t("feature_integration_desc"),
-      icon: GitHubIcon,
-      title: t("feature_integration_title"),
-    },
-  ] as const satisfies readonly FeatureCard[];
-
-  const handleSuccess = () => {
-    router.push("/dashboard", { locale });
-  };
+export function WelcomeFlow({ initialState, user }: Readonly<Props>) {
+  const { preferences } = useAppearancePreferences();
+  const reduceMotion = useReducedMotion() || preferences.reduceMotion;
+  const { actions, state } = useWelcomeFlow({ initialState, user });
 
   return (
-    <div className="flex w-full max-w-5xl flex-col items-center gap-12 sm:gap-16">
-      <div className="fade-in zoom-in-95 w-full max-w-md animate-in duration-300 ease-out">
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="font-bold text-2xl tracking-tight">{t("form_title")}</CardTitle>
-            <CardDescription className="text-sm">{t("form_desc")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ProfileDetailsForm
-              buttonText={t("form_button")}
-              isWelcome
-              onSuccess={handleSuccess}
-              user={user}
-            />
-          </CardContent>
-        </Card>
-      </div>
+    <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-1 flex-col justify-center gap-8">
+      <WelcomeProgress step={state.step} />
 
-      <div className="fade-in slide-in-from-bottom-8 flex animate-in items-center justify-center gap-4 duration-300">
-        {FEATURE_CARDS.map((item) => (
-          <Card
-            className={"flex w-full flex-col"}
-            key={item.title}
-          >
-            <CardHeader>
-              <item.icon className="size-5" />
-              <CardTitle className="font-bold text-lg">{item.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground text-sm">{item.desc}</CardContent>
-          </Card>
-        ))}
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          animate={{ opacity: 1, x: 0 }}
+          className="flex w-full"
+          exit={reduceMotion ? undefined : { opacity: 0, x: -12 }}
+          initial={reduceMotion ? undefined : { opacity: 0, x: 12 }}
+          key={state.step}
+          transition={{ duration: 0.22, ease: "easeOut" }}
+        >
+          {state.step === "welcome" && (
+            <WelcomeStep
+              hasGithubInstallation={state.hasGithubInstallation}
+              intent={state.intent}
+              isSubmitting={state.isSaving}
+              name={state.name}
+              onContinue={actions.continueFromWelcome}
+              onIntentChange={state.setIntent}
+              onNameChange={state.setName}
+              onSkip={actions.skip}
+            />
+          )}
+
+          {state.step === "github" && (
+            <GithubStep
+              hasGithubAccount={state.hasGithubAccount}
+              hasGithubInstallation={state.hasGithubInstallation}
+              onBack={actions.back}
+              onContinue={actions.continueFromGithub}
+              onSkip={actions.skip}
+            />
+          )}
+
+          {state.step === "repo" && (
+            <RepoStep
+              isImporting={state.isImporting}
+              onBack={actions.back}
+              onSelect={actions.selectRepo}
+              onSkip={actions.skip}
+            />
+          )}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

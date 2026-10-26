@@ -2,10 +2,12 @@ import type { ReactNode } from "react";
 import { cookies, headers } from "next/headers";
 import { unauthorized } from "next/navigation";
 
+import { REPO_LIST_PAGE_SIZE } from "@/shared/config/repos";
 import { SidebarInset, SidebarProvider } from "@/shared/ui/core/sidebar";
 import { SentryUserIdentificator } from "@/shared/ui/kit/sentry-user-identificator";
 
 import { Agent } from "@/features/agent/ui/agent";
+import { AppearanceSync } from "@/features/appearance/ui/appearance-sync";
 import { CreateRepoDialog } from "@/features/repo/ui/create-repo-dialog";
 
 import { AppFooter } from "@/widgets/app-footer/ui/app-footer";
@@ -28,9 +30,10 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
 
   await Promise.all([
     prefetch(trpcProxy.notification.getStats.queryOptions()),
+    prefetch(trpcProxy.user.getAppearance.queryOptions({})),
     prefetch(
       trpcProxy.repo.getSlim.infiniteQueryOptions(
-        { limit: 5 },
+        { limit: REPO_LIST_PAGE_SIZE },
         { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
       ),
     ),
@@ -44,6 +47,7 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
     <>
       <SentryUserIdentificator user={session.user} />
       <HydrateClient>
+        <AppearanceSync />
         <SidebarProvider
           className="flex h-dvh w-full flex-col overflow-hidden"
           defaultOpen={defaultOpen}

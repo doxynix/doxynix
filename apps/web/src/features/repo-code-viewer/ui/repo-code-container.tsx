@@ -15,7 +15,7 @@ import { useNodeContext } from "@/entities/repo/model/use-node-context";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { RepoCodeBrowser } from "./repo-code-browser";
-import { CodeSkeleton } from "./repo-code-skeleton";
+import { RepoCodeBrowserSkeleton } from "./repo-code-browser-skeleton";
 import { RepoCodeTree } from "./repo-code-tree";
 
 type Props = {
@@ -91,7 +91,7 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
           id="repo-code-browser"
         >
           {isLoading ? (
-            <CodeSkeleton />
+            <RepoCodeBrowserSkeleton />
           ) : path != null && data ? (
             <RepoCodeBrowser
               fileData={data}

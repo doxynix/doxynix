@@ -55,7 +55,7 @@ export function parseEncryptedString(input: string): ParsedEnvelope | false {
     return false;
   }
 
-  if (!BASE64_URL_RE.test(ciphertext) || ciphertext.length < 24) {
+  if (!BASE64_URL_RE.test(ciphertext) || ciphertext.length < 22) {
     return false;
   }
 

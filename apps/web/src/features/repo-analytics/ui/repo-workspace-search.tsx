@@ -19,6 +19,7 @@ import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { AppButton } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppSearch } from "@/shared/ui/kit/app-search";
+import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 
 import { buildRepoSearchResultHref } from "@/entities/repo/model/repo-workspace-navigation";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
@@ -94,11 +95,27 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
         <div className="absolute z-20 mt-2 w-full rounded-lg border bg-card">
           <div className="flex max-h-80 flex-col overflow-y-auto p-2">
             {isFetching && !hasResults ? (
-              <div className="flex flex-col gap-2 p-2">
-                <Skeleton className="h-9 w-full" />
-                <Skeleton className="h-9 w-full" />
-                <Skeleton className="h-9 w-full" />
-              </div>
+              <SkeletonList
+                className="flex flex-col"
+                count={3}
+                itemClassName="flex items-start gap-3 px-2 py-2"
+                renderItem={() => (
+                  <>
+                    <Skeleton className="mt-0.5 size-4 shrink-0" />
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <SkeletonText
+                        lines={1}
+                        widths={["w-full"]}
+                      />
+                      <SkeletonText
+                        lines={1}
+                        size="sm"
+                        widths={["w-2/3"]}
+                      />
+                    </div>
+                  </>
+                )}
+              />
             ) : hasResults ? (
               data?.map((result) => {
                 const Icon = RESULT_ICONS[result.kind];
