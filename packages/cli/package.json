@@ -1,6 +1,29 @@
 {
   "name": "@doxynix/cli",
   "version": "5.4.10",
+  "description": "AI-powered repository analysis and documentation CLI.",
+  "keywords": [
+    "doxynix",
+    "cli",
+    "documentation",
+    "code-analysis",
+    "repository-analysis",
+    "ai"
+  ],
+  "homepage": "https://doxynix.space",
+  "bugs": {
+    "url": "https://github.com/doxynix/doxynix/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/doxynix/doxynix.git",
+    "directory": "packages/cli"
+  },
+  "license": "AGPL-3.0-only",
+  "author": {
+    "name": "Doxynix",
+    "url": "https://doxynix.space"
+  },
   "type": "module",
   "bin": {
     "doxynix": "./dist/index.js",
@@ -44,6 +67,9 @@
     "dependency-cruiser": "18.6.0",
     "tsup": "9.0.0",
     "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "publishConfig": {
     "access": "public"
