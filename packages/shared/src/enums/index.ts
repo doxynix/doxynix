@@ -61,6 +61,14 @@ export const RepositorySelection = {
   SELECTED: "SELECTED",
 } as const;
 
+// ------------------- WorkspaceRole -------------------
+export const WorkspaceRoleSchema = z.enum(["MEMBER", "OWNER"]);
+export type WorkspaceRole = z.infer<typeof WorkspaceRoleSchema>;
+export const WorkspaceRole = {
+  MEMBER: "MEMBER",
+  OWNER: "OWNER",
+} as const;
+
 // ------------------- PRAnalysisStatus -------------------
 export const PRAnalysisStatusSchema = z.enum(["ANALYZING", "COMPLETED", "FAILED", "PENDING"]);
 export type PRAnalysisStatus = z.infer<typeof PRAnalysisStatusSchema>;

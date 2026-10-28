@@ -24,6 +24,9 @@ export async function cleanupDatabase() {
   await assertDisposableDatabase();
 
   const tablenames = [
+    "workspace_entitlements",
+    "workspace_members",
+    "workspaces",
     "audit_logs",
     "documents",
     "analyses",

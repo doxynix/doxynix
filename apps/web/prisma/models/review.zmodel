@@ -38,7 +38,7 @@ model Analysis {
 
   documents       Document[]
 
-  @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
+  @@allow('all', repo.createdBy == auth() || auth().role == 'ADMIN')
 
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
@@ -65,7 +65,7 @@ model Document {
   analysisId String?   @map("analysis_id") @db.Uuid
   analysis   Analysis? @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 
-  @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
+  @@allow('all', repo.createdBy == auth() || auth().role == 'ADMIN')
 
   @@unique([repoId, version, type, path])
   @@unique([repoId, version, type, analysisId])
@@ -104,7 +104,7 @@ model PullRequestAnalysis {
   comments         PullRequestComment[]
   generatedFixes   GeneratedFix[]
 
-  @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
+  @@allow('all', repo.createdBy == auth() || auth().role == 'ADMIN')
 
   @@unique([repoId, prNumber, headSha])
   @@index([jobId])
@@ -133,7 +133,7 @@ model PullRequestAnalysisConfig {
   repoId          String         @unique @map("repo_id") @db.Uuid
   repo            Repo           @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
-  @@allow('all', auth() == repo.user || auth().role == 'ADMIN')
+  @@allow('all', auth() == repo.createdBy || auth().role == 'ADMIN')
   @@map("pr_analysis_configs")
 }
 
@@ -158,7 +158,7 @@ model PullRequestComment {
   analysisId      String              @map("analysis_id") @db.Uuid @omit
   analysis        PullRequestAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 
-  @@allow('all', analysis.repo.user == auth() || auth().role == 'ADMIN')
+  @@allow('all', analysis.repo.createdBy == auth() || auth().role == 'ADMIN')
 
   @@index([analysisId, filePath])
   @@unique([analysisId, githubCommentId])
@@ -193,7 +193,7 @@ model GeneratedFix {
   prAnalysisId    String?              @map("pr_analysis_id") @db.Uuid @omit
   prAnalysis      PullRequestAnalysis? @relation(fields: [prAnalysisId], references: [id], onDelete: SetNull)
 
-  @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
+  @@allow('all', repo.createdBy == auth() || auth().role == 'ADMIN')
 
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])

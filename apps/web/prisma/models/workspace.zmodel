@@ -1,0 +1,68 @@
+import "./auth"
+import "./github"
+
+model Workspace {
+  /// @zod.custom.omit(["model"])
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  members             WorkspaceMember[]
+  entitlement         WorkspaceEntitlement?
+  repos               Repo[]
+  githubInstallations GithubInstallation[]
+
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "workspaces_created_at_id_idx")
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  /// @zod.custom.omit(["model"])
+  id          String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId String        @map("workspace_id") @db.Uuid
+  userId      String        @map("user_id") @db.Uuid
+  role        WorkspaceRole @default(MEMBER)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @default(now()) @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId, workspaceId])
+  @@index([workspaceId, role])
+  @@map("workspace_members")
+}
+
+model WorkspaceEntitlement {
+  /// @zod.custom.omit(["model"])
+  id                  String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId         String   @unique @map("workspace_id") @db.Uuid
+  planCode            String   @default("HOBBY") @map("plan_code")
+  /// @zod.number.int().min(0)
+  seatLimit           Int      @default(1) @map("seat_limit") @gte(0)
+  /// @zod.number.int().min(0)
+  reposLimit          Int?     @map("repos_limit") @gte(0)
+  privateReposAllowed Boolean  @default(false) @map("private_repos_allowed")
+  autoResync          Boolean  @default(false) @map("auto_resync")
+  prReviews           Boolean  @default(false) @map("pr_reviews")
+  /// @zod.number.int().min(0)
+  analysesPerMonth    Int?     @map("analyses_per_month") @gte(0)
+  /// @zod.number.int().min(0)
+  aiTokensPerMonth    Int?     @map("ai_tokens_per_month") @gte(0)
+  /// @zod.number.int().min(0)
+  historyDays         Int?     @map("history_days") @gte(0)
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+
+  @@index([planCode])
+  @@map("workspace_entitlements")
+}
+
+enum WorkspaceRole {
+  OWNER
+  MEMBER
+}
