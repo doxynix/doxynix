@@ -186,12 +186,6 @@
       "source": "deckardger/tanstack-agent-skills",
       "sourceType": "github"
     },
-    "tanstack-router-best-practices": {
-      "computedHash": "659549bfcacc5767cd489fcbceb2889247bd38c82f0a37c282da754eb2603f63",
-      "skillPath": "skills/tanstack-router/SKILL.md",
-      "source": "deckardger/tanstack-agent-skills",
-      "sourceType": "github"
-    },
     "trigger-tasks": {
       "computedHash": "fc5371f0356358a13a07b8d5f72f7e537002d4b0c50f3d2dacd57d10a2163cfa",
       "skillPath": "trigger-tasks/SKILL.md",

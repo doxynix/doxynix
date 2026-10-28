@@ -9,7 +9,6 @@
     "**/.dependency-cruiser.ts",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "**/routeTree.gen.ts",
     "**/prisma/migrations/**",
     "**/src/shared/ui/icons/**",
     "**/src/shared/ui/visuals/**",

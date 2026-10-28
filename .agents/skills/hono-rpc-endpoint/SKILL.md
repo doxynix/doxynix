@@ -1,16 +1,16 @@
 ---
 name: hono-rpc-endpoint
-description: Standardized procedure for creating end-to-end type-safe Hono RPC API endpoints with Zod validation in apps/siem-server and consuming them in apps/siem-client via hcWithType. Covers router mounting in src/index.ts, the AppType/hcWithType contract in src/client.ts, and the dist/-based type-check order. Use when adding or modifying a SIEM backend endpoint.
+description: Standardized procedure for creating end-to-end type-safe Hono RPC API endpoints with Zod validation in apps/siem-server and consuming them from apps/web through its BFF. Covers router mounting in src/index.ts, the AppType/hcWithType contract in src/client.ts, shared DTOs in @doxynix/shared, and the dist/-based type-check order. Use when adding or modifying a SIEM backend endpoint.
 ---
 
 # Hono RPC Endpoint Creation
 
 ## Overview
-Doxynix SIEM uses Hono RPC to provide compile-time end-to-end type safety between `siem-server` and `siem-client` without manual fetch or OpenAPI codegen steps.
+Doxynix SIEM uses Hono RPC to provide compile-time type safety inside `apps/siem-server`. The browser never calls it directly: `apps/web` proxies every SIEM request through its BFF and validates the contract with Zod DTOs from `@doxynix/shared`.
 
 ## The Iron Law
 ```
-EVERY REQUEST PAYLOAD MUST BE VALIDATED BY ZOD. CLIENT MUST CONSUME VIA hcWithType (NO RAW FETCH).
+EVERY REQUEST PAYLOAD MUST BE VALIDATED BY ZOD. THE BROWSER NEVER CALLS siem-server DIRECTLY.
 ```
 
 ## Doxynix facts
@@ -105,17 +105,22 @@ export const app = new Hono()
 export type AppType = typeof app;
 ```
 
-### Step 5: Consume in Client (`apps/siem-client`)
-```typescript
-import { hcWithType } from "@doxynix/siem-server/client";
+### Step 5: Expose through the web BFF (`apps/web`)
+Define the request/response DTO in `packages/shared` first, validate it in the router, then call the
+route from a server-side tRPC procedure in `apps/web/src/server/modules/siem/`:
 
-const res = await hcWithType.api.rules.$post({
-  json: { name: "Suspicious Login", query: "events where count > 5" },
+```typescript
+// apps/web/src/server/modules/siem/<slice>.router.ts
+export const siemRouter = createTRPCRouter({
+  list: adminProcedure
+    .input(SiemQuerySchema)
+    .query(({ input }) => siemClient.list(input)),
 });
-const data = await res.json();
 ```
 
-Never raw `fetch`, never a deep import into `apps/siem-server/src`.
+Server-side calls go through `hcWithType` from `@doxynix/siem-server/client`; browser components
+consume the tRPC procedure. Never raw `fetch` from the browser, never a deep import into
+`apps/siem-server/src`.
 
 ---
 
@@ -141,9 +146,9 @@ export const hcWithType = (...args: Parameters<typeof hc>): Client => hc<AppType
 "./client": { "types": "./dist/src/client.d.ts", "default": "./dist/src/client.js" }
 ```
 
-**Both point at `dist/`, not `src/`.** `packages/cli` and `apps/siem-client` therefore type-check
-against the **built** output of `apps/siem-server` — a new field added to a response type will not
-appear on the client until the server is rebuilt.
+**Both point at `dist/`, not `src/`.** `packages/cli` (types only) and the `apps/web` BFF therefore
+type-check against the **built** output of `apps/siem-server` — a new field added to a response type
+will not appear on the consumer until the server is rebuilt.
 
 ## Build order
 
@@ -155,8 +160,9 @@ bun --filter @doxynix/siem-server build      # tsc → dist/
 bun run type-check
 ```
 
-`bun --filter @doxynix/siem-client type-check` against a stale `dist/` produces phantom "property
-does not exist" errors that are not real bugs. When in doubt, rebuild before believing a type error.
+`bun --filter @doxynix/web type-check` against a stale `dist/` produces phantom "property
+does not exist" errors that are not real bugs. When in doubt, rebuild the server before believing a
+type error.
 
 Never hand-edit anything under `dist/`. Never hand-edit generated Drizzle migration SQL — see the
 `drizzle-migration` skill.

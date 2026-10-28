@@ -23,7 +23,6 @@
 | `base.json` | Global / Base | Base strict TypeScript compiler options (`noImplicitAny`, `strictNullChecks`) |
 | `nextjs.json` | `apps/web` | Extended TSConfig optimized for Next.js 16 App Router |
 | `hono.json` | `apps/siem-server` | TSConfig preset for Hono Bun / Node backend services |
-| `siem-client.json` | `apps/siem-client` | TSConfig preset for Vite + React 19 SPA bundling |
 | `node.json` | `packages/cli` | TSConfig preset for standalone Node.js and CLI tools |
 | `depcruise-base.json` | Global / Base | Shared dependency-cruiser "health" rules + options (extended by each workspace) |
 

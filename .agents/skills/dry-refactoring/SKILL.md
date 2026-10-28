@@ -16,7 +16,7 @@ First, detect the duplications. In this repo the detector is the root `dup` scri
 bun run dup
 ```
 
-It runs `jscpd . --skip-isolated "apps/web|apps/siem-server|apps/siem-client|packages/cli|packages/config|packages/shared"` against `.jscpd.json` (`mode: strict`, `threshold: 5`) and **exits non-zero over 5%**, so it doubles as the gate. For a narrower scope or extra flags, call the binary directly with `bun x jscpd`.
+It runs `jscpd . --skip-isolated "apps/web|apps/siem-server|packages/cli|packages/config|packages/shared"` against `.jscpd.json` (`mode: strict`, `threshold: 5`) and **exits non-zero over 5%**, so it doubles as the gate. For a narrower scope or extra flags, call the binary directly with `bun x jscpd`.
 
 In codebases that mix related formats (e.g. JavaScript and TypeScript), add `--cross-formats` so clones spanning both are detected too:
 

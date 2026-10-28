@@ -6,8 +6,7 @@
     "./base.json": "./base.json",
     "./hono.json": "./hono.json",
     "./nextjs.json": "./nextjs.json",
-    "./node.json": "./node.json",
-    "./siem-client.json": "./siem-client.json"
+    "./node.json": "./node.json"
   },
   "scripts": {
     "format": "biome check --write .",

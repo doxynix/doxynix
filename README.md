@@ -51,7 +51,6 @@ graph TB
     end
 
     subgraph InternalPlane [" Internal Security Plane (Restricted) "]
-        SIEM_CLIENT["apps/siem-client<br/><b>Vite 8 SPA</b><br/>SOC Operations Console"]
         SIEM_SERVER["apps/siem-server<br/><b>Hono RPC + Drizzle</b><br/>Telemetry & Threat Engine"]
     end
 
@@ -67,7 +66,6 @@ graph TB
     WEB --> VALKEY
     WEB --> TRIGGER
 
-    SIEM_CLIENT -->|Hono RPC Client| SIEM_SERVER
     SIEM_SERVER --> PG
     SIEM_SERVER --> VALKEY
     SIEM_SERVER --> AXIOM
@@ -81,7 +79,6 @@ graph TB
 | :--- | :--- | :--- | :---: |
 | [`apps/web`](apps/web) | `@doxynix/web` | Code intelligence portal, Interactive Repo Brief, AI pipeline | 🌐 **Public** |
 | [`apps/siem-server`](apps/siem-server) | `@doxynix/siem-server` | Telemetry processing, security audit logging, Drizzle ORM | 🔒 **Internal (Admins)** |
-| [`apps/siem-client`](apps/siem-client) | `@doxynix/siem-client` | Security operations dashboard, real-time incident console | 🔒 **Internal (Admins)** |
 | [`packages/cli`](packages/cli) | `@doxynix/cli` | Terminal interface for developers and CI/CD runners | 🚧 **Public (MVP)** |
 | [`packages/shared`](packages/shared) | `@doxynix/shared` | Shared Zod schemas, validation contracts, and domain types | 🔒 **Internal** |
 | [`packages/config`](packages/config) | `@doxynix/config` | Shared configurations for Biome, TypeScript, and Oxlint | 🌐 **Shared** |

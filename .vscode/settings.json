@@ -16,7 +16,6 @@
     "root",
     "security",
     "shared",
-    "siem-client",
     "siem-server",
     "skills",
     "tooling",
@@ -95,8 +94,7 @@
     "**/coverage": true,
     "**/dist": true,
     "**/node_modules": true,
-    "**/prisma/generated": true,
-    "**/routeTree.gen.ts": true
+    "**/prisma/generated": true
   },
 
   "sonarlint.connectedMode.project": {
@@ -114,7 +112,6 @@
   "tailwindCSS.classFunctions": ["cn", "cva", "clsx", "cx"],
 
   "tailwindCSS.experimental.configFile": {
-    "apps/siem-client": "apps/siem-client/src/global.css",
     "apps/web": "apps/web/src/app/globals.css"
   },
 

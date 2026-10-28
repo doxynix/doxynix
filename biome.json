@@ -75,7 +75,6 @@
       "!!**/public",
       "!!**/.stryker-tmp",
       "!!**/messages/en.d.json.ts",
-      "!!**/routeTree.gen.ts",
       "!!**/next-env.d.ts",
       "!!**/.dependency-cruiser-known-violations.json",
       "!!**/prisma/generated",

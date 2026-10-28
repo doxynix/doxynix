@@ -34,14 +34,13 @@ bun.lock              # the only lockfile
 | --- | --- | --- |
 | `apps/web` | `@doxynix/web` | Next.js App Router, tRPC, ZenStack/Prisma, Trigger.dev |
 | `apps/siem-server` | `@doxynix/siem-server` | Hono + Drizzle, ships `dist/` consumed via `exports` |
-| `apps/siem-client` | `@doxynix/siem-client` | Vite + React + TanStack Router (FSD) |
 | `packages/cli` | `@doxynix/cli` | `dxnx` binary; built `dist` is consumed by apps |
 | `packages/config` | `@doxynix/config` | shared tsconfig / dep-cruiser base config |
 | `packages/shared` | `@doxynix/shared` | pure types + Zod schemas; only runtime dep is `zod` |
 
 Turbo cannot run `packages/cli` scripts before `packages/config` is built, and
-`apps/siem-client` / `packages/cli` type-check against **`apps/siem-server`'s built `dist/`** —
-that is why `build`, `type-check` and `test` all declare `dependsOn: ["^build"]`.
+`packages/cli` type-checks against **`apps/siem-server`'s built `dist/`** (types only) — that is
+why `build`, `type-check` and `test` all declare `dependsOn: ["^build"]`.
 
 ## Running Tasks
 
@@ -61,7 +60,7 @@ Scope to one workspace with `bun --filter`:
 
 ```bash
 bun --filter @doxynix/web lint
-bun --filter @doxynix/siem-client type-check
+bun --filter @doxynix/cli type-check
 bun --filter '@doxynix/*' build
 bun --filter @doxynix/siem-server... build    # siem-server and everything it depends on
 ```
@@ -171,7 +170,7 @@ The monorepo is a modular monolith per app plus FSD on the clients. These are en
 `dep-cruiser` (`bun run arch:check`), not by convention:
 
 - `apps/*` must not import each other.
-- Client FSD (`apps/web/src/{app,entities,features,widgets,shared}`, `apps/siem-client`):
+- Client FSD (`apps/web/src/{app,entities,features,widgets,shared}`):
   imports flow **downward only**; no cross-slice imports. Gate: `bun --filter @doxynix/web lint:fsd`
   (steiger).
 - Server modules (`apps/web/src/server/modules`, `apps/siem-server/src/modules`,

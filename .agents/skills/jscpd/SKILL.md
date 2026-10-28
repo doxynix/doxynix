@@ -16,7 +16,7 @@ reads `.jscpd.json`:
 bun run dup
 ```
 
-That is `jscpd . --skip-isolated "apps/web|apps/siem-server|apps/siem-client|packages/cli|packages/config|packages/shared"`,
+That is `jscpd . --skip-isolated "apps/web|apps/siem-server|packages/cli|packages/config|packages/shared"`,
 and it **fails over the 5% threshold**, so it is the same command CI runs.
 
 `.jscpd.json` (repo root) is the source of truth for what gets scanned:

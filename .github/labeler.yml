@@ -77,10 +77,6 @@ siem:
   - changed-files:
       - any-glob-to-any-file: 'apps/siem/**/*'
 
-siem:client:
-  - changed-files:
-      - any-glob-to-any-file: 'apps/siem/client/**/*'
-
 siem:server:
   - changed-files:
       - any-glob-to-any-file: 'apps/siem/server/**/*'

@@ -1,11 +1,11 @@
 ---
 name: tanstack-query-best-practices
-description: TanStack Query 5 best practices for query keys, caching, mutations, error handling and prefetching, as used in apps/web (tRPC via @trpc/tanstack-react-query) and apps/siem-client (Hono RPC). Use when writing or reviewing useQuery/useSuspenseQuery/useMutation calls, query key factories, staleTime/gcTime defaults, invalidation, or optimistic updates.
+description: TanStack Query 5 best practices for query keys, caching, mutations, error handling and prefetching, as used in apps/web (tRPC via @trpc/tanstack-react-query). Use when writing or reviewing useQuery/useSuspenseQuery/useMutation calls, query key factories, staleTime/gcTime defaults, invalidation, or optimistic updates.
 ---
 
 # TanStack Query Best Practices
 
-Guidelines for `@tanstack/react-query` **5.102.2**, as used in `apps/web` and `apps/siem-client`.
+Guidelines for `@tanstack/react-query` **5.102.2**, as used in `apps/web`.
 
 ## Doxynix facts
 
@@ -13,7 +13,6 @@ Guidelines for `@tanstack/react-query` **5.102.2**, as used in `apps/web` and `a
 |------|-------|
 | Version | `@tanstack/react-query` 5.102.2 (root `catalog:`) |
 | `apps/web` | Data flows through **tRPC** — `@trpc/tanstack-react-query` 11.19.0 with `superjson` 2.2.6 |
-| `apps/siem-client` | Data flows through **Hono RPC** via `hcWithType` from `@doxynix/siem-server/client` |
 | Devtools | `@tanstack/react-query-devtools` 5.104.0 (dev only) |
 | QueryClient | created in `apps/web/src/app/composition-root.tsx` |
 
@@ -116,9 +115,10 @@ Counts below match the files that actually exist in `rules/`.
   `useMutation(trpc.<router>.<proc>.mutationOptions(opts))`, and invalidate with
   `queryClient.invalidateQueries(trpc.<router>.<proc>.queryFilter(input))` — or `pathFilter()`
   when you do not know the input.
-- **Hono RPC in `apps/siem-client`.** Calls go through `hcWithType` from `@doxynix/siem-server/client`
-  inside `queryFn` — never raw `fetch`. Because the client types come from the **built**
-  `apps/siem-server/dist`, rebuild the server before expecting a new field to type-check.
+- **SIEM data goes through the BFF.** `apps/web` tRPC procedures call `apps/siem-server` server-side
+  via `hcWithType` from `@doxynix/siem-server/client`; the browser only sees the tRPC procedure.
+  Because the client types come from the **built** `apps/siem-server/dist`, rebuild the server
+  before expecting a new field to type-check.
 - **FSD.** Hooks that wrap a query live in a slice's `model/` layer, never in `ui/`.
 
 ## How to Use

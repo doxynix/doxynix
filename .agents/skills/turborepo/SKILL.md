@@ -90,7 +90,7 @@ is fine.
 | `db:generate` | A hub task; `build`, `lint`, `lint:fix`, `type-check`, `test`, `dev`, `arch:baseline` and `validate` all `dependsOn` it |
 | Other `db:*` | `cache: false` (side-effecting), except `db:generate` |
 | `dev` | `cache: false`, `persistent: true` |
-| Built-artifact deps | `build`, `type-check` and `test` all `dependsOn: ["^build"]` — `apps/siem-client` and `packages/cli` type-check against `apps/siem-server`'s built `dist/` |
+| Built-artifact deps | `build`, `type-check` and `test` all `dependsOn: ["^build"]` — `packages/cli` type-checks against `apps/siem-server`'s built `dist/` |
 | UI | `"ui": "tui"` |
 | Concurrency / cache | `concurrency: "4"`, `cacheDir: ".turbo/cache"`, `cacheMaxAge: "14d"`, `cacheMaxSize: "5GB"` |
 

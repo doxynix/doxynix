@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  },
-  "extends": "@doxynix/config/siem-client.json",
-  "include": ["src/**/*"]
-}

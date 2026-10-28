@@ -29,7 +29,7 @@ relative to `apps/web`:
 ## Repo notes
 
 - Trigger.dev lives only in `apps/web` (`@trigger.dev/sdk`, `@trigger.dev/build` and
-  `@trigger.dev/react-hooks` all `4.6.4`). There is no Trigger setup in `apps/siem-client`.
+  `@trigger.dev/react-hooks` all `4.6.4`). There is no Trigger setup in `apps/siem-server` either.
 - `apps/web` is Next.js App Router, so every component using these hooks needs `"use client"` at the
   top; a server component cannot subscribe.
 - Frontend code lives under the FSD layers (`app/`, `widgets/`, `features/`, `entities/`, `shared/`)

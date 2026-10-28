@@ -5,12 +5,6 @@
       "package-name": "doxynix",
       "release-type": "node"
     },
-    "apps/siem-client": {
-      "bump-minor-pre-major": true,
-      "bump-patch-pre-major": true,
-      "package-name": "@doxynix/siem-client",
-      "release-type": "node"
-    },
     "apps/siem-server": {
       "bump-minor-pre-major": true,
       "bump-patch-pre-major": true,

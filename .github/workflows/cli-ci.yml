@@ -124,8 +124,11 @@ jobs:
       - name: Build CLI
         run: bun --filter @doxynix/cli build
 
-      - name: Smoke-run Built Binary
+      - name: Smoke-run Built Bundle (Node)
         run: node packages/cli/dist/index.js --version
+
+      - name: Smoke-run Built Bundle (Bun)
+        run: bun packages/cli/dist/index.js --version
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2

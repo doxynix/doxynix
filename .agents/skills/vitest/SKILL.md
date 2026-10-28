@@ -18,7 +18,7 @@ Vitest is a next-generation testing framework powered by Vite. It provides a Jes
 
 Vitest is **5.0.2 (stable, not beta)**, declared in the root `catalog` and pinned per-workspace.
 
-- Tests exist **only in `apps/web`**. `apps/siem-server`, `apps/siem-client`, `packages/cli`, `packages/config`
+- Tests exist **only in `apps/web`**. `apps/siem-server`, `packages/cli`, `packages/config`
   and `packages/shared` have no `test` script and no vitest dependency — do not try to run vitest there.
 - Everything below is executed with Bun. Never `npm`, `npx`, `pnpm` or `yarn`.
 

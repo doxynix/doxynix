@@ -225,7 +225,7 @@ tsconfig.json              # the single root config
 ```
 
 ```jsonc
-// apps/siem-client/tsconfig.json — shape, not verbatim
+// packages/cli/tsconfig.json — shape, not verbatim
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
