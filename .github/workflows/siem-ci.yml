@@ -7,7 +7,6 @@ on:
   push:
     branches: ["main", "develop"]
     paths:
-      - "apps/siem-client/**"
       - "apps/siem-server/**"
       - "packages/**"
       - "package.json"
@@ -17,7 +16,6 @@ on:
   pull_request:
     branches: ["main", "develop"]
     paths:
-      - "apps/siem-client/**"
       - "apps/siem-server/**"
       - "packages/**"
       - "package.json"
@@ -60,13 +58,13 @@ jobs:
       - name: Clean tree-sitter symlinks
         run: bun run clean:symlinks
 
-      # siem-client resolves @doxynix/siem-server through its package exports, which point at
-      # dist/. These steps bypass turbo, so the build has to be requested explicitly.
+      # siem-server's package exports point at dist/. These steps bypass turbo, so the build
+      # has to be requested explicitly.
       - name: Build siem-server
         run: bun --filter @doxynix/siem-server build
 
       - name: Run Architecture & Lint Checks
-        run: bun --filter "@doxynix/siem-*" validate
+        run: bun --filter @doxynix/siem-server validate
 
       - name: Run Type Check
-        run: bun --filter "@doxynix/siem-*" type-check
+        run: bun --filter @doxynix/siem-server type-check

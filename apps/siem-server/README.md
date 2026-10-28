@@ -24,7 +24,7 @@
 ### Key Capabilities
 
 * **Self-Contained Domain Slices:** Domain slices (`admin`, `analytics`, `audit`, `incidents`, `rules`, `scan`, `stream-logs`) are completely self-contained with zero cross-slice dependencies, and imports flow downward only (`src/modules` → `src/core`).
-* **End-to-End Type Safety:** Exports `AppType` to provide a zero-cost, fully typed RPC client (`hcWithType`) for `@doxynix/siem-client`.
+* **End-to-End Type Safety:** Exports `AppType` so consumers can drive a fully typed RPC client (`hcWithType`).
 * **UUIDv7 Indexed Primary Keys:** Native time-sorted UUIDv7 identifiers optimized for high-volume PostgreSQL B-tree chronological indexing.
 * **Axiom Batch Ingestion Worker:** Asynchronous, non-blocking telemetry forwarder that buffers and flushes security events directly into Axiom Datasets.
 * **Redis Event Bus & Flood Protection:** High-speed queueing and distributed rate limiting to shield backend workers from log bursts.

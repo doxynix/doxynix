@@ -36,8 +36,9 @@
   "scripts": {
     "arch:baseline": "depcruise src --config .dependency-cruiser.ts --baseline",
     "arch:check": "depcruise src --config .dependency-cruiser.ts --output-type err --ignore-known",
-    "build": "tsup",
-    "build:bin": "bun build src/index.ts --compile --minify --outfile dxnx",
+    "prebuild": "rm -rf dist",
+    "build": "bun build src/index.ts --target=node --format=esm --outdir=dist --minify --keep-names --banner '#!/usr/bin/env node'",
+    "build:bin": "bun build src/index.ts --compile --minify --bytecode --format=esm --outfile dxnx",
     "dev": "bun src/index.ts",
     "format": "biome check --write .",
     "format:check": "biome check .",
@@ -48,25 +49,22 @@
     "type-check": "bun check",
     "validate": "biome check . && oxlint && bun run arch:check && bun type-check"
   },
-  "dependencies": {
+  "devDependencies": {
     "@clack/prompts": "1.8.1",
+    "@doxynix/config": "workspace:*",
+    "@doxynix/shared": "workspace:*",
+    "@doxynix/web": "workspace:*",
     "@trpc/client": "catalog:",
+    "@trpc/server": "catalog:",
+    "@vitest/coverage-v8": "5.0.5",
     "commander": "14.0.3",
+    "dependency-cruiser": "18.6.0",
     "ora": "9.4.1",
     "pathe": "catalog:",
     "picocolors": "1.1.1",
     "superjson": "catalog:",
+    "vitest": "catalog:",
     "zod": "catalog:"
-  },
-  "devDependencies": {
-    "@doxynix/config": "workspace:*",
-    "@doxynix/shared": "workspace:*",
-    "@doxynix/web": "workspace:*",
-    "@trpc/server": "catalog:",
-    "@vitest/coverage-v8": "5.0.5",
-    "dependency-cruiser": "18.6.0",
-    "tsup": "9.0.0",
-    "vitest": "catalog:"
   },
   "engines": {
     "node": ">=20"

@@ -131,9 +131,9 @@ This is the one permitted cross-app import. A runtime import breaks `arch:check`
 `apps/siem-server` ships `dist/` and consumers read it through the package `exports` map.
 Consequences:
 
-- `apps/siem-client` and `packages/cli` **type-check against the built output**, not `src/`.
+- `packages/cli` **type-checks against the built output**, not `src/`.
 - That is why `build`, `type-check` and `test` all declare `dependsOn: ["^build"]` in `turbo.json`.
-- Running `bun --filter @doxynix/siem-client type-check` against a stale `dist/` produces phantom
+- Running `bun --filter @doxynix/cli type-check` against a stale `dist/` produces phantom
   type errors. Run through Turbo (`bun run type-check`) or build siem-server first.
 
 ## Build Optimization

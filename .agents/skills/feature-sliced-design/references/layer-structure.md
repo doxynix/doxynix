@@ -140,12 +140,10 @@ multiple UI elements into a meaningful section of a screen and then used in
 upper layers such as Pages or App.
 
 > **In this repo the widgets layer is a load-bearing part of the architecture, not something to
-> phase out.** `apps/web/src/widgets` and `apps/siem-client/src/widgets` both exist, and both are
-> enforced by `bun run lint:fsd` (Steiger). The upstream reference notes that a widget can blur
-> into a feature because both may carry data fetching and state; the fix here is composition, not
-> removal — a widget imports features and entities and owns no user flow of its own. In
-> `apps/siem-client` the routes are thin TanStack Router files, so a widget is routinely the home
-> of a screen's composition.
+> phase out.** `apps/web/src/widgets` exists and is enforced by `bun run lint:fsd` (Steiger). The
+> upstream reference notes that a widget can blur into a feature because both may carry data
+> fetching and state; the fix here is composition, not removal — a widget imports features and
+> entities and owns no user flow of its own.
 
 A widget is the right home when:
 

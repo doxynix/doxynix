@@ -9,7 +9,6 @@ const ALLOWED_SCOPES = [
   "root",
   "security",
   "shared",
-  "siem-client",
   "siem-server",
   "skills",
   "tooling",
@@ -90,7 +89,7 @@ export function checkCommitName(commitMsgFile?: string): boolean {
       console.error("   perf     - A code change that improves performance");
       console.error("   ci       - Changes to CI configuration files and scripts");
       console.error("\n📋 Allowed scopes:");
-      console.error("   web, siem-server, siem-client, cli, shared, config, root");
+      console.error("   web, siem-server, cli, shared, config, root");
       console.error("   (scope is optional — type: description is always fine)");
       console.error("\n📝 Example: feat(cli): add login validation");
       console.error(`\n❌ Your message: "${commitMsg.split("\n")[0]?.trim() ?? ""}"`);

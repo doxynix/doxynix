@@ -108,7 +108,7 @@ Rules the hook enforces:
 - Allowed types: `feat fix docs style refactor perf test build ci chore revert`.
 - Optional scope `(...)` and breaking-change `!` allowed. Scope **must be one of**:
   `ci`, `cli`, `config`, `db`, `deps`, `root`, `security`, `shared`,
-  `siem-client`, `siem-server`, `skills`, `tooling`, `web`
+  `siem-server`, `skills`, `tooling`, `web`
   (mirrors `conventionalCommits.scopes` in `.vscode/settings.json`). Omitting the
   scope entirely is always allowed; any other scope is rejected.
 - Merge / Revert / `fixup!` / `squash!` subjects are permitted bypass.

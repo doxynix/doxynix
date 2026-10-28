@@ -39,8 +39,6 @@ rest.
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "packages": {
     ".": { "package-name": "doxynix", "release-type": "node" },
-    "apps/siem-client": { "package-name": "@doxynix/siem-client", "release-type": "node",
-      "bump-minor-pre-major": true, "bump-patch-pre-major": true },
     "apps/siem-server": { "package-name": "@doxynix/siem-server", "release-type": "node",
       "bump-minor-pre-major": true, "bump-patch-pre-major": true },
     "apps/web": { "package-name": "@doxynix/web", "release-type": "node" },
@@ -57,9 +55,9 @@ Notes on what is actually set:
 - **`node-workspace` plugin.** Keeps the root and workspace versions in sync and updates the
   inter-workspace `workspace:*` ranges when a package is versioned. This is why you must not
   hand-edit a `version` field — the bot owns it.
-- **`bump-minor-pre-major` / `bump-patch-pre-major`** are set only for `apps/siem-client` and
-  `apps/siem-server`, which are still pre-1.0 (`0.4.0`, `0.3.2`). A `feat` on them yields a patch,
-  not `0.5.0`. The other five are past 1.0 and use normal semver.
+- **`bump-minor-pre-major` / `bump-patch-pre-major`** are set only for `apps/siem-server`, which is
+  still pre-1.0 (`0.4.3`). A `feat` on it yields a patch, not `0.5.0`. The other five are past 1.0
+  and use normal semver.
 - **Every workspace is tracked, including private ones.** `packages/config` and `packages/shared`
   get releases even though they are never published. That is intentional — they are consumed
   through `workspace:*`.
@@ -149,7 +147,7 @@ Copied verbatim from `scripts/check-commit-name.ts`:
 
 ```
 ci  cli  config  db  deps  root  security  shared
-siem-client  siem-server  skills  tooling  web
+siem-server  skills  tooling  web
 ```
 
 Anything else is rejected. Omitting the scope entirely is always valid — `type: description` never
@@ -195,7 +193,7 @@ feat(shared)!: drop the legacy v1 enums
 BREAKING CHANGE: import from "@doxynix/shared/enums/v2" instead. The v1 exports are removed.
 ```
 
-Two workspaces (`apps/siem-client`, `apps/siem-server`) are pre-1.0 with
+`apps/siem-server` is pre-1.0 with
 `bump-minor-pre-major: true`, so a breaking change there still lands as a minor bump — expected,
 not a bug.
 

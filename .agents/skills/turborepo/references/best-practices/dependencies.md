@@ -262,7 +262,7 @@ Add it to `trustedDependencies`; do not work around it by hand-copying binaries.
 
 ### Stale `dist/` type errors
 
-`apps/siem-client` and `packages/cli` type-check against `apps/siem-server`'s **built** `dist/`.
+`packages/cli` type-checks against `apps/siem-server`'s **built** `dist/` (types only).
 A stale `dist/` produces phantom errors. Run through Turbo (`bun run type-check`) or build
 siem-server first.
 

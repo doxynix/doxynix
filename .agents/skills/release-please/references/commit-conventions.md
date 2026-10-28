@@ -105,10 +105,10 @@ outside this list:
 
 ```
 ci  cli  config  db  deps  root  security  shared
-siem-client  siem-server  skills  tooling  web
+siem-server  skills  tooling  web
 ```
 
-Thirteen values. A scope outside the list fails the commit — this is not advisory.
+Twelve values. A scope outside the list fails the commit — this is not advisory.
 
 ### Omitting the scope is always valid
 
@@ -125,7 +125,6 @@ refactor: extract the api-error normaliser
 |-------|---------|
 | `web` | `apps/web` — Next.js, tRPC, ZenStack, Trigger.dev |
 | `siem-server` | `apps/siem-server` — Hono + Drizzle |
-| `siem-client` | `apps/siem-client` — Vite SPA |
 | `cli` | `packages/cli` — the `dxnx` binary |
 | `shared` | `packages/shared` — types, Zod schemas, auth contracts |
 | `config` | `packages/config`, tsconfig, dep-cruiser base |

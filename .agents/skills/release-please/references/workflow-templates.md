@@ -92,12 +92,6 @@ Four decisions worth preserving:
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "packages": {
     ".": { "package-name": "doxynix", "release-type": "node" },
-    "apps/siem-client": {
-      "package-name": "@doxynix/siem-client",
-      "release-type": "node",
-      "bump-minor-pre-major": true,
-      "bump-patch-pre-major": true
-    },
     "apps/siem-server": {
       "package-name": "@doxynix/siem-server",
       "release-type": "node",
@@ -117,7 +111,6 @@ Four decisions worth preserving:
 // .release-please-manifest.json
 {
   ".": "6.2.0",
-  "apps/siem-client": "0.4.0",
   "apps/siem-server": "0.3.2",
   "apps/web": "5.2.0",
   "packages/cli": "5.1.0",

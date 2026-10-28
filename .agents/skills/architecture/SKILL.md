@@ -16,7 +16,7 @@ IMPORTS FLOW DOWNWARD ONLY. CROSS-FEATURE AND CROSS-SLICE IMPORTS ARE STRICTLY F
 ---
 
 ## 1. Client Architecture: Feature-Sliced Design (FSD)
-Applies to: `apps/siem-client` and `apps/web/src/app` / `entities` / `features` / `widgets`.
+Applies to: `apps/web/src/app` / `entities` / `features` / `widgets`.
 
 ### Layer Hierarchy (Top to Bottom):
 1. **`app` / `routes`** (Routing, providers, entrypoints)
@@ -33,11 +33,11 @@ Applies to: `apps/siem-client` and `apps/web/src/app` / `entities` / `features` 
 ### Incorrect vs Correct:
 ```typescript
 // ❌ INCORRECT: Cross-feature import
-// In apps/siem-client/src/features/scan/index.tsx
+// In apps/web/src/features/scan/index.tsx
 import { AuthForm } from '@/features/auth/auth-form';
 
 // ✅ CORRECT: Compose in a widget or move shared logic down
-// In apps/siem-client/src/widgets/scan-widget/index.tsx
+// In apps/web/src/widgets/scan-widget/index.tsx
 import { ScanFeature } from '@/features/scan';
 import { AuthForm } from '@/features/auth';
 ```
@@ -72,7 +72,6 @@ server  ->  modules  ->  core / domain / utils
 | Place | FSD/module methodology lint (warn) | Dependency gate (error + baseline) |
 |---|---|---|
 | `apps/web` | steiger (`lint:fsd`) | dep-cruiser: `no-orphans`, `no-cross-slice-imports`, `no-lower-layer-to-module-imports`, `infra-must-not-import-domain`, `domain-must-not-reach-slices` + shared cycles/dev-dep rules |
-| `apps/siem-client` | steiger (`lint:fsd`) | dep-cruiser: `no-orphans`, `fsd-no-cross-feature-imports`, `fsd-layer-order` + shared cycles/dev-dep rules |
 | `apps/siem-server` | — (no FSD) | dep-cruiser: module slices + entry-reachability + cycles + orphans |
 | `packages/cli` | — (no FSD) | dep-cruiser: command slices + layering + entry-reachability + cycles + orphans |
 | `packages/shared`, `packages/config` | — | — (leaf packages: pure types / configs, no meaningful graph) |
@@ -95,9 +94,6 @@ bun --filter @doxynix/web arch:check
 
 # SIEM server - dep-cruiser: module slices (src/modules), cycles, orphans
 bun --filter @doxynix/siem-server arch:check
-
-# SIEM client - dep-cruiser: FSD boundaries, cycles, orphans (+ steiger in validate)
-bun --filter @doxynix/siem-client arch:check
 
 # CLI - dep-cruiser: command slices (src/commands) + layering, cycles, orphans
 bun --filter @doxynix/cli arch:check

@@ -19,7 +19,7 @@
 
 ## 🎯 Purpose & Invariants
 
-`@doxynix/shared` provides isomorphic, platform-agnostic types, schemas, and contracts shared between `apps/web`, `packages/cli`, `apps/siem-server`, and `apps/siem-client`.
+`@doxynix/shared` provides isomorphic, platform-agnostic types, schemas, and contracts shared between `apps/web`, `packages/cli`, and `apps/siem-server`.
 
 > [!IMPORTANT]  
 > **Zero Runtime Dependency Rule:** This package must strictly contain **pure TypeScript logic, constants, and Zod schemas**. No React, DOM APIs (`window`/`document`), Node.js built-ins (`fs`/`path`), Prisma, or heavy runtime dependencies are allowed.

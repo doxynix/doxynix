@@ -26,8 +26,8 @@ reviews:
     - "!**/*.tgz"
 
   path_instructions:
-    # Feature-Sliced Design (FSD) - applies to both Web and SIEM Client
-    - path: "apps/{web,siem-client}/src/{shared,entities,features,widgets}/**/*.{ts,tsx}"
+    # Feature-Sliced Design (FSD) - applies to Web
+    - path: "apps/web/src/{shared,entities,features,widgets}/**/*.{ts,tsx}"
       instructions: "This part of the project follows Feature-Sliced Design (FSD). Strictly enforce layer import rules: upper layers cannot import from higher layers (shared -> entities -> features -> widgets). Cross-imports between slices on the same layer are strictly forbidden. Ensure all public APIs are exported via index.ts files."
 
     # Next.js Specifics
@@ -41,10 +41,6 @@ reviews:
     # Trigger.dev (Background Tasks)
     - path: "apps/web/src/trigger/**/*.ts"
       instructions: "Trigger.dev background tasks. Ensure idempotency and proper timeout/retry handling for long-running processes."
-
-    # TanStack Router (SIEM Client)
-    - path: "apps/siem-client/src/routes/**/*.{ts,tsx}"
-      instructions: "TanStack Router route definitions. Ensure strict type safety for route params, proper usage of routing hooks, and clean component structure."
 
     # Drizzle ORM (SIEM Server)
     - path: "apps/siem-server/src/core/db/**/*.{ts,tsx}"

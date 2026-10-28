@@ -45,7 +45,7 @@
     },
     "build": {
       "dependsOn": ["^build", "db:generate"],
-      "env": ["APP_VERSION", "PORT", "NEXT_PUBLIC_*", "VITE_*"],
+      "env": ["APP_VERSION", "PORT", "NEXT_PUBLIC_*"],
       "outputs": [
         ".next/**",
         "!.next/cache/**",
@@ -149,7 +149,7 @@
     "dev": {
       "cache": false,
       "dependsOn": ["db:generate"],
-      "env": ["PORT", "NEXT_PUBLIC_*", "VITE_*"],
+      "env": ["PORT", "NEXT_PUBLIC_*"],
       "persistent": true
     },
     "format": {
@@ -189,7 +189,7 @@
     "test:e2e": {
       "cache": false,
       "dependsOn": ["build", "db:generate"],
-      "env": ["DATABASE_URL", "DIRECT_URL", "NEXT_PUBLIC_*", "VITE_*"]
+      "env": ["DATABASE_URL", "DIRECT_URL", "NEXT_PUBLIC_*"]
     },
     "test:int": {
       "cache": false,

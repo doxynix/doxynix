@@ -171,12 +171,6 @@ steps.release.outputs['packages/core--version']
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "packages": {
     ".": { "package-name": "doxynix", "release-type": "node" },
-    "apps/siem-client": {
-      "package-name": "@doxynix/siem-client",
-      "release-type": "node",
-      "bump-minor-pre-major": true,
-      "bump-patch-pre-major": true
-    },
     "apps/siem-server": {
       "package-name": "@doxynix/siem-server",
       "release-type": "node",
@@ -197,7 +191,6 @@ steps.release.outputs['packages/core--version']
 ```json
 {
   ".": "6.2.0",
-  "apps/siem-client": "0.4.0",
   "apps/siem-server": "0.3.2",
   "apps/web": "5.2.0",
   "packages/cli": "5.1.0",
@@ -225,9 +218,9 @@ Practical consequences:
 
 ### Pre-1.0 packages
 
-`apps/siem-client` (0.4.0) and `apps/siem-server` (0.3.2) set both `bump-minor-pre-major` and
-`bump-patch-pre-major`. A `feat` on either is a **patch**, not a minor — so `feat(siem-client): ...`
-produces `0.4.1`, not `0.5.0`. That is intended: the public contract has not stabilised.
+`apps/siem-server` (0.4.3) sets both `bump-minor-pre-major` and `bump-patch-pre-major`. A `feat` on
+it is a **patch**, not a minor — so `feat(siem-server): ...` produces `0.4.4`, not `0.5.0`. That is
+intended: the public contract has not stabilised.
 
 The other five packages are past 1.0 and use normal semver.
 
@@ -242,7 +235,6 @@ paths are aligned deliberately:
 | `cli` | `packages/cli` |
 | `shared` | `packages/shared` |
 | `config` | `packages/config` |
-| `siem-client` | `apps/siem-client` |
 | `siem-server` | `apps/siem-server` |
 | `web` | `apps/web` |
 | `ci`, `deps`, `db`, `root`, `security`, `skills`, `tooling` | repo-wide |

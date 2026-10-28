@@ -9,7 +9,7 @@
 [![CLI: dxnx](https://img.shields.io/badge/cli-dxnx-24292e?style=flat-square)](https://www.npmjs.com)
 [![Language: TypeScript](https://img.shields.io/badge/language-typescript%20strict-24292e?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![UI: Clack](https://img.shields.io/badge/ui-%40clack%2Fprompts-24292e?style=flat-square)](https://github.com/natemoo-re/clack)
-[![Bundler: tsup](https://img.shields.io/badge/bundler-tsup-24292e?style=flat-square)](https://tsup.egoist.dev/)
+[![Bundler: Bun](https://img.shields.io/badge/bundler-bun-24292e?style=flat-square&logo=bun)](https://bun.sh/docs/bundler)
 
 [Capabilities](#-capabilities) · [Architecture](#-architecture--stack) · [Installation & Linking](#-installation--local-build) · [Usage](#-usage--commands) · [Security](#-token-storage--security)
 
@@ -48,16 +48,16 @@ flowchart LR
 
 ## 📦 Installation & Local Build
 
-The CLI is bundled using `tsup` into a self-contained executable:
+The CLI is bundled with Bun into a single ESM file. The npm package runs on Node.js ≥ 20 or Bun; the optional standalone binary embeds the Bun runtime and needs no runtime installed:
 
 ```bash
-# 1. Compile standalone bundle via tsup
+# 1. Bundle the Node-compatible ESM entrypoint into dist/
 bun run --filter @doxynix/cli build
 
-# 2. Link binary globally to your system PATH
+# 2. Link the binary globally to your system PATH
 cd packages/cli && bun link
 
-# 3. (Optional) Compile standalone single-file binary with Bun
+# 3. (Optional) Compile a standalone single-file binary with Bun
 bun run build:bin
 
 # 4. Verify global availability
@@ -123,8 +123,11 @@ Run commands from the monorepo root or inside `/packages/cli`:
 # Run CLI directly in watch mode with Bun
 bun run dev
 
-# Compile production bundle
+# Build the Node-compatible ESM bundle (dist/index.js)
 bun run build
+
+# Build a standalone executable with the Bun runtime embedded
+bun run build:bin
 ```
 
 ---

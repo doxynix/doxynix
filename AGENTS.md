@@ -1,7 +1,7 @@
 # AGENTS.md — Doxynix Monorepo
 
 Bun + Turborepo + TypeScript (strict). Bun workspaces: `apps/web`, `apps/siem-server`,
-`apps/siem-client`, `packages/{cli,config,shared}`. Postgres 18, Valkey 9, ZenStack/Prisma (web),
+`packages/{cli,config,shared}`. Postgres 18, Valkey 9, ZenStack/Prisma (web),
 Drizzle (siem-server).
 
 `CLAUDE.md` is a symlink to this file. `.cursor/rules/global.mdc` is a stale copy — this file wins.
@@ -62,7 +62,7 @@ path filter can never reach those files — hence the separate `vitest.integrati
   `type { AppRouter } from "@doxynix/web/trpc"` (a devDependency, types only, via the `./trpc`
   export). Do not extend it to runtime imports.
 - Shared domain code and schemas go in `packages/shared` (`workspace:*`), not in an app.
-- **Client FSD** (`apps/web/src/{app,entities,features,widgets,shared}`, `apps/siem-client`):
+- **Client FSD** (`apps/web/src/{app,entities,features,widgets,shared}`):
   imports flow downward only; no cross-slice imports. `steiger` is the methodology gate
   (`lint:fsd`).
 - **Server modules** (`apps/web/src/server/modules`, `apps/siem-server/src/modules`,
@@ -86,11 +86,10 @@ Detail: `.agents/skills/architecture/SKILL.md`.
 | `apps/web/prisma/schema.prisma` | ZenStack compiler; edit `prisma/models/*.zmodel` + `schema.zmodel` |
 | `apps/web/src/server/core/field-encryption/config.generated.ts` | `prisma/field-encryption-generator.ts` (DMMF annotations) |
 | `packages/shared/src/enums/index.ts` | `prisma/enum-generator.ts`, run by `db:generate` |
-| `apps/siem-client/src/routeTree.gen.ts` | TanStack Router plugin |
 | `apps/web/messages/en.d.json.ts` | next-intl type generation |
-| `apps/siem-client/dist`, `apps/siem-server/dist` | build output consumed via package `exports` |
+| `apps/siem-server/dist` | build output consumed via package `exports` |
 
-`packages/cli` and `apps/siem-client` type-check against `apps/siem-server`'s **built** `dist/`, so
+`packages/cli` type-checks against `apps/siem-server`'s **built** `dist/` (types only), so
 run through Turbo (`bun run type-check`) or build siem-server first.
 
 ---
@@ -126,13 +125,6 @@ Workflow: `.agents/skills/zenstack-migration/SKILL.md`, `.agents/skills/analysis
   into `app` in `src/index.ts` or `AppType` inference breaks.
 
 Workflow: `.agents/skills/drizzle-migration/SKILL.md`, `.agents/skills/hono-rpc-endpoint/SKILL.md`.
-
-### `apps/siem-client` (Vite 8, React 19, TanStack Router)
-
-- FSD only: `routes → widgets → features → entities → shared`. Compose in a widget instead of
-  cross-importing features.
-- Consume the API through `hcWithType` from `@doxynix/siem-server/client` — never raw `fetch`, never
-  deep imports into server files.
 
 ### `packages/cli` (`dxnx`)
 
@@ -185,7 +177,7 @@ Lefthook:
   prefix (`main`/`master`/`dev`/`development` bypass it).
 - Commit subject: `type(scope): description`, ≤ 72 chars, no trailing period. Allowed types
   `feat fix docs style refactor perf test build ci chore revert`. Scope is optional but, if present,
-  must be one of `ci cli config db deps root security shared siem-client siem-server skills tooling
+  must be one of `ci cli config db deps root security shared siem-server skills tooling
   web` (`scripts/check-commit-name.ts`).
 - **Never put the ticket in the subject.** `prepare-commit-msg` reads `dxnx-<n>` off the branch and
   appends `Closes DXNX-NNN` itself.

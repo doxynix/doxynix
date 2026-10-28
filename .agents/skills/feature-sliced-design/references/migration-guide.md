@@ -26,7 +26,6 @@ this repo:
 
 ```bash
 bun --filter @doxynix/web lint:fsd
-bun --filter @doxynix/siem-client lint:fsd
 ```
 
 Look for these rules:
@@ -119,7 +118,7 @@ app/sync/background-sync.ts                  ← Global concern
 ## Phasing out a small widgets layer (not applicable in this repo)
 
 This section is upstream guidance for projects that want to shrink their widgets layer. **Do not
-apply it in Doxynix** — `widgets/` is a required layer in `apps/web` and `apps/siem-client`. It is
+apply it in Doxynix** — `widgets/` is a required layer in `apps/web`. It is
 kept here for reference when reading the upstream FSD material.
 
 Route each widget individually by its actual responsibility:

@@ -35,8 +35,8 @@ const config: IConfiguration = {
           "(^|/)(?:babel|webpack)[.]config[.](?:js|cjs|mjs|ts|cts|mts|json)$", // other configs
           // Process entry points - started by the runner, never imported:
           "^src/index[.]ts$",
-          // Public RPC client contract - consumed by @doxynix/siem-client via
-          // the package.json "exports" map, never imported in-process:
+          // Public RPC client contract - consumed through the package.json
+          // "exports" map, never imported in-process:
           "^src/client[.]ts$",
         ],
       },
@@ -68,8 +68,8 @@ const config: IConfiguration = {
     // Dead-code gate: every src module must be reachable from the single
     // runtime entry (src/index.ts). Catches unmounted slice routers and code
     // imported only from dead branches. src/client.ts is the RPC contract
-    // consumed by @doxynix/siem-client via the exports map — never imported
-    // in-process, so exempt (same reasoning as the no-orphans exception).
+    // consumed through the exports map — never imported in-process, so exempt
+    // (same reasoning as the no-orphans exception).
     {
       comment:
         "Server modules: module unreachable from src/index.ts — dead code or unmounted slice.",
