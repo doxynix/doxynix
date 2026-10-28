@@ -20,15 +20,20 @@ export const workspaceRouter = createTRPCRouter({
     }),
 
   myWorkspaces: protectedProcedure
-    .output(z.object({ items: z.array(WorkspaceSummarySchema) }))
+    .output(
+      z.object({
+        activeWorkspaceId: z.uuid(),
+        items: z.array(WorkspaceSummarySchema),
+        reset: z.boolean(),
+      }),
+    )
     .query(async ({ ctx }) => {
-      const items = await workspaceService.listForUser(
+      return workspaceService.listForUser(
         ctx.db,
         ctx.session.user.id,
+        ctx.req.headers.get("x-workspace-id"),
         ctx.session.user.name,
       );
-
-      return { items };
     }),
 
   removeMember: workspaceProcedure

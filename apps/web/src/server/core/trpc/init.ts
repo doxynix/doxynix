@@ -3,13 +3,12 @@ import { ApiKeyScope, type UserRole } from "@doxynix/shared";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { enhance } from "@zenstackhq/runtime";
 import superjson from "superjson";
-import * as z from "zod";
 
 import { IS_PROD } from "@/shared/config/env.flags";
 
 import { normalizeError } from "@/server/core/api-error";
 import { hasApiKeyScope } from "@/server/core/auth/api-key-scopes";
-import { createPersonalWorkspace } from "@/server/core/workspaces/personal-workspace";
+import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import { assertAdminSecondFactor, assertNotBanned } from "@/server/utils/admin-access";
 import {
   buildRequestStore,
@@ -174,37 +173,16 @@ const isWorkspaceMember = t.middleware(async ({ ctx, next }) => {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "You are not logged in" });
   }
 
-  let workspaceId = ctx.req.headers.get("x-workspace-id");
-
-  if (workspaceId == null) {
-    const existing = await ctx.prisma.workspaceMember.findFirst({
-      orderBy: { createdAt: "asc" },
-      select: { workspaceId: true },
-      where: { userId },
-    });
-
-    if (existing != null) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Workspace access denied" });
-    }
-
-    workspaceId = await createPersonalWorkspace(userId, ctx.session?.user.name);
-  } else if (!z.uuid().safeParse(workspaceId).success) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Workspace access denied" });
-  }
-
-  const membership = await ctx.prisma.workspaceMember.findUnique({
-    select: { role: true },
-    where: { workspaceId_userId: { userId, workspaceId } },
+  const workspace = await resolveWorkspace({
+    headerWorkspaceId: ctx.req.headers.get("x-workspace-id"),
+    name: ctx.session?.user.name,
+    userId,
   });
-
-  if (membership == null) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Workspace access denied" });
-  }
 
   return next({
     ctx: {
       ...ctx,
-      workspace: { id: workspaceId, role: membership.role },
+      workspace,
     },
   });
 });

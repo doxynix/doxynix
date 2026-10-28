@@ -1,8 +1,10 @@
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
+import { isLocalBillingUpgradeEnabled } from "@/shared/config/env.flags";
+
 import { type DbClient, prisma } from "@/server/core/db";
-import { createPersonalWorkspace } from "@/server/core/workspaces/personal-workspace";
+import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import { normalizeEmail } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
 
@@ -98,9 +100,10 @@ export const workspaceService = {
   async listForUser(
     db: DbClient,
     userId: string,
+    headerWorkspaceId: null | string,
     name?: null | string,
-  ): Promise<Array<WorkspaceSummary>> {
-    await createPersonalWorkspace(userId, name);
+  ) {
+    const resolved = await resolveWorkspace({ headerWorkspaceId, name, userId });
 
     const memberships = await db.workspaceMember.findMany({
       include: { workspace: { include: { entitlement: true } } },
@@ -108,7 +111,11 @@ export const workspaceService = {
       where: { userId },
     });
 
-    return memberships.map((membership) => toSummary(membership.workspace, membership.role));
+    return {
+      activeWorkspaceId: resolved.id,
+      items: memberships.map((membership) => toSummary(membership.workspace, membership.role)),
+      reset: resolved.reset,
+    };
   },
 
   async removeMember(db: DbClient, workspaceId: string, role: WorkspaceRole, userId: string) {
@@ -175,6 +182,11 @@ export const workspaceService = {
 
   async upgradeToPro(db: DbClient, workspaceId: string, role: WorkspaceRole) {
     requireOwner(role);
+
+    // TODO(DXNX-293): replaced by Checkout in BILL-06.
+    if (!isLocalBillingUpgradeEnabled()) {
+      throw new TRPCError({ code: "PRECONDITION_FAILED", message: "BILLING_NOT_READY" });
+    }
 
     const workspace = await db.workspace.findUnique({
       include: { entitlement: true, members: { select: { userId: true } } },

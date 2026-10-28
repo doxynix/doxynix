@@ -117,6 +117,18 @@ describe("workspaceService.upgradeToPro", () => {
     });
   });
 
+  it("returns BILLING_NOT_READY when the local upgrade flag is off", async () => {
+    process.env.BILLING_LOCAL_UPGRADE_ENABLED = "false";
+
+    try {
+      await expect(
+        workspaceService.upgradeToPro({} as never, WORKSPACE_ID, "OWNER"),
+      ).rejects.toMatchObject({ code: "PRECONDITION_FAILED", message: "BILLING_NOT_READY" });
+    } finally {
+      process.env.BILLING_LOCAL_UPGRADE_ENABLED = "true";
+    }
+  });
+
   it("updates the same workspace instead of creating a second one", async () => {
     const update = vi.fn().mockResolvedValue(
       entitlement({

@@ -118,6 +118,37 @@ describe("Workspace service and router", () => {
     expect(result.items).toHaveLength(1);
     expect(result.items[0]?.role).toBe("OWNER");
     expect(result.items[0]?.entitlement?.planCode).toBe("HOBBY");
+    expect(result.activeWorkspaceId).toBe(result.items[0]?.id);
+    expect(result.reset).toBe(false);
+  });
+
+  it("falls back to the default workspace when the header membership is gone", async () => {
+    const alice = await createTestUser("Alice");
+    const personalId = await createPersonalWorkspace(alice.user.id, alice.user.name);
+    const second = await prisma.workspace.create({ data: { name: "Second" } });
+
+    await prisma.workspaceMember.create({
+      data: { role: "OWNER", userId: alice.user.id, workspaceId: second.id },
+    });
+
+    const caller = callerFor(alice.user, second.id);
+    const before = await caller.workspace.myWorkspaces();
+
+    expect(before.activeWorkspaceId).toBe(second.id);
+    expect(before.reset).toBe(false);
+
+    await prisma.workspaceMember.delete({
+      where: { workspaceId_userId: { userId: alice.user.id, workspaceId: second.id } },
+    });
+
+    const after = await caller.workspace.myWorkspaces();
+
+    expect(after.activeWorkspaceId).toBe(personalId);
+    expect(after.reset).toBe(true);
+
+    const upgraded = await caller.workspace.upgradeToPro();
+
+    expect(upgraded.id).toBe(personalId);
   });
 
   it("lazily provisions a workspace from workspaceProcedure when the header is absent", async () => {
@@ -130,16 +161,12 @@ describe("Workspace service and router", () => {
     await expect(prisma.workspace.count()).resolves.toBe(1);
   });
 
-  it("answers FORBIDDEN, not NOT_FOUND, for a workspace the user does not belong to", async () => {
+  it("answers FORBIDDEN, not NOT_FOUND, for an explicitly requested foreign workspace", async () => {
     const alice = await createTestUser("Alice");
     const bob = await createTestUser("Bob");
     const workspaceId = await createPersonalWorkspace(alice.user.id, alice.user.name);
-    const caller = callerFor(bob.user, workspaceId);
+    const caller = callerFor(bob.user);
 
-    await expect(caller.workspace.upgradeToPro()).rejects.toMatchObject({
-      code: "FORBIDDEN",
-      message: "Workspace access denied",
-    });
     await expect(caller.workspace.switchWorkspace({ workspaceId })).rejects.toMatchObject({
       code: "FORBIDDEN",
       message: "Workspace access denied",
@@ -168,6 +195,23 @@ describe("Workspace service and router", () => {
 
     expect(member.role).toBe("MEMBER");
     expect(member.userId).toBe(bob.user.id);
+  });
+
+  it("returns BILLING_NOT_READY when the local upgrade flag is off", async () => {
+    const alice = await createTestUser("Alice");
+    const workspaceId = await createPersonalWorkspace(alice.user.id, alice.user.name);
+    const caller = callerFor(alice.user, workspaceId);
+
+    process.env.BILLING_LOCAL_UPGRADE_ENABLED = "false";
+
+    try {
+      await expect(caller.workspace.upgradeToPro()).rejects.toMatchObject({
+        code: "PRECONDITION_FAILED",
+        message: "BILLING_NOT_READY",
+      });
+    } finally {
+      process.env.BILLING_LOCAL_UPGRADE_ENABLED = "true";
+    }
   });
 
   it("refuses to remove the last OWNER", async () => {
