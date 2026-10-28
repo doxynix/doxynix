@@ -33,6 +33,7 @@ import { AuthEmail } from "@/server/core/auth/email";
 import { prisma } from "@/server/core/db";
 import { emailSignInLimiter } from "@/server/core/ratelimit";
 import { redisService } from "@/server/core/redis";
+import { createPersonalWorkspace } from "@/server/core/workspaces/personal-workspace";
 import { maskEmail, normalizeEmail, validateEmailSafety } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
 import { getIp } from "@/server/utils/request-context";
@@ -297,6 +298,16 @@ export const auth = betterAuth({
             type: "auth.register",
             userId: user.id,
           });
+
+          try {
+            await createPersonalWorkspace(user.id, user.name);
+          } catch (error) {
+            appLogger.error({
+              error: error instanceof Error ? error.message : String(error),
+              msg: "Failed to create personal workspace",
+              userId: user.id,
+            });
+          }
         },
         before: async (user) => {
           const payload = { ...user } as Record<string, unknown>;

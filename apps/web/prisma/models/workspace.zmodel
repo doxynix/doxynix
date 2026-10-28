@@ -13,6 +13,12 @@ model Workspace {
   repos               Repo[]
   githubInstallations GithubInstallation[]
 
+  @@deny('all', auth() == null)
+  @@allow('create', true)
+  @@allow('read', members?[userId == auth().id])
+  @@allow('update', members?[userId == auth().id && role == OWNER])
+  @@allow('delete', false)
+
   @@index([createdAt(sort: Desc), id(sort: Desc)], map: "workspaces_created_at_id_idx")
   @@map("workspaces")
 }
@@ -28,6 +34,10 @@ model WorkspaceMember {
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@deny('all', auth() == null)
+  @@allow('read', workspace.members?[userId == auth().id])
+  @@allow('create,update,delete', workspace.members?[userId == auth().id && role == OWNER])
 
   @@unique([workspaceId, userId])
   @@index([userId, workspaceId])
@@ -57,6 +67,11 @@ model WorkspaceEntitlement {
   updatedAt           DateTime @default(now()) @updatedAt @map("updated_at")
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+
+  @@deny('all', auth() == null)
+  @@allow('read', workspace.members?[userId == auth().id])
+  @@allow('create,update', workspace.members?[userId == auth().id && role == OWNER])
+  @@allow('delete', false)
 
   @@index([planCode])
   @@map("workspace_entitlements")
