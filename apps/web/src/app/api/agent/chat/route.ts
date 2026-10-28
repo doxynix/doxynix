@@ -56,21 +56,19 @@ async function handler(req: Request) {
   if (currentRepoId != null) {
     const dbRepo = await prisma.repo.findUnique({
       select: { id: true },
-      where: { id: currentRepoId, userId },
+      where: { createdByUserId: userId, id: currentRepoId },
     });
     if (dbRepo != null) {
       resolvedRepoId = dbRepo.id;
       internalRepoId = dbRepo.id;
     }
   } else if (currentRepo?.owner != null && currentRepo?.name != null) {
-    const dbRepo = await prisma.repo.findUnique({
+    const dbRepo = await prisma.repo.findFirst({
       select: { id: true },
       where: {
-        owner_name_userId: {
-          name: currentRepo.name,
-          owner: currentRepo.owner,
-          userId,
-        },
+        createdByUserId: userId,
+        name: currentRepo.name,
+        owner: currentRepo.owner,
       },
     });
 

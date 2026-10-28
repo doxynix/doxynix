@@ -30,10 +30,14 @@ export type FileActionRequest = {
 };
 
 export const fileActionsService = {
-  async buildFileActionRuntimeContext(db: DbClient, input: { nodeId?: string; repoId: string }) {
+  async buildFileActionRuntimeContext(
+    db: DbClient,
+    input: { nodeId?: string; repoId: string },
+    workspaceId: string,
+  ) {
     const [nodeContext, analysisRef] = await Promise.all([
-      analysisContext.build(db, input.repoId, input.nodeId),
-      analysisRepo.getLatestRef(db, input.repoId),
+      analysisContext.build(db, input.repoId, workspaceId, input.nodeId),
+      analysisRepo.getLatestRef(db, input.repoId, workspaceId),
     ]);
 
     return { analysisRef, nodeContext };
@@ -55,8 +59,8 @@ export const fileActionsService = {
     });
   },
 
-  async documentFile(db: DbClient, userId: string, input: FileActionRequest) {
-    return this.runFileAction(db, userId, "document-single-file", input);
+  async documentFile(db: DbClient, userId: string, input: FileActionRequest, workspaceId: string) {
+    return this.runFileAction(db, userId, "document-single-file", input, workspaceId);
   },
 
   async getFileActionResult(
@@ -82,8 +86,13 @@ export const fileActionsService = {
     };
   },
 
-  async quickFileAudit(db: DbClient, userId: string, input: FileActionRequest) {
-    return this.runFileAction(db, userId, "analyze-single-file", input);
+  async quickFileAudit(
+    db: DbClient,
+    userId: string,
+    input: FileActionRequest,
+    workspaceId: string,
+  ) {
+    return this.runFileAction(db, userId, "analyze-single-file", input, workspaceId);
   },
 
   async runFileAction(
@@ -91,10 +100,15 @@ export const fileActionsService = {
     userId: string,
     taskId: "analyze-single-file" | "document-single-file",
     input: FileActionRequest,
+    workspaceId: string,
   ) {
-    await analysisLifecycleService.assertRepoAccess(db, userId, input.repoId);
+    await analysisLifecycleService.assertRepoAccess(db, workspaceId, input.repoId);
 
-    const { analysisRef, nodeContext } = await this.buildFileActionRuntimeContext(db, input);
+    const { analysisRef, nodeContext } = await this.buildFileActionRuntimeContext(
+      db,
+      input,
+      workspaceId,
+    );
 
     const syncMeta = this.buildSyncFileMeta(input, nodeContext, analysisRef);
 
@@ -108,6 +122,7 @@ export const fileActionsService = {
         repoId: input.repoId,
         syncMeta,
         userId,
+        workspaceId,
       },
       {
         // concurrencyKey: `user-${userId}`,

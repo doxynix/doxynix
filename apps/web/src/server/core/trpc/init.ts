@@ -167,21 +167,23 @@ const isAuthed = t.middleware(({ ctx, next }) => {
 export const protectedProcedure = publicProcedure.use(isAuthed);
 
 const isWorkspaceMember = t.middleware(async ({ ctx, next }) => {
-  const userId = ctx.session?.user.id;
+  const session = ctx.session;
+  const userId = session?.user.id;
 
-  if (userId == null) {
+  if (session == null || userId == null) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "You are not logged in" });
   }
 
   const workspace = await resolveWorkspace({
-    headerWorkspaceId: ctx.req.headers.get("x-workspace-id"),
-    name: ctx.session?.user.name,
+    headerWorkspaceId: ctx.apiKeyWorkspaceId ?? ctx.req.headers.get("x-workspace-id"),
+    name: session.user.name,
     userId,
   });
 
   return next({
     ctx: {
       ...ctx,
+      session,
       workspace,
     },
   });

@@ -29,6 +29,7 @@ export const fixesService = {
     redis: Redis,
     userId: string,
     input: z.infer<typeof FixApplicationPayloadSchema>,
+    workspaceId: string,
   ) {
     appLogger.info({
       fixId: input.fixId,
@@ -38,7 +39,7 @@ export const fixesService = {
 
     try {
       const repo = await db.repo.findUnique({
-        where: { id: input.repoId },
+        where: { id: input.repoId, workspaceId },
       });
 
       if (repo == null) {
@@ -50,7 +51,7 @@ export const fixesService = {
 
       const clientContext = await getClientContext(db, userId, repo.owner);
 
-      const fix = await analysisRepo.getById(db, input.fixId);
+      const fix = await analysisRepo.getById(db, input.fixId, workspaceId);
 
       if (fix == null) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Fix not found" });
@@ -108,6 +109,7 @@ export const fixesService = {
       prAnalysisId?: string;
       repoId: string;
     },
+    workspaceId: string,
   ) {
     appLogger.info({
       findingsCount: input.findings.length,
@@ -120,9 +122,9 @@ export const fixesService = {
       let validPrAnalysisId: string | undefined;
 
       if (input.prAnalysisId != null) {
-        const prAnalysisRecord = await db.pullRequestAnalysis.findUnique({
+        const prAnalysisRecord = await db.pullRequestAnalysis.findFirst({
           select: { id: true },
-          where: { id: input.prAnalysisId },
+          where: { id: input.prAnalysisId, repo: { workspaceId } },
         });
 
         if (prAnalysisRecord != null) {
@@ -131,7 +133,7 @@ export const fixesService = {
       }
 
       const repo = await db.repo.findUnique({
-        where: { id: input.repoId },
+        where: { id: input.repoId, workspaceId },
       });
 
       if (repo == null) {
@@ -157,6 +159,7 @@ export const fixesService = {
           prAnalysisId: validPrAnalysisId,
           repoId: repo.id,
           userId,
+          workspaceId,
         },
         {
           // concurrencyKey: `repo-${repo.id}`,
@@ -190,8 +193,9 @@ export const fixesService = {
     db: DbClient,
     redis: Redis,
     fixId: string,
+    workspaceId: string,
   ): Promise<z.infer<typeof GeneratedFixDetailedDTO>> {
-    const fix = await analysisRepo.getById(db, fixId);
+    const fix = await analysisRepo.getById(db, fixId, workspaceId);
 
     if (fix == null) {
       throw new TRPCError({
@@ -209,8 +213,9 @@ export const fixesService = {
   async getByRepository(
     db: DbClient,
     repoId: string,
+    workspaceId: string,
   ): Promise<Array<z.infer<typeof GeneratedFixDTO>>> {
-    const fixes = await analysisRepo.getByRepoId(db, repoId);
+    const fixes = await analysisRepo.getByRepoId(db, repoId, workspaceId);
     return fixes.map((fix) => fixesMapper.toPublic(fix));
   },
 
@@ -219,6 +224,7 @@ export const fixesService = {
     redis: Redis,
     userId: string,
     input: { branch: string; repoId: string; title: string },
+    workspaceId: string,
   ) {
     appLogger.info({
       branch: input.branch,
@@ -228,7 +234,7 @@ export const fixesService = {
     });
 
     const repo = await db.repo.findUnique({
-      where: { id: input.repoId },
+      where: { id: input.repoId, workspaceId },
     });
 
     if (repo == null) {
@@ -242,6 +248,7 @@ export const fixesService = {
       where: {
         accountLogin: { equals: repo.owner, mode: "insensitive" },
         isSuspended: false,
+        workspaceId,
       },
     });
 

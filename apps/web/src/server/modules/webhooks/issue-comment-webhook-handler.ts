@@ -82,7 +82,7 @@ export async function handleIssueCommentEvent(
       }
 
       await realtimeService
-        .user(repo.userId)
+        .user(repo.createdByUserId)
         .publish(REALTIME_CONFIG.events.user.prCommentReceived, {
           author: payload.sender.login,
           authorAvatarUrl: payload.sender.avatar_url,
@@ -103,7 +103,7 @@ export async function handleIssueCommentEvent(
           prNumber: payload.issue.number,
           repoId: repo.id,
           repoName: payload.repository.name,
-          userId: repo.userId,
+          userId: repo.createdByUserId,
         };
       }
     }),

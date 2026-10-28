@@ -62,7 +62,42 @@ function parseSeedNumber(value: string | undefined, fallback: number): number {
   return Number(trimmed);
 }
 
-function createStressRepo(index: number, userId: string): Prisma.RepoCreateManyInput {
+async function ensureSeedWorkspace(userId: string, name: string): Promise<string> {
+  const existing = await prisma.workspaceMember.findFirst({
+    select: { workspaceId: true },
+    where: { userId },
+  });
+
+  if (existing != null) {
+    return existing.workspaceId;
+  }
+
+  const workspace = await prisma.workspace.create({
+    data: {
+      entitlement: { create: {} },
+      members: { create: { role: "OWNER", userId } },
+      name: `${name} workspace`,
+    },
+    select: { id: true },
+  });
+
+  return workspace.id;
+}
+
+async function createEmptySeedWorkspace(name: string): Promise<string> {
+  const workspace = await prisma.workspace.create({
+    data: { entitlement: { create: {} }, name: `${name} workspace` },
+    select: { id: true },
+  });
+
+  return workspace.id;
+}
+
+function createStressRepo(
+  index: number,
+  userId: string,
+  workspaceId: string,
+): Prisma.RepoCreateManyInput {
   const ownerPool = [
     "vercel",
     "facebook",
@@ -95,6 +130,7 @@ function createStressRepo(index: number, userId: string): Prisma.RepoCreateManyI
 
   return {
     createdAt: faker.date.recent({ days: 90 }),
+    createdByUserId: userId,
     defaultBranch: "main",
     description,
     forks: faker.number.int({ max: 5000 }),
@@ -112,8 +148,8 @@ function createStressRepo(index: number, userId: string): Prisma.RepoCreateManyI
     topics: [primaryTopic, secondaryTopic],
     updatedAt: faker.date.recent({ days: 30 }),
     url: `https://github.com/${owner}/${name}`,
-    userId,
     visibility: index % 5 === 0 ? Visibility.PRIVATE : Visibility.PUBLIC,
+    workspaceId,
   };
 }
 
@@ -323,8 +359,16 @@ async function seedStressProfile() {
   });
 
   if (existingUser != null) {
+    const existingWorkspace = await prisma.workspaceMember.findFirst({
+      select: { workspaceId: true },
+      where: { userId: existingUser.id },
+    });
+
     await prisma.notification.deleteMany({ where: { userId: existingUser.id } });
-    await prisma.repo.deleteMany({ where: { userId: existingUser.id } });
+
+    if (existingWorkspace != null) {
+      await prisma.repo.deleteMany({ where: { workspaceId: existingWorkspace.workspaceId } });
+    }
   }
 
   if (STRESS_REPO_COUNT === 0 && STRESS_NOTIFICATION_COUNT === 0) {
@@ -350,8 +394,13 @@ async function seedStressProfile() {
     where: { emailHash: getNormalizedHash(STRESS_USER_EMAIL) },
   });
 
+  const benchmarkWorkspaceId = await ensureSeedWorkspace(
+    benchmarkUser.id,
+    benchmarkUser.name ?? STRESS_USER_NAME,
+  );
+
   await prisma.notification.deleteMany({ where: { userId: benchmarkUser.id } });
-  await prisma.repo.deleteMany({ where: { userId: benchmarkUser.id } });
+  await prisma.repo.deleteMany({ where: { workspaceId: benchmarkWorkspaceId } });
 
   if (STRESS_REPO_COUNT > 0) {
     const totalRepoBatches = Math.ceil(STRESS_REPO_COUNT / REPO_BATCH_SIZE);
@@ -360,7 +409,7 @@ async function seedStressProfile() {
       const start = batchIndex * REPO_BATCH_SIZE;
       const batchLength = Math.min(REPO_BATCH_SIZE, STRESS_REPO_COUNT - start);
       const repoBatch = Array.from({ length: batchLength }, (_, offset) =>
-        createStressRepo(start + offset, benchmarkUser.id),
+        createStressRepo(start + offset, benchmarkUser.id, benchmarkWorkspaceId),
       );
 
       await prisma.repo.createMany({ data: repoBatch });
@@ -370,7 +419,7 @@ async function seedStressProfile() {
 
   const benchmarkRepos = await prisma.repo.findMany({
     select: { id: true },
-    where: { userId: benchmarkUser.id },
+    where: { workspaceId: benchmarkWorkspaceId },
   });
   const repoIds = benchmarkRepos.map((repo) => repo.id);
 
@@ -454,27 +503,31 @@ async function main() {
       description: "Admin seed repository for dashboard testing",
       githubId: faker.number.int({ max: 2_000_000_000, min: 100_000_000 }),
       name: repoName,
-      userId: admin.id,
     });
   });
 
+  const adminWorkspaceId = await ensureSeedWorkspace(admin.id, admin.name ?? "Admin");
+
   for (const repo of adminReposData) {
-    await prisma.repo.create({ data: repo });
+    await prisma.repo.create({
+      data: { ...repo, createdByUserId: admin.id, workspaceId: adminWorkspaceId },
+    });
   }
 
   console.log("Creating more users...");
 
   for (let index = 0; index < LIGHT_USER_COUNT; index++) {
+    const lightWorkspaceId = await createEmptySeedWorkspace(faker.person.fullName());
     const user = await prisma.user.create({
       data: clean({
         ...Fake.fakeUser(),
         apiKeys: {
-          create: [clean(Fake.fakeApiKey()), clean(Fake.fakeApiKey())],
+          create: [clean(Fake.fakeApiKey()), clean(Fake.fakeApiKey())].map((key) => ({
+            ...key,
+            workspaceId: lightWorkspaceId,
+          })),
         },
-        email: faker.internet.email(),
-        image: seededAvatar(),
-        name: faker.person.fullName(),
-        repos: {
+        createdRepos: {
           create: Array.from({ length: LIGHT_REPOS_PER_USER }).map(() => {
             const repoName = `${faker.word.noun()}-${faker.string.alphanumeric(4)}`;
 
@@ -531,9 +584,14 @@ async function main() {
               size: faker.number.int({ max: 100_000 }),
               stars: faker.number.int({ max: 10_000 }),
               url: faker.internet.url(),
+              workspaceId: lightWorkspaceId,
             });
           }),
         },
+        email: faker.internet.email(),
+        image: seededAvatar(),
+        name: faker.person.fullName(),
+        workspaceMemberships: { create: { role: "OWNER", workspaceId: lightWorkspaceId } },
       }),
     });
 

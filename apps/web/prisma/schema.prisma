@@ -71,6 +71,12 @@ enum WorkspaceRole {
   MEMBER
 }
 
+enum ApiKeyScope {
+  CLI
+  FULL
+  MCP
+}
+
 enum PRAnalysisStatus {
   PENDING
   ANALYZING
@@ -169,12 +175,6 @@ enum ChatRole {
   assistant
   system
   data
-}
-
-enum ApiKeyScope {
-  CLI
-  FULL
-  MCP
 }
 
 model User {
@@ -458,6 +458,7 @@ model Workspace {
   entitlement         WorkspaceEntitlement?
   repos               Repo[]
   githubInstallations GithubInstallation[]
+  apiKeys             ApiKey[]
 
   @@index([createdAt(sort: Desc), id(sort: Desc)], map: "workspaces_created_at_id_idx")
   @@map("workspaces")
@@ -504,6 +505,36 @@ model WorkspaceEntitlement {
 
   @@index([planCode])
   @@map("workspace_entitlements")
+}
+
+model ApiKey {
+  id           String        @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
+  prefix       String
+  /// @zod.custom.omit(["model"])
+  hashedKey    String        @unique() @map("hashed_key")
+  /// @zod.string.trim().min(1, { message: "The name must be between 1 and 50 characters long" }).max(50)
+  name         String
+  /// @zod.string.trim().max(1000, { message: "The description must be less than 1000 characters" })
+  description  String?       @db.Text()
+  lastUsed     DateTime?     @map("last_used")
+  expiresAt    DateTime?     @map("expires_at")
+  scopes       ApiKeyScope[] @default([])
+  revoked      Boolean       @default(false)
+  revokedAfter DateTime?     @map("revoked_after")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @default(now()) @updatedAt() @map("updated_at")
+  /// @zod.custom.omit(["model"])
+  workspaceId  String        @map("workspace_id") @db.Uuid()
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  /// @zod.custom.omit(["model"])
+  userId       String        @map("user_id") @db.Uuid()
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([revokedAfter])
+  @@map("api_keys")
 }
 
 model Analysis {
@@ -704,32 +735,6 @@ model UserAppearance {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_appearances")
-}
-
-model ApiKey {
-  id           String        @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
-  prefix       String
-  /// @zod.custom.omit(["model"])
-  hashedKey    String        @unique() @map("hashed_key")
-  /// @zod.string.trim().min(1, { message: "The name must be between 1 and 50 characters long" }).max(50)
-  name         String
-  /// @zod.string.trim().max(1000, { message: "The description must be less than 1000 characters" })
-  description  String?       @db.Text()
-  lastUsed     DateTime?     @map("last_used")
-  expiresAt    DateTime?     @map("expires_at")
-  scopes       ApiKeyScope[] @default([])
-  revoked      Boolean       @default(false)
-  revokedAfter DateTime?     @map("revoked_after")
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @default(now()) @updatedAt() @map("updated_at")
-  /// @zod.custom.omit(["model"])
-  userId       String        @map("user_id") @db.Uuid()
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([expiresAt])
-  @@index([revokedAfter])
-  @@map("api_keys")
 }
 
 model WebhookDelivery {

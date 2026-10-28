@@ -33,6 +33,7 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
   ApiKey: {
     connections: {
       user: "User",
+      workspace: "Workspace",
     },
     fields: {},
   },
@@ -175,6 +176,7 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
   },
   Workspace: {
     connections: {
+      apiKeys: "ApiKey",
       entitlement: "WorkspaceEntitlement",
       githubInstallations: "GithubInstallation",
       members: "WorkspaceMember",

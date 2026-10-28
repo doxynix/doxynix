@@ -32,7 +32,7 @@ export const agentService = {
     if (input.repoId != null) {
       const repo = await db.repo.findFirst({
         select: { id: true },
-        where: { id: input.repoId, userId },
+        where: { createdByUserId: userId, id: input.repoId },
       });
 
       if (repo == null) {
@@ -78,14 +78,12 @@ export const agentService = {
     let internalRepoId: null | string = null;
 
     if (input?.currentRepo != null) {
-      const repo = await db.repo.findUnique({
+      const repo = await db.repo.findFirst({
         select: { id: true },
         where: {
-          owner_name_userId: {
-            name: input.currentRepo.name,
-            owner: input.currentRepo.owner,
-            userId,
-          },
+          createdByUserId: userId,
+          name: input.currentRepo.name,
+          owner: input.currentRepo.owner,
         },
       });
       if (repo != null) {

@@ -12,7 +12,7 @@ import { createPersonalWorkspace } from "@/server/core/workspaces/personal-works
 import { appRouter } from "@/server/modules";
 import { buildRequestStore } from "@/server/utils/request-context";
 
-import { cleanupDatabase, createAnon, createTestUser } from "../helpers";
+import { cleanupDatabase, createAnon, createBareTestUser, createTestUser } from "../helpers";
 
 type TestUser = Awaited<ReturnType<typeof createTestUser>>["user"];
 
@@ -110,7 +110,7 @@ describe("Workspace service and router", () => {
   });
 
   it("lazily provisions a personal workspace for a user without one", async () => {
-    const alice = await createTestUser("Alice");
+    const alice = await createBareTestUser("Alice");
     const caller = callerFor(alice.user);
 
     const result = await caller.workspace.myWorkspaces();
@@ -152,7 +152,7 @@ describe("Workspace service and router", () => {
   });
 
   it("lazily provisions a workspace from workspaceProcedure when the header is absent", async () => {
-    const alice = await createTestUser("Alice");
+    const alice = await createBareTestUser("Alice");
     const caller = callerFor(alice.user);
 
     const upgraded = await caller.workspace.upgradeToPro();

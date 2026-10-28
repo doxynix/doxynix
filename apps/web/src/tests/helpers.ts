@@ -2,6 +2,7 @@ import { enhance } from "@zenstackhq/runtime";
 import { expect } from "vitest";
 
 import { prisma } from "@/server/core/db";
+import { createPersonalWorkspace } from "@/server/core/workspaces/personal-workspace";
 
 const DISPOSABLE_DATABASE_PATTERN = /test/i;
 
@@ -59,13 +60,20 @@ export async function cleanupDatabase() {
   });
 }
 
-export async function createTestUser(name: string, role: "ADMIN" | "USER" = "USER") {
+export async function createBareTestUser(name: string, role: "ADMIN" | "USER" = "USER") {
   const email = `${name.toLowerCase()}_${Date.now()}_${Math.floor(Math.random() * 10_000)}@test.com`;
   const user = await prisma.user.create({
     data: { email, name, role },
   });
   const db = enhance(prisma, { user: { id: user.id, role: user.role } });
   return { db, email, user };
+}
+
+export async function createTestUser(name: string, role: "ADMIN" | "USER" = "USER") {
+  const { db, email, user } = await createBareTestUser(name, role);
+  const workspaceId = await createPersonalWorkspace(user.id, user.name);
+
+  return { db, email, user, workspace: { id: workspaceId } };
 }
 
 export function createAnon() {

@@ -8,11 +8,12 @@ import { analyzePrTask } from "../tasks/analyze-pr.task";
 
 async function analyzeRepoForEvent(
   repoId: string,
+  workspaceId: string,
   action: string,
   pullRequest: PullRequestPayload["pull_request"],
   repository: PullRequestPayload["repository"],
 ): Promise<void> {
-  const config = await PRConfigService.getConfig(repoId, prisma);
+  const config = await PRConfigService.getConfig(repoId, workspaceId, prisma);
   if (!config.enabled) {
     appLogger.debug({
       msg: "pr_webhook_analysis_disabled",
@@ -26,6 +27,7 @@ async function analyzeRepoForEvent(
     prisma,
     repoId,
     pullRequest.number,
+    workspaceId,
   );
 
   if (existingAnalysis != null && (action === "opened" || action === "ready_for_review")) {
@@ -73,6 +75,7 @@ async function analyzeRepoForEvent(
     prNumber: pullRequest.number,
     repoId,
     repoName: repository.name,
+    workspaceId,
   });
 }
 
@@ -109,7 +112,7 @@ export async function handlePullRequestEvent(payload: PullRequestPayload): Promi
   });
 
   const repos = await prisma.repo.findMany({
-    select: { id: true },
+    select: { id: true, workspaceId: true },
     where: { githubId: repository.id },
   });
 
@@ -124,7 +127,9 @@ export async function handlePullRequestEvent(payload: PullRequestPayload): Promi
   }
 
   const settled = await Promise.allSettled(
-    repos.map((repo) => analyzeRepoForEvent(repo.id, action, pull_request, repository)),
+    repos.map((repo) =>
+      analyzeRepoForEvent(repo.id, repo.workspaceId, action, pull_request, repository),
+    ),
   );
 
   settled.forEach((outcome, index) => {

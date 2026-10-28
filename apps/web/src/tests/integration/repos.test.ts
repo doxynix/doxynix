@@ -13,22 +13,24 @@ describe("Repositories & Data Visibility", () => {
 
     const privateRepo = await alice.db.repo.create({
       data: {
+        createdByUserId: alice.user.id,
         githubId: 1,
         name: "priv",
         owner: "alice",
         url: "https://github.com/alice/priv",
-        userId: alice.user.id,
         visibility: "PRIVATE",
+        workspaceId: alice.workspace.id,
       },
     });
     const publicRepo = await alice.db.repo.create({
       data: {
+        createdByUserId: alice.user.id,
         githubId: 2,
         name: "pub",
         owner: "alice",
         url: "https://github.com/alice/pub",
-        userId: alice.user.id,
         visibility: "PUBLIC",
+        workspaceId: alice.workspace.id,
       },
     });
 
@@ -50,12 +52,13 @@ describe("Repositories & Data Visibility", () => {
 
     const repo = await alice.db.repo.create({
       data: {
+        createdByUserId: alice.user.id,
         githubId: 3,
         name: "n",
         owner: "a",
         url: "https://github.com/alice/n",
-        userId: alice.user.id,
         visibility: "PRIVATE",
+        workspaceId: alice.workspace.id,
       },
     });
     const analysis = await alice.db.analysis.create({
@@ -79,12 +82,13 @@ describe("Repositories & Data Visibility", () => {
 
     await alice.db.repo.create({
       data: {
+        createdByUserId: alice.user.id,
         githubId: 4,
         name: "sec",
         owner: "a",
         url: "https://github.com/alice/sec",
-        userId: alice.user.id,
         visibility: "PRIVATE",
+        workspaceId: alice.workspace.id,
       },
     });
 
@@ -107,12 +111,13 @@ describe("Repositories & Data Visibility", () => {
 
     await alice.db.repo.create({
       data: {
+        createdByUserId: alice.user.id,
         githubId: 5,
         name: "super-fast-engine",
         owner: "a",
         url: "https://github.com/alice/super-fast",
-        userId: alice.user.id,
         visibility: "PUBLIC",
+        workspaceId: alice.workspace.id,
       },
     });
 
@@ -133,11 +138,12 @@ describe("Repositories & Data Visibility", () => {
 
     const repo = await alice.db.repo.create({
       data: {
+        createdByUserId: alice.user.id,
         githubId: 6,
         name: "big",
         owner: "a",
         url: "https://github.com/alice/big",
-        userId: alice.user.id,
+        workspaceId: alice.workspace.id,
       },
     });
 
@@ -165,35 +171,38 @@ describe("Repositories & Data Visibility", () => {
 
     await alice.db.repo.create({
       data: {
+        createdByUserId: alice.user.id,
         githubId: 101,
         name: "react-ui",
         owner: "a",
         stars: 10,
         url: "https://github.com/alice/u",
-        userId: alice.user.id,
         visibility: "PUBLIC",
+        workspaceId: alice.workspace.id,
       },
     });
     await alice.db.repo.create({
       data: {
+        createdByUserId: alice.user.id,
         githubId: 102,
         name: "react-core",
         owner: "a",
         stars: 5,
         url: "https://github.com/alice/q",
-        userId: alice.user.id,
         visibility: "PUBLIC",
+        workspaceId: alice.workspace.id,
       },
     });
     await alice.db.repo.create({
       data: {
+        createdByUserId: alice.user.id,
         githubId: 103,
         name: "react-secret",
         owner: "a",
         stars: 50,
         url: "https://github.com/alice/m",
-        userId: alice.user.id,
         visibility: "PRIVATE",
+        workspaceId: alice.workspace.id,
       },
     });
 

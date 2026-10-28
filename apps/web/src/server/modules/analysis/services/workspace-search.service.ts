@@ -15,6 +15,7 @@ export const workspaceSearchService = {
     db: DbClient,
     repoId: string,
     search: string,
+    workspaceId: string,
     aid?: string,
   ): Promise<RepoSearchResult[]> {
     const normalizedSearch = normalizeSearchInput(search);
@@ -23,7 +24,7 @@ export const workspaceSearchService = {
       return [];
     }
 
-    const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    const repo = await analysisRepo.getRepoSnapshot(db, repoId, workspaceId, aid);
     if (repo == null) {
       return [];
     }
@@ -36,7 +37,7 @@ export const workspaceSearchService = {
       return [];
     }
 
-    const docs = await analysisRepo.loadLatestDocumentsWithContent(db, repoId, aid);
+    const docs = await analysisRepo.loadLatestDocumentsWithContent(db, repoId, workspaceId, aid);
     const results: RepoSearchResult[] = [];
 
     for (const node of structure.graph.nodes) {

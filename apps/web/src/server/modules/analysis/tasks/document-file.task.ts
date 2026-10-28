@@ -2,6 +2,7 @@ import { task } from "@trigger.dev/sdk";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
+import { prisma } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
 import { redisClient } from "@/server/core/redis";
 import { REDIS_CONFIG } from "@/server/utils/redis";
@@ -26,7 +27,17 @@ export const documentFileTask = task({
     repoId: string;
     syncMeta: SyncFileActionMeta;
     userId: string;
+    workspaceId: string;
   }) => {
+    const repo = await prisma.repo.findFirst({
+      select: { id: true },
+      where: { id: payload.repoId, workspaceId: payload.workspaceId },
+    });
+
+    if (repo == null) {
+      throw new Error("Repository not found or access denied");
+    }
+
     const documentedCode = await runDocumentFilePreview(payload.userId, payload);
 
     const result = toDocumentFilePreview({

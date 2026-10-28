@@ -2,6 +2,7 @@ import { task } from "@trigger.dev/sdk";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
+import { prisma } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
 import { redisService } from "@/server/core/redis";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
@@ -25,7 +26,17 @@ export const analyzeFileTask = task({
     repoId: string;
     syncMeta: SyncFileActionMeta;
     userId: string;
+    workspaceId: string;
   }) => {
+    const repo = await prisma.repo.findFirst({
+      select: { id: true },
+      where: { id: payload.repoId, workspaceId: payload.workspaceId },
+    });
+
+    if (repo == null) {
+      throw new Error("Repository not found or access denied");
+    }
+
     const audit = await runQuickFileAudit(payload.userId, payload);
 
     const baseResult = toQuickFileAuditPreview({

@@ -52,8 +52,8 @@ const ADMIN_USER_SELECT = {
 const ADMIN_USER_COUNT_SELECT = {
   apiKeys: true,
   chatSession: true,
+  createdRepos: true,
   notifications: true,
-  repos: true,
   sessions: true,
 } satisfies Prisma.UserCountOutputTypeSelect;
 

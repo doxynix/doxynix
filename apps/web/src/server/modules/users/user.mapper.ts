@@ -43,8 +43,8 @@ type AdminUserDetailRecord = AdminUserSummaryRecord & {
   _count: {
     apiKeys: number;
     chatSession: number;
+    createdRepos: number;
     notifications: number;
-    repos: number;
     sessions: number;
   };
 };
@@ -67,7 +67,7 @@ export const userMapper = {
         apiKeys: user._count.apiKeys,
         chatSessions: user._count.chatSession,
         notifications: user._count.notifications,
-        repos: user._count.repos,
+        repos: user._count.createdRepos,
         sessions: user._count.sessions,
       },
     };

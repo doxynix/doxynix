@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-import { protectedProcedure } from "@/server/core/trpc/init";
+import { workspaceProcedure } from "@/server/core/trpc/init";
 
 import {
   AnalysisScopeInputSchema,
@@ -13,12 +13,12 @@ import { workspaceService } from "./services/workspace.service";
 import { workspaceSearchService } from "./services/workspace-search.service";
 
 export const analysisRepoRouter = {
-  getAnalysis: protectedProcedure
+  getAnalysis: workspaceProcedure
     .input(z.object({ analysisId: z.string() }))
     .query(async ({ ctx, input }) => {
-      return prImpactService.getAnalysis(ctx.db, input.analysisId);
+      return prImpactService.getAnalysis(ctx.db, input.analysisId, ctx.workspace.id);
     }),
-  getByPRNumber: protectedProcedure
+  getByPRNumber: workspaceProcedure
     .input(
       z.object({
         prNumber: z.number().int().positive(),
@@ -26,35 +26,52 @@ export const analysisRepoRouter = {
       }),
     )
     .query(async ({ ctx, input }) => {
-      return prImpactService.getByRepoAndPRNumber(ctx.db, input.repoId, input.prNumber);
+      return prImpactService.getByRepoAndPRNumber(
+        ctx.db,
+        input.repoId,
+        input.prNumber,
+        ctx.workspace.id,
+      );
     }),
-  getComments: protectedProcedure
+  getComments: workspaceProcedure
     .input(z.object({ analysisId: z.string() }))
     .query(async ({ ctx, input }) => {
-      return prCommentsService.getComments(ctx.db, input.analysisId);
+      return prCommentsService.getComments(ctx.db, input.analysisId, ctx.workspace.id);
     }),
-  getNodeContext: protectedProcedure
+  getNodeContext: workspaceProcedure
     .input(NodeContextInputSchema)
     .output(NodeContextOutputSchema)
     .query(async ({ ctx, input }) => {
-      return workspaceService.getNodeContext(ctx.db, input.repoId, input.nodeId, input.aid);
+      return workspaceService.getNodeContext(
+        ctx.db,
+        input.repoId,
+        input.nodeId,
+        ctx.workspace.id,
+        input.aid,
+      );
     }),
-  getStructureMap: protectedProcedure
+  getStructureMap: workspaceProcedure
     .input(AnalysisScopeInputSchema)
     .query(async ({ ctx, input }) => {
-      return workspaceService.getStructureMap(ctx.db, input.repoId, input.aid);
+      return workspaceService.getStructureMap(ctx.db, input.repoId, ctx.workspace.id, input.aid);
     }),
-  getStructureNode: protectedProcedure
+  getStructureNode: workspaceProcedure
     .input(NodeContextInputSchema)
     .query(async ({ ctx, input }) => {
-      return workspaceService.getStructureNode(ctx.db, input.repoId, input.nodeId, input.aid);
+      return workspaceService.getStructureNode(
+        ctx.db,
+        input.repoId,
+        input.nodeId,
+        ctx.workspace.id,
+        input.aid,
+      );
     }),
-  listByRepository: protectedProcedure
+  listByRepository: workspaceProcedure
     .input(z.object({ repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      return prImpactService.listByRepository(ctx.db, input.repoId);
+      return prImpactService.listByRepository(ctx.db, input.repoId, ctx.workspace.id);
     }),
-  postCommentToPR: protectedProcedure
+  postCommentToPR: workspaceProcedure
     .input(
       z.object({
         body: z.string().min(1).max(5000),
@@ -64,9 +81,9 @@ export const analysisRepoRouter = {
     )
     .output(PostCommentToPROutput)
     .mutation(async ({ ctx, input }) => {
-      return prCommentsService.postCommentToPR(ctx.db, input);
+      return prCommentsService.postCommentToPR(ctx.db, input, ctx.workspace.id);
     }),
-  searchWorkspace: protectedProcedure
+  searchWorkspace: workspaceProcedure
     .input(
       z.object({
         aid: z.string().optional(),
@@ -75,6 +92,12 @@ export const analysisRepoRouter = {
       }),
     )
     .query(async ({ ctx, input }) => {
-      return workspaceSearchService.search(ctx.db, input.repoId, input.search, input.aid);
+      return workspaceSearchService.search(
+        ctx.db,
+        input.repoId,
+        input.search,
+        ctx.workspace.id,
+        input.aid,
+      );
     }),
 };

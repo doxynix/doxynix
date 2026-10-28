@@ -37,11 +37,12 @@ async function resolveAuthToken(client: {
 export async function getAnalysisContext(
   analysisId: string,
   userId: string,
+  workspaceId: string,
   forceRefresh?: boolean,
 ) {
   taskLogger.info(`GitHub: Accessing database...`);
 
-  const analysis = await prisma.analysis.findUnique({
+  const analysis = await prisma.analysis.findFirst({
     include: {
       repo: {
         include: {
@@ -53,7 +54,7 @@ export async function getAnalysisContext(
         },
       },
     },
-    where: { id: analysisId },
+    where: { id: analysisId, repo: { workspaceId } },
   });
 
   if (analysis == null) {

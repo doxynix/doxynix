@@ -45,7 +45,7 @@ export function isApiKeyDead(
 }
 
 export const apiKeyService = {
-  async create(db: DbClient, userId: string, input: CreateKeyInput) {
+  async create(db: DbClient, userId: string, workspaceId: string, input: CreateKeyInput) {
     const fullKey = generateApiKey();
     const displayPrefix = fullKey.slice(0, 11);
     const payload = extractPayloadFromKey(fullKey);
@@ -69,6 +69,7 @@ export const apiKeyService = {
           prefix: displayPrefix,
           scopes: input.scopes,
           userId,
+          workspaceId,
         },
       });
     } catch (error) {
@@ -86,7 +87,7 @@ export const apiKeyService = {
     return { key: fullKey };
   },
 
-  async list(db: DbClient, userId: string) {
+  async list(db: DbClient, workspaceId: string) {
     const allKeys = await db.apiKey.findMany({
       orderBy: { createdAt: "desc" },
       select: {
@@ -102,7 +103,7 @@ export const apiKeyService = {
         scopes: true,
         updatedAt: true,
       },
-      where: { userId },
+      where: { workspaceId },
     });
 
     const now = Date.now();
@@ -123,11 +124,11 @@ export const apiKeyService = {
     };
   },
 
-  async revoke(db: DbClient, id: string, userId: string) {
+  async revoke(db: DbClient, id: string, userId: string, workspaceId: string) {
     try {
       await db.apiKey.update({
         data: { revoked: true, revokedAfter: null },
-        where: { id, userId },
+        where: { id, workspaceId },
       });
 
       void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.apiKeyUpdated, {});
@@ -138,8 +139,8 @@ export const apiKeyService = {
     }
   },
 
-  async rotate(db: DbClient, id: string, userId: string) {
-    const existing = await db.apiKey.findFirst({ where: { id, userId } });
+  async rotate(db: DbClient, id: string, userId: string, workspaceId: string) {
+    const existing = await db.apiKey.findFirst({ where: { id, workspaceId } });
 
     if (existing == null || isApiKeyDead(existing, Date.now())) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Key not found" });
@@ -164,6 +165,7 @@ export const apiKeyService = {
         prefix: fullKey.slice(0, 11),
         scopes: existing.scopes,
         userId,
+        workspaceId,
       },
     });
 
@@ -181,9 +183,9 @@ export const apiKeyService = {
     };
   },
 
-  async touch(db: DbClient, id: string, userId: string) {
+  async touch(db: DbClient, id: string, userId: string, workspaceId: string) {
     const count = await db.apiKey
-      .updateMany({ data: { lastUsed: new Date() }, where: { id, userId } })
+      .updateMany({ data: { lastUsed: new Date() }, where: { id, workspaceId } })
       .then((result) => result.count)
       .catch((error) => handlePrismaError(error));
 
@@ -197,7 +199,7 @@ export const apiKeyService = {
     return { success: true };
   },
 
-  async update(db: DbClient, input: UpdateKeyInput, userId: string) {
+  async update(db: DbClient, input: UpdateKeyInput, userId: string, workspaceId: string) {
     const count = await db.apiKey
       .updateMany({
         data: {
@@ -208,7 +210,7 @@ export const apiKeyService = {
           }),
           name: input.name,
         },
-        where: { id: input.id, userId },
+        where: { id: input.id, workspaceId },
       })
       .then((result) => result.count)
       .catch((error) =>

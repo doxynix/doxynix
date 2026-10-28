@@ -2,7 +2,7 @@ import { GitHubQuerySchema } from "@doxynix/shared";
 import * as z from "zod";
 
 import { githubBrowseService } from "@/server/core/github/github-content";
-import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
+import { createTRPCRouter, protectedProcedure, workspaceProcedure } from "@/server/core/trpc/init";
 
 export const githubBrowseRouter = createTRPCRouter({
   getBranches: protectedProcedure
@@ -16,7 +16,7 @@ export const githubBrowseRouter = createTRPCRouter({
       );
     }),
 
-  getFileContent: protectedProcedure
+  getFileContent: workspaceProcedure
     .input(
       z.object({
         branch: z.string().optional(),
@@ -29,6 +29,7 @@ export const githubBrowseRouter = createTRPCRouter({
         ctx.db,
         ctx.prisma,
         ctx.session.user.id,
+        ctx.workspace.id,
         input.repoId,
         input.path,
         input.branch,

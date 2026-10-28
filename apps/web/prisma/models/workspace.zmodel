@@ -12,6 +12,7 @@ model Workspace {
   entitlement         WorkspaceEntitlement?
   repos               Repo[]
   githubInstallations GithubInstallation[]
+  apiKeys             ApiKey[]
 
   @@deny('all', auth() == null)
   @@allow('create', true)
@@ -80,4 +81,56 @@ model WorkspaceEntitlement {
 enum WorkspaceRole {
   OWNER
   MEMBER
+}
+
+model ApiKey {
+  id          String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  prefix      String
+  /// @zod.custom.omit(["model"])
+  hashedKey   String    @unique @map("hashed_key") @omit
+  /// @zod.string.trim().min(1, { message: "The name must be between 1 and 50 characters long" }).max(50)
+  name        String    @length(min: 1, max: 50, message: "The name must be between 1 and 50 characters long")
+  /// @zod.string.trim().max(1000, { message: "The description must be less than 1000 characters" })
+  description String?   @db.Text @length(max: 1000, message: "The description must be less than 1000 characters")
+  lastUsed    DateTime? @map("last_used")
+  expiresAt   DateTime? @map("expires_at")
+  scopes      ApiKeyScope[] @default([])
+  revoked     Boolean   @default(false)
+  revokedAfter DateTime? @map("revoked_after")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  /// @zod.custom.omit(["model"])
+  workspaceId String    @map("workspace_id") @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  /// @zod.custom.omit(["model"])
+  userId      String    @map("user_id") @db.Uuid @omit
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@deny('all', auth() == null)
+  @@allow('create', userId == auth().id && workspace.members?[userId == auth().id] && !revoked)
+  @@allow('read', workspace.members?[userId == auth().id] || auth().role == 'ADMIN')
+  @@allow(
+    'update',
+    (workspace.members?[userId == auth().id] &&
+      future().userId == userId &&
+      future().workspaceId == workspaceId &&
+      future().prefix == prefix &&
+      future().hashedKey == hashedKey) ||
+    auth().role == 'ADMIN'
+  )
+  @@deny('delete', true)
+
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([revokedAfter])
+  @@map("api_keys")
+}
+
+enum ApiKeyScope {
+  CLI
+  FULL
+  MCP
 }

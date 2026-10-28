@@ -54,8 +54,8 @@ export const PinAuditToDocsOutput = z.object({
 export type PinAuditToDocsOutput = z.infer<typeof PinAuditToDocsOutput>;
 
 export const docsService = {
-  async getAvailableDocs(db: DbClient, repoId: string, aid?: string) {
-    const repo = await analysisRepo.getRepoSnapshotWithDocuments(db, repoId, aid);
+  async getAvailableDocs(db: DbClient, repoId: string, workspaceId: string, aid?: string) {
+    const repo = await analysisRepo.getRepoSnapshotWithDocuments(db, repoId, workspaceId, aid);
     if (repo == null) {
       return [];
     }
@@ -66,10 +66,11 @@ export const docsService = {
     db: DbClient,
     repoId: string,
     type: DocType,
+    workspaceId: string,
     aid?: string,
     path?: string,
   ) {
-    const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    const repo = await analysisRepo.getRepoSnapshot(db, repoId, workspaceId, aid);
     if (repo == null) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
     }
@@ -83,6 +84,7 @@ export const docsService = {
       where: {
         repo: {
           id: repoId,
+          workspaceId,
         },
         type,
         ...(path != null ? { path } : {}),
@@ -125,7 +127,11 @@ export const docsService = {
     };
   },
 
-  async getWithGraphLinks(db: DbClient, input: z.infer<typeof GetWithGraphLinksInput>) {
+  async getWithGraphLinks(
+    db: DbClient,
+    input: z.infer<typeof GetWithGraphLinksInput>,
+    workspaceId: string,
+  ) {
     const document = await db.document.findFirst({
       select: {
         content: true,
@@ -138,7 +144,7 @@ export const docsService = {
       },
       where: {
         analysisId: input.analysisId,
-        repoId: input.repoId,
+        repo: { id: input.repoId, workspaceId },
         type: input.docType,
       },
     });
@@ -173,6 +179,7 @@ export const docsService = {
     redis: Redis,
     userId: string,
     input: { path: string; repoId: string },
+    workspaceId: string,
   ) {
     const cacheKey = REDIS_CONFIG.keys.fileAction(userId, input.path, "quick-file-audit");
     const cachedData = await redis.get<FileActionPreviewResult>(cacheKey);
@@ -188,11 +195,20 @@ export const docsService = {
 
     let internalAnalysisId: string | undefined;
     if (analysisId != null) {
-      const analysis = await db.analysis.findUnique({
+      const analysis = await db.analysis.findFirst({
         select: { id: true },
-        where: { id: analysisId },
+        where: { id: analysisId, repo: { workspaceId } },
       });
       internalAnalysisId = analysis?.id;
+    }
+
+    const repo = await db.repo.findUnique({
+      select: { id: true },
+      where: { id: input.repoId, workspaceId },
+    });
+
+    if (repo == null) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
     }
 
     const markdownContent = cachedData.content;
