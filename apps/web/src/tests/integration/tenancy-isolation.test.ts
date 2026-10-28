@@ -247,6 +247,33 @@ describe("Tenancy isolation", () => {
     ).rejects.toThrow(/denied|policy/i);
   });
 
+  it("allows only an OWNER to delete a repo", async () => {
+    const alice = await createTestUser("Alice");
+    const carol = await createTestUser("Carol");
+    const aliceWorkspace = await createPersonalWorkspace(alice.user.id, alice.user.name);
+
+    await prisma.workspaceMember.create({
+      data: { role: "MEMBER", userId: carol.user.id, workspaceId: aliceWorkspace },
+    });
+
+    const repo = await prisma.repo.create({
+      data: {
+        createdByUserId: alice.user.id,
+        githubId: 7003,
+        name: "owner-only-delete",
+        owner: "alice",
+        url: "https://github.com/alice/owner-only-delete",
+        workspaceId: aliceWorkspace,
+      },
+    });
+
+    const aliceDb = enhance(prisma, { user: { id: alice.user.id, role: alice.user.role } });
+    const carolDb = enhance(prisma, { user: { id: carol.user.id, role: carol.user.role } });
+
+    await expect(carolDb.repo.delete({ where: { id: repo.id } })).rejects.toThrow(/denied|policy/i);
+    await expect(aliceDb.repo.delete({ where: { id: repo.id } })).resolves.toBeDefined();
+  });
+
   it("lets co-members read each other, but not users from another workspace", async () => {
     const alice = await createTestUser("Alice");
     const bob = await createTestUser("Bob");

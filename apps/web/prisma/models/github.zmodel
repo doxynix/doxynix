@@ -52,7 +52,11 @@ model Repo {
   prAnalysisConfig PullRequestAnalysisConfig?
 
   @@deny('all', auth() == null)
-  @@allow('read,delete', workspace.members?[userId == auth().id] || auth().role == 'ADMIN')
+  @@allow('read', workspace.members?[userId == auth().id] || auth().role == 'ADMIN')
+  @@allow(
+    'delete',
+    workspace.members?[userId == auth().id && role == OWNER] || auth().role == 'ADMIN'
+  )
   @@allow('create', createdByUserId == auth().id && workspace.members?[userId == auth().id])
   @@allow(
     'update',
