@@ -67,7 +67,7 @@
     "zod": "catalog:"
   },
   "engines": {
-    "node": ">=20"
+    "node": "v26.13.0"
   },
   "publishConfig": {
     "access": "public"
