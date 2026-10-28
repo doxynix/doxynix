@@ -21,7 +21,12 @@ model Notification {
   repoId    String?    @map("repo_id") @db.Uuid @omit
   repo      Repo?      @relation(fields: [repoId], references: [id], onDelete: SetNull)
 
-  @@allow('all', auth() == user || auth().role == "ADMIN")
+  @@deny('all', auth() == null)
+  @@allow(
+    'all',
+    (auth() == user && (repoId == null || repo.workspace.members?[userId == auth().id])) ||
+    auth().role == 'ADMIN'
+  )
   @@index([userId, createdAt(sort: Desc), id(sort: Desc)])
   @@index([userId, isRead, createdAt(sort: Desc), id(sort: Desc)])
   @@index([userId, type, createdAt(sort: Desc), id(sort: Desc)])
@@ -179,7 +184,12 @@ model ChatSession {
   @@index([repoId])
   @@index([userId, updatedAt(sort: Desc)])
 
-  @@allow('all', (auth() != null && userId == auth().id && (repoId == null || repo.createdByUserId == auth().id)) || auth().role == 'ADMIN')
+  @@deny('all', auth() == null)
+  @@allow(
+    'all',
+    (userId == auth().id && (repoId == null || repo.workspace.members?[userId == auth().id])) ||
+    auth().role == 'ADMIN'
+  )
   @@map("chat_sessions")
 }
 
@@ -194,7 +204,13 @@ model ChatMessage {
 
   createdAt DateTime    @default(now()) @map("created_at")
 
-  @@allow('all', (auth() != null && session.userId == auth().id) || auth().role == 'ADMIN')
+  @@deny('all', auth() == null)
+  @@allow(
+    'all',
+    (session.userId == auth().id &&
+      (session.repoId == null || session.repo.workspace.members?[userId == auth().id])) ||
+    auth().role == 'ADMIN'
+  )
 
   @@index([sessionId, createdAt(sort: Asc)])
   @@map("chat_messages")

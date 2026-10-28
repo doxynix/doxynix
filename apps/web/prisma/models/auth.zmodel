@@ -46,7 +46,13 @@ model User {
   appearance           UserAppearance?
 
   @@allow('create', role == USER || auth().role == 'ADMIN')
-  @@allow('read,delete', auth() == this || auth().role == 'ADMIN')
+  @@allow(
+    'read',
+    auth() == this ||
+    auth().role == 'ADMIN' ||
+    workspaceMemberships?[workspace.members?[userId == auth().id]]
+  )
+  @@allow('delete', auth() == this || auth().role == 'ADMIN')
 
   @@allow('update',
     auth().role == 'ADMIN' ||

@@ -51,9 +51,14 @@ model Repo {
 
   prAnalysisConfig PullRequestAnalysisConfig?
 
-  @@allow('read,delete', auth() == createdBy || auth().role == 'ADMIN')
-  @@allow('create', auth() != null && createdByUserId == auth().id)
-  @@allow('update', (auth() == createdBy && future().createdByUserId == createdByUserId) || auth().role == 'ADMIN')
+  @@deny('all', auth() == null)
+  @@allow('read,delete', workspace.members?[userId == auth().id] || auth().role == 'ADMIN')
+  @@allow('create', createdByUserId == auth().id && workspace.members?[userId == auth().id])
+  @@allow(
+    'update',
+    (workspace.members?[userId == auth().id] && future().workspaceId == workspaceId && future().createdByUserId == createdByUserId) ||
+    auth().role == 'ADMIN'
+  )
 
   @@unique([owner, name, workspaceId])
   @@unique([githubId, workspaceId])
@@ -90,12 +95,13 @@ model GithubInstallation {
   userId              String?                @map("user_id") @db.Uuid @omit
   user                User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@allow('read', auth() != null && (userId == auth().id || auth().role == 'ADMIN'))
+  @@deny('all', auth() == null)
+  @@allow('read', workspace.members?[userId == auth().id] || auth().role == 'ADMIN')
   @@allow('delete', auth().role == 'ADMIN')
   @@allow('create', auth().role == 'ADMIN')
   @@allow(
     'update',
-    auth().role == 'ADMIN' || (userId == auth().id && future().userId == userId)
+    workspace.members?[userId == auth().id] || auth().role == 'ADMIN'
   )
 
   @@index([workspaceId, isSuspended, createdAt(sort: Asc)])
