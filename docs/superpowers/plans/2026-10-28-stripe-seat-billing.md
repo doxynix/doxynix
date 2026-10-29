@@ -461,9 +461,9 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
 - [x] **BILL-04 — Stripe SDK, secrets, catalog и version pin (0.5 дня)**
   - **Files touched:** Modify `apps/web/package.json`, `bun.lock`, `apps/web/src/shared/config/env.server.ts`, `apps/web/src/tests/setup-env.ts`, `apps/web/.env.example`; Create `apps/web/src/server/modules/billing/billing.stripe.ts`, `billing.catalog.ts`, `billing.catalog.test.ts`.
   - **Acceptance criteria:** Instance-based Stripe client, Endive в code и runbook; `STRIPE_API_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO_MONTHLY_USD`, `STRIPE_LIVEMODE`, tax jurisdictions через Doppler; test env не требует live values; unknown Price/interval/currency отклоняется; no API keys в репозитории.
-  - **Проверка:** `bun --filter @doxynix/web add stripe && bun run clean:symlinks && bun --filter @doxynix/web test src/server/modules/billing/billing.catalog.test.ts && bun --filter @doxynix/web type-check`
+  - **Проверка:** `(cd apps/web && bun add stripe) && bun run clean:symlinks && bun --filter @doxynix/web test src/server/modules/billing/billing.catalog.test.ts && bun --filter @doxynix/web type-check`
 
-- [ ] **BILL-05 — Local command idempotency (0.5 дня)**
+- [x] **BILL-05 — Local command idempotency (0.5 дня)**
   - **Files touched:** Create `apps/web/src/server/modules/billing/billing.operations.ts`, `billing.operations.test.ts`, `billing.schemas.ts`.
   - **Acceptance criteria:** UUID requestId + canonical hash; same operation resume/result, conflicting body 409; sanitized result без URL/PII; Stripe key ≤255 и не содержит email; concurrent same request создаёт одну operation.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.operations.test.ts`
