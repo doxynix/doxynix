@@ -20,6 +20,7 @@ import { appLogger } from "@/server/core/app-logger";
 import { resolveRequestUserId } from "@/server/core/auth/resolve-session";
 import { prisma } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
+import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import {
   AGENT_SYSTEM_PROMPT,
   GENERATE_CHAT_TITLE_PROMPT,
@@ -44,11 +45,18 @@ async function handler(req: Request) {
     });
   }
 
-  const userId = await resolveRequestUserId(await headers(), ApiKeyScope.CLI);
+  const requestHeaders = await headers();
+  const userId = await resolveRequestUserId(requestHeaders, ApiKeyScope.CLI);
 
   if (userId == null) {
     throw new AppError({ code: "UNAUTHORIZED", publicMessage: "Sign in to use the agent" });
   }
+
+  const workspace = await resolveWorkspace({
+    headerWorkspaceId: requestHeaders.get("x-workspace-id"),
+    strict: true,
+    userId,
+  });
 
   let resolvedRepoId: string | undefined;
   let internalRepoId: null | string = null;
@@ -56,7 +64,7 @@ async function handler(req: Request) {
   if (currentRepoId != null) {
     const dbRepo = await prisma.repo.findUnique({
       select: { id: true },
-      where: { createdByUserId: userId, id: currentRepoId },
+      where: { id: currentRepoId, workspaceId: workspace.id },
     });
     if (dbRepo != null) {
       resolvedRepoId = dbRepo.id;
@@ -66,9 +74,9 @@ async function handler(req: Request) {
     const dbRepo = await prisma.repo.findFirst({
       select: { id: true },
       where: {
-        createdByUserId: userId,
         name: currentRepo.name,
         owner: currentRepo.owner,
+        workspaceId: workspace.id,
       },
     });
 

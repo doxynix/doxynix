@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import * as z from "zod";
 
 import { prisma } from "../db";
@@ -14,9 +15,10 @@ export type ResolvedWorkspace = {
 export async function resolveWorkspace(input: {
   headerWorkspaceId: null | string;
   name?: null | string;
+  strict?: boolean;
   userId: string;
 }): Promise<ResolvedWorkspace> {
-  const { headerWorkspaceId, name, userId } = input;
+  const { headerWorkspaceId, name, strict = false, userId } = input;
 
   if (headerWorkspaceId != null && z.uuid().safeParse(headerWorkspaceId).success) {
     const membership = await prisma.workspaceMember.findUnique({
@@ -26,6 +28,17 @@ export async function resolveWorkspace(input: {
 
     if (membership != null) {
       return { id: headerWorkspaceId, reset: false, role: membership.role };
+    }
+
+    if (strict) {
+      const workspaceExists = await prisma.workspace.findUnique({
+        select: { id: true },
+        where: { id: headerWorkspaceId },
+      });
+
+      if (workspaceExists != null) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Workspace access denied" });
+      }
     }
   }
 

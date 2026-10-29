@@ -177,6 +177,7 @@ const isWorkspaceMember = t.middleware(async ({ ctx, next }) => {
   const workspace = await resolveWorkspace({
     headerWorkspaceId: ctx.apiKeyWorkspaceId ?? ctx.req.headers.get("x-workspace-id"),
     name: session.user.name,
+    strict: true,
     userId,
   });
 

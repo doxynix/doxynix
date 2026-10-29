@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { prisma } from "@/server/core/db";
 import { createPersonalWorkspace } from "@/server/core/workspaces/personal-workspace";
+import { getAnalysisContext } from "@/server/modules/analysis/logic/analysis-context";
+import { analysisLifecycleService } from "@/server/modules/analysis/services/analysis-lifecycle.service";
 
 import { cleanupDatabase, createAnon, createTestUser } from "../helpers";
 
@@ -272,6 +274,73 @@ describe("Tenancy isolation", () => {
 
     await expect(carolDb.repo.delete({ where: { id: repo.id } })).rejects.toThrow(/denied|policy/i);
     await expect(aliceDb.repo.delete({ where: { id: repo.id } })).resolves.toBeDefined();
+  });
+
+  it("refuses a task payload whose workspaceId does not own the analysis", async () => {
+    const alice = await createTestUser("Alice");
+    const bob = await createTestUser("Bob");
+    const aliceWorkspace = await createPersonalWorkspace(alice.user.id, alice.user.name);
+    const bobWorkspace = await createPersonalWorkspace(bob.user.id, bob.user.name);
+    const artifacts = await seedWorkspaceArtifacts(aliceWorkspace, alice.user.id);
+
+    await expect(
+      getAnalysisContext(artifacts.analysis.id, alice.user.id, bobWorkspace),
+    ).rejects.toThrow("Analysis not found");
+
+    const aliceDb = enhance(prisma, { user: { id: alice.user.id, role: alice.user.role } });
+
+    await expect(
+      analysisLifecycleService.assertRepoAccess(aliceDb, bobWorkspace, artifacts.repo.id),
+    ).rejects.toMatchObject({ code: "NOT_FOUND" });
+  });
+
+  it("scopes API keys to the workspace and keeps mutations owner-only", async () => {
+    const alice = await createTestUser("Alice");
+    const bob = await createTestUser("Bob");
+    const carol = await createTestUser("Carol");
+    const aliceWorkspace = await createPersonalWorkspace(alice.user.id, alice.user.name);
+
+    await prisma.workspaceMember.create({
+      data: { role: "MEMBER", userId: carol.user.id, workspaceId: aliceWorkspace },
+    });
+
+    const key = await prisma.apiKey.create({
+      data: {
+        hashedKey: "workspace-isolation-key",
+        name: "ci",
+        prefix: "dxnx_test",
+        userId: alice.user.id,
+        workspaceId: aliceWorkspace,
+      },
+    });
+
+    const aliceDb = enhance(prisma, { user: { id: alice.user.id, role: alice.user.role } });
+    const bobDb = enhance(prisma, { user: { id: bob.user.id, role: bob.user.role } });
+    const carolDb = enhance(prisma, { user: { id: carol.user.id, role: carol.user.role } });
+
+    await expect(aliceDb.apiKey.findUnique({ where: { id: key.id } })).resolves.toBeDefined();
+    await expect(carolDb.apiKey.findUnique({ where: { id: key.id } })).resolves.toBeDefined();
+    await expect(bobDb.apiKey.findUnique({ where: { id: key.id } })).resolves.toBeNull();
+
+    await expect(
+      carolDb.apiKey.create({
+        data: {
+          hashedKey: "member-cannot-create",
+          name: "nope",
+          prefix: "dxnx_nope",
+          userId: carol.user.id,
+          workspaceId: aliceWorkspace,
+        },
+      }),
+    ).rejects.toThrow(/denied|policy/i);
+
+    await expect(
+      carolDb.apiKey.update({ data: { revoked: true }, where: { id: key.id } }),
+    ).rejects.toThrow(/denied|policy/i);
+
+    await expect(
+      aliceDb.apiKey.update({ data: { revoked: true }, where: { id: key.id } }),
+    ).resolves.toBeDefined();
   });
 
   it("lets co-members read each other, but not users from another workspace", async () => {

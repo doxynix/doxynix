@@ -146,9 +146,10 @@ describe("Workspace service and router", () => {
     expect(after.activeWorkspaceId).toBe(personalId);
     expect(after.reset).toBe(true);
 
-    const upgraded = await caller.workspace.upgradeToPro();
-
-    expect(upgraded.id).toBe(personalId);
+    await expect(caller.workspace.upgradeToPro()).rejects.toMatchObject({
+      code: "FORBIDDEN",
+      message: "Workspace access denied",
+    });
   });
 
   it("lazily provisions a workspace from workspaceProcedure when the header is absent", async () => {
@@ -168,6 +169,18 @@ describe("Workspace service and router", () => {
     const caller = callerFor(bob.user);
 
     await expect(caller.workspace.switchWorkspace({ workspaceId })).rejects.toMatchObject({
+      code: "FORBIDDEN",
+      message: "Workspace access denied",
+    });
+  });
+
+  it("rejects a foreign X-Workspace-Id before the handler runs", async () => {
+    const alice = await createTestUser("Alice");
+    const bob = await createTestUser("Bob");
+    const workspaceId = await createPersonalWorkspace(alice.user.id, alice.user.name);
+    const caller = callerFor(bob.user, workspaceId);
+
+    await expect(caller.workspace.upgradeToPro()).rejects.toMatchObject({
       code: "FORBIDDEN",
       message: "Workspace access denied",
     });

@@ -109,11 +109,14 @@ model ApiKey {
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@deny('all', auth() == null)
-  @@allow('create', userId == auth().id && workspace.members?[userId == auth().id] && !revoked)
+  @@allow(
+    'create',
+    userId == auth().id && workspace.members?[userId == auth().id && role == OWNER] && !revoked
+  )
   @@allow('read', workspace.members?[userId == auth().id] || auth().role == 'ADMIN')
   @@allow(
     'update',
-    (workspace.members?[userId == auth().id] &&
+    (workspace.members?[userId == auth().id && role == OWNER] &&
       future().userId == userId &&
       future().workspaceId == workspaceId &&
       future().prefix == prefix &&

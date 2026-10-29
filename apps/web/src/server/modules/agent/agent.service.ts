@@ -26,13 +26,18 @@ export type DeleteSessionInput = {
 };
 
 export const agentService = {
-  async createSession(db: DbClient, userId: string, input: CreateSessionInput) {
+  async createSession(
+    db: DbClient,
+    userId: string,
+    workspaceId: string,
+    input: CreateSessionInput,
+  ) {
     let internalRepoId: string | undefined;
 
     if (input.repoId != null) {
       const repo = await db.repo.findFirst({
         select: { id: true },
-        where: { createdByUserId: userId, id: input.repoId },
+        where: { id: input.repoId, workspaceId },
       });
 
       if (repo == null) {
@@ -74,16 +79,21 @@ export const agentService = {
     return rawMessages.map((msg) => agentMapper.toSessionMessage(msg));
   },
 
-  async listSessions(db: DbClient, userId: string, input: ListSessionsInput | undefined) {
+  async listSessions(
+    db: DbClient,
+    userId: string,
+    workspaceId: string,
+    input: ListSessionsInput | undefined,
+  ) {
     let internalRepoId: null | string = null;
 
     if (input?.currentRepo != null) {
       const repo = await db.repo.findFirst({
         select: { id: true },
         where: {
-          createdByUserId: userId,
           name: input.currentRepo.name,
           owner: input.currentRepo.owner,
+          workspaceId,
         },
       });
       if (repo != null) {
