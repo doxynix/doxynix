@@ -215,6 +215,7 @@
     "shiki": "4.5.0",
     "simple-git": "4.0.2",
     "sonner": "2.0.8",
+    "stripe": "23.0.1",
     "superjson": "catalog:",
     "svix": "2.8.0",
     "tailwind-merge": "catalog:",

@@ -47,6 +47,10 @@ const envServer = createEnv({
     REDIS_TCP_URL: process.env.REDIS_TCP_URL,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     RESEND_WEBHOOK_SECRET: process.env.RESEND_WEBHOOK_SECRET,
+    STRIPE_API_KEY: process.env.STRIPE_API_KEY,
+    STRIPE_LIVEMODE: process.env.STRIPE_LIVEMODE,
+    STRIPE_PRICE_PRO_MONTHLY_USD: process.env.STRIPE_PRICE_PRO_MONTHLY_USD,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     TOOL_APPROVAL_SECRET: process.env.TOOL_APPROVAL_SECRET,
     TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
@@ -90,6 +94,10 @@ const envServer = createEnv({
     REDIS_TCP_URL: stringSchema,
     RESEND_API_KEY: stringSchema,
     RESEND_WEBHOOK_SECRET: stringSchema,
+    STRIPE_API_KEY: stringSchema,
+    STRIPE_LIVEMODE: z._default(z.enum(["true", "false"]), "false"),
+    STRIPE_PRICE_PRO_MONTHLY_USD: stringSchema,
+    STRIPE_WEBHOOK_SECRET: stringSchema,
     TOOL_APPROVAL_SECRET: stringSchema,
     TURNSTILE_SECRET_KEY: stringSchema,
     UPLOADTHING_TOKEN: stringSchema,
@@ -140,6 +148,11 @@ export const GITHUB_SYSTEM_PAT = envServer.GITHUB_SYSTEM_PAT;
 export const GITHUB_WEBHOOK_SECRET = envServer.GITHUB_WEBHOOK_SECRET;
 export const GITHUB_SYSTEM_INSTALLATION_ID = envServer.GITHUB_SYSTEM_INSTALLATION_ID;
 export const POSTHOG_HOST = envServer.POSTHOG_HOST;
+
+export const STRIPE_API_KEY = envServer.STRIPE_API_KEY;
+export const STRIPE_WEBHOOK_SECRET = envServer.STRIPE_WEBHOOK_SECRET;
+export const STRIPE_PRICE_PRO_MONTHLY_USD = envServer.STRIPE_PRICE_PRO_MONTHLY_USD;
+export const STRIPE_LIVEMODE = envServer.STRIPE_LIVEMODE === "true";
 
 export const AUTH_PROVIDERS = {
   github: {

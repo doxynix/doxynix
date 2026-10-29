@@ -458,7 +458,7 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
   - **Acceptance criteria:** Все `billing_*` таблицы раздела 4 (workspace-таблицы приходят из WS-01) включая partial unique current subscription и permanent unique Event ID; unknown Stripe status вставляется; ledger update/delete denied; payload purge не удаляет Event ID.
   - **Проверка:** `bun --filter @doxynix/web db:generate && (cd apps/web && bun prisma migrate dev --name add_billing) && bun --filter @doxynix/web db:push:test && bun --filter @doxynix/web test:int src/tests/integration/billing-schema.test.ts`
 
-- [ ] **BILL-04 — Stripe SDK, secrets, catalog и version pin (0.5 дня)**
+- [x] **BILL-04 — Stripe SDK, secrets, catalog и version pin (0.5 дня)**
   - **Files touched:** Modify `apps/web/package.json`, `bun.lock`, `apps/web/src/shared/config/env.server.ts`, `apps/web/src/tests/setup-env.ts`, `apps/web/.env.example`; Create `apps/web/src/server/modules/billing/billing.stripe.ts`, `billing.catalog.ts`, `billing.catalog.test.ts`.
   - **Acceptance criteria:** Instance-based Stripe client, Endive в code и runbook; `STRIPE_API_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO_MONTHLY_USD`, `STRIPE_LIVEMODE`, tax jurisdictions через Doppler; test env не требует live values; unknown Price/interval/currency отклоняется; no API keys в репозитории.
   - **Проверка:** `bun --filter @doxynix/web add stripe && bun run clean:symlinks && bun --filter @doxynix/web test src/server/modules/billing/billing.catalog.test.ts && bun --filter @doxynix/web type-check`
