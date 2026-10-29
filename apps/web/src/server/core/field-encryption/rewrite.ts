@@ -27,13 +27,38 @@ export function encryptOnWrite(
   key: { fingerprint: string; raw: Buffer },
 ): Record<string, unknown> {
   // No fast path here, unlike the read side: a model with no encrypted fields of its own can still own a relation that has them (`Analysis` -> `Document.content`).
-  const draft = structuredClone(args);
+  const draft = cloneForRewrite(args);
 
   for (const target of collectTargets(draft, model)) {
     rewriteTarget(draft, target, key);
   }
 
   return draft;
+}
+
+// `structuredClone` reduces Prisma's `DbNull`/`JsonNull` markers to `{}`, which writes JSON `{}`
+// instead of SQL NULL. Only plain objects and arrays need copying, so class instances (markers,
+// Date, Decimal, Buffer) are passed through by reference; the rewrite never mutates them.
+function cloneForRewrite<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((item) => cloneForRewrite(item)) as T;
+  }
+
+  if (
+    value == null ||
+    typeof value !== "object" ||
+    Object.getPrototypeOf(value) !== Object.prototype
+  ) {
+    return value;
+  }
+
+  const copy: Record<string, unknown> = {};
+
+  for (const [key, nested] of Object.entries(value)) {
+    copy[key] = cloneForRewrite(nested);
+  }
+
+  return copy as T;
 }
 
 export function decryptOnRead(

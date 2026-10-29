@@ -1,4 +1,5 @@
 import "./auth"
+import "./billing"
 import "./github"
 
 model Workspace {
@@ -13,6 +14,13 @@ model Workspace {
   repos               Repo[]
   githubInstallations GithubInstallation[]
   apiKeys             ApiKey[]
+
+  billingCustomer         BillingCustomer?
+  billingSubscriptions    BillingSubscription[]
+  billingCheckoutSessions BillingCheckoutSession[]
+  billingOperations       BillingOperation[]
+  billingLedgerEntries    BillingLedgerEntry[]
+  billingIssues           BillingIssue[]
 
   @@deny('all', auth() == null)
   @@allow('create', true)

@@ -1,6 +1,7 @@
 import "./models/base"
 import "./models/auth"
 import "./models/workspace"
+import "./models/billing"
 import "./models/github"
 import "./models/review"
 import "./models/core"

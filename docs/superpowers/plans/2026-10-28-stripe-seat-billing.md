@@ -453,7 +453,7 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
 
 ### Billing core
 
-- [ ] **BILL-03 — Billing schema и ledger constraints (1 день)**
+- [x] **BILL-03 — Billing schema и ledger constraints (1 день)**
   - **Files touched:** Create `apps/web/prisma/models/billing.zmodel`; Modify `apps/web/prisma/schema.zmodel`, `apps/web/src/tests/helpers.ts`; Create `apps/web/src/tests/integration/billing-schema.test.ts`, новую Prisma migration.
   - **Acceptance criteria:** Все `billing_*` таблицы раздела 4 (workspace-таблицы приходят из WS-01) включая partial unique current subscription и permanent unique Event ID; unknown Stripe status вставляется; ledger update/delete denied; payload purge не удаляет Event ID.
   - **Проверка:** `bun --filter @doxynix/web db:generate && (cd apps/web && bun prisma migrate dev --name add_billing) && bun --filter @doxynix/web db:push:test && bun --filter @doxynix/web test:int src/tests/integration/billing-schema.test.ts`

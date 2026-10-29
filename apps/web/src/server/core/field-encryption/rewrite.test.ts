@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 
 import { encryptString, parseEncryptedString } from "./cipher";
@@ -22,6 +23,12 @@ const at = (root: unknown, ...keys: string[]): Record<string, unknown> => {
 };
 
 describe("encryptOnWrite", () => {
+  it("keeps Prisma null markers instead of collapsing them into empty JSON", () => {
+    const out = encryptOnWrite({ data: { payload: Prisma.DbNull } }, "BillingEvent", parsedKey);
+
+    expect((out.data as Record<string, unknown>).payload).toBe(Prisma.DbNull);
+  });
+
   it("encrypts a plaintext field on create", () => {
     const out = encryptOnWrite({ data: { email: "user@example.com" } }, "User", parsedKey);
 
