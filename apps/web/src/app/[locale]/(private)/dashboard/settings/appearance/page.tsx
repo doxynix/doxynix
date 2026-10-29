@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { AppearanceSettings } from "@/features/appearance/ui/appearance-settings";
+import { AppearanceSettings } from "@/features/settings/ui/appearance/appearance-settings";
 
 export default async function AppearancePage() {
   const t = await getTranslations("Dashboard");

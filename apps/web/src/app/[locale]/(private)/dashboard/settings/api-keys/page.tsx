@@ -2,8 +2,8 @@ import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
 
-import { ApiKeysListContainer } from "@/features/api-keys/ui/api-keys-list-container";
-import { CreateApiKeyDialog } from "@/features/api-keys/ui/create-api-key-dialog";
+import { ApiKeysListContainer } from "@/features/settings/ui/api-keys/api-keys-list-container";
+import { CreateApiKeyDialog } from "@/features/settings/ui/api-keys/create-api-key-dialog";
 
 import { HydrateClient, prefetch, trpcProxy } from "@/server/core/trpc/prefetch";
 

@@ -11,7 +11,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { ToggleGroup, ToggleGroupItem } from "@/shared/ui/core/toggle-group";
 
-import type { AppearanceSectionProps } from "../model/appearance.types";
+import type { AppearanceSectionProps } from "../../model/appearance/appearance.types";
 
 export function ShapeSection({ preferences, update }: Readonly<AppearanceSectionProps>) {
   const t = useTranslations("Dashboard");

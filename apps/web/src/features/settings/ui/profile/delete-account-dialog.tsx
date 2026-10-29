@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { AppButton } from "@/shared/ui/core/button";
 import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 
-import { useProfileActions } from "../model/use-profile-actions";
+import { useProfileActions } from "../../model/profile/use-profile-actions";
 
 export function DeleteAccountDialog() {
   const [open, setOpen] = useState(false);

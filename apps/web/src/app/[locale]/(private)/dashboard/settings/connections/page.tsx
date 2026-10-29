@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
 
-import { ConnectionsListContainer } from "@/features/connections/ui/connections-list-container";
+import { ConnectionsListContainer } from "@/features/settings/ui/connections/connections-list-container";
 
 import { HydrateClient, prefetch, trpcProxy } from "@/server/core/trpc/prefetch";
 

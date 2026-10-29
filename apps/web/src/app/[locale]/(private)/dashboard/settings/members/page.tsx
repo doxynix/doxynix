@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
 
-import { WorkspaceMembersPage } from "@/features/workspace-members/ui/workspace-members-page";
+import { WorkspaceMembersPage } from "@/features/workspace/ui/workspace-members-page";
 
 export const generateMetadata = createMetadata("members_title", "members_desc");
 
