@@ -17,12 +17,6 @@ type WorkspaceWithEntitlement = Prisma.WorkspaceGetPayload<{
   include: { entitlement: true };
 }>;
 
-function requireOwner(role: WorkspaceRole): void {
-  if (role !== "OWNER") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Owner rights required" });
-  }
-}
-
 function toSummary(workspace: WorkspaceWithEntitlement, role: WorkspaceRole): WorkspaceSummary {
   const { entitlement } = workspace;
 
@@ -49,9 +43,7 @@ function toSummary(workspace: WorkspaceWithEntitlement, role: WorkspaceRole): Wo
 }
 
 export const workspaceService = {
-  async addMember(db: DbClient, workspaceId: string, role: WorkspaceRole, email: string) {
-    requireOwner(role);
-
+  async addMember(db: DbClient, workspaceId: string, email: string) {
     const workspace = await db.workspace.findUnique({
       include: { entitlement: true },
       where: { id: workspaceId },
@@ -159,9 +151,7 @@ export const workspaceService = {
     });
   },
 
-  async removeMember(db: DbClient, workspaceId: string, role: WorkspaceRole, userId: string) {
-    requireOwner(role);
-
+  async removeMember(db: DbClient, workspaceId: string, userId: string) {
     if (!("$transaction" in db)) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -221,9 +211,7 @@ export const workspaceService = {
     return toSummary(membership.workspace, membership.role);
   },
 
-  async upgradeToPro(db: DbClient, workspaceId: string, role: WorkspaceRole) {
-    requireOwner(role);
-
+  async upgradeToPro(db: DbClient, workspaceId: string, actorRole: WorkspaceRole) {
     // TODO(DXNX-293): PLACEHOLDER for local dev only. seatLimit = members+1 is not a real
     // quantity; BILL-06 replaces this path with Stripe Checkout and subscription quantity sync.
     if (!isLocalBillingUpgradeEnabled()) {
@@ -250,6 +238,6 @@ export const workspaceService = {
 
     const updated: WorkspaceWithEntitlement = { ...workspace, entitlement };
 
-    return toSummary(updated, role);
+    return toSummary(updated, actorRole);
   },
 };

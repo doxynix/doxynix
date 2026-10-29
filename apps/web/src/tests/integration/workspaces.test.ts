@@ -196,6 +196,28 @@ describe("Workspace service and router", () => {
     );
   });
 
+  it("denies member management to a non-owner before the handler runs", async () => {
+    const alice = await createTestUser("Alice");
+    const bob = await createTestUser("Bob");
+    const carol = await createTestUser("Carol");
+    const workspaceId = await createPersonalWorkspace(alice.user.id, alice.user.name);
+
+    await prisma.workspaceMember.create({
+      data: { role: "MEMBER", userId: carol.user.id, workspaceId },
+    });
+
+    const memberCaller = callerFor(carol.user, workspaceId);
+
+    // FORBIDDEN (not UPGRADE_REQUIRED) proves the owner middleware runs before the service.
+    await expect(memberCaller.workspace.addMember({ email: bob.email })).rejects.toMatchObject({
+      code: "FORBIDDEN",
+      message: "Owner rights required",
+    });
+    await expect(
+      memberCaller.workspace.removeMember({ userId: alice.user.id }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN", message: "Owner rights required" });
+  });
+
   it("rejects a foreign X-Workspace-Id before the handler runs", async () => {
     const alice = await createTestUser("Alice");
     const bob = await createTestUser("Bob");

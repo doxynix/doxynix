@@ -2,7 +2,12 @@ import { TRPCError } from "@trpc/server";
 import * as z from "zod";
 
 import { memberAddLimiter } from "@/server/core/ratelimit";
-import { createTRPCRouter, protectedProcedure, workspaceProcedure } from "@/server/core/trpc/init";
+import {
+  createTRPCRouter,
+  ownerProcedure,
+  protectedProcedure,
+  workspaceProcedure,
+} from "@/server/core/trpc/init";
 
 import {
   AddWorkspaceMemberSchema,
@@ -14,7 +19,7 @@ import {
 import { workspaceService } from "./workspace.service";
 
 export const workspaceRouter = createTRPCRouter({
-  addMember: workspaceProcedure
+  addMember: ownerProcedure
     .input(AddWorkspaceMemberSchema)
     .output(WorkspaceMemberSummarySchema)
     .mutation(async ({ ctx, input }) => {
@@ -24,7 +29,7 @@ export const workspaceRouter = createTRPCRouter({
         throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "RATE_LIMITED" });
       }
 
-      return workspaceService.addMember(ctx.db, ctx.workspace.id, ctx.workspace.role, input.email);
+      return workspaceService.addMember(ctx.db, ctx.workspace.id, input.email);
     }),
 
   members: workspaceProcedure
@@ -52,16 +57,11 @@ export const workspaceRouter = createTRPCRouter({
       );
     }),
 
-  removeMember: workspaceProcedure
+  removeMember: ownerProcedure
     .input(RemoveWorkspaceMemberSchema)
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      await workspaceService.removeMember(
-        ctx.db,
-        ctx.workspace.id,
-        ctx.workspace.role,
-        input.userId,
-      );
+      await workspaceService.removeMember(ctx.db, ctx.workspace.id, input.userId);
 
       return { success: true };
     }),
@@ -73,7 +73,7 @@ export const workspaceRouter = createTRPCRouter({
       return workspaceService.switchWorkspace(ctx.db, input.workspaceId, ctx.session.user.id);
     }),
 
-  upgradeToPro: workspaceProcedure.output(WorkspaceSummarySchema).mutation(async ({ ctx }) => {
+  upgradeToPro: ownerProcedure.output(WorkspaceSummarySchema).mutation(async ({ ctx }) => {
     return workspaceService.upgradeToPro(ctx.db, ctx.workspace.id, ctx.workspace.role);
   }),
 });

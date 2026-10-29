@@ -192,6 +192,14 @@ const isWorkspaceMember = t.middleware(async ({ ctx, next }) => {
 
 export const workspaceProcedure = protectedProcedure.use(isWorkspaceMember);
 
+export const ownerProcedure = workspaceProcedure.use(({ ctx, next }) => {
+  if (ctx.workspace.role !== "OWNER") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Owner rights required" });
+  }
+
+  return next({ ctx });
+});
+
 const isAdmin = t.middleware(async ({ ctx, next }) => {
   if (ctx.session?.user.role !== "ADMIN") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Admin rights required" });

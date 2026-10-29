@@ -62,7 +62,7 @@ describe("workspaceService.addMember", () => {
     } as never;
 
     await expect(
-      workspaceService.addMember(db, WORKSPACE_ID, "OWNER", "bob@test.com"),
+      workspaceService.addMember(db, WORKSPACE_ID, "bob@test.com"),
     ).rejects.toMatchObject({ code: "PRECONDITION_FAILED", message: "UPGRADE_REQUIRED" });
   });
 
@@ -94,7 +94,7 @@ describe("workspaceService.addMember", () => {
       },
     });
 
-    const member = await workspaceService.addMember(db, WORKSPACE_ID, "OWNER", "bob@test.com");
+    const member = await workspaceService.addMember(db, WORKSPACE_ID, "bob@test.com");
 
     expect(member.role).toBe("MEMBER");
     expect(create.mock.calls[0]?.[0]).toMatchObject({
@@ -124,28 +124,22 @@ describe("workspaceService.addMember", () => {
     });
 
     await expect(
-      workspaceService.addMember(db, WORKSPACE_ID, "OWNER", "bob@test.com"),
+      workspaceService.addMember(db, WORKSPACE_ID, "bob@test.com"),
     ).rejects.toMatchObject({ code: "FORBIDDEN", message: "LIMIT_EXCEEDED" });
   });
 });
 
 describe("workspaceService.upgradeToPro", () => {
-  it("rejects a member who is not the owner", async () => {
-    const db = {} as never;
-
-    await expect(workspaceService.upgradeToPro(db, WORKSPACE_ID, "MEMBER")).rejects.toMatchObject({
-      code: "FORBIDDEN",
-      message: "Owner rights required",
-    });
-  });
-
   it("returns BILLING_NOT_READY when the local upgrade flag is off", async () => {
     process.env.BILLING_LOCAL_UPGRADE_ENABLED = "false";
 
     try {
       await expect(
         workspaceService.upgradeToPro({} as never, WORKSPACE_ID, "OWNER"),
-      ).rejects.toMatchObject({ code: "PRECONDITION_FAILED", message: "BILLING_NOT_READY" });
+      ).rejects.toMatchObject({
+        code: "PRECONDITION_FAILED",
+        message: "BILLING_NOT_READY",
+      });
     } finally {
       process.env.BILLING_LOCAL_UPGRADE_ENABLED = "true";
     }
@@ -198,9 +192,10 @@ describe("workspaceService.removeMember", () => {
       $transaction: vi.fn(async (body: (client: unknown) => unknown) => body(tx)),
     } as never;
 
-    await expect(
-      workspaceService.removeMember(db, WORKSPACE_ID, "OWNER", USER_ID),
-    ).rejects.toMatchObject({ code: "PRECONDITION_FAILED", message: "LAST_OWNER" });
+    await expect(workspaceService.removeMember(db, WORKSPACE_ID, USER_ID)).rejects.toMatchObject({
+      code: "PRECONDITION_FAILED",
+      message: "LAST_OWNER",
+    });
     expect(remove).not.toHaveBeenCalled();
   });
 
@@ -219,7 +214,7 @@ describe("workspaceService.removeMember", () => {
       $transaction: vi.fn(async (body: (client: unknown) => unknown) => body(tx)),
     } as never;
 
-    await workspaceService.removeMember(db, WORKSPACE_ID, "OWNER", USER_ID);
+    await workspaceService.removeMember(db, WORKSPACE_ID, USER_ID);
 
     expect(remove).toHaveBeenCalledWith({
       where: { workspaceId_userId: { userId: USER_ID, workspaceId: WORKSPACE_ID } },
