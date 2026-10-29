@@ -71,30 +71,56 @@ export const workspaceService = {
     });
 
     if (user == null) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      throw new TRPCError({ code: "PRECONDITION_FAILED", message: "MEMBER_ADD_FAILED" });
     }
 
-    const existing = await db.workspaceMember.findUnique({
-      select: { id: true },
-      where: { workspaceId_userId: { userId: user.id, workspaceId } },
-    });
-
-    if (existing != null) {
-      throw new TRPCError({ code: "CONFLICT", message: "ALREADY_MEMBER" });
+    if (!("$transaction" in db)) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Workspace mutation requires a database client",
+      });
     }
 
-    const activeMembers = await db.workspaceMember.count({ where: { workspaceId } });
+    try {
+      return await db.$transaction(async (tx) => {
+        // Serialises seat accounting per workspace; without it two concurrent adds both pass the
+        // seatLimit check and create an unpaid seat.
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${workspaceId}))`;
 
-    if (workspace.entitlement.seatLimit > 0 && activeMembers >= workspace.entitlement.seatLimit) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "LIMIT_EXCEEDED" });
+        const existing = await tx.workspaceMember.findUnique({
+          select: { id: true },
+          where: { workspaceId_userId: { userId: user.id, workspaceId } },
+        });
+
+        if (existing != null) {
+          throw new TRPCError({ code: "CONFLICT", message: "ALREADY_MEMBER" });
+        }
+
+        const activeMembers = await tx.workspaceMember.count({ where: { workspaceId } });
+        const seatLimit = workspace.entitlement?.seatLimit ?? 0;
+
+        if (seatLimit > 0 && activeMembers >= seatLimit) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "LIMIT_EXCEEDED" });
+        }
+
+        const member = await tx.workspaceMember.create({
+          data: { role: "MEMBER", userId: user.id, workspaceId },
+          select: { id: true, role: true, userId: true },
+        });
+
+        return { ...member, user: { id: user.id, image: user.image, name: user.name } };
+      });
+    } catch (error) {
+      if (error instanceof TRPCError) {
+        throw error;
+      }
+
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        throw new TRPCError({ code: "CONFLICT", message: "ALREADY_MEMBER" });
+      }
+
+      throw error;
     }
-
-    const member = await db.workspaceMember.create({
-      data: { role: "MEMBER", userId: user.id, workspaceId },
-      select: { id: true, role: true, userId: true },
-    });
-
-    return { ...member, user: { id: user.id, image: user.image, name: user.name } };
   },
 
   async listForUser(
@@ -196,7 +222,8 @@ export const workspaceService = {
   async upgradeToPro(db: DbClient, workspaceId: string, role: WorkspaceRole) {
     requireOwner(role);
 
-    // TODO(DXNX-293): replaced by Checkout in BILL-06.
+    // TODO(DXNX-293): PLACEHOLDER for local dev only. seatLimit = members+1 is not a real
+    // quantity; BILL-06 replaces this path with Stripe Checkout and subscription quantity sync.
     if (!isLocalBillingUpgradeEnabled()) {
       throw new TRPCError({ code: "PRECONDITION_FAILED", message: "BILLING_NOT_READY" });
     }

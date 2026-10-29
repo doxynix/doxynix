@@ -26,8 +26,11 @@ function errorKey(message: string) {
     case "UPGRADE_REQUIRED": {
       return "settings_members_error_upgrade_required";
     }
-    case "User not found": {
+    case "MEMBER_ADD_FAILED": {
       return "settings_members_error_user_not_found";
+    }
+    case "RATE_LIMITED": {
+      return "settings_members_error_rate_limited";
     }
     default: {
       return "settings_members_error_generic";

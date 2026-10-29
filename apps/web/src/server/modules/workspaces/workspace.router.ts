@@ -1,5 +1,7 @@
+import { TRPCError } from "@trpc/server";
 import * as z from "zod";
 
+import { memberAddLimiter } from "@/server/core/ratelimit";
 import { createTRPCRouter, protectedProcedure, workspaceProcedure } from "@/server/core/trpc/init";
 
 import {
@@ -16,6 +18,12 @@ export const workspaceRouter = createTRPCRouter({
     .input(AddWorkspaceMemberSchema)
     .output(WorkspaceMemberSummarySchema)
     .mutation(async ({ ctx, input }) => {
+      const { success } = await memberAddLimiter.limit(`user:${ctx.session.user.id}`);
+
+      if (!success) {
+        throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "RATE_LIMITED" });
+      }
+
       return workspaceService.addMember(ctx.db, ctx.workspace.id, ctx.workspace.role, input.email);
     }),
 

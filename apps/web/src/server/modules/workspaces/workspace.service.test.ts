@@ -11,6 +11,20 @@ vi.mock("@/server/core/db", () => ({
 const WORKSPACE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5e";
 
+// Emulates the Prisma transaction client over the same mocks: addMember takes an advisory lock
+// and mutates inside $transaction, so the fake client must expose both methods.
+function withTransaction<T extends object>(db: T): never {
+  const client = {
+    ...db,
+    $executeRaw: vi.fn().mockResolvedValue(0),
+  };
+
+  return {
+    ...client,
+    $transaction: vi.fn(async (fn: (tx: typeof client) => unknown) => fn(client)),
+  } as never;
+}
+
 function entitlement(overrides: Record<string, unknown> = {}) {
   return {
     aiTokensPerMonth: 1_000_000,
@@ -64,7 +78,7 @@ describe("workspaceService.addMember", () => {
       user: { id: USER_ID, name: "Bob" },
       userId: USER_ID,
     });
-    const db = {
+    const db = withTransaction({
       user: { findUnique: vi.fn().mockResolvedValue({ id: USER_ID }) },
       workspace: {
         findUnique: vi
@@ -78,7 +92,7 @@ describe("workspaceService.addMember", () => {
         create,
         findUnique: vi.fn().mockResolvedValue(null),
       },
-    } as never;
+    });
 
     const member = await workspaceService.addMember(db, WORKSPACE_ID, "OWNER", "bob@test.com");
 
@@ -94,7 +108,7 @@ describe("workspaceService.addMember", () => {
       image: null,
       name: "Bob",
     } as never);
-    const db = {
+    const db = withTransaction({
       user: { findUnique: vi.fn().mockResolvedValue({ id: USER_ID }) },
       workspace: {
         findUnique: vi
@@ -107,7 +121,7 @@ describe("workspaceService.addMember", () => {
         count: vi.fn().mockResolvedValue(1),
         findUnique: vi.fn().mockResolvedValue(null),
       },
-    } as never;
+    });
 
     await expect(
       workspaceService.addMember(db, WORKSPACE_ID, "OWNER", "bob@test.com"),
