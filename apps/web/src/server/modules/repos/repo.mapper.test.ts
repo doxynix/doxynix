@@ -29,6 +29,7 @@ function makeRepoWithAnalyses(overrides?: Partial<RepoWithAnalyses>): RepoWithAn
       },
     ],
     createdAt: new Date("2025-01-01"),
+    createdByUserId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d",
     defaultBranch: "main",
     description: "A test repo",
     forks: 7,
@@ -47,8 +48,8 @@ function makeRepoWithAnalyses(overrides?: Partial<RepoWithAnalyses>): RepoWithAn
     topics: ["test"],
     updatedAt: new Date("2025-01-15"),
     url: "https://github.com/test-owner/test-repo",
-    userId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d",
     visibility: "PUBLIC" as const,
+    workspaceId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5e",
     ...overrides,
   };
 }

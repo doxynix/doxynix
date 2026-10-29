@@ -14,7 +14,13 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
     const alice = await createTestUser("Alice");
 
     const key = await alice.db.apiKey.create({
-      data: { hashedKey: "SECRET_HASH", name: "k", prefix: "p", userId: alice.user.id },
+      data: {
+        hashedKey: "SECRET_HASH",
+        name: "k",
+        prefix: "p",
+        userId: alice.user.id,
+        workspaceId: alice.workspace.id,
+      },
     });
     const fetchedKey = await alice.db.apiKey.findUnique({ where: { id: key.id } });
     expect(fetchedKey).not.toHaveProperty("hashedKey");
@@ -67,7 +73,14 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
 
     await expectDenied(
       alice.db.apiKey.create({
-        data: { hashedKey: "x", name: "bad", prefix: "x", revoked: true, userId: alice.user.id },
+        data: {
+          hashedKey: "x",
+          name: "bad",
+          prefix: "x",
+          revoked: true,
+          userId: alice.user.id,
+          workspaceId: alice.workspace.id,
+        },
       }),
     );
   });
@@ -75,7 +88,13 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
   it("should ensure logical separation for Soft Deleted items (Revoked)", async () => {
     const alice = await createTestUser("Alice");
     const key = await alice.db.apiKey.create({
-      data: { hashedKey: "h", name: "k", prefix: "p", userId: alice.user.id },
+      data: {
+        hashedKey: "h",
+        name: "k",
+        prefix: "p",
+        userId: alice.user.id,
+        workspaceId: alice.workspace.id,
+      },
     });
 
     await expectDenied(alice.db.apiKey.delete({ where: { id: key.id } }));

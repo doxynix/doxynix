@@ -1,5 +1,6 @@
 import "./github"
 import "./core"
+import "./workspace"
 
 model User {
   /// @zod.custom.omit(["model"])
@@ -32,19 +33,26 @@ model User {
   createdAt           DateTime             @default(now()) @map("created_at")
   updatedAt           DateTime             @default(now()) @updatedAt @map("updated_at")
 
-  accounts            Account[]
-  sessions            Session[]
-  repos               Repo[]
-  apiKeys             ApiKey[]
-  notifications       Notification[]
-  githubInstallations GithubInstallation[]
-  chatSession         ChatSession[]
-  passkeys            Passkey[]
-  twoFactors          TwoFactor[]
-  appearance          UserAppearance?
+  accounts             Account[]
+  sessions             Session[]
+  createdRepos         Repo[]               @relation("RepoCreatedBy")
+  workspaceMemberships WorkspaceMember[]
+  apiKeys              ApiKey[]
+  notifications        Notification[]
+  githubInstallations  GithubInstallation[]
+  chatSession          ChatSession[]
+  passkeys             Passkey[]
+  twoFactors           TwoFactor[]
+  appearance           UserAppearance?
 
   @@allow('create', role == USER || auth().role == 'ADMIN')
-  @@allow('read,delete', auth() == this || auth().role == 'ADMIN')
+  @@allow(
+    'read',
+    auth() == this ||
+    auth().role == 'ADMIN' ||
+    workspaceMemberships?[workspace.members?[userId == auth().id]]
+  )
+  @@allow('delete', auth() == this || auth().role == 'ADMIN')
 
   @@allow('update',
     auth().role == 'ADMIN' ||

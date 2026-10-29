@@ -5,6 +5,7 @@ import type { DbClient } from "@/server/core/db";
 import { apiKeyService, isApiKeyDead } from "@/server/modules/api-keys/api-key.service";
 
 const KEY_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b";
+const WORKSPACE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a70";
 const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 
 function createApiKeyDbMock(rows: unknown[] = []) {
@@ -58,7 +59,7 @@ describe("apiKeyService.list", () => {
     const archived = makeApiKeyRow({ id: "archived-id", revoked: true });
     const { db } = createApiKeyDbMock([active, archived]);
 
-    const result = await apiKeyService.list(db, USER_ID);
+    const result = await apiKeyService.list(db, WORKSPACE_ID);
 
     expect(result.active.map((key) => key.id)).toStrictEqual(["active-id"]);
     expect(result.archived.map((key) => key.id)).toStrictEqual(["archived-id"]);
@@ -67,7 +68,7 @@ describe("apiKeyService.list", () => {
   it("should not apply the redundant revoked OR clause", async () => {
     const { db, findMany } = createApiKeyDbMock();
 
-    await apiKeyService.list(db, USER_ID);
+    await apiKeyService.list(db, WORKSPACE_ID);
 
     expect(findMany).toHaveBeenCalledTimes(1);
     expect(findMany).toHaveBeenCalledWith(
@@ -76,14 +77,14 @@ describe("apiKeyService.list", () => {
     const args = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
     // The owner and nothing else — the redundant `revoked` OR clause must not come back, and
     // `where` must be exactly the tenant rather than a filter that could later be widened.
-    expect(args.where).toStrictEqual({ userId: USER_ID });
+    expect(args.where).toStrictEqual({ workspaceId: WORKSPACE_ID });
     expect(JSON.stringify(args)).not.toContain("OR");
   });
 
   it("should never read the hashed key", async () => {
     const { db, findMany } = createApiKeyDbMock();
 
-    await apiKeyService.list(db, USER_ID);
+    await apiKeyService.list(db, WORKSPACE_ID);
 
     const args = findMany.mock.calls[0]?.[0] as { select?: Record<string, boolean> };
     expect(Object.keys(args.select ?? {}).sort()).toStrictEqual(SELECTED_COLUMNS);
@@ -98,7 +99,7 @@ describe("apiKeyService.list", () => {
     });
     const { db } = createApiKeyDbMock([expired]);
 
-    const result = await apiKeyService.list(db, USER_ID);
+    const result = await apiKeyService.list(db, WORKSPACE_ID);
 
     expect(result.active).toHaveLength(0);
     expect(result.archived.map((key) => key.id)).toStrictEqual(["expired-id"]);
@@ -109,7 +110,7 @@ describe("apiKeyService.list", () => {
       makeApiKeyRow({ expiresAt: new Date(Date.now() + 60_000) }),
     ]);
 
-    const result = await apiKeyService.list(db, USER_ID);
+    const result = await apiKeyService.list(db, WORKSPACE_ID);
 
     expect(result.active).toHaveLength(1);
     expect(result.archived).toHaveLength(0);
@@ -120,7 +121,7 @@ describe("apiKeyService.list", () => {
       makeApiKeyRow({ revoked: true, revokedAfter: new Date(Date.now() + 60_000) }),
     ]);
 
-    const result = await apiKeyService.list(db, USER_ID);
+    const result = await apiKeyService.list(db, WORKSPACE_ID);
 
     expect(result.active).toHaveLength(1);
     expect(result.archived).toHaveLength(0);
@@ -131,7 +132,7 @@ describe("apiKeyService.list", () => {
       makeApiKeyRow({ revoked: true, revokedAfter: new Date(Date.now() - 60_000) }),
     ]);
 
-    const result = await apiKeyService.list(db, USER_ID);
+    const result = await apiKeyService.list(db, WORKSPACE_ID);
 
     expect(result.active).toHaveLength(0);
     expect(result.archived).toHaveLength(1);
@@ -140,7 +141,7 @@ describe("apiKeyService.list", () => {
   it("should grandfather an empty scopes array as full access", async () => {
     const { db } = createApiKeyDbMock([makeApiKeyRow({ scopes: [] })]);
 
-    const result = await apiKeyService.list(db, USER_ID);
+    const result = await apiKeyService.list(db, WORKSPACE_ID);
 
     expect(result.active[0]?.scopes).toStrictEqual(["FULL"]);
   });
@@ -148,7 +149,7 @@ describe("apiKeyService.list", () => {
   it("should preserve explicitly chosen scopes", async () => {
     const { db } = createApiKeyDbMock([makeApiKeyRow({ scopes: ["MCP"] })]);
 
-    const result = await apiKeyService.list(db, USER_ID);
+    const result = await apiKeyService.list(db, WORKSPACE_ID);
 
     expect(result.active[0]?.scopes).toStrictEqual(["MCP"]);
   });
@@ -159,7 +160,7 @@ describe("apiKeyService.list", () => {
       makeApiKeyRow({ id: "revoked-id", revoked: true }),
     ]);
 
-    const result = await apiKeyService.list(db, USER_ID);
+    const result = await apiKeyService.list(db, WORKSPACE_ID);
 
     for (const key of [...result.active, ...result.archived]) {
       expect(Object.keys(key).sort()).toStrictEqual(SELECTED_COLUMNS);
@@ -186,7 +187,10 @@ describe("apiKeyService.create", () => {
   it("should return the plaintext key exactly once", async () => {
     const { create, db } = createApiKeyDbMock();
 
-    const result = await apiKeyService.create(db, USER_ID, { name: "ci", scopes: ["FULL"] });
+    const result = await apiKeyService.create(db, USER_ID, WORKSPACE_ID, {
+      name: "ci",
+      scopes: ["FULL"],
+    });
 
     expect(result.key).toMatch(/^dxnx_/);
     expect(create).toHaveBeenCalledTimes(1);
@@ -195,7 +199,7 @@ describe("apiKeyService.create", () => {
   it("should persist only the hash and the display prefix", async () => {
     const { create, db } = createApiKeyDbMock();
 
-    const result = await apiKeyService.create(db, USER_ID, {
+    const result = await apiKeyService.create(db, USER_ID, WORKSPACE_ID, {
       description: "CI token",
       name: "ci",
       scopes: ["FULL"],
@@ -212,7 +216,7 @@ describe("apiKeyService.create", () => {
   it("should default new keys to full access when no scope is chosen", async () => {
     const { create, db } = createApiKeyDbMock();
 
-    await apiKeyService.create(db, USER_ID, { name: "ci", scopes: ["FULL"] });
+    await apiKeyService.create(db, USER_ID, WORKSPACE_ID, { name: "ci", scopes: ["FULL"] });
 
     const data = create.mock.calls[0]?.[0]?.data as { scopes: string[] };
     expect(data.scopes).toStrictEqual(["FULL"]);
@@ -221,7 +225,7 @@ describe("apiKeyService.create", () => {
   it("should persist the requested scopes verbatim", async () => {
     const { create, db } = createApiKeyDbMock();
 
-    await apiKeyService.create(db, USER_ID, { name: "mcp-only", scopes: ["MCP"] });
+    await apiKeyService.create(db, USER_ID, WORKSPACE_ID, { name: "mcp-only", scopes: ["MCP"] });
 
     const data = create.mock.calls[0]?.[0]?.data as { scopes: string[] };
     expect(data.scopes).toStrictEqual(["MCP"]);
@@ -233,12 +237,12 @@ describe("apiKeyService mutations", () => {
     const { db, updateMany } = createApiKeyDbMock();
     updateMany.mockResolvedValue({ count: 1 });
 
-    const result = await apiKeyService.touch(db, KEY_ID, USER_ID);
+    const result = await apiKeyService.touch(db, KEY_ID, USER_ID, WORKSPACE_ID);
 
     expect(result).toStrictEqual({ success: true });
     expect(updateMany).toHaveBeenCalledWith({
       data: { lastUsed: expect.any(Date) },
-      where: { id: KEY_ID, userId: USER_ID },
+      where: { id: KEY_ID, workspaceId: WORKSPACE_ID },
     });
   });
 
@@ -250,6 +254,7 @@ describe("apiKeyService mutations", () => {
       db,
       { description: "new", id: KEY_ID, name: "ci" },
       USER_ID,
+      WORKSPACE_ID,
     );
 
     expect(result).toStrictEqual({ success: true });
@@ -262,7 +267,12 @@ describe("apiKeyService mutations", () => {
     const { db, updateMany } = createApiKeyDbMock();
     updateMany.mockResolvedValue({ count: 1 });
 
-    await apiKeyService.update(db, { expiresAt: null, id: KEY_ID, name: "ci" }, USER_ID);
+    await apiKeyService.update(
+      db,
+      { expiresAt: null, id: KEY_ID, name: "ci" },
+      USER_ID,
+      WORKSPACE_ID,
+    );
 
     const args = updateMany.mock.calls[0]?.[0] as { data: Record<string, unknown> };
     expect(args.data.expiresAt).toBeNull();
@@ -272,7 +282,7 @@ describe("apiKeyService mutations", () => {
     const { db, updateMany } = createApiKeyDbMock();
     updateMany.mockResolvedValue({ count: 1 });
 
-    await apiKeyService.update(db, { id: KEY_ID, name: "ci" }, USER_ID);
+    await apiKeyService.update(db, { id: KEY_ID, name: "ci" }, USER_ID, WORKSPACE_ID);
 
     const args = updateMany.mock.calls[0]?.[0] as { data: Record<string, unknown> };
     expect(args.data).not.toHaveProperty("expiresAt");
@@ -281,11 +291,11 @@ describe("apiKeyService mutations", () => {
   it("should issue a replacement and only start the old key's grace window on rotate", async () => {
     const { create, db, findFirst, update } = createApiKeyDbMock([makeApiKeyRow()]);
 
-    const result = await apiKeyService.rotate(db, KEY_ID, USER_ID);
+    const result = await apiKeyService.rotate(db, KEY_ID, USER_ID, WORKSPACE_ID);
 
     expect(result.key).toMatch(/^dxnx_/);
     expect(result.gracePeriodDays).toBe(7);
-    expect(findFirst).toHaveBeenCalledWith({ where: { id: KEY_ID, userId: USER_ID } });
+    expect(findFirst).toHaveBeenCalledWith({ where: { id: KEY_ID, workspaceId: WORKSPACE_ID } });
 
     const created = create.mock.calls[0]?.[0]?.data as { scopes: string[] };
     expect(created.scopes).toStrictEqual(["FULL"]);
@@ -298,7 +308,7 @@ describe("apiKeyService mutations", () => {
     const { db, findFirst } = createApiKeyDbMock([]);
     findFirst.mockResolvedValue(makeApiKeyRow({ revoked: true, revokedAfter: null }));
 
-    await expect(apiKeyService.rotate(db, KEY_ID, USER_ID)).rejects.toMatchObject({
+    await expect(apiKeyService.rotate(db, KEY_ID, USER_ID, WORKSPACE_ID)).rejects.toMatchObject({
       code: "NOT_FOUND",
     });
   });
@@ -306,7 +316,7 @@ describe("apiKeyService mutations", () => {
   it("should clear any grace window when revoking outright", async () => {
     const { db, update } = createApiKeyDbMock();
 
-    await apiKeyService.revoke(db, KEY_ID, USER_ID);
+    await apiKeyService.revoke(db, KEY_ID, USER_ID, WORKSPACE_ID);
 
     const retired = update.mock.calls[0]?.[0] as { data: Record<string, unknown> };
     expect(retired.data).toStrictEqual({ revoked: true, revokedAfter: null });
@@ -315,7 +325,7 @@ describe("apiKeyService mutations", () => {
   it("should return no key material from revoke", async () => {
     const { db } = createApiKeyDbMock();
 
-    const result = await apiKeyService.revoke(db, KEY_ID, USER_ID);
+    const result = await apiKeyService.revoke(db, KEY_ID, USER_ID, WORKSPACE_ID);
 
     expect(result).toStrictEqual({ success: true });
     expect(JSON.stringify(result)).not.toContain("dxnx_");

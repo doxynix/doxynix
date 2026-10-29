@@ -22,6 +22,7 @@ export async function createContext({ req }: Props) {
 
   let sessionContext: NonNullable<typeof auth.$Infer.Session> | null = null;
   let apiKeyScopes: string[] | undefined;
+  let apiKeyWorkspaceId: string | undefined;
 
   const authHeader = req.headers.get("authorization");
   if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
@@ -32,6 +33,7 @@ export async function createContext({ req }: Props) {
 
       if (keyRecord != null) {
         apiKeyScopes = keyRecord.scopes;
+        apiKeyWorkspaceId = keyRecord.workspaceId;
         const now = new Date();
         sessionContext = {
           session: {
@@ -73,6 +75,7 @@ export async function createContext({ req }: Props) {
 
   return {
     ...(apiKeyScopes != null && { apiKeyScopes }),
+    ...(apiKeyWorkspaceId != null && { apiKeyWorkspaceId }),
     prisma,
     redis: redisClient,
     req,

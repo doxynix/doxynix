@@ -41,9 +41,14 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@zenstackhq/runtime", () => ({ enhance: (db: any) => db }));
 vi.mock("@/shared/config/env.flags", () => ({
+  IS_DEV: false,
   get IS_PROD() {
     return mocks.isProd;
   },
+  IS_TEST: true,
+}));
+vi.mock("@/server/core/workspaces/resolve-workspace", () => ({
+  resolveWorkspace: async () => ({ id: "workspace-1", reset: false, role: "OWNER" }),
 }));
 vi.mock("@/server/utils/request-context", () => ({
   buildRequestStore: () => ({ requestId: "req-123" }),

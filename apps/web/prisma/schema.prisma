@@ -66,6 +66,17 @@ enum RepositorySelection {
   SELECTED
 }
 
+enum WorkspaceRole {
+  OWNER
+  MEMBER
+}
+
+enum ApiKeyScope {
+  CLI
+  FULL
+  MCP
+}
+
 enum PRAnalysisStatus {
   PENDING
   ANALYZING
@@ -166,12 +177,6 @@ enum ChatRole {
   data
 }
 
-enum ApiKeyScope {
-  CLI
-  FULL
-  MCP
-}
-
 model User {
   /// @zod.custom.omit(["model"])
   id                             String               @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
@@ -202,7 +207,8 @@ model User {
   updatedAt                      DateTime             @default(now()) @updatedAt() @map("updated_at")
   accounts                       Account[]
   sessions                       Session[]
-  repos                          Repo[]
+  createdRepos                   Repo[]               @relation("RepoCreatedBy")
+  workspaceMemberships           WorkspaceMember[]
   apiKeys                        ApiKey[]
   notifications                  Notification[]
   githubInstallations            GithubInstallation[]
@@ -392,8 +398,11 @@ model Repo {
   githubCreatedAt  DateTime?                  @map("github_created_at")
   updatedAt        DateTime                   @default(now()) @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
-  userId           String                     @map("user_id") @db.Uuid()
-  user             User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId      String                     @map("workspace_id") @db.Uuid()
+  workspace        Workspace                  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  /// @zod.custom.omit(["model"])
+  createdByUserId  String                     @map("created_by_user_id") @db.Uuid()
+  createdBy        User                       @relation("RepoCreatedBy", fields: [createdByUserId], references: [id], onDelete: Cascade)
   analyses         Analysis[]
   documents        Document[]
   notifications    Notification[]
@@ -402,12 +411,13 @@ model Repo {
   chatSessions     ChatSession[]
   prAnalysisConfig PullRequestAnalysisConfig?
 
-  @@unique([owner, name, userId])
-  @@unique([githubId, userId])
-  @@index([userId, owner])
-  @@index([userId, name])
-  @@index([userId, visibility, createdAt(sort: Desc)])
-  @@index([userId, updatedAt(sort: Desc), id(sort: Desc)], map: "repos_user_id_updated_at_id_idx")
+  @@unique([owner, name, workspaceId])
+  @@unique([githubId, workspaceId])
+  @@index([workspaceId, owner])
+  @@index([workspaceId, name])
+  @@index([workspaceId, visibility, createdAt(sort: Desc)])
+  @@index([workspaceId, updatedAt(sort: Desc), id(sort: Desc)], map: "repos_workspace_id_updated_at_id_idx")
+  @@index([createdByUserId])
   @@index([updatedAt(sort: Desc), id(sort: Desc)], map: "repos_updated_at_id_idx")
   @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_name_trgm_idx")
   @@index([owner(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_owner_trgm_idx")
@@ -427,12 +437,104 @@ model GithubInstallation {
   htmlUrl             String?                @map("html_url")
   createdAt           DateTime               @default(now()) @map("created_at")
   updatedAt           DateTime               @default(now()) @updatedAt() @map("updated_at")
+  workspaceId         String                 @map("workspace_id") @db.Uuid()
+  workspace           Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   userId              String?                @map("user_id") @db.Uuid()
   user                User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId, isSuspended, createdAt(sort: Asc)])
-  @@index([userId, isSuspended, accountLogin])
+  @@index([workspaceId, isSuspended, createdAt(sort: Asc)])
+  @@index([workspaceId, isSuspended, accountLogin])
+  @@index([userId])
   @@map("github_installations")
+}
+
+model Workspace {
+  /// @zod.custom.omit(["model"])
+  id                  String                @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
+  name                String
+  createdAt           DateTime              @default(now()) @map("created_at")
+  updatedAt           DateTime              @default(now()) @updatedAt() @map("updated_at")
+  members             WorkspaceMember[]
+  entitlement         WorkspaceEntitlement?
+  repos               Repo[]
+  githubInstallations GithubInstallation[]
+  apiKeys             ApiKey[]
+
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "workspaces_created_at_id_idx")
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  /// @zod.custom.omit(["model"])
+  id          String        @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
+  workspaceId String        @map("workspace_id") @db.Uuid()
+  userId      String        @map("user_id") @db.Uuid()
+  role        WorkspaceRole @default(MEMBER)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @default(now()) @updatedAt() @map("updated_at")
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId, workspaceId])
+  @@index([workspaceId, role])
+  @@map("workspace_members")
+}
+
+model WorkspaceEntitlement {
+  /// @zod.custom.omit(["model"])
+  id                  String    @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
+  workspaceId         String    @unique() @map("workspace_id") @db.Uuid()
+  planCode            String    @default("HOBBY") @map("plan_code")
+  /// @zod.number.int().min(0)
+  seatLimit           Int       @default(1) @map("seat_limit")
+  /// @zod.number.int().min(0)
+  reposLimit          Int?      @map("repos_limit")
+  privateReposAllowed Boolean   @default(false) @map("private_repos_allowed")
+  autoResync          Boolean   @default(false) @map("auto_resync")
+  prReviews           Boolean   @default(false) @map("pr_reviews")
+  /// @zod.number.int().min(0)
+  analysesPerMonth    Int?      @map("analyses_per_month")
+  /// @zod.number.int().min(0)
+  aiTokensPerMonth    Int?      @map("ai_tokens_per_month")
+  /// @zod.number.int().min(0)
+  historyDays         Int?      @map("history_days")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @default(now()) @updatedAt() @map("updated_at")
+  workspace           Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+
+  @@index([planCode])
+  @@map("workspace_entitlements")
+}
+
+model ApiKey {
+  id           String        @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
+  prefix       String
+  /// @zod.custom.omit(["model"])
+  hashedKey    String        @unique() @map("hashed_key")
+  /// @zod.string.trim().min(1, { message: "The name must be between 1 and 50 characters long" }).max(50)
+  name         String
+  /// @zod.string.trim().max(1000, { message: "The description must be less than 1000 characters" })
+  description  String?       @db.Text()
+  lastUsed     DateTime?     @map("last_used")
+  expiresAt    DateTime?     @map("expires_at")
+  scopes       ApiKeyScope[] @default([])
+  revoked      Boolean       @default(false)
+  revokedAfter DateTime?     @map("revoked_after")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @default(now()) @updatedAt() @map("updated_at")
+  /// @zod.custom.omit(["model"])
+  workspaceId  String        @map("workspace_id") @db.Uuid()
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  /// @zod.custom.omit(["model"])
+  userId       String        @map("user_id") @db.Uuid()
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([revokedAfter])
+  @@map("api_keys")
 }
 
 model Analysis {
@@ -633,32 +735,6 @@ model UserAppearance {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_appearances")
-}
-
-model ApiKey {
-  id           String        @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
-  prefix       String
-  /// @zod.custom.omit(["model"])
-  hashedKey    String        @unique() @map("hashed_key")
-  /// @zod.string.trim().min(1, { message: "The name must be between 1 and 50 characters long" }).max(50)
-  name         String
-  /// @zod.string.trim().max(1000, { message: "The description must be less than 1000 characters" })
-  description  String?       @db.Text()
-  lastUsed     DateTime?     @map("last_used")
-  expiresAt    DateTime?     @map("expires_at")
-  scopes       ApiKeyScope[] @default([])
-  revoked      Boolean       @default(false)
-  revokedAfter DateTime?     @map("revoked_after")
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @default(now()) @updatedAt() @map("updated_at")
-  /// @zod.custom.omit(["model"])
-  userId       String        @map("user_id") @db.Uuid()
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([expiresAt])
-  @@index([revokedAfter])
-  @@map("api_keys")
 }
 
 model WebhookDelivery {

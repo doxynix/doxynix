@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
+import { createTRPCRouter, protectedProcedure, workspaceProcedure } from "@/server/core/trpc/init";
 
 import { agentService } from "./agent.service";
 
@@ -32,7 +32,7 @@ const UpdateSessionOutput = z.object({
 });
 
 export const agentChatRouter = createTRPCRouter({
-  createSession: protectedProcedure
+  createSession: workspaceProcedure
     .input(
       z.object({
         repoId: z.uuid().optional().describe("Public repo UUID, if chat in project"),
@@ -41,7 +41,7 @@ export const agentChatRouter = createTRPCRouter({
     )
     .output(CreateSessionOutput)
     .mutation(async ({ ctx, input }) => {
-      return agentService.createSession(ctx.db, ctx.session.user.id, input);
+      return agentService.createSession(ctx.db, ctx.session.user.id, ctx.workspace.id, input);
     }),
 
   deleteSession: protectedProcedure
@@ -56,7 +56,7 @@ export const agentChatRouter = createTRPCRouter({
       return agentService.getSessionHistory(ctx.db, ctx.session.user.id, input.sessionId);
     }),
 
-  listSessions: protectedProcedure
+  listSessions: workspaceProcedure
     .input(
       z
         .object({
@@ -71,7 +71,7 @@ export const agentChatRouter = createTRPCRouter({
     )
     .output(ListSessionsOutput)
     .query(async ({ ctx, input }) => {
-      return agentService.listSessions(ctx.db, ctx.session.user.id, input);
+      return agentService.listSessions(ctx.db, ctx.session.user.id, ctx.workspace.id, input);
     }),
 
   updateSession: protectedProcedure

@@ -16,9 +16,9 @@ import { isOctokitError } from "@/server/utils/handle-error";
 import { getNormalizedHash, getRawHash } from "@/server/utils/hash";
 
 export const githubAppService = {
-  async getInstallUrl(prisma: PrismaClientExtended, userId: string) {
+  async getInstallUrl(prisma: PrismaClientExtended, userId: string, workspaceId: string) {
     const state = crypto.randomBytes(32).toString("base64url");
-    const identifier = `github_install_${userId}`;
+    const identifier = `github_install_${workspaceId}_${userId}`;
 
     await prisma.$transaction([
       prisma.verification.deleteMany({
@@ -36,12 +36,17 @@ export const githubAppService = {
     return `https://github.com/apps/doxynix/installations/new?state=${state}`;
   },
 
-  async getMyRepos(db: DbClient, prisma: PrismaClientExtended, userId: string) {
-    await this.syncInstallations(prisma, userId);
+  async getMyRepos(
+    db: DbClient,
+    prisma: PrismaClientExtended,
+    userId: string,
+    workspaceId: string,
+  ) {
+    await this.syncInstallations(prisma, userId, workspaceId);
 
     const installations = await db.githubInstallation.findMany({
       orderBy: { createdAt: "asc" },
-      where: { isSuspended: false, userId },
+      where: { isSuspended: false, workspaceId },
     });
 
     const validToken = await githubTokenService.getValidToken(userId);
@@ -100,12 +105,11 @@ export const githubAppService = {
   ) {
     const instIdBigInt = BigInt(installationId);
     const inputInstIdNum = Number(installationId);
-    const identifier = `github_install_${userId}`;
 
     const validState = await prisma.verification.findFirst({
+      select: { identifier: true },
       where: {
         expiresAt: { gt: new Date() },
-        identifierHash: getNormalizedHash(identifier),
         valueHash: getRawHash(state),
       },
     });
@@ -116,6 +120,25 @@ export const githubAppService = {
         code: "FORBIDDEN",
         message: "Invalid, expired, or already used security state. Please try installing again.",
       });
+    }
+
+    const identifierMatch = /^github_install_([0-9a-f-]{36})_/.exec(validState.identifier);
+    const workspaceId = identifierMatch?.[1];
+
+    if (workspaceId == null) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Invalid, expired, or already used security state. Please try installing again.",
+      });
+    }
+
+    const membership = await prisma.workspaceMember.findUnique({
+      select: { role: true },
+      where: { workspaceId_userId: { userId, workspaceId } },
+    });
+
+    if (membership?.role !== "OWNER") {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Owner rights required" });
     }
 
     const validToken = await githubTokenService.getValidToken(userId);
@@ -177,7 +200,7 @@ export const githubAppService = {
       await prisma.$transaction(async (tx) => {
         const consumed = await tx.verification.deleteMany({
           where: {
-            identifierHash: getNormalizedHash(identifier),
+            identifierHash: getNormalizedHash(validState.identifier),
             valueHash: getRawHash(state),
           },
         });
@@ -189,34 +212,19 @@ export const githubAppService = {
           });
         }
 
-        const updated = await tx.githubInstallation.updateMany({
-          data: {
-            accountAvatar,
-            accountLogin,
-            htmlUrl: installationInfo.html_url,
-            isSuspended: false,
-            repositorySelection: repoSelection,
-            userId: userId,
-          },
-          where: {
-            id: instIdBigInt,
-            OR: [{ userId: null }, { userId: userId }],
-          },
+        const existing = await tx.githubInstallation.findUnique({
+          select: { workspaceId: true },
+          where: { id: instIdBigInt },
         });
 
-        if (updated.count === 0) {
-          const existing = await tx.githubInstallation.findUnique({
-            select: { userId: true },
-            where: { id: instIdBigInt },
+        if (existing != null && existing.workspaceId !== workspaceId) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "This installation is already linked to another workspace.",
           });
+        }
 
-          if (existing != null) {
-            throw new TRPCError({
-              code: "FORBIDDEN",
-              message: "This installation is already linked to another workspace.",
-            });
-          }
-
+        if (existing == null) {
           await tx.githubInstallation.create({
             data: {
               accountAvatar,
@@ -228,7 +236,20 @@ export const githubAppService = {
               targetId: BigInt(installationInfo.target_id),
               targetType,
               userId: userId,
+              workspaceId,
             },
+          });
+        } else {
+          await tx.githubInstallation.update({
+            data: {
+              accountAvatar,
+              accountLogin,
+              htmlUrl: installationInfo.html_url,
+              isSuspended: false,
+              repositorySelection: repoSelection,
+              userId: userId,
+            },
+            where: { id: instIdBigInt },
           });
         }
       });
@@ -249,7 +270,11 @@ export const githubAppService = {
     return { success: true };
   },
 
-  async syncInstallations(prisma: PrismaClientExtended, userId: string): Promise<void> {
+  async syncInstallations(
+    prisma: PrismaClientExtended,
+    userId: string,
+    workspaceId: string,
+  ): Promise<void> {
     const validToken = await githubTokenService.getValidToken(userId);
     if (validToken == null) {
       return;
@@ -272,10 +297,12 @@ export const githubAppService = {
       }
 
       const installed = await prisma.githubInstallation.findMany({
-        select: { id: true, userId: true },
+        select: { id: true, workspaceId: true },
         where: { id: { in: ourInstallations.map((inst) => BigInt(inst.id)) } },
       });
-      const existingOwners = new Map(installed.map((row) => [row.id.toString(), row.userId]));
+      const existingWorkspaces = new Map(
+        installed.map((row) => [row.id.toString(), row.workspaceId]),
+      );
 
       for (const inst of ourInstallations) {
         const instIdBigInt = BigInt(inst.id);
@@ -295,29 +322,38 @@ export const githubAppService = {
           repositorySelection: repoSelection,
         };
 
-        const owner = existingOwners.get(instIdBigInt.toString());
+        const owner = existingWorkspaces.get(instIdBigInt.toString());
         const isNew = owner === undefined;
 
-        if (owner != null && owner !== userId) {
+        if (owner != null && owner !== workspaceId) {
           appLogger.warn({
             installationId: instIdBigInt.toString(),
             msg: "Skipped GitHub installation sync: already linked to another workspace",
-            ownerUserId: owner,
+            ownerWorkspaceId: owner,
             userId,
+            workspaceId,
           });
           continue;
         }
 
         if (isNew) {
           await prisma.githubInstallation.create({
-            data: { ...shared, appId: inst.app_id, id: instIdBigInt, targetId, targetType, userId },
+            data: {
+              ...shared,
+              appId: inst.app_id,
+              id: instIdBigInt,
+              targetId,
+              targetType,
+              userId,
+              workspaceId,
+            },
           });
           continue;
         }
 
         await prisma.githubInstallation.updateMany({
           data: shared,
-          where: { id: instIdBigInt, OR: [{ userId: null }, { userId }] },
+          where: { id: instIdBigInt, workspaceId },
         });
       }
     } catch (error) {

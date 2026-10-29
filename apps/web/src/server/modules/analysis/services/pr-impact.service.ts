@@ -12,8 +12,8 @@ import type { PRImpactPayload } from "../logic/pr.types";
 const PULL_LIST_LIMIT = 500;
 
 export const prImpactService = {
-  async getAnalysis(db: DbClient, analysisId: string) {
-    const analysis = await db.pullRequestAnalysis.findUnique({
+  async getAnalysis(db: DbClient, analysisId: string, workspaceId: string) {
+    const analysis = await db.pullRequestAnalysis.findFirst({
       select: {
         baseSha: true,
         createdAt: true,
@@ -24,7 +24,7 @@ export const prImpactService = {
         riskScore: true,
         status: true,
       },
-      where: { id: analysisId },
+      where: { id: analysisId, repo: { workspaceId } },
     });
 
     if (analysis == null) {
@@ -35,8 +35,8 @@ export const prImpactService = {
     return analysis;
   },
 
-  async getByRepoAndPRNumber(db: DbClient, repoId: string, prNumber: number) {
-    const analysis = await analysisRepo.loadImpactAnalysis(db, repoId, prNumber);
+  async getByRepoAndPRNumber(db: DbClient, repoId: string, prNumber: number, workspaceId: string) {
+    const analysis = await analysisRepo.loadImpactAnalysis(db, repoId, prNumber, workspaceId);
     if (analysis == null) {
       return null;
     }
@@ -44,8 +44,8 @@ export const prImpactService = {
     const changedFiles = analysisMapper.parseChangedFilesSnapshot(analysis);
     const findings = analysisMapper.parsePersistedFindings(analysis);
 
-    const repo = await analysisRepo.getRepoBySha(db, repoId, analysis.headSha);
-    const repoSnapshot = repo ?? (await analysisRepo.getRepoSnapshot(db, repoId));
+    const repo = await analysisRepo.getRepoBySha(db, repoId, analysis.headSha, workspaceId);
+    const repoSnapshot = repo ?? (await analysisRepo.getRepoSnapshot(db, repoId, workspaceId));
 
     if (repoSnapshot == null) {
       return null;
@@ -128,7 +128,7 @@ export const prImpactService = {
     } satisfies PRImpactPayload;
   },
 
-  async listByRepository(db: DbClient, repoId: string) {
+  async listByRepository(db: DbClient, repoId: string, workspaceId: string) {
     const [items, total] = await Promise.all([
       db.pullRequestAnalysis.findMany({
         orderBy: { createdAt: "desc" },
@@ -147,10 +147,11 @@ export const prImpactService = {
         where: {
           repo: {
             id: repoId,
+            workspaceId,
           },
         },
       }),
-      db.pullRequestAnalysis.count({ where: { repo: { id: repoId } } }),
+      db.pullRequestAnalysis.count({ where: { repo: { id: repoId, workspaceId } } }),
     ]);
 
     return {

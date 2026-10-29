@@ -170,13 +170,13 @@ export const analysisRepo = {
     });
   },
 
-  async getById(db: DbClient, id: string) {
-    return db.generatedFix.findUnique({
-      where: { id },
+  async getById(db: DbClient, id: string, workspaceId: string) {
+    return db.generatedFix.findFirst({
+      where: { id, repo: { workspaceId } },
     });
   },
 
-  async getByRepoAndPRNumber(db: DbClient, repoId: string, prNumber: number) {
+  async getByRepoAndPRNumber(db: DbClient, repoId: string, prNumber: number, workspaceId: string) {
     return db.pullRequestAnalysis.findFirst({
       include: {
         comments: true,
@@ -189,23 +189,29 @@ export const analysisRepo = {
         prNumber,
         repo: {
           id: repoId,
+          workspaceId,
         },
       },
     });
   },
 
-  async getByRepoId(db: DbClient, repoId: string, status?: FixStatus) {
+  async getByRepoId(db: DbClient, repoId: string, workspaceId: string, status?: FixStatus) {
     return db.generatedFix.findMany({
       orderBy: { createdAt: "desc" },
       where: {
         repo: {
           id: repoId,
+          workspaceId,
         },
         ...(status != null && { status }),
       },
     });
   },
-  async getLatestRef(db: DbClient, repoId: string): Promise<AnalysisRef | null> {
+  async getLatestRef(
+    db: DbClient,
+    repoId: string,
+    workspaceId: string,
+  ): Promise<AnalysisRef | null> {
     const analysis = await db.analysis.findFirst({
       orderBy: { createdAt: "desc" },
       select: {
@@ -213,7 +219,7 @@ export const analysisRepo = {
         createdAt: true,
         id: true,
       },
-      where: { repo: { id: repoId }, status: "DONE" },
+      where: { repo: { id: repoId, workspaceId }, status: "DONE" },
     });
 
     if (analysis == null) {
@@ -231,6 +237,7 @@ export const analysisRepo = {
     db: DbClient,
     repoId: string,
     commitSha: string,
+    workspaceId: string,
   ): Promise<null | RepoWithLatestAnalysisAndDocs> {
     return db.repo.findUnique({
       select: {
@@ -242,21 +249,21 @@ export const analysisRepo = {
           where: { commitSha, status: "DONE" },
         },
       },
-      where: { id: repoId },
+      where: { id: repoId, workspaceId },
     });
   },
 
-  async getRepoSnapshot(db: DbClient, repoId: string, aid?: string) {
+  async getRepoSnapshot(db: DbClient, repoId: string, workspaceId: string, aid?: string) {
     const repo = await db.repo.findUnique({
       select: repoWithLatestAnalysisSelect,
-      where: { id: repoId },
+      where: { id: repoId, workspaceId },
     });
 
     if (repo == null) {
       return null;
     }
 
-    const target = await this.resolveTargetAnalysis(db, aid);
+    const target = await this.resolveTargetAnalysis(db, aid, workspaceId);
     if (target != null) {
       return { ...repo, analyses: [target] };
     }
@@ -268,17 +275,22 @@ export const analysisRepo = {
     return repo;
   },
 
-  async getRepoSnapshotWithDocuments(db: DbClient, repoId: string, aid?: string) {
+  async getRepoSnapshotWithDocuments(
+    db: DbClient,
+    repoId: string,
+    workspaceId: string,
+    aid?: string,
+  ) {
     const repo = await db.repo.findUnique({
       select: repoWithLatestAnalysisAndDocsSelect,
-      where: { id: repoId },
+      where: { id: repoId, workspaceId },
     });
 
     if (repo == null) {
       return null;
     }
 
-    const target = await this.resolveTargetAnalysis(db, aid);
+    const target = await this.resolveTargetAnalysis(db, aid, workspaceId);
     if (target != null) {
       return {
         ...repo,
@@ -294,7 +306,7 @@ export const analysisRepo = {
     return repo;
   },
 
-  async loadImpactAnalysis(db: DbClient, repoId: string, prNumber: number) {
+  async loadImpactAnalysis(db: DbClient, repoId: string, prNumber: number, workspaceId: string) {
     return db.pullRequestAnalysis.findFirst({
       orderBy: { createdAt: "desc" },
       select: {
@@ -331,12 +343,17 @@ export const analysisRepo = {
       },
       where: {
         prNumber,
-        repo: { id: repoId },
+        repo: { id: repoId, workspaceId },
       },
     });
   },
 
-  async loadLatestDocumentsWithContent(db: DbClient, repoId: string, aid?: string) {
+  async loadLatestDocumentsWithContent(
+    db: DbClient,
+    repoId: string,
+    workspaceId: string,
+    aid?: string,
+  ) {
     const docs = await db.document.findMany({
       orderBy: [{ type: "asc" }, { updatedAt: "desc" }],
       select: {
@@ -349,7 +366,7 @@ export const analysisRepo = {
       },
       take: MAX_SEARCHABLE_DOCUMENT_FETCH,
       where: {
-        repo: { id: repoId },
+        repo: { id: repoId, workspaceId },
         ...(aid != null ? { analysis: { id: aid } } : {}),
       },
     });
@@ -357,7 +374,7 @@ export const analysisRepo = {
     return pickLatestDocsByType(docs);
   },
 
-  async loadRelatedFixes(db: DbClient, analysisIds: string[]) {
+  async loadRelatedFixes(db: DbClient, analysisIds: string[], workspaceId: string) {
     const uniqueIds = uniq(analysisIds.filter((id) => id.length > 0));
     if (uniqueIds.length === 0) {
       return [];
@@ -376,6 +393,7 @@ export const analysisRepo = {
       where: {
         prAnalysis: {
           id: { in: uniqueIds },
+          repo: { workspaceId },
         },
       },
     });
@@ -383,7 +401,12 @@ export const analysisRepo = {
     return fixes.map((fix) => fixesMapper.toSummary(fix));
   },
 
-  async loadRelatedPrFindings(db: DbClient, repoId: string, relatedFiles: string[]) {
+  async loadRelatedPrFindings(
+    db: DbClient,
+    repoId: string,
+    workspaceId: string,
+    relatedFiles: string[],
+  ) {
     if (relatedFiles.length === 0) {
       return [];
     }
@@ -406,7 +429,7 @@ export const analysisRepo = {
       },
       take: 12,
       where: {
-        analysis: { repo: { id: repoId } },
+        analysis: { repo: { id: repoId, workspaceId } },
         filePath: { in: relatedFiles },
       },
     });
@@ -423,14 +446,14 @@ export const analysisRepo = {
     }));
   },
 
-  async resolveTargetAnalysis(db: DbClient, aid: string | undefined) {
+  async resolveTargetAnalysis(db: DbClient, aid: string | undefined, workspaceId: string) {
     if (aid == null) {
       return null;
     }
 
     const target = await db.analysis.findFirst({
       select: latestCompletedAnalysisSelect,
-      where: { id: aid, status: "DONE" },
+      where: { id: aid, repo: { workspaceId }, status: "DONE" },
     });
 
     if (target == null) {

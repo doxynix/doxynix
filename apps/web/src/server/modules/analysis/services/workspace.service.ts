@@ -12,8 +12,8 @@ import type { RepoNodeContextPayload, RepoWorkspacePayload } from "../logic/work
 import { buildWorkspacePayload } from "../logic/workspace-payload";
 
 export const workspaceService = {
-  async getDetailedMetrics(db: DbClient, repoId: string, aid?: string) {
-    const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+  async getDetailedMetrics(db: DbClient, repoId: string, workspaceId: string, aid?: string) {
+    const repo = await analysisRepo.getRepoSnapshot(db, repoId, workspaceId, aid);
     if (repo == null) {
       return null;
     }
@@ -24,9 +24,10 @@ export const workspaceService = {
     db: DbClient,
     repoId: string,
     nodeId: string,
+    workspaceId: string,
     aid?: string,
   ): Promise<null | RepoNodeContextPayload> {
-    const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    const repo = await analysisRepo.getRepoSnapshot(db, repoId, workspaceId, aid);
     if (repo == null) {
       return null;
     }
@@ -51,17 +52,19 @@ export const workspaceService = {
       this.loadRelatedDocSections(
         db,
         repoId,
+        workspaceId,
         nodeId,
         structureNode.node.label,
         relatedFiles,
         analyzeContext,
       ),
-      analysisRepo.loadRelatedPrFindings(db, repoId, relatedFiles),
+      analysisRepo.loadRelatedPrFindings(db, repoId, workspaceId, relatedFiles),
     ]);
 
     const fixes = await analysisRepo.loadRelatedFixes(
       db,
       findings.map((finding) => finding.prAnalysisId),
+      workspaceId,
     );
 
     return {
@@ -77,8 +80,8 @@ export const workspaceService = {
     };
   },
 
-  async getStructureMap(db: DbClient, repoId: string, aid?: string) {
-    const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+  async getStructureMap(db: DbClient, repoId: string, workspaceId: string, aid?: string) {
+    const repo = await analysisRepo.getRepoSnapshot(db, repoId, workspaceId, aid);
     if (repo == null) {
       return null;
     }
@@ -86,8 +89,14 @@ export const workspaceService = {
     return analyzeContext.getStructureMap();
   },
 
-  async getStructureNode(db: DbClient, repoId: string, nodeId: string, aid?: string) {
-    const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+  async getStructureNode(
+    db: DbClient,
+    repoId: string,
+    nodeId: string,
+    workspaceId: string,
+    aid?: string,
+  ) {
+    const repo = await analysisRepo.getRepoSnapshot(db, repoId, workspaceId, aid);
     if (repo == null) {
       return null;
     }
@@ -98,9 +107,10 @@ export const workspaceService = {
   async getWorkspace(
     db: DbClient,
     repoId: string,
+    workspaceId: string,
     aid?: string,
   ): Promise<null | RepoWorkspacePayload> {
-    const repo = await analysisRepo.getRepoSnapshotWithDocuments(db, repoId, aid);
+    const repo = await analysisRepo.getRepoSnapshotWithDocuments(db, repoId, workspaceId, aid);
     if (repo == null) {
       return null;
     }
@@ -118,12 +128,13 @@ export const workspaceService = {
   async loadRelatedDocSections(
     db: DbClient,
     repoId: string,
+    workspaceId: string,
     nodeId: string,
     nodeLabel: string,
     relatedFiles: string[],
     analyzeContext: ReturnType<typeof createAnalyzeContextBuilder>,
   ) {
-    const docs = await analysisRepo.loadLatestDocumentsWithContent(db, repoId);
+    const docs = await analysisRepo.loadLatestDocumentsWithContent(db, repoId, workspaceId);
 
     return matchDocSections({
       docs,

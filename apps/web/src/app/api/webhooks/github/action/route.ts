@@ -66,7 +66,7 @@ async function handler(req: Request) {
     where: {
       name: { equals: name, mode: "insensitive" },
       owner: { equals: owner, mode: "insensitive" },
-      userId: keyRecord.userId,
+      workspaceId: keyRecord.workspaceId,
     },
   });
 
@@ -74,13 +74,18 @@ async function handler(req: Request) {
     throw new AppError({ code: "NOT_FOUND", publicMessage: "Repository not registered" });
   }
 
-  const analysisResponse = await analysisLifecycleService.analyze(prisma, keyRecord.userId, {
-    branch: branch ?? dbRepo.defaultBranch,
-    docTypes: ["README", "API", "ARCHITECTURE", "CONTRIBUTING", "CHANGELOG"],
-    files: ["**/*"],
-    language: "English",
-    repoId: dbRepo.id,
-  });
+  const analysisResponse = await analysisLifecycleService.analyze(
+    prisma,
+    keyRecord.userId,
+    keyRecord.workspaceId,
+    {
+      branch: branch ?? dbRepo.defaultBranch,
+      docTypes: ["README", "API", "ARCHITECTURE", "CONTRIBUTING", "CHANGELOG"],
+      files: ["**/*"],
+      language: "English",
+      repoId: dbRepo.id,
+    },
+  );
 
   return NextResponse.json({ jobId: analysisResponse.jobId });
 }

@@ -67,7 +67,7 @@ describe("docsService.getWithGraphLinks", () => {
   it("selects exactly the seven columns the endpoint documents", async () => {
     const { captured, db } = makeDb(makeRow);
 
-    await docsService.getWithGraphLinks(db, INPUT);
+    await docsService.getWithGraphLinks(db, INPUT, "workspace-1");
 
     expect(Object.keys(captured.documentSelect as Record<string, unknown>)).toStrictEqual(
       EXPECTED_SELECT,
@@ -77,7 +77,7 @@ describe("docsService.getWithGraphLinks", () => {
   it("does not query the analysis row, because no column ever held a dependency graph", async () => {
     const { captured, db } = makeDb(makeRow);
 
-    await docsService.getWithGraphLinks(db, INPUT);
+    await docsService.getWithGraphLinks(db, INPUT, "workspace-1");
 
     // `dependencyGraph` is computed per analysis but never written to `resultJson`/`metricsJson`, so reading it back could only yield `undefined`; asserting the query is not made is the honest contract.
     expect(captured.analysisSelect).toBeUndefined();
@@ -87,7 +87,7 @@ describe("docsService.getWithGraphLinks", () => {
   it("hands the formatter a complete content string and version", async () => {
     const { db } = makeDb(makeRow);
 
-    const result = await docsService.getWithGraphLinks(db, INPUT);
+    const result = await docsService.getWithGraphLinks(db, INPUT, "workspace-1");
 
     expect(result.content).toBe(CONTENT);
     expect(result.version).toBe("abc123");
@@ -100,7 +100,7 @@ describe("docsService.getWithGraphLinks", () => {
   it("emits every selected field with a defined value, plus sections", async () => {
     const { db } = makeDb(makeRow);
 
-    const result = await docsService.getWithGraphLinks(db, INPUT);
+    const result = await docsService.getWithGraphLinks(db, INPUT, "workspace-1");
 
     expect(Object.keys(result).sort()).toStrictEqual([...EXPECTED_SELECT, "sections"].sort());
     for (const key of EXPECTED_SELECT) {
@@ -111,7 +111,7 @@ describe("docsService.getWithGraphLinks", () => {
   it("produces no graph links, because this endpoint has no graph to link against", async () => {
     const { db } = makeDb(makeRow);
 
-    const result = await docsService.getWithGraphLinks(db, INPUT);
+    const result = await docsService.getWithGraphLinks(db, INPUT, "workspace-1");
 
     // `withGraphLinks` accepts `null` and guards on `graph?.nodes`; the two endpoints that DO link are covered by `section-graph-linker.test.ts`.
     for (const section of result.sections) {
@@ -122,7 +122,7 @@ describe("docsService.getWithGraphLinks", () => {
   it("returns the document id but no longer leaks repoId / analysisId", async () => {
     const { db } = makeDb(makeRow);
 
-    const result = await docsService.getWithGraphLinks(db, INPUT);
+    const result = await docsService.getWithGraphLinks(db, INPUT, "workspace-1");
 
     expect(result.id).toBeDefined();
     for (const key of ["analysisId", "repoId"]) {
@@ -133,7 +133,7 @@ describe("docsService.getWithGraphLinks", () => {
   it("keeps a null document path rather than dropping the key", async () => {
     const { db } = makeDb((keys) => ({ ...makeRow(keys), path: null }));
 
-    const result = await docsService.getWithGraphLinks(db, INPUT);
+    const result = await docsService.getWithGraphLinks(db, INPUT, "workspace-1");
 
     expect(result.path).toBeNull();
     expect(Object.hasOwn(result, "path")).toBe(true);
@@ -169,13 +169,14 @@ describe("docsService.pinAuditToDocs", () => {
   function makePinDb(created: { analysis?: unknown } = {}) {
     const captured: { createData?: Record<string, unknown> } = {};
     const db = {
-      analysis: { findUnique: async () => ({ id: ANALYSIS_ID }) },
+      analysis: { findFirst: async () => ({ id: ANALYSIS_ID }) },
       document: {
         create: async (args: { data: Record<string, unknown> }) => {
           captured.createData = args.data;
           return { id: "0195f000-0000-7000-8000-000000000004" };
         },
       },
+      repo: { findUnique: async () => ({ id: REPO_ID }) },
     } as unknown as DbClient;
     return { captured, created, db };
   }
@@ -183,10 +184,16 @@ describe("docsService.pinAuditToDocs", () => {
   it("records the commit sha as the version and links the document to its analysis", async () => {
     const { captured, db } = makePinDb();
 
-    await docsService.pinAuditToDocs(db, makeRedis(), "user-1", {
-      path: AUDIT_PATH,
-      repoId: REPO_ID,
-    });
+    await docsService.pinAuditToDocs(
+      db,
+      makeRedis(),
+      "user-1",
+      {
+        path: AUDIT_PATH,
+        repoId: REPO_ID,
+      },
+      "workspace-1",
+    );
 
     expect(captured.createData?.version).toBe(COMMIT_SHA);
     expect(captured.createData?.analysis).toStrictEqual({ connect: { id: ANALYSIS_ID } });
@@ -200,6 +207,7 @@ describe("docsService.pinAuditToDocs", () => {
       makeRedis({ analysisId: undefined, commitSha: undefined }),
       "user-1",
       { path: AUDIT_PATH, repoId: REPO_ID },
+      "workspace-1",
     );
 
     expect(captured.createData?.version).toBe("manual");
@@ -209,10 +217,16 @@ describe("docsService.pinAuditToDocs", () => {
   it("still links the analysis when only the commit sha is missing", async () => {
     const { captured, db } = makePinDb();
 
-    await docsService.pinAuditToDocs(db, makeRedis({ commitSha: undefined }), "user-1", {
-      path: AUDIT_PATH,
-      repoId: REPO_ID,
-    });
+    await docsService.pinAuditToDocs(
+      db,
+      makeRedis({ commitSha: undefined }),
+      "user-1",
+      {
+        path: AUDIT_PATH,
+        repoId: REPO_ID,
+      },
+      "workspace-1",
+    );
 
     expect(captured.createData?.version).toBe("manual");
     expect(captured.createData?.analysis).toStrictEqual({ connect: { id: ANALYSIS_ID } });

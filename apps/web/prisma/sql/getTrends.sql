@@ -15,7 +15,7 @@ WITH daily_latest AS (
         a.created_at
     FROM analyses a
     JOIN repos r ON a.repo_id = r.id
-    WHERE r.user_id = $1::uuid
+    WHERE r.created_by_user_id = $1::uuid
       AND ($4::uuid IS NULL OR r.id = $4::uuid)
       AND a.status = 'DONE'
       AND a.created_at >= $2

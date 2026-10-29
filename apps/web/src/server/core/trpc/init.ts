@@ -8,6 +8,7 @@ import { IS_PROD } from "@/shared/config/env.flags";
 
 import { normalizeError } from "@/server/core/api-error";
 import { hasApiKeyScope } from "@/server/core/auth/api-key-scopes";
+import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import { assertAdminSecondFactor, assertNotBanned } from "@/server/utils/admin-access";
 import {
   buildRequestStore,
@@ -164,6 +165,40 @@ const isAuthed = t.middleware(({ ctx, next }) => {
 });
 
 export const protectedProcedure = publicProcedure.use(isAuthed);
+
+const isWorkspaceMember = t.middleware(async ({ ctx, next }) => {
+  const session = ctx.session;
+  const userId = session?.user.id;
+
+  if (session == null || userId == null) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "You are not logged in" });
+  }
+
+  const workspace = await resolveWorkspace({
+    headerWorkspaceId: ctx.apiKeyWorkspaceId ?? ctx.req.headers.get("x-workspace-id"),
+    name: session.user.name,
+    strict: true,
+    userId,
+  });
+
+  return next({
+    ctx: {
+      ...ctx,
+      session,
+      workspace,
+    },
+  });
+});
+
+export const workspaceProcedure = protectedProcedure.use(isWorkspaceMember);
+
+export const ownerProcedure = workspaceProcedure.use(({ ctx, next }) => {
+  if (ctx.workspace.role !== "OWNER") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Owner rights required" });
+  }
+
+  return next({ ctx });
+});
 
 const isAdmin = t.middleware(async ({ ctx, next }) => {
   if (ctx.session?.user.role !== "ADMIN") {

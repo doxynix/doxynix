@@ -20,14 +20,20 @@ async function runTrendsUnderTimeZone(
   });
 }
 
-async function seedRepoWithAnalyses(userId: string, label: string, dailyScores: number[]) {
+async function seedRepoWithAnalyses(
+  userId: string,
+  workspaceId: string,
+  label: string,
+  dailyScores: number[],
+) {
   const repo = await prisma.repo.create({
     data: {
+      createdByUserId: userId,
       githubId: 800_000_000 + Math.floor(Math.random() * 100_000_000),
       name: label,
       owner: "org",
       url: `https://github.com/org/${label}`,
-      userId,
+      workspaceId,
     },
   });
 
@@ -70,8 +76,8 @@ describe("getTrends", () => {
   });
 
   it("returns identical rows under every session TimeZone", async () => {
-    const { user } = await createTestUser("TrendsTimeZone");
-    const repo = await seedRepoWithAnalyses(user.id, "tz_repo", [90, 80, 70, 60]);
+    const { user, workspace } = await createTestUser("TrendsTimeZone");
+    const repo = await seedRepoWithAnalyses(user.id, workspace.id, "tz_repo", [90, 80, 70, 60]);
 
     const endDate = new Date(Date.UTC(2026, 9, 14, 22, 0, 0));
     const startDate = new Date(endDate.getTime() - 7 * DAY);
@@ -93,9 +99,9 @@ describe("getTrends", () => {
   });
 
   it("keeps the latest analysis of a repo-day and averages across repos", async () => {
-    const { user } = await createTestUser("TrendsDaily");
-    const repo = await seedRepoWithAnalyses(user.id, "daily_repo", [90, 80]);
-    await seedRepoWithAnalyses(user.id, "other_repo", [50]);
+    const { user, workspace } = await createTestUser("TrendsDaily");
+    const repo = await seedRepoWithAnalyses(user.id, workspace.id, "daily_repo", [90, 80]);
+    await seedRepoWithAnalyses(user.id, workspace.id, "other_repo", [50]);
 
     await prisma.analysis.create({
       data: {
@@ -126,8 +132,8 @@ describe("getTrends", () => {
   it("scopes to the calling user and ignores another user's rows", async () => {
     const alice = await createTestUser("TrendsAlice");
     const bob = await createTestUser("TrendsBob");
-    await seedRepoWithAnalyses(alice.user.id, "alice_repo", [90, 80, 70]);
-    await seedRepoWithAnalyses(bob.user.id, "bob_repo", [10, 20, 30]);
+    await seedRepoWithAnalyses(alice.user.id, alice.workspace.id, "alice_repo", [90, 80, 70]);
+    await seedRepoWithAnalyses(bob.user.id, bob.workspace.id, "bob_repo", [10, 20, 30]);
 
     const rows = await runTrendsUnderTimeZone(
       alice.user.id,

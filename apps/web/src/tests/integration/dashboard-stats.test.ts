@@ -17,7 +17,7 @@ WITH periods AS (
     SELECT $2::timestamp AS cur_start, ($4::date + interval '1 day')::timestamp AS cur_end,
            $3::timestamp AS prev_start, $2::timestamp AS prev_end
 ),
-user_repos AS (SELECT id, name, owner, created_at FROM repos WHERE user_id = $1::uuid),
+user_repos AS (SELECT id, name, owner, created_at FROM repos WHERE created_by_user_id = $1::uuid),
 base_data AS (
     SELECT a.*, ur.name as repo_name,
         (a.created_at >= p.cur_start AND a.created_at < p.cur_end) as is_current,
@@ -127,17 +127,18 @@ async function runDashboardStatsUnderTimeZone(
   });
 }
 
-async function seed(userId: string, repoCount: number, analysisCount: number) {
+async function seed(userId: string, workspaceId: string, repoCount: number, analysisCount: number) {
   const now = Date.now();
   for (let r = 0; r < repoCount; r++) {
     const repo = await prisma.repo.create({
       data: {
         createdAt: new Date(now - (30 + r) * DAY),
+        createdByUserId: userId,
         githubId: 900_000_000 + r,
         name: `repo_${r}`,
         owner: `org_${r}`,
         url: `https://github.com/org_${r}/repo_${r}`,
-        userId,
+        workspaceId,
       },
     });
 
@@ -180,17 +181,19 @@ async function seed(userId: string, repoCount: number, analysisCount: number) {
 
 async function seedAcrossPeriods(
   userId: string,
+  workspaceId: string,
   label: string,
   insideCount: number,
   outsideCount: number,
 ) {
   const repo = await prisma.repo.create({
     data: {
+      createdByUserId: userId,
       githubId: 910_000_000 + Math.floor(Math.random() * 10_000_000),
       name: label,
       owner: "org",
       url: `https://github.com/org/${label}`,
-      userId,
+      workspaceId,
     },
   });
 
@@ -250,11 +253,11 @@ describe("getDashboardStats", () => {
   });
 
   it("matches the reference formulation across every period window", async () => {
-    const { user } = await createTestUser("Dashboard");
-    await seed(user.id, 3, 6);
+    const { user, workspace } = await createTestUser("Dashboard");
+    await seed(user.id, workspace.id, 3, 6);
     // A second repo straddling the boundary is what makes the previous-period averages — and
     // therefore every `*Delta` column — non-zero, so the oracle has something to disagree about.
-    await seedAcrossPeriods(user.id, "prior_repo", 3, 3);
+    await seedAcrossPeriods(user.id, workspace.id, "prior_repo", 3, 3);
 
     const now = Date.now();
     for (const w of WINDOWS) {
@@ -272,8 +275,8 @@ describe("getDashboardStats", () => {
   });
 
   it("splits every analysis into exactly one status bucket", async () => {
-    const { user } = await createTestUser("Buckets");
-    await seed(user.id, 4, 8);
+    const { user, workspace } = await createTestUser("Buckets");
+    await seed(user.id, workspace.id, 4, 8);
 
     const now = Date.now();
     const row = await shipped(
@@ -307,8 +310,8 @@ describe("getDashboardStats", () => {
   });
 
   it("returns zeroes when the window predates all activity", async () => {
-    const { user } = await createTestUser("Quiet");
-    await seed(user.id, 2, 4);
+    const { user, workspace } = await createTestUser("Quiet");
+    await seed(user.id, workspace.id, 2, 4);
     const day = 86_400_000;
 
     const row = await shipped(
@@ -326,8 +329,8 @@ describe("getDashboardStats", () => {
   it("scopes to the calling user and ignores another user's rows", async () => {
     const alice = await createTestUser("Alice");
     const bob = await createTestUser("Bob");
-    await seed(alice.user.id, 2, 4);
-    await seed(bob.user.id, 5, 4);
+    await seed(alice.user.id, alice.workspace.id, 2, 4);
+    await seed(bob.user.id, bob.workspace.id, 5, 4);
 
     const now = Date.now();
     const row = await shipped(
@@ -342,8 +345,8 @@ describe("getDashboardStats", () => {
   });
 
   it("returns identical rows under every session TimeZone", async () => {
-    const { user } = await createTestUser("TimeZone");
-    await seed(user.id, 3, 6);
+    const { user, workspace } = await createTestUser("TimeZone");
+    await seed(user.id, workspace.id, 3, 6);
 
     const now = Date.now();
     // Late-evening UTC: if anything ever starts interpreting the period bounds in the session
@@ -356,7 +359,7 @@ describe("getDashboardStats", () => {
     // is `timestamp without time zone` and `@prisma/adapter-pg` sends Date params as a zone-less
     // UTC string, so nothing in the path interprets a zone and all three must agree. Rows further
     // out would pass even if a zone-sensitive cast were reintroduced.
-    const gapRepo = await prisma.repo.findFirstOrThrow({ where: { userId: user.id } });
+    const gapRepo = await prisma.repo.findFirstOrThrow({ where: { workspaceId: workspace.id } });
     for (const offsetHours of [4, 12]) {
       await prisma.analysis.create({
         data: {
@@ -397,8 +400,8 @@ describe("getDashboardStats", () => {
   });
 
   it("counts statuses only inside the selected period", async () => {
-    const { user } = await createTestUser("Scoped");
-    await seedAcrossPeriods(user.id, "scoped_repo", 4, 8);
+    const { user, workspace } = await createTestUser("Scoped");
+    await seedAcrossPeriods(user.id, workspace.id, "scoped_repo", 4, 8);
 
     const now = Date.now();
     const row = await shipped(
@@ -414,11 +417,11 @@ describe("getDashboardStats", () => {
   });
 
   it("returns the same extremes and top-N on every run", async () => {
-    const { user } = await createTestUser("Stable");
+    const { user, workspace } = await createTestUser("Stable");
     // Two repos, identical scores: `bestRepo` and `worstRepo` are pure ties, so the
     // `repo_name` tie-break is the only thing deciding which row wins.
-    await seedAcrossPeriods(user.id, "stable_aaa", 4, 0);
-    await seedAcrossPeriods(user.id, "stable_zzz", 4, 0);
+    await seedAcrossPeriods(user.id, workspace.id, "stable_aaa", 4, 0);
+    await seedAcrossPeriods(user.id, workspace.id, "stable_zzz", 4, 0);
 
     const now = Date.now();
     const args = [

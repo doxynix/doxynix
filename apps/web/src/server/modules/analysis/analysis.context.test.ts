@@ -63,7 +63,7 @@ describe("analysisContext.build", () => {
   });
 
   it("returns null when nodeId is null", async () => {
-    const result = await analysisContext.build(db, "repo-1", undefined);
+    const result = await analysisContext.build(db, "repo-1", "workspace-1", undefined);
     expect(result).toBeNull();
     expect(mocks.getRepoSnapshot).not.toHaveBeenCalled();
   });
@@ -71,9 +71,9 @@ describe("analysisContext.build", () => {
   it("returns null when getRepoSnapshot resolves null", async () => {
     mocks.getRepoSnapshot.mockResolvedValue(null);
 
-    const result = await analysisContext.build(db, "repo-1", "node-x");
+    const result = await analysisContext.build(db, "repo-1", "workspace-1", "node-x");
     expect(result).toBeNull();
-    expect(mocks.getRepoSnapshot).toHaveBeenCalledWith(db, "repo-1");
+    expect(mocks.getRepoSnapshot).toHaveBeenCalledWith(db, "repo-1", "workspace-1");
   });
 
   it("returns null when getNodeExplain resolves null", async () => {
@@ -81,7 +81,7 @@ describe("analysisContext.build", () => {
     mocks.getRepoSnapshot.mockResolvedValue(snapshot);
     mocks.getNodeExplain.mockReturnValue(null);
 
-    const result = await analysisContext.build(db, "repo-1", "node-x");
+    const result = await analysisContext.build(db, "repo-1", "workspace-1", "node-x");
     expect(result).toBeNull();
     expect(mocks.getNodeExplain).toHaveBeenCalledWith("node-x");
   });
@@ -92,10 +92,10 @@ describe("analysisContext.build", () => {
     mocks.getRepoSnapshot.mockResolvedValue(snapshot);
     mocks.getNodeExplain.mockReturnValue(explain);
 
-    const result = await analysisContext.build(db, "repo-1", "node-x");
+    const result = await analysisContext.build(db, "repo-1", "workspace-1", "node-x");
 
     expect(result).toEqual(expectedNodeContextFrom(explain));
-    expect(mocks.getRepoSnapshot).toHaveBeenCalledWith(db, "repo-1");
+    expect(mocks.getRepoSnapshot).toHaveBeenCalledWith(db, "repo-1", "workspace-1");
     expect(mocks.getNodeExplain).toHaveBeenCalledWith("node-x");
   });
 });

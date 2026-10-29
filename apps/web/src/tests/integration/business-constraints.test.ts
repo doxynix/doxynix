@@ -14,11 +14,12 @@ describe("Business Logic & Integrity Constraints", () => {
 
     const repo = await alice.db.repo.create({
       data: {
+        createdByUserId: alice.user.id,
         githubId: 100,
         name: "docs-repo",
         owner: "alice",
         url: "https://github.com/alice/docs",
-        userId: alice.user.id,
+        workspaceId: alice.workspace.id,
       },
     });
 

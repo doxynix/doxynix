@@ -40,12 +40,14 @@ export type SaveResultsParams = {
   repositoryFacts: NonNullable<AIResult["repository_facts"]>;
   repositoryFindings: NonNullable<AIResult["findings"]>;
   userId: string;
+  workspaceId: string;
 };
 
 export const analysisLifecycleService = {
   async analyze(
     db: DbClient,
     userId: string,
+    workspaceId: string,
     input: {
       branch?: string;
       docTypes: DocType[];
@@ -55,7 +57,7 @@ export const analysisLifecycleService = {
       repoId: string;
     },
   ) {
-    await this.assertRepoAccess(db, userId, input.repoId);
+    await this.assertRepoAccess(db, workspaceId, input.repoId);
 
     const analysis = await db.analysis.create({
       data: {
@@ -78,6 +80,7 @@ export const analysisLifecycleService = {
         selectedBranch: input.branch,
         selectedFiles: input.files,
         userId,
+        workspaceId,
       },
       {
         // concurrencyKey: `user-${userId}`,
@@ -109,9 +112,9 @@ export const analysisLifecycleService = {
     return { jobId: handle.id, publicAccessToken: handle.publicAccessToken, status: "QUEUED" };
   },
 
-  async assertRepoAccess(db: DbClient, userId: string, repoId: string) {
+  async assertRepoAccess(db: DbClient, workspaceId: string, repoId: string) {
     const repo = await db.repo.findFirst({
-      where: { id: repoId, userId },
+      where: { id: repoId, workspaceId },
     });
 
     if (repo == null) {
@@ -121,10 +124,10 @@ export const analysisLifecycleService = {
     return repo;
   },
 
-  async cancel(db: DbClient, analysisId: string) {
-    const analysis = await db.analysis.findUnique({
-      include: { repo: { select: { userId: true } } },
-      where: { id: analysisId },
+  async cancel(db: DbClient, analysisId: string, workspaceId: string) {
+    const analysis = await db.analysis.findFirst({
+      include: { repo: { select: { createdByUserId: true } } },
+      where: { id: analysisId, repo: { workspaceId } },
     });
 
     if (analysis == null) {
@@ -145,7 +148,7 @@ export const analysisLifecycleService = {
       });
 
       void realtimeService
-        .user(analysis.repo.userId)
+        .user(analysis.repo.createdByUserId)
         .publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
 
       if (analysis.jobId != null) {
@@ -171,7 +174,7 @@ export const analysisLifecycleService = {
     return { success: true };
   },
 
-  async getHistory(db: DbClient, repoId: string) {
+  async getHistory(db: DbClient, repoId: string, workspaceId: string) {
     const [items, total] = await Promise.all([
       db.analysis.findMany({
         orderBy: { createdAt: "desc" },
@@ -184,9 +187,9 @@ export const analysisLifecycleService = {
           status: true,
         },
         take: HISTORY_LIMIT,
-        where: { repo: { id: repoId } },
+        where: { repo: { id: repoId, workspaceId } },
       }),
-      db.analysis.count({ where: { repo: { id: repoId } } }),
+      db.analysis.count({ where: { repo: { id: repoId, workspaceId } } }),
     ]);
 
     return {
@@ -203,12 +206,12 @@ export const analysisLifecycleService = {
     };
   },
 
-  async getLatest(db: DbClient, repoId: string) {
+  async getLatest(db: DbClient, repoId: string, workspaceId: string) {
     const analysis = await db.analysis.findFirst({
       orderBy: { createdAt: "desc" },
       select: analysisLatestSelect,
       where: {
-        repo: { id: repoId },
+        repo: { id: repoId, workspaceId },
       },
     });
 
@@ -252,7 +255,12 @@ export const analysisLifecycleService = {
       repositoryFacts,
       repositoryFindings,
       userId,
+      workspaceId,
     } = params;
+
+    if (repo.workspaceId !== workspaceId) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found or access denied" });
+    }
 
     const teamRoles = calculateTeamRoles(rawContributors);
 

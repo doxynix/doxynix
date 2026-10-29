@@ -15,6 +15,8 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 import { RepoDetailsTabs } from "@/entities/repo/ui/repo-details-tabs";
 
+import { WorkspaceSwitcher } from "@/features/workspace-switcher/ui/workspace-switcher";
+
 import { AgentButton } from "./agent-button";
 import { AppCommandMenu } from "./app-command-menu";
 import { NotificationsNav } from "./notifications-nav";
@@ -64,6 +66,8 @@ export function AppHeader() {
           </AppTooltip>
 
           <Logo className="mt-1 w-20" />
+
+          <WorkspaceSwitcher />
 
           <AppBreadcrumbs
             className="hidden md:block"

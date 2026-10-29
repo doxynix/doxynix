@@ -13,6 +13,7 @@ import { makeQueryClient } from "@/shared/api/query-client";
 import { TRPCProvider } from "@/shared/api/trpc";
 import { APP_URL, TRPC_PREFIX } from "@/shared/config/env.client";
 import { IS_DEV } from "@/shared/config/env.flags";
+import { getWorkspaceCookie, WS_HEADER } from "@/shared/lib/workspace-cookie";
 import { TooltipProvider } from "@/shared/ui/core/tooltip";
 
 import type { AppRouter } from "@/server/modules";
@@ -52,6 +53,11 @@ export function Providers({ children }: Readonly<Props>) {
           enabled: (opts) => IS_DEV || (opts.direction === "down" && opts.result instanceof Error),
         }),
         httpBatchLink({
+          headers: () => {
+            const workspaceId = getWorkspaceCookie();
+
+            return workspaceId == null ? {} : { [WS_HEADER]: workspaceId };
+          },
           transformer: superjson,
           url: `${getBaseUrl()}${TRPC_PREFIX}`,
         }),
