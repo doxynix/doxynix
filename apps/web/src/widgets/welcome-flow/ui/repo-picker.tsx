@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { RefreshCcw, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -37,22 +37,19 @@ export function RepoPicker({ disabled = false, onSelect }: Readonly<Props>) {
     trpc.githubApp.getMyGithubRepos.queryOptions({}, { staleTime: STALE_TIME }),
   );
 
-  const items = useMemo(() => {
-    const query = deferredSearch.trim().toLowerCase();
-    const repos = [...(data?.items ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const query = deferredSearch.trim().toLowerCase();
+  const repos = [...(data?.items ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 
-    if (query.length === 0) {
-      return repos;
-    }
-
-    return repos.filter((repo) => {
-      return (
-        repo.fullName.toLowerCase().includes(query) ||
-        (repo.description ?? "").toLowerCase().includes(query) ||
-        (repo.language ?? "").toLowerCase().includes(query)
-      );
-    });
-  }, [data?.items, deferredSearch]);
+  const items =
+    query.length === 0
+      ? repos
+      : repos.filter((repo) => {
+          return (
+            repo.fullName.toLowerCase().includes(query) ||
+            (repo.description ?? "").toLowerCase().includes(query) ||
+            (repo.language ?? "").toLowerCase().includes(query)
+          );
+        });
 
   const selectedRepo = items.find((repo) => repo.fullName === selectedFullName) ?? null;
   const manageUrl =

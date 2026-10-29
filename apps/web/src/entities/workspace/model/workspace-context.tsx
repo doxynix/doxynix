@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo } from "react";
+import { createContext, type ReactNode, useContext, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -58,32 +58,13 @@ export function WorkspaceProvider({ children }: Readonly<{ children: ReactNode }
     }
   }, [data, queryClient, t]);
 
-  const switchWorkspace = useCallback(
-    (workspaceId: string) => {
-      setWorkspaceCookie(workspaceId);
-      queryClient.clear();
-      toast.success(t("workspace_switch_toast"));
-    },
-    [queryClient, t],
-  );
+  const switchWorkspace = (workspaceId: string) => {
+    setWorkspaceCookie(workspaceId);
+    queryClient.clear();
+    toast.success(t("workspace_switch_toast"));
+  };
 
-  const value = useMemo<WorkspaceContextValue | null>(() => {
-    if (data == null) {
-      return null;
-    }
-
-    const activeWorkspace = data.items.find((workspace) => workspace.id === data.activeWorkspaceId);
-
-    return {
-      activeWorkspace,
-      activeWorkspaceId: data.activeWorkspaceId,
-      isOwner: activeWorkspace?.role === "OWNER",
-      items: data.items,
-      switchWorkspace,
-    };
-  }, [data, switchWorkspace]);
-
-  if (isLoading || value == null) {
+  if (isLoading || data == null) {
     return (
       <div className="flex h-dvh w-full items-center justify-center">
         <Spinner className="size-6" />
@@ -91,6 +72,17 @@ export function WorkspaceProvider({ children }: Readonly<{ children: ReactNode }
     );
   }
 
+  const activeWorkspace = data.items.find((workspace) => workspace.id === data.activeWorkspaceId);
+
+  const value: WorkspaceContextValue = {
+    activeWorkspace,
+    activeWorkspaceId: data.activeWorkspaceId,
+    isOwner: activeWorkspace?.role === "OWNER",
+    items: data.items,
+    switchWorkspace,
+  };
+
+  // oxlint-disable-next-line react/jsx-no-constructed-context-values -- React Compiler memoizes the value, so the rule is obsolete here.
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
 }
 
