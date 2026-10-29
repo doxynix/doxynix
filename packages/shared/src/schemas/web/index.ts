@@ -242,3 +242,15 @@ export const CursorMetaSchema = z.object({
 });
 
 export type CursorMeta = z.infer<typeof CursorMetaSchema>;
+
+export const PLAN_CODES = ["HOBBY", "PRO", "TEAM"] as const;
+
+export const PlanCodeSchema = z.enum(PLAN_CODES);
+
+export type PlanCode = z.infer<typeof PlanCodeSchema>;
+
+export const PlanCode = {
+  HOBBY: "HOBBY",
+  PRO: "PRO",
+  TEAM: "TEAM",
+} as const satisfies Record<string, PlanCode>;

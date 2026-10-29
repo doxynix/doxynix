@@ -20,6 +20,10 @@ type WorkspaceWithEntitlement = Prisma.WorkspaceGetPayload<{
 function toSummary(workspace: WorkspaceWithEntitlement, role: WorkspaceRole): WorkspaceSummary {
   const { entitlement } = workspace;
 
+  // Fail closed: an unknown plan value degrades to HOBBY instead of throwing on read.
+  const parsedPlan = PlanCodeSchema.safeParse(entitlement?.planCode);
+  const planCode = parsedPlan.success ? parsedPlan.data : PlanCode.HOBBY;
+
   return {
     entitlement:
       entitlement == null
@@ -29,8 +33,7 @@ function toSummary(workspace: WorkspaceWithEntitlement, role: WorkspaceRole): Wo
             analysesPerMonth: entitlement.analysesPerMonth,
             autoResync: entitlement.autoResync,
             historyDays: entitlement.historyDays,
-            // Fail closed: an unknown plan value degrades to HOBBY instead of throwing on read.
-            planCode: PlanCodeSchema.catch(PlanCode.HOBBY).parse(entitlement.planCode),
+            planCode,
             privateReposAllowed: entitlement.privateReposAllowed,
             prReviews: entitlement.prReviews,
             reposLimit: entitlement.reposLimit,
