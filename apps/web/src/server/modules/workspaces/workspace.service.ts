@@ -1,3 +1,4 @@
+import { PlanCode, PlanCodeSchema } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
@@ -34,7 +35,8 @@ function toSummary(workspace: WorkspaceWithEntitlement, role: WorkspaceRole): Wo
             analysesPerMonth: entitlement.analysesPerMonth,
             autoResync: entitlement.autoResync,
             historyDays: entitlement.historyDays,
-            planCode: entitlement.planCode,
+            // Fail closed: an unknown plan value degrades to HOBBY instead of throwing on read.
+            planCode: PlanCodeSchema.catch(PlanCode.HOBBY).parse(entitlement.planCode),
             privateReposAllowed: entitlement.privateReposAllowed,
             prReviews: entitlement.prReviews,
             reposLimit: entitlement.reposLimit,

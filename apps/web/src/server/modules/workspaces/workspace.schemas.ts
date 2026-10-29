@@ -1,16 +1,12 @@
-import { WorkspaceRole } from "@doxynix/shared";
+import { PlanCode, PlanCodeSchema, WorkspaceRole } from "@doxynix/shared";
 import * as z from "zod";
-
-export const PLAN_CODES = ["HOBBY", "PRO", "TEAM"] as const;
-
-export const PlanCodeSchema = z.enum(PLAN_CODES);
 
 export const PRO_ENTITLEMENT = {
   aiTokensPerMonth: 20_000_000,
   analysesPerMonth: 500,
   autoResync: true,
   historyDays: 90,
-  planCode: "PRO",
+  planCode: PlanCode.PRO,
   privateReposAllowed: true,
   prReviews: true,
   reposLimit: null,
@@ -21,7 +17,7 @@ export const WorkspaceEntitlementSummarySchema = z.object({
   analysesPerMonth: z.number().int().nullable(),
   autoResync: z.boolean(),
   historyDays: z.number().int().nullable(),
-  planCode: z.string(),
+  planCode: PlanCodeSchema,
   privateReposAllowed: z.boolean(),
   prReviews: z.boolean(),
   reposLimit: z.number().int().nullable(),

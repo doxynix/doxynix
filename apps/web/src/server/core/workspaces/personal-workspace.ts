@@ -1,3 +1,5 @@
+import { PlanCode } from "@doxynix/shared";
+
 import { prisma } from "../db";
 
 export const PERSONAL_WORKSPACE_ENTITLEMENT = {
@@ -5,7 +7,7 @@ export const PERSONAL_WORKSPACE_ENTITLEMENT = {
   analysesPerMonth: 20,
   autoResync: false,
   historyDays: 7,
-  planCode: "HOBBY",
+  planCode: PlanCode.HOBBY,
   privateReposAllowed: false,
   prReviews: false,
   reposLimit: null,
