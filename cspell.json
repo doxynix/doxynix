@@ -34,6 +34,7 @@
     "**/src/features/high-five/model/licenses.json",
     "**/public/**",
     "**/.agents/**",
+    "**/docs/superpowers/**",
     "**/messages/ja.json",
     "**/messages/ko.json",
     "skills-lock.json"
