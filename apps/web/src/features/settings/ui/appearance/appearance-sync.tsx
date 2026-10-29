@@ -1,6 +1,6 @@
 "use client";
 
-import { useAppearanceSync } from "../model/use-appearance-sync";
+import { useAppearanceSync } from "../../model/appearance/use-appearance-sync";
 
 export function AppearanceSync() {
   useAppearanceSync();

@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { useProfileActions } from "../model/use-profile-actions";
+import { useProfileActions } from "../../model/profile/use-profile-actions";
 import { ProfileDetailsForm } from "./profile-details-form";
 
 type Props = {

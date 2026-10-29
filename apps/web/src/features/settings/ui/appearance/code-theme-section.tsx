@@ -25,8 +25,12 @@ import {
 } from "@/shared/ui/core/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/core/popover";
 
-import type { AppearanceSectionProps } from "../model/appearance.types";
-import { CODE_SAMPLES, DEFAULT_CODE_SAMPLE_ID, findCodeSample } from "../model/code-samples";
+import type { AppearanceSectionProps } from "../../model/appearance/appearance.types";
+import {
+  CODE_SAMPLES,
+  DEFAULT_CODE_SAMPLE_ID,
+  findCodeSample,
+} from "../../model/appearance/code-samples";
 import { CodePreview } from "./code-preview";
 
 export function CodeThemeSection({ preferences, update }: Readonly<AppearanceSectionProps>) {

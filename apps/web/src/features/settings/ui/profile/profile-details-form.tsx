@@ -20,7 +20,7 @@ import {
 import { Input } from "@/shared/ui/core/input";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { useProfileActions } from "../model/use-profile-actions";
+import { useProfileActions } from "../../model/profile/use-profile-actions";
 
 type Props = {
   user: User;

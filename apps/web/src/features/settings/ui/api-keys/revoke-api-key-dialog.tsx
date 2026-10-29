@@ -10,7 +10,7 @@ import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 
 import type { UiApiKey } from "@/entities/api-key/model/api-keys.types";
 
-import { useApiKeyActions } from "../model/use-api-key-actions";
+import { useApiKeyActions } from "../../model/api-keys/use-api-key-actions";
 
 type Props = {
   apiKey: UiApiKey;

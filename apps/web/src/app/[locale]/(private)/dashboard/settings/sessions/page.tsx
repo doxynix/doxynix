@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
 
-import { SessionsList } from "@/features/sessions/ui/sessions-list";
+import { SessionsList } from "@/features/settings/ui/sessions/sessions-list";
 
 import { HydrateClient, prefetch, trpcProxy } from "@/server/core/trpc/prefetch";
 

@@ -9,8 +9,8 @@ import { SentryUserIdentificator } from "@/shared/ui/kit/sentry-user-identificat
 import { WorkspaceProvider } from "@/entities/workspace/model/workspace-context";
 
 import { Agent } from "@/features/agent/ui/agent";
-import { AppearanceSync } from "@/features/appearance/ui/appearance-sync";
 import { CreateRepoDialog } from "@/features/repo/ui/create-repo-dialog";
+import { AppearanceSync } from "@/features/settings/ui/appearance/appearance-sync";
 
 import { AppFooter } from "@/widgets/app-footer/ui/app-footer";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";

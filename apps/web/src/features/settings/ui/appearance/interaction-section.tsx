@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 import { Label } from "@/shared/ui/core/label";
 import { Switch } from "@/shared/ui/core/switch";
 
-import type { AppearanceSectionProps } from "../model/appearance.types";
+import type { AppearanceSectionProps } from "../../model/appearance/appearance.types";
 
 const POINTER_CURSOR_ID = "appearance-pointer-cursor";
 const REDUCE_MOTION_ID = "appearance-reduce-motion";

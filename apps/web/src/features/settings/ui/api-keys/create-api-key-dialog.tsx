@@ -23,7 +23,7 @@ import { Input } from "@/shared/ui/core/input";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { useApiKeyActions } from "../model/use-api-key-actions";
+import { useApiKeyActions } from "../../model/api-keys/use-api-key-actions";
 import { ApiKeyFormFields, defaultExpiry } from "./api-key-form-fields";
 
 export function CreateApiKeyDialog() {
