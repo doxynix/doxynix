@@ -174,6 +174,28 @@ describe("Workspace service and router", () => {
     });
   });
 
+  it("lists members for the active workspace", async () => {
+    const alice = await createTestUser("Alice");
+    const carol = await createTestUser("Carol");
+    const workspaceId = await createPersonalWorkspace(alice.user.id, alice.user.name);
+
+    await prisma.workspaceMember.create({
+      data: { role: "MEMBER", userId: carol.user.id, workspaceId },
+    });
+
+    const ownerCaller = callerFor(alice.user, workspaceId);
+    const memberCaller = callerFor(carol.user, workspaceId);
+
+    const ownerView = await ownerCaller.workspace.members();
+    const memberView = await memberCaller.workspace.members();
+
+    expect(ownerView.items).toHaveLength(2);
+    expect(memberView.items).toHaveLength(2);
+    expect(ownerView.items.map((member) => member.userId).sort()).toEqual(
+      [alice.user.id, carol.user.id].sort(),
+    );
+  });
+
   it("rejects a foreign X-Workspace-Id before the handler runs", async () => {
     const alice = await createTestUser("Alice");
     const bob = await createTestUser("Bob");

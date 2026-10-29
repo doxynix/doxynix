@@ -19,6 +19,14 @@ export const workspaceRouter = createTRPCRouter({
       return workspaceService.addMember(ctx.db, ctx.workspace.id, ctx.workspace.role, input.email);
     }),
 
+  members: workspaceProcedure
+    .output(z.object({ items: z.array(WorkspaceMemberSummarySchema) }))
+    .query(async ({ ctx }) => {
+      const items = await workspaceService.listMembers(ctx.db, ctx.workspace.id);
+
+      return { items };
+    }),
+
   myWorkspaces: protectedProcedure
     .output(
       z.object({

@@ -40,6 +40,7 @@ export const WorkspaceMemberSummarySchema = z.object({
   role: z.enum(WorkspaceRole),
   user: z.object({
     id: z.uuid(),
+    image: z.string().nullable(),
     name: z.string().nullable(),
   }),
   userId: z.uuid(),

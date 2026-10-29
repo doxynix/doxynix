@@ -77,7 +77,7 @@ describe("apiKeyService.list", () => {
     const args = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
     // The owner and nothing else — the redundant `revoked` OR clause must not come back, and
     // `where` must be exactly the tenant rather than a filter that could later be widened.
-    expect(args.where).toStrictEqual({ userId: USER_ID });
+    expect(args.where).toStrictEqual({ workspaceId: WORKSPACE_ID });
     expect(JSON.stringify(args)).not.toContain("OR");
   });
 

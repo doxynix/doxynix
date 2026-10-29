@@ -66,7 +66,7 @@ export const workspaceService = {
     const emailHash = getNormalizedHash(normalizeEmail(email));
     // Membership lookup is a system read: a workspace owner must not be able to read the user row.
     const user = await prisma.user.findUnique({
-      select: { id: true, name: true },
+      select: { id: true, image: true, name: true },
       where: { emailHash },
     });
 
@@ -94,7 +94,7 @@ export const workspaceService = {
       select: { id: true, role: true, userId: true },
     });
 
-    return { ...member, user: { id: user.id, name: user.name } };
+    return { ...member, user: { id: user.id, image: user.image, name: user.name } };
   },
 
   async listForUser(
@@ -116,6 +116,19 @@ export const workspaceService = {
       items: memberships.map((membership) => toSummary(membership.workspace, membership.role)),
       reset: resolved.reset,
     };
+  },
+
+  async listMembers(db: DbClient, workspaceId: string) {
+    return db.workspaceMember.findMany({
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        role: true,
+        user: { select: { id: true, image: true, name: true } },
+        userId: true,
+      },
+      where: { workspaceId },
+    });
   },
 
   async removeMember(db: DbClient, workspaceId: string, role: WorkspaceRole, userId: string) {

@@ -26,6 +26,7 @@ export function useNavLabels(): Record<NavLabelKey, string> {
     high_five: t("nav_high_five"),
     home: t("nav_home"),
     map: t("nav_map"),
+    members: t("nav_members"),
     notifications: t("nav_notifications"),
     overview: t("nav_overview"),
     profile: t("nav_profile"),

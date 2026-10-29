@@ -6,6 +6,8 @@ import { REPO_LIST_PAGE_SIZE } from "@/shared/config/repos";
 import { SidebarInset, SidebarProvider } from "@/shared/ui/core/sidebar";
 import { SentryUserIdentificator } from "@/shared/ui/kit/sentry-user-identificator";
 
+import { WorkspaceProvider } from "@/entities/workspace/model/workspace-context";
+
 import { Agent } from "@/features/agent/ui/agent";
 import { AppearanceSync } from "@/features/appearance/ui/appearance-sync";
 import { CreateRepoDialog } from "@/features/repo/ui/create-repo-dialog";
@@ -29,6 +31,7 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
   }
 
   await Promise.all([
+    prefetch(trpcProxy.workspace.myWorkspaces.queryOptions()),
     prefetch(trpcProxy.notification.getStats.queryOptions()),
     prefetch(trpcProxy.user.getAppearance.queryOptions({})),
     prefetch(
@@ -47,36 +50,38 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
     <>
       <SentryUserIdentificator user={session.user} />
       <HydrateClient>
-        <AppearanceSync />
-        <SidebarProvider
-          className="flex h-dvh w-full flex-col overflow-hidden"
-          defaultOpen={defaultOpen}
-          defaultWidth={sidebarWidth > 0 ? sidebarWidth : undefined}
-        >
-          <div className="z-50 w-full shrink-0 border-b">
-            <AppHeader />
-          </div>
+        <WorkspaceProvider>
+          <AppearanceSync />
+          <SidebarProvider
+            className="flex h-dvh w-full flex-col overflow-hidden"
+            defaultOpen={defaultOpen}
+            defaultWidth={sidebarWidth > 0 ? sidebarWidth : undefined}
+          >
+            <div className="z-50 w-full shrink-0 border-b">
+              <AppHeader />
+            </div>
 
-          <div className="flex flex-1 overflow-hidden">
-            <AppSidebar />
-            <div className="relative flex flex-1 flex-col overflow-y-auto">
-              {/* <ScrollArea className="flex-1"> */}
-              <SidebarInset
-                className="mx-auto max-w-400 p-4"
-                id="main-content"
-                tabIndex={-1}
-              >
-                {children}
-              </SidebarInset>
-              {/* </ScrollArea> */}
-              <div className="z-50 w-full shrink-0 border-t">
-                <AppFooter />
+            <div className="flex flex-1 overflow-hidden">
+              <AppSidebar />
+              <div className="relative flex flex-1 flex-col overflow-y-auto">
+                {/* <ScrollArea className="flex-1"> */}
+                <SidebarInset
+                  className="mx-auto max-w-400 p-4"
+                  id="main-content"
+                  tabIndex={-1}
+                >
+                  {children}
+                </SidebarInset>
+                {/* </ScrollArea> */}
+                <div className="z-50 w-full shrink-0 border-t">
+                  <AppFooter />
+                </div>
               </div>
             </div>
-          </div>
-          <HotkeyListeners />
-          <Agent />
-        </SidebarProvider>
+            <HotkeyListeners />
+            <Agent />
+          </SidebarProvider>
+        </WorkspaceProvider>
       </HydrateClient>
       <GithubConnectionFeedback />
       <CreateRepoDialog />

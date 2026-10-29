@@ -53,7 +53,11 @@ describe("workspaceService.addMember", () => {
   });
 
   it("adds an existing user to a PRO workspace as a member", async () => {
-    vi.mocked(prisma.user.findUnique).mockResolvedValue({ id: USER_ID, name: "Bob" } as never);
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({
+      id: USER_ID,
+      image: null,
+      name: "Bob",
+    } as never);
     const create = vi.fn().mockResolvedValue({
       id: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a60",
       role: "MEMBER",
@@ -85,7 +89,11 @@ describe("workspaceService.addMember", () => {
   });
 
   it("stops at the seat limit instead of silently overfilling the workspace", async () => {
-    vi.mocked(prisma.user.findUnique).mockResolvedValue({ id: USER_ID, name: "Bob" } as never);
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({
+      id: USER_ID,
+      image: null,
+      name: "Bob",
+    } as never);
     const db = {
       user: { findUnique: vi.fn().mockResolvedValue({ id: USER_ID }) },
       workspace: {
