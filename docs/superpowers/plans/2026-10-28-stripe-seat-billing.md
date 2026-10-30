@@ -480,7 +480,7 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
   - **Acceptance criteria:** Raw verify до parse; correct HTTP matrix; unique Event ID+payload hash; type-only task import; exact `idempotencyKey=event.id`; failed enqueue даёт non-2xx и повторяется на retry; route не вызывает Stripe retrieve/domain projection.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.webhook.test.ts`
 
-- [ ] **BILL-08 — Canonical worker, retry и DLQ (1 день)**
+- [x] **BILL-08 — Canonical worker, retry и DLQ (1 день)**
   - **Files touched:** Create `apps/web/src/server/modules/billing/billing.events.ts`, `billing.resolver.ts`, `billing.events.test.ts`, `billing.issues.ts`; Modify `apps/web/src/server/modules/billing/tasks/process-stripe-event.task.ts`, `apps/web/src/server/utils/task-config.ts`; Create `apps/web/src/server/modules/billing/tasks/sweep-stripe-events.task.ts`.
   - **Acceptance criteria:** Worker canonical retrieve; per-owner serialization; non-retryable version/owner/schema errors; 8 attempts; final `onFailure` DLQ; 15-minute sweeper зависших runs; никакой Stripe write из worker.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.events.test.ts`

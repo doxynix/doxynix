@@ -36,6 +36,7 @@ const SUPPORTED_EVENT_TYPES = new Set<string>([
 ]);
 
 const EVENT_STATUS = {
+  DEAD_LETTER: "DEAD_LETTER",
   ENQUEUED: "ENQUEUED",
   PROCESSED: "PROCESSED",
   RECEIVED: "RECEIVED",
@@ -74,7 +75,7 @@ function ownershipKey(event: Stripe.Event): string {
 async function findExistingEvent(stripeEventId: string) {
   try {
     return await prisma.billingEvent.findUnique({
-      select: { id: true, payloadHash: true, status: true },
+      select: { id: true, payloadHash: true, replayCount: true, status: true },
       where: { stripeEventId },
     });
   } catch (error) {
@@ -123,10 +124,11 @@ export async function handleStripeWebhook(req: Request): Promise<Response> {
   }
 
   let event: Stripe.Event;
+  const stripe = getStripeClient();
 
   try {
     // Default tolerance on purpose: widening the window weakens replay protection.
-    event = getStripeClient().webhooks.constructEvent(raw, signature, STRIPE_WEBHOOK_SECRET);
+    event = stripe.webhooks.constructEvent(raw, signature, STRIPE_WEBHOOK_SECRET);
   } catch {
     return jsonResponse({ error: "INVALID_SIGNATURE" }, 400);
   }
@@ -147,10 +149,11 @@ export async function handleStripeWebhook(req: Request): Promise<Response> {
 
   const payloadHash = createHash("sha256").update(raw).digest("hex");
 
-  let billingEvent: { id: string; status: string };
+  let billingEvent: { id: string; replayCount: number; status: string };
+  let replay = false;
 
   try {
-    billingEvent = await prisma.billingEvent.create({
+    const created = await prisma.billingEvent.create({
       data: {
         apiVersion: event.api_version ?? null,
         livemode: event.livemode,
@@ -161,8 +164,10 @@ export async function handleStripeWebhook(req: Request): Promise<Response> {
         stripeEventId: event.id,
         type: event.type,
       },
-      select: { id: true, status: true },
+      select: { id: true, replayCount: true, status: true },
     });
+
+    billingEvent = created;
   } catch (error) {
     if (!isUniqueViolation(error)) {
       appLogger.error({ error, msg: "stripe_webhook_store_failed", stripeEventId: event.id });
@@ -179,26 +184,36 @@ export async function handleStripeWebhook(req: Request): Promise<Response> {
     if (existing.payloadHash !== payloadHash) {
       await recordHashMismatch(event);
 
-      return jsonResponse({ error: "PAYLOAD_HASH_MISMATCH" }, 400);
+      // 200 on purpose: a non-2xx would make Stripe retry a payload we will never accept.
+      return jsonResponse({ duplicate: true, hashMismatch: true }, 200);
     }
 
     if (existing.status === EVENT_STATUS.PROCESSED) {
       return jsonResponse({ duplicate: true, ok: true }, 200);
     }
 
-    // RECEIVED/ENQUEUED/DEAD_LETTER: retry the enqueue with the same Stripe event id.
-    billingEvent = { id: existing.id, status: existing.status };
+    // A dead-lettered event needs a fresh run: Trigger remembers `event.id` for 30 days and would
+    // hand back the failed run instead of starting a new one.
+    replay = existing.status === EVENT_STATUS.DEAD_LETTER;
+    billingEvent = existing;
   }
 
   try {
     const runId = await tasks.trigger<typeof processStripeEventTask>(
       "billing-process-stripe-event",
       { billingEventId: billingEvent.id },
-      { concurrencyKey: ownershipKey(event), idempotencyKey: event.id },
+      {
+        concurrencyKey: ownershipKey(event),
+        idempotencyKey: replay ? `${event.id}:replay:${billingEvent.replayCount + 1}` : event.id,
+      },
     );
 
     await prisma.billingEvent.update({
-      data: { status: EVENT_STATUS.ENQUEUED, triggerRunId: runId.id },
+      data: {
+        ...(replay ? { replayCount: { increment: 1 } } : {}),
+        status: EVENT_STATUS.ENQUEUED,
+        triggerRunId: runId.id,
+      },
       where: { id: billingEvent.id },
     });
   } catch (error) {

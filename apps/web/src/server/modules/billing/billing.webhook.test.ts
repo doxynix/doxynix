@@ -63,7 +63,9 @@ function uniqueViolation() {
 
 describe("stripe webhook intake", () => {
   beforeEach(() => {
-    dbMock.billingEvent.create.mockReset().mockResolvedValue({ id: "be_1", status: "RECEIVED" });
+    dbMock.billingEvent.create
+      .mockReset()
+      .mockResolvedValue({ id: "be_1", replayCount: 0, status: "RECEIVED" });
     dbMock.billingEvent.findUnique.mockReset().mockResolvedValue(null);
     dbMock.billingEvent.update.mockReset().mockResolvedValue({});
     dbMock.billingIssue.upsert.mockReset().mockResolvedValue({});
@@ -155,6 +157,7 @@ describe("stripe webhook intake", () => {
     dbMock.billingEvent.findUnique.mockResolvedValueOnce({
       id: "be_1",
       payloadHash: payloadHash(payload),
+      replayCount: 0,
       status: "RECEIVED",
     });
 
@@ -168,15 +171,44 @@ describe("stripe webhook intake", () => {
     });
   });
 
+  it("replays a dead-lettered event under a fresh Trigger key", async () => {
+    const payload = eventBody();
+    dbMock.billingEvent.create.mockRejectedValueOnce(uniqueViolation());
+    dbMock.billingEvent.findUnique.mockResolvedValueOnce({
+      id: "be_1",
+      payloadHash: payloadHash(payload),
+      replayCount: 2,
+      status: "DEAD_LETTER",
+    });
+
+    const response = await handleStripeWebhook(webhookRequest(payload, sign(payload)));
+
+    expect(response.status).toBe(200);
+    expect(triggerMock).toHaveBeenCalledWith(
+      "billing-process-stripe-event",
+      { billingEventId: "be_1" },
+      { concurrencyKey: "customer:cus_test", idempotencyKey: "evt_test_1:replay:3" },
+    );
+    expect(dbMock.billingEvent.update).toHaveBeenCalledWith({
+      data: {
+        replayCount: { increment: 1 },
+        status: "ENQUEUED",
+        triggerRunId: "run_1",
+      },
+      where: { id: "be_1" },
+    });
+  });
+
   it("lets only one of two concurrent duplicates create the row", async () => {
     const payload = eventBody();
     const signature = sign(payload);
     dbMock.billingEvent.create
-      .mockResolvedValueOnce({ id: "be_1", status: "RECEIVED" })
+      .mockResolvedValueOnce({ id: "be_1", replayCount: 0, status: "RECEIVED" })
       .mockRejectedValueOnce(uniqueViolation());
     dbMock.billingEvent.findUnique.mockResolvedValueOnce({
       id: "be_1",
       payloadHash: payloadHash(payload),
+      replayCount: 0,
       status: "RECEIVED",
     });
 
@@ -239,13 +271,14 @@ describe("stripe webhook intake", () => {
     dbMock.billingEvent.findUnique.mockResolvedValueOnce({
       id: "be_1",
       payloadHash: "a-different-hash",
+      replayCount: 0,
       status: "PROCESSED",
     });
 
     const response = await handleStripeWebhook(webhookRequest(payload, sign(payload)));
 
-    expect(response.status).toBe(400);
-    await expect(response.json()).resolves.toEqual({ error: "PAYLOAD_HASH_MISMATCH" });
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ duplicate: true, hashMismatch: true });
     expect(dbMock.billingIssue.upsert).toHaveBeenCalledTimes(1);
     expect(triggerMock).not.toHaveBeenCalled();
   });

@@ -87,7 +87,19 @@ export const TASK_CONFIGS = {
     machine: { preset: "micro" },
     maxDuration: 60 * 5, // TIME: 5 minutes
     retry: {
-      maxAttempts: 1,
+      factor: 2,
+      maxAttempts: 8,
+      maxTimeoutInMs: 60_000,
+      minTimeoutInMs: 1000,
+      randomize: true,
+    },
+  },
+
+  sweepStripeEvents: {
+    machine: { preset: "micro" },
+    maxDuration: 60 * 5, // TIME: 5 minutes
+    retry: {
+      maxAttempts: 2,
     },
   },
 
