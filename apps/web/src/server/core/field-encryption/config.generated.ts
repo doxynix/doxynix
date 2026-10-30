@@ -191,6 +191,12 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
     },
     fields: {},
   },
+  UsageEvent: {
+    connections: {
+      workspace: "Workspace",
+    },
+    fields: {},
+  },
   User: {
     connections: {
       accounts: "Account",
@@ -236,6 +242,8 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
       githubInstallations: "GithubInstallation",
       members: "WorkspaceMember",
       repos: "Repo",
+      usage: "WorkspaceUsage",
+      usageEvents: "UsageEvent",
     },
     fields: {},
   },
@@ -248,6 +256,12 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
   WorkspaceMember: {
     connections: {
       user: "User",
+      workspace: "Workspace",
+    },
+    fields: {},
+  },
+  WorkspaceUsage: {
+    connections: {
       workspace: "Workspace",
     },
     fields: {},

@@ -40,3 +40,13 @@ export const CreateCheckoutResultSchema = z.object({
 });
 
 export type CreateCheckoutResult = z.infer<typeof CreateCheckoutResultSchema>;
+
+// Quota and speed rejections BILL-10 will emit: 402 when the workspace must pay, 403 when a hard
+// limit is exceeded, 429 when the caller is merely too fast. Fixed here before the reader lands.
+export const BILLING_LIMIT_HTTP_STATUS = {
+  LIMIT_EXCEEDED: 403,
+  PAYMENT_REQUIRED: 402,
+  RATE_LIMITED: 429,
+} as const;
+
+export type BillingLimitCode = keyof typeof BILLING_LIMIT_HTTP_STATUS;

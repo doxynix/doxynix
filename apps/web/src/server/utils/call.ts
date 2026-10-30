@@ -10,6 +10,10 @@ import { google } from "@/server/core/ai/google";
 import { LLM_TEMPERATURE_STRATEGY, type LLMTaskType } from "@/server/core/ai/llm-temperature";
 import { isSchemaMismatchError } from "@/server/core/ai/schema-mismatch";
 import { appLogger } from "@/server/core/app-logger";
+import { upsertBillingIssue } from "@/server/core/billing/issue";
+import { prisma } from "@/server/core/db";
+import { type TokenUsage, UnknownModelPriceError } from "@/server/core/usage/price";
+import { releaseUsage, reserveUsage, settleUsage } from "@/server/core/usage/usage";
 import { taskLogger } from "@/server/utils/task-logger";
 
 const tracedAi = wrapAISDK(ai);
@@ -41,6 +45,154 @@ type CallWithFallbackProps<T> = {
 
 const LLM_API_TIMEOUT_MS = 300_000; // TIME: 5 minutes
 
+type UsageMeter = {
+  analysisId: null | string;
+  workspaceId: string;
+};
+
+type MeterUsage = {
+  cachedInputTokens?: number;
+  inputTokens?: number;
+  outputTokens?: number;
+};
+
+function readString(source: Record<string, unknown>, key: string): null | string {
+  const value = source[key];
+
+  return typeof value === "string" && value.length > 0 ? value : null;
+}
+
+// Analysis stages only know the analysis id; the workspace comes from its repo. Calls without
+// either context are not metered, but they never fail because of that.
+async function resolveUsageMeter(
+  attemptMetadata: Record<string, unknown>,
+): Promise<null | UsageMeter> {
+  const analysisId = readString(attemptMetadata, "analysisId");
+  const workspaceId = readString(attemptMetadata, "workspaceId");
+
+  if (workspaceId != null) {
+    return { analysisId, workspaceId };
+  }
+
+  if (analysisId == null) {
+    return null;
+  }
+
+  const analysis = await prisma.analysis.findUnique({
+    select: { repo: { select: { workspaceId: true } } },
+    where: { id: analysisId },
+  });
+  const resolved = analysis?.repo.workspaceId ?? null;
+
+  return resolved == null ? null : { analysisId, workspaceId: resolved };
+}
+
+function estimateTokens(system: string, prompt: string, maxOutputTokens: number): number {
+  return Math.ceil((system.length + prompt.length) / 4) + maxOutputTokens;
+}
+
+function toTokenUsage(usage: MeterUsage | null | undefined): TokenUsage {
+  return {
+    cachedInputTokens: usage?.cachedInputTokens ?? 0,
+    inputTokens: usage?.inputTokens ?? 0,
+    outputTokens: usage?.outputTokens ?? 0,
+  };
+}
+
+async function reserveAttempt(
+  meter: null | UsageMeter,
+  idempotencyKey: string,
+  estimatedTokens: number,
+): Promise<boolean> {
+  if (meter == null) {
+    return false;
+  }
+
+  try {
+    await reserveUsage(prisma, {
+      analysisId: meter.analysisId,
+      estimatedTokens,
+      idempotencyKey,
+      workspaceId: meter.workspaceId,
+    });
+
+    return true;
+  } catch (error) {
+    appLogger.warn({
+      error: error instanceof Error ? error.message : String(error),
+      msg: "Usage reservation failed",
+    });
+
+    return false;
+  }
+}
+
+async function releaseAttempt(meter: null | UsageMeter, idempotencyKey: string): Promise<void> {
+  if (meter == null) {
+    return;
+  }
+
+  try {
+    await releaseUsage(prisma, {
+      analysisId: meter.analysisId,
+      idempotencyKey,
+      workspaceId: meter.workspaceId,
+    });
+  } catch (error) {
+    appLogger.warn({
+      error: error instanceof Error ? error.message : String(error),
+      msg: "Usage release failed",
+    });
+  }
+}
+
+async function settleAttempt(
+  meter: null | UsageMeter,
+  idempotencyKey: string,
+  model: string,
+  usage: MeterUsage | null | undefined,
+): Promise<void> {
+  if (meter == null) {
+    return;
+  }
+
+  try {
+    await settleUsage(prisma, {
+      analysisId: meter.analysisId,
+      idempotencyKey,
+      model,
+      provider: "google",
+      usage: toTokenUsage(usage),
+      workspaceId: meter.workspaceId,
+    });
+  } catch (error) {
+    if (error instanceof UnknownModelPriceError) {
+      try {
+        await upsertBillingIssue(prisma, {
+          dedupeKey: `unknown_model_price:${model}`,
+          details: { model },
+          kind: "UNKNOWN_MODEL_PRICE",
+          severity: "CRITICAL",
+          source: "usage_metering",
+        });
+      } catch (issueError) {
+        appLogger.error({
+          error: issueError instanceof Error ? issueError.message : String(issueError),
+          msg: "Unknown model price issue write failed",
+        });
+      }
+    }
+
+    appLogger.warn({
+      error: error instanceof Error ? error.message : String(error),
+      model,
+      msg: "Usage settlement failed",
+    });
+
+    await releaseAttempt(meter, idempotencyKey);
+  }
+}
+
 export async function callWithFallback<T>({
   attemptMetadata = {},
   frequencyPenalty,
@@ -69,6 +221,18 @@ export async function callWithFallback<T>({
   const finalTopK = topK ?? strategy.topK;
   const finalTopP = topP ?? strategy.topP;
 
+  // Metering never blocks the model call: a failure to resolve the workspace only means this call
+  // is not attributed.
+  const meter = await resolveUsageMeter(attemptMetadata).catch((error) => {
+    appLogger.warn({
+      error: error instanceof Error ? error.message : String(error),
+      msg: "Usage meter resolution failed",
+    });
+
+    return null;
+  });
+
+  let attemptIndex = 0;
   let lastError: unknown = null;
 
   for (const modelName of models) {
@@ -81,7 +245,21 @@ export async function callWithFallback<T>({
         : [{ label: "structured", useTools: false }];
 
     for (const attempt of attempts) {
+      let reserved = false;
+      let usageKey = "";
+
       try {
+        attemptIndex += 1;
+        usageKey = `${meter?.workspaceId ?? "none"}:${meter?.analysisId ?? "none"}:${modelName}:${attempt.label}:${attemptIndex}`;
+        reserved =
+          meter == null
+            ? false
+            : await reserveAttempt(
+                meter,
+                usageKey,
+                estimateTokens(instructions, prompt, maxOutputTokens),
+              );
+
         appLogger.info({
           attempt: attempt.label,
           model: modelName,
@@ -116,6 +294,7 @@ export async function callWithFallback<T>({
           taskLogger.success(
             `AI (${String(attemptMetadata.phase ?? taskType)}): responded successfully.`,
           );
+          await settleAttempt(meter, usageKey, modelName, result.usage);
           return result.output;
         }
 
@@ -144,6 +323,7 @@ export async function callWithFallback<T>({
           taskLogger.success(
             `AI Text (${String(attemptMetadata.phase ?? taskType)}): generated successfully.`,
           );
+          await settleAttempt(meter, usageKey, modelName, result.usage);
           // Irreducible: `T` is the same parameter the structured branch resolves via `outputSchema`, which the compiler cannot check when a caller passes null.
           return result.text as unknown as T;
         }
@@ -169,6 +349,7 @@ export async function callWithFallback<T>({
           topP: finalTopP,
         });
 
+        let finalUsage: MeterUsage | null = null;
         let fullText = "";
         let streamError: unknown = null;
         let chunkBuffer = "";
@@ -226,6 +407,7 @@ export async function callWithFallback<T>({
           }
 
           if (part.type === "finish") {
+            finalUsage = part.totalUsage;
             flushChunkBuffer();
             appLogger.info({
               finishReason: part.finishReason,
@@ -249,10 +431,16 @@ export async function callWithFallback<T>({
         }
 
         taskLogger.success(`AI: finished generation.`);
+        await settleAttempt(meter, usageKey, modelName, finalUsage);
         // Same caller's-assertion situation as the non-streaming text branch.
         return fullText as T;
       } catch (error) {
         lastError = error;
+
+        if (reserved) {
+          await releaseAttempt(meter, usageKey);
+        }
+
         const schemaMismatch = isSchemaMismatchError(error);
         appLogger.warn({
           attempt: attempt.label,

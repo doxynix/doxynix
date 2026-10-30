@@ -21,6 +21,8 @@ model Workspace {
   billingOperations       BillingOperation[]
   billingLedgerEntries    BillingLedgerEntry[]
   billingIssues           BillingIssue[]
+  usageEvents             UsageEvent[]
+  usage                   WorkspaceUsage[]
 
   @@deny('all', auth() == null)
   @@allow('create', true)

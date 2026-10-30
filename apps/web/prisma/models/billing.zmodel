@@ -214,8 +214,7 @@ model BillingIssue {
   @@map("billing_issues")
 }
 
-model BillingReconciliationRun {
-  /// @zod.custom.omit(["model"])
+model BillingReconciliationRun {  /// @zod.custom.omit(["model"])
   id                   String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   scheduledForDate     DateTime  @unique @map("scheduled_for_date") @db.Date
   status               String
@@ -236,4 +235,62 @@ model BillingReconciliationRun {
   @@allow('create,update,delete', false)
 
   @@map("billing_reconciliation_runs")
+}
+
+// Append-only metering: one row per reserved, settled or cache-hit unit. `workspace_usage` is the
+// per-month rollup the entitlement reader consumes; it is never recomputed from these rows.
+model UsageEvent {
+  /// @zod.custom.omit(["model"])
+  id                String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId       String   @map("workspace_id") @db.Uuid
+  analysisId        String?  @map("analysis_id") @db.Uuid
+  kind              String   @default("AI_CALL")
+  idempotencyKey    String   @unique @map("idempotency_key")
+  provider          String?
+  model             String?
+  /// @zod.number.int().min(0)
+  inputTokens       Int      @default(0) @map("input_tokens") @gte(0)
+  /// @zod.number.int().min(0)
+  cachedInputTokens Int      @default(0) @map("cached_input_tokens") @gte(0)
+  /// @zod.number.int().min(0)
+  outputTokens      Int      @default(0) @map("output_tokens") @gte(0)
+  costCents         BigInt   @default(0) @map("cost_cents")
+  occurredAt        DateTime @map("occurred_at") @db.Timestamptz(3)
+  details           Json?
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+
+  @@deny('all', auth() == null)
+  @@allow('read', workspace.members?[userId == auth().id && role == OWNER] || auth().role == 'ADMIN')
+  @@allow('create,update,delete', false)
+
+  @@index([workspaceId, occurredAt, id])
+  @@index([analysisId])
+  @@map("usage_events")
+}
+
+model WorkspaceUsage {
+  /// @zod.custom.omit(["model"])
+  id            String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId   String   @map("workspace_id") @db.Uuid
+  periodStart   DateTime @map("period_start") @db.Date
+  /// @zod.number.int().min(0)
+  analysesCount Int      @default(0) @map("analyses_count") @gte(0)
+  /// @zod.number.int().min(0)
+  aiTokensUsed  Int      @default(0) @map("ai_tokens_used") @gte(0)
+  costCents     BigInt   @default(0) @map("cost_cents")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+
+  @@deny('all', auth() == null)
+  @@allow('read', workspace.members?[userId == auth().id && role == OWNER] || auth().role == 'ADMIN')
+  @@allow('create,update,delete', false)
+
+  @@unique([workspaceId, periodStart])
+  @@index([periodStart])
+  @@map("workspace_usage")
 }

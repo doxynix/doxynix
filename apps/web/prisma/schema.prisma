@@ -466,6 +466,8 @@ model Workspace {
   billingOperations       BillingOperation[]
   billingLedgerEntries    BillingLedgerEntry[]
   billingIssues           BillingIssue[]
+  usageEvents             UsageEvent[]
+  usage                   WorkspaceUsage[]
 
   @@index([createdAt(sort: Desc), id(sort: Desc)], map: "workspaces_created_at_id_idx")
   @@map("workspaces")
@@ -742,6 +744,52 @@ model BillingReconciliationRun {
   updatedAt            DateTime  @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
 
   @@map("billing_reconciliation_runs")
+}
+
+model UsageEvent {
+  /// @zod.custom.omit(["model"])
+  id                String    @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
+  workspaceId       String    @map("workspace_id") @db.Uuid()
+  analysisId        String?   @map("analysis_id") @db.Uuid()
+  kind              String    @default("AI_CALL")
+  idempotencyKey    String    @unique() @map("idempotency_key")
+  provider          String?
+  model             String?
+  /// @zod.number.int().min(0)
+  inputTokens       Int       @default(0) @map("input_tokens")
+  /// @zod.number.int().min(0)
+  cachedInputTokens Int       @default(0) @map("cached_input_tokens")
+  /// @zod.number.int().min(0)
+  outputTokens      Int       @default(0) @map("output_tokens")
+  costCents         BigInt    @default(0) @map("cost_cents")
+  occurredAt        DateTime  @map("occurred_at") @db.Timestamptz(3)
+  details           Json?
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime  @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+
+  @@index([workspaceId, occurredAt, id])
+  @@index([analysisId])
+  @@map("usage_events")
+}
+
+model WorkspaceUsage {
+  /// @zod.custom.omit(["model"])
+  id            String    @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
+  workspaceId   String    @map("workspace_id") @db.Uuid()
+  periodStart   DateTime  @map("period_start") @db.Date()
+  /// @zod.number.int().min(0)
+  analysesCount Int       @default(0) @map("analyses_count")
+  /// @zod.number.int().min(0)
+  aiTokensUsed  Int       @default(0) @map("ai_tokens_used")
+  costCents     BigInt    @default(0) @map("cost_cents")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime  @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+
+  @@unique([workspaceId, periodStart])
+  @@index([periodStart])
+  @@map("workspace_usage")
 }
 
 model Analysis {

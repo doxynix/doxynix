@@ -25,6 +25,8 @@ export async function cleanupDatabase() {
   await assertDisposableDatabase();
 
   const tablenames = [
+    "usage_events",
+    "workspace_usage",
     "billing_ledger_entries",
     "billing_events",
     "billing_operations",
