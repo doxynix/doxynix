@@ -227,7 +227,7 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
     connections: {
       apiKeys: "ApiKey",
       billingCheckoutSessions: "BillingCheckoutSession",
-      billingCustomer: "BillingCustomer",
+      billingCustomers: "BillingCustomer",
       billingIssues: "BillingIssue",
       billingLedgerEntries: "BillingLedgerEntry",
       billingOperations: "BillingOperation",

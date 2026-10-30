@@ -6,12 +6,14 @@ import "./workspace"
 
 model BillingCustomer {
   /// @zod.custom.omit(["model"])
-  id               String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  workspaceId      String   @unique @map("workspace_id") @db.Uuid
-  stripeCustomerId String   @unique @map("stripe_customer_id")
-  livemode         Boolean
-  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  id                 String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId        String   @map("workspace_id") @db.Uuid
+  provider           String   @default("stripe") @map("provider")
+  externalCustomerId String   @map("external_customer_id")
+  // Stripe-specific: a second provider needs `mode` or a nullable column.
+  livemode           Boolean
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   workspace     Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
   subscriptions BillingSubscription[]
@@ -20,6 +22,8 @@ model BillingCustomer {
   @@allow('read', workspace.members?[userId == auth().id && role == OWNER] || auth().role == 'ADMIN')
   @@allow('create,update,delete', false)
 
+  @@unique([workspaceId, provider])
+  @@unique([provider, externalCustomerId])
   @@map("billing_customers")
 }
 

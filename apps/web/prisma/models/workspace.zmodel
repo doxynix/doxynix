@@ -15,7 +15,7 @@ model Workspace {
   githubInstallations GithubInstallation[]
   apiKeys             ApiKey[]
 
-  billingCustomer         BillingCustomer?
+  billingCustomers        BillingCustomer[]
   billingSubscriptions    BillingSubscription[]
   billingCheckoutSessions BillingCheckoutSession[]
   billingOperations       BillingOperation[]

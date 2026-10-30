@@ -38,9 +38,9 @@ async function columnsFor(table: string): Promise<Array<ColumnRow>> {
   `;
 }
 
-async function createCustomer(workspaceId: string, stripeCustomerId = "cus_test_1") {
+async function createCustomer(workspaceId: string, externalCustomerId = "cus_test_1") {
   return prisma.billingCustomer.create({
-    data: { livemode: false, stripeCustomerId, workspaceId },
+    data: { externalCustomerId, livemode: false, workspaceId },
   });
 }
 
@@ -243,6 +243,41 @@ describe("billing schema", () => {
 
     await expect(alice.db.billingEvent.findMany()).resolves.toHaveLength(0);
     await expect(admin.db.billingEvent.findMany()).resolves.toHaveLength(1);
+  });
+
+  it("scopes customer identity by provider", async () => {
+    const alice = await createTestUser("Alice");
+    const bob = await createTestUser("Bob");
+    const columns = await columnsFor("billing_customers");
+
+    expect(columns.some((column) => column.column_name === "external_customer_id")).toBe(true);
+    expect(columns.some((column) => column.column_name === "stripe_customer_id")).toBe(false);
+
+    const customer = await createCustomer(alice.workspace.id, "cus_shared");
+    expect(customer.provider).toBe("stripe");
+
+    await expect(createCustomer(bob.workspace.id, "cus_shared")).rejects.toThrow(/unique/i);
+
+    const secondProvider = await prisma.billingCustomer.create({
+      data: {
+        externalCustomerId: "cus_shared",
+        livemode: false,
+        provider: "other",
+        workspaceId: alice.workspace.id,
+      },
+    });
+    expect(secondProvider.provider).toBe("other");
+
+    await expect(
+      prisma.billingCustomer.create({
+        data: {
+          externalCustomerId: "cus_other",
+          livemode: false,
+          provider: "other",
+          workspaceId: alice.workspace.id,
+        },
+      }),
+    ).rejects.toThrow(/unique/i);
   });
 
   it("truncates billing tables through cleanupDatabase", async () => {
