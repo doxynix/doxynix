@@ -5,7 +5,6 @@ import type Stripe from "stripe";
 import { appLogger } from "@/server/core/app-logger";
 import { type DbClient, prisma } from "@/server/core/db";
 
-import { BillingCatalogError, resolvePlanForPrice } from "./billing.catalog";
 import { PROCESS_STRIPE_EVENT_TASK_ID, STRIPE_API_VERSION } from "./billing.constants";
 import { NonRetryableBillingError } from "./billing.errors";
 import { upsertBillingIssue } from "./billing.issues";
@@ -16,6 +15,7 @@ import {
   resolveOwnership,
   type StoredStripeEvent,
 } from "./billing.resolver";
+import { projectSubscription } from "./billing.subscriptions";
 
 const EVENT_STATUS = {
   DEAD_LETTER: "DEAD_LETTER",
@@ -27,8 +27,6 @@ const EVENT_STATUS = {
 
 const STALE_EVENT_MS = 15 * 60 * 1000;
 const SWEEP_BATCH_SIZE = 50;
-
-type AccessState = "ACTIVE" | "CANCELED" | "GRACE" | "PENDING" | "REVIEW" | "SUSPENDED";
 
 export type StripeEventOutcome = { status: "processed" | "skipped" | "unowned" };
 
@@ -67,32 +65,6 @@ function parseStoredEvent(payload: Prisma.JsonValue | null): StoredStripeEvent {
   }
 
   return payload as unknown as StoredStripeEvent;
-}
-
-function accessStateForStatus(status: string): AccessState {
-  switch (status) {
-    case "active":
-    case "trialing": {
-      return "ACTIVE";
-    }
-    case "incomplete": {
-      return "PENDING";
-    }
-    case "past_due": {
-      return "GRACE";
-    }
-    case "paused":
-    case "unpaid": {
-      return "SUSPENDED";
-    }
-    case "canceled":
-    case "incomplete_expired": {
-      return "CANCELED";
-    }
-    default: {
-      return "REVIEW";
-    }
-  }
 }
 
 async function markProcessed(tx: DbClient, billingEventId: string): Promise<void> {
@@ -179,124 +151,6 @@ async function assertOwnerMatches(
   }
 }
 
-async function applySubscription(
-  tx: DbClient,
-  ownership: BillingOwnership,
-  subscription: Stripe.Subscription,
-): Promise<void> {
-  const item = subscription.items.data[0];
-
-  if (item == null) {
-    throw new NonRetryableBillingError(
-      "SUBSCRIPTION_ITEM_MISSING",
-      `Subscription ${subscription.id} has no items`,
-    );
-  }
-
-  if (ownership.billingCustomerId == null) {
-    throw new NonRetryableBillingError(
-      "CUSTOMER_MAPPING_MISSING",
-      `No billing customer mapping for subscription ${subscription.id}`,
-    );
-  }
-
-  const status = subscription.status;
-  const terminal = status === "canceled" || status === "incomplete_expired";
-  const isCurrent = terminal ? null : true;
-
-  let accessState = accessStateForStatus(status);
-
-  try {
-    resolvePlanForPrice({
-      currency: item.price.currency,
-      id: item.price.id,
-      interval: item.price.recurring?.interval ?? null,
-    });
-  } catch (error) {
-    if (!(error instanceof BillingCatalogError)) {
-      throw error;
-    }
-
-    accessState = "REVIEW";
-  }
-
-  const planCode = terminal ? "HOBBY" : "PRO";
-  const seatLimit = terminal ? 0 : (item.quantity ?? 1);
-  const cancelAt = subscription.cancel_at == null ? null : new Date(subscription.cancel_at * 1000);
-  const currentPeriodEnd = new Date(item.current_period_end * 1000);
-  const currentPeriodStart = new Date(item.current_period_start * 1000);
-  const latestInvoiceId = idOf(subscription.latest_invoice);
-  const needsReview = accessState === "REVIEW";
-  const reviewReason = needsReview ? "UNKNOWN_STATUS_OR_PRICE" : null;
-
-  // Frees the one-current slot before the upsert so the unique (workspaceId, isCurrent) holds.
-  if (isCurrent != null) {
-    await tx.billingSubscription.updateMany({
-      data: { isCurrent: null },
-      where: {
-        isCurrent: true,
-        stripeSubscriptionId: { not: subscription.id },
-        workspaceId: ownership.workspaceId,
-      },
-    });
-  }
-
-  const mirror = await tx.billingSubscription.upsert({
-    create: {
-      billingCustomerId: ownership.billingCustomerId,
-      cancelAt,
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      currency: item.price.currency,
-      currentPeriodEnd,
-      currentPeriodStart,
-      isCurrent,
-      latestInvoiceId,
-      needsReview,
-      quantity: item.quantity ?? 1,
-      reviewReason,
-      stripePriceId: item.price.id,
-      stripeStatus: status,
-      stripeSubscriptionId: subscription.id,
-      stripeSubscriptionItemId: item.id,
-      workspaceId: ownership.workspaceId,
-    },
-    update: {
-      cancelAt,
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      currency: item.price.currency,
-      currentPeriodEnd,
-      currentPeriodStart,
-      isCurrent,
-      latestInvoiceId,
-      needsReview,
-      quantity: item.quantity ?? 1,
-      reviewReason,
-      stripePriceId: item.price.id,
-      stripeStatus: status,
-      stripeSubscriptionItemId: item.id,
-    },
-    where: { stripeSubscriptionId: subscription.id },
-  });
-
-  await tx.workspaceEntitlement.upsert({
-    create: {
-      accessState,
-      planCode,
-      seatLimit,
-      sourceSubscriptionId: mirror.id,
-      workspaceId: ownership.workspaceId,
-    },
-    update: {
-      accessState,
-      planCode,
-      revision: { increment: 1 },
-      seatLimit,
-      sourceSubscriptionId: mirror.id,
-    },
-    where: { workspaceId: ownership.workspaceId },
-  });
-}
-
 // The Checkout row is the Session↔Workspace link; the session status is the only field the mirror
 // keeps. Access is granted by the subscription projection, never by a completed Checkout.
 async function applyCheckoutSession(
@@ -360,9 +214,15 @@ export async function processStripeEvent(billingEventId: string): Promise<Stripe
     await assertOwnerMatches(canonical.subscription, ownership.workspaceId);
   }
 
+  const now = new Date();
+
   await prisma.$transaction(async (tx) => {
     if (canonical.kind === "subscription") {
-      await applySubscription(tx, ownership, canonical.subscription);
+      await projectSubscription(tx, {
+        now,
+        ownership,
+        subscription: canonical.subscription,
+      });
     } else if (canonical.kind === "checkout_session") {
       await applyCheckoutSession(tx, ownership, canonical.session);
     }

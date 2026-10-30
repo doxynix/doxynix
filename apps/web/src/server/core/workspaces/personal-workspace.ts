@@ -3,6 +3,7 @@ import { PlanCode } from "@doxynix/shared";
 import { prisma } from "../db";
 
 export const PERSONAL_WORKSPACE_ENTITLEMENT = {
+  accessState: "ACTIVE",
   aiTokensPerMonth: 1_000_000,
   analysesPerMonth: 20,
   autoResync: false,

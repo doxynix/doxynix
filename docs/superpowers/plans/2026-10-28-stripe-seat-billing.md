@@ -485,7 +485,7 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
   - **Acceptance criteria:** Worker canonical retrieve; per-owner serialization; non-retryable version/owner/schema errors; 8 attempts; final `onFailure` DLQ; 15-minute sweeper зависших runs; никакой Stripe write из worker.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.events.test.ts`
 
-- [ ] **BILL-09 — Subscription projection и state machine (1 день)**
+- [x] **BILL-09 — Subscription projection и state machine (1 день)**
   - **Files touched:** Create `apps/web/src/server/modules/billing/billing.state.ts`, `billing.state.test.ts`, `billing.subscriptions.ts`, `billing.subscriptions.test.ts`; Modify `apps/web/src/server/modules/billing/billing.events.ts`.
   - **Acceptance criteria:** Все statuses/переходы раздела 5; current-period берётся из item; one-current сохраняет историю; initial active без paid не даёт доступ; canceled→active сохраняет mirror+REVIEW; projection transaction atomically обновляет entitlement.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.state.test.ts src/server/modules/billing/billing.subscriptions.test.ts`

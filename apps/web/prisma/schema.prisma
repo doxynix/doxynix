@@ -493,7 +493,7 @@ model WorkspaceEntitlement {
   id                   String    @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   workspaceId          String    @unique() @map("workspace_id") @db.Uuid()
   planCode             String    @default("HOBBY") @map("plan_code")
-  accessState          String    @default("ACTIVE") @map("access_state")
+  accessState          String    @default("NO_SUBSCRIPTION") @map("access_state")
   sourceSubscriptionId String?   @map("source_subscription_id") @db.Uuid()
   activatedAt          DateTime? @map("activated_at")
   graceEndsAt          DateTime? @map("grace_ends_at")

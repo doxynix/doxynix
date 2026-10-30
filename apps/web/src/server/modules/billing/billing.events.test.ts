@@ -24,7 +24,7 @@ const dbMock = vi.hoisted(() => ({
   billingEvent: { findMany: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
   billingIssue: { upsert: vi.fn() },
   billingSubscription: { findUnique: vi.fn(), updateMany: vi.fn(), upsert: vi.fn() },
-  workspaceEntitlement: { upsert: vi.fn() },
+  workspaceEntitlement: { findUnique: vi.fn(), upsert: vi.fn() },
 }));
 
 const triggerMock = vi.hoisted(() => vi.fn());
@@ -99,12 +99,21 @@ describe("stripe event worker", () => {
     dbMock.billingSubscription.findUnique.mockReset().mockResolvedValue(null);
     dbMock.billingSubscription.updateMany.mockReset().mockResolvedValue({ count: 0 });
     dbMock.billingSubscription.upsert.mockReset().mockResolvedValue({ id: "bs_1" });
+    dbMock.workspaceEntitlement.findUnique
+      .mockReset()
+      .mockResolvedValue({ accessState: "ACTIVE", sourceSubscriptionId: "bs_old" });
     dbMock.workspaceEntitlement.upsert.mockReset().mockResolvedValue({});
     triggerMock.mockReset().mockResolvedValue({ id: "run_1" });
     stripeMock.subscriptions.retrieve.mockReset().mockResolvedValue(subscription());
   });
 
   it("projects the canonical object, not the event snapshot", async () => {
+    dbMock.billingSubscription.findUnique.mockResolvedValue({
+      activatedAt: new Date("2026-09-01T00:00:00.000Z"),
+      graceEndsAt: null,
+      stripeStatus: "active",
+      workspaceId: WORKSPACE_ID,
+    });
     stripeMock.subscriptions.retrieve.mockResolvedValue(subscription({ status: "past_due" }));
 
     const outcome = await processStripeEvent("be_1");
@@ -118,7 +127,7 @@ describe("stripe event worker", () => {
       update: { stripeStatus: "past_due" },
     });
     expect(callArg(dbMock.workspaceEntitlement.upsert)).toMatchObject({
-      update: { accessState: "GRACE", planCode: "PRO", seatLimit: 2 },
+      update: { accessState: "SUSPENDED", planCode: "PRO", seatLimit: 2 },
     });
   });
 
