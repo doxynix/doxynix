@@ -2,12 +2,15 @@ import { createTRPCRouter, ownerProcedure } from "@/server/core/trpc/init";
 
 import { createCheckoutSession } from "./billing.checkout";
 import { changeSeats, previewPlanChange } from "./billing.plan-changes";
+import { createPortalSession, portalReturnUrl } from "./billing.portal";
 import {
   ChangeSeatsResultSchema,
   ChangeSeatsSchema,
   CreateCheckoutResultSchema,
   CreateCheckoutSchema,
+  CreatePortalSessionSchema,
   PlanChangeQuantitySchema,
+  PortalSessionResultSchema,
   PreviewPlanChangeResultSchema,
 } from "./billing.schemas";
 
@@ -32,6 +35,17 @@ export const billingRouter = createTRPCRouter({
         actorUserId: ctx.session.user.id,
         db: ctx.prisma,
         requestId: input.requestId,
+        workspaceId: ctx.workspace.id,
+      });
+    }),
+
+  createPortalSession: ownerProcedure
+    .input(CreatePortalSessionSchema)
+    .output(PortalSessionResultSchema)
+    .mutation(async ({ ctx, input }) => {
+      return createPortalSession({
+        db: ctx.prisma,
+        returnUrl: portalReturnUrl(input.returnPath ?? "/dashboard/settings/members"),
         workspaceId: ctx.workspace.id,
       });
     }),

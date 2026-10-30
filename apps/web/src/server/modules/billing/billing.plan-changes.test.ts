@@ -254,7 +254,7 @@ describe("changeSeats", () => {
       },
       expect.anything(),
     );
-    expect(result.prorationBehavior).toBe("create_prorations");
+    expect(result).toMatchObject({ prorationBehavior: "create_prorations" });
   });
 
   it("rejects a downgrade below the active member count before calling Stripe", async () => {
@@ -290,8 +290,18 @@ describe("changeSeats", () => {
     const second = await changeSeats(changeInput(fake, 3));
 
     expect(stripeMock.subscriptions.update).toHaveBeenCalledTimes(1);
-    expect(first.replayed).toBe(false);
-    expect(second.replayed).toBe(true);
+    expect(first).toMatchObject({ replayed: false });
+    expect(second).toMatchObject({ replayed: true });
+  });
+
+  it("returns changed:false without calling Stripe when the quantity is unchanged", async () => {
+    const fake = createFakeDb();
+
+    const result = await changeSeats(changeInput(fake, 2));
+
+    expect(result).toEqual({ changed: false, quantity: 2 });
+    expect(stripeMock.subscriptions.update).not.toHaveBeenCalled();
+    expect(fake.operations.size).toBe(0);
   });
 
   it("never touches the entitlement projection", async () => {

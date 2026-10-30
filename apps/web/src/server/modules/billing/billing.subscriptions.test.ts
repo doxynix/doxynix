@@ -42,6 +42,7 @@ function ownership() {
 
 function createTx() {
   const tx = {
+    billingIssue: { upsert: vi.fn().mockResolvedValue({}) },
     billingSubscription: {
       findUnique: vi.fn().mockResolvedValue(null),
       updateMany: vi.fn().mockResolvedValue({ count: 1 }),
@@ -54,6 +55,7 @@ function createTx() {
       }),
       upsert: vi.fn().mockResolvedValue({}),
     },
+    workspaceMember: { count: vi.fn().mockResolvedValue(0) },
   };
 
   return tx;
@@ -300,5 +302,32 @@ describe("markSubscriptionActivated", () => {
       data: { activatedAt: NOW },
       where: { activatedAt: null, stripeSubscriptionId: "sub_1" },
     });
+  });
+
+  it("never shrinks the seat limit below the active members and raises an issue", async () => {
+    const tx = createTx();
+    tx.billingSubscription.findUnique.mockResolvedValue({
+      activatedAt: NOW,
+      graceEndsAt: null,
+      stripeStatus: "active",
+    });
+    tx.workspaceMember.count.mockResolvedValue(3);
+
+    await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription({
+        items: { data: [{ ...subscription().items.data[0], quantity: 2 }] },
+      }) as never,
+    });
+
+    expect(callArg(tx.workspaceEntitlement.upsert)).toMatchObject({
+      update: { seatLimit: 3 },
+    });
+    expect(tx.billingIssue.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        create: expect.objectContaining({ kind: "SEATS_BELOW_MEMBERS" }),
+      }),
+    );
   });
 });

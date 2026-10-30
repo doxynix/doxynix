@@ -28,6 +28,7 @@ const dbMock = vi.hoisted(() => ({
   billingIssue: { upsert: vi.fn() },
   billingSubscription: { findUnique: vi.fn(), updateMany: vi.fn(), upsert: vi.fn() },
   workspaceEntitlement: { findUnique: vi.fn(), upsert: vi.fn() },
+  workspaceMember: { count: vi.fn() },
 }));
 
 const triggerMock = vi.hoisted(() => vi.fn());
@@ -107,6 +108,7 @@ describe("stripe event worker", () => {
       .mockReset()
       .mockResolvedValue({ accessState: "ACTIVE", sourceSubscriptionId: "bs_old" });
     dbMock.workspaceEntitlement.upsert.mockReset().mockResolvedValue({});
+    dbMock.workspaceMember.count.mockReset().mockResolvedValue(0);
     triggerMock.mockReset().mockResolvedValue({ id: "run_1" });
     stripeMock.subscriptions.retrieve.mockReset().mockResolvedValue(subscription());
   });

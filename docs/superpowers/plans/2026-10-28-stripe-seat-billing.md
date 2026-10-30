@@ -518,7 +518,7 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
   - **Acceptance criteria:** Preview не mutates; exact proration matrix; item ID+quantity; member-count guard; blocked delinquent/unknown states; successful command ждёт webhook, не выдаёт access из response.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.plan-changes.test.ts && bun --filter @doxynix/web test:int src/tests/integration/workspaces.test.ts`
 
-- [ ] **BILL-13 — Customer Portal и cancellation (0.5 дня)**
+- [x] **BILL-13 — Customer Portal и cancellation (0.5 дня)**
   - **Files touched:** Create `apps/web/src/server/modules/billing/billing.portal.ts`, `billing.portal.test.ts`; Modify `apps/web/src/server/modules/billing/billing.router.ts`.
   - **Acceptance criteria:** Owner-only scoped Customer; trusted return URL; portal URL не логируется/не сохраняется; cancellation доступен только через настроенный portal; cancel_at_period_end не отключает доступ до deleted/canceled.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.portal.test.ts`

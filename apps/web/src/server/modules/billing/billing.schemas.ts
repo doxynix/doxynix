@@ -1,5 +1,7 @@
 import * as z from "zod";
 
+import { PORTAL_RETURN_PATHS } from "./billing.constants";
+
 export const BillingOperationStatus = {
   COMPLETED: "COMPLETED",
   FAILED: "FAILED",
@@ -68,8 +70,17 @@ export const ChangeSeatsSchema = z.object({
 });
 
 export const ChangeSeatsResultSchema = z.object({
-  operationId: z.string(),
-  prorationBehavior: z.enum(["always_invoice", "create_prorations"]),
+  changed: z.boolean(),
+  operationId: z.string().optional(),
+  prorationBehavior: z.enum(["always_invoice", "create_prorations"]).optional(),
   quantity: z.number().int(),
-  replayed: z.boolean(),
+  replayed: z.boolean().optional(),
+});
+
+export const CreatePortalSessionSchema = z.object({
+  returnPath: z.enum(PORTAL_RETURN_PATHS).optional(),
+});
+
+export const PortalSessionResultSchema = z.object({
+  url: z.string(),
 });

@@ -29,12 +29,15 @@ export type PlanChangePreview = {
   quantity: number;
 };
 
-export type SeatChangeResult = {
-  operationId: string;
-  prorationBehavior: ProrationBehavior;
-  quantity: number;
-  replayed: boolean;
-};
+export type SeatChangeResult =
+  | { changed: false; quantity: number }
+  | {
+      changed: true;
+      operationId: string;
+      prorationBehavior: ProrationBehavior;
+      quantity: number;
+      replayed: boolean;
+    };
 
 type CurrentSubscription = {
   currency: string;
@@ -126,6 +129,11 @@ export async function previewPlanChange(input: PreviewPlanChangeInput): Promise<
 export async function changeSeats(input: PlanChangeInput): Promise<SeatChangeResult> {
   const current = await loadChangeableSubscription(input.db, input.workspaceId);
 
+  // Nothing to bill: no Stripe call, no operation row.
+  if (input.quantity === current.quantity) {
+    return { changed: false, quantity: input.quantity };
+  }
+
   if (input.quantity < current.quantity) {
     await assertSeatFloor(input.db, input.workspaceId, input.quantity);
   }
@@ -177,6 +185,7 @@ export async function changeSeats(input: PlanChangeInput): Promise<SeatChangeRes
       : prorationFor(input.quantity, current.quantity);
 
   return {
+    changed: true,
     operationId: run.operationId,
     prorationBehavior,
     quantity: input.quantity,

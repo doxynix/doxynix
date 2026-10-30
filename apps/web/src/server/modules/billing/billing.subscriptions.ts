@@ -4,6 +4,7 @@ import type { DbClient } from "@/server/core/db";
 
 import { BillingCatalogError, resolvePlanForPrice } from "./billing.catalog";
 import { NonRetryableBillingError } from "./billing.errors";
+import { upsertBillingIssue } from "./billing.issues";
 import type { BillingOwnership } from "./billing.resolver";
 import {
   type AccessState,
@@ -100,7 +101,26 @@ export async function projectSubscription(
   const terminal = isTerminalStatus(subscription.status);
   const isCurrent = terminal ? null : true;
   const planCode = terminal ? "HOBBY" : "PRO";
-  const seatLimit = terminal ? 0 : (item.quantity ?? 1);
+  const requestedSeats = item.quantity ?? 1;
+  const activeMembers = await tx.workspaceMember.count({
+    where: { workspaceId: ownership.workspaceId },
+  });
+
+  // Stripe can report fewer seats than the workspace already has (race, manual change in the
+  // Dashboard). Never shrink capacity below the people present; surface it as an issue instead.
+  if (!terminal && requestedSeats < activeMembers) {
+    await upsertBillingIssue(tx, {
+      dedupeKey: `seats_below_members:${subscription.id}`,
+      details: { activeMembers, requestedSeats },
+      kind: "SEATS_BELOW_MEMBERS",
+      severity: "WARNING",
+      source: "stripe_worker",
+      stripeObjectId: subscription.id,
+      workspaceId: ownership.workspaceId,
+    });
+  }
+
+  const seatLimit = terminal ? 0 : Math.max(requestedSeats, activeMembers);
   const cancelAt = subscription.cancel_at == null ? null : new Date(subscription.cancel_at * 1000);
   const currentPeriodEnd = new Date(item.current_period_end * 1000);
   const currentPeriodStart = new Date(item.current_period_start * 1000);

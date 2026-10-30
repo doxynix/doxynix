@@ -82,6 +82,7 @@ function createFakeTx(initial: Partial<Mirror> = {}) {
   const mirrorUpdates: Array<Record<string, unknown>> = [];
 
   const tx = {
+    billingIssue: { upsert: vi.fn().mockResolvedValue({}) },
     billingLedgerEntry: {
       create: vi.fn(async ({ data }: { data: LedgerRow }) => {
         if (ledger.has(data.entryKey)) {
@@ -140,6 +141,7 @@ function createFakeTx(initial: Partial<Mirror> = {}) {
         return {};
       }),
     },
+    workspaceMember: { count: vi.fn().mockResolvedValue(1) },
   };
 
   return {
