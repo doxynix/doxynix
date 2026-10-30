@@ -16,6 +16,8 @@ export type InvoiceEventInput = {
   invoice: Stripe.Invoice;
   now: Date;
   ownership: BillingOwnership;
+  // Retrieved by the caller before the transaction: a network call must not hold a DB transaction.
+  subscription: null | Stripe.Subscription;
 };
 
 // Endive moved the link under `parent.subscription_details`; the flat field is legacy.
@@ -69,12 +71,14 @@ async function applyInvoicePaid(tx: DbClient, input: InvoiceEventInput): Promise
     where: { stripeSubscriptionId: subscriptionId, workspaceId: input.ownership.workspaceId },
   });
 
-  const subscription = await getStripeClient().subscriptions.retrieve(subscriptionId);
+  if (input.subscription == null) {
+    return;
+  }
 
   await projectSubscription(tx, {
     now: input.now,
     ownership: input.ownership,
-    subscription,
+    subscription: input.subscription,
   });
 }
 
@@ -101,13 +105,28 @@ async function applyInvoicePaymentFailed(tx: DbClient, input: InvoiceEventInput)
     });
   }
 
-  const subscription = await getStripeClient().subscriptions.retrieve(subscriptionId);
+  if (input.subscription == null) {
+    return;
+  }
 
   await projectSubscription(tx, {
     now: input.now,
     ownership: input.ownership,
-    subscription,
+    subscription: input.subscription,
   });
+}
+
+// Runs outside the transaction. Returns null for one-off invoices that have no subscription.
+export async function retrieveSubscriptionForInvoice(
+  invoice: Stripe.Invoice,
+): Promise<null | Stripe.Subscription> {
+  const subscriptionId = subscriptionIdOf(invoice);
+
+  if (subscriptionId == null) {
+    return null;
+  }
+
+  return getStripeClient().subscriptions.retrieve(subscriptionId);
 }
 
 export async function applyInvoiceEvent(tx: DbClient, input: InvoiceEventInput): Promise<void> {

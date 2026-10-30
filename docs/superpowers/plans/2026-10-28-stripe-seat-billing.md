@@ -513,7 +513,7 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
 
 ### Customer actions и риски
 
-- [ ] **BILL-12 — Preview, plan и seat changes (1 день)**
+- [x] **BILL-12 — Preview, plan и seat changes (1 день)**
   - **Files touched:** Create `apps/web/src/server/modules/billing/billing.plan-changes.ts`, `billing.plan-changes.test.ts`; Modify `apps/web/src/server/modules/billing/billing.router.ts`, `apps/web/src/server/modules/billing/billing.schemas.ts`, `apps/web/src/server/modules/workspaces/workspace.service.ts`.
   - **Acceptance criteria:** Preview не mutates; exact proration matrix; item ID+quantity; member-count guard; blocked delinquent/unknown states; successful command ждёт webhook, не выдаёт access из response.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.plan-changes.test.ts && bun --filter @doxynix/web test:int src/tests/integration/workspaces.test.ts`

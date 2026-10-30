@@ -15,7 +15,10 @@ const stripeMock = vi.hoisted(() => ({
   customers: { create: vi.fn() },
 }));
 
-vi.mock("./billing.stripe", () => ({ getStripeClient: () => stripeMock }));
+vi.mock("./billing.stripe", () => ({
+  getStripeClient: () => stripeMock,
+  stripeEnvironment: () => "test",
+}));
 
 type OperationRow = {
   errorCode: null | string;

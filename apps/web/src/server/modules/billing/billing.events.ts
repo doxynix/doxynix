@@ -7,7 +7,7 @@ import { type DbClient, prisma } from "@/server/core/db";
 
 import { PROCESS_STRIPE_EVENT_TASK_ID, STRIPE_API_VERSION } from "./billing.constants";
 import { NonRetryableBillingError } from "./billing.errors";
-import { applyInvoiceEvent } from "./billing.invoices";
+import { applyInvoiceEvent, retrieveSubscriptionForInvoice } from "./billing.invoices";
 import { upsertBillingIssue } from "./billing.issues";
 import {
   type BillingOwnership,
@@ -216,6 +216,9 @@ export async function processStripeEvent(billingEventId: string): Promise<Stripe
   }
 
   const now = new Date();
+  // Stripe reads happen before the transaction; only DB writes hold it.
+  const invoiceSubscription =
+    canonical.kind === "invoice" ? await retrieveSubscriptionForInvoice(canonical.invoice) : null;
 
   await prisma.$transaction(async (tx) => {
     if (canonical.kind === "subscription") {
@@ -234,6 +237,7 @@ export async function processStripeEvent(billingEventId: string): Promise<Stripe
         invoice: canonical.invoice,
         now,
         ownership,
+        subscription: invoiceSubscription,
       });
     }
 

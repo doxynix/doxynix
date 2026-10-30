@@ -2,7 +2,6 @@ import { TRPCError } from "@trpc/server";
 import type Stripe from "stripe";
 
 import { APP_URL } from "@/shared/config/env.client";
-import { STRIPE_LIVEMODE } from "@/shared/config/env.server";
 import { DEFAULT_LOCALE } from "@/shared/config/locales";
 
 import type { DbClient } from "@/server/core/db";
@@ -11,7 +10,7 @@ import { proPlan } from "./billing.catalog";
 import { STRIPE_PROVIDER } from "./billing.constants";
 import { runBillingOperation, stripeIdempotencyKey } from "./billing.operations";
 import type { CreateCheckoutResult } from "./billing.schemas";
-import { getStripeClient } from "./billing.stripe";
+import { getStripeClient, stripeEnvironment } from "./billing.stripe";
 
 const CHECKOUT_RETURN_PATH = "/dashboard/settings/members";
 
@@ -24,10 +23,6 @@ export type CreateCheckoutInput = {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
-}
-
-function stripeEnvironment(): "live" | "test" {
-  return STRIPE_LIVEMODE ? "live" : "test";
 }
 
 function checkoutUrls(): { cancelUrl: string; successUrl: string } {

@@ -159,6 +159,7 @@ function paidInput(overrides: Record<string, unknown> = {}) {
     invoice: invoice() as never,
     now: NOW,
     ownership: { billingCustomerId: "bc_1", customerId: CUSTOMER_ID, workspaceId: WORKSPACE_ID },
+    subscription: subscription() as never,
     ...overrides,
   };
 }
@@ -246,6 +247,7 @@ describe("invoice.payment_failed", () => {
         eventCreatedAt: FAILED_AT,
         eventType: "invoice.payment_failed",
         now: FAILED_AT,
+        subscription: subscription({ status: "past_due" }),
       }),
     );
     const graceAfterFirst = fake.mirror.graceEndsAt;
@@ -256,6 +258,7 @@ describe("invoice.payment_failed", () => {
         eventCreatedAt: new Date(FAILED_AT.getTime() + 24 * 60 * 60 * 1000),
         eventType: "invoice.payment_failed",
         now: new Date(FAILED_AT.getTime() + 24 * 60 * 60 * 1000),
+        subscription: subscription({ status: "past_due" }),
       }),
     );
 
@@ -274,6 +277,7 @@ describe("invoice.payment_failed", () => {
         eventCreatedAt: FAILED_AT,
         eventType: "invoice.payment_failed",
         now: graceEndsAt,
+        subscription: subscription({ status: "past_due" }),
       }),
     );
 
@@ -290,6 +294,7 @@ describe("invoice.payment_failed", () => {
         eventCreatedAt: FAILED_AT,
         eventType: "invoice.payment_failed",
         now: insideGrace,
+        subscription: subscription({ status: "past_due" }),
       }),
     );
 

@@ -50,3 +50,26 @@ export const BILLING_LIMIT_HTTP_STATUS = {
 } as const;
 
 export type BillingLimitCode = keyof typeof BILLING_LIMIT_HTTP_STATUS;
+
+export const PlanChangeQuantitySchema = z.object({
+  quantity: z.number().int().min(1).max(1000),
+});
+
+export const PreviewPlanChangeResultSchema = z.object({
+  amountDueCents: z.number().int(),
+  currency: z.string(),
+  prorationBehavior: z.enum(["always_invoice", "create_prorations"]),
+  quantity: z.number().int(),
+});
+
+export const ChangeSeatsSchema = z.object({
+  quantity: z.number().int().min(1).max(1000),
+  requestId: BillingRequestIdSchema,
+});
+
+export const ChangeSeatsResultSchema = z.object({
+  operationId: z.string(),
+  prorationBehavior: z.enum(["always_invoice", "create_prorations"]),
+  quantity: z.number().int(),
+  replayed: z.boolean(),
+});
