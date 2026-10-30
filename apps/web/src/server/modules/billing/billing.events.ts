@@ -16,6 +16,7 @@ import {
   resolveOwnership,
   type StoredStripeEvent,
 } from "./billing.resolver";
+import { applyRiskEvent, isRiskObject, resolveRiskLinks } from "./billing.risk";
 import { projectSubscription } from "./billing.subscriptions";
 
 const EVENT_STATUS = {
@@ -234,6 +235,7 @@ export async function processStripeEvent(billingEventId: string): Promise<Stripe
   // Stripe reads happen before the transaction; only DB writes hold it.
   const invoiceSubscription =
     canonical.kind === "invoice" ? await retrieveSubscriptionForInvoice(canonical.invoice) : null;
+  const riskLinks = isRiskObject(canonical) ? await resolveRiskLinks(canonical) : null;
 
   await prisma.$transaction(async (tx) => {
     if (canonical.kind === "subscription") {
@@ -253,6 +255,13 @@ export async function processStripeEvent(billingEventId: string): Promise<Stripe
         now,
         ownership,
         subscription: invoiceSubscription,
+      });
+    } else if (isRiskObject(canonical) && riskLinks != null) {
+      await applyRiskEvent(tx, {
+        billingEventId,
+        canonical,
+        links: riskLinks,
+        ownership,
       });
     }
 
