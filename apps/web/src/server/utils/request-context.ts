@@ -8,6 +8,8 @@ import { APP_VERSION } from "@/shared/config/env.server";
 
 type RequestStore = {
   apiKeyScopes?: string[];
+  // Per-request memo for the entitlement reader; a batched tRPC call shares it across procedures.
+  entitlementMemo?: Map<string, Promise<unknown>>;
   appVersion?: string;
   country: string;
   ip: null | string;
@@ -160,6 +162,7 @@ export function buildRequestStore(input: RequestContextInput): RequestStore {
     apiKeyScopes: input.apiKeyScopes,
     appVersion: APP_VERSION,
     country: getCountry(input.req),
+    entitlementMemo: new Map(),
     ip: anonymizeIp(getIp(input.req)),
     method: input.method,
     origin: input.req.headers.get("origin") ?? undefined,

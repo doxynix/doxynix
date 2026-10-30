@@ -6,6 +6,7 @@ import { costCentsFor, type TokenUsage, totalTokens } from "./price";
 
 export const USAGE_EVENT_KIND = {
   ANALYSIS: "ANALYSIS",
+  ANALYSIS_RELEASE: "ANALYSIS_RELEASE",
   CACHE_HIT: "CACHE_HIT",
   RESERVE: "RESERVE",
   SETTLE: "SETTLE",
@@ -69,6 +70,15 @@ async function bumpUsage(
     },
     where: { workspaceId_periodStart: { periodStart, workspaceId: input.workspaceId } },
   });
+
+  // A release can make a counter negative; the rollup is a quota read model, never a debt.
+  await tx.$executeRaw`
+    UPDATE "workspace_usage"
+    SET "ai_tokens_used" = GREATEST(0, "ai_tokens_used"),
+        "cost_cents" = GREATEST(0, "cost_cents")
+    WHERE "workspace_id" = ${input.workspaceId}::uuid
+      AND "period_start" = ${periodStart.toISOString().slice(0, 10)}::date
+  `;
 }
 
 async function reservedTokensOf(db: DbClient, idempotencyKey: string): Promise<number> {
@@ -292,6 +302,48 @@ export async function recordAnalysisUsage(
 
       await bumpUsage(tx, {
         analyses: 1,
+        costCents: BigInt(0),
+        now,
+        tokens: 0,
+        workspaceId: input.workspaceId,
+      });
+    });
+  } catch (error) {
+    if (!isUniqueViolation(error)) {
+      throw error;
+    }
+  }
+}
+
+// Returns the quota unit when the analysis never started (queue failure), so a broken enqueue does
+// not consume a customer's monthly allowance.
+export async function releaseAnalysisUsage(
+  db: DbClient,
+  input: {
+    analysisId?: null | string;
+    idempotencyKey: string;
+    now?: Date;
+    workspaceId: string;
+  },
+): Promise<void> {
+  const now = input.now ?? new Date();
+
+  try {
+    await withTransaction(db, async (tx) => {
+      await tx.usageEvent.create({
+        data: {
+          analysisId: input.analysisId ?? null,
+          costCents: BigInt(0),
+          idempotencyKey: `${input.idempotencyKey}:release`,
+          inputTokens: 0,
+          kind: USAGE_EVENT_KIND.ANALYSIS_RELEASE,
+          occurredAt: now,
+          workspaceId: input.workspaceId,
+        },
+      });
+
+      await bumpUsage(tx, {
+        analyses: -1,
         costCents: BigInt(0),
         now,
         tokens: 0,

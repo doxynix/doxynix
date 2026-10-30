@@ -7,8 +7,10 @@ import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import { type DbClient, prisma } from "@/server/core/db";
+import { assertAnalysisAllowed, getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { trackServerEvent } from "@/server/core/posthog-events";
 import { realtimeService } from "@/server/core/realtime";
+import { recordAnalysisUsage, releaseAnalysisUsage } from "@/server/core/usage/usage";
 import { safeJsonClone } from "@/server/utils/safe-json";
 
 const HISTORY_LIMIT = 500;
@@ -58,6 +60,8 @@ export const analysisLifecycleService = {
     },
   ) {
     await this.assertRepoAccess(db, workspaceId, input.repoId);
+    // Access and quota are checked before anything is created or enqueued.
+    assertAnalysisAllowed(await getWorkspaceEntitlement(prisma, workspaceId));
 
     const analysis = await db.analysis.create({
       data: {
@@ -70,29 +74,59 @@ export const analysisLifecycleService = {
       },
     });
 
-    const handle = await tasks.trigger(
-      "analyze-repo",
-      {
-        analysisId: analysis.id,
-        docTypes: input.docTypes,
-        instructions: input.instructions,
-        language: input.language,
-        selectedBranch: input.branch,
-        selectedFiles: input.files,
-        userId,
-        workspaceId,
-      },
-      {
-        // concurrencyKey: `user-${userId}`,
-        // idempotencyKey: `analysis-${analysis.id}`,
-        ttl: "30m",
-      },
-    );
+    const usageKey = `analysis:${analysis.id}`;
+    let handle: null | { id: string; publicAccessToken: string } = null;
+    let quotaReserved = false;
 
-    await db.analysis.update({
-      data: { jobId: handle.id },
-      where: { id: analysis.id },
-    });
+    try {
+      // The quota unit is taken before enqueue and returned if the enqueue fails.
+      await recordAnalysisUsage(prisma, {
+        analysisId: analysis.id,
+        idempotencyKey: usageKey,
+        workspaceId,
+      });
+      quotaReserved = true;
+
+      handle = await tasks.trigger(
+        "analyze-repo",
+        {
+          analysisId: analysis.id,
+          docTypes: input.docTypes,
+          instructions: input.instructions,
+          language: input.language,
+          selectedBranch: input.branch,
+          selectedFiles: input.files,
+          userId,
+          workspaceId,
+        },
+        {
+          // concurrencyKey: `user-${userId}`,
+          // idempotencyKey: `analysis-${analysis.id}`,
+          ttl: "30m",
+        },
+      );
+
+      await db.analysis.update({
+        data: { jobId: handle.id },
+        where: { id: analysis.id },
+      });
+    } catch (error) {
+      if (quotaReserved) {
+        await releaseAnalysisUsage(prisma, {
+          analysisId: analysis.id,
+          idempotencyKey: usageKey,
+          workspaceId,
+        }).catch((releaseError: unknown) => {
+          appLogger.error({
+            error: releaseError,
+            msg: "Analysis quota release failed",
+            workspaceId,
+          });
+        });
+      }
+
+      throw error;
+    }
 
     trackServerEvent(
       "repo_analysis_queued",

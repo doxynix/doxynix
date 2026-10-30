@@ -1,16 +1,12 @@
-export const ACCESS_STATES = [
-  "NO_SUBSCRIPTION",
-  "PENDING",
-  "ACTIVE",
-  "GRACE",
-  "SUSPENDED",
-  "CANCELED",
-  "REVIEW",
-] as const;
+export {
+  ACCESS_STATES,
+  type AccessState,
+  DEFAULT_ACCESS_STATE,
+  hasAccess,
+  isAccessState,
+} from "@/server/core/entitlements/state";
 
-export type AccessState = (typeof ACCESS_STATES)[number];
-
-export const DEFAULT_ACCESS_STATE: AccessState = "NO_SUBSCRIPTION";
+import type { AccessState } from "@/server/core/entitlements/state";
 
 const KNOWN_STATUSES = new Set([
   "active",
@@ -50,14 +46,6 @@ export type AccessDecision = {
   accessState: AccessState;
   reviewReason: null | string;
 };
-
-export function isAccessState(value: unknown): value is AccessState {
-  return typeof value === "string" && (ACCESS_STATES as readonly string[]).includes(value);
-}
-
-export function hasAccess(state: AccessState): boolean {
-  return state === "ACTIVE" || state === "GRACE";
-}
 
 export function isTerminalStatus(status: string): boolean {
   return TERMINAL_STATUSES.has(status);

@@ -214,7 +214,7 @@ export class DifferentialAnalyzer {
       const activeModels = await getActiveModels();
 
       const rawResult = await callWithFallback<z.infer<typeof PrAiReviewOutputSchema>>({
-        attemptMetadata: { operation: "pr-ai-diff-review", prNumber },
+        attemptMetadata: { operation: "pr-ai-diff-review", prNumber, repoId: metadata.repoId },
         models: activeModels.POWERFUL,
         outputSchema: PrAiReviewOutputSchema,
         prompt: buildPrReviewUserPrompt({ diffPayload, projectOverviewJson }),

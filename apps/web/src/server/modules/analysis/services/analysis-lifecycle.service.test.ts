@@ -17,6 +17,16 @@ vi.mock("@trigger.dev/sdk", () => ({
   tasks: { trigger: triggerMock },
 }));
 
+vi.mock("@/server/core/entitlements", () => ({
+  assertAnalysisAllowed: vi.fn(),
+  getWorkspaceEntitlement: vi.fn().mockResolvedValue({ hasAccess: true }),
+}));
+
+vi.mock("@/server/core/usage/usage", () => ({
+  recordAnalysisUsage: vi.fn().mockResolvedValue(undefined),
+  releaseAnalysisUsage: vi.fn().mockResolvedValue(undefined),
+}));
+
 import { analysisLifecycleService } from "./analysis-lifecycle.service";
 
 function buildDb(): DbClient {

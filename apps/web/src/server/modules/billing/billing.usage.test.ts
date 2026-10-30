@@ -45,6 +45,7 @@ function createFakeDb() {
   let eventCount = 0;
 
   const db = {
+    $executeRaw: vi.fn().mockResolvedValue(0),
     $transaction: vi.fn(async (fn: (tx: unknown) => unknown) => fn(db)),
     usageEvent: {
       create: vi.fn(async ({ data }: { data: Omit<EventRow, "id"> }) => {

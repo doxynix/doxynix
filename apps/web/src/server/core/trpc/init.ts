@@ -6,8 +6,9 @@ import superjson from "superjson";
 
 import { IS_PROD } from "@/shared/config/env.flags";
 
-import { normalizeError } from "@/server/core/api-error";
+import { AppError, normalizeError } from "@/server/core/api-error";
 import { hasApiKeyScope } from "@/server/core/auth/api-key-scopes";
+import { getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import { assertAdminSecondFactor, assertNotBanned } from "@/server/utils/admin-access";
 import {
@@ -191,6 +192,18 @@ const isWorkspaceMember = t.middleware(async ({ ctx, next }) => {
 });
 
 export const workspaceProcedure = protectedProcedure.use(isWorkspaceMember);
+
+// Only procedures that start metered work use this; read-only workspace queries stay on
+// workspaceProcedure and must keep working for a suspended workspace.
+export const entitlementProcedure = workspaceProcedure.use(async ({ ctx, next }) => {
+  const entitlement = await getWorkspaceEntitlement(ctx.prisma, ctx.workspace.id);
+
+  if (entitlement == null || !entitlement.hasAccess) {
+    throw new AppError({ code: "PAYMENT_REQUIRED", publicMessage: "PAYMENT_REQUIRED" });
+  }
+
+  return next({ ctx: { ...ctx, entitlement } });
+});
 
 export const ownerProcedure = workspaceProcedure.use(({ ctx, next }) => {
   if (ctx.workspace.role !== "OWNER") {

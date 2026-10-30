@@ -74,17 +74,31 @@ async function resolveUsageMeter(
     return { analysisId, workspaceId };
   }
 
-  if (analysisId == null) {
+  if (analysisId != null) {
+    const analysis = await prisma.analysis.findUnique({
+      select: { repo: { select: { workspaceId: true } } },
+      where: { id: analysisId },
+    });
+    const resolved = analysis?.repo.workspaceId ?? null;
+
+    if (resolved != null) {
+      return { analysisId, workspaceId: resolved };
+    }
+  }
+
+  // PR review and file actions only carry a repo id; the workspace comes from the repo.
+  const repoId = readString(attemptMetadata, "repoId");
+
+  if (repoId == null) {
     return null;
   }
 
-  const analysis = await prisma.analysis.findUnique({
-    select: { repo: { select: { workspaceId: true } } },
-    where: { id: analysisId },
+  const repo = await prisma.repo.findUnique({
+    select: { workspaceId: true },
+    where: { id: repoId },
   });
-  const resolved = analysis?.repo.workspaceId ?? null;
 
-  return resolved == null ? null : { analysisId, workspaceId: resolved };
+  return repo == null ? null : { analysisId, workspaceId: repo.workspaceId };
 }
 
 function estimateTokens(system: string, prompt: string, maxOutputTokens: number): number {

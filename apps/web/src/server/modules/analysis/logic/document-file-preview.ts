@@ -67,7 +67,11 @@ export async function runDocumentFilePreview(
   const activeModels = await getActiveModels();
 
   const result = await callWithFallback<z.infer<typeof DocumentFilePreviewSchema>>({
-    attemptMetadata: { filePath: input.path, operation: "document-file-preview" },
+    attemptMetadata: {
+      filePath: input.path,
+      operation: "document-file-preview",
+      repoId: input.repoId,
+    },
     models: activeModels.WRITER,
     outputSchema: DocumentFilePreviewSchema,
     prompt: userPrompt,
