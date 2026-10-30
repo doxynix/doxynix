@@ -154,19 +154,34 @@ async function assertOwnerMatches(
 
 // The Checkout row is the Session↔Workspace link; the session status is the only field the mirror
 // keeps. Access is granted by the subscription projection, never by a completed Checkout.
+function checkoutSessionStatus(eventType: string, session: Stripe.Checkout.Session): null | string {
+  if (eventType === "checkout.session.completed") {
+    return "complete";
+  }
+
+  if (eventType === "checkout.session.expired") {
+    return "expired";
+  }
+
+  return session.status ?? null;
+}
+
 async function applyCheckoutSession(
   tx: DbClient,
   ownership: BillingOwnership,
   session: Stripe.Checkout.Session,
+  eventType: string,
 ): Promise<void> {
+  const stripeStatus = checkoutSessionStatus(eventType, session);
+
   await tx.billingCheckoutSession.upsert({
     create: {
       stripeCheckoutSessionId: session.id,
       stripeCustomerId: ownership.customerId ?? idOf(session.customer) ?? "",
-      stripeStatus: session.status ?? null,
+      stripeStatus,
       workspaceId: ownership.workspaceId,
     },
-    update: { stripeStatus: session.status ?? null },
+    update: { stripeStatus },
     where: { stripeCheckoutSessionId: session.id },
   });
 }
@@ -228,7 +243,7 @@ export async function processStripeEvent(billingEventId: string): Promise<Stripe
         subscription: canonical.subscription,
       });
     } else if (canonical.kind === "checkout_session") {
-      await applyCheckoutSession(tx, ownership, canonical.session);
+      await applyCheckoutSession(tx, ownership, canonical.session, event.type);
     } else if (canonical.kind === "invoice") {
       await applyInvoiceEvent(tx, {
         billingEventId,

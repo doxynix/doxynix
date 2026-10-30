@@ -14,6 +14,18 @@ import {
   isTerminalStatus,
 } from "./billing.state";
 
+function paidInvoiceAt(subscription: Stripe.Subscription): Date | null {
+  const invoice = subscription.latest_invoice;
+
+  if (invoice == null || typeof invoice !== "object" || invoice.status !== "paid") {
+    return null;
+  }
+
+  const paidAt = invoice.status_transitions.paid_at;
+
+  return paidAt == null ? null : new Date(paidAt * 1000);
+}
+
 export type ProjectedSubscription = {
   accessState: AccessState;
   mirrorId: string;
@@ -75,9 +87,29 @@ export async function projectSubscription(
   });
 
   const entitlement = await tx.workspaceEntitlement.findUnique({
-    select: { accessState: true, sourceSubscriptionId: true },
+    select: { accessState: true, activatedAt: true, sourceSubscriptionId: true },
     where: { workspaceId: ownership.workspaceId },
   });
+
+  // Lost `invoice.paid` must not leave a paying customer in PENDING for a month: a paid latest
+  // invoice on an active subscription is proof enough, and activation stays idempotent.
+  const paidAt = paidInvoiceAt(subscription);
+  let activatedAt = existing?.activatedAt ?? null;
+
+  if (
+    activatedAt == null &&
+    paidAt != null &&
+    (subscription.status === "active" || subscription.status === "trialing")
+  ) {
+    const activated = await markSubscriptionActivated(tx, {
+      activatedAt: paidAt,
+      stripeSubscriptionId: subscription.id,
+    });
+
+    if (activated) {
+      activatedAt = paidAt;
+    }
+  }
 
   // A personal HOBBY workspace is ACTIVE without a subscription; for transitions that counts as
   // NO_SUBSCRIPTION, otherwise the first paid event would look like an illegal ACTIVE -> PENDING.
@@ -90,7 +122,7 @@ export async function projectSubscription(
     current,
     now: input.now,
     remote: {
-      activatedAt: existing?.activatedAt ?? null,
+      activatedAt,
       graceEndsAt: existing?.graceEndsAt ?? null,
       previousStatus: existing?.stripeStatus ?? null,
       priceKnown: isPriceKnown(item.price),
@@ -187,6 +219,8 @@ export async function projectSubscription(
   await tx.workspaceEntitlement.upsert({
     create: {
       accessState: decision.accessState,
+      activatedAt:
+        decision.accessState === "ACTIVE" ? (entitlement?.activatedAt ?? activatedAt) : null,
       planCode,
       revision: BigInt(1),
       seatLimit,
@@ -195,6 +229,10 @@ export async function projectSubscription(
     },
     update: {
       accessState: decision.accessState,
+      activatedAt:
+        decision.accessState === "ACTIVE" && entitlement?.activatedAt == null
+          ? activatedAt
+          : undefined,
       planCode,
       revision: accessStateChanged ? { increment: 1 } : undefined,
       seatLimit,

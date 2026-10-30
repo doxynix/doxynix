@@ -126,7 +126,9 @@ export async function retrieveSubscriptionForInvoice(
     return null;
   }
 
-  return getStripeClient().subscriptions.retrieve(subscriptionId);
+  return getStripeClient().subscriptions.retrieve(subscriptionId, {
+    expand: ["latest_invoice"],
+  });
 }
 
 export async function applyInvoiceEvent(tx: DbClient, input: InvoiceEventInput): Promise<void> {

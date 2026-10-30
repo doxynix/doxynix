@@ -1,4 +1,7 @@
+import { readFileSync } from "node:fs";
+
 import { Prisma } from "@prisma/client";
+import { join } from "pathe";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { purgeBillingEventPayloads } from "@/server/core/billing/purge";
@@ -14,6 +17,7 @@ const stripeMock = vi.hoisted(() => ({
   charges: { retrieve: vi.fn() },
   checkout: { sessions: { retrieve: vi.fn() } },
   disputes: { retrieve: vi.fn() },
+  invoicePayments: { retrieve: vi.fn() },
   invoices: { retrieve: vi.fn() },
   radar: { earlyFraudWarnings: { retrieve: vi.fn() } },
   refunds: { retrieve: vi.fn() },
@@ -127,7 +131,9 @@ describe("stripe event worker", () => {
     const mirror = callArg(dbMock.billingSubscription.upsert);
 
     expect(outcome).toEqual({ status: "processed" });
-    expect(stripeMock.subscriptions.retrieve).toHaveBeenCalledWith("sub_1");
+    expect(stripeMock.subscriptions.retrieve).toHaveBeenCalledWith("sub_1", {
+      expand: ["latest_invoice"],
+    });
     expect(mirror).toMatchObject({
       create: { stripeStatus: "past_due" },
       update: { stripeStatus: "past_due" },
@@ -214,10 +220,11 @@ describe("stripe event worker", () => {
         }),
       }),
     );
+    // Stripe still reports "open" in some completed payloads; the event type is authoritative.
     stripeMock.checkout.sessions.retrieve.mockResolvedValue({
       customer: "cus_1",
       id: "cs_1",
-      status: "complete",
+      status: "open",
     });
 
     const outcome = await processStripeEvent("be_1");
@@ -227,6 +234,30 @@ describe("stripe event worker", () => {
       create: { stripeStatus: "complete", workspaceId: WORKSPACE_ID },
     });
     expect(dbMock.workspaceEntitlement.upsert).not.toHaveBeenCalled();
+  });
+
+  it("accepts invoice_payment.paid without projecting anything", async () => {
+    dbMock.billingEvent.findUnique.mockResolvedValue(
+      eventRow({
+        payload: storedEvent({
+          data: { object: { id: "inpay_1", object: "invoice_payment" } },
+          type: "invoice_payment.paid",
+        }),
+      }),
+    );
+    stripeMock.invoicePayments.retrieve.mockResolvedValue({
+      id: "inpay_1",
+      invoice: { customer: "cus_1", id: "in_1", parent: null },
+    });
+
+    const outcome = await processStripeEvent("be_1");
+
+    expect(outcome).toEqual({ status: "processed" });
+    expect(stripeMock.invoicePayments.retrieve).toHaveBeenCalledWith("inpay_1", {
+      expand: ["invoice"],
+    });
+    expect(dbMock.billingSubscription.upsert).not.toHaveBeenCalled();
+    expect("billingLedgerEntry" in dbMock).toBe(false);
   });
 
   it("marks a failed event as DEAD_LETTER with a critical issue", async () => {
@@ -302,5 +333,15 @@ describe("stripe event worker", () => {
       },
     });
     expect(dbMock.billingEvent).not.toHaveProperty("deleteMany");
+  });
+
+  it("schedules the sweeper with a bounded window", () => {
+    const source = readFileSync(
+      join(import.meta.dirname, "tasks/sweep-stripe-events.task.ts"),
+      "utf8",
+    );
+
+    expect(source).toContain('pattern: "*/15 * * * *"');
+    expect(source).toContain('window: "5m"');
   });
 });

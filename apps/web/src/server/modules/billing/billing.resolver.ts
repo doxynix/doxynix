@@ -20,6 +20,7 @@ export type CanonicalStripeObject =
   | { kind: "dispute"; dispute: Stripe.Dispute }
   | { kind: "early_fraud_warning"; warning: Stripe.Radar.EarlyFraudWarning }
   | { kind: "invoice"; invoice: Stripe.Invoice }
+  | { kind: "invoice_payment"; invoicePayment: Stripe.InvoicePayment }
   | { kind: "refund"; refund: Stripe.Refund }
   | { kind: "subscription"; subscription: Stripe.Subscription };
 
@@ -46,11 +47,24 @@ export async function resolveCanonicalObject(
   const objectId = event.data.object.id;
 
   if (event.type.startsWith("customer.subscription.")) {
-    return { kind: "subscription", subscription: await stripe.subscriptions.retrieve(objectId) };
+    return {
+      kind: "subscription",
+      // Expanded so the projection can see whether the latest invoice is already paid.
+      subscription: await stripe.subscriptions.retrieve(objectId, {
+        expand: ["latest_invoice"],
+      }),
+    };
   }
 
   if (event.type.startsWith("invoice.")) {
     return { invoice: await stripe.invoices.retrieve(objectId), kind: "invoice" };
+  }
+
+  if (event.type === "invoice_payment.paid") {
+    return {
+      invoicePayment: await stripe.invoicePayments.retrieve(objectId, { expand: ["invoice"] }),
+      kind: "invoice_payment",
+    };
   }
 
   if (event.type.startsWith("checkout.session.")) {
@@ -62,7 +76,10 @@ export async function resolveCanonicalObject(
   }
 
   if (event.type === "charge.refunded") {
-    return { charge: await stripe.charges.retrieve(objectId), kind: "charge" };
+    return {
+      charge: await stripe.charges.retrieve(objectId, { expand: ["refunds"] }),
+      kind: "charge",
+    };
   }
 
   if (event.type.startsWith("refund.")) {
@@ -96,6 +113,15 @@ async function customerIdFor(canonical: CanonicalStripeObject): Promise<null | s
     }
     case "checkout_session": {
       return idOf(canonical.session.customer);
+    }
+    case "invoice_payment": {
+      const invoice = canonical.invoicePayment.invoice;
+
+      if (typeof invoice === "string" || "deleted" in invoice) {
+        return null;
+      }
+
+      return idOf(invoice.customer);
     }
     case "charge": {
       return idOf(canonical.charge.customer);

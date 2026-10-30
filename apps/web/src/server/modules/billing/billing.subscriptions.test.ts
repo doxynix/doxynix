@@ -330,4 +330,74 @@ describe("markSubscriptionActivated", () => {
       }),
     );
   });
+
+  it("activates from a paid latest invoice when invoice.paid was lost", async () => {
+    const tx = createTx();
+    const paidAt = new Date("2026-10-20T10:00:00.000Z");
+    tx.billingSubscription.findUnique.mockResolvedValue({
+      activatedAt: null,
+      graceEndsAt: null,
+      stripeStatus: "active",
+    });
+
+    const result = await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription({
+        latest_invoice: {
+          status: "paid",
+          status_transitions: { paid_at: Math.floor(paidAt.getTime() / 1000) },
+        },
+      }) as never,
+    });
+
+    expect(result.accessState).toBe("ACTIVE");
+    expect(tx.billingSubscription.updateMany).toHaveBeenCalledWith({
+      data: { activatedAt: paidAt },
+      where: { activatedAt: null, stripeSubscriptionId: "sub_1" },
+    });
+  });
+
+  it("does not move activatedAt when a later event repeats it", async () => {
+    const tx = createTx();
+    tx.billingSubscription.findUnique.mockResolvedValue({
+      activatedAt: OLD_ACTIVATION,
+      graceEndsAt: null,
+      stripeStatus: "active",
+    });
+
+    await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription({
+        latest_invoice: {
+          status: "paid",
+          status_transitions: { paid_at: Math.floor(NOW.getTime() / 1000) },
+        },
+      }) as never,
+    });
+
+    expect(tx.billingSubscription.updateMany).not.toHaveBeenCalledWith(
+      expect.objectContaining({ data: { activatedAt: expect.any(Date) } }),
+    );
+  });
+
+  it("copies activatedAt into the entitlement when it becomes ACTIVE", async () => {
+    const tx = createTx();
+    tx.billingSubscription.findUnique.mockResolvedValue({
+      activatedAt: OLD_ACTIVATION,
+      graceEndsAt: null,
+      stripeStatus: "active",
+    });
+
+    await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription() as never,
+    });
+
+    expect(callArg(tx.workspaceEntitlement.upsert)).toMatchObject({
+      update: { activatedAt: OLD_ACTIVATION },
+    });
+  });
 });
