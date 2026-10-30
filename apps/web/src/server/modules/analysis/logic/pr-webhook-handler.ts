@@ -1,6 +1,6 @@
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import { analysisGate, getWorkspaceEntitlement } from "@/server/core/entitlements";
+import { analysisGate, getWorkspaceEntitlement, hasPlanFeature } from "@/server/core/entitlements";
 import type { PullRequestPayload } from "@/server/core/github/github-webhook.types";
 import { recordAnalysisUsage, releaseAnalysisUsage } from "@/server/core/usage/usage";
 import { PRConfigService } from "@/server/modules/analysis/logic/pr-config";
@@ -15,13 +15,24 @@ async function analyzeRepoForEvent(
   pullRequest: PullRequestPayload["pull_request"],
   repository: PullRequestPayload["repository"],
 ): Promise<void> {
-  const gate = analysisGate(await getWorkspaceEntitlement(prisma, workspaceId));
+  const entitlement = await getWorkspaceEntitlement(prisma, workspaceId);
+  const gate = analysisGate(entitlement);
 
   if (!gate.allowed) {
     appLogger.warn({
       msg: "pr_webhook_analysis_blocked",
       prNumber: pullRequest.number,
       reason: gate.reason,
+      repoId,
+    });
+    return;
+  }
+
+  if (!hasPlanFeature(entitlement, "prReviews")) {
+    appLogger.info({
+      msg: "pr_webhook_pr_reviews_disabled",
+      planCode: entitlement?.planCode,
+      prNumber: pullRequest.number,
       repoId,
     });
     return;

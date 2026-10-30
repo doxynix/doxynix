@@ -4,7 +4,8 @@ import { TRPCError } from "@trpc/server";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
-import type { DbClient } from "@/server/core/db";
+import { type DbClient, prisma } from "@/server/core/db";
+import { assertPlanFeature, getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { getRepoInfo } from "@/server/core/github/github-api";
 import { GitHubAuthRequiredError, parseUrl } from "@/server/core/github/github-client";
 import { realtimeService } from "@/server/core/realtime";
@@ -107,6 +108,11 @@ export const repoService = {
         });
       }
       throw toOctokitTrpcError(error) ?? error;
+    }
+
+    if (githubData.private) {
+      // The paywall is checked on the GitHub fact, before anything is written locally.
+      assertPlanFeature(await getWorkspaceEntitlement(prisma, workspaceId), "privateReposAllowed");
     }
 
     try {

@@ -5,13 +5,18 @@ import { requestContext } from "@/server/utils/request-context";
 
 import { type AccessState, isAccessState } from "./entitlements/state";
 
+export type PlanFeature = "autoResync" | "prReviews" | "privateReposAllowed";
+
 export type WorkspaceEntitlementView = {
   accessState: AccessState;
   aiTokensPerMonth: null | number;
   analysesPerMonth: null | number;
+  autoResync: boolean;
   graceEndsAt: Date | null;
   hasAccess: boolean;
   planCode: string;
+  prReviews: boolean;
+  privateReposAllowed: boolean;
   reposLimit: null | number;
   revision: bigint;
   seatLimit: number;
@@ -53,9 +58,12 @@ async function loadEntitlement(
     accessState,
     aiTokensPerMonth: entitlement.aiTokensPerMonth,
     analysesPerMonth: entitlement.analysesPerMonth,
+    autoResync: entitlement.autoResync,
     graceEndsAt: entitlement.graceEndsAt,
     hasAccess: accessState === "ACTIVE" || graceActive,
     planCode: entitlement.planCode,
+    privateReposAllowed: entitlement.privateReposAllowed,
+    prReviews: entitlement.prReviews,
     reposLimit: entitlement.reposLimit,
     revision: entitlement.revision,
     seatLimit: entitlement.seatLimit,
@@ -123,4 +131,21 @@ export function assertAnalysisAllowed(entitlement: null | WorkspaceEntitlementVi
   if (gate.reason === "LIMIT_EXCEEDED") {
     throw new AppError({ code: "FORBIDDEN", publicMessage: "LIMIT_EXCEEDED" });
   }
+}
+
+// One place for the paywall flags: callers must not re-derive them from the plan code.
+export function assertPlanFeature(
+  entitlement: null | WorkspaceEntitlementView,
+  feature: PlanFeature,
+): void {
+  if (entitlement == null || !entitlement[feature]) {
+    throw new AppError({ code: "FORBIDDEN", publicMessage: "FEATURE_NOT_IN_PLAN" });
+  }
+}
+
+export function hasPlanFeature(
+  entitlement: null | WorkspaceEntitlementView,
+  feature: PlanFeature,
+): boolean {
+  return entitlement?.[feature] === true;
 }

@@ -6,7 +6,9 @@ import { buildRequestStore, requestContext } from "@/server/utils/request-contex
 import {
   analysisGate,
   assertAnalysisAllowed,
+  assertPlanFeature,
   getWorkspaceEntitlement,
+  hasPlanFeature,
   type WorkspaceEntitlementView,
 } from "./entitlements";
 
@@ -53,9 +55,12 @@ function view(overrides: Partial<WorkspaceEntitlementView> = {}): WorkspaceEntit
     accessState: "ACTIVE",
     aiTokensPerMonth: 1_000_000,
     analysesPerMonth: 10,
+    autoResync: true,
     graceEndsAt: null,
     hasAccess: true,
     planCode: "PRO",
+    privateReposAllowed: true,
+    prReviews: true,
     reposLimit: null,
     revision: BigInt(3),
     seatLimit: 5,
@@ -204,5 +209,27 @@ describe("assertAnalysisAllowed", () => {
 
   it("passes for an allowed workspace", () => {
     expect(thrownBy(() => assertAnalysisAllowed(view()))).toBeNull();
+  });
+});
+
+describe("plan features", () => {
+  it.each(["autoResync", "prReviews", "privateReposAllowed"] as const)(
+    "rejects %s when the plan does not include it",
+    (feature) => {
+      const error = thrownBy(() => assertPlanFeature(view({ [feature]: false }), feature));
+
+      expect(error).toMatchObject({ code: "FORBIDDEN", publicMessage: "FEATURE_NOT_IN_PLAN" });
+    },
+  );
+
+  it("rejects every feature without an entitlement", () => {
+    expect(hasPlanFeature(null, "privateReposAllowed")).toBe(false);
+    expect(thrownBy(() => assertPlanFeature(null, "prReviews"))).toMatchObject({
+      publicMessage: "FEATURE_NOT_IN_PLAN",
+    });
+  });
+
+  it("passes for an included feature", () => {
+    expect(thrownBy(() => assertPlanFeature(view(), "autoResync"))).toBeNull();
   });
 });
