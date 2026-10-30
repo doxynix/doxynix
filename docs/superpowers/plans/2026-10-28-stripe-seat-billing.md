@@ -475,7 +475,7 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
 
 ### Events и entitlements
 
-- [ ] **BILL-07 — Raw webhook intake и durable enqueue (1 день)**
+- [x] **BILL-07 — Raw webhook intake и durable enqueue (1 день)**
   - **Files touched:** Create `apps/web/src/app/api/webhooks/stripe/route.ts`, `apps/web/src/server/modules/billing/billing.webhook.ts`, `billing.webhook.test.ts`, `tasks/process-stripe-event.task.ts`; Modify `apps/web/src/server/utils/task-config.ts`.
   - **Acceptance criteria:** Raw verify до parse; correct HTTP matrix; unique Event ID+payload hash; type-only task import; exact `idempotencyKey=event.id`; failed enqueue даёт non-2xx и повторяется на retry; route не вызывает Stripe retrieve/domain projection.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.webhook.test.ts`

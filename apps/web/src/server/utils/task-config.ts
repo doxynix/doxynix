@@ -83,6 +83,14 @@ export const TASK_CONFIGS = {
     },
   },
 
+  processStripeEvent: {
+    machine: { preset: "micro" },
+    maxDuration: 60 * 5, // TIME: 5 minutes
+    retry: {
+      maxAttempts: 1,
+    },
+  },
+
   writers: {
     concurrency: { total: 2 },
     machine: { preset: "small-2x" },
