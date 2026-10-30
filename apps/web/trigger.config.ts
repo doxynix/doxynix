@@ -23,7 +23,9 @@ type PackageJson = {
   workspaces?: unknown;
 };
 
-const RUNTIME: NonNullable<TriggerConfig["runtime"]> = "bun";
+// TODO(DXNX-290): the "bun" runtime breaks on Bun 1.4.3 (`--no-warnings` takes no value). Switch
+// back to "bun-1.4" after upgrading Trigger to >=4.8.2.
+const RUNTIME: NonNullable<TriggerConfig["runtime"]> = "node";
 
 function sanitizeDeployPackageJson(packageJson: PackageJson) {
   delete packageJson.patchedDependencies;
@@ -127,6 +129,5 @@ export default defineConfig({
   maxDuration: 1_000_000,
 
   project: "proj_whmkduzdqfzcgoyuhdyp",
-  // TODO(DXNX-290): switch to "bun-1.4" once Trigger 4.8.2 ships.
   runtime: RUNTIME,
 });
