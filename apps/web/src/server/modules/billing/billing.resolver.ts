@@ -8,6 +8,7 @@ import { getStripeClient } from "./billing.stripe";
 
 export type StoredStripeEvent = {
   api_version?: null | string;
+  created?: number;
   data: { object: { id: string; object: string } };
   id: string;
   type: string;

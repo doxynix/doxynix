@@ -7,6 +7,7 @@ import { type DbClient, prisma } from "@/server/core/db";
 
 import { PROCESS_STRIPE_EVENT_TASK_ID, STRIPE_API_VERSION } from "./billing.constants";
 import { NonRetryableBillingError } from "./billing.errors";
+import { applyInvoiceEvent } from "./billing.invoices";
 import { upsertBillingIssue } from "./billing.issues";
 import {
   type BillingOwnership,
@@ -225,6 +226,15 @@ export async function processStripeEvent(billingEventId: string): Promise<Stripe
       });
     } else if (canonical.kind === "checkout_session") {
       await applyCheckoutSession(tx, ownership, canonical.session);
+    } else if (canonical.kind === "invoice") {
+      await applyInvoiceEvent(tx, {
+        billingEventId,
+        eventCreatedAt: event.created == null ? now : new Date(event.created * 1000),
+        eventType: event.type,
+        invoice: canonical.invoice,
+        now,
+        ownership,
+      });
     }
 
     await markProcessed(tx, billingEventId);

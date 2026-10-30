@@ -500,7 +500,13 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
   - **Acceptance criteria:** DB-only read, request memoization, no Redis; owner/member scoping; ACTIVE/GRACE allow, все остальные deny; лимиты (`seatLimit`, `reposLimit`, `analysesPerMonth`, `aiTokensPerMonth`) отдаются тем же reader'ом, превышение → `403 LIMIT_EXCEEDED` до старта работы; источником израсходованного служит `workspace_usage` (BILL-10A), а не подсчёт `Analysis` в цикле; core не импортирует modules; seat check атомарен с membership mutation.
   - **Проверка:** `bun --filter @doxynix/web test src/server/core/entitlements.test.ts && bun --filter @doxynix/web test:int src/tests/integration/entitlements.test.ts && bun --filter @doxynix/web arch:check`
 
-- [ ] **BILL-11 — Invoice payment, dunning и ledger (1 день)**
+- [x] **BILL-10B — Feature gates: приватные репозитории и PR-ревью (0.5–1 день)**
+  - `privateReposAllowed`: запрет импорта приватного репозитория на тарифах без фичи (repo create / GitHub import).
+  - `prReviews`: запрет PR-анализа, если фича выключена (webhook и ручной запуск). Webhook не должен отдавать GitHub 5xx — только лог и пропуск.
+  - `autoResync`: переанализ по пушу только при флаге.
+  - **DoD:** HOBBY не может подключить приватный репо и не получает PR-ревью; флаги читаются из того же entitlement, без дублирования логики.
+
+- [x] **BILL-11 — Invoice payment, dunning и ledger (1 день)**
   - **Files touched:** Create `apps/web/src/server/modules/billing/billing.invoices.ts`, `billing.invoices.test.ts`, `billing.ledger.ts`, `billing.ledger.test.ts`; Modify `apps/web/src/server/modules/billing/billing.events.ts`, `apps/web/src/server/modules/system/tasks/cleanup-db.task.ts`.
   - **Acceptance criteria:** Paid активирует один раз и пишет ledger; first failure задаёт 7d; duplicates не продлевают/не дублируют; recovery canonical active очищает grace; unpaid/expired deny; payload purge через 90 дней сохраняет Event ID.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.invoices.test.ts src/server/modules/billing/billing.ledger.test.ts`

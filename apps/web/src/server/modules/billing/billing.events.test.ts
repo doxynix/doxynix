@@ -1,4 +1,7 @@
+import { Prisma } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { purgeBillingEventPayloads } from "@/server/core/billing/purge";
 
 import { proPlan } from "./billing.catalog";
 import { NonRetryableBillingError } from "./billing.errors";
@@ -21,7 +24,7 @@ const dbMock = vi.hoisted(() => ({
   $transaction: vi.fn(),
   billingCheckoutSession: { findFirst: vi.fn(), upsert: vi.fn() },
   billingCustomer: { findFirst: vi.fn() },
-  billingEvent: { findMany: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
+  billingEvent: { findMany: vi.fn(), findUnique: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
   billingIssue: { upsert: vi.fn() },
   billingSubscription: { findUnique: vi.fn(), updateMany: vi.fn(), upsert: vi.fn() },
   workspaceEntitlement: { findUnique: vi.fn(), upsert: vi.fn() },
@@ -95,6 +98,7 @@ describe("stripe event worker", () => {
     dbMock.billingEvent.findMany.mockReset().mockResolvedValue([]);
     dbMock.billingEvent.findUnique.mockReset().mockResolvedValue(eventRow());
     dbMock.billingEvent.update.mockReset().mockResolvedValue({});
+    dbMock.billingEvent.updateMany.mockReset().mockResolvedValue({ count: 0 });
     dbMock.billingIssue.upsert.mockReset().mockResolvedValue({});
     dbMock.billingSubscription.findUnique.mockReset().mockResolvedValue(null);
     dbMock.billingSubscription.updateMany.mockReset().mockResolvedValue({ count: 0 });
@@ -277,5 +281,24 @@ describe("stripe event worker", () => {
       }),
     );
     expect(triggerMock).not.toHaveBeenCalled();
+  });
+
+  it("purges an old payload without deleting the event id", async () => {
+    dbMock.billingEvent.updateMany.mockResolvedValue({ count: 3 });
+
+    const purged = await purgeBillingEventPayloads(
+      dbMock as never,
+      new Date("2026-10-30T00:00:00.000Z"),
+    );
+
+    expect(purged).toBe(3);
+    expect(dbMock.billingEvent.updateMany).toHaveBeenCalledWith({
+      data: { payload: Prisma.DbNull },
+      where: {
+        payload: { not: Prisma.DbNull },
+        receivedAt: { lt: expect.any(Date) },
+      },
+    });
+    expect(dbMock.billingEvent).not.toHaveProperty("deleteMany");
   });
 });

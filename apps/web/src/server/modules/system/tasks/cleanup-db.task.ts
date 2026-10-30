@@ -1,6 +1,7 @@
 import { schedules } from "@trigger.dev/sdk";
 
 import { appLogger } from "@/server/core/app-logger";
+import { purgeBillingEventPayloads } from "@/server/core/billing/purge";
 import { prisma } from "@/server/core/db";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
 
@@ -29,17 +30,22 @@ export const dailyDatabaseMaintenance = schedules.task({
         where: { createdAt: { lt: date14DaysAgo } },
       });
 
+      // The payload holds PII; the row and its stripeEventId stay forever for deduplication.
+      const purgedBillingPayloads = await purgeBillingEventPayloads(prisma, now);
+
       appLogger.info({
         deletedSessionsCount: deletedSessions.count,
         deletedTokensCount: deletedTokens.count,
         deletedWebhookLogsCount: deletedWebhooks.count,
         msg: "Database cleanup completed successfully.",
+        purgedBillingPayloads,
       });
 
       return {
         deletedSessions: deletedSessions.count,
         deletedTokens: deletedTokens.count,
         deletedWebhooks: deletedWebhooks.count,
+        purgedBillingPayloads,
         success: true,
       };
     } catch (error) {
