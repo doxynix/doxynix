@@ -28,3 +28,15 @@ export const BillingOperationRequestSchema = z.object({
 });
 
 export type BillingOperationRequest = z.infer<typeof BillingOperationRequestSchema>;
+
+export const CreateCheckoutSchema = z.object({
+  requestId: BillingRequestIdSchema,
+});
+
+export const CreateCheckoutResultSchema = z.object({
+  sessionId: z.string(),
+  // Null on replay: the URL is never stored, only returned once.
+  url: z.string().nullable(),
+});
+
+export type CreateCheckoutResult = z.infer<typeof CreateCheckoutResultSchema>;

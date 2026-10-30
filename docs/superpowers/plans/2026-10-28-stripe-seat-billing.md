@@ -468,7 +468,7 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
   - **Acceptance criteria:** UUID requestId + canonical hash; same operation resume/result, conflicting body 409; sanitized result без URL/PII; Stripe key ≤255 и не содержит email; concurrent same request создаёт одну operation.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.operations.test.ts`
 
-- [ ] **BILL-06 — Customer и hosted Checkout (1 день)**
+- [x] **BILL-06 — Customer и hosted Checkout (1 день)**
   - **Files touched:** Create `apps/web/src/server/modules/billing/billing.checkout.ts`, `billing.checkout.test.ts`, `billing.router.ts`; Modify `apps/web/src/server/modules/index.ts`.
   - **Acceptance criteria:** Owner-only `createCheckout`; Customer create и Session create идемпотентны; Session persistently связана с Workspace без metadata; `mode=subscription`, quantity=members, automatic tax/tax ID/full address/classic, dynamic PM, no trial; success return не меняет entitlement.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.checkout.test.ts && bun --filter @doxynix/web type-check`

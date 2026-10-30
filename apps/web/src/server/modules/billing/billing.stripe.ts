@@ -4,9 +4,9 @@ import Stripe from "stripe";
 
 import { STRIPE_API_KEY } from "@/shared/config/env.server";
 
-// The one place the API version lives: the SDK types only describe this version, and the webhook
-// endpoint is configured for it in the Dashboard.
-export const STRIPE_API_VERSION = "2026-09-30.endive" as const;
+import { STRIPE_API_VERSION } from "./billing.constants";
+
+export { STRIPE_API_VERSION };
 
 let stripeClient: null | Stripe = null;
 
