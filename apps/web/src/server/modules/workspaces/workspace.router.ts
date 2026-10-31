@@ -72,8 +72,4 @@ export const workspaceRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       return workspaceService.switchWorkspace(ctx.db, input.workspaceId, ctx.session.user.id);
     }),
-
-  upgradeToPro: ownerProcedure.output(WorkspaceSummarySchema).mutation(async ({ ctx }) => {
-    return workspaceService.upgradeToPro(ctx.db, ctx.workspace.id, ctx.workspace.role);
-  }),
 });

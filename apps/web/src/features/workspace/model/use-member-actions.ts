@@ -11,9 +11,6 @@ function errorKey(message: string) {
     case "ALREADY_MEMBER": {
       return "settings_members_error_already_member";
     }
-    case "BILLING_NOT_READY": {
-      return "settings_members_error_billing_not_ready";
-    }
     case "LAST_OWNER": {
       return "settings_members_error_last_owner";
     }
@@ -72,15 +69,5 @@ export function useMemberActions() {
     }),
   );
 
-  const upgrade = useMutation(
-    trpc.workspace.upgradeToPro.mutationOptions({
-      onError,
-      onSuccess: () => {
-        toast.success(t("settings_members_upgraded_toast"));
-        invalidate();
-      },
-    }),
-  );
-
-  return { add, remove, upgrade };
+  return { add, remove };
 }

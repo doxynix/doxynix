@@ -2,14 +2,12 @@ import { PlanCode, PlanCodeSchema } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
-import { isLocalBillingUpgradeEnabled } from "@/shared/config/env.flags";
-
 import { type DbClient, prisma } from "@/server/core/db";
 import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import { normalizeEmail } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
 
-import { PRO_ENTITLEMENT, type WorkspaceSummary } from "./workspace.schemas";
+import type { WorkspaceSummary } from "./workspace.schemas";
 
 type WorkspaceRole = "MEMBER" | "OWNER";
 
@@ -212,35 +210,5 @@ export const workspaceService = {
     }
 
     return toSummary(membership.workspace, membership.role);
-  },
-
-  async upgradeToPro(db: DbClient, workspaceId: string, actorRole: WorkspaceRole) {
-    // TODO(DXNX-293): PLACEHOLDER for local dev only. seatLimit = members+1 is not a real
-    // quantity; BILL-06 replaces this path with Stripe Checkout and subscription quantity sync.
-    if (!isLocalBillingUpgradeEnabled()) {
-      throw new TRPCError({ code: "PRECONDITION_FAILED", message: "BILLING_NOT_READY" });
-    }
-
-    const workspace = await db.workspace.findUnique({
-      include: { entitlement: true, members: { select: { userId: true } } },
-      where: { id: workspaceId },
-    });
-
-    if (workspace == null) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Workspace access denied" });
-    }
-
-    const entitlement = await db.workspaceEntitlement.update({
-      data: {
-        ...PRO_ENTITLEMENT,
-        // Stripe owns the real quantity from BILL-06; one seat keeps the local upgrade usable.
-        seatLimit: Math.max(workspace.members.length + 1, 1),
-      },
-      where: { workspaceId },
-    });
-
-    const updated: WorkspaceWithEntitlement = { ...workspace, entitlement };
-
-    return toSummary(updated, actorRole);
   },
 };

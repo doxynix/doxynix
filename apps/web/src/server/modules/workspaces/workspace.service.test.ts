@@ -129,56 +129,6 @@ describe("workspaceService.addMember", () => {
   });
 });
 
-describe("workspaceService.upgradeToPro", () => {
-  it("returns BILLING_NOT_READY when the local upgrade flag is off", async () => {
-    process.env.BILLING_LOCAL_UPGRADE_ENABLED = "false";
-
-    try {
-      await expect(
-        workspaceService.upgradeToPro({} as never, WORKSPACE_ID, "OWNER"),
-      ).rejects.toMatchObject({
-        code: "PRECONDITION_FAILED",
-        message: "BILLING_NOT_READY",
-      });
-    } finally {
-      process.env.BILLING_LOCAL_UPGRADE_ENABLED = "true";
-    }
-  });
-
-  it("updates the same workspace instead of creating a second one", async () => {
-    const update = vi.fn().mockResolvedValue(
-      entitlement({
-        aiTokensPerMonth: 20_000_000,
-        analysesPerMonth: 500,
-        autoResync: true,
-        historyDays: 90,
-        planCode: "PRO",
-        privateReposAllowed: true,
-        prReviews: true,
-        seatLimit: 2,
-      }),
-    );
-    const db = {
-      workspace: {
-        findUnique: vi.fn().mockResolvedValue(
-          workspace({
-            members: [{ userId: USER_ID }],
-          }),
-        ),
-      },
-      workspaceEntitlement: { update },
-    } as never;
-
-    const result = await workspaceService.upgradeToPro(db, WORKSPACE_ID, "OWNER");
-
-    expect(result.entitlement?.planCode).toBe("PRO");
-    expect(update.mock.calls[0]?.[0]).toMatchObject({
-      data: { planCode: "PRO", seatLimit: 2 },
-      where: { workspaceId: WORKSPACE_ID },
-    });
-  });
-});
-
 describe("workspaceService.removeMember", () => {
   it("refuses to delete the last OWNER", async () => {
     const remove = vi.fn();

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { Link } from "@/shared/i18n/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/core/avatar";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
@@ -11,7 +12,6 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 
 import { useWorkspace } from "@/entities/workspace/model/workspace-context";
 
-import { useMemberActions } from "../model/use-member-actions";
 import { AddMemberDialog } from "./add-member-dialog";
 import { RemoveMemberDialog } from "./remove-member-dialog";
 
@@ -23,7 +23,6 @@ export function WorkspaceMembersPage() {
   const trpc = useTRPC();
   const t = useTranslations("Dashboard");
   const { activeWorkspace, isOwner } = useWorkspace();
-  const { upgrade } = useMemberActions();
   const { data, isLoading } = useQuery(trpc.workspace.members.queryOptions());
 
   const planCode = activeWorkspace?.entitlement?.planCode ?? "HOBBY";
@@ -35,11 +34,8 @@ export function WorkspaceMembersPage() {
         <h3 className="font-medium text-lg">{t("settings_members_list_title")}</h3>
         {isOwner &&
           (isHobby ? (
-            <AppButton
-              disabled={upgrade.isPending}
-              onClick={() => upgrade.mutate()}
-            >
-              {t("settings_members_upgrade")}
+            <AppButton asChild>
+              <Link href="/dashboard/settings/billing">{t("settings_members_upgrade")}</Link>
             </AppButton>
           ) : (
             <AddMemberDialog />

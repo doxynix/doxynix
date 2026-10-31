@@ -146,7 +146,7 @@ describe("Workspace service and router", () => {
     expect(after.activeWorkspaceId).toBe(personalId);
     expect(after.reset).toBe(true);
 
-    await expect(caller.workspace.upgradeToPro()).rejects.toMatchObject({
+    await expect(caller.workspace.members()).rejects.toMatchObject({
       code: "FORBIDDEN",
       message: "Workspace access denied",
     });
@@ -156,9 +156,10 @@ describe("Workspace service and router", () => {
     const alice = await createBareTestUser("Alice");
     const caller = callerFor(alice.user);
 
-    const upgraded = await caller.workspace.upgradeToPro();
+    const members = await caller.workspace.members();
 
-    expect(upgraded.entitlement?.planCode).toBe("PRO");
+    expect(members.items).toHaveLength(1);
+    expect(members.items[0]?.role).toBe("OWNER");
     await expect(prisma.workspace.count()).resolves.toBe(1);
   });
 
@@ -224,13 +225,13 @@ describe("Workspace service and router", () => {
     const workspaceId = await createPersonalWorkspace(alice.user.id, alice.user.name);
     const caller = callerFor(bob.user, workspaceId);
 
-    await expect(caller.workspace.upgradeToPro()).rejects.toMatchObject({
+    await expect(caller.workspace.members()).rejects.toMatchObject({
       code: "FORBIDDEN",
       message: "Workspace access denied",
     });
   });
 
-  it("refuses new members on HOBBY and allows them after an in-place PRO upgrade", async () => {
+  it("refuses new members on HOBBY and allows them once Stripe grants PRO", async () => {
     const alice = await createTestUser("Alice");
     const bob = await createTestUser("Bob");
     const workspaceId = await createPersonalWorkspace(alice.user.id, alice.user.name);
@@ -242,33 +243,19 @@ describe("Workspace service and router", () => {
     });
 
     const workspaceCountBefore = await prisma.workspace.count();
-    const upgraded = await caller.workspace.upgradeToPro();
 
-    expect(upgraded.id).toBe(workspaceId);
-    expect(upgraded.entitlement?.planCode).toBe("PRO");
+    // Only the Stripe webhook projection grants PRO; there is no local upgrade mutation.
+    await prisma.workspaceEntitlement.update({
+      data: { planCode: "PRO", seatLimit: 2 },
+      where: { workspaceId },
+    });
+
     await expect(prisma.workspace.count()).resolves.toBe(workspaceCountBefore);
 
     const member = await caller.workspace.addMember({ email: bob.email });
 
     expect(member.role).toBe("MEMBER");
     expect(member.userId).toBe(bob.user.id);
-  });
-
-  it("returns BILLING_NOT_READY when the local upgrade flag is off", async () => {
-    const alice = await createTestUser("Alice");
-    const workspaceId = await createPersonalWorkspace(alice.user.id, alice.user.name);
-    const caller = callerFor(alice.user, workspaceId);
-
-    process.env.BILLING_LOCAL_UPGRADE_ENABLED = "false";
-
-    try {
-      await expect(caller.workspace.upgradeToPro()).rejects.toMatchObject({
-        code: "PRECONDITION_FAILED",
-        message: "BILLING_NOT_READY",
-      });
-    } finally {
-      process.env.BILLING_LOCAL_UPGRADE_ENABLED = "true";
-    }
   });
 
   it("refuses to remove the last OWNER", async () => {
