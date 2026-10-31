@@ -910,6 +910,29 @@ F18 снят, N8/N1/F15/F17 закрыты в шестом проходе — с
   `billing-grace`, `billing-idempotency`, `billing-ledger`, `billing-schema`,
   `billing-webhooks`, `entitlements` (интеграция на локальной `dxnx_web_test`).
 
+### Девятый проход (по ревью 1 ноября, H1–H3)
+
+- **H1 — дубль живой подписки диагностируется и в worker-пути.** `projectSubscription` при
+  `ownsAccess=false && !terminal` сам пишет CRITICAL `DUPLICATE_ACTIVE_SUBSCRIPTION`
+  (`dedupeKey = duplicate_active:<sub>`). Отдельный `flagDuplicate` в reconciliation удалён —
+  политика живёт в одном месте, reconciliation получает issue через repair.
+- **H2 — source больше не даёт владения.** Правило упрощено: доступ пишет только подписка,
+  у которой `isCurrent = true`, либо та, для которой слот свободен (`otherCurrent == null`),
+  либо та, которую caller явно уполномочил заменить терминального держателя
+  (`allowCurrentTakeover`). `entitlement.sourceSubscriptionId` из правила убран, поэтому
+  историческая подписка с source при живой current больше не может переписать доступ.
+- **H3 — takeover только после canonical read.** Worker никогда не вытесняет держателя слота
+  по зеркалу: при терминальном зеркале он делает mirror + issue. Reconciliation вызывает
+  `holderIsTerminal` (retrieve держателя) и передаёт `allowCurrentTakeover: true` только если
+  Stripe подтвердил терминальность (или объект удалён). Зеркало, врёт про `canceled`, живую
+  подписку не двигает. Добавлен `slotFreed`: если держателя нет, живая подписка сама забирает
+  слот на ближайшем прогоне (иначе после освобождения слота доступ оставался CANCELED).
+- **Тесты:** worker-first duplicate (issue + mirror-only), source-historical при живой current,
+  takeover без canonical read (worker) и с ним (reconciliation), stale-mirror (retrieve =
+  active → current не переезжает), slotFreed.
+- Прогоны: `src/server/modules/billing` — 17 файлов / 219 тестов; интеграция billing/entitlements
+  — 4 файла / 14 тестов; `type-check` и `lint` — pass.
+
 ## Self-check
 
 ### Пять утверждений с наименьшей уверенностью

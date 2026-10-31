@@ -83,6 +83,8 @@ function localSubscription(overrides: Record<string, unknown> = {}) {
     externalStatus: "active",
     externalSubscriptionId: "sub_1",
     externalSubscriptionItemId: "si_1",
+    id: "bs_1",
+    isCurrent: true,
     quantity: 2,
     workspaceId: WORKSPACE_ID,
     ...overrides,
@@ -287,8 +289,11 @@ describe("runStripeReconciliation", () => {
     expect(seatSyncMock).not.toHaveBeenCalled();
   });
 
-  it("mirrors a duplicate live subscription and raises a critical issue", async () => {
-    dbMock.billingSubscription.findFirst.mockResolvedValue({ id: "bs_current" });
+  it("mirrors a live subscription when the current slot is occupied", async () => {
+    dbMock.billingSubscription.findFirst.mockResolvedValue({
+      externalStatus: "active",
+      externalSubscriptionId: "sub_current",
+    });
     projectMock.mockResolvedValue({
       accessState: "ACTIVE",
       mirrorId: "bs_duplicate",
@@ -303,19 +308,70 @@ describe("runStripeReconciliation", () => {
     const summary = await runStripeReconciliation(NOW);
 
     expect(summary.mismatchCount).toBe(1);
-    expect(issueKinds()).toContain("DUPLICATE_ACTIVE_SUBSCRIPTION");
+    expect(projectMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ allowCurrentTakeover: false }),
+    );
   });
 
-  it("lets a live subscription take the slot once the stale current is terminal", async () => {
+  it("does not evict a current subscription whose mirror lies about cancellation", async () => {
+    dbMock.billingSubscription.findUnique.mockResolvedValue(
+      localSubscription({ externalSubscriptionId: "sub_duplicate", isCurrent: null }),
+    );
+    dbMock.workspaceEntitlement.findUnique.mockResolvedValue({
+      sourceSubscriptionId: "bs_current",
+    });
+    dbMock.billingSubscription.findFirst.mockResolvedValue({
+      externalStatus: "canceled",
+      externalSubscriptionId: "sub_current",
+    });
+    stripeMock.subscriptions.retrieve.mockResolvedValue({ status: "active" });
+    stripeMock.subscriptions.list.mockResolvedValue({
+      data: [subscription({ id: "sub_duplicate" })],
+      has_more: false,
+    });
+
+    const summary = await runStripeReconciliation(NOW);
+
+    expect(stripeMock.subscriptions.retrieve).toHaveBeenCalledWith("sub_current");
+    expect(summary.mismatchCount).toBe(0);
+    expect(projectMock).not.toHaveBeenCalled();
+  });
+
+  it("lets a live subscription take the slot once Stripe confirms the current is terminal", async () => {
     dbMock.billingSubscription.findUnique.mockResolvedValue(
       localSubscription({ externalSubscriptionId: "sub_new", isCurrent: null, quantity: 2 }),
     );
     dbMock.workspaceEntitlement.findUnique.mockResolvedValue({
       sourceSubscriptionId: "bs_canceled",
     });
-    // The first findFirst call is the free-slot probe; the second is gone because the probe
-    // returned a terminal row.
-    dbMock.billingSubscription.findFirst.mockResolvedValue({ externalStatus: "canceled" });
+    dbMock.billingSubscription.findFirst.mockResolvedValue({
+      externalStatus: "canceled",
+      externalSubscriptionId: "sub_canceled",
+    });
+    stripeMock.subscriptions.retrieve.mockResolvedValue({ status: "canceled" });
+    stripeMock.subscriptions.list.mockResolvedValue({
+      data: [subscription({ id: "sub_new" })],
+      has_more: false,
+    });
+
+    const summary = await runStripeReconciliation(NOW);
+
+    expect(stripeMock.subscriptions.retrieve).toHaveBeenCalledWith("sub_canceled");
+    expect(summary.mismatchCount).toBe(1);
+    expect(projectMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ allowCurrentTakeover: true }),
+    );
+  });
+
+  it("gives a live subscription the slot once the previous holder is gone", async () => {
+    dbMock.billingSubscription.findUnique.mockResolvedValue(
+      localSubscription({ externalSubscriptionId: "sub_new", isCurrent: null, quantity: 2 }),
+    );
+    dbMock.workspaceEntitlement.findUnique.mockResolvedValue({
+      sourceSubscriptionId: "bs_canceled",
+    });
     stripeMock.subscriptions.list.mockResolvedValue({
       data: [subscription({ id: "sub_new" })],
       has_more: false,
@@ -324,25 +380,10 @@ describe("runStripeReconciliation", () => {
     const summary = await runStripeReconciliation(NOW);
 
     expect(summary.mismatchCount).toBe(1);
-    expect(projectMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("does not raise a duplicate issue for a terminal subscription", async () => {
-    dbMock.billingSubscription.findFirst.mockResolvedValue({ id: "bs_current" });
-    projectMock.mockResolvedValue({
-      accessState: "CANCELED",
-      mirrorId: "bs_history",
-      ownsAccess: false,
-      reviewReason: null,
-    });
-    stripeMock.subscriptions.list.mockResolvedValue({
-      data: [subscription({ id: "sub_old", status: "canceled" })],
-      has_more: false,
-    });
-
-    await runStripeReconciliation(NOW);
-
-    expect(issueKinds()).not.toContain("DUPLICATE_ACTIVE_SUBSCRIPTION");
+    expect(projectMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ allowCurrentTakeover: false }),
+    );
   });
 
   it("does not count a matching mirror as a mismatch", async () => {

@@ -65,6 +65,8 @@ export async function projectSubscription(
     now: Date;
     ownership: BillingOwnership;
     subscription: Stripe.Subscription;
+    // The caller (reconciliation) proved from Stripe that the current slot holder is terminal.
+    allowCurrentTakeover?: boolean;
     // Operator resolution of a revoked terminal id: skip the revival guard for this projection.
     overrideRevivedTerminal?: boolean;
   },
@@ -126,15 +128,17 @@ export async function projectSubscription(
     },
   });
 
-  // Only the subscription that already holds access may rewrite it. A late or replayed event for
-  // a historical id updates its own mirror and nothing else: otherwise it can downgrade the live
+  // Only the subscription that already holds access may rewrite it, or one that finds the slot
+  // free, or one the caller proved can replace a terminal holder. A late or replayed event for a
+  // historical id updates its own mirror and nothing else: otherwise it can downgrade the live
   // plan or take the current slot from the subscription the entitlement points at. A terminal
-  // current row is released by its own event, so only a live subscription may replace it.
+  // current row is released by its own event; replacing it needs a canonical read first.
   const ownsAccess =
     existing?.isCurrent === true ||
-    (existing != null && entitlement?.sourceSubscriptionId === existing.id) ||
     otherCurrent == null ||
-    (!terminal && isTerminalStatus(otherCurrent.externalStatus));
+    (!terminal &&
+      input.allowCurrentTakeover === true &&
+      isTerminalStatus(otherCurrent.externalStatus));
 
   // Lost `invoice.paid` must not leave a paying customer in PENDING for a month: a paid latest
   // invoice on an active subscription is proof enough, and activation stays idempotent.
@@ -250,6 +254,20 @@ export async function projectSubscription(
         : subscription.latest_invoice.id;
   const needsReview = ownsAccess && accessState === "REVIEW";
   const persistedReviewReason = ownsAccess ? reviewReason : null;
+
+  // A live subscription the entitlement does not point at is never silent: it is mirrored as
+  // history and surfaced, otherwise Stripe keeps billing something nobody in the workspace sees.
+  if (!ownsAccess && !terminal) {
+    await upsertBillingIssue(tx, {
+      dedupeKey: `duplicate_active:${subscription.id}`,
+      details: { subscriptionStatus: subscription.status },
+      externalObjectId: subscription.id,
+      kind: "DUPLICATE_ACTIVE_SUBSCRIPTION",
+      severity: "CRITICAL",
+      source: "stripe_worker",
+      workspaceId: ownership.workspaceId,
+    });
+  }
 
   // A review state is not silent: without an issue nobody learns that a paying workspace lost
   // access and reconciliation has nothing to resolve.

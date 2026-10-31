@@ -442,6 +442,34 @@ describe("projectSubscription", () => {
     });
   });
 
+  it("does not treat an entitlement source as ownership while a live current exists", async () => {
+    const tx = createTx();
+    tx.billingSubscription.findUnique.mockResolvedValue({
+      activatedAt: OLD_ACTIVATION,
+      externalStatus: "active",
+      graceEndsAt: null,
+      id: "bs_historical",
+      isCurrent: null,
+      needsReview: false,
+      reviewReason: null,
+    });
+    tx.workspaceEntitlement.findUnique.mockResolvedValue({
+      accessState: "ACTIVE",
+      sourceSubscriptionId: "bs_historical",
+    });
+    tx.billingSubscription.findFirst.mockResolvedValue({ externalStatus: "active" });
+
+    const result = await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription({ id: "sub_historical", status: "canceled" }) as never,
+    });
+
+    expect(result.ownsAccess).toBe(false);
+    expect(tx.workspaceEntitlement.upsert).not.toHaveBeenCalled();
+    expect(tx.billingSubscription.updateMany).not.toHaveBeenCalled();
+  });
+
   it("refuses to take the current slot while another live subscription holds it", async () => {
     const tx = createTx();
     tx.billingSubscription.findFirst.mockResolvedValue({ externalStatus: "active" });
@@ -457,7 +485,22 @@ describe("projectSubscription", () => {
     expect(tx.billingSubscription.updateMany).not.toHaveBeenCalled();
   });
 
-  it("takes the current slot from a terminal subscription", async () => {
+  it("takes the current slot from a terminal subscription when the caller allows it", async () => {
+    const tx = createTx();
+    tx.billingSubscription.findFirst.mockResolvedValue({ externalStatus: "canceled" });
+
+    const result = await projectSubscription(tx as unknown as DbClient, {
+      allowCurrentTakeover: true,
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription({ id: "sub_new" }) as never,
+    });
+
+    expect(result.ownsAccess).toBe(true);
+    expect(callArg(tx.workspaceEntitlement.upsert)).toBeDefined();
+  });
+
+  it("does not evict a terminal current subscription without a canonical check", async () => {
     const tx = createTx();
     tx.billingSubscription.findFirst.mockResolvedValue({ externalStatus: "canceled" });
 
@@ -467,8 +510,39 @@ describe("projectSubscription", () => {
       subscription: subscription({ id: "sub_new" }) as never,
     });
 
-    expect(result.ownsAccess).toBe(true);
-    expect(callArg(tx.workspaceEntitlement.upsert)).toBeDefined();
+    expect(result.ownsAccess).toBe(false);
+    expect(tx.workspaceEntitlement.upsert).not.toHaveBeenCalled();
+    expect(tx.billingIssue.createMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: [expect.objectContaining({ kind: "DUPLICATE_ACTIVE_SUBSCRIPTION" })],
+      }),
+    );
+  });
+
+  it("surfaces a live duplicate even when the worker sees it first", async () => {
+    const tx = createTx();
+    tx.billingSubscription.findFirst.mockResolvedValue({ externalStatus: "active" });
+
+    const result = await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription({ id: "sub_duplicate" }) as never,
+    });
+
+    expect(result.ownsAccess).toBe(false);
+    expect(tx.workspaceEntitlement.upsert).not.toHaveBeenCalled();
+    expect(tx.billingSubscription.updateMany).not.toHaveBeenCalled();
+    expect(tx.billingIssue.createMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: [
+          expect.objectContaining({
+            dedupeKey: "duplicate_active:sub_duplicate",
+            kind: "DUPLICATE_ACTIVE_SUBSCRIPTION",
+            severity: "CRITICAL",
+          }),
+        ],
+      }),
+    );
   });
 
   it("cancels access when the only subscription is terminal", async () => {

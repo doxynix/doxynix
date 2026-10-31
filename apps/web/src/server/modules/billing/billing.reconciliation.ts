@@ -115,43 +115,53 @@ async function repair(
   subscription: Stripe.Subscription,
   ownership: { billingCustomerId: string; customerId: null | string; workspaceId: string },
   now: Date,
+  options: { allowTakeover?: boolean } = {},
 ): Promise<ProjectedSubscription> {
   return prisma.$transaction(async (tx) =>
-    projectSubscription(tx, { now, ownership, subscription }),
+    projectSubscription(tx, {
+      allowCurrentTakeover: options.allowTakeover === true,
+      now,
+      ownership,
+      subscription,
+    }),
   );
 }
 
-// A live subscription the entitlement does not point at is never dropped silently: it is mirrored
-// as history and surfaced, otherwise Stripe keeps billing something nobody in the workspace sees.
-async function flagDuplicate(
-  projected: ProjectedSubscription,
-  subscription: Stripe.Subscription,
+async function currentSlotHolder(
+  subscriptionId: string,
   workspaceId: string,
-): Promise<void> {
-  if (projected.ownsAccess || isTerminalStatus(subscription.status)) {
-    return;
-  }
-
-  await upsertBillingIssue(prisma, {
-    dedupeKey: `duplicate_active:${subscription.id}`,
-    details: { subscriptionStatus: subscription.status },
-    externalObjectId: subscription.id,
-    kind: "DUPLICATE_ACTIVE_SUBSCRIPTION",
-    severity: "CRITICAL",
-    source: "stripe_reconciliation",
-    workspaceId,
+): Promise<null | { externalStatus: string; externalSubscriptionId: string }> {
+  return prisma.billingSubscription.findFirst({
+    select: { externalStatus: true, externalSubscriptionId: true },
+    where: {
+      externalSubscriptionId: { not: subscriptionId },
+      isCurrent: true,
+      workspaceId,
+    },
   });
 }
 
-// A live subscription that does not hold the current slot yet may take it once the slot is free:
-// a canceled row still marked current is the usual aftermath of an out-of-order replacement.
-async function currentSlotIsFree(workspaceId: string): Promise<boolean> {
-  const current = await prisma.billingSubscription.findFirst({
-    select: { externalStatus: true },
-    where: { isCurrent: true, workspaceId },
-  });
+// Replacing a current subscription is allowed only for a terminal holder confirmed by Stripe: the
+// mirror can be stale, and evicting a paid subscription on stale data is worse than waiting.
+async function holderIsTerminal(holder: {
+  externalStatus: string;
+  externalSubscriptionId: string;
+}): Promise<boolean> {
+  if (!isTerminalStatus(holder.externalStatus)) {
+    return false;
+  }
 
-  return current == null || isTerminalStatus(current.externalStatus);
+  try {
+    const canonical = await getStripeClient().subscriptions.retrieve(holder.externalSubscriptionId);
+
+    return isTerminalStatus(canonical.status);
+  } catch (error) {
+    if (isMissingResource(error)) {
+      return true;
+    }
+
+    throw error;
+  }
 }
 
 async function entitlementLimitsStale(workspaceId: string): Promise<boolean> {
@@ -215,19 +225,16 @@ async function reconcileSubscription(
   }
 
   if (local == null) {
-    const occupied = await prisma.billingSubscription.findFirst({
-      select: { id: true },
-      where: { isCurrent: true, workspaceId: mapping.workspaceId },
-    });
-    const projected = await repair(
+    const holder = await currentSlotHolder(subscription.id, mapping.workspaceId);
+    const takeover =
+      !isTerminalStatus(subscription.status) && holder != null && (await holderIsTerminal(holder));
+
+    await repair(
       subscription,
       { billingCustomerId: mapping.id, customerId, workspaceId: mapping.workspaceId },
       now,
+      { allowTakeover: takeover },
     );
-
-    if (occupied != null) {
-      await flagDuplicate(projected, subscription, mapping.workspaceId);
-    }
 
     return true;
   }
@@ -262,27 +269,31 @@ async function reconcileSubscription(
   // are repaired too: without a fresh event a PRO row written before the catalog carried limits
   // would stay on HOBBY quotas. Only the owning subscription may heal the entitlement, so the
   // limits check stays out of the historical path to avoid a repair every run.
-  const takeover =
-    !ownsEntitlement &&
-    !isTerminalStatus(subscription.status) &&
-    (await currentSlotIsFree(mapping.workspaceId));
+  const holder = ownsEntitlement
+    ? null
+    : await currentSlotHolder(subscription.id, mapping.workspaceId);
+  const live = !isTerminalStatus(subscription.status);
+  // The slot is free once the holder's terminal event has landed; a terminal holder is replaced
+  // only after Stripe confirms it.
+  const slotFreed = !ownsEntitlement && live && holder == null;
+  const takeover = !ownsEntitlement && live && holder != null && (await holderIsTerminal(holder));
+
+  let projected: null | ProjectedSubscription = null;
 
   if (
     differs(local, subscription) ||
     local.needsReview ||
     (ownsEntitlement && (await entitlementLimitsStale(mapping.workspaceId))) ||
+    slotFreed ||
     takeover
   ) {
-    const projected = await repair(
+    projected = await repair(
       subscription,
       { billingCustomerId: mapping.id, customerId, workspaceId: mapping.workspaceId },
       now,
+      { allowTakeover: takeover },
     );
     changed = true;
-
-    if (!ownsEntitlement) {
-      await flagDuplicate(projected, subscription, mapping.workspaceId);
-    }
   }
 
   // Seats are derived from membership, not from the local mirror: a failed or skipped post-commit
@@ -293,7 +304,7 @@ async function reconcileSubscription(
   });
 
   if (
-    ownsEntitlement &&
+    (projected?.ownsAccess ?? ownsEntitlement) &&
     subscription.status === "active" &&
     item != null &&
     (item.quantity ?? 1) !== Math.max(1, members)
