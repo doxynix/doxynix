@@ -189,6 +189,23 @@ describe("runStripeReconciliation", () => {
     });
   });
 
+  it("repairs a stale mirror and the seat quantity in one run", async () => {
+    dbMock.billingSubscription.findUnique.mockResolvedValue(
+      localSubscription({ stripeStatus: "past_due" }),
+    );
+    dbMock.workspaceMember.count.mockResolvedValue(3);
+    stripeMock.subscriptions.list.mockResolvedValue({
+      data: [subscription({ status: "active" })],
+      has_more: false,
+    });
+
+    const summary = await runStripeReconciliation(NOW);
+
+    expect(summary.mismatchCount).toBe(1);
+    expect(projectMock).toHaveBeenCalledTimes(1);
+    expect(seatSyncMock).toHaveBeenCalled();
+  });
+
   it("does not count a matching mirror as a mismatch", async () => {
     dbMock.billingSubscription.findUnique.mockResolvedValue(localSubscription());
     stripeMock.subscriptions.list.mockResolvedValue({

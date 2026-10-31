@@ -165,6 +165,19 @@ async function reconcileSubscription(
     return true;
   }
 
+  // Repair the mirror first: seat sync reads it to decide whether the subscription is billable,
+  // and a stale `past_due` row would make it skip while Stripe is already `active`.
+  let changed = false;
+
+  if (differs(local, subscription)) {
+    await repair(
+      subscription,
+      { billingCustomerId: mapping.id, customerId, workspaceId: mapping.workspaceId },
+      now,
+    );
+    changed = true;
+  }
+
   // Seats are derived from membership, not from the local mirror: a failed or skipped post-commit
   // sync would otherwise leave the customer paying for a seat that no longer exists.
   const item = itemOf(subscription);
@@ -182,20 +195,10 @@ async function reconcileSubscription(
       workspaceId: mapping.workspaceId,
     });
 
-    return true;
+    changed = true;
   }
 
-  if (!differs(local, subscription)) {
-    return false;
-  }
-
-  await repair(
-    subscription,
-    { billingCustomerId: mapping.id, customerId, workspaceId: mapping.workspaceId },
-    now,
-  );
-
-  return true;
+  return changed;
 }
 
 async function reconcileMissingLocal(seen: Set<string>, now: Date): Promise<number> {
