@@ -735,12 +735,17 @@ advisory-lock + pending-строкой; **N13** — места в GRACE не п�
 лимиты лечатся при расхождении, а не только при смене плана. Покрыто integration-тестом
 `apps/web/src/tests/integration/billing-grace.test.ts`.
 
-Осталось (medium, до запуска не блокирует):
-N7 (agent chat без entitlement-гейта и метеринга), ручная `SeatsCard` конфликтует с автосинком
-(убрать или превратить в предоплату), F10 (issue на REVIEW), F11 (`concurrency` у
-`processStripeEvent`), F14 (атомарная квота), F15 (cache-hit не тратит квоту), F17 (tax preflight
-перед Checkout), F18 (аудит админ-действий), F19 (idempotency портала).
-F16 — `cannot-verify` (семантика `cachedInputTokens` у Gemini).
+Четвёртый проход (закрытие medium): **F10** — issue `SUBSCRIPTION_REVIEW` и пересчёт застрявшего
+REVIEW в reconciliation; **F11** — `concurrency: { perKey: 1, total: 10 }` и общий ключ владельца
+для webhook, admin replay и sweeper; **F14** — резерв квоты под advisory-lock до создания анализа;
+**F15** — повторный анализ того же SHA возвращает квоту и пишет `CACHE_HIT`; **F17** — Checkout
+блокируется, если заданная юрисдикция без регистрации; **F18** — действия админа пишутся
+структурным логом (таблица аудита — follow-up, схему не меняли); **F19** — idempotency у Portal;
+**N7** — agent chat и GitHub-reply проверяют entitlement и метерятся; **SeatsCard** стал read-only,
+места следуют за составом команды.
+
+Осталось: F16 — `cannot-verify` (семантика `cachedInputTokens` у Gemini); аудит админки в БД
+(требует миграции); живой sandbox-прогон и Dashboard-настройки.
 
 ---
 
