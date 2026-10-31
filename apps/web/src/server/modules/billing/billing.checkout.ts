@@ -126,16 +126,33 @@ export async function createCheckoutSession(
 
       // A second tab must not open a second Subscription. Two live Sessions on one customer can
       // both be paid, and the loser would keep billing invisibly (it never becomes `isCurrent`).
-      const openSession = await input.db.billingCheckoutSession.findFirst({
-        select: { id: true },
+      // An open session is reused instead of blocking the purchase for its 24h lifetime.
+      const recentSession = await input.db.billingCheckoutSession.findFirst({
+        orderBy: { createdAt: "desc" },
+        select: { stripeCheckoutSessionId: true, stripeStatus: true },
         where: {
           createdAt: { gte: new Date(Date.now() - CHECKOUT_SESSION_TTL_MS) },
-          stripeStatus: "open",
+          stripeStatus: { in: ["complete", "open"] },
           workspaceId: input.workspaceId,
         },
       });
 
-      if (openSession != null) {
+      if (recentSession != null) {
+        if (recentSession.stripeStatus === "open") {
+          const existing = await getStripeClient()
+            .checkout.sessions.retrieve(recentSession.stripeCheckoutSessionId)
+            .catch(() => null);
+
+          if (existing?.status === "open" && existing.url != null) {
+            return {
+              result: { sessionId: existing.id, url: existing.url },
+              stripeObjectId: existing.id,
+            };
+          }
+        }
+
+        // Paid, but the subscription webhook has not been projected yet: a second Session here
+        // would create a second subscription.
         throw new TRPCError({ code: "CONFLICT", message: "CHECKOUT_IN_PROGRESS" });
       }
 

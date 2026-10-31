@@ -11,7 +11,7 @@ const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5f";
 const CHECKOUT_URL = "https://checkout.stripe.com/c/pay/cs_new";
 
 const stripeMock = vi.hoisted(() => ({
-  checkout: { sessions: { create: vi.fn() } },
+  checkout: { sessions: { create: vi.fn(), retrieve: vi.fn() } },
   customers: { create: vi.fn() },
 }));
 
@@ -58,6 +58,7 @@ function createFakeDb(
     existingCustomerId?: string;
     members?: number;
     openSession?: boolean;
+    completeSession?: boolean;
   } = {},
 ) {
   let members = options.members ?? 2;
@@ -85,7 +86,12 @@ function createFakeDb(
 
         return data;
       },
-      findFirst: async () => (options.openSession === true ? { id: "cs_open" } : null),
+      findFirst: async () =>
+        options.openSession === true
+          ? { stripeCheckoutSessionId: "cs_open", stripeStatus: "open" }
+          : options.completeSession === true
+            ? { stripeCheckoutSessionId: "cs_done", stripeStatus: "complete" }
+            : null,
     },
     billingCustomer: {
       findFirst: async ({ where }: { where: { provider: string; workspaceId: string } }) =>
@@ -214,6 +220,7 @@ describe("createCheckoutSession", () => {
     stripeMock.checkout.sessions.create
       .mockReset()
       .mockResolvedValue({ id: "cs_new", status: "open", url: CHECKOUT_URL });
+    stripeMock.checkout.sessions.retrieve.mockReset();
   });
 
   it("creates a classic subscription session with tax, address and seat quantity", async () => {
@@ -309,8 +316,24 @@ describe("createCheckoutSession", () => {
     expect(fake.sessions).toHaveLength(0);
   });
 
-  it("refuses to open a second checkout while one is still open", async () => {
+  it("returns the url of an open checkout instead of blocking the purchase", async () => {
     const fake = createFakeDb({ existingCustomerId: "cus_existing", openSession: true });
+    stripeMock.checkout.sessions.retrieve.mockResolvedValue({
+      id: "cs_open",
+      status: "open",
+      url: "https://checkout.stripe.com/c/pay/cs_open",
+    });
+
+    await expect(createCheckoutSession(checkoutInput(fake))).resolves.toEqual({
+      sessionId: "cs_open",
+      url: "https://checkout.stripe.com/c/pay/cs_open",
+    });
+    expect(stripeMock.checkout.sessions.create).not.toHaveBeenCalled();
+    expect(fake.sessions).toHaveLength(0);
+  });
+
+  it("refuses a second checkout while the paid one is still being projected", async () => {
+    const fake = createFakeDb({ completeSession: true, existingCustomerId: "cus_existing" });
 
     await expect(createCheckoutSession(checkoutInput(fake))).rejects.toMatchObject({
       code: "CONFLICT",
