@@ -84,3 +84,45 @@ export const CreatePortalSessionSchema = z.object({
 export const PortalSessionResultSchema = z.object({
   url: z.string(),
 });
+
+export const ReplayEventSchema = z.object({
+  billingEventId: z.uuid(),
+});
+
+export const ReplayEventResultSchema = z.object({
+  runId: z.string(),
+});
+
+export const ResolveIssueSchema = z.object({
+  issueId: z.uuid(),
+  note: z.string().trim().max(500).optional(),
+});
+
+export const ResolveIssueResultSchema = z.object({
+  resolved: z.boolean(),
+});
+
+export const ListIssuesSchema = z.object({
+  cursor: z.uuid().optional(),
+  severity: z.enum(["CRITICAL", "INFO", "WARNING"]).optional(),
+  status: z.enum(["OPEN", "RESOLVED"]).optional(),
+});
+
+export const BillingIssueSummarySchema = z.object({
+  details: z.unknown(),
+  firstSeenAt: z.date(),
+  id: z.uuid(),
+  kind: z.string(),
+  lastSeenAt: z.date(),
+  resolvedAt: z.date().nullable(),
+  severity: z.string(),
+  source: z.string(),
+  status: z.string(),
+  stripeObjectId: z.string().nullable(),
+  workspaceId: z.uuid().nullable(),
+});
+
+export const ListIssuesResultSchema = z.object({
+  items: z.array(BillingIssueSummarySchema),
+  nextCursor: z.string().nullable(),
+});
