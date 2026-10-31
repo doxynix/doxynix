@@ -3,7 +3,7 @@ import type Stripe from "stripe";
 import { captureBillingAlert } from "@/server/core/billing/metrics";
 import type { DbClient } from "@/server/core/db";
 
-import { upsertBillingIssue } from "./billing.issues";
+import { resolveBillingIssue, upsertBillingIssue } from "./billing.issues";
 import { appendLedgerEntry } from "./billing.ledger";
 import type { BillingOwnership, CanonicalStripeObject } from "./billing.resolver";
 import { getStripeClient } from "./billing.stripe";
@@ -153,44 +153,63 @@ async function applyDispute(
 ): Promise<void> {
   const { dispute } = input;
   const status = dispute.status;
-  const resolved = status === "won" || status === "lost";
+  // Stripe closes a dispute (or an inquiry) with more than `won`/`lost`: `charge_refunded` means
+  // the merchant already refunded the charge, `prevented`/`warning_closed` mean it never became
+  // one. All of them are terminal and none of them moves money in the ledger.
+  const closedStatuses = new Set(["charge_refunded", "lost", "prevented", "warning_closed", "won"]);
+  const closed = closedStatuses.has(status);
+  const alreadyOpened =
+    (await tx.billingLedgerEntry.findFirst({
+      select: { id: true },
+      where: { kind: "DISPUTE_OPENED", stripeObjectId: dispute.id },
+    })) != null;
 
-  // Cash view: opening holds the amount once (whatever intermediate status Stripe reports),
-  // winning returns it, losing keeps it. Nothing is ever written twice for the same dispute state.
+  // Cash view: opening holds the amount once, `won` returns it (and only if it was held), every
+  // other closing status keeps it. A refund, if any, is a separate ledger entry.
   const entry =
     status === "won"
-      ? { amount: BigInt(dispute.amount), keyStatus: "won", kind: "DISPUTE_WON" }
-      : status === "lost"
-        ? { amount: BigInt(0), keyStatus: "lost", kind: "DISPUTE_LOST" }
+      ? {
+          amount: alreadyOpened ? BigInt(dispute.amount) : BigInt(0),
+          keyStatus: "won",
+          kind: "DISPUTE_WON",
+        }
+      : closed
+        ? { amount: BigInt(0), keyStatus: status, kind: `DISPUTE_${status.toUpperCase()}` }
         : { amount: -BigInt(dispute.amount), keyStatus: "open", kind: "DISPUTE_OPENED" };
 
-  await appendLedgerEntry(tx, {
-    amount: entry.amount,
-    billingEventId: input.billingEventId,
-    currency: dispute.currency,
-    details: { status },
-    kind: entry.kind,
-    occurredAt: new Date(dispute.created * 1000),
-    relatedInvoiceId: input.links.invoiceId,
-    relatedSubscriptionId: input.links.subscriptionId,
-    status: entry.keyStatus,
-    stripeObjectId: dispute.id,
-    workspaceId: input.ownership.workspaceId,
-  });
-
-  if (!resolved) {
-    captureBillingAlert("DISPUTE", { disputeId: dispute.id });
-
-    await upsertBillingIssue(tx, {
-      dedupeKey: `dispute_opened:${dispute.id}`,
-      details: { amount: dispute.amount, status },
-      kind: "DISPUTE_OPENED",
-      severity: "CRITICAL",
-      source: "stripe_risk",
+  if (closed || !alreadyOpened) {
+    await appendLedgerEntry(tx, {
+      amount: entry.amount,
+      billingEventId: input.billingEventId,
+      currency: dispute.currency,
+      details: { status },
+      kind: entry.kind,
+      occurredAt: new Date(dispute.created * 1000),
+      relatedInvoiceId: input.links.invoiceId,
+      relatedSubscriptionId: input.links.subscriptionId,
+      status: entry.keyStatus,
       stripeObjectId: dispute.id,
       workspaceId: input.ownership.workspaceId,
     });
   }
+
+  if (closed) {
+    await resolveBillingIssue(tx, `dispute_opened:${dispute.id}`);
+
+    return;
+  }
+
+  captureBillingAlert("DISPUTE", { disputeId: dispute.id });
+
+  await upsertBillingIssue(tx, {
+    dedupeKey: `dispute_opened:${dispute.id}`,
+    details: { amount: dispute.amount, status },
+    kind: "DISPUTE_OPENED",
+    severity: "CRITICAL",
+    source: "stripe_risk",
+    stripeObjectId: dispute.id,
+    workspaceId: input.ownership.workspaceId,
+  });
 }
 
 // Risk handlers only write ledger and issues. They never touch the subscription mirror or the

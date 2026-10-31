@@ -12,6 +12,13 @@ export type BillingIssueInput = {
   workspaceId?: null | string;
 };
 
+export async function resolveBillingIssue(db: DbClient, dedupeKey: string): Promise<void> {
+  await db.billingIssue.updateMany({
+    data: { resolvedAt: new Date(), status: "RESOLVED" },
+    where: { dedupeKey, status: "OPEN" },
+  });
+}
+
 // Issues are deduplicated by key, so a repeated webhook bumps `lastSeenAt` instead of flooding.
 export async function upsertBillingIssue(db: DbClient, input: BillingIssueInput): Promise<void> {
   const now = new Date();

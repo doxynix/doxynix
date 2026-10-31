@@ -55,6 +55,7 @@ function createFakeTx() {
 
         return { count };
       }),
+      findFirst: vi.fn().mockResolvedValue(null),
     },
   };
 
@@ -253,8 +254,51 @@ describe("applyRiskEvent", () => {
       ownership: OWNERSHIP,
     });
 
-    expect(fake.ledger.get("DISPUTE_WON:dp_1:won")?.amount).toBe(BigInt(1900));
+    // No open entry was ever written, so a `won` here must not invent a refund.
+    expect(fake.ledger.get("DISPUTE_WON:dp_1:won")?.amount).toBe(BigInt(0));
     expect(fake.ledger.get("DISPUTE_LOST:dp_1:lost")?.amount).toBe(BigInt(0));
+    expect(fake.issues).not.toHaveBeenCalled();
+  });
+
+  it("returns the held amount when a dispute is won and resolves the issue", async () => {
+    const fake = createFakeTx();
+    const findFirst = (
+      fake.tx as unknown as {
+        billingLedgerEntry: { findFirst: ReturnType<typeof vi.fn> };
+      }
+    ).billingLedgerEntry.findFirst;
+    findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: "ledger_1" });
+
+    await applyRiskEvent(fake.tx, {
+      billingEventId: "be_1",
+      canonical: { dispute: dispute({ status: "needs_response" }) as never, kind: "dispute" },
+      links: LINKS,
+      ownership: OWNERSHIP,
+    });
+    await applyRiskEvent(fake.tx, {
+      billingEventId: "be_1",
+      canonical: { dispute: dispute({ status: "won" }) as never, kind: "dispute" },
+      links: LINKS,
+      ownership: OWNERSHIP,
+    });
+
+    const total = [...fake.ledger.values()].reduce((sum, row) => sum + row.amount, BigInt(0));
+
+    expect(total).toBe(BigInt(0));
+    expect(fake.issues).toHaveBeenCalled();
+  });
+
+  it("closes the dispute issue for statuses that are not won or lost", async () => {
+    const fake = createFakeTx();
+
+    await applyRiskEvent(fake.tx, {
+      billingEventId: "be_1",
+      canonical: { dispute: dispute({ status: "warning_closed" }) as never, kind: "dispute" },
+      links: LINKS,
+      ownership: OWNERSHIP,
+    });
+
+    expect(fake.ledger.get("DISPUTE_WARNING_CLOSED:dp_1:warning_closed")?.amount).toBe(BigInt(0));
     expect(fake.issues).not.toHaveBeenCalled();
   });
 

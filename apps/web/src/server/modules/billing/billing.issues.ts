@@ -1,1 +1,5 @@
-export { type BillingIssueInput, upsertBillingIssue } from "@/server/core/billing/issue";
+export {
+  type BillingIssueInput,
+  resolveBillingIssue,
+  upsertBillingIssue,
+} from "@/server/core/billing/issue";
