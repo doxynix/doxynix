@@ -121,7 +121,9 @@ export function canonicalRequestHash(requestBody: unknown): string {
   return createHash("sha256").update(canonicalJson(requestBody)).digest("hex");
 }
 
-function sanitizeValue(value: unknown, depth: number): unknown {
+// Deliberately separate from `sanitizePayload`: that one redacts secrets for logs, while an
+// operation result must also drop money, URLs and tax ids, and stay JSON-safe for JSONB.
+function sanitizeBillingValue(value: unknown, depth: number): unknown {
   if (value === null || value === undefined) {
     return value;
   }
@@ -151,7 +153,7 @@ function sanitizeValue(value: unknown, depth: number): unknown {
   }
 
   if (Array.isArray(value)) {
-    return value.map((item) => sanitizeValue(item, depth + 1));
+    return value.map((item) => sanitizeBillingValue(item, depth + 1));
   }
 
   if (typeof value === "object") {
@@ -162,7 +164,7 @@ function sanitizeValue(value: unknown, depth: number): unknown {
         continue;
       }
 
-      clean[key] = sanitizeValue(nested, depth + 1);
+      clean[key] = sanitizeBillingValue(nested, depth + 1);
     }
 
     return clean;
@@ -173,7 +175,7 @@ function sanitizeValue(value: unknown, depth: number): unknown {
 
 // Safe to persist: no links, no personal data, no money.
 export function sanitizeBillingResult(result: unknown): unknown {
-  return sanitizeValue(result, 0);
+  return sanitizeBillingValue(result, 0);
 }
 
 function idempotencyConflict(): TRPCError {

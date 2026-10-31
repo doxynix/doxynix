@@ -31,6 +31,8 @@ export function periodStartOf(now: Date): Date {
 }
 
 // `DbClient` is a union: a transaction client has no `$transaction`, so nested calls run inline.
+// Accepts the root client or an already-open transaction: inside a caller's transaction we must
+// reuse it, because a nested `$transaction` would commit outside the caller's atomic block.
 async function withTransaction<T>(db: DbClient, fn: (tx: DbClient) => Promise<T>): Promise<T> {
   if (!("$transaction" in db)) {
     return fn(db);
