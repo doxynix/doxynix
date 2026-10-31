@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import { encryptString, parseEncryptedString } from "./cipher";
 import { hashValue } from "./config";
-import { findKeyForMessage, makeKeychain, parseKey } from "./keyring";
+import { parseKey } from "./key-internal";
+import { findKeyForMessage, makeKeychain } from "./keyring";
 import { decryptOnRead, encryptOnWrite } from "./rewrite";
 
 vi.mock("@/shared/config/env.server", () => ({

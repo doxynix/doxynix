@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { AuthorGroup } from "./high-five.types";
+import type { AuthorGroup } from "@/entities/high-five/model/high-five.types";
+
 import { filterAuthorGroups } from "./high-five-filters";
 
 const GROUP = (author: string, packages: string[]): AuthorGroup => ({

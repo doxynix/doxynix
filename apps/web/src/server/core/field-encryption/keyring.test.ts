@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { COMPAT_FIXTURE } from "./compat-fixture";
-import { findKeyForMessage, makeKeychain, parseKey } from "./keyring";
+import { parseKey } from "./key-internal";
+import { findKeyForMessage, makeKeychain } from "./keyring";
 
 describe("field-encryption keyring", () => {
   it("derives the same fingerprint the library reported", () => {

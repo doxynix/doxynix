@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
+import { isOctokitError } from "@/server/core/api-error";
 import { getFileScore } from "@/server/core/path-classify/score";
-import { isOctokitError } from "@/server/utils/handle-error";
 
 import { appLogger } from "../app-logger";
 import type { DbClient, PrismaClientExtended } from "../db";

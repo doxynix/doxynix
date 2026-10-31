@@ -6,7 +6,7 @@ vi.mock("@/shared/config/env.server", () => ({
 
 import { encryptString } from "./cipher";
 import { fieldEncryptionExtension } from "./index";
-import { parseKey } from "./keyring";
+import { parseKey } from "./key-internal";
 
 const KEY = `k1.aesgcm256.${Buffer.from("0123456789abcdef0123456789abcdef").toString("base64url")}`;
 

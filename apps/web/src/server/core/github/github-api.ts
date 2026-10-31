@@ -5,9 +5,8 @@ import { sumBy } from "es-toolkit";
 
 import type { RepoItemFields } from "@/shared/api/repo.types";
 
-import { AppError } from "@/server/core/api-error";
+import { AppError, isOctokitError } from "@/server/core/api-error";
 import { isIgnored } from "@/server/core/git/ignore-rules";
-import { isOctokitError } from "@/server/utils/handle-error";
 import { getLanguageColor } from "@/server/utils/language-metadata";
 import { taskLogger } from "@/server/utils/task-logger";
 

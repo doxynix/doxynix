@@ -36,8 +36,6 @@ export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
   throw toTrpcError(normalized);
 }
 
-export { isOctokitError } from "../core/api-error";
-
 // Returns undefined for statuses this app has no copy for, so the caller rethrows the original error untouched.
 export function toOctokitTrpcError(error: unknown): TRPCError | undefined {
   const normalized = normalizeError(error);

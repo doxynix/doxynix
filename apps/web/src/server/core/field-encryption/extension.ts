@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 
-import { type Keychain, makeKeychain, type ParsedKey, parseKey } from "./keyring";
+import { type ParsedKey, parseKey } from "./key-internal";
+import { type Keychain, makeKeychain } from "./keyring";
 import { decryptOnRead, encryptOnWrite } from "./rewrite";
 
 export type FieldEncryptionKeys = {

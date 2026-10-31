@@ -13,7 +13,10 @@ const mocks = vi.hoisted(() => ({
   searchRepos: vi.fn(),
 }));
 
-vi.mock("@/server/utils/handle-error", () => ({ isOctokitError: mocks.isOctokitError }));
+vi.mock("@/server/core/api-error", async (importOriginal) => ({
+  ...(await importOriginal()),
+  isOctokitError: mocks.isOctokitError,
+}));
 vi.mock("../app-logger", () => ({ appLogger: mocks.appLogger }));
 vi.mock("./github-api", () => ({
   getFileContent: mocks.getRawFileContent,

@@ -18,8 +18,6 @@ import {
   type StructureNodePayload,
 } from "./structure-shared";
 
-export type { NodeExplainPayload } from "./structure-shared";
-
 export function buildNodeExplainPayloadFromContext(
   context: StructureContext,
   analysisRef: AnalysisRef | null,

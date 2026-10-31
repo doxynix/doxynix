@@ -6,13 +6,13 @@ import { TRPCError } from "@trpc/server";
 import { GITHUB_APP_ID } from "@/shared/config/env.server";
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
+import { isOctokitError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import type { DbClient, PrismaClientExtended } from "@/server/core/db";
 import { githubTokenService } from "@/server/core/github/github-access-token";
 import { getMyRepos } from "@/server/core/github/github-api";
 import { getInstallationInfo, getPublicClient } from "@/server/core/github/github-client";
 import { realtimeService } from "@/server/core/realtime";
-import { isOctokitError } from "@/server/utils/handle-error";
 import { getNormalizedHash, getRawHash } from "@/server/utils/hash";
 
 export const githubAppService = {

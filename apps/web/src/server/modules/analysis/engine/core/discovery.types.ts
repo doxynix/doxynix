@@ -1,7 +1,5 @@
 import type { SymbolKind } from "@/server/core/tree-sitter";
 
-export type { SymbolKind };
-
 export type ParseTier = "heuristic" | "tree-sitter" | "typescript-ast";
 
 export type RepositoryFile = {

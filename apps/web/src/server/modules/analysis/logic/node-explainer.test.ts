@@ -2,9 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import type { AIResult } from "../engine/core/analysis-result.schemas";
 import type { RepoMetrics } from "../engine/core/metrics.types";
-import type { StructureNodePayload } from "./graph-navigator";
 import { buildNodeExplainPayloadFromContext } from "./node-explainer";
-import type { StructureContext } from "./structure-shared";
+import type { StructureContext, StructureNodePayload } from "./structure-shared";
 
 const makeMetrics = (overrides: Partial<RepoMetrics> = {}): RepoMetrics =>
   ({

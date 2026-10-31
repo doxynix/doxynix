@@ -5,9 +5,9 @@ import { parseAsString, useQueryState } from "nuqs";
 
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
+import type { AuthorGroup } from "@/entities/high-five/model/high-five.types";
 import { HighFiveCard } from "@/entities/high-five/ui/high-five-card";
 
-import type { AuthorGroup } from "../model/high-five.types";
 import { filterAuthorGroups } from "../model/high-five-filters";
 
 type Props = {
