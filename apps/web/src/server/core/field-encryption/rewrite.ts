@@ -37,25 +37,54 @@ export function encryptOnWrite(
 }
 
 // `structuredClone` reduces Prisma's `DbNull`/`JsonNull` markers to `{}`, which writes JSON `{}`
-// instead of SQL NULL. Only plain objects and arrays need copying, so class instances (markers,
-// Date, Decimal, Buffer) are passed through by reference; the rewrite never mutates them.
-function cloneForRewrite<T>(value: T): T {
+// instead of SQL NULL, and turns `Buffer`/`Decimal` into plain objects. Only plain objects and
+// arrays need copying, so other class instances are passed through by reference.
+function cloneForRewrite<T>(value: T, seen: WeakMap<object, unknown> = new WeakMap()): T {
   if (Array.isArray(value)) {
-    return value.map((item) => cloneForRewrite(item)) as T;
+    const cached = seen.get(value);
+
+    if (cached != null) {
+      return cached as T;
+    }
+
+    const copy: unknown[] = [];
+    seen.set(value, copy);
+
+    for (const item of value) {
+      copy.push(cloneForRewrite(item, seen));
+    }
+
+    return copy as T;
   }
 
-  if (
-    value == null ||
-    typeof value !== "object" ||
-    Object.getPrototypeOf(value) !== Object.prototype
-  ) {
+  if (value == null || typeof value !== "object") {
     return value;
   }
 
+  const prototype = Object.getPrototypeOf(value);
+
+  // `Object.create(null)` maps are plain data; every other class instance is passed through.
+  if (prototype !== Object.prototype && prototype !== null) {
+    return value;
+  }
+
+  const cached = seen.get(value);
+
+  if (cached != null) {
+    return cached as T;
+  }
+
   const copy: Record<string, unknown> = {};
+  seen.set(value, copy);
 
   for (const [key, nested] of Object.entries(value)) {
-    copy[key] = cloneForRewrite(nested);
+    // `defineProperty` keeps an own `__proto__` key instead of triggering the prototype setter.
+    Object.defineProperty(copy, key, {
+      configurable: true,
+      enumerable: true,
+      value: cloneForRewrite(nested, seen),
+      writable: true,
+    });
   }
 
   return copy as T;

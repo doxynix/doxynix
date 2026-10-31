@@ -89,6 +89,43 @@ describe("encryptOnWrite", () => {
     expect(args.data.email).toBe("user@example.com");
   });
 
+  it("clones null-prototype maps instead of mutating the caller's object", () => {
+    const data = Object.assign(Object.create(null) as Record<string, unknown>, {
+      email: "user@example.com",
+    });
+
+    const out = encryptOnWrite({ data }, "User", parsedKey) as {
+      data: Record<string, unknown>;
+    };
+
+    expect(data.email).toBe("user@example.com");
+    expect(out.data.email).not.toBe("user@example.com");
+  });
+
+  it("keeps class instances such as Buffer by reference", () => {
+    const bytes = Buffer.from("abc");
+    const out = encryptOnWrite(
+      { data: { email: "user@example.com", resetToken: bytes } },
+      "User",
+      parsedKey,
+    ) as {
+      data: Record<string, unknown>;
+    };
+
+    expect(out.data.resetToken).toBe(bytes);
+  });
+
+  it("survives a cyclic args object", () => {
+    const data: Record<string, unknown> = { email: "user@example.com" };
+    data.self = data;
+
+    const out = encryptOnWrite({ data }, "User", parsedKey) as {
+      data: Record<string, unknown>;
+    };
+
+    expect(out.data.self).toBe(out.data);
+  });
+
   it("ignores models with no encrypted fields", () => {
     const args = { data: { name: "Repo" } };
 
