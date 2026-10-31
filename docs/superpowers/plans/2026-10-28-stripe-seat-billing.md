@@ -744,8 +744,17 @@ REVIEW в reconciliation; **F11** — `concurrency: { perKey: 1, total: 10 }` и
 **N7** — agent chat и GitHub-reply проверяют entitlement и метерятся; **SeatsCard** стал read-only,
 места следуют за составом команды.
 
+Пятый проход (по блокерам H1–H4): **H1** — entitlement под локом читается с `fresh: true` (memo
+больше не отдаёт pre-lock снимок), квота возвращается только если резерв реально состоялся;
+**H2** — кеш-хит возвращает квоту в ветке раннего skip задачи (`analyze-repo`), а не после
+`saveResults`; **H3** — agent chat отпускает резерв на `onAbort`/`onError` и сеттлит в awaited
+`onEnd`; **H4** — проверка доступа и резерв выполняются в одной транзакции под advisory-lock;
+**F17** — в prod пустой `STRIPE_TAX_REQUIRED_JURISDICTIONS` блокирует Checkout (`TAX_NOT_CONFIGURED`);
+**F10** — уход из REVIEW закрывает `SUBSCRIPTION_REVIEW`-issue.
+
 Осталось: F16 — `cannot-verify` (семантика `cachedInputTokens` у Gemini); аудит админки в БД
-(требует миграции); живой sandbox-прогон и Dashboard-настройки.
+(требует миграции); автоснятие REVIEW для «оживлённого» terminal-ID (нужен след истории статусов);
+`changeSeats` всё ещё держит Stripe внутри транзакции (N8-остаток); живой sandbox и Dashboard.
 
 ---
 
