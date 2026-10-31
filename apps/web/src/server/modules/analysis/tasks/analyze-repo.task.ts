@@ -11,6 +11,7 @@ import { prisma } from "@/server/core/db";
 import { cloneRepository } from "@/server/core/git/clone";
 import { calculateBusFactor } from "@/server/core/github/github-api";
 import { trackServerEvent } from "@/server/core/posthog-events";
+import { recordCacheHitUsage, releaseAnalysisUsage } from "@/server/core/usage/usage";
 import { getAnalysisContext } from "@/server/modules/analysis/logic/analysis-context";
 import { analysisProgress } from "@/server/modules/analysis/logic/analysis-progress";
 import { cleanup, readAndFilterFiles } from "@/server/modules/analysis/logic/repo-file-scanner";
@@ -76,6 +77,19 @@ export const analyzeRepoTask = task({
       );
 
       if (repo == null) {
+        // A real cache hit never reaches `saveResults`, so the reserved quota unit has to be
+        // returned here; charging for a skipped run is exactly what §2.8 forbids.
+        await recordCacheHitUsage(prisma, {
+          analysisId,
+          idempotencyKey: `cache-hit:${analysisId}`,
+          workspaceId,
+        });
+        await releaseAnalysisUsage(prisma, {
+          analysisId,
+          idempotencyKey: `cache-hit:${analysisId}`,
+          workspaceId,
+        });
+
         await analysisProgress.finalize(
           analysisId,
           Status.DONE,

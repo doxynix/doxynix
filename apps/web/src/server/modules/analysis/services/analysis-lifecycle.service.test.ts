@@ -107,7 +107,7 @@ describe("analysisLifecycleService.analyze analytics", () => {
     );
   });
 
-  it("reserves the quota before creating anything and releases it on rejection", async () => {
+  it("does not release a unit that was never reserved", async () => {
     vi.mocked(assertAnalysisAllowed).mockImplementationOnce(() => {
       throw new AppError({ code: "FORBIDDEN", publicMessage: "LIMIT_EXCEEDED" });
     });
@@ -124,6 +124,23 @@ describe("analysisLifecycleService.analyze analytics", () => {
 
     expect(db.analysis.create).not.toHaveBeenCalled();
     expect(triggerMock).not.toHaveBeenCalled();
+    // A rejected request never took a unit, so releasing one would make the quota porous.
+    expect(releaseAnalysisUsage).not.toHaveBeenCalled();
+  });
+
+  it("returns the reserved unit when the queue call fails", async () => {
+    triggerMock.mockRejectedValueOnce(new Error("trigger down"));
+    const db = buildDb();
+
+    await expect(
+      analysisLifecycleService.analyze(db, "user-1", "workspace-1", {
+        docTypes: [],
+        files: [],
+        language: "en",
+        repoId: "repo-1",
+      }),
+    ).rejects.toThrow("trigger down");
+
     expect(releaseAnalysisUsage).toHaveBeenCalled();
   });
 

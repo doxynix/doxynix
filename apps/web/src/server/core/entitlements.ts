@@ -74,11 +74,17 @@ async function loadEntitlement(
 
 // DB-only read model. The memo lives in the request store, so a batched tRPC call reads the
 // workspace once; there is no cross-request cache and therefore no revocation staleness.
+// `fresh` bypasses the memo for callers that must see the value after taking a lock.
 export async function getWorkspaceEntitlement(
   db: DbClient,
   workspaceId: string,
   now: Date = new Date(),
+  options: { fresh?: boolean } = {},
 ): Promise<null | WorkspaceEntitlementView> {
+  if (options.fresh === true) {
+    return loadEntitlement(db, workspaceId, now);
+  }
+
   const memo = requestContext.getStore()?.entitlementMemo;
 
   if (memo == null) {
