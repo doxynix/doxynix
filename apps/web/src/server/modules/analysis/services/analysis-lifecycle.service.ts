@@ -10,7 +10,11 @@ import { type DbClient, prisma } from "@/server/core/db";
 import { assertAnalysisAllowed, getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { trackServerEvent } from "@/server/core/posthog-events";
 import { realtimeService } from "@/server/core/realtime";
-import { recordAnalysisUsage, releaseAnalysisUsage } from "@/server/core/usage/usage";
+import {
+  recordAnalysisUsage,
+  recordCacheHitUsage,
+  releaseAnalysisUsage,
+} from "@/server/core/usage/usage";
 import { safeJsonClone } from "@/server/utils/safe-json";
 
 const HISTORY_LIMIT = 500;
@@ -60,32 +64,37 @@ export const analysisLifecycleService = {
     },
   ) {
     await this.assertRepoAccess(db, workspaceId, input.repoId);
-    // Access and quota are checked before anything is created or enqueued.
-    assertAnalysisAllowed(await getWorkspaceEntitlement(prisma, workspaceId));
 
-    const analysis = await db.analysis.create({
-      data: {
-        repo: {
-          connect: {
-            id: input.repoId,
-          },
-        },
-        status: "PENDING",
-      },
-    });
-
-    const usageKey = `analysis:${analysis.id}`;
+    // The reservation and the quota check share one advisory lock: reading `workspace_usage` and
+    // incrementing it later lets two parallel requests both pass a limit of one.
+    const usageKey = `analysis:reserve:${crypto.randomUUID()}`;
+    let analysisId: null | string = null;
     let handle: null | { id: string; publicAccessToken: string } = null;
-    let quotaReserved = false;
 
     try {
-      // The quota unit is taken before enqueue and returned if the enqueue fails.
-      await recordAnalysisUsage(prisma, {
-        analysisId: analysis.id,
-        idempotencyKey: usageKey,
-        workspaceId,
+      await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`analysis-quota:${workspaceId}`}))`;
+        // Access and quota are checked before anything is created or enqueued.
+        assertAnalysisAllowed(await getWorkspaceEntitlement(tx, workspaceId));
+
+        // The quota unit is taken before enqueue and returned if the enqueue fails.
+        await recordAnalysisUsage(tx, {
+          idempotencyKey: usageKey,
+          workspaceId,
+        });
       });
-      quotaReserved = true;
+
+      const analysis = await db.analysis.create({
+        data: {
+          repo: {
+            connect: {
+              id: input.repoId,
+            },
+          },
+          status: "PENDING",
+        },
+      });
+      analysisId = analysis.id;
 
       handle = await tasks.trigger(
         "analyze-repo",
@@ -111,19 +120,17 @@ export const analysisLifecycleService = {
         where: { id: analysis.id },
       });
     } catch (error) {
-      if (quotaReserved) {
-        await releaseAnalysisUsage(prisma, {
-          analysisId: analysis.id,
-          idempotencyKey: usageKey,
+      await releaseAnalysisUsage(prisma, {
+        analysisId,
+        idempotencyKey: usageKey,
+        workspaceId,
+      }).catch((releaseError: unknown) => {
+        appLogger.error({
+          error: releaseError,
+          msg: "Analysis quota release failed",
           workspaceId,
-        }).catch((releaseError: unknown) => {
-          appLogger.error({
-            error: releaseError,
-            msg: "Analysis quota release failed",
-            workspaceId,
-          });
         });
-      }
+      });
 
       throw error;
     }
@@ -131,7 +138,7 @@ export const analysisLifecycleService = {
     trackServerEvent(
       "repo_analysis_queued",
       {
-        analysis_id: analysis.id,
+        analysis_id: analysisId,
         doc_types_count: input.docTypes.length,
         has_custom_instructions: (input.instructions?.length ?? 0) > 0,
         language: input.language,
@@ -425,6 +432,31 @@ export const analysisLifecycleService = {
 
       return { activated, notification };
     });
+
+    // A second analysis of the same commit repeats work that already exists, so it must not consume
+    // the monthly quota: give the reserved unit back and record a zero-cost cache hit.
+    const previousRun = await prisma.analysis.findFirst({
+      select: { id: true },
+      where: {
+        commitSha: currentSha,
+        id: { not: analysisId },
+        repoId: repo.id,
+        status: Status.DONE,
+      },
+    });
+
+    if (previousRun != null) {
+      await recordCacheHitUsage(prisma, {
+        analysisId,
+        idempotencyKey: `cache-hit:${analysisId}`,
+        workspaceId,
+      });
+      await releaseAnalysisUsage(prisma, {
+        analysisId,
+        idempotencyKey: `cache-hit:${analysisId}`,
+        workspaceId,
+      });
+    }
 
     if (activated) {
       void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.userUpdated, {});
