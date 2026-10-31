@@ -48,6 +48,24 @@ type CurrentSubscription = {
   stripeSubscriptionItemId: string;
 };
 
+// Seat changes for one workspace are serialized: two parallel commands must not interleave their
+// read-modify-write against Stripe. A transaction client has no `$transaction`, so it runs inline.
+async function withWorkspaceLock<T>(
+  db: DbClient,
+  workspaceId: string,
+  fn: () => Promise<T>,
+): Promise<T> {
+  if (!("$transaction" in db)) {
+    return fn();
+  }
+
+  return db.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${workspaceId}))`;
+
+    return fn();
+  });
+}
+
 function notChangeable(): TRPCError {
   return new TRPCError({ code: "CONFLICT", message: "BILLING_NOT_CHANGEABLE" });
 }
@@ -141,31 +159,33 @@ export async function changeSeats(input: PlanChangeInput): Promise<SeatChangeRes
   const run = await runBillingOperation(input.db, {
     actorUserId: input.actorUserId,
     execute: async () => {
-      // Re-read inside the operation: the subscription may have changed since the preview.
-      const subscription = await loadChangeableSubscription(input.db, input.workspaceId);
-      const prorationBehavior = prorationFor(input.quantity, subscription.quantity);
+      return withWorkspaceLock(input.db, input.workspaceId, async () => {
+        // Re-read inside the lock: the subscription may have changed since the preview.
+        const subscription = await loadChangeableSubscription(input.db, input.workspaceId);
+        const prorationBehavior = prorationFor(input.quantity, subscription.quantity);
 
-      const updated = await getStripeClient().subscriptions.update(
-        subscription.stripeSubscriptionId,
-        {
-          items: [{ id: subscription.stripeSubscriptionItemId, quantity: input.quantity }],
-          proration_behavior: prorationBehavior,
-        },
-        {
-          idempotencyKey: stripeIdempotencyKey({
-            environment: stripeEnvironment(),
-            operation: "subscription",
-            requestId: input.requestId,
-            workspaceId: input.workspaceId,
-          }),
-        },
-      );
+        const updated = await getStripeClient().subscriptions.update(
+          subscription.stripeSubscriptionId,
+          {
+            items: [{ id: subscription.stripeSubscriptionItemId, quantity: input.quantity }],
+            proration_behavior: prorationBehavior,
+          },
+          {
+            idempotencyKey: stripeIdempotencyKey({
+              environment: stripeEnvironment(),
+              operation: "subscription",
+              requestId: input.requestId,
+              workspaceId: input.workspaceId,
+            }),
+          },
+        );
 
-      // The response never grants access; only the webhook projection does.
-      return {
-        result: { prorationBehavior, quantity: input.quantity },
-        stripeObjectId: updated.id,
-      };
+        // The response never grants access; only the webhook projection does.
+        return {
+          result: { prorationBehavior, quantity: input.quantity },
+          stripeObjectId: updated.id,
+        };
+      });
     },
     operation: "SUBSCRIPTION_UPDATE",
     requestBody: { quantity: input.quantity, workspaceId: input.workspaceId },
