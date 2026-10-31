@@ -384,6 +384,7 @@
     "billing_seats_changed": "Seats updated.",
     "billing_seats_confirm": "Confirm change",
     "billing_seats_desc": "Seats follow active workspace members. You can buy more seats than you have members.",
+    "billing_seats_follow_members": "Seats follow your team: adding a member bills one more seat.",
     "billing_seats_input_label": "Seats",
     "billing_seats_min": "You cannot buy fewer seats than active members ({count}).",
     "billing_seats_no_charge": "No payment is due now.",

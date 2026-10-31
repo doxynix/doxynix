@@ -384,6 +384,7 @@
     "billing_seats_changed": "Miejsca zaktualizowane.",
     "billing_seats_confirm": "Potwierdź zmianę",
     "billing_seats_desc": "Liczba miejsc odpowiada aktywnym członkom obszaru roboczego. Możesz kupić więcej miejsc, niż masz członków.",
+    "billing_seats_follow_members": "Miejsca podążają za zespołem: dodanie członka oznacza rozliczenie kolejnego miejsca.",
     "billing_seats_input_label": "Miejsca",
     "billing_seats_min": "Nie możesz kupić mniej miejsc niż aktywnych członków ({count}).",
     "billing_seats_no_charge": "Teraz nie ma płatności do uregulowania.",

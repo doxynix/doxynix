@@ -384,6 +384,7 @@
     "billing_seats_changed": "Sièges mis à jour.",
     "billing_seats_confirm": "Confirmer la modification",
     "billing_seats_desc": "Les sièges suivent les membres actifs de l’espace de travail. Vous pouvez acheter plus de sièges que vous n’avez de membres.",
+    "billing_seats_follow_members": "Les sièges suivent l'équipe : chaque membre ajouté facture un siège de plus.",
     "billing_seats_input_label": "Sièges",
     "billing_seats_min": "Vous ne pouvez pas acheter moins de sièges que de membres actifs ({count}).",
     "billing_seats_no_charge": "Aucun paiement n’est dû maintenant.",

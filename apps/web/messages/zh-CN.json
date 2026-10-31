@@ -384,6 +384,7 @@
     "billing_seats_changed": "席位已更新。",
     "billing_seats_confirm": "确认更改",
     "billing_seats_desc": "席位数与工作区活跃成员数一致。你可以购买多于成员数的席位。",
+    "billing_seats_follow_members": "席位随团队人数变化：添加成员会多计一个席位。",
     "billing_seats_input_label": "席位",
     "billing_seats_min": "购买的席位数不能少于活跃成员数（{count}）。",
     "billing_seats_no_charge": "现在无需付款。",

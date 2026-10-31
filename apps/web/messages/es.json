@@ -384,6 +384,7 @@
     "billing_seats_changed": "Plazas actualizadas.",
     "billing_seats_confirm": "Confirmar cambio",
     "billing_seats_desc": "Las plazas siguen a los miembros activos del espacio de trabajo. Puedes comprar más plazas que miembros tienes.",
+    "billing_seats_follow_members": "Los asientos siguen al equipo: añadir un miembro factura un asiento más.",
     "billing_seats_input_label": "Plazas",
     "billing_seats_min": "No puedes comprar menos plazas que miembros activos ({count}).",
     "billing_seats_no_charge": "No hay ningún pago pendiente ahora.",

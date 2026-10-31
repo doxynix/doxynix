@@ -384,6 +384,7 @@
     "billing_seats_changed": "Koltuklar güncellendi.",
     "billing_seats_confirm": "Değişikliği onayla",
     "billing_seats_desc": "Koltuklar etkin çalışma alanı üyelerini izler. Üye sayınızdan daha fazla koltuk satın alabilirsiniz.",
+    "billing_seats_follow_members": "Koltuklar ekibi takip eder: üye eklemek bir koltuk daha faturalandırır.",
     "billing_seats_input_label": "Koltuklar",
     "billing_seats_min": "Etkin üye sayısından ({count}) daha az koltuk satın alamazsınız.",
     "billing_seats_no_charge": "Şu anda ödenecek tutar yok.",

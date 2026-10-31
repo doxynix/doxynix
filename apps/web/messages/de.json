@@ -384,6 +384,7 @@
     "billing_seats_changed": "Sitze aktualisiert.",
     "billing_seats_confirm": "Änderung bestätigen",
     "billing_seats_desc": "Sitze entsprechen den aktiven Workspace-Mitgliedern. Du kannst mehr Sitze kaufen, als du Mitglieder hast.",
+    "billing_seats_follow_members": "Sitze folgen dem Team: Jedes neue Mitglied wird als zusätzlicher Sitz berechnet.",
     "billing_seats_input_label": "Sitze",
     "billing_seats_min": "Du kannst nicht weniger Sitze kaufen als aktive Mitglieder ({count}).",
     "billing_seats_no_charge": "Jetzt ist keine Zahlung fällig.",

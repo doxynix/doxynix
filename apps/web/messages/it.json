@@ -384,6 +384,7 @@
     "billing_seats_changed": "Posti aggiornati.",
     "billing_seats_confirm": "Conferma modifica",
     "billing_seats_desc": "I posti seguono i membri attivi del workspace. Puoi acquistare più posti di quanti membri hai.",
+    "billing_seats_follow_members": "I posti seguono il team: aggiungere un membro fattura un posto in più.",
     "billing_seats_input_label": "Posti",
     "billing_seats_min": "Non puoi acquistare meno posti dei membri attivi ({count}).",
     "billing_seats_no_charge": "Nessun pagamento dovuto ora.",

@@ -46,10 +46,7 @@ export function BillingSettingsPage() {
       </div>
       <SeatsCard
         activeMembers={data.activeMembers}
-        isOwner={isOwner}
-        planCode={data.entitlement.planCode}
         seatLimit={data.entitlement.seatLimit}
-        subscription={data.subscription}
       />
     </div>
   );

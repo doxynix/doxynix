@@ -384,6 +384,7 @@
     "billing_seats_changed": "Assentos atualizados.",
     "billing_seats_confirm": "Confirmar alteração",
     "billing_seats_desc": "Os assentos acompanham os membros ativos do workspace. Você pode comprar mais assentos do que membros.",
+    "billing_seats_follow_members": "Os assentos acompanham a equipe: adicionar um membro cobra mais um assento.",
     "billing_seats_input_label": "Assentos",
     "billing_seats_min": "Você não pode comprar menos assentos do que membros ativos ({count}).",
     "billing_seats_no_charge": "Nenhum pagamento devido agora.",

@@ -384,6 +384,7 @@
     "billing_seats_changed": "シートを更新しました。",
     "billing_seats_confirm": "変更を確定",
     "billing_seats_desc": "シート数はアクティブなワークスペースメンバー数に連動します。メンバー数より多く購入することもできます。",
+    "billing_seats_follow_members": "席数はチームに連動します。メンバーを追加すると1席分が請求されます。",
     "billing_seats_input_label": "シート",
     "billing_seats_min": "アクティブなメンバー数（{count}）より少ないシートは購入できません。",
     "billing_seats_no_charge": "現在お支払い額はありません。",
