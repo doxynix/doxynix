@@ -1,7 +1,5 @@
-// The one place the Stripe API version lives: the SDK types describe only this version, and the
-// webhook endpoint is configured for it in the Dashboard. Kept free of `server-only` so operator
-// scripts can pin the same version.
-export const STRIPE_API_VERSION = "2026-09-30.endive" as const;
+// Re-exported so the SDK version keeps living in one place for the webhook endpoint and scripts.
+export { STRIPE_API_VERSION } from "@/server/core/billing/stripe-version";
 
 // Value of `BillingCustomer.provider` for Stripe rows; the column exists so a second provider
 // does not need a schema change.

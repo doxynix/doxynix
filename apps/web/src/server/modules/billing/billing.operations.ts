@@ -12,8 +12,11 @@ import {
   BillingOperationStatus,
 } from "./billing.schemas";
 
-const STRIPE_IDEMPOTENCY_KEY_MAX_LENGTH = 255;
-const STRIPE_IDEMPOTENCY_KEY_PREFIX = "doxynix";
+export {
+  BillingIdempotencyKeyError,
+  type BillingIdempotencyKeyErrorCode,
+  stripeIdempotencyKey,
+} from "@/server/core/billing/idempotency";
 
 // Keys whose values never belong in a stored result: links, personal data and money. Stripe
 // amounts are the ledger's job, not an operation payload.
@@ -70,20 +73,6 @@ export type BillingOperationRun = {
   replayed: boolean;
   result: unknown;
 };
-
-export type BillingIdempotencyKeyErrorCode =
-  | "BILLING_IDEMPOTENCY_KEY_CONTAINS_EMAIL"
-  | "BILLING_IDEMPOTENCY_KEY_TOO_LONG";
-
-export class BillingIdempotencyKeyError extends Error {
-  readonly code: BillingIdempotencyKeyErrorCode;
-
-  constructor(code: BillingIdempotencyKeyErrorCode, message: string) {
-    super(message);
-    this.code = code;
-    this.name = "BillingIdempotencyKeyError";
-  }
-}
 
 // Deterministic serialization: sorted keys, explicit number/Date handling, undefined dropped.
 // Two bodies that differ only in key order must hash identically.
@@ -185,41 +174,6 @@ function sanitizeValue(value: unknown, depth: number): unknown {
 // Safe to persist: no links, no personal data, no money.
 export function sanitizeBillingResult(result: unknown): unknown {
   return sanitizeValue(result, 0);
-}
-
-// Stripe rejects idempotency keys longer than 255 characters, and a key is not a place for PII.
-export function stripeIdempotencyKey(input: {
-  environment: string;
-  operation: string;
-  requestId: string;
-  workspaceId: string;
-}): string {
-  const key = [
-    STRIPE_IDEMPOTENCY_KEY_PREFIX,
-    input.environment,
-    input.operation,
-    input.workspaceId,
-    input.requestId,
-  ]
-    .map((segment) => segment.trim())
-    .filter((segment) => segment !== "")
-    .join(":");
-
-  if (key.length > STRIPE_IDEMPOTENCY_KEY_MAX_LENGTH) {
-    throw new BillingIdempotencyKeyError(
-      "BILLING_IDEMPOTENCY_KEY_TOO_LONG",
-      `Stripe idempotency key exceeds ${STRIPE_IDEMPOTENCY_KEY_MAX_LENGTH} characters`,
-    );
-  }
-
-  if (EMAIL_PATTERN.test(key)) {
-    throw new BillingIdempotencyKeyError(
-      "BILLING_IDEMPOTENCY_KEY_CONTAINS_EMAIL",
-      "Stripe idempotency key must not contain an email address",
-    );
-  }
-
-  return key;
 }
 
 function idempotencyConflict(): TRPCError {

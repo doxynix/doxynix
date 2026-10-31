@@ -369,14 +369,14 @@ describe("markSubscriptionActivated", () => {
     });
   });
 
-  it("never shrinks the seat limit below the active members and raises an issue", async () => {
+  it("keeps the seat limit at the paid quantity and raises an issue", async () => {
     const tx = createTx();
     tx.billingSubscription.findUnique.mockResolvedValue({
       activatedAt: NOW,
       graceEndsAt: null,
       stripeStatus: "active",
     });
-    tx.workspaceMember.count.mockResolvedValue(3);
+    tx.workspaceMember.count.mockResolvedValue(5);
 
     await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
@@ -387,7 +387,7 @@ describe("markSubscriptionActivated", () => {
     });
 
     expect(callArg(tx.workspaceEntitlement.upsert)).toMatchObject({
-      update: { seatLimit: 3 },
+      update: { seatLimit: 2 },
     });
     expect(tx.billingIssue.createMany).toHaveBeenCalledWith(
       expect.objectContaining({

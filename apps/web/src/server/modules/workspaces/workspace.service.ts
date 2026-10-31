@@ -3,6 +3,9 @@ import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
 import { AppError } from "@/server/core/api-error";
+import { appLogger } from "@/server/core/app-logger";
+import { upsertBillingIssue } from "@/server/core/billing/issue";
+import { syncWorkspaceSeats } from "@/server/core/billing/seat-sync";
 import { type DbClient, prisma } from "@/server/core/db";
 import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import { normalizeEmail } from "@/server/utils/email-guard";
@@ -15,6 +18,46 @@ type WorkspaceRole = "MEMBER" | "OWNER";
 type WorkspaceWithEntitlement = Prisma.WorkspaceGetPayload<{
   include: { entitlement: true };
 }>;
+
+// The membership is already committed, so a failing Stripe call or issue insert must never reach
+// the caller; it is logged and recorded instead.
+async function syncSeatsAfterMembershipChange(
+  db: DbClient,
+  input: { requestId: string; workspaceId: string },
+): Promise<void> {
+  try {
+    await syncWorkspaceSeats({ db, requestId: input.requestId, workspaceId: input.workspaceId });
+  } catch (error) {
+    const details = {
+      error: error instanceof Error ? error.message : "unknown",
+      requestId: input.requestId,
+    };
+
+    appLogger.error({
+      error,
+      msg: "workspace.seat_sync_failed",
+      requestId: input.requestId,
+      workspaceId: input.workspaceId,
+    });
+
+    try {
+      await upsertBillingIssue(db, {
+        dedupeKey: `seat_sync_failed:${input.workspaceId}`,
+        details,
+        kind: "SEAT_SYNC_FAILED",
+        severity: "WARNING",
+        source: "workspace",
+        workspaceId: input.workspaceId,
+      });
+    } catch (issueError) {
+      appLogger.error({
+        error: issueError,
+        msg: "workspace.seat_sync_issue_failed",
+        workspaceId: input.workspaceId,
+      });
+    }
+  }
+}
 
 function toSummary(workspace: WorkspaceWithEntitlement, role: WorkspaceRole): WorkspaceSummary {
   const { entitlement } = workspace;
@@ -84,7 +127,7 @@ export const workspaceService = {
     }
 
     try {
-      return await db.$transaction(async (tx) => {
+      const member = await db.$transaction(async (tx) => {
         // Serialises seat accounting per workspace; without it two concurrent adds both pass the
         // seatLimit check and create an unpaid seat.
         await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${workspaceId}))`;
@@ -98,21 +141,19 @@ export const workspaceService = {
           throw new TRPCError({ code: "CONFLICT", message: "ALREADY_MEMBER" });
         }
 
-        const activeMembers = await tx.workspaceMember.count({ where: { workspaceId } });
-        // seatLimit is never "unlimited" here: 0 seats means the workspace may not add anyone.
-        const seatLimit = workspace.entitlement?.seatLimit ?? 0;
-
-        if (activeMembers >= seatLimit) {
-          throw new TRPCError({ code: "FORBIDDEN", message: "LIMIT_EXCEEDED" });
-        }
-
-        const member = await tx.workspaceMember.create({
+        // Seats are not pre-purchased: the subscription quantity follows the membership count, and
+        // the sync below invoices the extra seat with `always_invoice`.
+        const created = await tx.workspaceMember.create({
           data: { role: "MEMBER", userId: user.id, workspaceId },
           select: { id: true, role: true, userId: true },
         });
 
-        return { ...member, user: { id: user.id, image: user.image, name: user.name } };
+        return { ...created, user: { id: user.id, image: user.image, name: user.name } };
       });
+
+      await syncSeatsAfterMembershipChange(db, { requestId: member.id, workspaceId });
+
+      return member;
     } catch (error) {
       if (error instanceof TRPCError) {
         throw error;
@@ -169,10 +210,10 @@ export const workspaceService = {
     }
 
     try {
-      await db.$transaction(
+      const removedId = await db.$transaction(
         async (tx) => {
           const members = await tx.workspaceMember.findMany({
-            select: { role: true, userId: true },
+            select: { id: true, role: true, userId: true },
             where: { workspaceId },
           });
 
@@ -188,12 +229,20 @@ export const workspaceService = {
             throw new TRPCError({ code: "PRECONDITION_FAILED", message: "LAST_OWNER" });
           }
 
-          await tx.workspaceMember.delete({
+          const deleted = await tx.workspaceMember.delete({
+            select: { id: true },
             where: { workspaceId_userId: { userId, workspaceId } },
           });
+
+          return deleted.id;
         },
         { isolationLevel: "Serializable" },
       );
+
+      await syncSeatsAfterMembershipChange(db, {
+        requestId: `remove:${removedId}`,
+        workspaceId,
+      });
     } catch (error) {
       if (error instanceof TRPCError) {
         throw error;

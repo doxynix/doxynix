@@ -8,8 +8,18 @@ vi.mock("@/server/core/db", () => ({
   prisma: { user: { findUnique: vi.fn() } },
 }));
 
+const seatSyncMock = vi.hoisted(() => vi.fn());
+const issueMock = vi.hoisted(() => vi.fn());
+
+vi.mock("@/server/core/billing/seat-sync", () => ({ syncWorkspaceSeats: seatSyncMock }));
+vi.mock("@/server/core/billing/issue", () => ({ upsertBillingIssue: issueMock }));
+vi.mock("@/server/core/app-logger", () => ({
+  appLogger: { debug: vi.fn(), error: vi.fn(), flush: vi.fn(), info: vi.fn(), warn: vi.fn() },
+}));
+
 const WORKSPACE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5e";
+const MEMBER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a60";
 
 // Emulates the Prisma transaction client over the same mocks: addMember takes an advisory lock
 // and mutates inside $transaction, so the fake client must expose both methods.
@@ -74,7 +84,7 @@ describe("workspaceService.addMember", () => {
       name: "Bob",
     } as never);
     const create = vi.fn().mockResolvedValue({
-      id: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a60",
+      id: MEMBER_ID,
       role: "MEMBER",
       user: { id: USER_ID, name: "Bob" },
       userId: USER_ID,
@@ -101,14 +111,63 @@ describe("workspaceService.addMember", () => {
     expect(create.mock.calls[0]?.[0]).toMatchObject({
       data: { role: "MEMBER", userId: USER_ID, workspaceId: WORKSPACE_ID },
     });
+    expect(seatSyncMock).toHaveBeenCalledWith({
+      db,
+      requestId: MEMBER_ID,
+      workspaceId: WORKSPACE_ID,
+    });
   });
 
-  it("stops at the seat limit instead of silently overfilling the workspace", async () => {
+  it("keeps the committed membership and records an issue when Stripe rejects the seat sync", async () => {
     vi.mocked(prisma.user.findUnique).mockResolvedValue({
       id: USER_ID,
       image: null,
       name: "Bob",
     } as never);
+    seatSyncMock.mockRejectedValueOnce(new Error("stripe unavailable"));
+    const db = withTransaction({
+      user: { findUnique: vi.fn().mockResolvedValue({ id: USER_ID }) },
+      workspace: {
+        findUnique: vi
+          .fn()
+          .mockResolvedValue(
+            workspace({ entitlement: entitlement({ planCode: "PRO", seatLimit: 2 }) }),
+          ),
+      },
+      workspaceMember: {
+        count: vi.fn().mockResolvedValue(1),
+        create: vi.fn().mockResolvedValue({ id: MEMBER_ID, role: "MEMBER", userId: USER_ID }),
+        findUnique: vi.fn().mockResolvedValue(null),
+      },
+    });
+
+    const member = await workspaceService.addMember(db, WORKSPACE_ID, "bob@test.com");
+
+    expect(member.role).toBe("MEMBER");
+    expect(issueMock).toHaveBeenCalledWith(
+      db,
+      expect.objectContaining({
+        dedupeKey: `seat_sync_failed:${WORKSPACE_ID}`,
+        details: { error: "stripe unavailable", requestId: MEMBER_ID },
+        kind: "SEAT_SYNC_FAILED",
+        severity: "WARNING",
+        source: "workspace",
+        workspaceId: WORKSPACE_ID,
+      }),
+    );
+  });
+
+  it("adds past the current seat limit and bills the extra seat", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({
+      id: USER_ID,
+      image: null,
+      name: "Bob",
+    } as never);
+    const create = vi.fn().mockResolvedValue({
+      id: MEMBER_ID,
+      role: "MEMBER",
+      userId: USER_ID,
+    });
     const db = withTransaction({
       user: { findUnique: vi.fn().mockResolvedValue({ id: USER_ID }) },
       workspace: {
@@ -120,39 +179,19 @@ describe("workspaceService.addMember", () => {
       },
       workspaceMember: {
         count: vi.fn().mockResolvedValue(1),
+        create,
         findUnique: vi.fn().mockResolvedValue(null),
       },
     });
 
-    await expect(
-      workspaceService.addMember(db, WORKSPACE_ID, "bob@test.com"),
-    ).rejects.toMatchObject({ code: "FORBIDDEN", message: "LIMIT_EXCEEDED" });
-  });
+    const member = await workspaceService.addMember(db, WORKSPACE_ID, "bob@test.com");
 
-  it("treats a zero seat limit as no capacity instead of unlimited", async () => {
-    vi.mocked(prisma.user.findUnique).mockResolvedValue({
-      id: USER_ID,
-      image: null,
-      name: "Bob",
-    } as never);
-    const db = withTransaction({
-      user: { findUnique: vi.fn().mockResolvedValue({ id: USER_ID }) },
-      workspace: {
-        findUnique: vi
-          .fn()
-          .mockResolvedValue(
-            workspace({ entitlement: entitlement({ planCode: "PRO", seatLimit: 0 }) }),
-          ),
-      },
-      workspaceMember: {
-        count: vi.fn().mockResolvedValue(0),
-        findUnique: vi.fn().mockResolvedValue(null),
-      },
+    expect(member.role).toBe("MEMBER");
+    expect(seatSyncMock).toHaveBeenCalledWith({
+      db,
+      requestId: MEMBER_ID,
+      workspaceId: WORKSPACE_ID,
     });
-
-    await expect(
-      workspaceService.addMember(db, WORKSPACE_ID, "bob@test.com"),
-    ).rejects.toMatchObject({ code: "FORBIDDEN", message: "LIMIT_EXCEEDED" });
   });
 
   it("refuses to add a seat while the subscription is not ACTIVE", async () => {
@@ -207,13 +246,17 @@ describe("workspaceService.removeMember", () => {
   });
 
   it("removes an owner when another owner remains", async () => {
-    const remove = vi.fn().mockResolvedValue({});
+    const remove = vi.fn().mockResolvedValue({ id: "member_removed" });
     const tx = {
       workspaceMember: {
         delete: remove,
         findMany: vi.fn().mockResolvedValue([
-          { role: "OWNER", userId: USER_ID },
-          { role: "OWNER", userId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a61" },
+          { id: "member_removed", role: "OWNER", userId: USER_ID },
+          {
+            id: "member_other_owner",
+            role: "OWNER",
+            userId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a61",
+          },
         ]),
       },
     };
@@ -224,7 +267,13 @@ describe("workspaceService.removeMember", () => {
     await workspaceService.removeMember(db, WORKSPACE_ID, USER_ID);
 
     expect(remove).toHaveBeenCalledWith({
+      select: { id: true },
       where: { workspaceId_userId: { userId: USER_ID, workspaceId: WORKSPACE_ID } },
+    });
+    expect(seatSyncMock).toHaveBeenCalledWith({
+      db,
+      requestId: "remove:member_removed",
+      workspaceId: WORKSPACE_ID,
     });
   });
 });

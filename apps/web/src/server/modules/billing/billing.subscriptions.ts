@@ -149,7 +149,7 @@ export async function projectSubscription(
   });
 
   // Stripe can report fewer seats than the workspace already has (race, manual change in the
-  // Dashboard). Never shrink capacity below the people present; surface it as an issue instead.
+  // Dashboard). Paid seats are the billing truth: surface the gap instead of gifting capacity.
   if (!terminal && requestedSeats < activeMembers) {
     await upsertBillingIssue(tx, {
       dedupeKey: `seats_below_members:${subscription.id}`,
@@ -162,7 +162,7 @@ export async function projectSubscription(
     });
   }
 
-  const seatLimit = terminal ? 0 : Math.max(requestedSeats, activeMembers);
+  const seatLimit = terminal ? 0 : requestedSeats;
   const cancelAt = subscription.cancel_at == null ? null : new Date(subscription.cancel_at * 1000);
   const currentPeriodEnd = new Date(item.current_period_end * 1000);
   const currentPeriodStart = new Date(item.current_period_start * 1000);
