@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import type Stripe from "stripe";
 
 import { APP_URL } from "@/shared/config/env.client";
+import { IS_PROD } from "@/shared/config/env.flags";
 import { DEFAULT_LOCALE } from "@/shared/config/locales";
 
 import type { DbClient } from "@/server/core/db";
@@ -206,8 +207,15 @@ export async function createCheckoutSession(
 
       try {
         // With required jurisdictions configured, a sale must not start while Stripe Tax lacks a
-        // registration: `automatic_tax` would otherwise collect zero and look like success.
-        if (requiredJurisdictions().length > 0) {
+        // registration: `automatic_tax` would otherwise collect zero and look like success. In
+        // production an empty list is itself a misconfiguration and blocks the sale.
+        const required = requiredJurisdictions();
+
+        if (required.length === 0) {
+          if (IS_PROD) {
+            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "TAX_NOT_CONFIGURED" });
+          }
+        } else {
           const preflight = await runTaxPreflight(input.db);
 
           if (!preflight.settingsActive || preflight.missingJurisdictions.length > 0) {
