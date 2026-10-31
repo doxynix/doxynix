@@ -1,10 +1,12 @@
 import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
+import { appLogger } from "@/server/core/app-logger";
 import { recordBillingMetric } from "@/server/core/billing/metrics";
 import type { DbClient } from "@/server/core/db";
 
 import { PROCESS_STRIPE_EVENT_TASK_ID } from "./billing.constants";
+import { ownershipKeyFromPayload } from "./billing.ownership";
 import type { processStripeEventTask } from "./tasks/process-stripe-event.task";
 
 const REPLAYABLE_STATUSES = new Set(["DEAD_LETTER", "ENQUEUED", "RECEIVED"]);
@@ -26,10 +28,15 @@ export type BillingIssueSummary = {
 
 export async function replayBillingEvent(
   db: DbClient,
-  input: { billingEventId: string },
+  input: { actorUserId: string; billingEventId: string },
 ): Promise<{ runId: string }> {
   const event = await db.billingEvent.findUnique({
-    select: { replayCount: true, status: true, stripeEventId: true },
+    select: {
+      payload: true,
+      replayCount: true,
+      status: true,
+      stripeEventId: true,
+    },
     where: { id: input.billingEventId },
   });
 
@@ -50,7 +57,10 @@ export async function replayBillingEvent(
   const run = await tasks.trigger<typeof processStripeEventTask>(
     PROCESS_STRIPE_EVENT_TASK_ID,
     { billingEventId: input.billingEventId },
-    { idempotencyKey: `${event.stripeEventId}:replay:${event.replayCount + 1}` },
+    {
+      concurrencyKey: ownershipKeyFromPayload(event.payload),
+      idempotencyKey: `${event.stripeEventId}:replay:${event.replayCount + 1}`,
+    },
   );
 
   await db.billingEvent.update({
@@ -63,6 +73,16 @@ export async function replayBillingEvent(
   });
 
   recordBillingMetric("billing_replay_total", 1, {});
+
+  // Billing models are not in the audited set, so the operator action is recorded structurally
+  // here; a schema-backed audit row is tracked as a follow-up.
+  appLogger.info({
+    actorUserId: input.actorUserId,
+    billingEventId: input.billingEventId,
+    msg: "billing.event_replayed",
+    runId: run.id,
+    type: "billing.audit",
+  });
 
   return { runId: run.id };
 }
@@ -87,7 +107,7 @@ function mergeResolutionNote(details: unknown, note: string): Record<string, unk
 
 export async function resolveBillingIssue(
   db: DbClient,
-  input: { issueId: string; note?: string },
+  input: { actorUserId: string; issueId: string; note?: string },
 ): Promise<{ resolved: boolean }> {
   const issue = await db.billingIssue.findUnique({
     select: { details: true, status: true },
@@ -114,6 +134,13 @@ export async function resolveBillingIssue(
       status: "RESOLVED",
     },
     where: { id: input.issueId },
+  });
+
+  appLogger.info({
+    actorUserId: input.actorUserId,
+    issueId: input.issueId,
+    msg: "billing.issue_resolved",
+    type: "billing.audit",
   });
 
   return { resolved: true };

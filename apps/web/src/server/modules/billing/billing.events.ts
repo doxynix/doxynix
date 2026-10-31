@@ -10,6 +10,7 @@ import { PROCESS_STRIPE_EVENT_TASK_ID, STRIPE_API_VERSION } from "./billing.cons
 import { NonRetryableBillingError } from "./billing.errors";
 import { applyInvoiceEvent, retrieveSubscriptionForInvoice } from "./billing.invoices";
 import { upsertBillingIssue } from "./billing.issues";
+import { ownershipKeyFromPayload } from "./billing.ownership";
 import {
   type BillingOwnership,
   type CanonicalStripeObject,
@@ -319,7 +320,7 @@ export async function sweepStaleStripeEvents(
 
   const stale = await prisma.billingEvent.findMany({
     orderBy: { receivedAt: "asc" },
-    select: { id: true, replayCount: true, stripeEventId: true },
+    select: { id: true, payload: true, replayCount: true, stripeEventId: true },
     take: SWEEP_BATCH_SIZE,
     where: {
       OR: [
@@ -339,7 +340,10 @@ export async function sweepStaleStripeEvents(
       const runId = await tasks.trigger(
         PROCESS_STRIPE_EVENT_TASK_ID,
         { billingEventId: event.id },
-        { idempotencyKey: `${event.stripeEventId}:replay:${event.replayCount + 1}` },
+        {
+          concurrencyKey: ownershipKeyFromPayload(event.payload),
+          idempotencyKey: `${event.stripeEventId}:replay:${event.replayCount + 1}`,
+        },
       );
 
       await prisma.billingEvent.update({

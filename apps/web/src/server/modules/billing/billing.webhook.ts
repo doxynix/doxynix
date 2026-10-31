@@ -11,6 +11,7 @@ import { captureBillingAlert, recordBillingMetric } from "@/server/core/billing/
 import { prisma } from "@/server/core/db";
 
 import { upsertBillingIssue } from "./billing.issues";
+import { ownershipKeyForObject } from "./billing.ownership";
 import { getStripeClient } from "./billing.stripe";
 import type { processStripeEventTask } from "./tasks/process-stripe-event.task";
 
@@ -57,23 +58,7 @@ function isUniqueViolation(error: unknown): boolean {
 // Serializes events that share a Stripe owner, so two workers never project the same subscription
 // or customer at the same time. The worker refines this once it knows the workspace.
 function ownershipKey(event: Stripe.Event): string {
-  const object: unknown = event.data.object;
-
-  if (typeof object === "object" && object !== null) {
-    if ("customer" in object && typeof object.customer === "string") {
-      return `customer:${object.customer}`;
-    }
-
-    if ("subscription" in object && typeof object.subscription === "string") {
-      return `subscription:${object.subscription}`;
-    }
-
-    if ("id" in object && typeof object.id === "string") {
-      return `object:${object.id}`;
-    }
-  }
-
-  return `event:${event.id}`;
+  return ownershipKeyForObject(event.data.object);
 }
 
 async function findExistingEvent(stripeEventId: string) {

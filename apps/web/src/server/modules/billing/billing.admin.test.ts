@@ -24,6 +24,7 @@ function createDb() {
   return {
     billingEvent: {
       findUnique: vi.fn().mockResolvedValue({
+        payload: { data: { object: { customer: "cus_1" } } },
         replayCount: 2,
         status: "DEAD_LETTER",
         stripeEventId: "evt_1",
@@ -51,13 +52,16 @@ describe("replayBillingEvent", () => {
   it("re-enqueues a dead-lettered event with a replay suffix", async () => {
     const db = createDb();
 
-    const result = await replayBillingEvent(asDb(db), { billingEventId: EVENT_ID });
+    const result = await replayBillingEvent(asDb(db), {
+      actorUserId: "admin_1",
+      billingEventId: EVENT_ID,
+    });
 
     expect(result).toEqual({ runId: "run_2" });
     expect(triggerMock).toHaveBeenCalledWith(
       "billing-process-stripe-event",
       { billingEventId: EVENT_ID },
-      { idempotencyKey: "evt_1:replay:3" },
+      { concurrencyKey: "customer:cus_1", idempotencyKey: "evt_1:replay:3" },
     );
     expect(db.billingEvent.update).toHaveBeenCalledWith({
       data: { replayCount: { increment: 1 }, status: "ENQUEUED", triggerRunId: "run_2" },
@@ -74,7 +78,9 @@ describe("replayBillingEvent", () => {
       stripeEventId: "evt_1",
     });
 
-    await expect(replayBillingEvent(asDb(db), { billingEventId: EVENT_ID })).rejects.toMatchObject({
+    await expect(
+      replayBillingEvent(asDb(db), { actorUserId: "admin_1", billingEventId: EVENT_ID }),
+    ).rejects.toMatchObject({
       code: "CONFLICT",
       message: "BILLING_EVENT_ALREADY_PROCESSED",
     });
@@ -89,7 +95,9 @@ describe("replayBillingEvent", () => {
       stripeEventId: "evt_1",
     });
 
-    await expect(replayBillingEvent(asDb(db), { billingEventId: EVENT_ID })).rejects.toMatchObject({
+    await expect(
+      replayBillingEvent(asDb(db), { actorUserId: "admin_1", billingEventId: EVENT_ID }),
+    ).rejects.toMatchObject({
       message: "BILLING_EVENT_NOT_REPLAYABLE",
     });
   });
@@ -98,7 +106,9 @@ describe("replayBillingEvent", () => {
     const db = createDb();
     db.billingEvent.findUnique.mockResolvedValue(null);
 
-    await expect(replayBillingEvent(asDb(db), { billingEventId: EVENT_ID })).rejects.toMatchObject({
+    await expect(
+      replayBillingEvent(asDb(db), { actorUserId: "admin_1", billingEventId: EVENT_ID }),
+    ).rejects.toMatchObject({
       code: "NOT_FOUND",
     });
   });
@@ -113,6 +123,7 @@ describe("resolveBillingIssue", () => {
     const db = createDb();
 
     const result = await resolveBillingIssue(asDb(db), {
+      actorUserId: "admin_1",
       issueId: ISSUE_ID,
       note: "fixed by hand",
     });
@@ -132,6 +143,7 @@ describe("resolveBillingIssue", () => {
     const db = createDb();
 
     await resolveBillingIssue(asDb(db), {
+      actorUserId: "admin_1",
       issueId: ISSUE_ID,
       note: "see https://example.com/secret",
     });
@@ -147,7 +159,10 @@ describe("resolveBillingIssue", () => {
     const db = createDb();
     db.billingIssue.findUnique.mockResolvedValue({ details: {}, status: "RESOLVED" });
 
-    const result = await resolveBillingIssue(asDb(db), { issueId: ISSUE_ID });
+    const result = await resolveBillingIssue(asDb(db), {
+      actorUserId: "admin_1",
+      issueId: ISSUE_ID,
+    });
 
     expect(result).toEqual({ resolved: false });
     expect(db.billingIssue.update).not.toHaveBeenCalled();

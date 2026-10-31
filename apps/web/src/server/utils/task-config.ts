@@ -84,6 +84,9 @@ export const TASK_CONFIGS = {
   },
 
   processStripeEvent: {
+    // Billing events mutate the same subscription and entitlement rows; a single worker per
+    // project keeps two events of one owner from projecting in parallel and losing a transition.
+    concurrency: { perKey: 1, total: 10 },
     machine: { preset: "micro" },
     maxDuration: 60 * 5, // TIME: 5 minutes
     retry: {

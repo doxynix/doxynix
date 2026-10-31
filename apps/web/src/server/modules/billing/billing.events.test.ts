@@ -285,7 +285,12 @@ describe("stripe event worker", () => {
 
   it("requeues a stale event under a replay key", async () => {
     dbMock.billingEvent.findMany.mockResolvedValue([
-      { id: "be_1", replayCount: 2, stripeEventId: "evt_1" },
+      {
+        id: "be_1",
+        payload: { data: { object: { customer: "cus_1" } } },
+        replayCount: 2,
+        stripeEventId: "evt_1",
+      },
     ]);
 
     const result = await sweepStaleStripeEvents(new Date("2026-10-30T12:00:00.000Z"));
@@ -307,7 +312,7 @@ describe("stripe event worker", () => {
     expect(triggerMock).toHaveBeenCalledWith(
       "billing-process-stripe-event",
       { billingEventId: "be_1" },
-      { idempotencyKey: "evt_1:replay:3" },
+      { concurrencyKey: "customer:cus_1", idempotencyKey: "evt_1:replay:3" },
     );
     expect(callArg(dbMock.billingEvent.update)).toMatchObject({
       data: { replayCount: { increment: 1 }, status: "ENQUEUED" },
@@ -367,7 +372,7 @@ describe("stripe event worker", () => {
     expect(triggerMock).toHaveBeenCalledWith(
       "billing-process-stripe-event",
       { billingEventId: "be_lost" },
-      { idempotencyKey: "evt_lost:replay:1" },
+      { concurrencyKey: "owner:unknown", idempotencyKey: "evt_lost:replay:1" },
     );
   });
 });
