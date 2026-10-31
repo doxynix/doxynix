@@ -57,6 +57,7 @@ async function* listAllSubscriptions(stripe: Stripe): AsyncGenerator<Stripe.Subs
 
   do {
     const page = await stripe.subscriptions.list({
+      expand: ["data.latest_invoice"],
       limit: PAGE_SIZE,
       starting_after: startingAfter,
       status: "all",
@@ -189,7 +190,9 @@ async function reconcileMissingLocal(seen: Set<string>, now: Date): Promise<numb
 
     try {
       // A direct retrieve separates a pagination gap from a genuinely deleted subscription.
-      const subscription = await stripe.subscriptions.retrieve(local.stripeSubscriptionId);
+      const subscription = await stripe.subscriptions.retrieve(local.stripeSubscriptionId, {
+        expand: ["latest_invoice"],
+      });
       const customerId = idOf(subscription.customer);
       const mapping =
         customerId == null

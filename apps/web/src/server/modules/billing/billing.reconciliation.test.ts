@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { proPlan } from "./billing.catalog";
 import { runStripeReconciliation } from "./billing.reconciliation";
+import type * as BillingSubscriptions from "./billing.subscriptions";
 
 const WORKSPACE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 const NOW = new Date("2026-10-30T04:17:00.000Z");
@@ -14,8 +15,14 @@ const dbMock = vi.hoisted(() => ({
   billingIssue: { createMany: vi.fn(), updateMany: vi.fn() },
   billingLedgerEntry: { createMany: vi.fn(), findMany: vi.fn() },
   billingReconciliationRun: { create: vi.fn(), findFirst: vi.fn(), update: vi.fn() },
-  billingSubscription: { findMany: vi.fn(), findUnique: vi.fn(), updateMany: vi.fn() },
-  workspaceEntitlement: { updateMany: vi.fn() },
+  billingSubscription: {
+    findMany: vi.fn(),
+    findUnique: vi.fn(),
+    updateMany: vi.fn(),
+    upsert: vi.fn(),
+  },
+  workspaceEntitlement: { findUnique: vi.fn(), updateMany: vi.fn(), upsert: vi.fn() },
+  workspaceMember: { count: vi.fn() },
 }));
 
 const projectMock = vi.hoisted(() => vi.fn());
@@ -23,7 +30,7 @@ const projectMock = vi.hoisted(() => vi.fn());
 const stripeMock = vi.hoisted(() => ({
   invoices: { retrieve: vi.fn() },
   subscriptions: { list: vi.fn(), retrieve: vi.fn() },
-  tax: { registrations: { list: vi.fn() } },
+  tax: { registrations: { list: vi.fn() }, settings: { retrieve: vi.fn() } },
 }));
 
 vi.mock("@/server/core/db", () => ({ prisma: dbMock }));
@@ -53,7 +60,7 @@ function subscription(overrides: Record<string, unknown> = {}) {
           current_period_end: 1_800_000_000,
           current_period_start: 1_790_000_000,
           id: "si_1",
-          price: { currency: "usd", id: proPlan().priceId },
+          price: { currency: "usd", id: proPlan().priceId, recurring: { interval: "month" } },
           quantity: 2,
         },
       ],
@@ -103,7 +110,11 @@ describe("runStripeReconciliation", () => {
     dbMock.billingSubscription.findMany.mockResolvedValue([]);
     dbMock.billingSubscription.findUnique.mockResolvedValue(null);
     dbMock.billingSubscription.updateMany.mockResolvedValue({ count: 1 });
+    dbMock.billingSubscription.upsert.mockResolvedValue({ id: "bs_1" });
     dbMock.workspaceEntitlement.updateMany.mockResolvedValue({ count: 1 });
+    dbMock.workspaceEntitlement.findUnique.mockResolvedValue(null);
+    dbMock.workspaceEntitlement.upsert.mockResolvedValue({});
+    dbMock.workspaceMember.count.mockResolvedValue(0);
     stripeMock.invoices.retrieve.mockReset();
     stripeMock.subscriptions.list.mockReset().mockResolvedValue({ data: [], has_more: false });
     stripeMock.subscriptions.retrieve.mockReset();
@@ -254,5 +265,39 @@ describe("runStripeReconciliation", () => {
     expect(stripeMock.subscriptions).not.toHaveProperty("update");
     expect(stripeMock.subscriptions).not.toHaveProperty("create");
     expect(stripeMock.invoices).not.toHaveProperty("update");
+  });
+
+  it("repairs with an expanded paid invoice and activates the subscription", async () => {
+    const actual = await vi.importActual<typeof BillingSubscriptions>("./billing.subscriptions");
+    projectMock.mockImplementationOnce(actual.projectSubscription);
+
+    const paidAt = new Date("2026-10-20T10:00:00.000Z");
+    stripeMock.subscriptions.list.mockResolvedValue({
+      data: [
+        subscription({
+          latest_invoice: {
+            status: "paid",
+            status_transitions: { paid_at: Math.floor(paidAt.getTime() / 1000) },
+          },
+        }),
+      ],
+      has_more: false,
+    });
+    dbMock.billingSubscription.upsert.mockResolvedValue({ id: "bs_1" });
+
+    await runStripeReconciliation(NOW);
+
+    expect(stripeMock.subscriptions.list).toHaveBeenCalledWith(
+      expect.objectContaining({ expand: ["data.latest_invoice"] }),
+    );
+    expect(dbMock.billingSubscription.updateMany).toHaveBeenCalledWith({
+      data: { activatedAt: paidAt },
+      where: { activatedAt: null, stripeSubscriptionId: "sub_1" },
+    });
+    expect(dbMock.workspaceEntitlement.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        create: expect.objectContaining({ accessState: "ACTIVE" }),
+      }),
+    );
   });
 });
