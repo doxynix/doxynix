@@ -21,7 +21,7 @@ import { resolveRequestUserId } from "@/server/core/auth/resolve-session";
 import { prisma } from "@/server/core/db";
 import { getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { realtimeService } from "@/server/core/realtime";
-import { reserveUsage, settleUsage } from "@/server/core/usage/usage";
+import { releaseUsage, reserveUsage, settleUsage } from "@/server/core/usage/usage";
 import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import {
   AGENT_SYSTEM_PROMPT,
@@ -64,27 +64,9 @@ async function handler(req: Request) {
   });
 
   // The agent spends the same AI budget as analyses: a suspended or exhausted workspace must not
-  // reach the model at all.
-  const entitlement = await getWorkspaceEntitlement(prisma, workspace.id);
-
-  if (entitlement == null || !entitlement.hasAccess) {
-    throw new AppError({ code: "PAYMENT_REQUIRED", publicMessage: "PAYMENT_REQUIRED" });
-  }
-
-  if (
-    entitlement.aiTokensPerMonth != null &&
-    entitlement.usedTokens >= entitlement.aiTokensPerMonth
-  ) {
-    throw new AppError({ code: "FORBIDDEN", publicMessage: "LIMIT_EXCEEDED" });
-  }
-
+  // reach the model at all. The reservation happens together with this check, just before the
+  // model call, so a plain read cannot be raced by a second chat.
   const usageKey = `agent:${sessionId ?? "new"}:${crypto.randomUUID()}`;
-
-  await reserveUsage(prisma, {
-    estimatedTokens: AGENT_TOKEN_ESTIMATE,
-    idempotencyKey: usageKey,
-    workspaceId: workspace.id,
-  });
 
   let resolvedRepoId: string | undefined;
   let internalRepoId: null | string = null;
@@ -161,13 +143,41 @@ async function handler(req: Request) {
 - Automatically assume this repository for all tools requiring "repoId" (e.g., quickFileAudit, triggerRepositoryAnalysis, etc.). You do not need to ask the user or search for it.
 - Only prompt for a repository ID if the user explicitly wants to target a completely different project.`;
 
+  await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`agent-quota:${workspace.id}`}))`;
+
+    const fresh = await getWorkspaceEntitlement(tx, workspace.id, new Date(), { fresh: true });
+
+    if (fresh == null || !fresh.hasAccess) {
+      throw new AppError({ code: "PAYMENT_REQUIRED", publicMessage: "PAYMENT_REQUIRED" });
+    }
+
+    if (fresh.aiTokensPerMonth != null && fresh.usedTokens >= fresh.aiTokensPerMonth) {
+      throw new AppError({ code: "FORBIDDEN", publicMessage: "LIMIT_EXCEEDED" });
+    }
+
+    await reserveUsage(tx, {
+      estimatedTokens: AGENT_TOKEN_ESTIMATE,
+      idempotencyKey: usageKey,
+      workspaceId: workspace.id,
+    });
+  });
+
   const result = streamText({
     experimental_toolApprovalSecret: TOOL_APPROVAL_SECRET,
     instructions: dynamicSystemPrompt,
     messages: modelMessages,
     model: google(agentModelId),
-    onEnd: ({ usage }) => {
-      void settleUsage(prisma, {
+    onAbort: () => {
+      void releaseUsage(prisma, {
+        idempotencyKey: usageKey,
+        workspaceId: workspace.id,
+      }).catch((error: unknown) => {
+        appLogger.error({ error, msg: "agent.usage_release_failed" });
+      });
+    },
+    onEnd: async ({ usage }) => {
+      await settleUsage(prisma, {
         idempotencyKey: usageKey,
         model: agentModelId,
         provider: "google",
@@ -179,6 +189,14 @@ async function handler(req: Request) {
         workspaceId: workspace.id,
       }).catch((error: unknown) => {
         appLogger.error({ error, msg: "agent.usage_settle_failed" });
+      });
+    },
+    onError: () => {
+      void releaseUsage(prisma, {
+        idempotencyKey: usageKey,
+        workspaceId: workspace.id,
+      }).catch((error: unknown) => {
+        appLogger.error({ error, msg: "agent.usage_release_failed" });
       });
     },
     stopWhen: isStepCount(10),
