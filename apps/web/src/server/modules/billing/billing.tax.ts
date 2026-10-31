@@ -1,7 +1,9 @@
 import type Stripe from "stripe";
 
+import { IS_PROD } from "@/shared/config/env.flags";
 import { STRIPE_TAX_REQUIRED_JURISDICTIONS } from "@/shared/config/env.server";
 
+import { captureBillingAlert } from "@/server/core/billing/metrics";
 import { type DbClient, prisma } from "@/server/core/db";
 
 import { upsertBillingIssue } from "./billing.issues";
@@ -46,11 +48,23 @@ export async function runTaxPreflight(
     activeJurisdictions.push(registration.country.toUpperCase());
   }
 
+  if (required.length === 0 && IS_PROD) {
+    await upsertBillingIssue(db, {
+      dedupeKey: "tax_jurisdictions_not_configured",
+      details: {},
+      kind: "TAX_JURISDICTIONS_NOT_CONFIGURED",
+      severity: "CRITICAL",
+      source: "stripe_tax",
+    });
+  }
+
   const missingJurisdictions = required
     .map((country) => country.toUpperCase())
     .filter((country) => !activeJurisdictions.includes(country));
 
   for (const country of missingJurisdictions) {
+    captureBillingAlert("TAX_REGISTRATION_MISSING", { country });
+
     await upsertBillingIssue(db, {
       dedupeKey: `tax_registration_missing:${country}`,
       details: { country },

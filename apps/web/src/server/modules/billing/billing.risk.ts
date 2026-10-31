@@ -1,5 +1,6 @@
 import type Stripe from "stripe";
 
+import { captureBillingAlert } from "@/server/core/billing/metrics";
 import type { DbClient } from "@/server/core/db";
 
 import { upsertBillingIssue } from "./billing.issues";
@@ -169,6 +170,8 @@ async function applyDispute(
   });
 
   if (!resolved) {
+    captureBillingAlert("DISPUTE", { disputeId: dispute.id });
+
     await upsertBillingIssue(tx, {
       dedupeKey: `dispute_opened:${dispute.id}`,
       details: { amount: dispute.amount, status },
@@ -226,6 +229,8 @@ export async function applyRiskEvent(
       return;
     }
     case "early_fraud_warning": {
+      captureBillingAlert("EARLY_FRAUD_WARNING", { warningId: input.canonical.warning.id });
+
       await upsertBillingIssue(tx, {
         dedupeKey: `early_fraud_warning:${input.canonical.warning.id}`,
         details: { created: input.canonical.warning.created },

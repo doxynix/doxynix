@@ -3,6 +3,7 @@ import { tasks } from "@trigger.dev/sdk";
 import type Stripe from "stripe";
 
 import { appLogger } from "@/server/core/app-logger";
+import { captureBillingAlert, recordBillingMetric } from "@/server/core/billing/metrics";
 import { type DbClient, prisma } from "@/server/core/db";
 
 import { PROCESS_STRIPE_EVENT_TASK_ID, STRIPE_API_VERSION } from "./billing.constants";
@@ -130,6 +131,8 @@ async function handleUnownedEvent(
 
     await markProcessed(tx, billingEventId);
   });
+
+  captureBillingAlert("UNOWNED_STRIPE_OBJECT", { stripeObjectId: event.data.object.id });
 
   appLogger.error({
     billingEventId,
@@ -298,6 +301,10 @@ export async function markEventDeadLetter(billingEventId: string, error: unknown
       stripeObjectId: stored?.stripeEventId ?? null,
     });
   });
+
+  recordBillingMetric("billing_dlq_total", 1, {});
+  recordBillingMetric("billing_event_failures_total", 1, {});
+  captureBillingAlert("DLQ", { billingEventId });
 
   appLogger.error({ billingEventId, msg: "stripe_event_dead_letter" });
 }

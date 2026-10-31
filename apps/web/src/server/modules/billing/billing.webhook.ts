@@ -7,6 +7,7 @@ import type Stripe from "stripe";
 import { STRIPE_LIVEMODE, STRIPE_WEBHOOK_SECRET } from "@/shared/config/env.server";
 
 import { appLogger } from "@/server/core/app-logger";
+import { captureBillingAlert, recordBillingMetric } from "@/server/core/billing/metrics";
 import { prisma } from "@/server/core/db";
 
 import { upsertBillingIssue } from "./billing.issues";
@@ -128,8 +129,18 @@ export async function handleStripeWebhook(req: Request): Promise<Response> {
     // Default tolerance on purpose: widening the window weakens replay protection.
     event = stripe.webhooks.constructEvent(raw, signature, STRIPE_WEBHOOK_SECRET);
   } catch {
+    captureBillingAlert("INVALID_SIGNATURE");
+
     return jsonResponse({ error: "INVALID_SIGNATURE" }, 400);
   }
+
+  recordBillingMetric(
+    "billing_webhook_lag_seconds",
+    Math.max(0, Date.now() / 1000 - event.created),
+    {
+      type: event.type,
+    },
+  );
 
   if (event.livemode !== STRIPE_LIVEMODE) {
     appLogger.error({
@@ -180,6 +191,7 @@ export async function handleStripeWebhook(req: Request): Promise<Response> {
     }
 
     if (existing.payloadHash !== payloadHash) {
+      captureBillingAlert("PAYLOAD_HASH_MISMATCH", { eventId: event.id });
       await recordHashMismatch(event);
 
       // 200 on purpose: a non-2xx would make Stripe retry a payload we will never accept.
@@ -220,6 +232,11 @@ export async function handleStripeWebhook(req: Request): Promise<Response> {
 
     return jsonResponse({ error: "ENQUEUE_FAILED" }, 500);
   }
+
+  recordBillingMetric("billing_webhook_received_total", 1, {
+    result: "enqueued",
+    type: event.type,
+  });
 
   return jsonResponse({ ok: true }, 200);
 }

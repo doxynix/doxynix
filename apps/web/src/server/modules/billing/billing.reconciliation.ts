@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import type Stripe from "stripe";
 
 import { appLogger } from "@/server/core/app-logger";
+import { captureBillingAlert, recordBillingMetric } from "@/server/core/billing/metrics";
 import { prisma } from "@/server/core/db";
 
 import { STRIPE_PROVIDER } from "./billing.constants";
@@ -347,6 +348,10 @@ async function assertPreviousRunFresh(now: Date): Promise<void> {
   }
 
   if (now.getTime() - previous.finishedAt.getTime() > RECONCILIATION_ALERT_MS) {
+    captureBillingAlert("RECONCILIATION_STALE", {
+      lastSuccess: previous.finishedAt.toISOString(),
+    });
+
     await upsertBillingIssue(prisma, {
       dedupeKey: `reconciliation_stale:${previous.finishedAt.toISOString()}`,
       details: { lastSuccess: previous.finishedAt.toISOString() },
@@ -380,6 +385,7 @@ export async function runStripeReconciliation(
 
   let checkedSubscriptions = 0;
   let mismatchCount = 0;
+  const startedAt = Date.now();
 
   try {
     await assertPreviousRunFresh(now);
@@ -401,18 +407,34 @@ export async function runStripeReconciliation(
     await checkEventQueue(now);
     await checkTaxRegistrations();
 
+    const finishedAt = new Date();
+
     await prisma.billingReconciliationRun.update({
       data: {
         checkedSubscriptions,
-        finishedAt: new Date(),
+        finishedAt,
         mismatchCount,
         status: "SUCCESS",
       },
       where: { id: runId },
     });
 
+    recordBillingMetric(
+      "billing_reconciliation_duration_seconds",
+      (Date.now() - startedAt) / 1000,
+      {},
+    );
+    recordBillingMetric("billing_reconciliation_mismatches_total", mismatchCount, {});
+    recordBillingMetric(
+      "billing_reconciliation_last_success_timestamp",
+      Math.floor(finishedAt.getTime() / 1000),
+      {},
+    );
+
     return { checkedSubscriptions, mismatchCount, runId, skipped: false };
   } catch (error) {
+    captureBillingAlert("RECONCILIATION_FAILED", {});
+
     await prisma.billingReconciliationRun.update({
       data: {
         error: error instanceof Error ? error.message.slice(0, 500) : "UNKNOWN_ERROR",

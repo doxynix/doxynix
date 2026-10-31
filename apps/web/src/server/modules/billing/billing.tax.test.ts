@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type * as EnvFlags from "@/shared/config/env.flags";
+
 import type { DbClient } from "@/server/core/db";
 
 import { applyInvoiceEvent } from "./billing.invoices";
@@ -13,6 +15,11 @@ const stripeMock = vi.hoisted(() => ({
 }));
 
 vi.mock("./billing.stripe", () => ({ getStripeClient: () => stripeMock }));
+vi.mock("@/shared/config/env.flags", async (importOriginal) => {
+  const actual = await importOriginal<typeof EnvFlags>();
+
+  return { ...actual, IS_PROD: true };
+});
 
 function asyncIterable<T>(items: Array<T>) {
   return {
@@ -217,5 +224,13 @@ describe("recordTaxCollection", () => {
     });
 
     expect(fake.issues.size).toBe(0);
+  });
+
+  it("raises a configuration issue when no jurisdictions are configured in production", async () => {
+    const fake = createIssueStore();
+
+    await runTaxPreflight(fake.db, []);
+
+    expect([...fake.issues.keys()]).toContain("tax_jurisdictions_not_configured");
   });
 });

@@ -1,5 +1,6 @@
 import type Stripe from "stripe";
 
+import { recordBillingMetric } from "@/server/core/billing/metrics";
 import type { DbClient } from "@/server/core/db";
 
 import { BillingCatalogError, resolvePlanForPrice } from "./billing.catalog";
@@ -129,6 +130,12 @@ export async function projectSubscription(
       status: subscription.status,
     },
   });
+
+  recordBillingMetric("billing_subscription_transition_total", 1, {
+    from: current,
+    to: decision.accessState,
+  });
+  recordBillingMetric("billing_entitlement_total", 1, { state: decision.accessState });
 
   const terminal = isTerminalStatus(subscription.status);
   const isCurrent = terminal ? null : true;
