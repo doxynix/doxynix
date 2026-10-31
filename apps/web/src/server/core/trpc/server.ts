@@ -17,11 +17,11 @@ import { createCallerFactory } from "./init";
 
 // Dynamic because server slices import this file back for `apiForUser`; a static import
 // would close the cycle, and deferring keeps the routers out of unrelated entrypoints.
-export const apiForUser = cache(async (userId: string) => {
+export const apiForUser = cache(async (userId: string, workspaceId?: string) => {
   const { appRouter } = await import("@/server/modules");
   const createCaller = createCallerFactory(appRouter);
 
-  return createCaller(await ctxForUser(userId));
+  return createCaller(await ctxForUser(userId, undefined, workspaceId));
 });
 
 export const ctxForUser = cache(
@@ -115,7 +115,9 @@ async function readWorkspaceCookie(): Promise<string | undefined> {
 
 export const ctxForRequest = cache(async () => {
   const store = requestContext.getStore();
-  const workspaceId = await readWorkspaceCookie();
+  // The explicitly resolved workspace (payload/header) outranks the cookie: a task or API route
+  // must not read another workspace just because the browser cookie points elsewhere.
+  const workspaceId = store?.workspaceId ?? (await readWorkspaceCookie());
 
   if (store?.userId != null) {
     return ctxForUser(store.userId, store.apiKeyScopes, workspaceId);

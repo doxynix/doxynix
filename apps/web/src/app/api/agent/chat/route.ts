@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { ApiKeyScope, ChatRole } from "@doxynix/shared";
+import { Prisma } from "@prisma/client";
 import {
   convertToModelMessages,
   createUIMessageStreamResponse,
@@ -29,6 +30,7 @@ import {
 } from "@/server/modules/agent/agent.prompts";
 import { getAgentTools, MUTATION_TOOLS } from "@/server/modules/agent/agent.tools";
 import { processMessageParts } from "@/server/modules/agent/agent-storage";
+import { requestContext } from "@/server/utils/request-context";
 import { withApiHandler } from "@/server/utils/with-api-handler";
 
 export const maxDuration = 60;
@@ -62,6 +64,14 @@ async function handler(req: Request) {
     strict: true,
     userId,
   });
+
+  // Pin the tools to the same workspace the route resolved from the header; otherwise they fall
+  // back to the browser cookie and can read another workspace.
+  const requestStore = requestContext.getStore();
+
+  if (requestStore != null) {
+    requestStore.workspaceId = workspace.id;
+  }
 
   // The agent spends the same AI budget as analyses: a suspended or exhausted workspace must not
   // reach the model at all. The reservation happens together with this check, just before the
@@ -109,14 +119,24 @@ async function handler(req: Request) {
         });
 
         if (sessionExists == null) {
-          await tx.chatSession.create({
-            data: {
-              id: sessionId,
-              repoId: internalRepoId,
-              title: "New Chat",
-              userId,
-            },
-          });
+          try {
+            await tx.chatSession.create({
+              data: {
+                id: sessionId,
+                repoId: internalRepoId,
+                title: "New Chat",
+                userId,
+              },
+            });
+          } catch (error) {
+            // A client-generated id can collide with another user's session: surface a conflict
+            // instead of leaking a raw P2002 as a 500.
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+              throw new AppError({ code: "CONFLICT", publicMessage: "SESSION_ID_TAKEN" });
+            }
+
+            throw error;
+          }
         }
 
         await tx.chatMessage.create({

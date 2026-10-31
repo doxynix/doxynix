@@ -23,6 +23,7 @@ type RequestStore = {
   userAgent: string;
   userId?: string;
   userRole?: string;
+  workspaceId?: string;
 };
 
 const globalForRequestContext = globalThis as unknown as {
@@ -115,6 +116,7 @@ type RequestContextInput = {
   requestId?: string;
   userId?: string;
   userRole?: string;
+  workspaceId?: string;
 };
 
 function getRequestIdFromHeaders(request: Request): string | undefined {
@@ -172,6 +174,7 @@ export function buildRequestStore(input: RequestContextInput): RequestStore {
     userAgent: getUa(input.req),
     userId: input.userId,
     userRole: input.userRole,
+    workspaceId: input.workspaceId,
   };
 }
 

@@ -16,7 +16,10 @@ const WORKSPACE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 const NOW = new Date("2026-10-30T12:00:00.000Z");
 
 const stripeMock = vi.hoisted(() => ({
-  billingPortal: { sessions: { create: vi.fn() } },
+  billingPortal: {
+    configurations: { list: vi.fn() },
+    sessions: { create: vi.fn() },
+  },
 }));
 
 vi.mock("@/server/core/billing/stripe-client", () => ({
@@ -34,6 +37,9 @@ describe("createPortalSession", () => {
   beforeEach(() => {
     stripeMock.billingPortal.sessions.create.mockReset().mockResolvedValue({
       url: "https://billing.stripe.com/p/session/test",
+    });
+    stripeMock.billingPortal.configurations.list.mockReset().mockResolvedValue({
+      data: [{ features: { subscription_update: { enabled: false } } }],
     });
   });
 
@@ -70,6 +76,23 @@ describe("createPortalSession", () => {
         workspaceId: WORKSPACE_ID,
       }),
     ).rejects.toMatchObject({ code: "FORBIDDEN", message: "BILLING_CUSTOMER_NOT_FOUND" });
+    expect(stripeMock.billingPortal.sessions.create).not.toHaveBeenCalled();
+  });
+
+  it("refuses a portal that would bypass checkout plan changes", async () => {
+    stripeMock.billingPortal.configurations.list.mockResolvedValue({
+      data: [{ features: { subscription_update: { enabled: true } } }],
+    });
+    const db = createDb({ externalCustomerId: "cus_workspace" });
+
+    await expect(
+      createPortalSession({
+        db,
+        requestId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5e",
+        returnUrl: portalReturnUrl("/dashboard/settings/members"),
+        workspaceId: WORKSPACE_ID,
+      }),
+    ).rejects.toMatchObject({ code: "PRECONDITION_FAILED", message: "PORTAL_ALLOWS_PLAN_CHANGE" });
     expect(stripeMock.billingPortal.sessions.create).not.toHaveBeenCalled();
   });
 

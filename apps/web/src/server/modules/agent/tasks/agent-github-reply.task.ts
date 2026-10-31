@@ -147,6 +147,7 @@ export const agentGithubReplyTask = task({
       req: taskRequest,
       requestId: `reply-${payload.commentId}`,
       userId: payload.userId,
+      workspaceId: payload.workspaceId,
     });
 
     return requestContext.run(store, async () => {

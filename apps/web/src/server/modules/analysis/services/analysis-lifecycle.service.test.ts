@@ -22,6 +22,10 @@ vi.mock("@/server/core/entitlements", () => ({
   getWorkspaceEntitlement: vi.fn().mockResolvedValue({ hasAccess: true }),
 }));
 
+vi.mock("@/server/core/github/github-api", () => ({
+  getBranchHeadSha: vi.fn().mockResolvedValue(null),
+}));
+
 vi.mock("@/server/core/usage/usage", () => ({
   recordAnalysisUsage: vi.fn().mockResolvedValue(undefined),
   recordCacheHitUsage: vi.fn().mockResolvedValue(undefined),

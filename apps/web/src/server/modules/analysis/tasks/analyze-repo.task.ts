@@ -11,7 +11,11 @@ import { prisma } from "@/server/core/db";
 import { cloneRepository } from "@/server/core/git/clone";
 import { calculateBusFactor } from "@/server/core/github/github-api";
 import { trackServerEvent } from "@/server/core/posthog-events";
-import { recordCacheHitUsage, releaseAnalysisUsage } from "@/server/core/usage/usage";
+import {
+  recordAnalysisUsage,
+  recordCacheHitUsage,
+  releaseAnalysisUsage,
+} from "@/server/core/usage/usage";
 import { getAnalysisContext } from "@/server/modules/analysis/logic/analysis-context";
 import { analysisProgress } from "@/server/modules/analysis/logic/analysis-progress";
 import { cleanup, readAndFilterFiles } from "@/server/modules/analysis/logic/repo-file-scanner";
@@ -36,6 +40,7 @@ type TaskPayload = {
   forceRefresh?: boolean;
   instructions?: string;
   language: string;
+  quotaReserved?: boolean;
   selectedBranch?: string;
   selectedFiles: string[];
   userId: string;
@@ -84,11 +89,13 @@ export const analyzeRepoTask = task({
           idempotencyKey: `cache-hit:${analysisId}`,
           workspaceId,
         });
-        await releaseAnalysisUsage(prisma, {
-          analysisId,
-          idempotencyKey: `cache-hit:${analysisId}`,
-          workspaceId,
-        });
+        if (payload.quotaReserved !== false) {
+          await releaseAnalysisUsage(prisma, {
+            analysisId,
+            idempotencyKey: `cache-hit:${analysisId}`,
+            workspaceId,
+          });
+        }
 
         await analysisProgress.finalize(
           analysisId,
@@ -107,6 +114,16 @@ export const analyzeRepoTask = task({
         );
 
         return { reason: "SHA_MATCH", skipped: true };
+      }
+
+      // The pre-trigger cache check did not reserve a unit. If the branch moved between that check
+      // and the clone, this run is real work and must be charged after all.
+      if (payload.quotaReserved === false) {
+        await recordAnalysisUsage(prisma, {
+          analysisId,
+          idempotencyKey: `analysis:late:${analysisId}`,
+          workspaceId,
+        });
       }
 
       await analysisProgress.milestone({

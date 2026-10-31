@@ -208,6 +208,36 @@ export async function getRepoBranches(
   });
 }
 
+export async function getBranchHeadSha(
+  prisma: DbClient,
+  userId: string,
+  owner: string,
+  name: string,
+  branch: string,
+): Promise<null | string> {
+  try {
+    const context = await resolveClientContext(prisma, userId, {
+      allowPublicFallback: true,
+      allowSystemFallback: true,
+      owner,
+    });
+
+    return await executeWithFallback(
+      prisma,
+      userId,
+      context.octokit,
+      context.type,
+      async (client) => {
+        const response = await client.rest.repos.getBranch({ branch, owner, repo: name });
+
+        return response.data.commit.sha;
+      },
+    );
+  } catch {
+    return null;
+  }
+}
+
 export async function getRepoTree(
   prisma: DbClient,
   userId: string,
