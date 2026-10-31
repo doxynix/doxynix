@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import type { RouterOutput } from "@/shared/api/trpc";
 import { useTRPC } from "@/shared/api/trpc";
+import { useRouter } from "@/shared/i18n/navigation";
 import {
   clearWorkspaceCookie,
   getWorkspaceCookie,
@@ -29,6 +30,7 @@ const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
 export function WorkspaceProvider({ children }: Readonly<{ children: ReactNode }>) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const router = useRouter();
   const t = useTranslations("Dashboard");
   const { data, isLoading } = useQuery(trpc.workspace.myWorkspaces.queryOptions());
 
@@ -59,9 +61,16 @@ export function WorkspaceProvider({ children }: Readonly<{ children: ReactNode }
   }, [data, queryClient, t]);
 
   const switchWorkspace = (workspaceId: string) => {
+    if (data == null || workspaceId === data.activeWorkspaceId) {
+      return;
+    }
+
     setWorkspaceCookie(workspaceId);
     queryClient.clear();
     toast.success(t("workspace_switch_toast"));
+    // The server tree was rendered with the previous cookie: without a refresh the page keeps
+    // showing the old workspace until a full reload.
+    router.refresh();
   };
 
   if (isLoading || data == null) {
