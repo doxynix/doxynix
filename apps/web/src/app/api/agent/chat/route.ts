@@ -164,6 +164,7 @@ async function handler(req: Request) {
   });
 
   const result = streamText({
+    abortSignal: req.signal,
     experimental_toolApprovalSecret: TOOL_APPROVAL_SECRET,
     instructions: dynamicSystemPrompt,
     messages: modelMessages,
@@ -177,19 +178,29 @@ async function handler(req: Request) {
       });
     },
     onEnd: async ({ usage }) => {
-      await settleUsage(prisma, {
-        idempotencyKey: usageKey,
-        model: agentModelId,
-        provider: "google",
-        usage: {
-          cachedInputTokens: usage.inputTokenDetails.cacheReadTokens ?? 0,
-          inputTokens: usage.inputTokens ?? 0,
-          outputTokens: usage.outputTokens ?? 0,
-        },
-        workspaceId: workspace.id,
-      }).catch((error: unknown) => {
+      try {
+        await settleUsage(prisma, {
+          idempotencyKey: usageKey,
+          model: agentModelId,
+          provider: "google",
+          usage: {
+            cachedInputTokens: usage.inputTokenDetails.cacheReadTokens ?? 0,
+            inputTokens: usage.inputTokens ?? 0,
+            outputTokens: usage.outputTokens ?? 0,
+          },
+          workspaceId: workspace.id,
+        });
+      } catch (error) {
+        // An unpriced model or a DB hiccup must not leave the reservation behind.
         appLogger.error({ error, msg: "agent.usage_settle_failed" });
-      });
+
+        await releaseUsage(prisma, {
+          idempotencyKey: usageKey,
+          workspaceId: workspace.id,
+        }).catch((releaseError: unknown) => {
+          appLogger.error({ error: releaseError, msg: "agent.usage_release_failed" });
+        });
+      }
     },
     onError: () => {
       void releaseUsage(prisma, {
