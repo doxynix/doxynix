@@ -61,7 +61,12 @@ export default defineConfig({
       reporter: ["text", "json", "html", "json-summary"],
     },
     environment: "node",
-    exclude: ["src/tests/integration/**/*", "src/tests/e2e/**/*", "node_modules/**/*"],
+    exclude: [
+      "src/tests/integration/**/*",
+      "src/tests/e2e/**/*",
+      "src/tests/stripe/**/*",
+      "node_modules/**/*",
+    ],
     globals: true,
     include: [
       "prisma/**/*.{test,spec}.ts",

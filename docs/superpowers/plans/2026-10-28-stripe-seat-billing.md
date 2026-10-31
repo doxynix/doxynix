@@ -556,7 +556,7 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
   - **Проверка:** `bun --filter @doxynix/web test:int && bun --filter @doxynix/web test`
 
 - [x] **BILL-20 — Sandbox test clocks и go-live scenarios (1 день)**
-  - **Files touched:** Create `apps/web/vitest.stripe.config.ts`, `apps/web/tests/stripe/test-clocks.test.ts`, `apps/web/tests/stripe/stripe-sandbox.ts`; Modify `apps/web/package.json`.
+  - **Files touched:** Create `apps/web/vitest.stripe.config.ts`, `apps/web/src/tests/stripe/test-clocks.test.ts`, `apps/web/src/tests/stripe/stripe-sandbox.ts`; Modify `apps/web/package.json`.
   - **Acceptance criteria:** Отдельный sandbox; initial/renewal/dunning/recovery/proration/cancel/refund/dispute/tax scenarios; poll processed state; suite не входит в default unit/CI; results задокументированы. Без sandbox credentials статус остаётся `cannot-verify`.
   - **Проверка:** `bun --filter @doxynix/web test:stripe`
 

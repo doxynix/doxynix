@@ -19,7 +19,7 @@ export default defineConfig({
     fileParallelism: false,
     globals: true,
     hookTimeout: 180_000,
-    include: ["tests/stripe/**/*.test.ts"],
+    include: ["src/tests/stripe/**/*.test.ts"],
     setupFiles: ["./src/tests/setup-env.ts"],
     testTimeout: 180_000,
   },

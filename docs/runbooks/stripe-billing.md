@@ -111,7 +111,7 @@ Warning: `EVENT_QUEUE_STALLED`, `SEATS_BELOW_MEMBERS`.
 
 ## 6. Sandbox-сценарии test clocks
 
-Сьют: `bun --filter @doxynix/web test:stripe` (`tests/stripe/test-clocks.test.ts`).
+Сьют: `bun --filter @doxynix/web test:stripe` (`src/tests/stripe/test-clocks.test.ts`).
 
 | # | Сценарий | Статус |
 |---|---|---|
