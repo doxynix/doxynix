@@ -180,7 +180,7 @@ describe("billing schema", () => {
     const visible = await alice.db.billingLedgerEntry.findMany({
       where: { workspaceId: alice.workspace.id },
     });
-    expect(visible.map((row) => row.id)).toEqual([entry.id]);
+    expect(visible.map((row: { id: string }) => row.id)).toEqual([entry.id]);
 
     await expectDenied(
       alice.db.billingLedgerEntry.update({
