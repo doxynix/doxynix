@@ -104,15 +104,9 @@ export const workspaceService = {
       throw new TRPCError({ code: "PRECONDITION_FAILED", message: "UPGRADE_REQUIRED" });
     }
 
-    // A seat is a paid resource: adding people while the subscription is suspended or in review
-    // would create capacity nobody has paid for. Grace still has access, so it may grow; the seat
-    // sync is deferred until the subscription is active again.
-    const graceActive =
-      workspace.entitlement.accessState === "GRACE" &&
-      workspace.entitlement.graceEndsAt != null &&
-      workspace.entitlement.graceEndsAt.getTime() > Date.now();
-
-    if (workspace.entitlement.accessState !== "ACTIVE" && !graceActive) {
+    // A seat is a paid resource: §9.7 forbids raising seats while the subscription is not active,
+    // so grace keeps its existing seats but cannot grow. Suspended/review have no access at all.
+    if (workspace.entitlement.accessState !== "ACTIVE") {
       throw new AppError({ code: "PAYMENT_REQUIRED", publicMessage: "PAYMENT_REQUIRED" });
     }
 

@@ -222,7 +222,7 @@ describe("workspaceService.addMember", () => {
     ).rejects.toMatchObject({ code: "PAYMENT_REQUIRED" });
   });
 
-  it("allows adding during grace and leaves the seat sync to reconciliation", async () => {
+  it("refuses to raise seats during grace", async () => {
     vi.mocked(prisma.user.findUnique).mockResolvedValue({
       id: USER_ID,
       image: null,
@@ -244,18 +244,15 @@ describe("workspaceService.addMember", () => {
       },
       workspaceMember: {
         count: vi.fn().mockResolvedValue(1),
-        create: vi.fn().mockResolvedValue({ id: MEMBER_ID, role: "MEMBER", userId: USER_ID }),
+        create: vi.fn(),
         findUnique: vi.fn().mockResolvedValue(null),
       },
     });
 
-    const member = await workspaceService.addMember(db, WORKSPACE_ID, "bob@test.com");
-
-    expect(member.role).toBe("MEMBER");
-    expect(seatSyncMock).toHaveBeenCalledWith({
-      requestId: MEMBER_ID,
-      workspaceId: WORKSPACE_ID,
-    });
+    await expect(
+      workspaceService.addMember(db, WORKSPACE_ID, "bob@test.com"),
+    ).rejects.toMatchObject({ code: "PAYMENT_REQUIRED" });
+    expect(seatSyncMock).not.toHaveBeenCalled();
   });
 
   it("refuses grace whose deadline has already passed", async () => {
