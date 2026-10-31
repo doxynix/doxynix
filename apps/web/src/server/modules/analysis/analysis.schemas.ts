@@ -87,6 +87,7 @@ export type FileActionInput = {
   nodeContext?: FileActionNodeContext;
   path: string;
   repoId: string;
+  workspaceId: string;
 };
 
 export type QuickFileAuditResult = z.infer<typeof QuickFileAuditSchema> & {

@@ -19,12 +19,10 @@ import {
 import type { FileActionRequest } from "../services/file-actions.service";
 import { applyDocumentSurgicalEdit } from "./document-surgical-edit";
 
-type WorkspaceScopedPreviewInput = FileActionRequest & { workspaceId: string };
-
 // Lives outside the file-actions service on purpose: it needs the AI tool profile, which reaches the tRPC server
 export async function runDocumentFilePreview(
   userId: string,
-  input: WorkspaceScopedPreviewInput,
+  input: FileActionRequest,
 ): Promise<DocumentFilePreviewResult> {
   const rawContent = input.content.trim();
 
