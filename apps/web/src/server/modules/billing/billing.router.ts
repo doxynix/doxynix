@@ -1,10 +1,16 @@
-import { adminProcedure, createTRPCRouter, ownerProcedure } from "@/server/core/trpc/init";
+import {
+  adminProcedure,
+  createTRPCRouter,
+  ownerProcedure,
+  workspaceProcedure,
+} from "@/server/core/trpc/init";
 
 import { listBillingIssues, replayBillingEvent, resolveBillingIssue } from "./billing.admin";
 import { createCheckoutSession } from "./billing.checkout";
 import { changeSeats, previewPlanChange } from "./billing.plan-changes";
 import { createPortalSession, portalReturnUrl } from "./billing.portal";
 import {
+  BillingStateSchema,
   ChangeSeatsResultSchema,
   ChangeSeatsSchema,
   CreateCheckoutResultSchema,
@@ -20,6 +26,7 @@ import {
   ResolveIssueResultSchema,
   ResolveIssueSchema,
 } from "./billing.schemas";
+import { getBillingState } from "./billing.view";
 
 export const billingRouter = createTRPCRouter({
   changeSeats: ownerProcedure
@@ -56,6 +63,10 @@ export const billingRouter = createTRPCRouter({
         workspaceId: ctx.workspace.id,
       });
     }),
+
+  getState: workspaceProcedure.output(BillingStateSchema).query(async ({ ctx }) => {
+    return getBillingState(ctx.prisma, ctx.workspace.id);
+  }),
 
   listIssues: adminProcedure
     .input(ListIssuesSchema)

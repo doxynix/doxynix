@@ -1,5 +1,7 @@
 import * as z from "zod";
 
+import { ACCESS_STATES } from "@/server/core/entitlements/state";
+
 import { PORTAL_RETURN_PATHS } from "./billing.constants";
 
 export const BillingOperationStatus = {
@@ -52,6 +54,34 @@ export const BILLING_LIMIT_HTTP_STATUS = {
 } as const;
 
 export type BillingLimitCode = keyof typeof BILLING_LIMIT_HTTP_STATUS;
+
+export const BillingEntitlementSummarySchema = z.object({
+  accessState: z.enum(ACCESS_STATES),
+  aiTokensPerMonth: z.number().int().nullable(),
+  analysesPerMonth: z.number().int().nullable(),
+  graceEndsAt: z.date().nullable(),
+  planCode: z.string(),
+  seatLimit: z.number().int(),
+  usedAnalyses: z.number().int(),
+  usedTokens: z.number().int(),
+});
+
+export const BillingSubscriptionSummarySchema = z.object({
+  cancelAtPeriodEnd: z.boolean(),
+  currentPeriodEnd: z.date(),
+  quantity: z.number().int(),
+  status: z.string(),
+});
+
+// Both roles read this: MEMBER sees the plan, seats, usage and renewal date, while every mutation
+// stays on ownerProcedure.
+export const BillingStateSchema = z.object({
+  activeMembers: z.number().int().min(0),
+  entitlement: BillingEntitlementSummarySchema.nullable(),
+  subscription: BillingSubscriptionSummarySchema.nullable(),
+});
+
+export type BillingState = z.infer<typeof BillingStateSchema>;
 
 export const PlanChangeQuantitySchema = z.object({
   quantity: z.number().int().min(1).max(1000),

@@ -569,7 +569,7 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
 
 > Переключатель воркспейсов и страница участников уже входят в **WS-05** (раздел 20) — здесь их не дублируем. BILL-22 зависит от WS-05, если у пользователя больше одного воркспейса.
 
-- [ ] **BILL-22 — Billing UI: тариф, места, Upgrade/Manage (2–3 дня)**
+- [x] **BILL-22 — Billing UI: тариф, места, Upgrade/Manage (2–3 дня)**
   - **Files touched:** Create `apps/web/src/app/[locale]/(private)/dashboard/settings/billing/page.tsx` + `_components/`; Create `apps/web/src/features/manage-subscription/{ui,model}`; Modify `apps/web/src/app/[locale]/(private)/dashboard/settings/layout.tsx`, `apps/web/messages/*` (все 12 локалей).
   - **Acceptance criteria:** экран показывает `planCode`, `accessState`, места, лимиты и дату следующего списания из entitlement — без вызова Stripe на рендере; `Upgrade` вызывает `createCheckout` и редиректит на `session.url`; `Manage` вызывает `createPortal` и редиректит; состояния `ACTIVE/GRACE/REVIEW/CANCELED` и ошибки `BILLING_NOT_CHANGEABLE`/`LIMIT_EXCEEDED` отображаются текстом, а не падением; действия доступны только `OWNER`, `MEMBER` видит read-only; URL портала и ключи не логируются и не сохраняются; новые строки во всех 12 локалях; FSD-импорты не нарушены.
   - **Проверка:** `bun run lint:i18n && bun run lint:locales && bun --filter @doxynix/web type-check && bun run lint`
