@@ -19,7 +19,9 @@ import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { resolveRequestUserId } from "@/server/core/auth/resolve-session";
 import { prisma } from "@/server/core/db";
+import { getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { realtimeService } from "@/server/core/realtime";
+import { reserveUsage, settleUsage } from "@/server/core/usage/usage";
 import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import {
   AGENT_SYSTEM_PROMPT,
@@ -30,6 +32,9 @@ import { processMessageParts } from "@/server/modules/agent/agent-storage";
 import { withApiHandler } from "@/server/utils/with-api-handler";
 
 export const maxDuration = 60;
+
+// Reservation for the whole streamed turn; `settleUsage` releases the difference on finish.
+const AGENT_TOKEN_ESTIMATE = 2000;
 
 async function handler(req: Request) {
   const { currentRepo, currentRepoId, messages, sessionId } = await req.json();
@@ -56,6 +61,29 @@ async function handler(req: Request) {
     headerWorkspaceId: requestHeaders.get("x-workspace-id"),
     strict: true,
     userId,
+  });
+
+  // The agent spends the same AI budget as analyses: a suspended or exhausted workspace must not
+  // reach the model at all.
+  const entitlement = await getWorkspaceEntitlement(prisma, workspace.id);
+
+  if (entitlement == null || !entitlement.hasAccess) {
+    throw new AppError({ code: "PAYMENT_REQUIRED", publicMessage: "PAYMENT_REQUIRED" });
+  }
+
+  if (
+    entitlement.aiTokensPerMonth != null &&
+    entitlement.usedTokens >= entitlement.aiTokensPerMonth
+  ) {
+    throw new AppError({ code: "FORBIDDEN", publicMessage: "LIMIT_EXCEEDED" });
+  }
+
+  const usageKey = `agent:${sessionId ?? "new"}:${crypto.randomUUID()}`;
+
+  await reserveUsage(prisma, {
+    estimatedTokens: AGENT_TOKEN_ESTIMATE,
+    idempotencyKey: usageKey,
+    workspaceId: workspace.id,
   });
 
   let resolvedRepoId: string | undefined;
@@ -138,6 +166,21 @@ async function handler(req: Request) {
     instructions: dynamicSystemPrompt,
     messages: modelMessages,
     model: google(agentModelId),
+    onEnd: ({ usage }) => {
+      void settleUsage(prisma, {
+        idempotencyKey: usageKey,
+        model: agentModelId,
+        provider: "google",
+        usage: {
+          cachedInputTokens: usage.inputTokenDetails.cacheReadTokens ?? 0,
+          inputTokens: usage.inputTokens ?? 0,
+          outputTokens: usage.outputTokens ?? 0,
+        },
+        workspaceId: workspace.id,
+      }).catch((error: unknown) => {
+        appLogger.error({ error, msg: "agent.usage_settle_failed" });
+      });
+    },
     stopWhen: isStepCount(10),
     timeout: { chunkMs: 20_000, stepMs: 55_000, toolMs: 40_000 },
     toolApproval: Object.fromEntries(
