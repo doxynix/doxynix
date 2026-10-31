@@ -213,6 +213,16 @@ export async function projectSubscription(
       stripeObjectId: subscription.id,
       workspaceId: ownership.workspaceId,
     });
+  } else if (decision.accessState === "ACTIVE") {
+    // Leaving REVIEW closes the issue that made the state visible, otherwise operators keep an
+    // open critical issue for a workspace that already recovered.
+    await tx.billingIssue.updateMany({
+      data: { resolvedAt: new Date(), status: "RESOLVED" },
+      where: {
+        dedupeKey: { startsWith: `subscription_review:${subscription.id}:` },
+        status: "OPEN",
+      },
+    });
   }
 
   // Frees the single current slot before the upsert; history stays null, never false.
