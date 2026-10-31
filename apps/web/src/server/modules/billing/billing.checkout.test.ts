@@ -53,7 +53,12 @@ function uniqueViolation() {
 // In-memory stand-in for the billing tables: the operation ledger is exercised for real, so the
 // replay/conflict behaviour under test is the production one, not a stub.
 function createFakeDb(
-  options: { currentSubscription?: boolean; existingCustomerId?: string; members?: number } = {},
+  options: {
+    currentSubscription?: boolean;
+    existingCustomerId?: string;
+    members?: number;
+    openSession?: boolean;
+  } = {},
 ) {
   let members = options.members ?? 2;
   let operationCount = 0;
@@ -80,6 +85,7 @@ function createFakeDb(
 
         return data;
       },
+      findFirst: async () => (options.openSession === true ? { id: "cs_open" } : null),
     },
     billingCustomer: {
       findFirst: async ({ where }: { where: { provider: string; workspaceId: string } }) =>
@@ -298,6 +304,17 @@ describe("createCheckoutSession", () => {
     await expect(createCheckoutSession(checkoutInput(fake))).rejects.toMatchObject({
       code: "PRECONDITION_FAILED",
       message: "ALREADY_SUBSCRIBED",
+    });
+    expect(stripeMock.checkout.sessions.create).not.toHaveBeenCalled();
+    expect(fake.sessions).toHaveLength(0);
+  });
+
+  it("refuses to open a second checkout while one is still open", async () => {
+    const fake = createFakeDb({ existingCustomerId: "cus_existing", openSession: true });
+
+    await expect(createCheckoutSession(checkoutInput(fake))).rejects.toMatchObject({
+      code: "CONFLICT",
+      message: "CHECKOUT_IN_PROGRESS",
     });
     expect(stripeMock.checkout.sessions.create).not.toHaveBeenCalled();
     expect(fake.sessions).toHaveLength(0);

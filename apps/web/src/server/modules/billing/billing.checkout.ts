@@ -13,6 +13,8 @@ import type { CreateCheckoutResult } from "./billing.schemas";
 import { getStripeClient, stripeEnvironment } from "./billing.stripe";
 
 const CHECKOUT_RETURN_PATH = "/dashboard/settings/members";
+// Stripe expires an open Checkout Session after 24 hours by default.
+const CHECKOUT_SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 
 export type CreateCheckoutInput = {
   actorUserId: string;
@@ -120,6 +122,21 @@ export async function createCheckoutSession(
 
       if (current != null) {
         throw new TRPCError({ code: "PRECONDITION_FAILED", message: "ALREADY_SUBSCRIBED" });
+      }
+
+      // A second tab must not open a second Subscription. Two live Sessions on one customer can
+      // both be paid, and the loser would keep billing invisibly (it never becomes `isCurrent`).
+      const openSession = await input.db.billingCheckoutSession.findFirst({
+        select: { id: true },
+        where: {
+          createdAt: { gte: new Date(Date.now() - CHECKOUT_SESSION_TTL_MS) },
+          stripeStatus: "open",
+          workspaceId: input.workspaceId,
+        },
+      });
+
+      if (openSession != null) {
+        throw new TRPCError({ code: "CONFLICT", message: "CHECKOUT_IN_PROGRESS" });
       }
 
       const customerId = await ensureCustomer(input);

@@ -2,6 +2,7 @@ import { PlanCode, PlanCodeSchema } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
+import { AppError } from "@/server/core/api-error";
 import { type DbClient, prisma } from "@/server/core/db";
 import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import { normalizeEmail } from "@/server/utils/email-guard";
@@ -58,6 +59,12 @@ export const workspaceService = {
       throw new TRPCError({ code: "PRECONDITION_FAILED", message: "UPGRADE_REQUIRED" });
     }
 
+    // A seat is a paid resource: adding people while the subscription is suspended, in review or
+    // in grace would create capacity nobody has paid for.
+    if (workspace.entitlement.accessState !== "ACTIVE") {
+      throw new AppError({ code: "PAYMENT_REQUIRED", publicMessage: "PAYMENT_REQUIRED" });
+    }
+
     const emailHash = getNormalizedHash(normalizeEmail(email));
     // Membership lookup is a system read: a workspace owner must not be able to read the user row.
     const user = await prisma.user.findUnique({
@@ -92,9 +99,10 @@ export const workspaceService = {
         }
 
         const activeMembers = await tx.workspaceMember.count({ where: { workspaceId } });
+        // seatLimit is never "unlimited" here: 0 seats means the workspace may not add anyone.
         const seatLimit = workspace.entitlement?.seatLimit ?? 0;
 
-        if (seatLimit > 0 && activeMembers >= seatLimit) {
+        if (activeMembers >= seatLimit) {
           throw new TRPCError({ code: "FORBIDDEN", message: "LIMIT_EXCEEDED" });
         }
 

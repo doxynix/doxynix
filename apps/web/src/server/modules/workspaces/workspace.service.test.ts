@@ -27,6 +27,7 @@ function withTransaction<T extends object>(db: T): never {
 
 function entitlement(overrides: Record<string, unknown> = {}) {
   return {
+    accessState: "ACTIVE",
     aiTokensPerMonth: 1_000_000,
     analysesPerMonth: 20,
     autoResync: false,
@@ -126,6 +127,62 @@ describe("workspaceService.addMember", () => {
     await expect(
       workspaceService.addMember(db, WORKSPACE_ID, "bob@test.com"),
     ).rejects.toMatchObject({ code: "FORBIDDEN", message: "LIMIT_EXCEEDED" });
+  });
+
+  it("treats a zero seat limit as no capacity instead of unlimited", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({
+      id: USER_ID,
+      image: null,
+      name: "Bob",
+    } as never);
+    const db = withTransaction({
+      user: { findUnique: vi.fn().mockResolvedValue({ id: USER_ID }) },
+      workspace: {
+        findUnique: vi
+          .fn()
+          .mockResolvedValue(
+            workspace({ entitlement: entitlement({ planCode: "PRO", seatLimit: 0 }) }),
+          ),
+      },
+      workspaceMember: {
+        count: vi.fn().mockResolvedValue(0),
+        findUnique: vi.fn().mockResolvedValue(null),
+      },
+    });
+
+    await expect(
+      workspaceService.addMember(db, WORKSPACE_ID, "bob@test.com"),
+    ).rejects.toMatchObject({ code: "FORBIDDEN", message: "LIMIT_EXCEEDED" });
+  });
+
+  it("refuses to add a seat while the subscription is not ACTIVE", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({
+      id: USER_ID,
+      image: null,
+      name: "Bob",
+    } as never);
+    const db = withTransaction({
+      user: { findUnique: vi.fn().mockResolvedValue({ id: USER_ID }) },
+      workspace: {
+        findUnique: vi.fn().mockResolvedValue(
+          workspace({
+            entitlement: entitlement({
+              accessState: "REVIEW",
+              planCode: "PRO",
+              seatLimit: 3,
+            }),
+          }),
+        ),
+      },
+      workspaceMember: {
+        count: vi.fn().mockResolvedValue(1),
+        findUnique: vi.fn().mockResolvedValue(null),
+      },
+    });
+
+    await expect(
+      workspaceService.addMember(db, WORKSPACE_ID, "bob@test.com"),
+    ).rejects.toMatchObject({ code: "PAYMENT_REQUIRED" });
   });
 });
 
