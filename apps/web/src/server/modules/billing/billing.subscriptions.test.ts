@@ -169,6 +169,68 @@ describe("projectSubscription", () => {
     expect((unchanged.update as Record<string, unknown>).revision).toBeUndefined();
   });
 
+  it("grants PRO features and quotas when a paid subscription is projected", async () => {
+    const tx = createTx();
+    tx.billingSubscription.findUnique.mockResolvedValue({
+      activatedAt: NOW,
+      graceEndsAt: null,
+      stripeStatus: "active",
+    });
+
+    await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription() as never,
+    });
+
+    const entitlement = callArg(tx.workspaceEntitlement.upsert);
+
+    expect(entitlement.create).toMatchObject({
+      aiTokensPerMonth: 20_000_000,
+      analysesPerMonth: 500,
+      autoResync: true,
+      historyDays: 90,
+      planCode: "PRO",
+      privateReposAllowed: true,
+      prReviews: true,
+    });
+    expect(entitlement.update).toMatchObject({
+      aiTokensPerMonth: 20_000_000,
+      analysesPerMonth: 500,
+      autoResync: true,
+      historyDays: 90,
+      privateReposAllowed: true,
+      prReviews: true,
+    });
+  });
+
+  it("falls back to HOBBY features when the subscription is terminal", async () => {
+    const tx = createTx();
+    tx.billingSubscription.findUnique.mockResolvedValue({
+      activatedAt: NOW,
+      graceEndsAt: null,
+      stripeStatus: "active",
+    });
+
+    await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription({ status: "canceled" }) as never,
+    });
+
+    expect(callArg(tx.workspaceEntitlement.upsert)).toMatchObject({
+      update: {
+        aiTokensPerMonth: 1_000_000,
+        analysesPerMonth: 20,
+        autoResync: false,
+        historyDays: 7,
+        planCode: "HOBBY",
+        privateReposAllowed: false,
+        prReviews: false,
+      },
+    });
+  });
+
   it("turns a revived terminal subscription into REVIEW", async () => {
     const tx = createTx();
     tx.billingSubscription.findUnique.mockResolvedValue({

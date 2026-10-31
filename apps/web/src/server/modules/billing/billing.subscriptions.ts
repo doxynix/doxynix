@@ -3,7 +3,7 @@ import type Stripe from "stripe";
 import { recordBillingMetric } from "@/server/core/billing/metrics";
 import type { DbClient } from "@/server/core/db";
 
-import { BillingCatalogError, resolvePlanForPrice } from "./billing.catalog";
+import { BillingCatalogError, planEntitlements, resolvePlanForPrice } from "./billing.catalog";
 import { NonRetryableBillingError } from "./billing.errors";
 import { upsertBillingIssue } from "./billing.issues";
 import type { BillingOwnership } from "./billing.resolver";
@@ -140,6 +140,9 @@ export async function projectSubscription(
   const terminal = isTerminalStatus(subscription.status);
   const isCurrent = terminal ? null : true;
   const planCode = terminal ? "HOBBY" : "PRO";
+  // Paid features and quotas live in the projection, never in Stripe: flipping `planCode` without
+  // them would sell PRO at HOBBY limits. Terminal subscriptions fall back to the HOBBY row.
+  const plan = planEntitlements(planCode);
   const requestedSeats = item.quantity ?? 1;
   const activeMembers = await tx.workspaceMember.count({
     where: { workspaceId: ownership.workspaceId },
@@ -233,6 +236,7 @@ export async function projectSubscription(
       seatLimit,
       sourceSubscriptionId: mirror.id,
       workspaceId: ownership.workspaceId,
+      ...plan,
     },
     update: {
       accessState: decision.accessState,
@@ -244,6 +248,7 @@ export async function projectSubscription(
       revision: accessStateChanged ? { increment: 1 } : undefined,
       seatLimit,
       sourceSubscriptionId: mirror.id,
+      ...plan,
     },
     where: { workspaceId: ownership.workspaceId },
   });
