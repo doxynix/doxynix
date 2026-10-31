@@ -104,9 +104,15 @@ export const workspaceService = {
       throw new TRPCError({ code: "PRECONDITION_FAILED", message: "UPGRADE_REQUIRED" });
     }
 
-    // A seat is a paid resource: adding people while the subscription is suspended, in review or
-    // in grace would create capacity nobody has paid for.
-    if (workspace.entitlement.accessState !== "ACTIVE") {
+    // A seat is a paid resource: adding people while the subscription is suspended or in review
+    // would create capacity nobody has paid for. Grace still has access, so it may grow; the seat
+    // sync is deferred until the subscription is active again.
+    const graceActive =
+      workspace.entitlement.accessState === "GRACE" &&
+      workspace.entitlement.graceEndsAt != null &&
+      workspace.entitlement.graceEndsAt.getTime() > Date.now();
+
+    if (workspace.entitlement.accessState !== "ACTIVE" && !graceActive) {
       throw new AppError({ code: "PAYMENT_REQUIRED", publicMessage: "PAYMENT_REQUIRED" });
     }
 

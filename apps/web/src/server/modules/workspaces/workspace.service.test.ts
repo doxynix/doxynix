@@ -221,6 +221,73 @@ describe("workspaceService.addMember", () => {
       workspaceService.addMember(db, WORKSPACE_ID, "bob@test.com"),
     ).rejects.toMatchObject({ code: "PAYMENT_REQUIRED" });
   });
+
+  it("allows adding during grace and leaves the seat sync to reconciliation", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({
+      id: USER_ID,
+      image: null,
+      name: "Bob",
+    } as never);
+    const db = withTransaction({
+      user: { findUnique: vi.fn().mockResolvedValue({ id: USER_ID }) },
+      workspace: {
+        findUnique: vi.fn().mockResolvedValue(
+          workspace({
+            entitlement: entitlement({
+              accessState: "GRACE",
+              graceEndsAt: new Date(Date.now() + 86_400_000),
+              planCode: "PRO",
+              seatLimit: 3,
+            }),
+          }),
+        ),
+      },
+      workspaceMember: {
+        count: vi.fn().mockResolvedValue(1),
+        create: vi.fn().mockResolvedValue({ id: MEMBER_ID, role: "MEMBER", userId: USER_ID }),
+        findUnique: vi.fn().mockResolvedValue(null),
+      },
+    });
+
+    const member = await workspaceService.addMember(db, WORKSPACE_ID, "bob@test.com");
+
+    expect(member.role).toBe("MEMBER");
+    expect(seatSyncMock).toHaveBeenCalledWith({
+      requestId: MEMBER_ID,
+      workspaceId: WORKSPACE_ID,
+    });
+  });
+
+  it("refuses grace whose deadline has already passed", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({
+      id: USER_ID,
+      image: null,
+      name: "Bob",
+    } as never);
+    const db = withTransaction({
+      user: { findUnique: vi.fn().mockResolvedValue({ id: USER_ID }) },
+      workspace: {
+        findUnique: vi.fn().mockResolvedValue(
+          workspace({
+            entitlement: entitlement({
+              accessState: "GRACE",
+              graceEndsAt: new Date(Date.now() - 1000),
+              planCode: "PRO",
+              seatLimit: 3,
+            }),
+          }),
+        ),
+      },
+      workspaceMember: {
+        count: vi.fn().mockResolvedValue(1),
+        findUnique: vi.fn().mockResolvedValue(null),
+      },
+    });
+
+    await expect(
+      workspaceService.addMember(db, WORKSPACE_ID, "bob@test.com"),
+    ).rejects.toMatchObject({ code: "PAYMENT_REQUIRED" });
+  });
 });
 
 describe("workspaceService.removeMember", () => {
