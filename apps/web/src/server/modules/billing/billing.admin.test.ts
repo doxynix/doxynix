@@ -9,19 +9,28 @@ import { listBillingIssues, replayBillingEvent, resolveBillingIssue } from "./bi
 
 const EVENT_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 const ISSUE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5e";
+const WORKSPACE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5f";
 
 const triggerMock = vi.hoisted(() => vi.fn());
 const metricMock = vi.hoisted(() => vi.fn());
 const alertMock = vi.hoisted(() => vi.fn());
+const projectMock = vi.hoisted(() => vi.fn());
+const stripeMock = vi.hoisted(() => ({ subscriptions: { retrieve: vi.fn() } }));
 
 vi.mock("@trigger.dev/sdk", () => ({ tasks: { trigger: triggerMock } }));
+vi.mock("./billing.subscriptions", () => ({ projectSubscription: projectMock }));
+vi.mock("@/server/core/billing/stripe-client", () => ({
+  getStripeClient: () => stripeMock,
+}));
 vi.mock("@/server/core/billing/metrics", () => ({
   captureBillingAlert: alertMock,
   recordBillingMetric: metricMock,
 }));
 
 function createDb() {
-  return {
+  const db = {
+    $transaction: vi.fn(),
+    billingCustomer: { findFirst: vi.fn().mockResolvedValue(null) },
     billingEvent: {
       findUnique: vi.fn().mockResolvedValue({
         externalEventId: "evt_1",
@@ -36,7 +45,12 @@ function createDb() {
       findUnique: vi.fn().mockResolvedValue({ details: { type: "invoice.paid" }, status: "OPEN" }),
       update: vi.fn().mockResolvedValue({}),
     },
+    billingSubscription: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
   };
+
+  db.$transaction.mockImplementation(async (fn: (tx: unknown) => unknown) => fn(db));
+
+  return db;
 }
 
 function asDb(db: ReturnType<typeof createDb>): DbClient {
@@ -153,6 +167,113 @@ describe("resolveBillingIssue", () => {
     };
 
     expect(update.data.details.resolutionNote).toBe("see [redacted]");
+  });
+
+  it("heals a reviewed subscription before marking the issue resolved", async () => {
+    const db = createDb();
+    db.billingIssue.findUnique.mockResolvedValue({
+      details: {},
+      externalObjectId: "sub_1",
+      kind: "SUBSCRIPTION_REVIEW",
+      status: "OPEN",
+      workspaceId: WORKSPACE_ID,
+    });
+    db.billingCustomer.findFirst.mockResolvedValue({
+      externalCustomerId: "cus_1",
+      id: "bc_1",
+    });
+    stripeMock.subscriptions.retrieve.mockResolvedValue({ id: "sub_1" });
+    projectMock.mockResolvedValue({
+      accessState: "ACTIVE",
+      mirrorId: "bs_1",
+      ownsAccess: true,
+      reviewReason: null,
+    });
+
+    const result = await resolveBillingIssue(asDb(db), {
+      actorUserId: "admin_1",
+      issueId: ISSUE_ID,
+    });
+
+    expect(result).toEqual({ resolved: true });
+    expect(db.billingSubscription.updateMany).toHaveBeenCalledWith({
+      data: { needsReview: false, reviewReason: null },
+      where: { externalSubscriptionId: "sub_1" },
+    });
+    expect(projectMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ overrideRevivedTerminal: true, subscription: { id: "sub_1" } }),
+    );
+    const [flagOrder] = db.billingSubscription.updateMany.mock.invocationCallOrder;
+    const [resolveOrder] = db.billingIssue.update.mock.invocationCallOrder;
+
+    expect(flagOrder).toBeLessThan(resolveOrder ?? 0);
+  });
+
+  it("leaves the issue open when Stripe cannot read the subscription", async () => {
+    const db = createDb();
+    db.billingIssue.findUnique.mockResolvedValue({
+      details: {},
+      externalObjectId: "sub_1",
+      kind: "SUBSCRIPTION_REVIEW",
+      status: "OPEN",
+      workspaceId: WORKSPACE_ID,
+    });
+    db.billingCustomer.findFirst.mockResolvedValue({
+      externalCustomerId: "cus_1",
+      id: "bc_1",
+    });
+    stripeMock.subscriptions.retrieve.mockRejectedValue(new Error("stripe down"));
+
+    await expect(
+      resolveBillingIssue(asDb(db), { actorUserId: "admin_1", issueId: ISSUE_ID }),
+    ).rejects.toMatchObject({
+      code: "PRECONDITION_FAILED",
+      message: "BILLING_SUBSCRIPTION_UNREADABLE",
+    });
+    expect(db.billingIssue.update).not.toHaveBeenCalled();
+    expect(projectMock).not.toHaveBeenCalled();
+  });
+
+  it("leaves the issue open when the projection fails", async () => {
+    const db = createDb();
+    db.billingIssue.findUnique.mockResolvedValue({
+      details: {},
+      externalObjectId: "sub_1",
+      kind: "SUBSCRIPTION_REVIEW",
+      status: "OPEN",
+      workspaceId: WORKSPACE_ID,
+    });
+    db.billingCustomer.findFirst.mockResolvedValue({
+      externalCustomerId: "cus_1",
+      id: "bc_1",
+    });
+    stripeMock.subscriptions.retrieve.mockResolvedValue({ id: "sub_1" });
+    projectMock.mockRejectedValue(new Error("projection failed"));
+
+    await expect(
+      resolveBillingIssue(asDb(db), { actorUserId: "admin_1", issueId: ISSUE_ID }),
+    ).rejects.toThrow("projection failed");
+    expect(db.billingIssue.update).not.toHaveBeenCalled();
+  });
+
+  it("refuses to heal without a billing customer mapping", async () => {
+    const db = createDb();
+    db.billingIssue.findUnique.mockResolvedValue({
+      details: {},
+      externalObjectId: "sub_1",
+      kind: "SUBSCRIPTION_REVIEW",
+      status: "OPEN",
+      workspaceId: WORKSPACE_ID,
+    });
+
+    await expect(
+      resolveBillingIssue(asDb(db), { actorUserId: "admin_1", issueId: ISSUE_ID }),
+    ).rejects.toMatchObject({
+      code: "PRECONDITION_FAILED",
+      message: "BILLING_CUSTOMER_MISSING",
+    });
+    expect(db.billingIssue.update).not.toHaveBeenCalled();
   });
 
   it("is idempotent for an already resolved issue", async () => {

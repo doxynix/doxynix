@@ -94,6 +94,7 @@ function createFakeTx(initial: Partial<Mirror> = {}) {
       }),
     },
     billingSubscription: {
+      findFirst: vi.fn(async () => null),
       findUnique: vi.fn(async () => ({ ...mirror })),
       updateMany: vi.fn(
         async ({

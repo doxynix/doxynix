@@ -1,6 +1,7 @@
 import type { BillingIssueSeverity, BillingIssueStatus } from "@doxynix/shared";
 import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
+import type Stripe from "stripe";
 
 import { appLogger } from "@/server/core/app-logger";
 import { recordBillingMetric } from "@/server/core/billing/metrics";
@@ -9,6 +10,7 @@ import type { DbClient } from "@/server/core/db";
 
 import { PROCESS_STRIPE_EVENT_TASK_ID } from "./billing.constants";
 import { ownershipKeyFromPayload } from "./billing.ownership";
+import type { ProjectedSubscription } from "./billing.subscriptions";
 import { projectSubscription } from "./billing.subscriptions";
 import type { processStripeEventTask } from "./tasks/process-stripe-event.task";
 
@@ -108,6 +110,55 @@ function mergeResolutionNote(details: unknown, note: string): Record<string, unk
   return { ...base, resolutionNote };
 }
 
+type ReviewProjection = {
+  ownership: { billingCustomerId: string; customerId: null | string; workspaceId: string };
+  subscription: Stripe.Subscription;
+};
+
+// The canonical read happens outside the transaction: a Stripe timeout must not hold a DB
+// transaction, and a failure here leaves the issue exactly as the operator found it.
+async function loadReviewProjection(
+  db: DbClient,
+  issue: { externalObjectId: null | string; workspaceId: null | string },
+): Promise<null | ReviewProjection> {
+  if (issue.externalObjectId == null || issue.workspaceId == null) {
+    return null;
+  }
+
+  const customer = await db.billingCustomer.findFirst({
+    select: { externalCustomerId: true, id: true },
+    where: { provider: "stripe", workspaceId: issue.workspaceId },
+  });
+
+  if (customer == null) {
+    throw new TRPCError({ code: "PRECONDITION_FAILED", message: "BILLING_CUSTOMER_MISSING" });
+  }
+
+  let subscription: Stripe.Subscription;
+
+  try {
+    subscription = await getStripeClient().subscriptions.retrieve(issue.externalObjectId, {
+      expand: ["latest_invoice"],
+    });
+  } catch (error) {
+    appLogger.error({ error, msg: "billing.review_projection_failed" });
+
+    throw new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: "BILLING_SUBSCRIPTION_UNREADABLE",
+    });
+  }
+
+  return {
+    ownership: {
+      billingCustomerId: customer.id,
+      customerId: customer.externalCustomerId,
+      workspaceId: issue.workspaceId,
+    },
+    subscription,
+  };
+}
+
 export async function resolveBillingIssue(
   db: DbClient,
   input: { actorUserId: string; issueId: string; note?: string },
@@ -136,53 +187,51 @@ export async function resolveBillingIssue(
       ? (issue.details as Record<string, unknown> | null)
       : mergeResolutionNote(issue.details, input.note);
 
-  await db.billingIssue.update({
-    data: {
-      details: details ?? undefined,
-      resolvedAt: new Date(),
-      status: "RESOLVED",
-    },
-    where: { id: input.issueId },
-  });
-
   // Clearing the review flag is not enough: the entitlement is still REVIEW, and reconciliation
-  // only repairs rows that differ. Recompute the projection from the canonical subscription here.
-  if (
-    issue.kind === "SUBSCRIPTION_REVIEW" &&
-    issue.externalObjectId != null &&
-    issue.workspaceId != null
-  ) {
-    await db.billingSubscription.updateMany({
-      data: { needsReview: false, reviewReason: null },
-      where: { externalSubscriptionId: issue.externalObjectId },
-    });
+  // only repairs rows that differ. Recompute the projection from the canonical subscription.
+  const projection =
+    issue.kind === "SUBSCRIPTION_REVIEW" ? await loadReviewProjection(db, issue) : null;
 
-    try {
-      const customer = await db.billingCustomer.findFirst({
-        select: { externalCustomerId: true, id: true },
-        where: { provider: "stripe", workspaceId: issue.workspaceId },
+  // The issue becomes RESOLVED only after the projection commits; a failed heal must leave it open
+  // instead of reporting success while the workspace still has no access.
+  const resolve = async (tx: DbClient): Promise<null | ProjectedSubscription> => {
+    let projected: null | ProjectedSubscription = null;
+
+    if (projection != null) {
+      await tx.billingSubscription.updateMany({
+        data: { needsReview: false, reviewReason: null },
+        where: { externalSubscriptionId: projection.subscription.id },
       });
 
-      if (customer != null) {
-        const subscription = await getStripeClient().subscriptions.retrieve(
-          issue.externalObjectId,
-          { expand: ["latest_invoice"] },
-        );
-
-        await projectSubscription(db, {
-          now: new Date(),
-          overrideRevivedTerminal: true,
-          ownership: {
-            billingCustomerId: customer.id,
-            customerId: customer.externalCustomerId,
-            workspaceId: issue.workspaceId,
-          },
-          subscription,
-        });
-      }
-    } catch (error) {
-      appLogger.error({ error, msg: "billing.review_projection_failed" });
+      projected = await projectSubscription(tx, {
+        now: new Date(),
+        overrideRevivedTerminal: true,
+        ownership: projection.ownership,
+        subscription: projection.subscription,
+      });
     }
+
+    await tx.billingIssue.update({
+      data: {
+        details: details ?? undefined,
+        resolvedAt: new Date(),
+        status: "RESOLVED",
+      },
+      where: { id: input.issueId },
+    });
+
+    return projected;
+  };
+
+  const projected = "$transaction" in db ? await db.$transaction(resolve) : await resolve(db);
+
+  if (projected != null && !projected.ownsAccess && projection != null) {
+    appLogger.warn({
+      externalObjectId: projection.subscription.id,
+      msg: "billing.review_projection_skipped_historical",
+      type: "billing.audit",
+      workspaceId: projection.ownership.workspaceId,
+    });
   }
 
   appLogger.info({

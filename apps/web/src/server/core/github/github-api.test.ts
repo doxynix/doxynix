@@ -3,12 +3,13 @@ import type { Repo } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { DbClient } from "../db";
-import { calculateBusFactor, executeWithFallback, mapRepos } from "./github-api";
+import { calculateBusFactor, executeWithFallback, getMyRepos, mapRepos } from "./github-api";
 import type { OctokitInstance } from "./github-client";
 
 const mocks = vi.hoisted(() => ({
   appLogger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
   GitHubAuthRequiredError: class GitHubAuthRequiredError extends Error {},
+  getInstallationClient: vi.fn(),
   getLanguageColor: vi.fn((lang: string | null) => (lang === "TypeScript" ? "#3178c6" : "#cccccc")),
   getPublicClient: vi.fn(),
   isOctokitError: vi.fn(() => false),
@@ -30,13 +31,18 @@ vi.mock("@/server/utils/task-logger", () => ({
 
 vi.mock("./github-client", () => ({
   GitHubAuthRequiredError: mocks.GitHubAuthRequiredError,
+  getInstallationClient: mocks.getInstallationClient,
   getPublicClient: mocks.getPublicClient,
   resolveClientContext: mocks.resolveClientContext,
 }));
 
-const prismaMocks = { account: { findMany: vi.fn() } };
+const prismaMocks = {
+  account: { findMany: vi.fn() },
+  githubInstallation: { findMany: vi.fn() },
+};
 
 const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
+const WORKSPACE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a6e";
 const prismaMock = prismaMocks as unknown as DbClient;
 
 const createOctokitMock = (contributors: Array<{ contributions: number; login: string }>) => ({
@@ -46,6 +52,53 @@ const createOctokitMock = (contributors: Array<{ contributions: number; login: s
       listContributors: vi.fn(),
     },
   },
+});
+
+describe("getMyRepos workspace scope", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    prismaMocks.account.findMany.mockResolvedValue([]);
+    mocks.getInstallationClient.mockReturnValue({
+      paginate: vi.fn().mockResolvedValue([
+        {
+          description: null,
+          full_name: "acme/api",
+          language: "TypeScript",
+          private: true,
+          stargazers_count: 3,
+          updated_at: "2026-10-01T00:00:00.000Z",
+        },
+      ]),
+      rest: { apps: { listReposAccessibleToInstallation: vi.fn() } },
+    });
+  });
+
+  it("shows a claimed installation to members who did not claim it", async () => {
+    prismaMocks.githubInstallation.findMany.mockResolvedValue([
+      { id: "123", userId: "claimer", workspaceId: WORKSPACE_ID },
+    ]);
+
+    const repos = await getMyRepos(prismaMock, USER_ID, WORKSPACE_ID);
+
+    expect(prismaMocks.githubInstallation.findMany).toHaveBeenCalledWith({
+      where: { isSuspended: false, workspaceId: WORKSPACE_ID },
+    });
+    expect(prismaMocks.account.findMany).toHaveBeenCalledWith({
+      where: { accessToken: { not: null }, providerId: "github", userId: USER_ID },
+    });
+    expect(repos.map((repo) => repo.fullName)).toEqual(["acme/api"]);
+  });
+
+  it("keeps the claiming user's filter when no workspace is pinned", async () => {
+    prismaMocks.githubInstallation.findMany.mockResolvedValue([]);
+
+    await getMyRepos(prismaMock, USER_ID);
+
+    expect(prismaMocks.githubInstallation.findMany).toHaveBeenCalledWith({
+      where: { isSuspended: false, userId: USER_ID },
+    });
+    expect(mocks.getInstallationClient).not.toHaveBeenCalled();
+  });
 });
 
 describe("github-api: Core Logic & Resilient Algorithms", () => {

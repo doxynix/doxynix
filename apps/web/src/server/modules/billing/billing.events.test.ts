@@ -33,7 +33,12 @@ const dbMock = vi.hoisted(() => ({
     createMany: vi.fn().mockResolvedValue({ count: 1 }),
     updateMany: vi.fn().mockResolvedValue({ count: 1 }),
   },
-  billingSubscription: { findUnique: vi.fn(), updateMany: vi.fn(), upsert: vi.fn() },
+  billingSubscription: {
+    findFirst: vi.fn(),
+    findUnique: vi.fn(),
+    updateMany: vi.fn(),
+    upsert: vi.fn(),
+  },
   workspaceEntitlement: { findUnique: vi.fn(), upsert: vi.fn() },
   workspaceMember: { count: vi.fn() },
 }));
@@ -109,6 +114,7 @@ describe("stripe event worker", () => {
     dbMock.billingEvent.updateMany.mockReset().mockResolvedValue({ count: 0 });
     dbMock.billingIssue.createMany.mockReset().mockResolvedValue({ count: 1 });
     dbMock.billingIssue.updateMany.mockReset().mockResolvedValue({ count: 1 });
+    dbMock.billingSubscription.findFirst.mockReset().mockResolvedValue(null);
     dbMock.billingSubscription.findUnique.mockReset().mockResolvedValue(null);
     dbMock.billingSubscription.updateMany.mockReset().mockResolvedValue({ count: 0 });
     dbMock.billingSubscription.upsert.mockReset().mockResolvedValue({ id: "bs_1" });

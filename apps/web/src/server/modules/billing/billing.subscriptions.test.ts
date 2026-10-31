@@ -47,6 +47,7 @@ function createTx() {
       updateMany: vi.fn().mockResolvedValue({ count: 1 }),
     },
     billingSubscription: {
+      findFirst: vi.fn().mockResolvedValue(null),
       findUnique: vi.fn().mockResolvedValue(null),
       updateMany: vi.fn().mockResolvedValue({ count: 1 }),
       upsert: vi.fn().mockResolvedValue({ id: "bs_1" }),
@@ -112,6 +113,8 @@ describe("projectSubscription", () => {
       activatedAt: NOW,
       externalStatus: "active",
       graceEndsAt: null,
+      id: "bs_1",
+      isCurrent: true,
     });
 
     await projectSubscription(tx as unknown as DbClient, {
@@ -267,6 +270,8 @@ describe("projectSubscription", () => {
       activatedAt: NOW,
       externalStatus: "active",
       graceEndsAt: null,
+      id: "bs_1",
+      isCurrent: true,
     });
 
     await projectSubscription(tx as unknown as DbClient, {
@@ -402,6 +407,89 @@ describe("projectSubscription", () => {
     });
 
     expect(result.accessState).toBe("PENDING");
+  });
+
+  it("never rewrites access from a historical subscription", async () => {
+    const tx = createTx();
+    tx.billingSubscription.findUnique.mockResolvedValue({
+      activatedAt: OLD_ACTIVATION,
+      externalStatus: "active",
+      graceEndsAt: null,
+      id: "bs_historical",
+      isCurrent: null,
+      needsReview: false,
+      reviewReason: null,
+    });
+    tx.billingSubscription.findFirst.mockResolvedValue({ externalStatus: "active" });
+    tx.workspaceEntitlement.findUnique.mockResolvedValue({
+      accessState: "ACTIVE",
+      sourceSubscriptionId: "bs_live",
+    });
+
+    const result = await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription({ id: "sub_historical", status: "canceled" }) as never,
+    });
+
+    expect(result.ownsAccess).toBe(false);
+    expect(result.accessState).toBe("ACTIVE");
+    expect(tx.workspaceEntitlement.upsert).not.toHaveBeenCalled();
+    expect(tx.billingSubscription.updateMany).not.toHaveBeenCalled();
+    expect(callArg(tx.billingSubscription.upsert)).toMatchObject({
+      create: { isCurrent: null },
+      update: { isCurrent: null },
+    });
+  });
+
+  it("refuses to take the current slot while another live subscription holds it", async () => {
+    const tx = createTx();
+    tx.billingSubscription.findFirst.mockResolvedValue({ externalStatus: "active" });
+
+    const result = await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription({ id: "sub_duplicate" }) as never,
+    });
+
+    expect(result.ownsAccess).toBe(false);
+    expect(tx.workspaceEntitlement.upsert).not.toHaveBeenCalled();
+    expect(tx.billingSubscription.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("takes the current slot from a terminal subscription", async () => {
+    const tx = createTx();
+    tx.billingSubscription.findFirst.mockResolvedValue({ externalStatus: "canceled" });
+
+    const result = await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription({ id: "sub_new" }) as never,
+    });
+
+    expect(result.ownsAccess).toBe(true);
+    expect(callArg(tx.workspaceEntitlement.upsert)).toBeDefined();
+  });
+
+  it("mirrors a terminal subscription without creating access", async () => {
+    const tx = createTx();
+    tx.workspaceEntitlement.findUnique.mockResolvedValue({
+      accessState: "NO_SUBSCRIPTION",
+      sourceSubscriptionId: null,
+    });
+
+    const result = await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription({ status: "canceled" }) as never,
+    });
+
+    expect(result.ownsAccess).toBe(false);
+    expect(result.accessState).toBe("NO_SUBSCRIPTION");
+    expect(tx.workspaceEntitlement.upsert).not.toHaveBeenCalled();
+    expect(callArg(tx.billingSubscription.upsert)).toMatchObject({
+      create: { isCurrent: null, needsReview: false },
+    });
   });
 
   it("never overwrites activatedAt", async () => {

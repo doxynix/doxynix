@@ -871,6 +871,37 @@ F18 снят, N8/N1/F15/F17 закрыты в шестом проходе — с
 13–16 падений не воспроизвелись. После правок B1–B6 прогнаны только таргетные 60/60 и
 `type-check`; полный сьют не запускался.
 
+### Восьмой проход (по ревью 1 ноября, H1–H5)
+
+- **H1/H3 — guard в `projectSubscription`, а не только в reconciliation.** Право переписывать
+  доступ вычисляется один раз на проекцию: подписка владеет доступом, если её mirror уже
+  `isCurrent = true`, если entitlement.sourceSubscriptionId указывает на неё, либо если она
+  не-terminal и не существует другого живого current (терминальный current перекрывается).
+  Иначе обновляется только своей mirror: `isCurrent` остаётся прежним (история — `null`),
+  entitlement/current-slot/review-issue/seat-issue/metrics не трогаются. `ProjectedSubscription`
+  теперь возвращает `ownsAccess`, поэтому worker, admin-resolve и reconciliation используют одну
+  и ту же логику.
+- **H2 — `resolveBillingIssue` атомарен.** Canonical retrieve выполняется до транзакции
+  (Stripe-таймаут не держит транзакцию). Ошибка Stripe → `PRECONDITION_FAILED`
+  `BILLING_SUBSCRIPTION_UNREADABLE`, отсутствие customer mapping → `BILLING_CUSTOMER_MISSING`;
+  в обоих случаях issue остаётся OPEN. Снятие sticky-флага, проекция и `RESOLVED` идут в одной
+  транзакции, причём `RESOLVED` пишется последним. Историческая подписка резолвится как
+  mirror-only и пишет warning `billing.review_projection_skipped_historical`.
+- **H4 — reconciliation не выбрасывает подписку при занятом current-slot.** `local == null` +
+  занятый current (и второй случай — существующая историческая строка с drift) проецирует
+  mirror с `isCurrent = null` и поднимает `DUPLICATE_ACTIVE_SUBSCRIPTION` (CRITICAL), кроме
+  терминальных подписок — для них issue не создаётся. Seat-sync в reconciliation теперь только
+  для владеющей подписки.
+- **H5 — тесты на guard'ы, а не на моки:** владение доступом (4 кейса в
+  `billing.subscriptions.test.ts`), duplicate-issue и исторический mirror в reconciliation,
+  транзакционный resolve (успех/ошибка Stripe/ошибка проекции/нет customer mapping) в
+  `billing.admin.test.ts`, «default не первый» в portal, workspace-аргумент `apiForUser`,
+  видимость installation для второго участника и guard `with-test-db`
+  (`scripts/test-db-name.ts` + unit-тест: `latest_prod`/`test_prod` отклоняются,
+  `dxnx_web` → `dxnx_web_test`).
+- **Побочно:** `with-test-db` больше не содержит regex inline — правило вынесено в
+  side-effect-free модуль, чтобы его можно было тестировать.
+
 ## Self-check
 
 ### Пять утверждений с наименьшей уверенностью

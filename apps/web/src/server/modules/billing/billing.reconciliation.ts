@@ -11,6 +11,8 @@ import { prisma } from "@/server/core/db";
 import { planEntitlements } from "./billing.catalog";
 import { STRIPE_PROVIDER } from "./billing.constants";
 import { appendLedgerEntry } from "./billing.ledger";
+import { isTerminalStatus } from "./billing.state";
+import type { ProjectedSubscription } from "./billing.subscriptions";
 import { projectSubscription } from "./billing.subscriptions";
 import { runTaxPreflight } from "./billing.tax";
 
@@ -113,10 +115,43 @@ async function repair(
   subscription: Stripe.Subscription,
   ownership: { billingCustomerId: string; customerId: null | string; workspaceId: string },
   now: Date,
+): Promise<ProjectedSubscription> {
+  return prisma.$transaction(async (tx) =>
+    projectSubscription(tx, { now, ownership, subscription }),
+  );
+}
+
+// A live subscription the entitlement does not point at is never dropped silently: it is mirrored
+// as history and surfaced, otherwise Stripe keeps billing something nobody in the workspace sees.
+async function flagDuplicate(
+  projected: ProjectedSubscription,
+  subscription: Stripe.Subscription,
+  workspaceId: string,
 ): Promise<void> {
-  await prisma.$transaction(async (tx) => {
-    await projectSubscription(tx, { now, ownership, subscription });
+  if (projected.ownsAccess || isTerminalStatus(subscription.status)) {
+    return;
+  }
+
+  await upsertBillingIssue(prisma, {
+    dedupeKey: `duplicate_active:${subscription.id}`,
+    details: { subscriptionStatus: subscription.status },
+    externalObjectId: subscription.id,
+    kind: "DUPLICATE_ACTIVE_SUBSCRIPTION",
+    severity: "CRITICAL",
+    source: "stripe_reconciliation",
+    workspaceId,
   });
+}
+
+// A live subscription that does not hold the current slot yet may take it once the slot is free:
+// a canceled row still marked current is the usual aftermath of an out-of-order replacement.
+async function currentSlotIsFree(workspaceId: string): Promise<boolean> {
+  const current = await prisma.billingSubscription.findFirst({
+    select: { externalStatus: true },
+    where: { isCurrent: true, workspaceId },
+  });
+
+  return current == null || isTerminalStatus(current.externalStatus);
 }
 
 async function entitlementLimitsStale(workspaceId: string): Promise<boolean> {
@@ -184,16 +219,15 @@ async function reconcileSubscription(
       select: { id: true },
       where: { isCurrent: true, workspaceId: mapping.workspaceId },
     });
-
-    if (occupied != null) {
-      return false;
-    }
-
-    await repair(
+    const projected = await repair(
       subscription,
       { billingCustomerId: mapping.id, customerId, workspaceId: mapping.workspaceId },
       now,
     );
+
+    if (occupied != null) {
+      await flagDuplicate(projected, subscription, mapping.workspaceId);
+    }
 
     return true;
   }
@@ -212,18 +246,12 @@ async function reconcileSubscription(
     return true;
   }
 
-  // Only the subscription the entitlement actually points at may rewrite access. A historical
-  // (isCurrent=null) row drifting from Stripe must never downgrade the active plan.
   const entitlement = await prisma.workspaceEntitlement.findUnique({
     select: { sourceSubscriptionId: true },
     where: { workspaceId: mapping.workspaceId },
   });
   const ownsEntitlement =
     local.isCurrent === true || entitlement?.sourceSubscriptionId === local.id;
-
-  if (!ownsEntitlement) {
-    return false;
-  }
 
   // Repair the mirror first: seat sync reads it to decide whether the subscription is billable,
   // and a stale `past_due` row would make it skip while Stripe is already `active`.
@@ -232,18 +260,29 @@ async function reconcileSubscription(
   // `needsReview` means the worker refused a transition; the canonical read has happened here, so
   // a workspace stuck in REVIEW with a matching mirror must still be recomputed. Stale plan limits
   // are repaired too: without a fresh event a PRO row written before the catalog carried limits
-  // would stay on HOBBY quotas.
+  // would stay on HOBBY quotas. Only the owning subscription may heal the entitlement, so the
+  // limits check stays out of the historical path to avoid a repair every run.
+  const takeover =
+    !ownsEntitlement &&
+    !isTerminalStatus(subscription.status) &&
+    (await currentSlotIsFree(mapping.workspaceId));
+
   if (
     differs(local, subscription) ||
     local.needsReview ||
-    (await entitlementLimitsStale(mapping.workspaceId))
+    (ownsEntitlement && (await entitlementLimitsStale(mapping.workspaceId))) ||
+    takeover
   ) {
-    await repair(
+    const projected = await repair(
       subscription,
       { billingCustomerId: mapping.id, customerId, workspaceId: mapping.workspaceId },
       now,
     );
     changed = true;
+
+    if (!ownsEntitlement) {
+      await flagDuplicate(projected, subscription, mapping.workspaceId);
+    }
   }
 
   // Seats are derived from membership, not from the local mirror: a failed or skipped post-commit
@@ -254,6 +293,7 @@ async function reconcileSubscription(
   });
 
   if (
+    ownsEntitlement &&
     subscription.status === "active" &&
     item != null &&
     (item.quantity ?? 1) !== Math.max(1, members)

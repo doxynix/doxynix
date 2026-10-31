@@ -223,6 +223,22 @@ describe("ai-tools execution logic", () => {
 
       expect(result).toContain("[[src/auth.ts]]");
       expect(result).toContain("checkAuth: auth helper");
+      // The pinned workspace, not the user's first membership: quotas and search scope follow it.
+      expect(mocks.apiForUser).toHaveBeenCalledWith(USER_ID, WORKSPACE_ID);
+    });
+  });
+
+  describe("triggerRepositoryAnalysis", () => {
+    it("queues the run in the pinned workspace", async () => {
+      const analyze = vi.fn().mockResolvedValue({ runId: "run_1" });
+
+      mocks.apiForUser.mockResolvedValue({ analysis: { analyze } });
+
+      const tool = getTool(buildTools("github_agent"), "triggerRepositoryAnalysis");
+      await tool.execute({});
+
+      expect(mocks.apiForUser).toHaveBeenCalledWith(USER_ID, WORKSPACE_ID);
+      expect(analyze).toHaveBeenCalledWith(expect.objectContaining({ repoId: "repo-uuid" }));
     });
   });
 });

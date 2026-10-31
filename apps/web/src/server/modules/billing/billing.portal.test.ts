@@ -109,6 +109,34 @@ describe("createPortalSession", () => {
     expect(stripeMock.billingPortal.sessions.create).not.toHaveBeenCalled();
   });
 
+  it("checks the default configuration even when another one is listed first", async () => {
+    stripeMock.billingPortal.configurations.list.mockResolvedValue({
+      data: [
+        {
+          features: { subscription_update: { enabled: false } },
+          id: "bpc_other",
+          is_default: false,
+        },
+        {
+          features: { subscription_update: { enabled: true } },
+          id: "bpc_default",
+          is_default: true,
+        },
+      ],
+    });
+    const db = createDb({ externalCustomerId: "cus_workspace" });
+
+    await expect(
+      createPortalSession({
+        db,
+        requestId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5e",
+        returnUrl: portalReturnUrl("/dashboard/settings/members"),
+        workspaceId: WORKSPACE_ID,
+      }),
+    ).rejects.toMatchObject({ code: "PRECONDITION_FAILED", message: "PORTAL_ALLOWS_PLAN_CHANGE" });
+    expect(stripeMock.billingPortal.sessions.create).not.toHaveBeenCalled();
+  });
+
   it("refuses to open a portal when Stripe has no configuration", async () => {
     stripeMock.billingPortal.configurations.list.mockResolvedValue({ data: [] });
     const db = createDb({ externalCustomerId: "cus_workspace" });
@@ -185,10 +213,13 @@ describe("cancel at period end", () => {
         updateMany: vi.fn().mockResolvedValue({ count: 1 }),
       },
       billingSubscription: {
+        findFirst: vi.fn().mockResolvedValue(null),
         findUnique: vi.fn().mockResolvedValue({
           activatedAt: NOW,
           externalStatus: "active",
           graceEndsAt: null,
+          id: "bs_1",
+          isCurrent: true,
         }),
         updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         upsert: vi.fn().mockResolvedValue({ id: "bs_1" }),

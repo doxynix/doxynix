@@ -26,6 +26,8 @@ function paidInvoiceAt(subscription: Stripe.Subscription): Date | null {
 export type ProjectedSubscription = {
   accessState: AccessState;
   mirrorId: string;
+  // False for a historical subscription: its mirror was refreshed but access was left untouched.
+  ownsAccess: boolean;
   reviewReason: null | string;
 };
 
@@ -89,6 +91,8 @@ export async function projectSubscription(
       activatedAt: true,
       externalStatus: true,
       graceEndsAt: true,
+      id: true,
+      isCurrent: true,
       needsReview: true,
       reviewReason: true,
     },
@@ -111,6 +115,24 @@ export async function projectSubscription(
     },
     where: { workspaceId: ownership.workspaceId },
   });
+
+  const terminal = isTerminalStatus(subscription.status);
+  const otherCurrent = await tx.billingSubscription.findFirst({
+    select: { externalStatus: true },
+    where: {
+      externalSubscriptionId: { not: subscription.id },
+      isCurrent: true,
+      workspaceId: ownership.workspaceId,
+    },
+  });
+
+  // Only the subscription that already holds access may rewrite it. A late or replayed event for
+  // a historical id updates its own mirror and nothing else: otherwise it can downgrade the live
+  // plan or take the current slot from the subscription the entitlement points at.
+  const ownsAccess =
+    existing?.isCurrent === true ||
+    (existing != null && entitlement?.sourceSubscriptionId === existing.id) ||
+    (!terminal && (otherCurrent == null || isTerminalStatus(otherCurrent.externalStatus)));
 
   // Lost `invoice.paid` must not leave a paying customer in PENDING for a month: a paid latest
   // invoice on an active subscription is proof enough, and activation stays idempotent.
@@ -167,14 +189,15 @@ export async function projectSubscription(
     reviewReason = existing.reviewReason ?? null;
   }
 
-  recordBillingMetric("billing_subscription_transition_total", 1, {
-    from: current,
-    to: accessState,
-  });
-  recordBillingMetric("billing_entitlement_total", 1, { state: accessState });
+  if (ownsAccess) {
+    recordBillingMetric("billing_subscription_transition_total", 1, {
+      from: current,
+      to: accessState,
+    });
+    recordBillingMetric("billing_entitlement_total", 1, { state: accessState });
+  }
 
-  const terminal = isTerminalStatus(subscription.status);
-  const isCurrent = terminal ? null : true;
+  const isCurrent = ownsAccess ? (terminal ? null : true) : (existing?.isCurrent ?? null);
   // Only the PRO price exists in the catalog, so a non-terminal subscription means PRO — unless
   // the workspace is already on TEAM, which no Stripe price maps to and must not be downgraded.
   const planCode = terminal ? "HOBBY" : entitlement?.planCode === "TEAM" ? "TEAM" : "PRO";
@@ -201,7 +224,7 @@ export async function projectSubscription(
 
   // Stripe can report fewer seats than the workspace already has (race, manual change in the
   // Dashboard). Paid seats are the billing truth: surface the gap instead of gifting capacity.
-  if (!terminal && requestedSeats < activeMembers) {
+  if (ownsAccess && !terminal && requestedSeats < activeMembers) {
     await upsertBillingIssue(tx, {
       dedupeKey: `seats_below_members:${subscription.id}`,
       details: { activeMembers, requestedSeats },
@@ -223,11 +246,12 @@ export async function projectSubscription(
       : typeof subscription.latest_invoice === "string"
         ? subscription.latest_invoice
         : subscription.latest_invoice.id;
-  const needsReview = accessState === "REVIEW";
+  const needsReview = ownsAccess && accessState === "REVIEW";
+  const persistedReviewReason = ownsAccess ? reviewReason : null;
 
   // A review state is not silent: without an issue nobody learns that a paying workspace lost
   // access and reconciliation has nothing to resolve.
-  if (reviewReason != null) {
+  if (ownsAccess && reviewReason != null) {
     await upsertBillingIssue(tx, {
       dedupeKey: `subscription_review:${subscription.id}:${reviewReason}`,
       details: { reason: reviewReason, status: subscription.status },
@@ -237,7 +261,7 @@ export async function projectSubscription(
       source: "stripe_worker",
       workspaceId: ownership.workspaceId,
     });
-  } else if (accessState === "ACTIVE") {
+  } else if (ownsAccess && accessState === "ACTIVE") {
     // Leaving REVIEW closes the issue that made the state visible, otherwise operators keep an
     // open critical issue for a workspace that already recovered.
     await tx.billingIssue.updateMany({
@@ -247,10 +271,16 @@ export async function projectSubscription(
         status: "OPEN",
       },
     });
+
+    // The duplicate became the live subscription; the reconciliation issue for it is stale.
+    await tx.billingIssue.updateMany({
+      data: { resolvedAt: new Date(), status: "RESOLVED" },
+      where: { dedupeKey: `duplicate_active:${subscription.id}`, status: "OPEN" },
+    });
   }
 
   // Frees the single current slot before the upsert; history stays null, never false.
-  if (isCurrent != null) {
+  if (ownsAccess && isCurrent != null) {
     await tx.billingSubscription.updateMany({
       data: { isCurrent: null },
       where: {
@@ -278,7 +308,7 @@ export async function projectSubscription(
       latestInvoiceId,
       needsReview,
       quantity: item.quantity ?? 1,
-      reviewReason: reviewReason,
+      reviewReason: persistedReviewReason,
       workspaceId: ownership.workspaceId,
     },
     update: {
@@ -291,7 +321,7 @@ export async function projectSubscription(
       latestInvoiceId,
       needsReview,
       quantity: item.quantity ?? 1,
-      reviewReason: reviewReason,
+      reviewReason: persistedReviewReason,
       // Only an ACTIVE canonical subscription ends the dunning window; a paid invoice alone does
       // not prove recovery while Stripe still reports `past_due`.
       ...(accessState === "ACTIVE"
@@ -306,40 +336,43 @@ export async function projectSubscription(
 
   const accessStateChanged = current !== accessState;
 
-  await tx.workspaceEntitlement.upsert({
-    create: {
-      accessState: accessState,
-      activatedAt: accessState === "ACTIVE" ? (entitlement?.activatedAt ?? activatedAt) : null,
-      graceEndsAt: accessState === "GRACE" ? (existing?.graceEndsAt ?? null) : null,
-      planCode,
-      revision: BigInt(1),
-      seatLimit,
-      sourceSubscriptionId: mirror.id,
-      workspaceId: ownership.workspaceId,
-      ...plan,
-    },
-    update: {
-      accessState: accessState,
-      activatedAt:
-        accessState === "ACTIVE" && entitlement?.activatedAt == null ? activatedAt : undefined,
-      // The reader (`hasAccess`) requires a live deadline for GRACE; without this column the whole
-      // grace window is dead and a paying customer is blocked on the first failed payment.
-      graceEndsAt: accessState === "GRACE" ? (existing?.graceEndsAt ?? null) : null,
-      planCode,
-      revision: accessStateChanged ? { increment: 1 } : undefined,
-      seatLimit,
-      sourceSubscriptionId: mirror.id,
-      // Limits are only rewritten on a plan change or when the row is stale, so a manual
-      // adjustment survives ordinary renewal events instead of being reset every month.
-      ...(writePlan ? plan : {}),
-    },
-    where: { workspaceId: ownership.workspaceId },
-  });
+  if (ownsAccess) {
+    await tx.workspaceEntitlement.upsert({
+      create: {
+        accessState: accessState,
+        activatedAt: accessState === "ACTIVE" ? (entitlement?.activatedAt ?? activatedAt) : null,
+        graceEndsAt: accessState === "GRACE" ? (existing?.graceEndsAt ?? null) : null,
+        planCode,
+        revision: BigInt(1),
+        seatLimit,
+        sourceSubscriptionId: mirror.id,
+        workspaceId: ownership.workspaceId,
+        ...plan,
+      },
+      update: {
+        accessState: accessState,
+        activatedAt:
+          accessState === "ACTIVE" && entitlement?.activatedAt == null ? activatedAt : undefined,
+        // The reader (`hasAccess`) requires a live deadline for GRACE; without this column the whole
+        // grace window is dead and a paying customer is blocked on the first failed payment.
+        graceEndsAt: accessState === "GRACE" ? (existing?.graceEndsAt ?? null) : null,
+        planCode,
+        revision: accessStateChanged ? { increment: 1 } : undefined,
+        seatLimit,
+        sourceSubscriptionId: mirror.id,
+        // Limits are only rewritten on a plan change or when the row is stale, so a manual
+        // adjustment survives ordinary renewal events instead of being reset every month.
+        ...(writePlan ? plan : {}),
+      },
+      where: { workspaceId: ownership.workspaceId },
+    });
+  }
 
   return {
-    accessState: accessState,
+    accessState: ownsAccess ? accessState : current,
     mirrorId: mirror.id,
-    reviewReason: reviewReason,
+    ownsAccess,
+    reviewReason: persistedReviewReason,
   };
 }
 

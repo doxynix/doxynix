@@ -2,8 +2,8 @@
  * Run a command against the disposable test database.
  *
  * `test:int` truncates shared tables between files, so it refuses to run against anything but a
- * database whose name contains `test`. With `with-doppler` that meant the script always pointed
- * at the development database and failed every time — the guard working, the wiring wrong.
+ * database named `test` or ending in `_test`. With `with-doppler` that meant the script always
+ * pointed at the development database and failed every time — the guard working, the wiring wrong.
  *
  * So the URL is rewritten here rather than left to whatever Doppler injects:
  *
@@ -12,20 +12,13 @@
  *   DATABASE_URL …/dxnx_web_stress → refused: a stress clone is a fixture, not a scratch DB
  *
  * Override the target with TEST_DATABASE_URL, or bypass the rewrite entirely by pointing
- * DATABASE_URL somewhere that already contains `test`.
+ * DATABASE_URL at a database that already ends in `_test`.
  *
  * Usage: bun scripts/with-test-db.ts <command> [args…]
  */
 import { spawn, spawnSync } from "node:child_process";
 
-// Anchored on purpose: a bare `includes("test")` would wave through `latest_prod`, which does
-// contain those letters, and these tests TRUNCATE shared tables.
-const TEST_DB_NAME = /^test$|_test$/;
-
-function derivedName(name: string): string {
-  const base = name.replace(/_stress$/, "");
-  return TEST_DB_NAME.test(base) ? base : `${base}_test`;
-}
+import { derivedTestDatabaseName, isTestDatabaseName } from "./test-db-name";
 
 function parse(url: string): { host: string; name: string } | null {
   try {
@@ -51,18 +44,18 @@ if (parsed == null) {
   process.exit(1);
 }
 // No explicit override: derive `<name>_test` from whatever Doppler injected, which is the
-// naming `init-dbs.sql` and the guard's own "must contain test" rule both assume.
+// naming `init-dbs.sql` and the guard's own suffix rule both assume.
 const derived = new URL(source);
-derived.pathname = `/${derivedName(parsed.name)}`;
+derived.pathname = `/${derivedTestDatabaseName(parsed.name)}`;
 
 const override = process.env.TEST_DATABASE_URL;
 const target = override == null ? derived : new URL(override);
 const name = target.pathname.replace(/^\//, "");
 
-if (!TEST_DB_NAME.test(name)) {
+if (!isTestDatabaseName(name)) {
   console.error(
     `refusing to run against "${name}": integration tests truncate shared tables, so the target ` +
-      `database must contain "test" in its name`,
+      `database must be named "test" or end with "_test"`,
   );
   process.exit(1);
 }
