@@ -519,6 +519,30 @@ describe("projectSubscription", () => {
     );
   });
 
+  it("closes the duplicate issue once the subscription owns access", async () => {
+    const tx = createTx();
+    tx.billingSubscription.findFirst.mockResolvedValue({ externalStatus: "canceled" });
+    tx.workspaceEntitlement.findUnique.mockResolvedValue({
+      accessState: "CANCELED",
+      sourceSubscriptionId: "bs_old",
+    });
+
+    const result = await projectSubscription(tx as unknown as DbClient, {
+      allowCurrentTakeover: true,
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription({ id: "sub_new" }) as never,
+    });
+
+    // No paid invoice yet, so the takeover lands in PENDING rather than ACTIVE.
+    expect(result.ownsAccess).toBe(true);
+    expect(result.accessState).toBe("PENDING");
+    expect(tx.billingIssue.updateMany).toHaveBeenCalledWith({
+      data: { resolvedAt: expect.any(Date), status: "RESOLVED" },
+      where: { dedupeKey: "duplicate_active:sub_new", status: "OPEN" },
+    });
+  });
+
   it("surfaces a live duplicate even when the worker sees it first", async () => {
     const tx = createTx();
     tx.billingSubscription.findFirst.mockResolvedValue({ externalStatus: "active" });

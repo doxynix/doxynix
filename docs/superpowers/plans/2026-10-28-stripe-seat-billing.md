@@ -939,8 +939,9 @@ F18 снят, N8/N1/F15/F17 закрыты в шестом проходе — с
 
 1. **`DUPLICATE_ACTIVE_SUBSCRIPTION` закрывается только при `ownsAccess && ACTIVE`.** Takeover в
    `PENDING`/`GRACE`/`SUSPENDED` оставляет CRITICAL issue открытым, хотя подписка уже current.
-   Минимальный фикс: закрывать `duplicate_active:<sub>` при `ownsAccess` независимо от
-   `accessState` (плюс `subscription_review` оставить как есть).
+   **Закрыто (`52a6f667`):** `duplicate_active:<sub>` закрывается при любом `ownsAccess`,
+   `subscription_review` по-прежнему только при `ACTIVE`. Тест: takeover → `PENDING` закрывает
+   issue.
 2. **Legacy-дубли без issue.** Зеркала, созданные до этого прохода и уже синхронные со Stripe,
    не репейрятся (`differs=false`, `needsReview=false`, takeover=false), поэтому issue для них
    не появится. Нужен разовый backfill: `isCurrent = null` + живой `externalStatus` без

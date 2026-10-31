@@ -291,8 +291,11 @@ export async function projectSubscription(
         status: "OPEN",
       },
     });
+  }
 
-    // The duplicate became the live subscription; the reconciliation issue for it is stale.
+  // The duplicate is now the live subscription; whichever state it lands in (PENDING, GRACE,
+  // SUSPENDED), the issue that reported it outside the current slot is stale.
+  if (ownsAccess) {
     await tx.billingIssue.updateMany({
       data: { resolvedAt: new Date(), status: "RESOLVED" },
       where: { dedupeKey: `duplicate_active:${subscription.id}`, status: "OPEN" },
