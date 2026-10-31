@@ -30,7 +30,7 @@ export const dailyDatabaseMaintenance = schedules.task({
         where: { createdAt: { lt: date14DaysAgo } },
       });
 
-      // The payload holds PII; the row and its stripeEventId stay forever for deduplication.
+      // The payload holds PII; the row and its externalEventId stay forever for deduplication.
       const purgedBillingPayloads = await purgeBillingEventPayloads(prisma, now);
 
       appLogger.info({
