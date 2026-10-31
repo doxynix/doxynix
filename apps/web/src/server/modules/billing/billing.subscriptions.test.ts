@@ -204,6 +204,63 @@ describe("projectSubscription", () => {
     });
   });
 
+  it("writes the grace deadline into the entitlement so grace actually grants access", async () => {
+    const tx = createTx();
+    const graceEndsAt = new Date(NOW.getTime() + 86_400_000);
+    tx.billingSubscription.findUnique.mockResolvedValue({
+      activatedAt: OLD_ACTIVATION,
+      graceEndsAt,
+      stripeStatus: "past_due",
+    });
+    tx.workspaceEntitlement.findUnique.mockResolvedValue({
+      accessState: "ACTIVE",
+      sourceSubscriptionId: "bs_old",
+    });
+
+    const result = await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription({ status: "past_due" }) as never,
+    });
+
+    expect(result.accessState).toBe("GRACE");
+    expect(callArg(tx.workspaceEntitlement.upsert)).toMatchObject({
+      update: { graceEndsAt, planCode: "PRO" },
+    });
+  });
+
+  it("heals a PRO row whose limits are still the HOBBY ones", async () => {
+    const tx = createTx();
+    tx.billingSubscription.findUnique.mockResolvedValue({
+      activatedAt: NOW,
+      graceEndsAt: null,
+      stripeStatus: "active",
+    });
+    tx.workspaceEntitlement.findUnique.mockResolvedValue({
+      accessState: "ACTIVE",
+      aiTokensPerMonth: 1_000_000,
+      analysesPerMonth: 20,
+      autoResync: false,
+      historyDays: 7,
+      planCode: "PRO",
+      privateReposAllowed: false,
+      prReviews: false,
+      reposLimit: null,
+      sourceSubscriptionId: "bs_old",
+    });
+
+    await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription() as never,
+    });
+
+    // The plan code did not change, but the limits did not match PRO: the row must be repaired.
+    expect(callArg(tx.workspaceEntitlement.upsert)).toMatchObject({
+      update: { analysesPerMonth: 500, privateReposAllowed: true, prReviews: true },
+    });
+  });
+
   it("falls back to HOBBY features when the subscription is terminal", async () => {
     const tx = createTx();
     tx.billingSubscription.findUnique.mockResolvedValue({
@@ -229,6 +286,29 @@ describe("projectSubscription", () => {
         prReviews: false,
       },
     });
+  });
+
+  it("activates on the first projection instead of losing activatedAt before the row exists", async () => {
+    const tx = createTx();
+    const paidAt = new Date("2026-10-01T00:00:00.000Z");
+    // `billingSubscription.findUnique` returns null: this is the very first event for the id.
+
+    const result = await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription({
+        latest_invoice: {
+          id: "in_1",
+          status: "paid",
+          status_transitions: { paid_at: Math.floor(paidAt.getTime() / 1000) },
+        },
+      }) as never,
+    });
+
+    expect(result.accessState).toBe("ACTIVE");
+    expect(
+      (callArg(tx.billingSubscription.upsert).create as Record<string, unknown>).activatedAt,
+    ).toEqual(paidAt);
   });
 
   it("turns a revived terminal subscription into REVIEW", async () => {
@@ -305,7 +385,8 @@ describe("projectSubscription", () => {
     const mirror = callArg(tx.billingSubscription.upsert);
 
     expect(mirror.update).not.toHaveProperty("activatedAt");
-    expect(mirror.create).toMatchObject({ activatedAt: null });
+    // The create branch is not used here, but it must carry the known activation, not wipe it.
+    expect(mirror.create).toMatchObject({ activatedAt: OLD_ACTIVATION });
   });
 
   it("stores an unknown status verbatim and reviews the entitlement", async () => {

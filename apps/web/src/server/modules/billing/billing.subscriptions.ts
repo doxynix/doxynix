@@ -88,7 +88,19 @@ export async function projectSubscription(
   });
 
   const entitlement = await tx.workspaceEntitlement.findUnique({
-    select: { accessState: true, activatedAt: true, planCode: true, sourceSubscriptionId: true },
+    select: {
+      accessState: true,
+      activatedAt: true,
+      aiTokensPerMonth: true,
+      analysesPerMonth: true,
+      autoResync: true,
+      historyDays: true,
+      planCode: true,
+      privateReposAllowed: true,
+      prReviews: true,
+      reposLimit: true,
+      sourceSubscriptionId: true,
+    },
     where: { workspaceId: ownership.workspaceId },
   });
 
@@ -102,14 +114,14 @@ export async function projectSubscription(
     paidAt != null &&
     (subscription.status === "active" || subscription.status === "trialing")
   ) {
-    const activated = await markSubscriptionActivated(tx, {
+    // Records activation on an existing mirror; on the very first projection the row does not
+    // exist yet, so the value is carried into the `create` below instead of being lost.
+    await markSubscriptionActivated(tx, {
       activatedAt: paidAt,
       stripeSubscriptionId: subscription.id,
     });
 
-    if (activated) {
-      activatedAt = paidAt;
-    }
+    activatedAt = paidAt;
   }
 
   // A personal HOBBY workspace is ACTIVE without a subscription; for transitions that counts as
@@ -146,6 +158,18 @@ export async function projectSubscription(
   // Paid features and quotas live in the projection, never in Stripe: flipping `planCode` without
   // them would sell PRO at HOBBY limits. Terminal subscriptions fall back to the HOBBY row.
   const plan = planEntitlements(planCode);
+  // A row written before the plan carried limits (or by `handleUnownedEvent`) must heal even when
+  // the plan code itself did not change.
+  const planStale =
+    entitlement != null &&
+    (entitlement.aiTokensPerMonth !== plan.aiTokensPerMonth ||
+      entitlement.analysesPerMonth !== plan.analysesPerMonth ||
+      entitlement.autoResync !== plan.autoResync ||
+      entitlement.historyDays !== plan.historyDays ||
+      entitlement.privateReposAllowed !== plan.privateReposAllowed ||
+      entitlement.prReviews !== plan.prReviews ||
+      entitlement.reposLimit !== plan.reposLimit);
+  const writePlan = planChanged || planStale;
   const requestedSeats = item.quantity ?? 1;
   const activeMembers = await tx.workspaceMember.count({
     where: { workspaceId: ownership.workspaceId },
@@ -191,7 +215,7 @@ export async function projectSubscription(
 
   const mirror = await tx.billingSubscription.upsert({
     create: {
-      activatedAt: null,
+      activatedAt,
       billingCustomerId: ownership.billingCustomerId,
       cancelAt,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
@@ -239,6 +263,7 @@ export async function projectSubscription(
       accessState: decision.accessState,
       activatedAt:
         decision.accessState === "ACTIVE" ? (entitlement?.activatedAt ?? activatedAt) : null,
+      graceEndsAt: decision.accessState === "GRACE" ? (existing?.graceEndsAt ?? null) : null,
       planCode,
       revision: BigInt(1),
       seatLimit,
@@ -252,13 +277,16 @@ export async function projectSubscription(
         decision.accessState === "ACTIVE" && entitlement?.activatedAt == null
           ? activatedAt
           : undefined,
+      // The reader (`hasAccess`) requires a live deadline for GRACE; without this column the whole
+      // grace window is dead and a paying customer is blocked on the first failed payment.
+      graceEndsAt: decision.accessState === "GRACE" ? (existing?.graceEndsAt ?? null) : null,
       planCode,
       revision: accessStateChanged ? { increment: 1 } : undefined,
       seatLimit,
       sourceSubscriptionId: mirror.id,
-      // Limits are only rewritten on a plan change, so a manual adjustment survives ordinary
-      // renewal events instead of being silently reset every month.
-      ...(planChanged ? plan : {}),
+      // Limits are only rewritten on a plan change or when the row is stale, so a manual
+      // adjustment survives ordinary renewal events instead of being reset every month.
+      ...(writePlan ? plan : {}),
     },
     where: { workspaceId: ownership.workspaceId },
   });
