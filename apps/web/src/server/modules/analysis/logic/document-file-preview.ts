@@ -22,7 +22,7 @@ import { applyDocumentSurgicalEdit } from "./document-surgical-edit";
 // Lives outside the file-actions service on purpose: it needs the AI tool profile, which reaches the tRPC server
 export async function runDocumentFilePreview(
   userId: string,
-  input: FileActionRequest,
+  input: FileActionRequest & { workspaceId: string },
 ): Promise<DocumentFilePreviewResult> {
   const rawContent = input.content.trim();
 
@@ -77,7 +77,13 @@ export async function runDocumentFilePreview(
     prompt: userPrompt,
     system: systemPrompt,
     taskType: "creative",
-    tools: buildRepositoryToolProfile("file_action", userId, input.repoId, input.branch),
+    tools: buildRepositoryToolProfile(
+      "file_action",
+      userId,
+      input.workspaceId,
+      input.repoId,
+      input.branch,
+    ),
   });
 
   let documentedCode = input.content;

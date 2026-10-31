@@ -165,6 +165,7 @@ export const analyzeRepoTask = task({
         analysisId,
         language,
         userId,
+        workspaceId,
         repo.id,
         selectedBranch ?? repo.defaultBranch,
       );

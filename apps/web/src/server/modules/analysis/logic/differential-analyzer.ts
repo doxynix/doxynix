@@ -34,6 +34,7 @@ type PRAnalysisMetadata = {
   branch: string;
   repoId: string;
   userId: string;
+  workspaceId: string;
 };
 
 export class DifferentialAnalyzer {
@@ -223,6 +224,7 @@ export class DifferentialAnalyzer {
         tools: buildRepositoryToolProfile(
           "pr_review",
           metadata.userId,
+          metadata.workspaceId,
           metadata.repoId,
           metadata.branch,
         ),

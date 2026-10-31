@@ -31,9 +31,10 @@ vi.mock("@/server/utils/optimizers", () => ({ CodeOptimizer: mocks.CodeOptimizer
 import { buildRepositoryToolProfile, type RepositoryToolProfile } from "./ai-tools";
 
 const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
+const WORKSPACE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a6e";
 
 function buildTools(profile: RepositoryToolProfile) {
-  return buildRepositoryToolProfile(profile, USER_ID, "repo-uuid", "main");
+  return buildRepositoryToolProfile(profile, USER_ID, WORKSPACE_ID, "repo-uuid", "main");
 }
 
 type ToolValue = {
@@ -76,10 +77,10 @@ describe("ai-tools profile composition", () => {
   }
 
   it("throws for unrecognized profile key", () => {
-    // @ts-expect-error testing runtime invalid profile
-    expect(() => buildRepositoryToolProfile("invalid_profile", 1, "repo-uuid", "main")).toThrow(
-      "is not iterable",
-    );
+    expect(() =>
+      // @ts-expect-error testing runtime invalid profile
+      buildRepositoryToolProfile("invalid_profile", 1, WORKSPACE_ID, "repo-uuid", "main"),
+    ).toThrow("is not iterable");
   });
 });
 
@@ -111,6 +112,23 @@ describe("ai-tools execution logic", () => {
       const rawResult = (await tool.execute({ path: "src/a.ts", skeletonize: false })) as any;
       expect(rawResult.content).toBe("clean:const x = 1;");
       expect(rawResult.skeletonized).toBe(false);
+    });
+
+    it("passes the user's workspace scope through to getFileContent", async () => {
+      mocks.githubBrowseService.getFileContent.mockResolvedValue({ content: "const x = 1;" });
+      const tool = getTool(buildTools("architect"), "readFile");
+
+      await tool.execute({ path: "src/a.ts", skeletonize: false });
+
+      expect(mocks.githubBrowseService.getFileContent).toHaveBeenCalledWith({
+        branch: "main",
+        db: expect.anything(),
+        path: "src/a.ts",
+        prisma: expect.anything(),
+        repoId: "repo-uuid",
+        userId: USER_ID,
+        workspaceId: WORKSPACE_ID,
+      });
     });
 
     it("readMultipleFiles isolates errors per file without failing the whole batch", async () => {

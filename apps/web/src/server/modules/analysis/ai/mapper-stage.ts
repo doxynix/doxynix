@@ -20,6 +20,7 @@ export async function executeMapperPhase(
   evidence: RepositoryEvidence,
   analysisId: string,
   userId: string,
+  workspaceId: string,
   repoId: string,
   branch: string,
 ): Promise<ProjectMap> {
@@ -44,7 +45,7 @@ export async function executeMapperPhase(
       },
       system: buildMapperSystemPrompt(),
       taskType: "reasoning",
-      tools: buildRepositoryToolProfile("mapper", userId, repoId, branch),
+      tools: buildRepositoryToolProfile("mapper", userId, workspaceId, repoId, branch),
     });
 
     const projectMap = normalizeProjectMapOutput(raw);

@@ -37,6 +37,7 @@ export async function runAiPipeline(
   analysisId: string,
   language: string,
   userId: string,
+  workspaceId: string,
   repoId: string,
   branch: string,
 ): Promise<AIResult> {
@@ -55,7 +56,16 @@ export async function runAiPipeline(
 
   taskLogger.info("Project Mapper: Scanning topology and module boundaries...");
   const projectMap = await llmLimiter.schedule({ id: `${analysisId}-mapper`, weight: 80_000 }, () =>
-    executeMapperPhase(validFiles, hardMetrics, evidence, analysisId, userId, repoId, branch),
+    executeMapperPhase(
+      validFiles,
+      hardMetrics,
+      evidence,
+      analysisId,
+      userId,
+      workspaceId,
+      repoId,
+      branch,
+    ),
   );
   taskLogger.success(`Project Mapper: Identified ${projectMap.modules.length} core modules`);
 
@@ -84,6 +94,7 @@ export async function runAiPipeline(
       language,
       repoId,
       userId,
+      workspaceId,
       branch,
     ),
   );

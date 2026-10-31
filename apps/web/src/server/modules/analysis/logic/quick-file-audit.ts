@@ -23,7 +23,7 @@ import {
 // Lives outside `analysis.utils` on purpose: it needs the AI tool profile, which reaches the tRPC server
 export async function runQuickFileAudit(
   userId: string,
-  input: FileActionInput,
+  input: FileActionInput & { workspaceId: string },
 ): Promise<QuickFileAuditResult> {
   const rawContent = input.content.trim();
 
@@ -78,7 +78,13 @@ export async function runQuickFileAudit(
     prompt: userPrompt,
     system: systemPrompt,
     taskType: "classification",
-    tools: buildRepositoryToolProfile("file_action", userId, input.repoId, input.branch),
+    tools: buildRepositoryToolProfile(
+      "file_action",
+      userId,
+      input.workspaceId,
+      input.repoId,
+      input.branch,
+    ),
   });
 
   return {

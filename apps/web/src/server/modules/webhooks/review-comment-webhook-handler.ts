@@ -31,5 +31,6 @@ export async function handleReviewCommentEvent(
     repoId: repo.id,
     repoName: payload.repository.name,
     userId: repo.createdByUserId,
+    workspaceId: repo.workspaceId,
   }));
 }

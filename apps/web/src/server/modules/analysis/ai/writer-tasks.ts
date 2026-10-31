@@ -113,6 +113,7 @@ type SimpleWriterArgs = [
   language: string,
   repoId: string,
   userId: string,
+  workspaceId: string,
   branch: string,
 ];
 
@@ -146,6 +147,7 @@ function runSimpleWriter(name: SimpleWriterName, args: SimpleWriterArgs): Promis
     language,
     repoId,
     userId,
+    workspaceId,
     branch,
   ] = args;
   const { buildSystemPrompt, buildUserPrompt, phase } = SIMPLE_WRITERS[name];
@@ -157,7 +159,7 @@ function runSimpleWriter(name: SimpleWriterName, args: SimpleWriterArgs): Promis
     prompt: buildUserPrompt(payload, engineeringDossierPayload, context, allowedPaths),
     promptChars: payload.length + engineeringDossierPayload.length + context.length,
     system: buildSystemPrompt(language),
-    tools: buildRepositoryToolProfile(phase, userId, repoId, branch),
+    tools: buildRepositoryToolProfile(phase, userId, workspaceId, repoId, branch),
   });
 }
 
@@ -181,6 +183,7 @@ export async function executeArchitectureWriter(
   language: string,
   repoId: string,
   userId: string,
+  workspaceId: string,
   branch: string,
 ): Promise<WriterResult> {
   return runWriterPrompt({
@@ -202,7 +205,7 @@ export async function executeArchitectureWriter(
       engineeringDossierPayload.length +
       context.length,
     system: buildArchitectureWriterSystemPrompt(language),
-    tools: buildRepositoryToolProfile("writer_architecture", userId, repoId, branch),
+    tools: buildRepositoryToolProfile("writer_architecture", userId, workspaceId, repoId, branch),
   });
 }
 

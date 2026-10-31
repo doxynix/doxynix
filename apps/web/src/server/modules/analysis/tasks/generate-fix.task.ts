@@ -65,14 +65,15 @@ export const generateFixTask = task({
             repoId: repo.id,
           });
           try {
-            const githubFile = await githubBrowseService.getFileContent(
+            const githubFile = await githubBrowseService.getFileContent({
+              branch: targetBranch,
+              db: prisma,
+              path: filePath,
               prisma,
-              prisma,
-              payload.userId,
-              repo.id,
-              filePath,
-              targetBranch,
-            );
+              repoId: repo.id,
+              userId: payload.userId,
+              workspaceId: payload.workspaceId,
+            });
             fileContents[filePath] = githubFile.content;
           } catch (fetchError) {
             appLogger.error({

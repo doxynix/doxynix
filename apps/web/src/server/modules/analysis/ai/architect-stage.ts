@@ -26,6 +26,7 @@ export async function executeArchitectPhase(
   language: string,
   repoId: string,
   userId: string,
+  workspaceId: string,
   branch: string,
 ): Promise<AIResult> {
   taskLogger.info("Architect: Building final intelligence report...");
@@ -61,7 +62,7 @@ export async function executeArchitectPhase(
       providerOptions: { google: { safetySettings: SAFETY_SETTINGS } },
       system: buildAnalysisSystemPrompt(language),
       taskType: "reasoning",
-      tools: buildRepositoryToolProfile("architect", userId, repoId, branch),
+      tools: buildRepositoryToolProfile("architect", userId, workspaceId, repoId, branch),
     });
 
     const aiResult = normalizeAiGenerationOutput(raw);

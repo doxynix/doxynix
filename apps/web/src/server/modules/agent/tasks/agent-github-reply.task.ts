@@ -153,6 +153,7 @@ export const agentGithubReplyTask = task({
         tools: buildRepositoryToolProfile(
           "github_agent",
           payload.userId,
+          payload.workspaceId,
           payload.repoId,
           payload.branch,
         ),

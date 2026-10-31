@@ -9,4 +9,5 @@ export type GithubMentionReply = {
   repoId: string;
   repoName: string;
   userId: string;
+  workspaceId: string;
 };
