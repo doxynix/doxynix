@@ -6,7 +6,8 @@ import { DEFAULT_LOCALE } from "@/shared/config/locales";
 import type { DbClient } from "@/server/core/db";
 
 import { PORTAL_RETURN_PATHS, STRIPE_PROVIDER } from "./billing.constants";
-import { getStripeClient } from "./billing.stripe";
+import { stripeIdempotencyKey } from "./billing.operations";
+import { getStripeClient, stripeEnvironment } from "./billing.stripe";
 
 export type PortalReturnPath = (typeof PORTAL_RETURN_PATHS)[number];
 
@@ -25,6 +26,7 @@ function assertAllowedReturnUrl(returnUrl: string): void {
 
 export type PortalSessionInput = {
   db: DbClient;
+  requestId: string;
   returnUrl: string;
   workspaceId: string;
 };
@@ -46,10 +48,20 @@ export async function createPortalSession(input: PortalSessionInput): Promise<Po
 
   assertAllowedReturnUrl(input.returnUrl);
 
-  const session = await getStripeClient().billingPortal.sessions.create({
-    customer: customer.externalCustomerId,
-    return_url: input.returnUrl,
-  });
+  const session = await getStripeClient().billingPortal.sessions.create(
+    {
+      customer: customer.externalCustomerId,
+      return_url: input.returnUrl,
+    },
+    {
+      idempotencyKey: stripeIdempotencyKey({
+        environment: stripeEnvironment(),
+        operation: "portal",
+        requestId: input.requestId,
+        workspaceId: input.workspaceId,
+      }),
+    },
+  );
 
   // Returned once to the caller; never logged and never persisted.
   return { url: session.url };

@@ -59,6 +59,7 @@ export const billingRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       return createPortalSession({
         db: ctx.prisma,
+        requestId: input.requestId,
         returnUrl: portalReturnUrl(input.returnPath ?? "/dashboard/settings/members"),
         workspaceId: ctx.workspace.id,
       });
@@ -91,13 +92,19 @@ export const billingRouter = createTRPCRouter({
     .input(ReplayEventSchema)
     .output(ReplayEventResultSchema)
     .mutation(async ({ ctx, input }) => {
-      return replayBillingEvent(ctx.prisma, input);
+      return replayBillingEvent(ctx.prisma, {
+        ...input,
+        actorUserId: ctx.session.user.id,
+      });
     }),
 
   resolveIssue: adminProcedure
     .input(ResolveIssueSchema)
     .output(ResolveIssueResultSchema)
     .mutation(async ({ ctx, input }) => {
-      return resolveBillingIssue(ctx.prisma, input);
+      return resolveBillingIssue(ctx.prisma, {
+        ...input,
+        actorUserId: ctx.session.user.id,
+      });
     }),
 });

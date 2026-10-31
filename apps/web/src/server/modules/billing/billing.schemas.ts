@@ -109,6 +109,7 @@ export const ChangeSeatsResultSchema = z.object({
 });
 
 export const CreatePortalSessionSchema = z.object({
+  requestId: z.uuid(),
   returnPath: z.enum(PORTAL_RETURN_PATHS).optional(),
 });
 

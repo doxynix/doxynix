@@ -19,7 +19,10 @@ const stripeMock = vi.hoisted(() => ({
   billingPortal: { sessions: { create: vi.fn() } },
 }));
 
-vi.mock("./billing.stripe", () => ({ getStripeClient: () => stripeMock }));
+vi.mock("./billing.stripe", () => ({
+  getStripeClient: () => stripeMock,
+  stripeEnvironment: () => "test",
+}));
 
 function createDb(customer: null | { externalCustomerId: string }) {
   return {
@@ -38,12 +41,20 @@ describe("createPortalSession", () => {
     const db = createDb({ externalCustomerId: "cus_workspace" });
     const returnUrl = portalReturnUrl("/dashboard/settings/members");
 
-    const result = await createPortalSession({ db, returnUrl, workspaceId: WORKSPACE_ID });
-
-    expect(stripeMock.billingPortal.sessions.create).toHaveBeenCalledWith({
-      customer: "cus_workspace",
-      return_url: `${APP_URL.replace(/\/+$/, "")}/${DEFAULT_LOCALE}/dashboard/settings/members`,
+    const result = await createPortalSession({
+      db,
+      requestId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5e",
+      returnUrl,
+      workspaceId: WORKSPACE_ID,
     });
+
+    expect(stripeMock.billingPortal.sessions.create).toHaveBeenCalledWith(
+      {
+        customer: "cus_workspace",
+        return_url: `${APP_URL.replace(/\/+$/, "")}/${DEFAULT_LOCALE}/dashboard/settings/members`,
+      },
+      { idempotencyKey: expect.stringContaining(":portal:") },
+    );
     expect(result).toEqual({ url: "https://billing.stripe.com/p/session/test" });
     expect(Object.keys(result)).toEqual(["url"]);
   });
@@ -54,6 +65,7 @@ describe("createPortalSession", () => {
     await expect(
       createPortalSession({
         db,
+        requestId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5e",
         returnUrl: portalReturnUrl("/dashboard/settings/members"),
         workspaceId: WORKSPACE_ID,
       }),
@@ -67,6 +79,7 @@ describe("createPortalSession", () => {
     await expect(
       createPortalSession({
         db,
+        requestId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5e",
         returnUrl: "https://evil.example.com/steal",
         workspaceId: WORKSPACE_ID,
       }),

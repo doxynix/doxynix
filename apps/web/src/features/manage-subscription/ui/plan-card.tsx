@@ -46,7 +46,7 @@ export function PlanCard({ canManage, entitlement, subscription }: Readonly<Prop
   const openPortal = () => {
     setErrorKey(null);
     portal.mutate(
-      { returnPath: "/dashboard/settings/billing" },
+      { requestId: crypto.randomUUID(), returnPath: "/dashboard/settings/billing" },
       { onError: (error) => setErrorKey(billingErrorKey(error)) },
     );
   };
