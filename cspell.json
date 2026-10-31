@@ -35,6 +35,7 @@
     "**/public/**",
     "**/.agents/**",
     "**/docs/superpowers/**",
+    "**/docs/runbooks/**",
     "**/messages/ja.json",
     "**/messages/ko.json",
     "skills-lock.json"

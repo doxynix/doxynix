@@ -60,6 +60,7 @@
     "test:coverage": "bun with-doppler \"cross-env TZ=UTC vitest run --coverage --config vitest.config.ts --no-file-parallelism\"",
     "test:e2e": "bun with-doppler \"playwright test\"",
     "test:int": "bun with-doppler \"bun scripts/with-test-db.ts bun x cross-env TZ=UTC vitest run --config vitest.integration.config.ts\"",
+    "test:stripe": "doppler run --config ${STRIPE_DOPPLER_CONFIG:-stripe_sandbox} -- sh -c 'TZ=UTC vitest run --config vitest.stripe.config.ts'",
     "test:stryker": "bun with-doppler \"stryker run vitest.stryker.config.ts\"",
     "test:unit": "bun with-doppler \"cross-env TZ=UTC vitest run src --config vitest.config.ts\"",
     "type-check": "bun check -b",
