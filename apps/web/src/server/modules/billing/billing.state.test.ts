@@ -102,6 +102,12 @@ const STATUS_CASES: Array<StatusCase> = [
     remote: { status: "incomplete_expired" },
   },
   {
+    current: "NO_SUBSCRIPTION",
+    expected: "CANCELED",
+    name: "the first subscription is already canceled",
+    remote: { activatedAt: null, previousStatus: null, status: "canceled" },
+  },
+  {
     current: "ACTIVE",
     expected: "REVIEW",
     name: "an unknown Stripe status",

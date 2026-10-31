@@ -901,6 +901,14 @@ F18 снят, N8/N1/F15/F17 закрыты в шестом проходе — с
   `dxnx_web` → `dxnx_web_test`).
 - **Побочно:** `with-test-db` больше не содержит regex inline — правило вынесено в
   side-effect-free модуль, чтобы его можно было тестировать.
+- **Транзишн-таблица:** `NO_SUBSCRIPTION → CANCELED` теперь разрешён. Интеграционный сценарий
+  `subscription-deleted → updated` на личном workspace (entitlement `ACTIVE`, source = null →
+  текущее состояние `NO_SUBSCRIPTION`) иначе парковал доступ в `REVIEW` и создавал CRITICAL
+  `SUBSCRIPTION_REVIEW`; второе событие это лечило, но issue оставался. Оба состояния без
+  доступа, поэтому переход безопасен.
+- **Прогоны после этого прохода:** unit 257 файлов / 2515 тестов; таргетно
+  `billing-grace`, `billing-idempotency`, `billing-ledger`, `billing-schema`,
+  `billing-webhooks`, `entitlements` (интеграция на локальной `dxnx_web_test`).
 
 ## Self-check
 

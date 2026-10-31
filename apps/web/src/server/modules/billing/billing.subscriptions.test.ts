@@ -471,10 +471,10 @@ describe("projectSubscription", () => {
     expect(callArg(tx.workspaceEntitlement.upsert)).toBeDefined();
   });
 
-  it("mirrors a terminal subscription without creating access", async () => {
+  it("cancels access when the only subscription is terminal", async () => {
     const tx = createTx();
     tx.workspaceEntitlement.findUnique.mockResolvedValue({
-      accessState: "NO_SUBSCRIPTION",
+      accessState: "ACTIVE",
       sourceSubscriptionId: null,
     });
 
@@ -484,12 +484,37 @@ describe("projectSubscription", () => {
       subscription: subscription({ status: "canceled" }) as never,
     });
 
-    expect(result.ownsAccess).toBe(false);
-    expect(result.accessState).toBe("NO_SUBSCRIPTION");
-    expect(tx.workspaceEntitlement.upsert).not.toHaveBeenCalled();
+    expect(result.ownsAccess).toBe(true);
+    expect(callArg(tx.workspaceEntitlement.upsert)).toMatchObject({
+      update: { accessState: "CANCELED", planCode: "HOBBY" },
+    });
     expect(callArg(tx.billingSubscription.upsert)).toMatchObject({
       create: { isCurrent: null, needsReview: false },
     });
+  });
+
+  it("does not let an older terminal subscription free a terminal current slot", async () => {
+    const tx = createTx();
+    tx.billingSubscription.findUnique.mockResolvedValue({
+      activatedAt: OLD_ACTIVATION,
+      externalStatus: "canceled",
+      graceEndsAt: null,
+      id: "bs_history",
+      isCurrent: null,
+      needsReview: false,
+      reviewReason: null,
+    });
+    tx.billingSubscription.findFirst.mockResolvedValue({ externalStatus: "canceled" });
+
+    const result = await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      subscription: subscription({ id: "sub_history", status: "canceled" }) as never,
+    });
+
+    expect(result.ownsAccess).toBe(false);
+    expect(tx.workspaceEntitlement.upsert).not.toHaveBeenCalled();
+    expect(tx.billingSubscription.updateMany).not.toHaveBeenCalled();
   });
 
   it("never overwrites activatedAt", async () => {

@@ -19,7 +19,9 @@ const ALLOWED_TRANSITIONS: Record<AccessState, ReadonlySet<AccessState>> = {
   ACTIVE: new Set(["ACTIVE", "GRACE", "SUSPENDED", "CANCELED", "REVIEW"]),
   CANCELED: new Set(["CANCELED", "PENDING", "ACTIVE", "REVIEW"]),
   GRACE: new Set(["ACTIVE", "GRACE", "SUSPENDED", "CANCELED", "REVIEW"]),
-  NO_SUBSCRIPTION: new Set(["NO_SUBSCRIPTION", "PENDING", "ACTIVE", "REVIEW"]),
+  // A personal workspace starts at NO_SUBSCRIPTION; a late `subscription.deleted` for the first
+  // attempt must land on CANCELED instead of parking access in REVIEW.
+  NO_SUBSCRIPTION: new Set(["NO_SUBSCRIPTION", "PENDING", "ACTIVE", "CANCELED", "REVIEW"]),
   PENDING: new Set(["ACTIVE", "CANCELED", "PENDING", "REVIEW", "SUSPENDED"]),
   REVIEW: new Set(["ACTIVE", "CANCELED", "GRACE", "PENDING", "REVIEW", "SUSPENDED"]),
   SUSPENDED: new Set(["ACTIVE", "CANCELED", "REVIEW", "SUSPENDED"]),

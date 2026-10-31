@@ -128,11 +128,13 @@ export async function projectSubscription(
 
   // Only the subscription that already holds access may rewrite it. A late or replayed event for
   // a historical id updates its own mirror and nothing else: otherwise it can downgrade the live
-  // plan or take the current slot from the subscription the entitlement points at.
+  // plan or take the current slot from the subscription the entitlement points at. A terminal
+  // current row is released by its own event, so only a live subscription may replace it.
   const ownsAccess =
     existing?.isCurrent === true ||
     (existing != null && entitlement?.sourceSubscriptionId === existing.id) ||
-    (!terminal && (otherCurrent == null || isTerminalStatus(otherCurrent.externalStatus)));
+    otherCurrent == null ||
+    (!terminal && isTerminalStatus(otherCurrent.externalStatus));
 
   // Lost `invoice.paid` must not leave a paying customer in PENDING for a month: a paid latest
   // invoice on an active subscription is proof enough, and activation stays idempotent.
