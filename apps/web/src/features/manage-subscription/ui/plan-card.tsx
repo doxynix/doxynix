@@ -7,10 +7,25 @@ import { formatShortDate } from "@/shared/lib/date-utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
+import type { BillingEntitlement, BillingSubscription } from "../model/billing.types";
 import { billingErrorKey } from "../model/billing-errors";
-import type { BillingEntitlement, BillingSubscription } from "../model/types";
 import { useSubscriptionActions } from "../model/use-subscription-actions";
 import { BillingStateBadge } from "./billing-state-badge";
+
+type PlanCode = BillingEntitlement["planCode"];
+
+// TEAM has no copy yet, so it keeps the raw code in the label and reuses the paid description.
+const PLAN_COPY: Record<
+  PlanCode,
+  {
+    description: "billing_plan_hobby_desc" | "billing_plan_pro_desc";
+    label: "billing_plan_hobby" | "billing_plan_pro" | null;
+  }
+> = {
+  HOBBY: { description: "billing_plan_hobby_desc", label: "billing_plan_hobby" },
+  PRO: { description: "billing_plan_pro_desc", label: "billing_plan_pro" },
+  TEAM: { description: "billing_plan_pro_desc", label: null },
+};
 
 type Props = {
   canManage: boolean;
@@ -26,6 +41,7 @@ export function PlanCard({ canManage, entitlement, subscription }: Readonly<Prop
 
   const isHobby = entitlement.planCode === "HOBBY";
   const canUpgrade = isHobby || subscription == null;
+  const planCopy = PLAN_COPY[entitlement.planCode];
   const pending = checkout.isPending || portal.isPending;
 
   const startCheckout = () => {
@@ -55,21 +71,13 @@ export function PlanCard({ canManage, entitlement, subscription }: Readonly<Prop
     <Card>
       <CardHeader>
         <CardTitle>{t("billing_plan_title")}</CardTitle>
-        <CardDescription>
-          {entitlement.planCode === "HOBBY"
-            ? t("billing_plan_hobby_desc")
-            : t("billing_plan_pro_desc")}
-        </CardDescription>
+        <CardDescription>{t(planCopy.description)}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">
           <span className="text-muted-foreground text-sm">{t("billing_plan_current")}</span>
           <span className="font-semibold">
-            {entitlement.planCode === "HOBBY"
-              ? t("billing_plan_hobby")
-              : entitlement.planCode === "PRO"
-                ? t("billing_plan_pro")
-                : entitlement.planCode}
+            {planCopy.label == null ? entitlement.planCode : t(planCopy.label)}
           </span>
         </div>
         <div className="flex items-center justify-between gap-3">

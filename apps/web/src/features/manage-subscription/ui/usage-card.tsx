@@ -5,17 +5,28 @@ import { useLocale, useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Progress } from "@/shared/ui/core/progress";
 
-import type { BillingEntitlement } from "../model/types";
+import type { BillingEntitlement } from "../model/billing.types";
 
 type Props = {
   entitlement: BillingEntitlement;
 };
 
-function compact(value: number, locale: string): string {
-  return new Intl.NumberFormat(locale, {
-    maximumFractionDigits: 1,
-    notation: "compact",
-  }).format(value);
+// `Intl.NumberFormat` is the only correct tool here; es-toolkit's `compact` filters falsy array
+// items, it does not format numbers. Formatters are cached because each instance is expensive.
+const compactFormatters = new Map<string, Intl.NumberFormat>();
+
+function formatCompactNumber(value: number, locale: string): string {
+  let formatter = compactFormatters.get(locale);
+
+  if (formatter == null) {
+    formatter = new Intl.NumberFormat(locale, {
+      maximumFractionDigits: 1,
+      notation: "compact",
+    });
+    compactFormatters.set(locale, formatter);
+  }
+
+  return formatter.format(value);
 }
 
 function UsageRow({
@@ -27,7 +38,9 @@ function UsageRow({
   const locale = useLocale();
 
   const value =
-    limit == null ? compact(used, locale) : `${compact(used, locale)} / ${compact(limit, locale)}`;
+    limit == null
+      ? formatCompactNumber(used, locale)
+      : `${formatCompactNumber(used, locale)} / ${formatCompactNumber(limit, locale)}`;
   const percent = limit == null || limit === 0 ? 0 : Math.min(100, (used / limit) * 100);
 
   return (

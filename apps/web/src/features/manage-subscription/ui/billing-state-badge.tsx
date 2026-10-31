@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { AppBadge } from "@/shared/ui/core/badge";
 
-import type { BillingAccessState } from "../model/types";
+import type { BillingAccessState } from "../model/billing.types";
 
 const STATE_VARIANT: Record<
   BillingAccessState,

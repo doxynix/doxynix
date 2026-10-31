@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { formatShortDate } from "@/shared/lib/date-utils";
 import { Alert, AlertDescription } from "@/shared/ui/core/alert";
 
-import type { BillingAccessState } from "../model/types";
+import type { BillingAccessState } from "../model/billing.types";
 
 type Props = {
   accessState: BillingAccessState;
