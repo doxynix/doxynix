@@ -16,7 +16,7 @@
  *
  * Usage: bun scripts/with-test-db.ts <command> [args…]
  */
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 
 // Anchored on purpose: a bare `includes("test")` would wave through `latest_prod`, which does
 // contain those letters, and these tests TRUNCATE shared tables.
@@ -71,6 +71,28 @@ if (parsed.name === name) {
   console.warn(`using ${name} as given`);
 } else {
   console.warn(`redirecting ${parsed.name} → ${name}`);
+}
+
+// A run that was interrupted leaves rows behind, and the next suite then fails on state it did
+// not create. Reset the disposable database every time; TEST_DB_RESET=0 opts out for a faster
+// local loop when the previous run finished cleanly.
+if (process.env.TEST_DB_RESET !== "0") {
+  const reset = spawnSync(
+    "bun",
+    ["x", "prisma", "db", "push", "--force-reset", "--skip-generate"],
+    {
+      env: {
+        ...process.env,
+        DATABASE_URL: target.toString(),
+        DIRECT_URL: target.toString(),
+      },
+      stdio: "inherit",
+    },
+  );
+
+  if (reset.status !== 0) {
+    process.exit(reset.status ?? 1);
+  }
 }
 
 const child = spawn(command[0], command.slice(1), {

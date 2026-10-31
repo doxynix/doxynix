@@ -79,7 +79,7 @@ export const githubAppService = {
     }
 
     try {
-      const repos = await getMyRepos(prisma, userId);
+      const repos = await getMyRepos(prisma, userId, workspaceId);
       return {
         installations: installationList,
         isConnected: true,
@@ -122,10 +122,13 @@ export const githubAppService = {
       });
     }
 
-    const identifierMatch = /^github_install_([0-9a-f-]{36})_/.exec(validState.identifier);
+    const identifierMatch = /^github_install_([0-9a-f-]{36})_([0-9a-f-]{36})$/.exec(
+      validState.identifier,
+    );
     const workspaceId = identifierMatch?.[1];
+    const stateUserId = identifierMatch?.[2];
 
-    if (workspaceId == null) {
+    if (workspaceId == null || stateUserId !== userId) {
       throw new TRPCError({
         code: "FORBIDDEN",
         message: "Invalid, expired, or already used security state. Please try installing again.",
@@ -311,8 +314,6 @@ export const githubAppService = {
         const accountAvatar =
           account != null && "avatar_url" in account ? account.avatar_url : null;
         const repoSelection = inst.repository_selection.toUpperCase() as RepositorySelection;
-        const targetType = inst.target_type.toUpperCase() as InstallationTargetType;
-        const targetId = account != null && "id" in account ? BigInt(account.id) : BigInt(0);
 
         const shared = {
           accountAvatar,
@@ -337,16 +338,13 @@ export const githubAppService = {
         }
 
         if (isNew) {
-          await prisma.githubInstallation.create({
-            data: {
-              ...shared,
-              appId: inst.app_id,
-              id: instIdBigInt,
-              targetId,
-              targetType,
-              userId,
-              workspaceId,
-            },
+          // Installing from GitHub does not carry a workspace state, so the row must stay
+          // unclaimed until the user installs through /api/github/setup from a workspace.
+          appLogger.warn({
+            installationId: instIdBigInt.toString(),
+            msg: "Skipped GitHub installation sync: installation is not claimed by a workspace",
+            userId,
+            workspaceId,
           });
           continue;
         }

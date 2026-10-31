@@ -338,6 +338,13 @@ export const adminUserService = {
       assertNotLastAdmin({ activeAdminCount: await countActiveAdmins(db), isTargetAdmin: true });
     }
 
-    return persistUserUpdate(db, input.id, { role: input.role });
+    const updated = await persistUserUpdate(db, input.id, { role: input.role });
+
+    // The session snapshot carries the role; without revocation a demoted admin keeps ADMIN
+    // rights until the cookie expires. System client: the target's sessions are outside the
+    // actor's policy scope.
+    await revokeUserSessions(prisma, input.id);
+
+    return updated;
   },
 };

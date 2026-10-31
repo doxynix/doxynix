@@ -96,11 +96,15 @@ async function fetchOauthRepos(account: { accessToken: null | string; id: string
   }
 }
 
-export async function getMyRepos(prisma: DbClient, userId: string): Promise<RepoItemFields[]> {
+export async function getMyRepos(
+  prisma: DbClient,
+  userId: string,
+  workspaceId?: string,
+): Promise<RepoItemFields[]> {
   try {
     const [installations, oauthAccounts] = await Promise.all([
       prisma.githubInstallation.findMany({
-        where: { isSuspended: false, userId },
+        where: { isSuspended: false, userId, ...(workspaceId == null ? {} : { workspaceId }) },
       }),
       prisma.account.findMany({
         where: { accessToken: { not: null }, providerId: "github", userId },

@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import { adminUserService, assertNotActor, assertNotLastAdmin } from "./admin-user.service";
 
+vi.mock("@/server/utils/access-revocation", () => ({ revokeUserSessions: vi.fn() }));
+
 const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 const OTHER_ID = "018f0000-0000-7000-8000-0000000000b2";
 

@@ -38,17 +38,15 @@ async function handler(request: NextRequest) {
   };
 
   if (state == null) {
-    if (installationId == null) {
-      return finish("missing_params");
-    }
-
-    appLogger.info({
+    // A bare GitHub install has no workspace to claim into. Do not report success: the user has
+    // to start the install from a workspace so the state binds the installation to an owner.
+    appLogger.warn({
       installationId,
-      msg: "GitHub App installed, returning to the surface that started the install",
+      msg: "GitHub App installed without a workspace state; installation stays unclaimed",
       userId,
     });
 
-    return finish("success");
+    return finish("missing_params");
   }
 
   if (installationId == null) {
