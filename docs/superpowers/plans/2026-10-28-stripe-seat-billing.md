@@ -721,22 +721,26 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
 - [x] **F8/F9** — `invoice.paid` при `past_due` не сбрасывает grace; спор даёт один минус, `won` возвращает сумму. `d842e4b3`
 - [x] **F13** — `getFileContent` переведён на объектный аргумент, workspaceId проброшен во все вызовы. `03eaaacd`
 
-Второй проход (по находкам повторного ревью): N1 — синк сверяется со Stripe, а не с отстающим
-зеркалом; N2 — `SEAT_SYNC_FAILED` пишется системным клиентом (политика `BillingIssue` запрещает
-`create` всем); N3 — открытая сессия переиспользуется вместо блокировки на 24 часа; N4 —
-self-removal и удаление аккаунта синкают места; N5 — TEAM не понижается, лимиты перезаписываются
-только при смене плана, `assertPlanFeature` требует `hasAccess`; N6 — терминальные статусы спора
+Второй проход: N1 — синк сверяется со Stripe, а не с отстающим зеркалом; N2 — `SEAT_SYNC_FAILED`
+пишется системным клиентом (политика `BillingIssue` запрещает `create` всем); N3 — открытая сессия
+переиспользуется вместо блокировки на 24 часа; N4 — self-removal и удаление аккаунта синкают места;
+N5 — TEAM не понижается, `assertPlanFeature` требует `hasAccess`; N6 — терминальные статусы спора
 (`charge_refunded`, `prevented`, `warning_closed`), legacy-ключ и `won` без предшествующего open;
-N8 — GRACE с живым дедлайном снова может добавлять места (синк отложен до recovery); N9 —
-`CHECKOUT_IN_PROGRESS` и `OWNER_OF_ACTIVE_SUBSCRIPTION` замаплены в UI на всех 12 локалях.
-Осталось: ручная карточка мест конфликтует с автосинком (убрать или превратить в предоплату).
+N9 — `CHECKOUT_IN_PROGRESS` и `OWNER_OF_ACTIVE_SUBSCRIPTION` замаплены в UI на 12 локалях.
+
+Третий проход: **N10 (blocker)** — `graceEndsAt` пишется в entitlement, без этого GRACE не давал
+доступа вовсе; попутно **F12** — `activatedAt` больше не теряется на первой проекции; **N11** —
+reconciliation чинит зеркало до seat-синка; **N12** — создание Checkout сериализовано
+advisory-lock + pending-строкой; **N13** — места в GRACE не повышаются (§9.7); N5-остаток —
+лимиты лечатся при расхождении, а не только при смене плана. Покрыто integration-тестом
+`apps/web/src/tests/integration/billing-grace.test.ts`.
 
 Осталось (medium, до запуска не блокирует):
-F10 (issue на REVIEW + reconciliation entitlement), F11 (`concurrency` у `processStripeEvent`),
-F12 (активация при первом `create`), F14 (атомарная квота), F15 (cache-hit не тратит квоту),
-F17 (tax preflight перед Checkout), F18 (аудит админ-действий), F19 (idempotency портала).
-F16 — `cannot-verify` (семантика `cachedInputTokens` у Gemini). Плюс UI-предупреждение о
-списании при добавлении участника: теперь место оплачивается автоматически.
+N7 (agent chat без entitlement-гейта и метеринга), ручная `SeatsCard` конфликтует с автосинком
+(убрать или превратить в предоплату), F10 (issue на REVIEW), F11 (`concurrency` у
+`processStripeEvent`), F14 (атомарная квота), F15 (cache-hit не тратит квоту), F17 (tax preflight
+перед Checkout), F18 (аудит админ-действий), F19 (idempotency портала).
+F16 — `cannot-verify` (семантика `cachedInputTokens` у Gemini).
 
 ---
 
