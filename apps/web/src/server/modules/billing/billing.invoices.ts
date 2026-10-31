@@ -67,12 +67,8 @@ async function applyInvoicePaid(tx: DbClient, input: InvoiceEventInput): Promise
     stripeSubscriptionId: subscriptionId,
   });
 
-  // Recovery: a paid invoice plus a canonical active subscription clears the dunning window.
-  await tx.billingSubscription.updateMany({
-    data: { graceEndsAt: null, needsAction: null, pastDueStartedAt: null },
-    where: { stripeSubscriptionId: subscriptionId, workspaceId: input.ownership.workspaceId },
-  });
-
+  // Recovery is decided by the canonical subscription, not by an invoice: a paid invoice for an
+  // older period while the subscription is still `past_due` must keep the running grace window.
   await recordTaxCollection(tx, {
     invoice: input.invoice,
     workspaceId: input.ownership.workspaceId,

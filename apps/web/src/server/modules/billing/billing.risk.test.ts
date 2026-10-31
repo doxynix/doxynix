@@ -229,7 +229,7 @@ describe("applyRiskEvent", () => {
       ownership: OWNERSHIP,
     });
 
-    expect(fake.ledger.get("DISPUTE_OPENED:dp_1:needs_response")?.amount).toBe(BigInt(-1900));
+    expect(fake.ledger.get("DISPUTE_OPENED:dp_1:open")?.amount).toBe(BigInt(-1900));
     expect(fake.issues).toHaveBeenCalledWith(
       expect.objectContaining({
         data: [expect.objectContaining({ kind: "DISPUTE_OPENED", severity: "CRITICAL" })],
@@ -253,9 +253,27 @@ describe("applyRiskEvent", () => {
       ownership: OWNERSHIP,
     });
 
-    expect(fake.ledger.has("DISPUTE_WON:dp_1:won")).toBe(true);
-    expect(fake.ledger.has("DISPUTE_LOST:dp_1:lost")).toBe(true);
+    expect(fake.ledger.get("DISPUTE_WON:dp_1:won")?.amount).toBe(BigInt(1900));
+    expect(fake.ledger.get("DISPUTE_LOST:dp_1:lost")?.amount).toBe(BigInt(0));
     expect(fake.issues).not.toHaveBeenCalled();
+  });
+
+  it("holds the disputed amount once across intermediate dispute statuses", async () => {
+    const fake = createFakeTx();
+
+    for (const status of ["needs_response", "under_review", "warning_under_review"]) {
+      await applyRiskEvent(fake.tx, {
+        billingEventId: "be_1",
+        canonical: { dispute: dispute({ status }) as never, kind: "dispute" },
+        links: LINKS,
+        ownership: OWNERSHIP,
+      });
+    }
+
+    expect(fake.ledger.size).toBe(1);
+    const total = [...fake.ledger.values()].reduce((sum, row) => sum + row.amount, BigInt(0));
+
+    expect(total).toBe(BigInt(-1900));
   });
 
   it("raises a critical issue for an early fraud warning without a ledger entry", async () => {

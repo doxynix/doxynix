@@ -72,6 +72,7 @@ function createFakeTx(initial: Partial<Mirror> = {}) {
   const ledger = new Map<string, LedgerRow>();
   const entitlementUpdates: Array<Record<string, unknown>> = [];
   const mirrorUpdates: Array<Record<string, unknown>> = [];
+  const upsertUpdates: Array<Record<string, unknown>> = [];
 
   const tx = {
     billingIssue: {
@@ -122,11 +123,20 @@ function createFakeTx(initial: Partial<Mirror> = {}) {
           return { count: 1 };
         },
       ),
-      upsert: vi.fn(async ({ create }: { create: Record<string, unknown> }) => {
-        mirror.stripeStatus = create.stripeStatus as string;
+      upsert: vi.fn(
+        async ({
+          create,
+          update,
+        }: {
+          create: Record<string, unknown>;
+          update: Record<string, unknown>;
+        }) => {
+          upsertUpdates.push(update);
+          mirror.stripeStatus = create.stripeStatus as string;
 
-        return { id: "bs_1" };
-      }),
+          return { id: "bs_1" };
+        },
+      ),
     },
     workspaceEntitlement: {
       findUnique: vi.fn(async () => ({
@@ -148,6 +158,7 @@ function createFakeTx(initial: Partial<Mirror> = {}) {
     mirror,
     mirrorUpdates,
     tx: tx as unknown as DbClient,
+    upsertUpdates,
   };
 }
 
@@ -211,12 +222,29 @@ describe("invoice.paid", () => {
 
     await applyInvoiceEvent(fake.tx, paidInput({ invoice: invoice({ id: "in_recovery" }) }));
 
-    expect(fake.mirrorUpdates).toContainEqual({
+    expect(fake.upsertUpdates.at(-1)).toMatchObject({
       graceEndsAt: null,
       needsAction: null,
       pastDueStartedAt: null,
     });
     expect(fake.entitlementUpdates.at(-1)).toMatchObject({ accessState: "ACTIVE" });
+  });
+
+  it("keeps the running grace window when the canonical subscription is still past_due", async () => {
+    const graceEndsAt = new Date("2026-11-01T00:00:00.000Z");
+    const fake = createFakeTx({ graceEndsAt, pastDueStartedAt: NOW, stripeStatus: "past_due" });
+
+    await applyInvoiceEvent(
+      fake.tx,
+      paidInput({
+        invoice: invoice({ id: "in_old" }),
+        subscription: { ...subscription(), status: "past_due" },
+      }),
+    );
+
+    expect(fake.mirrorUpdates.some((row) => "graceEndsAt" in row)).toBe(false);
+    expect(fake.upsertUpdates.at(-1)).not.toMatchObject({ graceEndsAt: null });
+    expect(fake.mirror.graceEndsAt).toEqual(graceEndsAt);
   });
 
   it("only writes the ledger when the invoice is not subscription-backed", async () => {

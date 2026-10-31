@@ -217,6 +217,11 @@ export async function projectSubscription(
       needsReview,
       quantity: item.quantity ?? 1,
       reviewReason: decision.reviewReason,
+      // Only an ACTIVE canonical subscription ends the dunning window; a paid invoice alone does
+      // not prove recovery while Stripe still reports `past_due`.
+      ...(decision.accessState === "ACTIVE"
+        ? { graceEndsAt: null, needsAction: null, pastDueStartedAt: null }
+        : {}),
       stripePriceId: item.price.id,
       stripeStatus: subscription.status,
       stripeSubscriptionItemId: item.id,

@@ -155,16 +155,25 @@ async function applyDispute(
   const status = dispute.status;
   const resolved = status === "won" || status === "lost";
 
+  // Cash view: opening holds the amount once (whatever intermediate status Stripe reports),
+  // winning returns it, losing keeps it. Nothing is ever written twice for the same dispute state.
+  const entry =
+    status === "won"
+      ? { amount: BigInt(dispute.amount), keyStatus: "won", kind: "DISPUTE_WON" }
+      : status === "lost"
+        ? { amount: BigInt(0), keyStatus: "lost", kind: "DISPUTE_LOST" }
+        : { amount: -BigInt(dispute.amount), keyStatus: "open", kind: "DISPUTE_OPENED" };
+
   await appendLedgerEntry(tx, {
-    amount: resolved ? BigInt(0) : -BigInt(dispute.amount),
+    amount: entry.amount,
     billingEventId: input.billingEventId,
     currency: dispute.currency,
     details: { status },
-    kind: resolved ? `DISPUTE_${status.toUpperCase()}` : "DISPUTE_OPENED",
+    kind: entry.kind,
     occurredAt: new Date(dispute.created * 1000),
     relatedInvoiceId: input.links.invoiceId,
     relatedSubscriptionId: input.links.subscriptionId,
-    status,
+    status: entry.keyStatus,
     stripeObjectId: dispute.id,
     workspaceId: input.ownership.workspaceId,
   });
