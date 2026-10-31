@@ -432,16 +432,16 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
 
 | # | Проверка | Ответ |
 |---|---|---|
-| 1 | Есть Workspace/Membership, owner-only billing и проверенные seat invariants? | no |
-| 2 | Все billing таблицы/constraints/indexes мигрированы, Event ID unique, ledger update/delete запрещены? | no |
-| 3 | Checkout/Portal работают в отдельном sandbox без `payment_method_types`, с pinned Endive и RAK? | no |
-| 4 | Raw-signature webhook, durable enqueue, duplicate/out-of-order/retry/DLQ tests проходят? | no |
-| 5 | State machine принимает любые remote statuses, но fail-closed при anomaly; grace/recovery проверены? | no |
-| 6 | Entitlement не ходит в Stripe на request path, отдаёт лимиты (seats/repos/analyses/tokens) и не имеет distributed-cache staleness? | no |
-| 7 | Upgrade/downgrade/quantity/proration и idempotency conflicts покрыты unit+sandbox tests? | no |
-| 8 | Refund/dispute/fraud, tax finalization и nightly reconciliation создают ledger/issues без нежелательных automatic rollbacks? | no |
-| 9 | Test clocks, failure injection, integration suite и `bun run validate` зелёные? | no |
-| 10 | В live account подтверждены Tax Settings, все обязательные registrations, tax code, Smart Retries, emails и portal configuration? | cannot-verify |
+| 1 | Есть Workspace/Membership, owner-only billing и проверенные seat invariants? | **yes** — WS-01…WS-06 закрыты, billing-мутации на `ownerProcedure`, seat invariants и last-owner покрыты integration-тестами. |
+| 2 | Все billing таблицы/constraints/indexes мигрированы, Event ID unique, ledger update/delete запрещены? | **yes** — миграции BILL-03/10A/16, `stripeEventId`/`entryKey` unique, update/delete ledger denied (BILL-19). |
+| 3 | Checkout/Portal работают в отдельном sandbox без `payment_method_types`, с pinned Endive и RAK? | **cannot-verify** — Checkout подтверждён живым sandbox-прогоном (сессия → вебхук → ACTIVE), Portal и RAK/Dashboard-конфигурация не проверялись. |
+| 4 | Raw-signature webhook, durable enqueue, duplicate/out-of-order/retry/DLQ tests проходят? | **yes** — BILL-07/18/19: raw body, unique Event ID, replay-ключи, DLQ и конкурентные доставки. |
+| 5 | State machine принимает любые remote statuses, но fail-closed при anomaly; grace/recovery проверены? | **yes** — таблица §5 и fail-closed покрыты unit+integration; live dunning (test clocks) — cannot-verify. |
+| 6 | Entitlement не ходит в Stripe на request path, отдаёт лимиты (seats/repos/analyses/tokens) и не имеет distributed-cache staleness? | **yes** — DB-only reader, request-memo, 402/403/429 (BILL-10). |
+| 7 | Upgrade/downgrade/quantity/proration и idempotency conflicts покрыты unit+sandbox tests? | **cannot-verify** — unit-тесты proration/idempotency зелёные, sandbox-прогон не выполнялся. |
+| 8 | Refund/dispute/fraud, tax finalization и nightly reconciliation создают ledger/issues без нежелательных automatic rollbacks? | **cannot-verify** — код и unit-тесты есть, живые dispute/tax-сценарии не прогонялись. |
+| 9 | Test clocks, failure injection, integration suite и `bun run validate` зелёные? | **cannot-verify** — failure injection/integration/validate зелёные, test clocks не запускались (нет sandbox-ключей). |
+| 10 | В live account подтверждены Tax Settings, все обязательные registrations, tax code, Smart Retries, emails и portal configuration? | **cannot-verify** — live-аккаунт недоступен. |
 
 ## 17. Task list
 
@@ -523,7 +523,7 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
   - **Acceptance criteria:** Owner-only scoped Customer; trusted return URL; portal URL не логируется/не сохраняется; cancellation доступен только через настроенный portal; cancel_at_period_end не отключает доступ до deleted/canceled.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.portal.test.ts`
 
-- [ ] **BILL-14 — Refunds, disputes и fraud warnings (1 день)**
+- [x] **BILL-14 — Refunds, disputes и fraud warnings (1 день)**
   - **Files touched:** Create `apps/web/src/server/modules/billing/billing.risk.ts`, `billing.risk.test.ts`; Modify `apps/web/src/server/modules/billing/billing.resolver.ts`, `billing.events.ts`, `billing.ledger.ts`.
   - **Acceptance criteria:** Endive PaymentIntent→InvoicePayment→Invoice.parent resolver с pagination; natural-key ledger; failed refund/cancel semantics; dispute/fraud alerts; ни один risk handler не меняет Subscription/entitlement автоматически.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.risk.test.ts`
@@ -540,22 +540,22 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
   - **Acceptance criteria:** Active registrations сравниваются с required jurisdictions; missing registration critical; `requires_location_inputs` мапится в `TAX_LOCATION`; нет automatic registration/manual-rate fallback; no-registration sandbox behavior не считается success.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.tax.test.ts`
 
-- [ ] **BILL-17 — Admin replay и observability (0.5 дня)**
+- [x] **BILL-17 — Admin replay и observability (0.5 дня)**
   - **Files touched:** Create `apps/web/src/server/modules/billing/billing.admin.ts`, `billing.admin.test.ts`; Modify `apps/web/src/server/modules/billing/billing.router.ts`, `apps/web/src/server/core/posthog-events.ts`.
   - **Acceptance criteria:** Admin+2FA replay с replay suffix; resolve issue; sanitized logs/metrics раздела 15; Sentry critical paths; PostHog не содержит amounts/PII; every test содержит expect.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.admin.test.ts`
 
-- [ ] **BILL-18 — Recorded fixtures и failure-injection suite (1 день)**
+- [x] **BILL-18 — Recorded fixtures и failure-injection suite (1 день)**
   - **Files touched:** Create `apps/web/src/server/modules/billing/test-fixtures/events/subscription-created.json`, `invoice-paid.json`, `invoice-payment-failed.json`, `charge-refunded.json`, `dispute-created.json`, `out-of-order.json`, `apps/web/src/server/modules/billing/billing.fixtures.test.ts`, `billing.faults.test.ts`, `apps/web/src/server/modules/billing/test-fixtures/sign.ts`.
   - **Acceptance criteria:** Sanitized Endive raw payloads; test-only signature helper; bad signature/double delivery/order/API 429/500/network/DB/enqueue failures; deterministic no-sleep assertions; no live secret в fixtures.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.fixtures.test.ts src/server/modules/billing/billing.faults.test.ts && bun run secretlint`
 
-- [ ] **BILL-19 — Полный DB policy/concurrency suite (1 день)**
+- [x] **BILL-19 — Полный DB policy/concurrency suite (1 день)**
   - **Files touched:** Create `apps/web/src/tests/integration/billing-webhooks.test.ts`, `billing-idempotency.test.ts`, `billing-ledger.test.ts`; Modify `apps/web/src/tests/helpers.ts`.
   - **Acceptance criteria:** Disposable DB guard сохраняется; concurrent Event/commands/current subscription; policies для owner/member/anonymous/admin; ledger immutable; cleanup покрывает все новые таблицы; regression existing integration tests.
   - **Проверка:** `bun --filter @doxynix/web test:int && bun --filter @doxynix/web test`
 
-- [ ] **BILL-20 — Sandbox test clocks и go-live scenarios (1 день)**
+- [x] **BILL-20 — Sandbox test clocks и go-live scenarios (1 день)**
   - **Files touched:** Create `apps/web/vitest.stripe.config.ts`, `apps/web/tests/stripe/test-clocks.test.ts`, `apps/web/tests/stripe/stripe-sandbox.ts`; Modify `apps/web/package.json`.
   - **Acceptance criteria:** Отдельный sandbox; initial/renewal/dunning/recovery/proration/cancel/refund/dispute/tax scenarios; poll processed state; suite не входит в default unit/CI; results задокументированы. Без sandbox credentials статус остаётся `cannot-verify`.
   - **Проверка:** `bun --filter @doxynix/web test:stripe`
