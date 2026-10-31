@@ -24,7 +24,11 @@ import type {
   AdminUserSummary,
   AdminUsersFilterInput,
 } from "./admin-user.schemas";
-import { assertNotSubscriptionOwner } from "./owned-subscription";
+import {
+  assertNotSubscriptionOwner,
+  listMemberWorkspaceIds,
+  syncSeatsAfterUserDeletion,
+} from "./owned-subscription";
 import { userMapper } from "./user.mapper";
 
 export type ReauthInput = {
@@ -181,10 +185,13 @@ export const adminUserService = {
       twoFactorEnabled: reauth.twoFactorEnabled,
     });
 
-    await assertNotSubscriptionOwner(db, input.id);
+    await assertNotSubscriptionOwner(input.id);
+    const workspaceIds = await listMemberWorkspaceIds(input.id);
 
     try {
       await db.user.delete({ where: { id: input.id } });
+
+      await syncSeatsAfterUserDeletion(workspaceIds, input.id);
 
       return { success: true };
     } catch (error) {

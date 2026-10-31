@@ -112,7 +112,6 @@ describe("workspaceService.addMember", () => {
       data: { role: "MEMBER", userId: USER_ID, workspaceId: WORKSPACE_ID },
     });
     expect(seatSyncMock).toHaveBeenCalledWith({
-      db,
       requestId: MEMBER_ID,
       workspaceId: WORKSPACE_ID,
     });
@@ -145,7 +144,7 @@ describe("workspaceService.addMember", () => {
 
     expect(member.role).toBe("MEMBER");
     expect(issueMock).toHaveBeenCalledWith(
-      db,
+      prisma,
       expect.objectContaining({
         dedupeKey: `seat_sync_failed:${WORKSPACE_ID}`,
         details: { error: "stripe unavailable", requestId: MEMBER_ID },
@@ -188,7 +187,6 @@ describe("workspaceService.addMember", () => {
 
     expect(member.role).toBe("MEMBER");
     expect(seatSyncMock).toHaveBeenCalledWith({
-      db,
       requestId: MEMBER_ID,
       workspaceId: WORKSPACE_ID,
     });
@@ -271,7 +269,6 @@ describe("workspaceService.removeMember", () => {
       where: { workspaceId_userId: { userId: USER_ID, workspaceId: WORKSPACE_ID } },
     });
     expect(seatSyncMock).toHaveBeenCalledWith({
-      db,
       requestId: "remove:member_removed",
       workspaceId: WORKSPACE_ID,
     });

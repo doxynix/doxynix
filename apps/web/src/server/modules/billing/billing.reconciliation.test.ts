@@ -26,6 +26,7 @@ const dbMock = vi.hoisted(() => ({
 }));
 
 const projectMock = vi.hoisted(() => vi.fn());
+const seatSyncMock = vi.hoisted(() => vi.fn());
 
 const stripeMock = vi.hoisted(() => ({
   invoices: { retrieve: vi.fn() },
@@ -34,6 +35,7 @@ const stripeMock = vi.hoisted(() => ({
 }));
 
 vi.mock("@/server/core/db", () => ({ prisma: dbMock }));
+vi.mock("@/server/core/billing/seat-sync", () => ({ syncWorkspaceSeats: seatSyncMock }));
 vi.mock("./billing.stripe", () => ({ getStripeClient: () => stripeMock }));
 vi.mock("./billing.subscriptions", () => ({ projectSubscription: projectMock }));
 
@@ -114,7 +116,8 @@ describe("runStripeReconciliation", () => {
     dbMock.workspaceEntitlement.updateMany.mockResolvedValue({ count: 1 });
     dbMock.workspaceEntitlement.findUnique.mockResolvedValue(null);
     dbMock.workspaceEntitlement.upsert.mockResolvedValue({});
-    dbMock.workspaceMember.count.mockResolvedValue(0);
+    dbMock.workspaceMember.count.mockResolvedValue(2);
+    seatSyncMock.mockReset().mockResolvedValue({ quantity: 2, synced: true });
     stripeMock.invoices.retrieve.mockReset();
     stripeMock.subscriptions.list.mockReset().mockResolvedValue({ data: [], has_more: false });
     stripeMock.subscriptions.retrieve.mockReset();
@@ -167,6 +170,23 @@ describe("runStripeReconciliation", () => {
 
     expect(summary.mismatchCount).toBe(1);
     expect(projectMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("repairs seats that drifted from the membership count", async () => {
+    dbMock.billingSubscription.findUnique.mockResolvedValue(localSubscription());
+    dbMock.workspaceMember.count.mockResolvedValue(3);
+    stripeMock.subscriptions.list.mockResolvedValue({
+      data: [subscription()],
+      has_more: false,
+    });
+
+    const summary = await runStripeReconciliation(NOW);
+
+    expect(summary.mismatchCount).toBe(1);
+    expect(seatSyncMock).toHaveBeenCalledWith({
+      requestId: expect.stringContaining("reconcile:sub_"),
+      workspaceId: WORKSPACE_ID,
+    });
   });
 
   it("does not count a matching mirror as a mismatch", async () => {

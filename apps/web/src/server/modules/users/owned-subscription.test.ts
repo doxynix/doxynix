@@ -1,24 +1,34 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { DbClient } from "@/server/core/db";
+import {
+  assertNotSubscriptionOwner,
+  listMemberWorkspaceIds,
+  syncSeatsAfterUserDeletion,
+} from "./owned-subscription";
 
-import { assertNotSubscriptionOwner } from "./owned-subscription";
+const dbMock = vi.hoisted(() => ({
+  workspaceMember: { findFirst: vi.fn(), findMany: vi.fn() },
+}));
+const seatSyncMock = vi.hoisted(() => vi.fn());
+const logMock = vi.hoisted(() => ({ error: vi.fn() }));
 
-function fakeDb(result: unknown) {
-  const findFirst = vi.fn().mockResolvedValue(result);
-
-  return { db: { workspaceMember: { findFirst } } as unknown as DbClient, findFirst };
-}
+vi.mock("@/server/core/db", () => ({ prisma: dbMock }));
+vi.mock("@/server/core/billing/seat-sync", () => ({ syncWorkspaceSeats: seatSyncMock }));
+vi.mock("@/server/core/app-logger", () => ({ appLogger: logMock }));
 
 describe("assertNotSubscriptionOwner", () => {
-  it("refuses to delete a user who owns a workspace with a live subscription", async () => {
-    const { db, findFirst } = fakeDb({ workspaceId: "ws_1" });
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
-    await expect(assertNotSubscriptionOwner(db, "user_1")).rejects.toMatchObject({
+  it("refuses to delete a user who owns a workspace with a live subscription", async () => {
+    dbMock.workspaceMember.findFirst.mockResolvedValue({ workspaceId: "ws_1" });
+
+    await expect(assertNotSubscriptionOwner("user_1")).rejects.toMatchObject({
       code: "PRECONDITION_FAILED",
       message: "OWNER_OF_ACTIVE_SUBSCRIPTION",
     });
-    expect(findFirst.mock.calls[0]?.[0]).toMatchObject({
+    expect(dbMock.workspaceMember.findFirst.mock.calls[0]?.[0]).toMatchObject({
       where: {
         role: "OWNER",
         userId: "user_1",
@@ -33,8 +43,46 @@ describe("assertNotSubscriptionOwner", () => {
   });
 
   it("allows deletion when the user owns no paid workspace", async () => {
-    const { db } = fakeDb(null);
+    dbMock.workspaceMember.findFirst.mockResolvedValue(null);
 
-    await expect(assertNotSubscriptionOwner(db, "user_1")).resolves.toBeUndefined();
+    await expect(assertNotSubscriptionOwner("user_1")).resolves.toBeUndefined();
+  });
+});
+
+describe("seat sync around account deletion", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns the workspaces the user belongs to", async () => {
+    dbMock.workspaceMember.findMany.mockResolvedValue([
+      { workspaceId: "ws_1" },
+      { workspaceId: "ws_2" },
+    ]);
+
+    await expect(listMemberWorkspaceIds("user_1")).resolves.toEqual(["ws_1", "ws_2"]);
+  });
+
+  it("re-bills every workspace the deleted user belonged to", async () => {
+    seatSyncMock.mockResolvedValue({ quantity: 1, synced: true });
+
+    await syncSeatsAfterUserDeletion(["ws_1", "ws_2"], "user_1");
+
+    expect(seatSyncMock).toHaveBeenCalledTimes(2);
+    expect(seatSyncMock).toHaveBeenCalledWith({
+      requestId: "user-delete:user_1:ws_1",
+      workspaceId: "ws_1",
+    });
+  });
+
+  it("keeps going when one workspace fails to sync", async () => {
+    seatSyncMock.mockRejectedValueOnce(new Error("stripe unavailable")).mockResolvedValueOnce({
+      quantity: 1,
+      synced: true,
+    });
+
+    await expect(syncSeatsAfterUserDeletion(["ws_1", "ws_2"], "user_1")).resolves.toBeUndefined();
+    expect(seatSyncMock).toHaveBeenCalledTimes(2);
+    expect(logMock.error).toHaveBeenCalled();
   });
 });

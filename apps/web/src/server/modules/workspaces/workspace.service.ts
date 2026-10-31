@@ -21,12 +21,12 @@ type WorkspaceWithEntitlement = Prisma.WorkspaceGetPayload<{
 
 // The membership is already committed, so a failing Stripe call or issue insert must never reach
 // the caller; it is logged and recorded instead.
-async function syncSeatsAfterMembershipChange(
-  db: DbClient,
-  input: { requestId: string; workspaceId: string },
-): Promise<void> {
+async function syncSeatsAfterMembershipChange(input: {
+  requestId: string;
+  workspaceId: string;
+}): Promise<void> {
   try {
-    await syncWorkspaceSeats({ db, requestId: input.requestId, workspaceId: input.workspaceId });
+    await syncWorkspaceSeats(input);
   } catch (error) {
     const details = {
       error: error instanceof Error ? error.message : "unknown",
@@ -41,7 +41,9 @@ async function syncSeatsAfterMembershipChange(
     });
 
     try {
-      await upsertBillingIssue(db, {
+      // BillingIssue denies `create` to every policy role, so the issue must go through the
+      // system client; the enhanced one would silently drop it.
+      await upsertBillingIssue(prisma, {
         dedupeKey: `seat_sync_failed:${input.workspaceId}`,
         details,
         kind: "SEAT_SYNC_FAILED",
@@ -151,7 +153,7 @@ export const workspaceService = {
         return { ...created, user: { id: user.id, image: user.image, name: user.name } };
       });
 
-      await syncSeatsAfterMembershipChange(db, { requestId: member.id, workspaceId });
+      await syncSeatsAfterMembershipChange({ requestId: member.id, workspaceId });
 
       return member;
     } catch (error) {
@@ -239,7 +241,7 @@ export const workspaceService = {
         { isolationLevel: "Serializable" },
       );
 
-      await syncSeatsAfterMembershipChange(db, {
+      await syncSeatsAfterMembershipChange({
         requestId: `remove:${removedId}`,
         workspaceId,
       });

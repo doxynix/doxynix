@@ -1,4 +1,4 @@
-import type { DbClient } from "@/server/core/db";
+import { prisma } from "@/server/core/db";
 
 import { stripeIdempotencyKey } from "./idempotency";
 import { getStripeClient, stripeEnvironment } from "./stripe-client";
@@ -8,21 +8,19 @@ export type SeatSyncResult = {
   synced: boolean;
 };
 
-// Network calls belong outside the membership transaction: a failed Stripe update must never roll
-// back a committed membership, and a slow one must never hold the workspace lock.
+// Seats are billing state, not tenant data: this runs on the system client so the post-commit
+// path also works when the actor just left the workspace (self-removal, account deletion).
 export async function syncWorkspaceSeats(input: {
-  db: DbClient;
   requestId: string;
   workspaceId: string;
 }): Promise<SeatSyncResult> {
-  const members = await input.db.workspaceMember.count({
+  const members = await prisma.workspaceMember.count({
     where: { workspaceId: input.workspaceId },
   });
   const quantity = Math.max(1, members);
 
-  const subscription = await input.db.billingSubscription.findFirst({
+  const subscription = await prisma.billingSubscription.findFirst({
     select: {
-      quantity: true,
       stripeStatus: true,
       stripeSubscriptionId: true,
       stripeSubscriptionItemId: true,
@@ -35,13 +33,19 @@ export async function syncWorkspaceSeats(input: {
     return { quantity, synced: false };
   }
 
-  if (quantity === subscription.quantity) {
+  // Dunning owns the item while the subscription is not active; changing seats there breaks
+  // retries and grace periods. Reconciliation still compares quantity with members and repairs it.
+  if (subscription.stripeStatus !== "active") {
     return { quantity, synced: false };
   }
 
-  // Dunning owns the item while the subscription is not active; changing seats there breaks
-  // retries and grace periods.
-  if (subscription.stripeStatus !== "active") {
+  // Always send the absolute target. The local mirror only learns the new quantity from a webhook,
+  // so "equal to the mirror" is not "equal to Stripe" — comparing against it silently skips the
+  // update and leaves the customer paying for a seat that no longer exists.
+  const remote = await getStripeClient().subscriptions.retrieve(subscription.stripeSubscriptionId);
+  const currentQuantity = remote.items.data[0]?.quantity ?? 1;
+
+  if (currentQuantity === quantity) {
     return { quantity, synced: false };
   }
 
@@ -49,7 +53,7 @@ export async function syncWorkspaceSeats(input: {
     subscription.stripeSubscriptionId,
     {
       items: [{ id: subscription.stripeSubscriptionItemId, quantity }],
-      proration_behavior: quantity > subscription.quantity ? "always_invoice" : "create_prorations",
+      proration_behavior: quantity > currentQuantity ? "always_invoice" : "create_prorations",
     },
     {
       idempotencyKey: stripeIdempotencyKey({

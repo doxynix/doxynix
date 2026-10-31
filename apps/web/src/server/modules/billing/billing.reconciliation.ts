@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 
 import { appLogger } from "@/server/core/app-logger";
 import { captureBillingAlert, recordBillingMetric } from "@/server/core/billing/metrics";
+import { syncWorkspaceSeats } from "@/server/core/billing/seat-sync";
 import { prisma } from "@/server/core/db";
 
 import { STRIPE_PROVIDER } from "./billing.constants";
@@ -159,6 +160,26 @@ async function reconcileSubscription(
       source: "stripe_reconciliation",
       stripeObjectId: subscription.id,
       workspaceId: local.workspaceId,
+    });
+
+    return true;
+  }
+
+  // Seats are derived from membership, not from the local mirror: a failed or skipped post-commit
+  // sync would otherwise leave the customer paying for a seat that no longer exists.
+  const item = itemOf(subscription);
+  const members = await prisma.workspaceMember.count({
+    where: { workspaceId: mapping.workspaceId },
+  });
+
+  if (
+    subscription.status === "active" &&
+    item != null &&
+    (item.quantity ?? 1) !== Math.max(1, members)
+  ) {
+    await syncWorkspaceSeats({
+      requestId: `reconcile:${subscription.id}:${now.getTime()}`,
+      workspaceId: mapping.workspaceId,
     });
 
     return true;
