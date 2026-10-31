@@ -1,3 +1,5 @@
+import { PlanCode, PlanCodeSchema } from "@doxynix/shared";
+
 import type { DbClient } from "@/server/core/db";
 import { getWorkspaceEntitlement } from "@/server/core/entitlements";
 
@@ -20,6 +22,8 @@ export async function getBillingState(db: DbClient, workspaceId: string): Promis
     db.workspaceMember.count({ where: { workspaceId } }),
   ]);
 
+  const parsedPlan = entitlement == null ? null : PlanCodeSchema.safeParse(entitlement.planCode);
+
   return {
     activeMembers,
     entitlement:
@@ -30,7 +34,8 @@ export async function getBillingState(db: DbClient, workspaceId: string): Promis
             aiTokensPerMonth: entitlement.aiTokensPerMonth,
             analysesPerMonth: entitlement.analysesPerMonth,
             graceEndsAt: entitlement.graceEndsAt,
-            planCode: entitlement.planCode,
+            // Fail closed to HOBBY: an unknown plan is already REVIEW in the access state.
+            planCode: parsedPlan?.success === true ? parsedPlan.data : PlanCode.HOBBY,
             seatLimit: entitlement.seatLimit,
             usedAnalyses: entitlement.usedAnalyses,
             usedTokens: entitlement.usedTokens,

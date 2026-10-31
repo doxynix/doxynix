@@ -1,3 +1,4 @@
+import { PlanCodeSchema } from "@doxynix/shared";
 import * as z from "zod";
 
 import { ACCESS_STATES } from "@/server/core/entitlements/state";
@@ -60,7 +61,7 @@ export const BillingEntitlementSummarySchema = z.object({
   aiTokensPerMonth: z.number().int().nullable(),
   analysesPerMonth: z.number().int().nullable(),
   graceEndsAt: z.date().nullable(),
-  planCode: z.string(),
+  planCode: PlanCodeSchema,
   seatLimit: z.number().int(),
   usedAnalyses: z.number().int(),
   usedTokens: z.number().int(),
