@@ -59,7 +59,13 @@ function isPriceKnown(price: Stripe.Price): boolean {
 // entitlement state is derived from the transition table, never from the snapshot in the event.
 export async function projectSubscription(
   tx: DbClient,
-  input: { now: Date; ownership: BillingOwnership; subscription: Stripe.Subscription },
+  input: {
+    now: Date;
+    ownership: BillingOwnership;
+    subscription: Stripe.Subscription;
+    // Operator resolution of a revoked terminal id: skip the revival guard for this projection.
+    overrideRevivedTerminal?: boolean;
+  },
 ): Promise<ProjectedSubscription> {
   const { ownership, subscription } = input;
   const item = subscription.items.data[0];
@@ -139,7 +145,8 @@ export async function projectSubscription(
     remote: {
       activatedAt,
       graceEndsAt: existing?.graceEndsAt ?? null,
-      previousStatus: existing?.externalStatus ?? null,
+      previousStatus:
+        input.overrideRevivedTerminal === true ? null : (existing?.externalStatus ?? null),
       priceKnown: isPriceKnown(item.price),
       status: subscription.status,
     },

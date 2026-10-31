@@ -311,6 +311,30 @@ describe("projectSubscription", () => {
     ).toEqual(paidAt);
   });
 
+  it("lets an operator override leave a revived terminal review", async () => {
+    const tx = createTx();
+    tx.billingSubscription.findUnique.mockResolvedValue({
+      activatedAt: NOW,
+      externalStatus: "canceled",
+      graceEndsAt: null,
+      needsReview: false,
+      reviewReason: null,
+    });
+    tx.workspaceEntitlement.findUnique.mockResolvedValue({
+      accessState: "REVIEW",
+      sourceSubscriptionId: "bs_1",
+    });
+
+    const result = await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      overrideRevivedTerminal: true,
+      ownership: ownership(),
+      subscription: subscription() as never,
+    });
+
+    expect(result.accessState).toBe("ACTIVE");
+  });
+
   it("turns a revived terminal subscription into REVIEW", async () => {
     const tx = createTx();
     tx.billingSubscription.findUnique.mockResolvedValue({

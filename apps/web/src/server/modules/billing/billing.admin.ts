@@ -171,6 +171,7 @@ export async function resolveBillingIssue(
 
         await projectSubscription(db, {
           now: new Date(),
+          overrideRevivedTerminal: true,
           ownership: {
             billingCustomerId: customer.id,
             customerId: customer.externalCustomerId,
