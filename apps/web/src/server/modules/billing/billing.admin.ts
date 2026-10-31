@@ -111,7 +111,7 @@ export async function resolveBillingIssue(
   input: { actorUserId: string; issueId: string; note?: string },
 ): Promise<{ resolved: boolean }> {
   const issue = await db.billingIssue.findUnique({
-    select: { details: true, status: true },
+    select: { details: true, externalObjectId: true, kind: true, status: true },
     where: { id: input.issueId },
   });
 
@@ -136,6 +136,15 @@ export async function resolveBillingIssue(
     },
     where: { id: input.issueId },
   });
+
+  // Clearing the review flag is what lets the next canonical event heal the projection; without it
+  // the sticky REVIEW guard would keep the workspace locked forever.
+  if (issue.kind === "SUBSCRIPTION_REVIEW" && issue.externalObjectId != null) {
+    await db.billingSubscription.updateMany({
+      data: { needsReview: false, reviewReason: null },
+      where: { externalSubscriptionId: issue.externalObjectId },
+    });
+  }
 
   appLogger.info({
     actorUserId: input.actorUserId,

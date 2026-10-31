@@ -177,8 +177,10 @@ async function applyDispute(
         ? { amount: BigInt(0), keyStatus: status, kind: `DISPUTE_${status.toUpperCase()}` }
         : { amount: -BigInt(dispute.amount), keyStatus: "open", kind: "DISPUTE_OPENED" };
 
+  let appended = false;
+
   if (closed || !alreadyOpened) {
-    await appendLedgerEntry(tx, {
+    appended = await appendLedgerEntry(tx, {
       amount: entry.amount,
       billingEventId: input.billingEventId,
       currency: dispute.currency,
@@ -199,7 +201,10 @@ async function applyDispute(
     return;
   }
 
-  captureBillingAlert("DISPUTE", { disputeId: dispute.id });
+  // Alert only when the hold is new: every intermediate status would otherwise page again.
+  if (appended) {
+    captureBillingAlert("DISPUTE", { disputeId: dispute.id });
+  }
 
   await upsertBillingIssue(tx, {
     dedupeKey: `dispute_opened:${dispute.id}`,

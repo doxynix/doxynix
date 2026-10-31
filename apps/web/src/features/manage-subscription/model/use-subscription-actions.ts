@@ -1,12 +1,11 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import { useTRPC } from "@/shared/api/trpc";
 
 export function useSubscriptionActions() {
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
 
   const checkout = useMutation(
     trpc.billing.createCheckout.mutationOptions({
@@ -27,15 +26,5 @@ export function useSubscriptionActions() {
     }),
   );
 
-  const preview = useMutation(trpc.billing.previewPlanChange.mutationOptions());
-
-  const changeSeats = useMutation(
-    trpc.billing.changeSeats.mutationOptions({
-      onSuccess: () => {
-        void queryClient.invalidateQueries(trpc.billing.getState.pathFilter());
-      },
-    }),
-  );
-
-  return { changeSeats, checkout, portal, preview };
+  return { checkout, portal };
 }

@@ -40,6 +40,19 @@ export const agentGithubReplyTask = task({
       return;
     }
 
+    if (
+      entitlement.aiTokensPerMonth != null &&
+      entitlement.usedTokens >= entitlement.aiTokensPerMonth
+    ) {
+      appLogger.warn({
+        msg: "github_agent_reply_skipped_quota_exhausted",
+        repo: `${payload.owner}/${payload.repoName}`,
+        workspaceId: payload.workspaceId,
+      });
+
+      return;
+    }
+
     const installation = await prisma.githubInstallation.findFirst({
       where: {
         accountLogin: payload.owner,

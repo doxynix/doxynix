@@ -202,6 +202,15 @@ export const entitlementProcedure = workspaceProcedure.use(async ({ ctx, next })
     throw new AppError({ code: "PAYMENT_REQUIRED", publicMessage: "PAYMENT_REQUIRED" });
   }
 
+  // Token quota binds every metered procedure, not only `analyze`: file actions and fixes spend
+  // the same AI budget and must stop at the same limit.
+  if (
+    entitlement.aiTokensPerMonth != null &&
+    entitlement.usedTokens >= entitlement.aiTokensPerMonth
+  ) {
+    throw new AppError({ code: "FORBIDDEN", publicMessage: "LIMIT_EXCEEDED" });
+  }
+
   return next({ ctx: { ...ctx, entitlement } });
 });
 

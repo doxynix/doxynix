@@ -8,6 +8,7 @@ import { syncWorkspaceSeats } from "@/server/core/billing/seat-sync";
 import { getStripeClient } from "@/server/core/billing/stripe-client";
 import { prisma } from "@/server/core/db";
 
+import { planEntitlements } from "./billing.catalog";
 import { STRIPE_PROVIDER } from "./billing.constants";
 import { appendLedgerEntry } from "./billing.ledger";
 import { projectSubscription } from "./billing.subscriptions";
@@ -118,6 +119,43 @@ async function repair(
   });
 }
 
+async function entitlementLimitsStale(workspaceId: string): Promise<boolean> {
+  const entitlement = await prisma.workspaceEntitlement.findUnique({
+    select: {
+      aiTokensPerMonth: true,
+      analysesPerMonth: true,
+      autoResync: true,
+      historyDays: true,
+      planCode: true,
+      privateReposAllowed: true,
+      prReviews: true,
+      reposLimit: true,
+    },
+    where: { workspaceId },
+  });
+
+  if (entitlement == null) {
+    return true;
+  }
+
+  const plan =
+    entitlement.planCode === "TEAM"
+      ? planEntitlements("TEAM")
+      : entitlement.planCode === "PRO"
+        ? planEntitlements("PRO")
+        : planEntitlements("HOBBY");
+
+  return (
+    entitlement.aiTokensPerMonth !== plan.aiTokensPerMonth ||
+    entitlement.analysesPerMonth !== plan.analysesPerMonth ||
+    entitlement.autoResync !== plan.autoResync ||
+    entitlement.historyDays !== plan.historyDays ||
+    entitlement.privateReposAllowed !== plan.privateReposAllowed ||
+    entitlement.prReviews !== plan.prReviews ||
+    entitlement.reposLimit !== plan.reposLimit
+  );
+}
+
 async function reconcileSubscription(
   subscription: Stripe.Subscription,
   now: Date,
@@ -170,8 +208,14 @@ async function reconcileSubscription(
   let changed = false;
 
   // `needsReview` means the worker refused a transition; the canonical read has happened here, so
-  // a workspace stuck in REVIEW with a matching mirror must still be recomputed.
-  if (differs(local, subscription) || local.needsReview) {
+  // a workspace stuck in REVIEW with a matching mirror must still be recomputed. Stale plan limits
+  // are repaired too: without a fresh event a PRO row written before the catalog carried limits
+  // would stay on HOBBY quotas.
+  if (
+    differs(local, subscription) ||
+    local.needsReview ||
+    (await entitlementLimitsStale(mapping.workspaceId))
+  ) {
     await repair(
       subscription,
       { billingCustomerId: mapping.id, customerId, workspaceId: mapping.workspaceId },

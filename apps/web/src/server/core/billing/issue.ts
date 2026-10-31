@@ -43,7 +43,9 @@ export async function upsertBillingIssue(db: DbClient, input: BillingIssueInput)
   });
 
   await db.billingIssue.updateMany({
-    data: { lastSeenAt: now },
+    // A recurrence of a resolved condition must be visible again: keeping RESOLVED would hide a
+    // repeated seat-sync or tax failure until an operator happens to look at old issues.
+    data: { lastSeenAt: now, resolvedAt: null, status: "OPEN" },
     where: { dedupeKey: input.dedupeKey },
   });
 }

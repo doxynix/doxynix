@@ -114,7 +114,16 @@ describe("runStripeReconciliation", () => {
     dbMock.billingSubscription.updateMany.mockResolvedValue({ count: 1 });
     dbMock.billingSubscription.upsert.mockResolvedValue({ id: "bs_1" });
     dbMock.workspaceEntitlement.updateMany.mockResolvedValue({ count: 1 });
-    dbMock.workspaceEntitlement.findUnique.mockResolvedValue(null);
+    dbMock.workspaceEntitlement.findUnique.mockResolvedValue({
+      aiTokensPerMonth: 20_000_000,
+      analysesPerMonth: 500,
+      autoResync: true,
+      historyDays: 90,
+      planCode: "PRO",
+      privateReposAllowed: true,
+      prReviews: true,
+      reposLimit: null,
+    });
     dbMock.workspaceEntitlement.upsert.mockResolvedValue({});
     dbMock.workspaceMember.count.mockResolvedValue(2);
     seatSyncMock.mockReset().mockResolvedValue({ quantity: 2, synced: true });
@@ -219,6 +228,29 @@ describe("runStripeReconciliation", () => {
 
     expect(projectMock).toHaveBeenCalledTimes(1);
     expect(summary.mismatchCount).toBe(1);
+  });
+
+  it("repairs stale plan limits even when the mirror matches", async () => {
+    dbMock.billingSubscription.findUnique.mockResolvedValue(localSubscription());
+    dbMock.workspaceEntitlement.findUnique.mockResolvedValue({
+      aiTokensPerMonth: 1_000_000,
+      analysesPerMonth: 20,
+      autoResync: false,
+      historyDays: 7,
+      planCode: "PRO",
+      privateReposAllowed: false,
+      prReviews: false,
+      reposLimit: null,
+    });
+    stripeMock.subscriptions.list.mockResolvedValue({
+      data: [subscription()],
+      has_more: false,
+    });
+
+    const summary = await runStripeReconciliation(NOW);
+
+    expect(summary.mismatchCount).toBe(1);
+    expect(projectMock).toHaveBeenCalledTimes(1);
   });
 
   it("does not count a matching mirror as a mismatch", async () => {

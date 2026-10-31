@@ -7,20 +7,15 @@ import {
 
 import { listBillingIssues, replayBillingEvent, resolveBillingIssue } from "./billing.admin";
 import { createCheckoutSession } from "./billing.checkout";
-import { changeSeats, previewPlanChange } from "./billing.plan-changes";
 import { createPortalSession, portalReturnUrl } from "./billing.portal";
 import {
   BillingStateSchema,
-  ChangeSeatsResultSchema,
-  ChangeSeatsSchema,
   CreateCheckoutResultSchema,
   CreateCheckoutSchema,
   CreatePortalSessionSchema,
   ListIssuesResultSchema,
   ListIssuesSchema,
-  PlanChangeQuantitySchema,
   PortalSessionResultSchema,
-  PreviewPlanChangeResultSchema,
   ReplayEventResultSchema,
   ReplayEventSchema,
   ResolveIssueResultSchema,
@@ -29,18 +24,6 @@ import {
 import { getBillingState } from "./billing.view";
 
 export const billingRouter = createTRPCRouter({
-  changeSeats: ownerProcedure
-    .input(ChangeSeatsSchema)
-    .output(ChangeSeatsResultSchema)
-    .mutation(async ({ ctx, input }) => {
-      return changeSeats({
-        actorUserId: ctx.session.user.id,
-        db: ctx.prisma,
-        quantity: input.quantity,
-        requestId: input.requestId,
-        workspaceId: ctx.workspace.id,
-      });
-    }),
   createCheckout: ownerProcedure
     .input(CreateCheckoutSchema)
     .output(CreateCheckoutResultSchema)
@@ -74,18 +57,6 @@ export const billingRouter = createTRPCRouter({
     .output(ListIssuesResultSchema)
     .query(async ({ ctx, input }) => {
       return listBillingIssues(ctx.prisma, input);
-    }),
-
-  previewPlanChange: ownerProcedure
-    .input(PlanChangeQuantitySchema)
-    .output(PreviewPlanChangeResultSchema)
-    .mutation(async ({ ctx, input }) => {
-      return previewPlanChange({
-        actorUserId: ctx.session.user.id,
-        db: ctx.prisma,
-        quantity: input.quantity,
-        workspaceId: ctx.workspace.id,
-      });
     }),
 
   replayEvent: adminProcedure

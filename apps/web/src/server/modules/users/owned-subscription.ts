@@ -2,6 +2,7 @@ import { AccessState } from "@doxynix/shared";
 import { TRPCError } from "@trpc/server";
 
 import { appLogger } from "@/server/core/app-logger";
+import { upsertBillingIssue } from "@/server/core/billing/issue";
 import { syncWorkspaceSeats } from "@/server/core/billing/seat-sync";
 import { prisma } from "@/server/core/db";
 
@@ -67,6 +68,20 @@ export async function syncSeatsAfterUserDeletion(
         msg: "users.seat_sync_after_delete_failed",
         userId,
         workspaceId,
+      });
+
+      await upsertBillingIssue(prisma, {
+        dedupeKey: `seat_sync_failed:${workspaceId}`,
+        details: {
+          error: error instanceof Error ? error.message : "unknown",
+          source: "user_delete",
+        },
+        kind: "SEAT_SYNC_FAILED",
+        severity: "WARNING",
+        source: "users",
+        workspaceId,
+      }).catch((issueError: unknown) => {
+        appLogger.error({ error: issueError, msg: "users.seat_sync_issue_failed", workspaceId });
       });
     }
   }

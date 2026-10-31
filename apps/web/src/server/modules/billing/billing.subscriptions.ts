@@ -79,7 +79,13 @@ export async function projectSubscription(
   }
 
   const existing = await tx.billingSubscription.findUnique({
-    select: { activatedAt: true, externalStatus: true, graceEndsAt: true },
+    select: {
+      activatedAt: true,
+      externalStatus: true,
+      graceEndsAt: true,
+      needsReview: true,
+      reviewReason: true,
+    },
     where: { externalSubscriptionId: subscription.id },
   });
 
@@ -139,11 +145,26 @@ export async function projectSubscription(
     },
   });
 
+  let accessState = decision.accessState;
+  let reviewReason = decision.reviewReason;
+
+  // A revived terminal id stays in REVIEW until an operator clears it: otherwise the next event
+  // sees the already-overwritten mirror status and silently returns ACTIVE.
+  const stickyReview =
+    existing?.needsReview === true &&
+    existing.reviewReason === "REVIVED_TERMINAL_SUBSCRIPTION" &&
+    decision.accessState === "ACTIVE";
+
+  if (stickyReview) {
+    accessState = "REVIEW";
+    reviewReason = existing.reviewReason ?? null;
+  }
+
   recordBillingMetric("billing_subscription_transition_total", 1, {
     from: current,
-    to: decision.accessState,
+    to: accessState,
   });
-  recordBillingMetric("billing_entitlement_total", 1, { state: decision.accessState });
+  recordBillingMetric("billing_entitlement_total", 1, { state: accessState });
 
   const terminal = isTerminalStatus(subscription.status);
   const isCurrent = terminal ? null : true;
@@ -195,21 +216,21 @@ export async function projectSubscription(
       : typeof subscription.latest_invoice === "string"
         ? subscription.latest_invoice
         : subscription.latest_invoice.id;
-  const needsReview = decision.accessState === "REVIEW";
+  const needsReview = accessState === "REVIEW";
 
   // A review state is not silent: without an issue nobody learns that a paying workspace lost
   // access and reconciliation has nothing to resolve.
-  if (decision.reviewReason != null) {
+  if (reviewReason != null) {
     await upsertBillingIssue(tx, {
-      dedupeKey: `subscription_review:${subscription.id}:${decision.reviewReason}`,
-      details: { reason: decision.reviewReason, status: subscription.status },
+      dedupeKey: `subscription_review:${subscription.id}:${reviewReason}`,
+      details: { reason: reviewReason, status: subscription.status },
       externalObjectId: subscription.id,
       kind: "SUBSCRIPTION_REVIEW",
       severity: "CRITICAL",
       source: "stripe_worker",
       workspaceId: ownership.workspaceId,
     });
-  } else if (decision.accessState === "ACTIVE") {
+  } else if (accessState === "ACTIVE") {
     // Leaving REVIEW closes the issue that made the state visible, otherwise operators keep an
     // open critical issue for a workspace that already recovered.
     await tx.billingIssue.updateMany({
@@ -250,7 +271,7 @@ export async function projectSubscription(
       latestInvoiceId,
       needsReview,
       quantity: item.quantity ?? 1,
-      reviewReason: decision.reviewReason,
+      reviewReason: reviewReason,
       workspaceId: ownership.workspaceId,
     },
     update: {
@@ -263,10 +284,10 @@ export async function projectSubscription(
       latestInvoiceId,
       needsReview,
       quantity: item.quantity ?? 1,
-      reviewReason: decision.reviewReason,
+      reviewReason: reviewReason,
       // Only an ACTIVE canonical subscription ends the dunning window; a paid invoice alone does
       // not prove recovery while Stripe still reports `past_due`.
-      ...(decision.accessState === "ACTIVE"
+      ...(accessState === "ACTIVE"
         ? { graceEndsAt: null, needsAction: null, pastDueStartedAt: null }
         : {}),
       externalPriceId: item.price.id,
@@ -276,14 +297,13 @@ export async function projectSubscription(
     where: { externalSubscriptionId: subscription.id },
   });
 
-  const accessStateChanged = current !== decision.accessState;
+  const accessStateChanged = current !== accessState;
 
   await tx.workspaceEntitlement.upsert({
     create: {
-      accessState: decision.accessState,
-      activatedAt:
-        decision.accessState === "ACTIVE" ? (entitlement?.activatedAt ?? activatedAt) : null,
-      graceEndsAt: decision.accessState === "GRACE" ? (existing?.graceEndsAt ?? null) : null,
+      accessState: accessState,
+      activatedAt: accessState === "ACTIVE" ? (entitlement?.activatedAt ?? activatedAt) : null,
+      graceEndsAt: accessState === "GRACE" ? (existing?.graceEndsAt ?? null) : null,
       planCode,
       revision: BigInt(1),
       seatLimit,
@@ -292,14 +312,12 @@ export async function projectSubscription(
       ...plan,
     },
     update: {
-      accessState: decision.accessState,
+      accessState: accessState,
       activatedAt:
-        decision.accessState === "ACTIVE" && entitlement?.activatedAt == null
-          ? activatedAt
-          : undefined,
+        accessState === "ACTIVE" && entitlement?.activatedAt == null ? activatedAt : undefined,
       // The reader (`hasAccess`) requires a live deadline for GRACE; without this column the whole
       // grace window is dead and a paying customer is blocked on the first failed payment.
-      graceEndsAt: decision.accessState === "GRACE" ? (existing?.graceEndsAt ?? null) : null,
+      graceEndsAt: accessState === "GRACE" ? (existing?.graceEndsAt ?? null) : null,
       planCode,
       revision: accessStateChanged ? { increment: 1 } : undefined,
       seatLimit,
@@ -312,9 +330,9 @@ export async function projectSubscription(
   });
 
   return {
-    accessState: decision.accessState,
+    accessState: accessState,
     mirrorId: mirror.id,
-    reviewReason: decision.reviewReason,
+    reviewReason: reviewReason,
   };
 }
 

@@ -160,40 +160,47 @@ export async function changeSeats(input: PlanChangeInput): Promise<SeatChangeRes
     return { changed: false, quantity: input.quantity };
   }
 
-  if (input.quantity < current.quantity) {
-    await assertSeatFloor(input.db, input.workspaceId, input.quantity);
-  }
-
   const run = await runBillingOperation(input.db, {
     actorUserId: input.actorUserId,
     execute: async () => {
-      return withWorkspaceLock(input.db, input.workspaceId, async () => {
-        // Re-read inside the lock: the subscription may have changed since the preview.
+      // The lock only guards the read and the floor check. The Stripe call happens after it, so a
+      // slow network call never holds a transaction or the workspace advisory lock.
+      const snapshot = await withWorkspaceLock(input.db, input.workspaceId, async () => {
         const subscription = await loadChangeableSubscription(input.db, input.workspaceId);
-        const prorationBehavior = prorationFor(input.quantity, subscription.quantity);
 
-        const updated = await getStripeClient().subscriptions.update(
-          subscription.externalSubscriptionId,
-          {
-            items: [{ id: subscription.externalSubscriptionItemId, quantity: input.quantity }],
-            proration_behavior: prorationBehavior,
-          },
-          {
-            idempotencyKey: stripeIdempotencyKey({
-              environment: stripeEnvironment(),
-              operation: "subscription",
-              requestId: input.requestId,
-              workspaceId: input.workspaceId,
-            }),
-          },
-        );
+        if (input.quantity < subscription.quantity) {
+          await assertSeatFloor(input.db, input.workspaceId, input.quantity);
+        }
 
-        // The response never grants access; only the webhook projection does.
         return {
-          externalObjectId: updated.id,
-          result: { prorationBehavior, quantity: input.quantity },
+          prorationBehavior: prorationFor(input.quantity, subscription.quantity),
+          subscription,
         };
       });
+
+      const updated = await getStripeClient().subscriptions.update(
+        snapshot.subscription.externalSubscriptionId,
+        {
+          items: [
+            { id: snapshot.subscription.externalSubscriptionItemId, quantity: input.quantity },
+          ],
+          proration_behavior: snapshot.prorationBehavior,
+        },
+        {
+          idempotencyKey: stripeIdempotencyKey({
+            environment: stripeEnvironment(),
+            operation: "subscription",
+            requestId: input.requestId,
+            workspaceId: input.workspaceId,
+          }),
+        },
+      );
+
+      // The response never grants access; only the webhook projection does.
+      return {
+        externalObjectId: updated.id,
+        result: { prorationBehavior: snapshot.prorationBehavior, quantity: input.quantity },
+      };
     },
     operation: "SUBSCRIPTION_UPDATE",
     requestBody: { quantity: input.quantity, workspaceId: input.workspaceId },
