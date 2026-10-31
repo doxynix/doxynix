@@ -2,10 +2,12 @@ import type Stripe from "stripe";
 
 import type { DbClient } from "@/server/core/db";
 
+import { upsertBillingIssue } from "./billing.issues";
 import { appendLedgerEntry } from "./billing.ledger";
 import type { BillingOwnership } from "./billing.resolver";
 import { getStripeClient } from "./billing.stripe";
 import { markSubscriptionActivated, projectSubscription } from "./billing.subscriptions";
+import { recordTaxCollection } from "./billing.tax";
 
 export const GRACE_PERIOD_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -67,8 +69,13 @@ async function applyInvoicePaid(tx: DbClient, input: InvoiceEventInput): Promise
 
   // Recovery: a paid invoice plus a canonical active subscription clears the dunning window.
   await tx.billingSubscription.updateMany({
-    data: { graceEndsAt: null, pastDueStartedAt: null },
+    data: { graceEndsAt: null, needsAction: null, pastDueStartedAt: null },
     where: { stripeSubscriptionId: subscriptionId, workspaceId: input.ownership.workspaceId },
+  });
+
+  await recordTaxCollection(tx, {
+    invoice: input.invoice,
+    workspaceId: input.ownership.workspaceId,
   });
 
   if (input.subscription == null) {
@@ -131,6 +138,36 @@ export async function retrieveSubscriptionForInvoice(
   });
 }
 
+// A tax-location failure blocks payment collection but not access: the customer keeps the current
+// billing state until a canonical transition says otherwise.
+async function applyInvoiceFinalizationFailed(
+  tx: DbClient,
+  input: InvoiceEventInput,
+): Promise<void> {
+  if (input.invoice.automatic_tax.status !== "requires_location_inputs") {
+    return;
+  }
+
+  const subscriptionId = subscriptionIdOf(input.invoice);
+
+  if (subscriptionId != null) {
+    await tx.billingSubscription.updateMany({
+      data: { needsAction: "TAX_LOCATION" },
+      where: { stripeSubscriptionId: subscriptionId },
+    });
+  }
+
+  await upsertBillingIssue(tx, {
+    dedupeKey: `tax_location:${input.invoice.id}`,
+    details: { needsAction: "TAX_LOCATION" },
+    kind: "TAX_LOCATION",
+    severity: "CRITICAL",
+    source: "stripe_tax",
+    stripeObjectId: input.invoice.id,
+    workspaceId: input.ownership.workspaceId,
+  });
+}
+
 export async function applyInvoiceEvent(tx: DbClient, input: InvoiceEventInput): Promise<void> {
   if (input.eventType === "invoice.paid") {
     await applyInvoicePaid(tx, input);
@@ -139,5 +176,10 @@ export async function applyInvoiceEvent(tx: DbClient, input: InvoiceEventInput):
 
   if (input.eventType === "invoice.payment_failed") {
     await applyInvoicePaymentFailed(tx, input);
+    return;
+  }
+
+  if (input.eventType === "invoice.finalization_failed") {
+    await applyInvoiceFinalizationFailed(tx, input);
   }
 }

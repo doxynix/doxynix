@@ -535,7 +535,7 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
   - **Acceptance criteria:** Full pagination, one daily run, canonical mirror repair, unowned/extra fail-closed, append-only money correction, tax/queue checks, issues и >26h alert; zero Stripe writes.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.reconciliation.test.ts && bun --filter @doxynix/web test:int src/tests/integration/billing-reconciliation.test.ts`
 
-- [ ] **BILL-16 — Tax preflight и finalization handling (0.5 дня)**
+- [x] **BILL-16 — Tax preflight и finalization handling (0.5 дня)**
   - **Files touched:** Create `apps/web/src/server/modules/billing/billing.tax.ts`, `billing.tax.test.ts`; Modify `apps/web/src/server/modules/billing/billing.reconciliation.ts`, `billing.invoices.ts`.
   - **Acceptance criteria:** Active registrations сравниваются с required jurisdictions; missing registration critical; `requires_location_inputs` мапится в `TAX_LOCATION`; нет automatic registration/manual-rate fallback; no-registration sandbox behavior не считается success.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.tax.test.ts`

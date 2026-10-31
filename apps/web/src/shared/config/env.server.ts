@@ -50,6 +50,7 @@ const envServer = createEnv({
     STRIPE_API_KEY: process.env.STRIPE_API_KEY,
     STRIPE_LIVEMODE: process.env.STRIPE_LIVEMODE,
     STRIPE_PRICE_PRO_MONTHLY_USD: process.env.STRIPE_PRICE_PRO_MONTHLY_USD,
+    STRIPE_TAX_REQUIRED_JURISDICTIONS: process.env.STRIPE_TAX_REQUIRED_JURISDICTIONS,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     TOOL_APPROVAL_SECRET: process.env.TOOL_APPROVAL_SECRET,
     TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
@@ -97,6 +98,7 @@ const envServer = createEnv({
     STRIPE_API_KEY: stringSchema,
     STRIPE_LIVEMODE: z._default(z.enum(["true", "false"]), "false"),
     STRIPE_PRICE_PRO_MONTHLY_USD: stringSchema,
+    STRIPE_TAX_REQUIRED_JURISDICTIONS: z._default(z.string(), ""),
     STRIPE_WEBHOOK_SECRET: stringSchema,
     TOOL_APPROVAL_SECRET: stringSchema,
     TURNSTILE_SECRET_KEY: stringSchema,
@@ -153,6 +155,13 @@ export const STRIPE_API_KEY = envServer.STRIPE_API_KEY;
 export const STRIPE_WEBHOOK_SECRET = envServer.STRIPE_WEBHOOK_SECRET;
 export const STRIPE_PRICE_PRO_MONTHLY_USD = envServer.STRIPE_PRICE_PRO_MONTHLY_USD;
 export const STRIPE_LIVEMODE = envServer.STRIPE_LIVEMODE === "true";
+// Comma-separated country codes that must have an active tax registration before a paid launch.
+// `emptyStringAsUndefined` turns the blank default into undefined when validation is skipped.
+const rawRequiredJurisdictions = envServer.STRIPE_TAX_REQUIRED_JURISDICTIONS as string | undefined;
+export const STRIPE_TAX_REQUIRED_JURISDICTIONS = (rawRequiredJurisdictions ?? "")
+  .split(",")
+  .map((jurisdiction) => jurisdiction.trim().toUpperCase())
+  .filter((jurisdiction) => jurisdiction.length > 0);
 
 export const AUTH_PROVIDERS = {
   github: {

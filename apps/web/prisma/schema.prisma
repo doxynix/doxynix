@@ -594,6 +594,7 @@ model BillingSubscription {
   /// true, which is the one-current-subscription invariant. Never write false.
   isCurrent                Boolean?        @map("is_current")
   needsReview              Boolean         @default(false) @map("needs_review")
+  needsAction              String?         @map("needs_action")
   reviewReason             String?         @map("review_reason")
   createdAt                DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt                DateTime        @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)

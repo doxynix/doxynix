@@ -211,7 +211,11 @@ describe("invoice.paid", () => {
 
     await applyInvoiceEvent(fake.tx, paidInput({ invoice: invoice({ id: "in_recovery" }) }));
 
-    expect(fake.mirrorUpdates).toContainEqual({ graceEndsAt: null, pastDueStartedAt: null });
+    expect(fake.mirrorUpdates).toContainEqual({
+      graceEndsAt: null,
+      needsAction: null,
+      pastDueStartedAt: null,
+    });
     expect(fake.entitlementUpdates.at(-1)).toMatchObject({ accessState: "ACTIVE" });
   });
 

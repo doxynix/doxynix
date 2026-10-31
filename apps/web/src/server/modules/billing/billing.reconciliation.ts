@@ -9,6 +9,7 @@ import { upsertBillingIssue } from "./billing.issues";
 import { appendLedgerEntry } from "./billing.ledger";
 import { getStripeClient } from "./billing.stripe";
 import { projectSubscription } from "./billing.subscriptions";
+import { runTaxPreflight } from "./billing.tax";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const LEDGER_LOOKBACK_MS = 90 * DAY_MS;
@@ -324,22 +325,9 @@ async function checkEventQueue(now: Date): Promise<void> {
 
 async function checkTaxRegistrations(): Promise<void> {
   try {
-    const registrations = await getStripeClient().tax.registrations.list({
-      limit: 1,
-      status: "active",
-    });
-
-    if (registrations.data.length === 0) {
-      await upsertBillingIssue(prisma, {
-        dedupeKey: "tax_registrations_missing",
-        details: {},
-        kind: "TAX_REGISTRATIONS_MISSING",
-        severity: "WARNING",
-        source: "stripe_reconciliation",
-      });
-    }
+    await runTaxPreflight(prisma);
   } catch (error) {
-    // BILL-16 owns tax; reconciliation only records that it could not be checked.
+    // Tax configuration must never fail the whole reconciliation run.
     appLogger.warn({
       error: error instanceof Error ? error.message : String(error),
       msg: "stripe_reconciliation_tax_check_failed",
