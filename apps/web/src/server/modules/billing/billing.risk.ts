@@ -1,12 +1,12 @@
 import type Stripe from "stripe";
 
+import { resolveBillingIssue, upsertBillingIssue } from "@/server/core/billing/issue";
 import { captureBillingAlert } from "@/server/core/billing/metrics";
+import { getStripeClient } from "@/server/core/billing/stripe-client";
 import type { DbClient } from "@/server/core/db";
 
-import { resolveBillingIssue, upsertBillingIssue } from "./billing.issues";
 import { appendLedgerEntry } from "./billing.ledger";
 import type { BillingOwnership, CanonicalStripeObject } from "./billing.resolver";
-import { getStripeClient } from "./billing.stripe";
 
 export type RiskLinks = {
   invoiceId: null | string;

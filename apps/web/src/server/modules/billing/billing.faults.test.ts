@@ -23,7 +23,7 @@ const stripeMock = vi.hoisted(() => ({ subscriptions: { retrieve: vi.fn() } }));
 
 vi.mock("@/server/core/db", () => ({ prisma: dbMock }));
 vi.mock("@trigger.dev/sdk", () => ({ tasks: { trigger: triggerMock } }));
-vi.mock("./billing.stripe", () => ({ getStripeClient: () => stripeMock }));
+vi.mock("@/server/core/billing/stripe-client", () => ({ getStripeClient: () => stripeMock }));
 
 const FIXTURES_DIR = join(import.meta.dirname, "test-fixtures", "events");
 

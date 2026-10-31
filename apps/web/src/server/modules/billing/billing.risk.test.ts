@@ -20,7 +20,7 @@ const stripeMock = vi.hoisted(() => ({
   refunds: { retrieve: vi.fn() },
 }));
 
-vi.mock("./billing.stripe", () => ({ getStripeClient: () => stripeMock }));
+vi.mock("@/server/core/billing/stripe-client", () => ({ getStripeClient: () => stripeMock }));
 
 type LedgerRow = { amount: bigint; entryKey: string; kind: string };
 

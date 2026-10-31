@@ -1,11 +1,11 @@
 import type Stripe from "stripe";
 
+import { upsertBillingIssue } from "@/server/core/billing/issue";
 import { recordBillingMetric } from "@/server/core/billing/metrics";
 import type { DbClient } from "@/server/core/db";
 
 import { BillingCatalogError, planEntitlements, resolvePlanForPrice } from "./billing.catalog";
 import { NonRetryableBillingError } from "./billing.errors";
-import { upsertBillingIssue } from "./billing.issues";
 import type { BillingOwnership } from "./billing.resolver";
 import {
   type AccessState,

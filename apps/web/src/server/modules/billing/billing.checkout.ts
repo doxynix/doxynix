@@ -5,13 +5,13 @@ import { APP_URL } from "@/shared/config/env.client";
 import { IS_PROD } from "@/shared/config/env.flags";
 import { DEFAULT_LOCALE } from "@/shared/config/locales";
 
+import { getStripeClient, stripeEnvironment } from "@/server/core/billing/stripe-client";
 import type { DbClient } from "@/server/core/db";
 
 import { proPlan } from "./billing.catalog";
 import { STRIPE_PROVIDER } from "./billing.constants";
 import { runBillingOperation, stripeIdempotencyKey } from "./billing.operations";
 import type { CreateCheckoutResult } from "./billing.schemas";
-import { getStripeClient, stripeEnvironment } from "./billing.stripe";
 import { requiredJurisdictions, runTaxPreflight } from "./billing.tax";
 
 const CHECKOUT_RETURN_PATH = "/dashboard/settings/members";

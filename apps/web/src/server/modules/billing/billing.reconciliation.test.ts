@@ -36,7 +36,7 @@ const stripeMock = vi.hoisted(() => ({
 
 vi.mock("@/server/core/db", () => ({ prisma: dbMock }));
 vi.mock("@/server/core/billing/seat-sync", () => ({ syncWorkspaceSeats: seatSyncMock }));
-vi.mock("./billing.stripe", () => ({ getStripeClient: () => stripeMock }));
+vi.mock("@/server/core/billing/stripe-client", () => ({ getStripeClient: () => stripeMock }));
 vi.mock("./billing.subscriptions", () => ({ projectSubscription: projectMock }));
 
 function uniqueViolation() {

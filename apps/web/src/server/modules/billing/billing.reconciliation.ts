@@ -2,14 +2,14 @@ import { Prisma } from "@prisma/client";
 import type Stripe from "stripe";
 
 import { appLogger } from "@/server/core/app-logger";
+import { upsertBillingIssue } from "@/server/core/billing/issue";
 import { captureBillingAlert, recordBillingMetric } from "@/server/core/billing/metrics";
 import { syncWorkspaceSeats } from "@/server/core/billing/seat-sync";
+import { getStripeClient } from "@/server/core/billing/stripe-client";
 import { prisma } from "@/server/core/db";
 
 import { STRIPE_PROVIDER } from "./billing.constants";
-import { upsertBillingIssue } from "./billing.issues";
 import { appendLedgerEntry } from "./billing.ledger";
-import { getStripeClient } from "./billing.stripe";
 import { projectSubscription } from "./billing.subscriptions";
 import { runTaxPreflight } from "./billing.tax";
 

@@ -1,11 +1,11 @@
 import { TRPCError } from "@trpc/server";
 
+import { getStripeClient, stripeEnvironment } from "@/server/core/billing/stripe-client";
 import type { DbClient } from "@/server/core/db";
 import { getWorkspaceEntitlement } from "@/server/core/entitlements";
 
 import { resolvePlanForPrice } from "./billing.catalog";
 import { runBillingOperation, stripeIdempotencyKey } from "./billing.operations";
-import { getStripeClient, stripeEnvironment } from "./billing.stripe";
 
 export type ProrationBehavior = "always_invoice" | "create_prorations";
 

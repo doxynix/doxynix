@@ -13,7 +13,7 @@ const stripeMock = vi.hoisted(() => ({
   subscriptions: { update: vi.fn() },
 }));
 
-vi.mock("@/server/modules/billing/billing.stripe", () => ({
+vi.mock("@/server/core/billing/stripe-client", () => ({
   getStripeClient: () => stripeMock,
   stripeEnvironment: () => "test",
 }));

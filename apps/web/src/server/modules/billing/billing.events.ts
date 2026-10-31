@@ -3,13 +3,13 @@ import { tasks } from "@trigger.dev/sdk";
 import type Stripe from "stripe";
 
 import { appLogger } from "@/server/core/app-logger";
+import { upsertBillingIssue } from "@/server/core/billing/issue";
 import { captureBillingAlert, recordBillingMetric } from "@/server/core/billing/metrics";
 import { type DbClient, prisma } from "@/server/core/db";
 
 import { PROCESS_STRIPE_EVENT_TASK_ID, STRIPE_API_VERSION } from "./billing.constants";
 import { NonRetryableBillingError } from "./billing.errors";
 import { applyInvoiceEvent, retrieveSubscriptionForInvoice } from "./billing.invoices";
-import { upsertBillingIssue } from "./billing.issues";
 import { ownershipKeyFromPayload } from "./billing.ownership";
 import {
   type BillingOwnership,

@@ -13,7 +13,7 @@ const FAILED_AT = new Date("2026-10-28T09:00:00.000Z");
 
 const stripeMock = vi.hoisted(() => ({ subscriptions: { retrieve: vi.fn() } }));
 
-vi.mock("./billing.stripe", () => ({ getStripeClient: () => stripeMock }));
+vi.mock("@/server/core/billing/stripe-client", () => ({ getStripeClient: () => stripeMock }));
 
 type Mirror = {
   activatedAt: Date | null;

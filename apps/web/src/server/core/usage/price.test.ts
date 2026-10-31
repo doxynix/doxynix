@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { costCentsFor, priceFor, totalTokens, UnknownModelPriceError } from "./billing.price";
+import { costCentsFor, priceFor, totalTokens, UnknownModelPriceError } from "./price";
 
 const MODEL = "gemini-3.5-flash-lite";
 const BEFORE_REPRICE = new Date("2026-03-01T00:00:00.000Z");

@@ -42,7 +42,7 @@ const triggerMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/server/core/db", () => ({ prisma: dbMock }));
 vi.mock("@trigger.dev/sdk", () => ({ tasks: { trigger: triggerMock } }));
-vi.mock("./billing.stripe", () => ({ getStripeClient: () => stripeMock }));
+vi.mock("@/server/core/billing/stripe-client", () => ({ getStripeClient: () => stripeMock }));
 
 function storedEvent(overrides: Record<string, unknown> = {}) {
   return {

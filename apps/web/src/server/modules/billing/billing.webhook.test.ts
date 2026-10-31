@@ -5,7 +5,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { STRIPE_WEBHOOK_SECRET } from "@/shared/config/env.server";
 
-import { getStripeClient } from "./billing.stripe";
+import { getStripeClient } from "@/server/core/billing/stripe-client";
+
 import { handleStripeWebhook } from "./billing.webhook";
 
 const dbMock = vi.hoisted(() => ({

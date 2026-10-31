@@ -3,11 +3,10 @@ import type Stripe from "stripe";
 import { IS_PROD } from "@/shared/config/env.flags";
 import { STRIPE_TAX_REQUIRED_JURISDICTIONS } from "@/shared/config/env.server";
 
+import { upsertBillingIssue } from "@/server/core/billing/issue";
 import { captureBillingAlert } from "@/server/core/billing/metrics";
+import { getStripeClient } from "@/server/core/billing/stripe-client";
 import { type DbClient, prisma } from "@/server/core/db";
-
-import { upsertBillingIssue } from "./billing.issues";
-import { getStripeClient } from "./billing.stripe";
 
 export type TaxPreflightResult = {
   activeJurisdictions: string[];

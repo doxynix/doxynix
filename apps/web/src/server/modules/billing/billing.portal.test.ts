@@ -19,7 +19,7 @@ const stripeMock = vi.hoisted(() => ({
   billingPortal: { sessions: { create: vi.fn() } },
 }));
 
-vi.mock("./billing.stripe", () => ({
+vi.mock("@/server/core/billing/stripe-client", () => ({
   getStripeClient: () => stripeMock,
   stripeEnvironment: () => "test",
 }));

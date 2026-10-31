@@ -7,12 +7,12 @@ import type Stripe from "stripe";
 import { STRIPE_LIVEMODE, STRIPE_WEBHOOK_SECRET } from "@/shared/config/env.server";
 
 import { appLogger } from "@/server/core/app-logger";
+import { upsertBillingIssue } from "@/server/core/billing/issue";
 import { captureBillingAlert, recordBillingMetric } from "@/server/core/billing/metrics";
+import { getStripeClient } from "@/server/core/billing/stripe-client";
 import { prisma } from "@/server/core/db";
 
-import { upsertBillingIssue } from "./billing.issues";
 import { ownershipKeyForObject } from "./billing.ownership";
-import { getStripeClient } from "./billing.stripe";
 import type { processStripeEventTask } from "./tasks/process-stripe-event.task";
 
 // Endpoint is subscribed to exactly these types; anything else signed is acknowledged and dropped.

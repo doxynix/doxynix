@@ -3,11 +3,11 @@ import { TRPCError } from "@trpc/server";
 import { APP_URL } from "@/shared/config/env.client";
 import { DEFAULT_LOCALE } from "@/shared/config/locales";
 
+import { getStripeClient, stripeEnvironment } from "@/server/core/billing/stripe-client";
 import type { DbClient } from "@/server/core/db";
 
 import { PORTAL_RETURN_PATHS, STRIPE_PROVIDER } from "./billing.constants";
 import { stripeIdempotencyKey } from "./billing.operations";
-import { getStripeClient, stripeEnvironment } from "./billing.stripe";
 
 export type PortalReturnPath = (typeof PORTAL_RETURN_PATHS)[number];
 

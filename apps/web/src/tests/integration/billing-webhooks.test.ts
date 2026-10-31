@@ -3,10 +3,10 @@ import { readFileSync } from "node:fs";
 import { join } from "pathe";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type * as BillingStripe from "@/server/core/billing/stripe-client";
 import { prisma } from "@/server/core/db";
 import { proPlan } from "@/server/modules/billing/billing.catalog";
 import { processStripeEvent } from "@/server/modules/billing/billing.events";
-import type * as BillingStripe from "@/server/modules/billing/billing.stripe";
 import { handleStripeWebhook } from "@/server/modules/billing/billing.webhook";
 import { signStripePayload } from "@/server/modules/billing/test-fixtures/sign";
 
@@ -19,7 +19,7 @@ vi.mock("@trigger.dev/sdk", () => ({ tasks: { trigger: triggerMock } }));
 
 // The real client is kept for signature verification; only the canonical subscription read is
 // replaced, so the webhook path stays end-to-end.
-vi.mock("@/server/modules/billing/billing.stripe", async (importOriginal) => {
+vi.mock("@/server/core/billing/stripe-client", async (importOriginal) => {
   const actual = await importOriginal<typeof BillingStripe>();
   const client = actual.getStripeClient();
   client.subscriptions.retrieve = stripeRetrieve;

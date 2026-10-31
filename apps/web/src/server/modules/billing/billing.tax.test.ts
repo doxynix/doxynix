@@ -14,7 +14,7 @@ const stripeMock = vi.hoisted(() => ({
   tax: { registrations: { list: vi.fn() }, settings: { retrieve: vi.fn() } },
 }));
 
-vi.mock("./billing.stripe", () => ({ getStripeClient: () => stripeMock }));
+vi.mock("@/server/core/billing/stripe-client", () => ({ getStripeClient: () => stripeMock }));
 vi.mock("@/shared/config/env.flags", async (importOriginal) => {
   const actual = await importOriginal<typeof EnvFlags>();
 

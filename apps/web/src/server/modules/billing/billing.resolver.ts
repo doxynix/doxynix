@@ -1,10 +1,10 @@
 import type Stripe from "stripe";
 
+import { getStripeClient } from "@/server/core/billing/stripe-client";
 import type { DbClient } from "@/server/core/db";
 
 import { STRIPE_PROVIDER } from "./billing.constants";
 import { NonRetryableBillingError } from "./billing.errors";
-import { getStripeClient } from "./billing.stripe";
 
 export type StoredStripeEvent = {
   api_version?: null | string;

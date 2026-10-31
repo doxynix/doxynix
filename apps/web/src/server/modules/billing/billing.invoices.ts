@@ -1,11 +1,11 @@
 import type Stripe from "stripe";
 
+import { upsertBillingIssue } from "@/server/core/billing/issue";
+import { getStripeClient } from "@/server/core/billing/stripe-client";
 import type { DbClient } from "@/server/core/db";
 
-import { upsertBillingIssue } from "./billing.issues";
 import { appendLedgerEntry } from "./billing.ledger";
 import type { BillingOwnership } from "./billing.resolver";
-import { getStripeClient } from "./billing.stripe";
 import { markSubscriptionActivated, projectSubscription } from "./billing.subscriptions";
 import { recordTaxCollection } from "./billing.tax";
 
