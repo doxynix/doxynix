@@ -88,7 +88,7 @@ export async function projectSubscription(
   });
 
   const entitlement = await tx.workspaceEntitlement.findUnique({
-    select: { accessState: true, activatedAt: true, sourceSubscriptionId: true },
+    select: { accessState: true, activatedAt: true, planCode: true, sourceSubscriptionId: true },
     where: { workspaceId: ownership.workspaceId },
   });
 
@@ -139,7 +139,10 @@ export async function projectSubscription(
 
   const terminal = isTerminalStatus(subscription.status);
   const isCurrent = terminal ? null : true;
-  const planCode = terminal ? "HOBBY" : "PRO";
+  // Only the PRO price exists in the catalog, so a non-terminal subscription means PRO — unless
+  // the workspace is already on TEAM, which no Stripe price maps to and must not be downgraded.
+  const planCode = terminal ? "HOBBY" : entitlement?.planCode === "TEAM" ? "TEAM" : "PRO";
+  const planChanged = entitlement?.planCode !== planCode;
   // Paid features and quotas live in the projection, never in Stripe: flipping `planCode` without
   // them would sell PRO at HOBBY limits. Terminal subscriptions fall back to the HOBBY row.
   const plan = planEntitlements(planCode);
@@ -253,7 +256,9 @@ export async function projectSubscription(
       revision: accessStateChanged ? { increment: 1 } : undefined,
       seatLimit,
       sourceSubscriptionId: mirror.id,
-      ...plan,
+      // Limits are only rewritten on a plan change, so a manual adjustment survives ordinary
+      // renewal events instead of being silently reset every month.
+      ...(planChanged ? plan : {}),
     },
     where: { workspaceId: ownership.workspaceId },
   });

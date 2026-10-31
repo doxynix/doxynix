@@ -133,12 +133,13 @@ export function assertAnalysisAllowed(entitlement: null | WorkspaceEntitlementVi
   }
 }
 
-// One place for the paywall flags: callers must not re-derive them from the plan code.
+// One place for the paywall flags: a suspended or unpaid workspace must not get a paid feature
+// just because the plan row still says PRO.
 export function assertPlanFeature(
   entitlement: null | WorkspaceEntitlementView,
   feature: PlanFeature,
 ): void {
-  if (entitlement == null || !entitlement[feature]) {
+  if (entitlement == null || !entitlement.hasAccess || !entitlement[feature]) {
     throw new AppError({ code: "FORBIDDEN", publicMessage: "FEATURE_NOT_IN_PLAN" });
   }
 }
@@ -147,5 +148,5 @@ export function hasPlanFeature(
   entitlement: null | WorkspaceEntitlementView,
   feature: PlanFeature,
 ): boolean {
-  return entitlement?.[feature] === true;
+  return entitlement != null && entitlement.hasAccess && entitlement[feature];
 }
