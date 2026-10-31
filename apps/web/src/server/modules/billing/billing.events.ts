@@ -28,6 +28,9 @@ const EVENT_STATUS = {
 } as const;
 
 const STALE_EVENT_MS = 15 * 60 * 1000;
+// An ENQUEUED event whose run was lost (deploy, concurrency stall) needs a longer grace than a
+// PROCESSING one, but it must not sit forever.
+const STALE_ENQUEUED_MS = 30 * 60 * 1000;
 const SWEEP_BATCH_SIZE = 50;
 
 export type StripeEventOutcome = { status: "processed" | "skipped" | "unowned" };
@@ -304,15 +307,21 @@ export async function markEventDeadLetter(billingEventId: string, error: unknown
 export async function sweepStaleStripeEvents(
   now: Date = new Date(),
 ): Promise<{ requeued: number }> {
-  const threshold = new Date(now.getTime() - STALE_EVENT_MS);
+  const processingThreshold = new Date(now.getTime() - STALE_EVENT_MS);
+  const enqueuedThreshold = new Date(now.getTime() - STALE_ENQUEUED_MS);
 
   const stale = await prisma.billingEvent.findMany({
     orderBy: { receivedAt: "asc" },
     select: { id: true, replayCount: true, stripeEventId: true },
     take: SWEEP_BATCH_SIZE,
     where: {
-      status: { in: [EVENT_STATUS.RECEIVED, EVENT_STATUS.PROCESSING] },
-      updatedAt: { lt: threshold },
+      OR: [
+        {
+          status: { in: [EVENT_STATUS.RECEIVED, EVENT_STATUS.PROCESSING] },
+          updatedAt: { lt: processingThreshold },
+        },
+        { status: EVENT_STATUS.ENQUEUED, updatedAt: { lt: enqueuedThreshold } },
+      ],
     },
   });
 
@@ -332,7 +341,12 @@ export async function sweepStaleStripeEvents(
           status: EVENT_STATUS.ENQUEUED,
           triggerRunId: runId.id,
         },
-        where: { id: event.id, status: { in: [EVENT_STATUS.RECEIVED, EVENT_STATUS.PROCESSING] } },
+        where: {
+          id: event.id,
+          status: {
+            in: [EVENT_STATUS.RECEIVED, EVENT_STATUS.PROCESSING, EVENT_STATUS.ENQUEUED],
+          },
+        },
       });
 
       requeued += 1;

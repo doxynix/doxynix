@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { DbClient } from "@/server/core/db";
@@ -25,13 +24,6 @@ vi.mock("./billing.stripe", () => ({ getStripeClient: () => stripeMock }));
 
 type LedgerRow = { amount: bigint; entryKey: string; kind: string };
 
-function uniqueViolation() {
-  return new Prisma.PrismaClientKnownRequestError("Unique constraint failed on the fields", {
-    clientVersion: Prisma.prismaVersion.client,
-    code: "P2002",
-  });
-}
-
 function asyncIterable<T>(items: Array<T>) {
   return {
     async *[Symbol.asyncIterator]() {
@@ -46,21 +38,27 @@ function createFakeTx() {
   const ledger = new Map<string, LedgerRow>();
 
   const tx = {
-    billingIssue: { upsert: vi.fn().mockResolvedValue({}) },
+    billingIssue: {
+      createMany: vi.fn().mockResolvedValue({ count: 1 }),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+    },
     billingLedgerEntry: {
-      create: vi.fn(async ({ data }: { data: LedgerRow }) => {
-        if (ledger.has(data.entryKey)) {
-          throw uniqueViolation();
+      createMany: vi.fn(async ({ data }: { data: Array<LedgerRow> }) => {
+        let count = 0;
+
+        for (const row of data) {
+          if (!ledger.has(row.entryKey)) {
+            ledger.set(row.entryKey, row);
+            count += 1;
+          }
         }
 
-        ledger.set(data.entryKey, data);
-
-        return data;
+        return { count };
       }),
     },
   };
 
-  return { issues: tx.billingIssue.upsert, ledger, tx: tx as unknown as DbClient };
+  return { issues: tx.billingIssue.createMany, ledger, tx: tx as unknown as DbClient };
 }
 
 function refund(overrides: Record<string, unknown> = {}) {
@@ -234,7 +232,7 @@ describe("applyRiskEvent", () => {
     expect(fake.ledger.get("DISPUTE_OPENED:dp_1:needs_response")?.amount).toBe(BigInt(-1900));
     expect(fake.issues).toHaveBeenCalledWith(
       expect.objectContaining({
-        create: expect.objectContaining({ kind: "DISPUTE_OPENED", severity: "CRITICAL" }),
+        data: [expect.objectContaining({ kind: "DISPUTE_OPENED", severity: "CRITICAL" })],
       }),
     );
   });
@@ -276,7 +274,7 @@ describe("applyRiskEvent", () => {
     expect(fake.ledger.size).toBe(0);
     expect(fake.issues).toHaveBeenCalledWith(
       expect.objectContaining({
-        create: expect.objectContaining({ kind: "EARLY_FRAUD_WARNING", severity: "CRITICAL" }),
+        data: [expect.objectContaining({ kind: "EARLY_FRAUD_WARNING", severity: "CRITICAL" })],
       }),
     );
   });

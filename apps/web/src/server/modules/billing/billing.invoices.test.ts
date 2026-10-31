@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { DbClient } from "@/server/core/db";
@@ -24,13 +23,6 @@ type Mirror = {
 };
 
 type LedgerRow = { amount: bigint; entryKey: string; kind: string };
-
-function uniqueViolation() {
-  return new Prisma.PrismaClientKnownRequestError("Unique constraint failed on the fields", {
-    clientVersion: Prisma.prismaVersion.client,
-    code: "P2002",
-  });
-}
 
 function subscription(overrides: Record<string, unknown> = {}) {
   return {
@@ -82,16 +74,22 @@ function createFakeTx(initial: Partial<Mirror> = {}) {
   const mirrorUpdates: Array<Record<string, unknown>> = [];
 
   const tx = {
-    billingIssue: { upsert: vi.fn().mockResolvedValue({}) },
+    billingIssue: {
+      createMany: vi.fn().mockResolvedValue({ count: 1 }),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+    },
     billingLedgerEntry: {
-      create: vi.fn(async ({ data }: { data: LedgerRow }) => {
-        if (ledger.has(data.entryKey)) {
-          throw uniqueViolation();
+      createMany: vi.fn(async ({ data }: { data: Array<LedgerRow> }) => {
+        let count = 0;
+
+        for (const row of data) {
+          if (!ledger.has(row.entryKey)) {
+            ledger.set(row.entryKey, row);
+            count += 1;
+          }
         }
 
-        ledger.set(data.entryKey, data);
-
-        return data;
+        return { count };
       }),
     },
     billingSubscription: {

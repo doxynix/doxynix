@@ -16,20 +16,27 @@ export type BillingIssueInput = {
 export async function upsertBillingIssue(db: DbClient, input: BillingIssueInput): Promise<void> {
   const now = new Date();
 
-  await db.billingIssue.upsert({
-    create: {
-      dedupeKey: input.dedupeKey,
-      details: input.details ?? Prisma.DbNull,
-      firstSeenAt: now,
-      kind: input.kind,
-      lastSeenAt: now,
-      severity: input.severity,
-      source: input.source,
-      status: "OPEN",
-      stripeObjectId: input.stripeObjectId ?? null,
-      workspaceId: input.workspaceId ?? null,
-    },
-    update: { lastSeenAt: now },
+  // Same reason as the ledger: ON CONFLICT DO NOTHING cannot abort the caller's transaction.
+  await db.billingIssue.createMany({
+    data: [
+      {
+        dedupeKey: input.dedupeKey,
+        details: input.details ?? Prisma.DbNull,
+        firstSeenAt: now,
+        kind: input.kind,
+        lastSeenAt: now,
+        severity: input.severity,
+        source: input.source,
+        status: "OPEN",
+        stripeObjectId: input.stripeObjectId ?? null,
+        workspaceId: input.workspaceId ?? null,
+      },
+    ],
+    skipDuplicates: true,
+  });
+
+  await db.billingIssue.updateMany({
+    data: { lastSeenAt: now },
     where: { dedupeKey: input.dedupeKey },
   });
 }

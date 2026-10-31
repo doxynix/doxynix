@@ -10,7 +10,10 @@ import { handleStripeWebhook } from "./billing.webhook";
 
 const dbMock = vi.hoisted(() => ({
   billingEvent: { create: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
-  billingIssue: { upsert: vi.fn() },
+  billingIssue: {
+    createMany: vi.fn().mockResolvedValue({ count: 1 }),
+    updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+  },
 }));
 
 const triggerMock = vi.hoisted(() => vi.fn());
@@ -68,7 +71,8 @@ describe("stripe webhook intake", () => {
       .mockResolvedValue({ id: "be_1", replayCount: 0, status: "RECEIVED" });
     dbMock.billingEvent.findUnique.mockReset().mockResolvedValue(null);
     dbMock.billingEvent.update.mockReset().mockResolvedValue({});
-    dbMock.billingIssue.upsert.mockReset().mockResolvedValue({});
+    dbMock.billingIssue.createMany.mockReset().mockResolvedValue({ count: 1 });
+    dbMock.billingIssue.updateMany.mockReset().mockResolvedValue({ count: 1 });
     triggerMock.mockReset().mockResolvedValue({ id: "run_1" });
   });
 
@@ -279,7 +283,7 @@ describe("stripe webhook intake", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ duplicate: true, hashMismatch: true });
-    expect(dbMock.billingIssue.upsert).toHaveBeenCalledTimes(1);
+    expect(dbMock.billingIssue.createMany).toHaveBeenCalledTimes(1);
     expect(triggerMock).not.toHaveBeenCalled();
   });
 });

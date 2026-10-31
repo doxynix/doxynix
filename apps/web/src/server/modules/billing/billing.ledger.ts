@@ -5,6 +5,7 @@ import type { DbClient } from "@/server/core/db";
 export type LedgerEntryInput = {
   amount: bigint;
   billingEventId?: null | string;
+  correctsEntryId?: null | string;
   currency: string;
   details?: Prisma.InputJsonValue;
   kind: string;
@@ -22,11 +23,14 @@ export function ledgerEntryKey(kind: string, stripeObjectId: string, status: str
 }
 
 export async function appendLedgerEntry(db: DbClient, input: LedgerEntryInput): Promise<boolean> {
-  try {
-    await db.billingLedgerEntry.create({
-      data: {
+  // `skipDuplicates` compiles to ON CONFLICT DO NOTHING: a replay must not abort the surrounding
+  // transaction, which is what a caught unique violation does.
+  const result = await db.billingLedgerEntry.createMany({
+    data: [
+      {
         amount: input.amount,
         billingEventId: input.billingEventId ?? null,
+        correctsEntryId: input.correctsEntryId ?? null,
         currency: input.currency,
         details: input.details ?? Prisma.DbNull,
         entryKey: ledgerEntryKey(input.kind, input.stripeObjectId, input.status),
@@ -37,14 +41,9 @@ export async function appendLedgerEntry(db: DbClient, input: LedgerEntryInput): 
         stripeObjectId: input.stripeObjectId,
         workspaceId: input.workspaceId,
       },
-    });
+    ],
+    skipDuplicates: true,
+  });
 
-    return true;
-  } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      return false;
-    }
-
-    throw error;
-  }
+  return result.count > 0;
 }

@@ -29,7 +29,10 @@ const dbMock = vi.hoisted(() => ({
   billingCheckoutSession: { findFirst: vi.fn(), upsert: vi.fn() },
   billingCustomer: { findFirst: vi.fn() },
   billingEvent: { findMany: vi.fn(), findUnique: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
-  billingIssue: { upsert: vi.fn() },
+  billingIssue: {
+    createMany: vi.fn().mockResolvedValue({ count: 1 }),
+    updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+  },
   billingSubscription: { findUnique: vi.fn(), updateMany: vi.fn(), upsert: vi.fn() },
   workspaceEntitlement: { findUnique: vi.fn(), upsert: vi.fn() },
   workspaceMember: { count: vi.fn() },
@@ -104,7 +107,8 @@ describe("stripe event worker", () => {
     dbMock.billingEvent.findUnique.mockReset().mockResolvedValue(eventRow());
     dbMock.billingEvent.update.mockReset().mockResolvedValue({});
     dbMock.billingEvent.updateMany.mockReset().mockResolvedValue({ count: 0 });
-    dbMock.billingIssue.upsert.mockReset().mockResolvedValue({});
+    dbMock.billingIssue.createMany.mockReset().mockResolvedValue({ count: 1 });
+    dbMock.billingIssue.updateMany.mockReset().mockResolvedValue({ count: 1 });
     dbMock.billingSubscription.findUnique.mockReset().mockResolvedValue(null);
     dbMock.billingSubscription.updateMany.mockReset().mockResolvedValue({ count: 0 });
     dbMock.billingSubscription.upsert.mockReset().mockResolvedValue({ id: "bs_1" });
@@ -172,8 +176,9 @@ describe("stripe event worker", () => {
     expect(callArg(dbMock.workspaceEntitlement.upsert)).toMatchObject({
       update: { accessState: "REVIEW" },
     });
-    expect(callArg(dbMock.billingIssue.upsert)).toMatchObject({
-      create: { kind: "UNOWNED_STRIPE_OBJECT", severity: "CRITICAL" },
+    expect(callArg(dbMock.billingIssue.createMany)).toMatchObject({
+      data: [{ kind: "UNOWNED_STRIPE_OBJECT", severity: "CRITICAL" }],
+      skipDuplicates: true,
     });
   });
 
@@ -185,7 +190,7 @@ describe("stripe event worker", () => {
 
     expect(outcome).toEqual({ status: "unowned" });
     expect(dbMock.workspaceEntitlement.upsert).not.toHaveBeenCalled();
-    expect(dbMock.billingIssue.upsert).toHaveBeenCalledTimes(1);
+    expect(dbMock.billingIssue.createMany).toHaveBeenCalledTimes(1);
   });
 
   it("refuses an event produced by another API version without calling Stripe", async () => {
@@ -272,8 +277,9 @@ describe("stripe event worker", () => {
       data: { lastError: "boom", status: "DEAD_LETTER" },
       where: { id: "be_1" },
     });
-    expect(callArg(dbMock.billingIssue.upsert)).toMatchObject({
-      create: { kind: "EVENT_DEAD_LETTER", severity: "CRITICAL" },
+    expect(callArg(dbMock.billingIssue.createMany)).toMatchObject({
+      data: [{ kind: "EVENT_DEAD_LETTER", severity: "CRITICAL" }],
+      skipDuplicates: true,
     });
   });
 
@@ -288,8 +294,13 @@ describe("stripe event worker", () => {
     expect(dbMock.billingEvent.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: {
-          status: { in: ["RECEIVED", "PROCESSING"] },
-          updatedAt: { lt: expect.any(Date) },
+          OR: [
+            {
+              status: { in: ["RECEIVED", "PROCESSING"] },
+              updatedAt: { lt: expect.any(Date) },
+            },
+            { status: "ENQUEUED", updatedAt: { lt: expect.any(Date) } },
+          ],
         },
       }),
     );
@@ -309,7 +320,7 @@ describe("stripe event worker", () => {
     expect(dbMock.billingEvent.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          status: { in: ["RECEIVED", "PROCESSING"] },
+          OR: expect.arrayContaining([expect.objectContaining({ status: "ENQUEUED" })]),
         }),
       }),
     );
@@ -343,5 +354,20 @@ describe("stripe event worker", () => {
 
     expect(source).toContain('pattern: "*/15 * * * *"');
     expect(source).toContain('window: "5m"');
+  });
+
+  it("requeues a stale ENQUEUED event whose run was lost", async () => {
+    dbMock.billingEvent.findMany.mockResolvedValue([
+      { id: "be_lost", replayCount: 0, stripeEventId: "evt_lost" },
+    ]);
+
+    const result = await sweepStaleStripeEvents(new Date("2026-10-30T12:00:00.000Z"));
+
+    expect(result).toEqual({ requeued: 1 });
+    expect(triggerMock).toHaveBeenCalledWith(
+      "billing-process-stripe-event",
+      { billingEventId: "be_lost" },
+      { idempotencyKey: "evt_lost:replay:1" },
+    );
   });
 });

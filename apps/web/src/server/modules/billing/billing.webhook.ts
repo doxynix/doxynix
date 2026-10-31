@@ -9,6 +9,7 @@ import { STRIPE_LIVEMODE, STRIPE_WEBHOOK_SECRET } from "@/shared/config/env.serv
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 
+import { upsertBillingIssue } from "./billing.issues";
 import { getStripeClient } from "./billing.stripe";
 import type { processStripeEventTask } from "./tasks/process-stripe-event.task";
 
@@ -98,18 +99,13 @@ async function recordHashMismatch(event: Stripe.Event): Promise<void> {
   });
 
   try {
-    await prisma.billingIssue.upsert({
-      create: {
-        dedupeKey,
-        details: { type: event.type },
-        kind: "PAYLOAD_HASH_MISMATCH",
-        severity: "CRITICAL",
-        source: "stripe_webhook",
-        status: "OPEN",
-        stripeObjectId: event.id,
-      },
-      update: { lastSeenAt: new Date() },
-      where: { dedupeKey },
+    await upsertBillingIssue(prisma, {
+      dedupeKey,
+      details: { type: event.type },
+      kind: "PAYLOAD_HASH_MISMATCH",
+      severity: "CRITICAL",
+      source: "stripe_webhook",
+      stripeObjectId: event.id,
     });
   } catch (error) {
     appLogger.error({ error, msg: "stripe_webhook_issue_write_failed", stripeEventId: event.id });

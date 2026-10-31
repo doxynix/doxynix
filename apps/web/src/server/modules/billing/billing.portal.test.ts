@@ -116,7 +116,10 @@ describe("cancel at period end", () => {
 
   function createTx() {
     return {
-      billingIssue: { upsert: vi.fn().mockResolvedValue({}) },
+      billingIssue: {
+        createMany: vi.fn().mockResolvedValue({ count: 1 }),
+        updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+      },
       billingSubscription: {
         findUnique: vi.fn().mockResolvedValue({
           activatedAt: NOW,

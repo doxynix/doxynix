@@ -42,7 +42,10 @@ function ownership() {
 
 function createTx() {
   const tx = {
-    billingIssue: { upsert: vi.fn().mockResolvedValue({}) },
+    billingIssue: {
+      createMany: vi.fn().mockResolvedValue({ count: 1 }),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+    },
     billingSubscription: {
       findUnique: vi.fn().mockResolvedValue(null),
       updateMany: vi.fn().mockResolvedValue({ count: 1 }),
@@ -324,9 +327,9 @@ describe("markSubscriptionActivated", () => {
     expect(callArg(tx.workspaceEntitlement.upsert)).toMatchObject({
       update: { seatLimit: 3 },
     });
-    expect(tx.billingIssue.upsert).toHaveBeenCalledWith(
+    expect(tx.billingIssue.createMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        create: expect.objectContaining({ kind: "SEATS_BELOW_MEMBERS" }),
+        data: [expect.objectContaining({ kind: "SEATS_BELOW_MEMBERS" })],
       }),
     );
   });

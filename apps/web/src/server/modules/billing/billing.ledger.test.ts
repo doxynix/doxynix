@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { DbClient } from "@/server/core/db";
@@ -16,26 +15,22 @@ type LedgerRow = {
   stripeObjectId: string;
 };
 
-function uniqueViolation() {
-  return new Prisma.PrismaClientKnownRequestError("Unique constraint failed on the fields", {
-    clientVersion: Prisma.prismaVersion.client,
-    code: "P2002",
-  });
-}
-
 function createDb() {
   const rows = new Map<string, LedgerRow>();
 
   const db = {
     billingLedgerEntry: {
-      create: vi.fn(async ({ data }: { data: LedgerRow }) => {
-        if (rows.has(data.entryKey)) {
-          throw uniqueViolation();
+      createMany: vi.fn(async ({ data }: { data: Array<LedgerRow> }) => {
+        let count = 0;
+
+        for (const row of data) {
+          if (!rows.has(row.entryKey)) {
+            rows.set(row.entryKey, row);
+            count += 1;
+          }
         }
 
-        rows.set(data.entryKey, data);
-
-        return data;
+        return { count };
       }),
     },
   };
