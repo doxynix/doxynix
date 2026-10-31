@@ -24,6 +24,7 @@ import type {
   AdminUserSummary,
   AdminUsersFilterInput,
 } from "./admin-user.schemas";
+import { assertNotSubscriptionOwner } from "./owned-subscription";
 import { userMapper } from "./user.mapper";
 
 export type ReauthInput = {
@@ -179,6 +180,8 @@ export const adminUserService = {
       headers: reauth.headers,
       twoFactorEnabled: reauth.twoFactorEnabled,
     });
+
+    await assertNotSubscriptionOwner(db, input.id);
 
     try {
       await db.user.delete({ where: { id: input.id } });

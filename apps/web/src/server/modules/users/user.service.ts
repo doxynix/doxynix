@@ -17,6 +17,7 @@ import {
 import { realtimeService } from "@/server/core/realtime";
 import { handlePrismaError } from "@/server/utils/handle-error";
 
+import { assertNotSubscriptionOwner } from "./owned-subscription";
 import { userMapper } from "./user.mapper";
 
 export function assertCanDisconnectAccount(input: {
@@ -97,6 +98,8 @@ async function runSerializableTransaction(
 
 export const userService = {
   async deleteAccount(db: DbClient, userId: string) {
+    await assertNotSubscriptionOwner(db, userId);
+
     const user = await prisma.user.findUnique({
       select: { imageKey: true },
       where: { id: userId },
