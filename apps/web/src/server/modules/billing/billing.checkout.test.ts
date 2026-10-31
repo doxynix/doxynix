@@ -20,6 +20,16 @@ vi.mock("./billing.stripe", () => ({
   stripeEnvironment: () => "test",
 }));
 
+const taxMock = vi.hoisted(() => ({
+  preflight: vi.fn(),
+  required: [] as string[],
+}));
+
+vi.mock("./billing.tax", () => ({
+  requiredJurisdictions: () => taxMock.required,
+  runTaxPreflight: taxMock.preflight,
+}));
+
 type OperationRow = {
   errorCode: null | string;
   id: string;
@@ -273,6 +283,8 @@ describe("createCheckoutSession", () => {
       .mockReset()
       .mockResolvedValue({ id: "cs_new", status: "open", url: CHECKOUT_URL });
     stripeMock.checkout.sessions.retrieve.mockReset();
+    taxMock.required = [];
+    taxMock.preflight.mockReset();
   });
 
   it("creates a classic subscription session with tax, address and seat quantity", async () => {
@@ -392,6 +404,23 @@ describe("createCheckoutSession", () => {
     await expect(createCheckoutSession(checkoutInput(fake))).rejects.toMatchObject({
       code: "CONFLICT",
       message: "CHECKOUT_IN_PROGRESS",
+    });
+    expect(stripeMock.checkout.sessions.create).not.toHaveBeenCalled();
+    expect(fake.sessions).toHaveLength(0);
+  });
+
+  it("refuses checkout when a required tax jurisdiction has no registration", async () => {
+    taxMock.required = ["US"];
+    taxMock.preflight.mockResolvedValue({
+      activeJurisdictions: [],
+      missingJurisdictions: ["US"],
+      settingsActive: true,
+    });
+    const fake = createFakeDb({ existingCustomerId: "cus_existing" });
+
+    await expect(createCheckoutSession(checkoutInput(fake))).rejects.toMatchObject({
+      code: "PRECONDITION_FAILED",
+      message: "TAX_NOT_READY",
     });
     expect(stripeMock.checkout.sessions.create).not.toHaveBeenCalled();
     expect(fake.sessions).toHaveLength(0);

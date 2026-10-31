@@ -11,6 +11,7 @@ import { STRIPE_PROVIDER } from "./billing.constants";
 import { runBillingOperation, stripeIdempotencyKey } from "./billing.operations";
 import type { CreateCheckoutResult } from "./billing.schemas";
 import { getStripeClient, stripeEnvironment } from "./billing.stripe";
+import { requiredJurisdictions, runTaxPreflight } from "./billing.tax";
 
 const CHECKOUT_RETURN_PATH = "/dashboard/settings/members";
 // Stripe expires an open Checkout Session after 24 hours by default.
@@ -200,25 +201,36 @@ export async function createCheckoutSession(
         throw new TRPCError({ code: "CONFLICT", message: "CHECKOUT_IN_PROGRESS" });
       }
 
-      const customerId = await ensureCustomer(input);
-
-      const params: Stripe.Checkout.SessionCreateParams = {
-        automatic_tax: { enabled: true },
-        billing_address_collection: "required",
-        cancel_url: cancelUrl,
-        customer: customerId,
-        customer_update: { address: "auto" },
-        line_items: [{ price: plan.priceId, quantity }],
-        mode: "subscription",
-        // Pins proration/cancellation behaviour to classic regardless of the account default.
-        subscription_data: { billing_mode: { type: "classic" } },
-        success_url: successUrl,
-        tax_id_collection: { enabled: true, required: "never" },
-      };
-
       let session: Stripe.Checkout.Session;
+      let customerId = "";
 
       try {
+        // With required jurisdictions configured, a sale must not start while Stripe Tax lacks a
+        // registration: `automatic_tax` would otherwise collect zero and look like success.
+        if (requiredJurisdictions().length > 0) {
+          const preflight = await runTaxPreflight(input.db);
+
+          if (!preflight.settingsActive || preflight.missingJurisdictions.length > 0) {
+            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "TAX_NOT_READY" });
+          }
+        }
+
+        customerId = await ensureCustomer(input);
+
+        const params: Stripe.Checkout.SessionCreateParams = {
+          automatic_tax: { enabled: true },
+          billing_address_collection: "required",
+          cancel_url: cancelUrl,
+          customer: customerId,
+          customer_update: { address: "auto" },
+          line_items: [{ price: plan.priceId, quantity }],
+          mode: "subscription",
+          // Pins proration/cancellation behaviour to classic regardless of the account default.
+          subscription_data: { billing_mode: { type: "classic" } },
+          success_url: successUrl,
+          tax_id_collection: { enabled: true, required: "never" },
+        };
+
         session = await getStripeClient().checkout.sessions.create(params, {
           idempotencyKey: stripeIdempotencyKey({
             environment: stripeEnvironment(),
