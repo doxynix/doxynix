@@ -163,7 +163,7 @@ describe("invoice.finalization_failed", () => {
 
     expect(fake.tx.billingSubscription.updateMany).toHaveBeenCalledWith({
       data: { needsAction: "TAX_LOCATION" },
-      where: { stripeSubscriptionId: "sub_1" },
+      where: { externalSubscriptionId: "sub_1" },
     });
     expect([...fake.issues.values()]).toEqual([expect.objectContaining({ kind: "TAX_LOCATION" })]);
     expect(fake.tx).not.toHaveProperty("workspaceEntitlement");

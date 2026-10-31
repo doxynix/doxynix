@@ -132,12 +132,12 @@ async function appendRefundEntry(
     billingEventId: input.billingEventId,
     currency: refund.currency,
     details: { status: refund.status },
+    externalObjectId: refund.id,
     kind: succeeded ? "REFUND_SUCCEEDED" : "REFUND_FAILED",
     occurredAt: new Date(refund.created * 1000),
     relatedInvoiceId: input.links.invoiceId,
     relatedSubscriptionId: input.links.subscriptionId,
     status: refund.status ?? "unknown",
-    stripeObjectId: refund.id,
     workspaceId: input.ownership.workspaceId,
   });
 }
@@ -161,7 +161,7 @@ async function applyDispute(
   const alreadyOpened =
     (await tx.billingLedgerEntry.findFirst({
       select: { id: true },
-      where: { kind: "DISPUTE_OPENED", stripeObjectId: dispute.id },
+      where: { externalObjectId: dispute.id, kind: "DISPUTE_OPENED" },
     })) != null;
 
   // Cash view: opening holds the amount once, `won` returns it (and only if it was held), every
@@ -183,12 +183,12 @@ async function applyDispute(
       billingEventId: input.billingEventId,
       currency: dispute.currency,
       details: { status },
+      externalObjectId: dispute.id,
       kind: entry.kind,
       occurredAt: new Date(dispute.created * 1000),
       relatedInvoiceId: input.links.invoiceId,
       relatedSubscriptionId: input.links.subscriptionId,
       status: entry.keyStatus,
-      stripeObjectId: dispute.id,
       workspaceId: input.ownership.workspaceId,
     });
   }
@@ -204,10 +204,10 @@ async function applyDispute(
   await upsertBillingIssue(tx, {
     dedupeKey: `dispute_opened:${dispute.id}`,
     details: { amount: dispute.amount, status },
+    externalObjectId: dispute.id,
     kind: "DISPUTE_OPENED",
     severity: "CRITICAL",
     source: "stripe_risk",
-    stripeObjectId: dispute.id,
     workspaceId: input.ownership.workspaceId,
   });
 }
@@ -262,10 +262,10 @@ export async function applyRiskEvent(
       await upsertBillingIssue(tx, {
         dedupeKey: `early_fraud_warning:${input.canonical.warning.id}`,
         details: { created: input.canonical.warning.created },
+        externalObjectId: input.canonical.warning.id,
         kind: "EARLY_FRAUD_WARNING",
         severity: "CRITICAL",
         source: "stripe_risk",
-        stripeObjectId: input.canonical.warning.id,
         workspaceId: input.ownership.workspaceId,
       });
       break;

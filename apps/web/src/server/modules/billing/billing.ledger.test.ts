@@ -12,7 +12,7 @@ type LedgerRow = {
   currency: string;
   entryKey: string;
   kind: string;
-  stripeObjectId: string;
+  externalObjectId: string;
 };
 
 function createDb() {
@@ -55,11 +55,11 @@ describe("appendLedgerEntry", () => {
     const appended = await appendLedgerEntry(fake.db, {
       amount: BigInt(1900),
       currency: "usd",
+      externalObjectId: "in_1",
       kind: "INVOICE_PAID",
       occurredAt: OCCURRED_AT,
       relatedInvoiceId: "in_1",
       status: "paid",
-      stripeObjectId: "in_1",
       workspaceId: WORKSPACE_ID,
     });
 
@@ -67,8 +67,8 @@ describe("appendLedgerEntry", () => {
     expect(fake.rows.get("INVOICE_PAID:in_1:paid")).toMatchObject({
       amount: BigInt(1900),
       currency: "usd",
+      externalObjectId: "in_1",
       kind: "INVOICE_PAID",
-      stripeObjectId: "in_1",
     });
   });
 
@@ -77,10 +77,10 @@ describe("appendLedgerEntry", () => {
     const input = {
       amount: BigInt(1900),
       currency: "usd",
+      externalObjectId: "in_1",
       kind: "INVOICE_PAID",
       occurredAt: OCCURRED_AT,
       status: "paid",
-      stripeObjectId: "in_1",
       workspaceId: WORKSPACE_ID,
     };
 
@@ -97,9 +97,9 @@ describe("appendLedgerEntry", () => {
     const base = {
       amount: BigInt(1900),
       currency: "usd",
+      externalObjectId: "re_1",
       kind: "REFUND_SUCCEEDED",
       occurredAt: OCCURRED_AT,
-      stripeObjectId: "re_1",
       workspaceId: WORKSPACE_ID,
     };
 

@@ -86,25 +86,25 @@ function differs(local: Record<string, unknown>, subscription: Stripe.Subscripti
   }
 
   return (
-    local.stripeStatus !== subscription.status ||
-    local.stripePriceId !== item.price.id ||
+    local.externalStatus !== subscription.status ||
+    local.externalPriceId !== item.price.id ||
     local.quantity !== (item.quantity ?? 1) ||
     local.currency !== item.price.currency ||
-    local.stripeSubscriptionItemId !== item.id ||
+    local.externalSubscriptionItemId !== item.id ||
     seconds(local.currentPeriodStart as Date) !== item.current_period_start ||
     seconds(local.currentPeriodEnd as Date) !== item.current_period_end ||
     local.cancelAtPeriodEnd !== subscription.cancel_at_period_end
   );
 }
 
-async function unownedIssue(stripeObjectId: string): Promise<void> {
+async function unownedIssue(externalObjectId: string): Promise<void> {
   await upsertBillingIssue(prisma, {
-    dedupeKey: `unowned:${stripeObjectId}`,
+    dedupeKey: `unowned:${externalObjectId}`,
     details: { source: "reconciliation" },
+    externalObjectId,
     kind: "UNOWNED_STRIPE_OBJECT",
     severity: "CRITICAL",
     source: "stripe_reconciliation",
-    stripeObjectId,
   });
 }
 
@@ -131,7 +131,7 @@ async function reconcileSubscription(
           where: { externalCustomerId: customerId, provider: STRIPE_PROVIDER },
         });
   const local = await prisma.billingSubscription.findUnique({
-    where: { stripeSubscriptionId: subscription.id },
+    where: { externalSubscriptionId: subscription.id },
   });
 
   if (mapping == null) {
@@ -155,10 +155,10 @@ async function reconcileSubscription(
     await upsertBillingIssue(prisma, {
       dedupeKey: `owner_mismatch:${subscription.id}`,
       details: { localWorkspaceId: local.workspaceId },
+      externalObjectId: subscription.id,
       kind: "OWNER_MISMATCH",
       severity: "CRITICAL",
       source: "stripe_reconciliation",
-      stripeObjectId: subscription.id,
       workspaceId: local.workspaceId,
     });
 
@@ -206,19 +206,19 @@ async function reconcileSubscription(
 async function reconcileMissingLocal(seen: Set<string>, now: Date): Promise<number> {
   const stripe = getStripeClient();
   const locals = await prisma.billingSubscription.findMany({
-    select: { stripeSubscriptionId: true, workspaceId: true },
+    select: { externalSubscriptionId: true, workspaceId: true },
     where: { isCurrent: true },
   });
   let mismatches = 0;
 
   for (const local of locals) {
-    if (seen.has(local.stripeSubscriptionId)) {
+    if (seen.has(local.externalSubscriptionId)) {
       continue;
     }
 
     try {
       // A direct retrieve separates a pagination gap from a genuinely deleted subscription.
-      const subscription = await stripe.subscriptions.retrieve(local.stripeSubscriptionId, {
+      const subscription = await stripe.subscriptions.retrieve(local.externalSubscriptionId, {
         expand: ["latest_invoice"],
       });
       const customerId = idOf(subscription.customer);
@@ -246,19 +246,19 @@ async function reconcileMissingLocal(seen: Set<string>, now: Date): Promise<numb
 
       await prisma.billingSubscription.updateMany({
         data: { needsReview: true, reviewReason: "MISSING_IN_STRIPE" },
-        where: { stripeSubscriptionId: local.stripeSubscriptionId },
+        where: { externalSubscriptionId: local.externalSubscriptionId },
       });
       await prisma.workspaceEntitlement.updateMany({
         data: { accessState: "REVIEW" },
         where: { workspaceId: local.workspaceId },
       });
       await upsertBillingIssue(prisma, {
-        dedupeKey: `missing_in_stripe:${local.stripeSubscriptionId}`,
+        dedupeKey: `missing_in_stripe:${local.externalSubscriptionId}`,
         details: {},
+        externalObjectId: local.externalSubscriptionId,
         kind: "MISSING_IN_STRIPE",
         severity: "CRITICAL",
         source: "stripe_reconciliation",
-        stripeObjectId: local.stripeSubscriptionId,
         workspaceId: local.workspaceId,
       });
 
@@ -272,7 +272,7 @@ async function reconcileMissingLocal(seen: Set<string>, now: Date): Promise<numb
 async function reconcileLedger(now: Date): Promise<number> {
   const stripe = getStripeClient();
   const entries = await prisma.billingLedgerEntry.findMany({
-    select: { amount: true, currency: true, id: true, stripeObjectId: true, workspaceId: true },
+    select: { amount: true, currency: true, externalObjectId: true, id: true, workspaceId: true },
     where: {
       kind: "INVOICE_PAID",
       occurredAt: { gte: new Date(now.getTime() - LEDGER_LOOKBACK_MS) },
@@ -284,19 +284,19 @@ async function reconcileLedger(now: Date): Promise<number> {
     let invoice: Stripe.Invoice;
 
     try {
-      invoice = await stripe.invoices.retrieve(entry.stripeObjectId);
+      invoice = await stripe.invoices.retrieve(entry.externalObjectId);
     } catch (error) {
       if (!isMissingResource(error)) {
         throw error;
       }
 
       await upsertBillingIssue(prisma, {
-        dedupeKey: `missing_invoice:${entry.stripeObjectId}`,
+        dedupeKey: `missing_invoice:${entry.externalObjectId}`,
         details: {},
+        externalObjectId: entry.externalObjectId,
         kind: "MISSING_INVOICE",
         severity: "CRITICAL",
         source: "stripe_reconciliation",
-        stripeObjectId: entry.stripeObjectId,
       });
       mismatches += 1;
       continue;
@@ -314,11 +314,11 @@ async function reconcileLedger(now: Date): Promise<number> {
       correctsEntryId: entry.id,
       currency: invoice.currency,
       details: { source: "reconciliation" },
+      externalObjectId: entry.externalObjectId,
       kind: "INVOICE_PAID_CORRECTION",
       occurredAt: now,
       relatedInvoiceId: invoice.id,
       status: `correction:${expected - entry.amount}`,
-      stripeObjectId: entry.stripeObjectId,
       workspaceId: entry.workspaceId,
     });
     mismatches += 1;

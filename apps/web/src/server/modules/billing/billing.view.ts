@@ -14,8 +14,8 @@ export async function getBillingState(db: DbClient, workspaceId: string): Promis
       select: {
         cancelAtPeriodEnd: true,
         currentPeriodEnd: true,
+        externalStatus: true,
         quantity: true,
-        stripeStatus: true,
       },
       where: { isCurrent: true, workspaceId },
     }),
@@ -47,7 +47,7 @@ export async function getBillingState(db: DbClient, workspaceId: string): Promis
             cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
             currentPeriodEnd: subscription.currentPeriodEnd,
             quantity: subscription.quantity,
-            status: subscription.stripeStatus,
+            status: subscription.externalStatus,
           },
   };
 }

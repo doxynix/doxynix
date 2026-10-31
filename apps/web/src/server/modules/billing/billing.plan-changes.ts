@@ -1,11 +1,12 @@
 import { TRPCError } from "@trpc/server";
 
+import { stripeIdempotencyKey } from "@/server/core/billing/idempotency";
 import { getStripeClient, stripeEnvironment } from "@/server/core/billing/stripe-client";
 import type { DbClient } from "@/server/core/db";
 import { getWorkspaceEntitlement } from "@/server/core/entitlements";
 
 import { resolvePlanForPrice } from "./billing.catalog";
-import { runBillingOperation, stripeIdempotencyKey } from "./billing.operations";
+import { runBillingOperation } from "./billing.operations";
 
 export type ProrationBehavior = "always_invoice" | "create_prorations";
 
@@ -42,10 +43,10 @@ export type SeatChangeResult =
 type CurrentSubscription = {
   currency: string;
   quantity: number;
-  stripePriceId: string;
-  stripeStatus: string;
-  stripeSubscriptionId: string;
-  stripeSubscriptionItemId: string;
+  externalPriceId: string;
+  externalStatus: string;
+  externalSubscriptionId: string;
+  externalSubscriptionItemId: string;
 };
 
 // Seat changes for one workspace are serialized: two parallel commands must not interleave their
@@ -92,23 +93,23 @@ async function loadChangeableSubscription(
   const subscription = await db.billingSubscription.findFirst({
     select: {
       currency: true,
+      externalPriceId: true,
+      externalStatus: true,
+      externalSubscriptionId: true,
+      externalSubscriptionItemId: true,
       quantity: true,
-      stripePriceId: true,
-      stripeStatus: true,
-      stripeSubscriptionId: true,
-      stripeSubscriptionItemId: true,
     },
     where: { isCurrent: true, workspaceId },
   });
 
-  if (subscription?.stripeStatus !== "active") {
+  if (subscription?.externalStatus !== "active") {
     throw notChangeable();
   }
 
   try {
     resolvePlanForPrice({
       currency: subscription.currency,
-      id: subscription.stripePriceId,
+      id: subscription.externalPriceId,
       interval: "month",
     });
   } catch {
@@ -136,9 +137,9 @@ export async function previewPlanChange(input: PreviewPlanChangeInput): Promise<
 
   // Read-only: the preview must never mutate the subscription.
   const preview = await getStripeClient().invoices.createPreview({
-    subscription: subscription.stripeSubscriptionId,
+    subscription: subscription.externalSubscriptionId,
     subscription_details: {
-      items: [{ id: subscription.stripeSubscriptionItemId, quantity: input.quantity }],
+      items: [{ id: subscription.externalSubscriptionItemId, quantity: input.quantity }],
       proration_behavior: prorationBehavior,
     },
   });
@@ -172,9 +173,9 @@ export async function changeSeats(input: PlanChangeInput): Promise<SeatChangeRes
         const prorationBehavior = prorationFor(input.quantity, subscription.quantity);
 
         const updated = await getStripeClient().subscriptions.update(
-          subscription.stripeSubscriptionId,
+          subscription.externalSubscriptionId,
           {
-            items: [{ id: subscription.stripeSubscriptionItemId, quantity: input.quantity }],
+            items: [{ id: subscription.externalSubscriptionItemId, quantity: input.quantity }],
             proration_behavior: prorationBehavior,
           },
           {
@@ -189,8 +190,8 @@ export async function changeSeats(input: PlanChangeInput): Promise<SeatChangeRes
 
         // The response never grants access; only the webhook projection does.
         return {
+          externalObjectId: updated.id,
           result: { prorationBehavior, quantity: input.quantity },
-          stripeObjectId: updated.id,
         };
       });
     },

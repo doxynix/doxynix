@@ -1,10 +1,17 @@
+import { AccessState } from "@doxynix/shared";
 import { TRPCError } from "@trpc/server";
 
 import { appLogger } from "@/server/core/app-logger";
 import { syncWorkspaceSeats } from "@/server/core/billing/seat-sync";
 import { prisma } from "@/server/core/db";
 
-const LIVE_ACCESS_STATES = ["ACTIVE", "GRACE", "PENDING", "REVIEW", "SUSPENDED"];
+const LIVE_ACCESS_STATES: AccessState[] = [
+  AccessState.ACTIVE,
+  AccessState.GRACE,
+  AccessState.PENDING,
+  AccessState.REVIEW,
+  AccessState.SUSPENDED,
+];
 
 // Deleting the only OWNER leaves the subscription without anyone who can open the Portal, while
 // Stripe keeps charging. Ownership has to move (or the subscription has to end) first.

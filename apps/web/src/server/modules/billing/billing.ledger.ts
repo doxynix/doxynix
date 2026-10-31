@@ -13,13 +13,13 @@ export type LedgerEntryInput = {
   relatedInvoiceId?: null | string;
   relatedSubscriptionId?: null | string;
   status: string;
-  stripeObjectId: string;
+  externalObjectId: string;
   workspaceId: string;
 };
 
 // Natural key: replaying the same Stripe object in the same state must not append twice.
-export function ledgerEntryKey(kind: string, stripeObjectId: string, status: string): string {
-  return `${kind}:${stripeObjectId}:${status}`;
+export function ledgerEntryKey(kind: string, externalObjectId: string, status: string): string {
+  return `${kind}:${externalObjectId}:${status}`;
 }
 
 export async function appendLedgerEntry(db: DbClient, input: LedgerEntryInput): Promise<boolean> {
@@ -33,12 +33,12 @@ export async function appendLedgerEntry(db: DbClient, input: LedgerEntryInput): 
         correctsEntryId: input.correctsEntryId ?? null,
         currency: input.currency,
         details: input.details ?? Prisma.DbNull,
-        entryKey: ledgerEntryKey(input.kind, input.stripeObjectId, input.status),
+        entryKey: ledgerEntryKey(input.kind, input.externalObjectId, input.status),
+        externalObjectId: input.externalObjectId,
         kind: input.kind,
         occurredAt: input.occurredAt,
         relatedInvoiceId: input.relatedInvoiceId ?? null,
         relatedSubscriptionId: input.relatedSubscriptionId ?? null,
-        stripeObjectId: input.stripeObjectId,
         workspaceId: input.workspaceId,
       },
     ],

@@ -68,7 +68,7 @@
 
 - **DLQ**: `billing_events.status = DEAD_LETTER`. Переиграть через admin-процедуру
   `billing.replayEvent({ billingEventId })` (admin + 2FA): новый run с ключом
-  `${stripeEventId}:replay:${replayCount + 1}`, `replayCount` инкрементится.
+  `${externalEventId}:replay:${replayCount + 1}`, `replayCount` инкрементится.
 - **Issue**: `billing.listIssues({ status, severity, cursor })`; закрыть —
   `billing.resolveIssue({ issueId, note? })` (note санитизируется, URL/email редактируются).
 - **Диагностика события**:

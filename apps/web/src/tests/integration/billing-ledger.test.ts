@@ -19,10 +19,10 @@ function entry(workspaceId: string, overrides: Record<string, unknown> = {}) {
   return {
     amount: BigInt(-1900),
     currency: "usd",
+    externalObjectId: "re_1",
     kind: "REFUND_SUCCEEDED",
     occurredAt: OCCURRED_AT,
     status: "succeeded",
-    stripeObjectId: "re_1",
     workspaceId,
     ...overrides,
   };
@@ -60,7 +60,7 @@ describe("billing ledger against Postgres", () => {
       const duplicate = await appendLedgerEntry(tx, entry(alice.workspace.id));
       const other = await appendLedgerEntry(
         tx,
-        entry(alice.workspace.id, { kind: "DISPUTE_OPENED", stripeObjectId: "dp_1" }),
+        entry(alice.workspace.id, { externalObjectId: "dp_1", kind: "DISPUTE_OPENED" }),
       );
 
       expect([first, duplicate, other]).toEqual([true, false, true]);
@@ -85,9 +85,9 @@ describe("billing ledger against Postgres", () => {
         amount: BigInt(-1900),
         currency: "usd",
         entryKey: "REFUND_SUCCEEDED:re_policy:succeeded",
+        externalObjectId: "re_policy",
         kind: "REFUND_SUCCEEDED",
         occurredAt: OCCURRED_AT,
-        stripeObjectId: "re_policy",
         workspaceId: alice.workspace.id,
       },
     });
@@ -113,9 +113,9 @@ describe("billing ledger against Postgres", () => {
         amount: BigInt(1000),
         currency: "usd",
         entryKey: "INVOICE_PAID:in_correction:paid",
+        externalObjectId: "in_correction",
         kind: "INVOICE_PAID",
         occurredAt: OCCURRED_AT,
-        stripeObjectId: "in_correction",
         workspaceId: alice.workspace.id,
       },
     });
@@ -124,16 +124,16 @@ describe("billing ledger against Postgres", () => {
       amount: BigInt(200),
       correctsEntryId: original.id,
       currency: "usd",
+      externalObjectId: "in_correction",
       kind: "INVOICE_PAID_CORRECTION",
       occurredAt: OCCURRED_AT,
       status: "correction:200",
-      stripeObjectId: "in_correction",
       workspaceId: alice.workspace.id,
     });
 
     const rows = await prisma.billingLedgerEntry.findMany({
       orderBy: { createdAt: "asc" },
-      where: { stripeObjectId: "in_correction" },
+      where: { externalObjectId: "in_correction" },
     });
 
     expect(created).toBe(true);
@@ -204,10 +204,10 @@ describe("cleanup coverage", () => {
 
     await prisma.billingEvent.create({
       data: {
+        externalCreatedAt: OCCURRED_AT,
+        externalEventId: "evt_cleanup",
         livemode: false,
         payloadHash: "hash",
-        stripeCreatedAt: OCCURRED_AT,
-        stripeEventId: "evt_cleanup",
         type: "invoice.paid",
       },
     });
@@ -217,11 +217,11 @@ describe("cleanup coverage", () => {
         currency: "usd",
         currentPeriodEnd: OCCURRED_AT,
         currentPeriodStart: OCCURRED_AT,
+        externalPriceId: "price_cleanup",
+        externalStatus: "active",
+        externalSubscriptionId: "sub_cleanup",
+        externalSubscriptionItemId: "si_cleanup",
         quantity: 1,
-        stripePriceId: "price_cleanup",
-        stripeStatus: "active",
-        stripeSubscriptionId: "sub_cleanup",
-        stripeSubscriptionItemId: "si_cleanup",
         workspaceId: alice.workspace.id,
       },
     });
@@ -270,7 +270,7 @@ describe("cleanup coverage", () => {
     await prisma.$transaction(async (tx) => {
       await upsertBillingIssue(tx, issue);
       await upsertBillingIssue(tx, issue);
-      await appendLedgerEntry(tx, entry(alice.workspace.id, { stripeObjectId: "re_issue" }));
+      await appendLedgerEntry(tx, entry(alice.workspace.id, { externalObjectId: "re_issue" }));
     });
 
     const issues = await prisma.billingIssue.count({ where: { dedupeKey: "duplicate-issue" } });

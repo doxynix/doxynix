@@ -1,22 +1,13 @@
 import { createHash } from "node:crypto";
 
+import { BillingOperationStatus } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
 import type { DbClient } from "@/server/core/db";
 
 import { BillingCatalogError } from "./billing.catalog";
-import {
-  type BillingOperationRequest,
-  BillingOperationRequestSchema,
-  BillingOperationStatus,
-} from "./billing.schemas";
-
-export {
-  BillingIdempotencyKeyError,
-  type BillingIdempotencyKeyErrorCode,
-  stripeIdempotencyKey,
-} from "@/server/core/billing/idempotency";
+import { type BillingOperationRequest, BillingOperationRequestSchema } from "./billing.schemas";
 
 // Keys whose values never belong in a stored result: links, personal data and money. Stripe
 // amounts are the ledger's job, not an operation payload.
@@ -29,11 +20,11 @@ const MAX_RESULT_DEPTH = 6;
 
 const OPERATION_SELECT = {
   errorCode: true,
+  externalObjectId: true,
   id: true,
   requestHash: true,
   resultJson: true,
   status: true,
-  stripeObjectId: true,
 } as const;
 
 export type BillingOperationRow = {
@@ -42,7 +33,7 @@ export type BillingOperationRow = {
   requestHash: string;
   resultJson: unknown;
   status: string;
-  stripeObjectId: null | string;
+  externalObjectId: null | string;
 };
 
 export type BillingOperationStart =
@@ -61,7 +52,7 @@ export type BeginBillingOperationInput = {
 
 export type BillingOperationExecution = {
   result?: unknown;
-  stripeObjectId?: null | string;
+  externalObjectId?: null | string;
 };
 
 export type RunBillingOperationInput = BeginBillingOperationInput & {
@@ -280,7 +271,7 @@ export async function beginBillingOperation(
 
 export async function completeBillingOperation(
   db: DbClient,
-  input: { operationId: string; result?: unknown; stripeObjectId?: null | string },
+  input: { operationId: string; result?: unknown; externalObjectId?: null | string },
 ): Promise<void> {
   const sanitized = sanitizeBillingResult(input.result);
   const resultJson: Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput =
@@ -289,9 +280,9 @@ export async function completeBillingOperation(
   await db.billingOperation.update({
     data: {
       errorCode: null,
+      externalObjectId: input.externalObjectId ?? null,
       resultJson,
       status: BillingOperationStatus.COMPLETED,
-      stripeObjectId: input.stripeObjectId ?? null,
     },
     where: { id: input.operationId },
   });
@@ -337,9 +328,9 @@ export async function runBillingOperation(
     const execution = await input.execute();
 
     await completeBillingOperation(db, {
+      externalObjectId: execution.externalObjectId,
       operationId: start.operation.id,
       result: execution.result,
-      stripeObjectId: execution.stripeObjectId,
     });
 
     return { operationId: start.operation.id, replayed: false, result: execution.result };

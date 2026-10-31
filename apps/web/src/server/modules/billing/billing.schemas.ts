@@ -1,20 +1,9 @@
-import { PlanCodeSchema } from "@doxynix/shared";
+import { BillingIssueSeverity, BillingIssueStatus, PlanCodeSchema } from "@doxynix/shared";
 import * as z from "zod";
 
 import { ACCESS_STATES } from "@/server/core/entitlements/state";
 
 import { PORTAL_RETURN_PATHS } from "./billing.constants";
-
-export const BillingOperationStatus = {
-  COMPLETED: "COMPLETED",
-  FAILED: "FAILED",
-  STARTED: "STARTED",
-} as const;
-
-export type BillingOperationStatus =
-  (typeof BillingOperationStatus)[keyof typeof BillingOperationStatus];
-
-export const BillingOperationStatusSchema = z.enum(BillingOperationStatus);
 
 // Operation names are server-owned constants (CHECKOUT_CREATE, PORTAL_CREATE, ...); the shape is
 // constrained here so a client cannot smuggle free text into the ledger-facing column.
@@ -136,12 +125,13 @@ export const ResolveIssueResultSchema = z.object({
 
 export const ListIssuesSchema = z.object({
   cursor: z.uuid().optional(),
-  severity: z.enum(["CRITICAL", "INFO", "WARNING"]).optional(),
-  status: z.enum(["OPEN", "RESOLVED"]).optional(),
+  severity: z.enum(BillingIssueSeverity).optional(),
+  status: z.enum(BillingIssueStatus).optional(),
 });
 
 export const BillingIssueSummarySchema = z.object({
   details: z.unknown(),
+  externalObjectId: z.string().nullable(),
   firstSeenAt: z.date(),
   id: z.uuid(),
   kind: z.string(),
@@ -150,7 +140,6 @@ export const BillingIssueSummarySchema = z.object({
   severity: z.string(),
   source: z.string(),
   status: z.string(),
-  stripeObjectId: z.string().nullable(),
   workspaceId: z.uuid().nullable(),
 });
 

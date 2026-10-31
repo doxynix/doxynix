@@ -6,7 +6,7 @@
  */
 import Stripe from "stripe";
 
-import { STRIPE_API_VERSION } from "../src/server/modules/billing/billing.constants";
+import { STRIPE_API_VERSION } from "../src/server/core/billing/stripe-version";
 
 function fail(message: string): never {
   console.error(`stripe-sanity: ${message}`);

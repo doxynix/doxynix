@@ -81,8 +81,8 @@ describe("projectSubscription", () => {
     const tx = createTx();
     tx.billingSubscription.findUnique.mockResolvedValue({
       activatedAt: NOW,
+      externalStatus: "active",
       graceEndsAt: null,
-      stripeStatus: "active",
     });
 
     const result = await projectSubscription(tx as unknown as DbClient, {
@@ -95,8 +95,8 @@ describe("projectSubscription", () => {
     expect(tx.billingSubscription.updateMany).toHaveBeenCalledWith({
       data: { isCurrent: null },
       where: {
+        externalSubscriptionId: { not: "sub_1" },
         isCurrent: true,
-        stripeSubscriptionId: { not: "sub_1" },
         workspaceId: WORKSPACE_ID,
       },
     });
@@ -110,8 +110,8 @@ describe("projectSubscription", () => {
     const tx = createTx();
     tx.billingSubscription.findUnique.mockResolvedValue({
       activatedAt: NOW,
+      externalStatus: "active",
       graceEndsAt: null,
-      stripeStatus: "active",
     });
 
     await projectSubscription(tx as unknown as DbClient, {
@@ -133,8 +133,8 @@ describe("projectSubscription", () => {
     const tx = createTx();
     tx.billingSubscription.findUnique.mockResolvedValue({
       activatedAt: NOW,
+      externalStatus: "active",
       graceEndsAt: null,
-      stripeStatus: "active",
     });
     tx.workspaceEntitlement.findUnique.mockResolvedValue({
       accessState: "PENDING",
@@ -154,8 +154,8 @@ describe("projectSubscription", () => {
     const unchangedTx = createTx();
     unchangedTx.billingSubscription.findUnique.mockResolvedValue({
       activatedAt: NOW,
+      externalStatus: "active",
       graceEndsAt: null,
-      stripeStatus: "active",
     });
 
     await projectSubscription(unchangedTx as unknown as DbClient, {
@@ -173,8 +173,8 @@ describe("projectSubscription", () => {
     const tx = createTx();
     tx.billingSubscription.findUnique.mockResolvedValue({
       activatedAt: NOW,
+      externalStatus: "active",
       graceEndsAt: null,
-      stripeStatus: "active",
     });
 
     await projectSubscription(tx as unknown as DbClient, {
@@ -209,8 +209,8 @@ describe("projectSubscription", () => {
     const graceEndsAt = new Date(NOW.getTime() + 86_400_000);
     tx.billingSubscription.findUnique.mockResolvedValue({
       activatedAt: OLD_ACTIVATION,
+      externalStatus: "past_due",
       graceEndsAt,
-      stripeStatus: "past_due",
     });
     tx.workspaceEntitlement.findUnique.mockResolvedValue({
       accessState: "ACTIVE",
@@ -233,8 +233,8 @@ describe("projectSubscription", () => {
     const tx = createTx();
     tx.billingSubscription.findUnique.mockResolvedValue({
       activatedAt: NOW,
+      externalStatus: "active",
       graceEndsAt: null,
-      stripeStatus: "active",
     });
     tx.workspaceEntitlement.findUnique.mockResolvedValue({
       accessState: "ACTIVE",
@@ -265,8 +265,8 @@ describe("projectSubscription", () => {
     const tx = createTx();
     tx.billingSubscription.findUnique.mockResolvedValue({
       activatedAt: NOW,
+      externalStatus: "active",
       graceEndsAt: null,
-      stripeStatus: "active",
     });
 
     await projectSubscription(tx as unknown as DbClient, {
@@ -315,8 +315,8 @@ describe("projectSubscription", () => {
     const tx = createTx();
     tx.billingSubscription.findUnique.mockResolvedValue({
       activatedAt: NOW,
+      externalStatus: "canceled",
       graceEndsAt: null,
-      stripeStatus: "canceled",
     });
     tx.workspaceEntitlement.findUnique.mockResolvedValue({
       accessState: "CANCELED",
@@ -384,8 +384,8 @@ describe("projectSubscription", () => {
     const tx = createTx();
     tx.billingSubscription.findUnique.mockResolvedValue({
       activatedAt: OLD_ACTIVATION,
+      externalStatus: "active",
       graceEndsAt: null,
-      stripeStatus: "active",
     });
 
     await projectSubscription(tx as unknown as DbClient, {
@@ -412,7 +412,7 @@ describe("projectSubscription", () => {
 
     expect(result.accessState).toBe("REVIEW");
     expect(callArg(tx.billingSubscription.upsert)).toMatchObject({
-      create: { stripeStatus: "some_future_status" },
+      create: { externalStatus: "some_future_status" },
     });
   });
 
@@ -447,18 +447,18 @@ describe("markSubscriptionActivated", () => {
 
     const first = await markSubscriptionActivated(db as unknown as DbClient, {
       activatedAt: NOW,
-      stripeSubscriptionId: "sub_1",
+      externalSubscriptionId: "sub_1",
     });
     const second = await markSubscriptionActivated(db as unknown as DbClient, {
       activatedAt: new Date(),
-      stripeSubscriptionId: "sub_1",
+      externalSubscriptionId: "sub_1",
     });
 
     expect(first).toBe(true);
     expect(second).toBe(false);
     expect(db.billingSubscription.updateMany).toHaveBeenCalledWith({
       data: { activatedAt: NOW },
-      where: { activatedAt: null, stripeSubscriptionId: "sub_1" },
+      where: { activatedAt: null, externalSubscriptionId: "sub_1" },
     });
   });
 
@@ -466,8 +466,8 @@ describe("markSubscriptionActivated", () => {
     const tx = createTx();
     tx.billingSubscription.findUnique.mockResolvedValue({
       activatedAt: NOW,
+      externalStatus: "active",
       graceEndsAt: null,
-      stripeStatus: "active",
     });
     tx.workspaceMember.count.mockResolvedValue(5);
 
@@ -494,8 +494,8 @@ describe("markSubscriptionActivated", () => {
     const paidAt = new Date("2026-10-20T10:00:00.000Z");
     tx.billingSubscription.findUnique.mockResolvedValue({
       activatedAt: null,
+      externalStatus: "active",
       graceEndsAt: null,
-      stripeStatus: "active",
     });
 
     const result = await projectSubscription(tx as unknown as DbClient, {
@@ -512,7 +512,7 @@ describe("markSubscriptionActivated", () => {
     expect(result.accessState).toBe("ACTIVE");
     expect(tx.billingSubscription.updateMany).toHaveBeenCalledWith({
       data: { activatedAt: paidAt },
-      where: { activatedAt: null, stripeSubscriptionId: "sub_1" },
+      where: { activatedAt: null, externalSubscriptionId: "sub_1" },
     });
   });
 
@@ -520,8 +520,8 @@ describe("markSubscriptionActivated", () => {
     const tx = createTx();
     tx.billingSubscription.findUnique.mockResolvedValue({
       activatedAt: OLD_ACTIVATION,
+      externalStatus: "active",
       graceEndsAt: null,
-      stripeStatus: "active",
     });
 
     await projectSubscription(tx as unknown as DbClient, {
@@ -544,8 +544,8 @@ describe("markSubscriptionActivated", () => {
     const tx = createTx();
     tx.billingSubscription.findUnique.mockResolvedValue({
       activatedAt: OLD_ACTIVATION,
+      externalStatus: "active",
       graceEndsAt: null,
-      stripeStatus: "active",
     });
 
     await projectSubscription(tx as unknown as DbClient, {

@@ -26,7 +26,7 @@ type OperationRow = {
   requestHash: string;
   resultJson: unknown;
   status: string;
-  stripeObjectId: null | string;
+  externalObjectId: null | string;
 };
 
 function uniqueViolation() {
@@ -39,11 +39,11 @@ function uniqueViolation() {
 function mirror(overrides: Record<string, unknown> = {}) {
   return {
     currency: "usd",
+    externalPriceId: proPlan().priceId,
+    externalStatus: "active",
+    externalSubscriptionId: "sub_1",
+    externalSubscriptionItemId: "si_1",
     quantity: 2,
-    stripePriceId: proPlan().priceId,
-    stripeStatus: "active",
-    stripeSubscriptionId: "sub_1",
-    stripeSubscriptionItemId: "si_1",
     ...overrides,
   };
 }
@@ -72,11 +72,11 @@ function createFakeDb(
           operationCount += 1;
           const row: OperationRow = {
             errorCode: null,
+            externalObjectId: null,
             id: `op_${operationCount}`,
             requestHash: data.requestHash,
             resultJson: null,
             status: data.status,
-            stripeObjectId: null,
           };
           operations.set(key, row);
 
@@ -267,7 +267,7 @@ describe("changeSeats", () => {
   });
 
   it("rejects a delinquent subscription", async () => {
-    const fake = createFakeDb({ mirror: mirror({ stripeStatus: "past_due" }) });
+    const fake = createFakeDb({ mirror: mirror({ externalStatus: "past_due" }) });
 
     await expect(changeSeats(changeInput(fake, 3))).rejects.toMatchObject({
       message: "BILLING_NOT_CHANGEABLE",

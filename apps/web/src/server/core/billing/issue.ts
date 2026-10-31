@@ -8,7 +8,7 @@ export type BillingIssueInput = {
   kind: string;
   severity: "CRITICAL" | "INFO" | "WARNING";
   source: string;
-  stripeObjectId?: null | string;
+  externalObjectId?: null | string;
   workspaceId?: null | string;
 };
 
@@ -29,13 +29,13 @@ export async function upsertBillingIssue(db: DbClient, input: BillingIssueInput)
       {
         dedupeKey: input.dedupeKey,
         details: input.details ?? Prisma.DbNull,
+        externalObjectId: input.externalObjectId ?? null,
         firstSeenAt: now,
         kind: input.kind,
         lastSeenAt: now,
         severity: input.severity,
         source: input.source,
         status: "OPEN",
-        stripeObjectId: input.stripeObjectId ?? null,
         workspaceId: input.workspaceId ?? null,
       },
     ],

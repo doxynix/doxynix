@@ -36,7 +36,7 @@ type OperationRow = {
   requestHash: string;
   resultJson: unknown;
   status: string;
-  stripeObjectId: null | string;
+  externalObjectId: null | string;
 };
 
 type CustomerRow = {
@@ -47,9 +47,9 @@ type CustomerRow = {
 };
 
 type SessionRow = {
-  stripeCheckoutSessionId: string;
-  stripeCustomerId: string;
-  stripeStatus: null | string;
+  externalCheckoutSessionId: string;
+  externalCustomerId: string;
+  externalStatus: null | string;
   workspaceId: string;
 };
 
@@ -97,9 +97,9 @@ function createFakeDb(
 
         return data;
       },
-      delete: async ({ where }: { where: { stripeCheckoutSessionId: string } }) => {
+      delete: async ({ where }: { where: { externalCheckoutSessionId: string } }) => {
         const index = sessions.findIndex(
-          (row) => row.stripeCheckoutSessionId === where.stripeCheckoutSessionId,
+          (row) => row.externalCheckoutSessionId === where.externalCheckoutSessionId,
         );
 
         if (index >= 0) {
@@ -108,11 +108,11 @@ function createFakeDb(
 
         return {};
       },
-      deleteMany: async ({ where }: { where: { stripeCheckoutSessionId: string } }) => {
+      deleteMany: async ({ where }: { where: { externalCheckoutSessionId: string } }) => {
         const before = sessions.length;
 
         for (let index = sessions.length - 1; index >= 0; index -= 1) {
-          if (sessions[index]?.stripeCheckoutSessionId === where.stripeCheckoutSessionId) {
+          if (sessions[index]?.externalCheckoutSessionId === where.externalCheckoutSessionId) {
             sessions.splice(index, 1);
           }
         }
@@ -121,12 +121,12 @@ function createFakeDb(
       },
       findFirst: async () =>
         options.openSession === true
-          ? { createdAt: new Date(), stripeCheckoutSessionId: "cs_open", stripeStatus: "open" }
+          ? { createdAt: new Date(), externalCheckoutSessionId: "cs_open", externalStatus: "open" }
           : options.completeSession === true
             ? {
                 createdAt: new Date(),
-                stripeCheckoutSessionId: "cs_done",
-                stripeStatus: "complete",
+                externalCheckoutSessionId: "cs_done",
+                externalStatus: "complete",
               }
             : null,
       update: async ({
@@ -134,10 +134,10 @@ function createFakeDb(
         where,
       }: {
         data: Partial<SessionRow>;
-        where: { stripeCheckoutSessionId: string };
+        where: { externalCheckoutSessionId: string };
       }) => {
         const row = sessions.find(
-          (session) => session.stripeCheckoutSessionId === where.stripeCheckoutSessionId,
+          (session) => session.externalCheckoutSessionId === where.externalCheckoutSessionId,
         );
 
         if (row == null) {
@@ -191,11 +191,11 @@ function createFakeDb(
         operationCount += 1;
         const row: OperationRow = {
           errorCode: null,
+          externalObjectId: null,
           id: `op_${operationCount}`,
           requestHash: data.requestHash,
           resultJson: null,
           status: data.status,
-          stripeObjectId: null,
         };
         operations.set(key, row);
 
@@ -313,12 +313,12 @@ describe("createCheckoutSession", () => {
     expect(options.idempotencyKey).toContain(REQUEST_ID);
     expect(result).toEqual({ sessionId: "cs_new", url: CHECKOUT_URL });
     expect(fake.sessions).toHaveLength(1);
-    expect(fake.sessions[0]?.stripeCheckoutSessionId).toBe("cs_new");
+    expect(fake.sessions[0]?.externalCheckoutSessionId).toBe("cs_new");
     expect(fake.sessions).toEqual([
       {
-        stripeCheckoutSessionId: "cs_new",
-        stripeCustomerId: "cus_new",
-        stripeStatus: "open",
+        externalCheckoutSessionId: "cs_new",
+        externalCustomerId: "cus_new",
+        externalStatus: "open",
         workspaceId: WORKSPACE_ID,
       },
     ]);

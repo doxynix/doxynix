@@ -5,7 +5,7 @@ import type { DbClient } from "@/server/core/db";
 export const BILLING_PAYLOAD_RETENTION_MS = 90 * 24 * 60 * 60 * 1000;
 
 // The raw payload is the only PII-bearing part of an event. It is dropped after 90 days; the row
-// and its unique stripeEventId stay forever, because deduplication depends on them.
+// and its unique externalEventId stay forever, because deduplication depends on them.
 export async function purgeBillingEventPayloads(
   db: DbClient,
   now: Date = new Date(),

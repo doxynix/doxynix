@@ -120,14 +120,14 @@ describe.skipIf(!HAS_SANDBOX_CREDENTIALS)("stripe sandbox test clocks", () => {
 
     await waitForEvent({ type: "customer.subscription.updated" });
     const before = await prisma.billingSubscription.findUnique({
-      where: { stripeSubscriptionId: subscriptionId },
+      where: { externalSubscriptionId: subscriptionId },
     });
 
     await advanceClock(clockId, 31 * DAY_SECONDS);
     await waitForEvent({ type: "invoice.paid" });
 
     const after = await prisma.billingSubscription.findUnique({
-      where: { stripeSubscriptionId: subscriptionId },
+      where: { externalSubscriptionId: subscriptionId },
     });
 
     expect(after?.activatedAt).toEqual(before?.activatedAt);
@@ -146,13 +146,13 @@ describe.skipIf(!HAS_SANDBOX_CREDENTIALS)("stripe sandbox test clocks", () => {
     await waitForEvent({ type: "invoice.payment_failed" });
 
     const first = await prisma.billingSubscription.findUnique({
-      where: { stripeSubscriptionId: subscriptionId },
+      where: { externalSubscriptionId: subscriptionId },
     });
     const graceEndsAt = first?.graceEndsAt;
 
     await advanceClock(clockId, 2 * DAY_SECONDS);
     const second = await prisma.billingSubscription.findUnique({
-      where: { stripeSubscriptionId: subscriptionId },
+      where: { externalSubscriptionId: subscriptionId },
     });
 
     await advanceClock(clockId, (GRACE_DAYS + 1) * DAY_SECONDS);
@@ -193,7 +193,7 @@ describe.skipIf(!HAS_SANDBOX_CREDENTIALS)("stripe sandbox test clocks", () => {
 
     const entitlement = await entitlementOf(fixture.workspaceId);
     const subscription = await prisma.billingSubscription.findUnique({
-      where: { stripeSubscriptionId: subscriptionId },
+      where: { externalSubscriptionId: subscriptionId },
     });
 
     expect(entitlement?.accessState).toBe("ACTIVE");

@@ -1,13 +1,10 @@
 import { Prisma } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 
+import { stripeIdempotencyKey } from "@/server/core/billing/idempotency";
 import type { DbClient } from "@/server/core/db";
 
-import {
-  canonicalRequestHash,
-  runBillingOperation,
-  stripeIdempotencyKey,
-} from "./billing.operations";
+import { canonicalRequestHash, runBillingOperation } from "./billing.operations";
 
 const WORKSPACE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 const REQUEST_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5e";
@@ -19,17 +16,17 @@ type OperationRow = {
   requestHash: string;
   resultJson: unknown;
   status: string;
-  stripeObjectId: null | string;
+  externalObjectId: null | string;
 };
 
 function row(overrides: Partial<OperationRow> = {}): OperationRow {
   return {
     errorCode: null,
+    externalObjectId: null,
     id: OPERATION_ID,
     requestHash: "",
     resultJson: null,
     status: "STARTED",
-    stripeObjectId: null,
     ...overrides,
   };
 }
@@ -64,8 +61,8 @@ describe("billing operation idempotency", () => {
   it("runs the action once and replays the stored result for the same request", async () => {
     const requestHash = canonicalRequestHash(baseInput.requestBody);
     const execute = vi.fn(async () => ({
+      externalObjectId: "cs_1",
       result: { sessionId: "cs_1" },
-      stripeObjectId: "cs_1",
     }));
     const create = vi
       .fn()

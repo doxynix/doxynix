@@ -98,10 +98,10 @@ export async function recordTaxCollection(
     await upsertBillingIssue(tx, {
       dedupeKey: `tax_not_collected:${invoice.id}`,
       details: { total: invoice.total },
+      externalObjectId: invoice.id,
       kind: "TAX_NOT_COLLECTED",
       severity: "CRITICAL",
       source: "stripe_tax",
-      stripeObjectId: invoice.id,
       workspaceId: input.workspaceId,
     });
   }

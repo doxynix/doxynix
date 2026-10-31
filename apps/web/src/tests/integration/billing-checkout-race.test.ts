@@ -71,8 +71,8 @@ describe("checkout concurrency", () => {
     });
 
     expect(rows).toHaveLength(1);
-    expect(rows[0]?.stripeCheckoutSessionId).toBe("cs_race_1");
-    expect(rows[0]?.stripeStatus).toBe("open");
+    expect(rows[0]?.externalCheckoutSessionId).toBe("cs_race_1");
+    expect(rows[0]?.externalStatus).toBe("open");
   });
 
   it("clears an abandoned placeholder instead of blocking the next attempt", async () => {
@@ -83,9 +83,9 @@ describe("checkout concurrency", () => {
     await prisma.billingCheckoutSession.create({
       data: {
         createdAt: new Date(Date.now() - 11 * 60 * 1000),
-        stripeCheckoutSessionId: "pending:abandoned",
-        stripeCustomerId: "",
-        stripeStatus: "pending",
+        externalCheckoutSessionId: "pending:abandoned",
+        externalCustomerId: "",
+        externalStatus: "pending",
         workspaceId: alice.workspace.id,
       },
     });
@@ -104,6 +104,6 @@ describe("checkout concurrency", () => {
       where: { workspaceId: alice.workspace.id },
     });
 
-    expect(rows.map((row) => row.stripeCheckoutSessionId)).toEqual(["cs_race_2"]);
+    expect(rows.map((row) => row.externalCheckoutSessionId)).toEqual(["cs_race_2"]);
   });
 });

@@ -78,11 +78,11 @@ function localSubscription(overrides: Record<string, unknown> = {}) {
     currency: "usd",
     currentPeriodEnd: new Date(1_800_000_000 * 1000),
     currentPeriodStart: new Date(1_790_000_000 * 1000),
+    externalPriceId: proPlan().priceId,
+    externalStatus: "active",
+    externalSubscriptionId: "sub_1",
+    externalSubscriptionItemId: "si_1",
     quantity: 2,
-    stripePriceId: proPlan().priceId,
-    stripeStatus: "active",
-    stripeSubscriptionId: "sub_1",
-    stripeSubscriptionItemId: "si_1",
     workspaceId: WORKSPACE_ID,
     ...overrides,
   };
@@ -159,7 +159,7 @@ describe("runStripeReconciliation", () => {
 
   it("repairs a mirror that drifted from Stripe", async () => {
     dbMock.billingSubscription.findUnique.mockResolvedValue(
-      localSubscription({ stripeStatus: "past_due" }),
+      localSubscription({ externalStatus: "past_due" }),
     );
     stripeMock.subscriptions.list.mockResolvedValue({
       data: [subscription({ status: "active" })],
@@ -191,7 +191,7 @@ describe("runStripeReconciliation", () => {
 
   it("repairs a stale mirror and the seat quantity in one run", async () => {
     dbMock.billingSubscription.findUnique.mockResolvedValue(
-      localSubscription({ stripeStatus: "past_due" }),
+      localSubscription({ externalStatus: "past_due" }),
     );
     dbMock.workspaceMember.count.mockResolvedValue(3);
     stripeMock.subscriptions.list.mockResolvedValue({
@@ -236,7 +236,7 @@ describe("runStripeReconciliation", () => {
 
   it("fails closed when a local current subscription disappeared from Stripe", async () => {
     dbMock.billingSubscription.findMany.mockResolvedValue([
-      { stripeSubscriptionId: "sub_gone", workspaceId: WORKSPACE_ID },
+      { externalSubscriptionId: "sub_gone", workspaceId: WORKSPACE_ID },
     ]);
     stripeMock.subscriptions.retrieve.mockRejectedValue(missingResource());
 
@@ -245,7 +245,7 @@ describe("runStripeReconciliation", () => {
     expect(summary.mismatchCount).toBe(1);
     expect(dbMock.billingSubscription.updateMany).toHaveBeenCalledWith({
       data: { needsReview: true, reviewReason: "MISSING_IN_STRIPE" },
-      where: { stripeSubscriptionId: "sub_gone" },
+      where: { externalSubscriptionId: "sub_gone" },
     });
     expect(dbMock.workspaceEntitlement.updateMany).toHaveBeenCalledWith({
       data: { accessState: "REVIEW" },
@@ -259,8 +259,8 @@ describe("runStripeReconciliation", () => {
       {
         amount: BigInt(1000),
         currency: "usd",
+        externalObjectId: "in_1",
         id: "le_1",
-        stripeObjectId: "in_1",
         workspaceId: WORKSPACE_ID,
       },
     ]);
@@ -344,7 +344,7 @@ describe("runStripeReconciliation", () => {
     );
     expect(dbMock.billingSubscription.updateMany).toHaveBeenCalledWith({
       data: { activatedAt: paidAt },
-      where: { activatedAt: null, stripeSubscriptionId: "sub_1" },
+      where: { activatedAt: null, externalSubscriptionId: "sub_1" },
     });
     expect(dbMock.workspaceEntitlement.upsert).toHaveBeenCalledWith(
       expect.objectContaining({

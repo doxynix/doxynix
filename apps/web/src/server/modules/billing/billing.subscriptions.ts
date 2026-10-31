@@ -1,19 +1,15 @@
+import type { AccessState } from "@doxynix/shared";
 import type Stripe from "stripe";
 
 import { upsertBillingIssue } from "@/server/core/billing/issue";
 import { recordBillingMetric } from "@/server/core/billing/metrics";
 import type { DbClient } from "@/server/core/db";
+import { DEFAULT_ACCESS_STATE, isAccessState } from "@/server/core/entitlements/state";
 
 import { BillingCatalogError, planEntitlements, resolvePlanForPrice } from "./billing.catalog";
 import { NonRetryableBillingError } from "./billing.errors";
 import type { BillingOwnership } from "./billing.resolver";
-import {
-  type AccessState,
-  DEFAULT_ACCESS_STATE,
-  decideAccessState,
-  isAccessState,
-  isTerminalStatus,
-} from "./billing.state";
+import { decideAccessState, isTerminalStatus } from "./billing.state";
 
 function paidInvoiceAt(subscription: Stripe.Subscription): Date | null {
   const invoice = subscription.latest_invoice;
@@ -83,8 +79,8 @@ export async function projectSubscription(
   }
 
   const existing = await tx.billingSubscription.findUnique({
-    select: { activatedAt: true, graceEndsAt: true, stripeStatus: true },
-    where: { stripeSubscriptionId: subscription.id },
+    select: { activatedAt: true, externalStatus: true, graceEndsAt: true },
+    where: { externalSubscriptionId: subscription.id },
   });
 
   const entitlement = await tx.workspaceEntitlement.findUnique({
@@ -118,7 +114,7 @@ export async function projectSubscription(
     // exist yet, so the value is carried into the `create` below instead of being lost.
     await markSubscriptionActivated(tx, {
       activatedAt: paidAt,
-      stripeSubscriptionId: subscription.id,
+      externalSubscriptionId: subscription.id,
     });
 
     activatedAt = paidAt;
@@ -137,7 +133,7 @@ export async function projectSubscription(
     remote: {
       activatedAt,
       graceEndsAt: existing?.graceEndsAt ?? null,
-      previousStatus: existing?.stripeStatus ?? null,
+      previousStatus: existing?.externalStatus ?? null,
       priceKnown: isPriceKnown(item.price),
       status: subscription.status,
     },
@@ -181,10 +177,10 @@ export async function projectSubscription(
     await upsertBillingIssue(tx, {
       dedupeKey: `seats_below_members:${subscription.id}`,
       details: { activeMembers, requestedSeats },
+      externalObjectId: subscription.id,
       kind: "SEATS_BELOW_MEMBERS",
       severity: "WARNING",
       source: "stripe_worker",
-      stripeObjectId: subscription.id,
       workspaceId: ownership.workspaceId,
     });
   }
@@ -207,10 +203,10 @@ export async function projectSubscription(
     await upsertBillingIssue(tx, {
       dedupeKey: `subscription_review:${subscription.id}:${decision.reviewReason}`,
       details: { reason: decision.reviewReason, status: subscription.status },
+      externalObjectId: subscription.id,
       kind: "SUBSCRIPTION_REVIEW",
       severity: "CRITICAL",
       source: "stripe_worker",
-      stripeObjectId: subscription.id,
       workspaceId: ownership.workspaceId,
     });
   } else if (decision.accessState === "ACTIVE") {
@@ -230,8 +226,8 @@ export async function projectSubscription(
     await tx.billingSubscription.updateMany({
       data: { isCurrent: null },
       where: {
+        externalSubscriptionId: { not: subscription.id },
         isCurrent: true,
-        stripeSubscriptionId: { not: subscription.id },
         workspaceId: ownership.workspaceId,
       },
     });
@@ -246,15 +242,15 @@ export async function projectSubscription(
       currency: item.price.currency,
       currentPeriodEnd,
       currentPeriodStart,
+      externalPriceId: item.price.id,
+      externalStatus: subscription.status,
+      externalSubscriptionId: subscription.id,
+      externalSubscriptionItemId: item.id,
       isCurrent,
       latestInvoiceId,
       needsReview,
       quantity: item.quantity ?? 1,
       reviewReason: decision.reviewReason,
-      stripePriceId: item.price.id,
-      stripeStatus: subscription.status,
-      stripeSubscriptionId: subscription.id,
-      stripeSubscriptionItemId: item.id,
       workspaceId: ownership.workspaceId,
     },
     update: {
@@ -273,11 +269,11 @@ export async function projectSubscription(
       ...(decision.accessState === "ACTIVE"
         ? { graceEndsAt: null, needsAction: null, pastDueStartedAt: null }
         : {}),
-      stripePriceId: item.price.id,
-      stripeStatus: subscription.status,
-      stripeSubscriptionItemId: item.id,
+      externalPriceId: item.price.id,
+      externalStatus: subscription.status,
+      externalSubscriptionItemId: item.id,
     },
-    where: { stripeSubscriptionId: subscription.id },
+    where: { externalSubscriptionId: subscription.id },
   });
 
   const accessStateChanged = current !== decision.accessState;
@@ -326,11 +322,11 @@ export async function projectSubscription(
 // timestamp that proves when access was first granted.
 export async function markSubscriptionActivated(
   db: DbClient,
-  input: { activatedAt: Date; stripeSubscriptionId: string },
+  input: { activatedAt: Date; externalSubscriptionId: string },
 ): Promise<boolean> {
   const updated = await db.billingSubscription.updateMany({
     data: { activatedAt: input.activatedAt },
-    where: { activatedAt: null, stripeSubscriptionId: input.stripeSubscriptionId },
+    where: { activatedAt: null, externalSubscriptionId: input.externalSubscriptionId },
   });
 
   return updated.count > 0;

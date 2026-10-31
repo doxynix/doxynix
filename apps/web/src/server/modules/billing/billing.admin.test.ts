@@ -24,10 +24,10 @@ function createDb() {
   return {
     billingEvent: {
       findUnique: vi.fn().mockResolvedValue({
+        externalEventId: "evt_1",
         payload: { data: { object: { customer: "cus_1" } } },
         replayCount: 2,
         status: "DEAD_LETTER",
-        stripeEventId: "evt_1",
       }),
       update: vi.fn().mockResolvedValue({}),
     },
@@ -73,9 +73,9 @@ describe("replayBillingEvent", () => {
   it("refuses a processed event", async () => {
     const db = createDb();
     db.billingEvent.findUnique.mockResolvedValue({
+      externalEventId: "evt_1",
       replayCount: 0,
       status: "PROCESSED",
-      stripeEventId: "evt_1",
     });
 
     await expect(
@@ -90,9 +90,9 @@ describe("replayBillingEvent", () => {
   it("refuses an event that is currently processing", async () => {
     const db = createDb();
     db.billingEvent.findUnique.mockResolvedValue({
+      externalEventId: "evt_1",
       replayCount: 0,
       status: "PROCESSING",
-      stripeEventId: "evt_1",
     });
 
     await expect(
@@ -174,6 +174,7 @@ describe("listBillingIssues", () => {
     const db = createDb();
     const rows = Array.from({ length: 51 }, (_, index) => ({
       details: {},
+      externalObjectId: null,
       firstSeenAt: new Date(),
       id: `issue_${index}`,
       kind: "TEST",
@@ -182,7 +183,6 @@ describe("listBillingIssues", () => {
       severity: "CRITICAL",
       source: "test",
       status: "OPEN",
-      stripeObjectId: null,
       workspaceId: null,
     }));
     db.billingIssue.findMany.mockResolvedValue(rows);

@@ -1,9 +1,11 @@
+import type { AccessState } from "@doxynix/shared";
+
 import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
 import { periodStartOf } from "@/server/core/usage/usage";
 import { requestContext } from "@/server/utils/request-context";
 
-import { type AccessState, isAccessState } from "./entitlements/state";
+import { isAccessState } from "./entitlements/state";
 
 export type PlanFeature = "autoResync" | "prReviews" | "privateReposAllowed";
 

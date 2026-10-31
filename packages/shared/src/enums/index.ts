@@ -69,6 +69,27 @@ export const WorkspaceRole = {
   OWNER: "OWNER",
 } as const;
 
+// ------------------- AccessState -------------------
+export const AccessStateSchema = z.enum([
+  "ACTIVE",
+  "CANCELED",
+  "GRACE",
+  "NO_SUBSCRIPTION",
+  "PENDING",
+  "REVIEW",
+  "SUSPENDED",
+]);
+export type AccessState = z.infer<typeof AccessStateSchema>;
+export const AccessState = {
+  ACTIVE: "ACTIVE",
+  CANCELED: "CANCELED",
+  GRACE: "GRACE",
+  NO_SUBSCRIPTION: "NO_SUBSCRIPTION",
+  PENDING: "PENDING",
+  REVIEW: "REVIEW",
+  SUSPENDED: "SUSPENDED",
+} as const;
+
 // ------------------- ApiKeyScope -------------------
 export const ApiKeyScopeSchema = z.enum(["CLI", "FULL", "MCP"]);
 export type ApiKeyScope = z.infer<typeof ApiKeyScopeSchema>;
@@ -76,6 +97,75 @@ export const ApiKeyScope = {
   CLI: "CLI",
   FULL: "FULL",
   MCP: "MCP",
+} as const;
+
+// ------------------- BillingEventStatus -------------------
+export const BillingEventStatusSchema = z.enum([
+  "DEAD_LETTER",
+  "ENQUEUED",
+  "PROCESSED",
+  "PROCESSING",
+  "RECEIVED",
+]);
+export type BillingEventStatus = z.infer<typeof BillingEventStatusSchema>;
+export const BillingEventStatus = {
+  DEAD_LETTER: "DEAD_LETTER",
+  ENQUEUED: "ENQUEUED",
+  PROCESSED: "PROCESSED",
+  PROCESSING: "PROCESSING",
+  RECEIVED: "RECEIVED",
+} as const;
+
+// ------------------- BillingOperationStatus -------------------
+export const BillingOperationStatusSchema = z.enum(["COMPLETED", "FAILED", "STARTED"]);
+export type BillingOperationStatus = z.infer<typeof BillingOperationStatusSchema>;
+export const BillingOperationStatus = {
+  COMPLETED: "COMPLETED",
+  FAILED: "FAILED",
+  STARTED: "STARTED",
+} as const;
+
+// ------------------- BillingReconciliationStatus -------------------
+export const BillingReconciliationStatusSchema = z.enum(["FAILED", "RUNNING", "SUCCESS"]);
+export type BillingReconciliationStatus = z.infer<typeof BillingReconciliationStatusSchema>;
+export const BillingReconciliationStatus = {
+  FAILED: "FAILED",
+  RUNNING: "RUNNING",
+  SUCCESS: "SUCCESS",
+} as const;
+
+// ------------------- BillingIssueStatus -------------------
+export const BillingIssueStatusSchema = z.enum(["OPEN", "RESOLVED"]);
+export type BillingIssueStatus = z.infer<typeof BillingIssueStatusSchema>;
+export const BillingIssueStatus = {
+  OPEN: "OPEN",
+  RESOLVED: "RESOLVED",
+} as const;
+
+// ------------------- BillingIssueSeverity -------------------
+export const BillingIssueSeveritySchema = z.enum(["CRITICAL", "INFO", "WARNING"]);
+export type BillingIssueSeverity = z.infer<typeof BillingIssueSeveritySchema>;
+export const BillingIssueSeverity = {
+  CRITICAL: "CRITICAL",
+  INFO: "INFO",
+  WARNING: "WARNING",
+} as const;
+
+// ------------------- UsageEventKind -------------------
+export const UsageEventKindSchema = z.enum([
+  "ANALYSIS",
+  "ANALYSIS_RELEASE",
+  "CACHE_HIT",
+  "RESERVE",
+  "SETTLE",
+]);
+export type UsageEventKind = z.infer<typeof UsageEventKindSchema>;
+export const UsageEventKind = {
+  ANALYSIS: "ANALYSIS",
+  ANALYSIS_RELEASE: "ANALYSIS_RELEASE",
+  CACHE_HIT: "CACHE_HIT",
+  RESERVE: "RESERVE",
+  SETTLE: "SETTLE",
 } as const;
 
 // ------------------- PRAnalysisStatus -------------------

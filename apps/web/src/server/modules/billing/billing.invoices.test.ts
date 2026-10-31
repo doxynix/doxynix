@@ -19,7 +19,7 @@ type Mirror = {
   activatedAt: Date | null;
   graceEndsAt: Date | null;
   pastDueStartedAt: Date | null;
-  stripeStatus: string;
+  externalStatus: string;
 };
 
 type LedgerRow = { amount: bigint; entryKey: string; kind: string };
@@ -64,9 +64,9 @@ function invoice(overrides: Record<string, unknown> = {}) {
 function createFakeTx(initial: Partial<Mirror> = {}) {
   const mirror: Mirror = {
     activatedAt: null,
+    externalStatus: "active",
     graceEndsAt: null,
     pastDueStartedAt: null,
-    stripeStatus: "active",
     ...initial,
   };
   const ledger = new Map<string, LedgerRow>();
@@ -132,7 +132,7 @@ function createFakeTx(initial: Partial<Mirror> = {}) {
           update: Record<string, unknown>;
         }) => {
           upsertUpdates.push(update);
-          mirror.stripeStatus = create.stripeStatus as string;
+          mirror.externalStatus = create.externalStatus as string;
 
           return { id: "bs_1" };
         },
@@ -232,7 +232,7 @@ describe("invoice.paid", () => {
 
   it("keeps the running grace window when the canonical subscription is still past_due", async () => {
     const graceEndsAt = new Date("2026-11-01T00:00:00.000Z");
-    const fake = createFakeTx({ graceEndsAt, pastDueStartedAt: NOW, stripeStatus: "past_due" });
+    const fake = createFakeTx({ externalStatus: "past_due", graceEndsAt, pastDueStartedAt: NOW });
 
     await applyInvoiceEvent(
       fake.tx,

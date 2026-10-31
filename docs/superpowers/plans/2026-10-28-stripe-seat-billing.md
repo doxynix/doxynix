@@ -122,50 +122,50 @@ Stripe — не источник истины о том, кому принадл
 
 **`billing_customers`**
 - `workspaceId UUID UNIQUE → workspaces.id RESTRICT`.
-- `stripeCustomerId TEXT UNIQUE NOT NULL`, `livemode BOOLEAN NOT NULL`, timestamps.
-- Index `(stripeCustomerId,workspaceId)` не нужен отдельно: обе колонки уже уникальны.
+- `externalCustomerId TEXT UNIQUE NOT NULL`, `livemode BOOLEAN NOT NULL`, timestamps.
+- Index `(externalCustomerId,workspaceId)` не нужен отдельно: обе колонки уже уникальны.
 
 **`billing_subscriptions`**
 - `workspaceId`, `billingCustomerId`, оба `RESTRICT` и indexed.
-- `stripeSubscriptionId TEXT UNIQUE NOT NULL`, `stripeSubscriptionItemId TEXT UNIQUE NOT NULL`.
-- `stripePriceId TEXT NOT NULL`, `stripeStatus TEXT NOT NULL`, `quantity INT CHECK >0`, `currency TEXT NOT NULL`.
+- `externalSubscriptionId TEXT UNIQUE NOT NULL`, `externalSubscriptionItemId TEXT UNIQUE NOT NULL`.
+- `externalPriceId TEXT NOT NULL`, `externalStatus TEXT NOT NULL`, `quantity INT CHECK >0`, `currency TEXT NOT NULL`.
 - `currentPeriodStart/End TIMESTAMPTZ NOT NULL`; в Endive они берутся из `items.data[0].current_period_*` ([Subscription object](https://docs.stripe.com/api/subscriptions/object#subscription_object-items)).
 - `cancelAtPeriodEnd BOOLEAN`, `cancelAt TIMESTAMPTZ NULL`, `latestInvoiceId`, `latestInvoiceStatus`.
 - `activatedAt`, `pastDueStartedAt`, `graceEndsAt`, `isCurrent`, `needsReview`, `reviewReason`, timestamps.
-- Partial unique: `UNIQUE(workspaceId) WHERE isCurrent`; indexes `(billingCustomerId,createdAt)`, `(stripeStatus,currentPeriodEnd)`.
+- Partial unique: `UNIQUE(workspaceId) WHERE isCurrent`; indexes `(billingCustomerId,createdAt)`, `(externalStatus,currentPeriodEnd)`.
 - Неизвестные status/price/currency сохраняются; не делаем CHECK по значениям Stripe.
 
 **`billing_checkout_sessions`**
-- `workspaceId`, `stripeCheckoutSessionId TEXT UNIQUE NOT NULL`, `stripeCustomerId TEXT NOT NULL`.
-- `stripeStatus TEXT NULL`, timestamps; index `(workspaceId,createdAt)`.
+- `workspaceId`, `externalCheckoutSessionId TEXT UNIQUE NOT NULL`, `externalCustomerId TEXT NOT NULL`.
+- `externalStatus TEXT NULL`, timestamps; index `(workspaceId,createdAt)`.
 - Эта таблица связывает Session с Workspace без metadata. `checkout.session.*` содержит `customer` и `subscription` IDs ([Checkout Session object](https://docs.stripe.com/api/checkout/sessions/object)).
 
 **`billing_operations`**
-- `workspaceId`, nullable `actorUserId SET NULL`, `operation`, `requestId`, `requestHash`, `status`, `stripeObjectId`, sanitized `resultJson`, `errorCode`, timestamps.
+- `workspaceId`, nullable `actorUserId SET NULL`, `operation`, `requestId`, `requestHash`, `status`, `externalObjectId`, sanitized `resultJson`, `errorCode`, timestamps.
 - `UNIQUE(workspaceId,requestId)`, index `(status,updatedAt)`.
 - Checkout/Portal URL не сохраняются; сохраняется только object ID/безопасный результат.
 
 ### Events, ledger и reconciliation
 
 **`billing_events`**
-- `stripeEventId TEXT UNIQUE NOT NULL`, `type TEXT NOT NULL`, `livemode BOOLEAN NOT NULL`.
-- `apiVersion TEXT NULL`, `stripeCreatedAt TIMESTAMPTZ NOT NULL`.
+- `externalEventId TEXT UNIQUE NOT NULL`, `type TEXT NOT NULL`, `livemode BOOLEAN NOT NULL`.
+- `apiVersion TEXT NULL`, `externalCreatedAt TIMESTAMPTZ NOT NULL`.
 - `payload JSONB NULL`, `payloadHash TEXT NOT NULL`.
 - `status TEXT CHECK (RECEIVED|ENQUEUED|PROCESSING|PROCESSED|DEAD_LETTER)`.
 - `attempts INT DEFAULT 0`, `replayCount INT DEFAULT 0`, `lastError TEXT NULL`, `triggerRunId TEXT NULL`.
 - `receivedAt`, `processedAt`, timestamps.
-- Indexes `(status,receivedAt)`, `(type,stripeCreatedAt)`, `(stripeCreatedAt,id)`.
-- `payload` очищается через 90 дней; row и unique `stripeEventId` остаются бессрочно для дедупликации.
+- Indexes `(status,receivedAt)`, `(type,externalCreatedAt)`, `(externalCreatedAt,id)`.
+- `payload` очищается через 90 дней; row и unique `externalEventId` остаются бессрочно для дедупликации.
 
 **`billing_ledger_entries`** — operational, append-only, не GAAP ledger
 - `workspaceId`, nullable `billingEventId`, `entryKey TEXT UNIQUE NOT NULL`.
-- `kind`, `stripeObjectId`, `relatedInvoiceId`, `relatedSubscriptionId`, `correctsEntryId NULL`.
+- `kind`, `externalObjectId`, `relatedInvoiceId`, `relatedSubscriptionId`, `correctsEntryId NULL`.
 - `amount BIGINT NOT NULL` в cents, signed; `currency TEXT NOT NULL`; `occurredAt`, `createdAt`; sanitized `details JSONB`.
-- Indexes `(workspaceId,occurredAt,id)`, `(relatedInvoiceId,kind)`, `(stripeObjectId,kind)`.
+- Indexes `(workspaceId,occurredAt,id)`, `(relatedInvoiceId,kind)`, `(externalObjectId,kind)`.
 - ZenStack: create/read только через разрешённые server paths; `@@allow('update,delete', false)` по образцу существующего `WebhookDelivery`. Исправление — новая запись с `correctsEntryId`, не UPDATE.
 
 **`billing_issues`**
-- `source`, `kind`, `severity`, `dedupeKey TEXT UNIQUE`, nullable `workspaceId`, `stripeObjectId`.
+- `source`, `kind`, `severity`, `dedupeKey TEXT UNIQUE`, nullable `workspaceId`, `externalObjectId`.
 - `status OPEN|RESOLVED`, sanitized `details JSONB`, `firstSeenAt`, `lastSeenAt`, `resolvedAt`, timestamps.
 - Indexes `(status,severity,lastSeenAt)`, `(workspaceId,status)`.
 
@@ -202,7 +202,7 @@ Stripe — не источник истины о том, кому принадл
 - `ACTIVE → GRACE|SUSPENDED|CANCELED|REVIEW`.
 - `GRACE → ACTIVE|SUSPENDED|CANCELED|REVIEW`.
 - `SUSPENDED → ACTIVE|CANCELED|REVIEW`.
-- `CANCELED → PENDING|ACTIVE` только при **новом** `stripeSubscriptionId`; оживление canceled ID = `REVIEW`.
+- `CANCELED → PENDING|ACTIVE` только при **новом** `externalSubscriptionId`; оживление canceled ID = `REVIEW`.
 - Одинаковое состояние и `* → REVIEW` допустимы. Из `REVIEW` выход только после нового canonical read с валидной конфигурацией; issue закрывается отдельно.
 
 ### Что двигает состояние
@@ -254,7 +254,7 @@ Replay: admin создаёт новый run из сохраненного payloa
 | Create Checkout Session | `...:checkout:{workspaceId}:{requestId}` | Повтор команды не создаёт вторую Session. |
 | Update Subscription price/quantity | `...:subscription:{workspaceId}:{requestId}` | Повтор не меняет дважды; сохраняем Subscription ID. |
 | Create Portal Session | Случайный request ID на каждое намеренное открытие | Safe retry одного HTTP запроса; новый клик = новый request ID. URL не сохраняем. |
-| Ledger | `kind:{stripeObjectId}:{status/sequence}` | Unique `entryKey`; повторный event = no-op. |
+| Ledger | `kind:{externalObjectId}:{status/sequence}` | Unique `entryKey`; повторный event = no-op. |
 | Reconciliation run | `scheduledForDate` unique + `reconcile:{date}` | Повтор schedule не создаёт параллельный run. |
 
 Все POST к Stripe v1 принимают idempotency keys; GET/DELETE не получают их ([idempotent requests](https://docs.stripe.com/api/idempotent_requests)). Ключи ≤255 chars, без email/PII.
@@ -360,7 +360,7 @@ Nightly `schedules.task`, `17 4 * * *` UTC, unique date, distributed overlap з�
 Алгоритм:
 
 1. Загрузить все Subscriptions со `status=all`, полной cursor pagination (`starting_after`, `has_more`) ([List subscriptions](https://docs.stripe.com/api/subscriptions/list)).
-2. Сверить по `stripeSubscriptionId`: Workspace mapping, Customer, status, one item, Price, quantity, currency, period, cancellation flags. `status=all` включает все состояния ([List subscriptions](https://docs.stripe.com/api/subscriptions/list)).
+2. Сверить по `externalSubscriptionId`: Workspace mapping, Customer, status, one item, Price, quantity, currency, period, cancellation flags. `status=all` включает все состояния ([List subscriptions](https://docs.stripe.com/api/subscriptions/list)).
 3. Для каждого локального current Subscription отсутствующего в list сделать direct retrieve, чтобы отличить filtering/pagination error.
 4. Для локальных Invoice/Refund/Dispute IDs за 90 дней выполнить canonical retrieve и сверить ledger natural keys/amount/currency/status. Unknown object связывается только через уже подтверждённый Customer/Invoice graph; никаких metadata guesses.
 5. Проверить очередь событий, active tax registrations и последний successful run.
@@ -433,7 +433,7 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
 | # | Проверка | Ответ |
 |---|---|---|
 | 1 | Есть Workspace/Membership, owner-only billing и проверенные seat invariants? | **yes** — WS-01…WS-06 закрыты, billing-мутации на `ownerProcedure`, seat invariants и last-owner покрыты integration-тестами. |
-| 2 | Все billing таблицы/constraints/indexes мигрированы, Event ID unique, ledger update/delete запрещены? | **yes** — миграции BILL-03/10A/16, `stripeEventId`/`entryKey` unique, update/delete ledger denied (BILL-19). |
+| 2 | Все billing таблицы/constraints/indexes мигрированы, Event ID unique, ledger update/delete запрещены? | **yes** — миграции BILL-03/10A/16, `externalEventId`/`entryKey` unique, update/delete ledger denied (BILL-19). |
 | 3 | Checkout/Portal работают в отдельном sandbox без `payment_method_types`, с pinned Endive и RAK? | **cannot-verify** — Checkout подтверждён живым sandbox-прогоном (сессия → вебхук → ACTIVE), Portal и RAK/Dashboard-конфигурация не проверялись. |
 | 4 | Raw-signature webhook, durable enqueue, duplicate/out-of-order/retry/DLQ tests проходят? | **yes** — BILL-07/18/19: raw body, unique Event ID, replay-ключи, DLQ и конкурентные доставки. |
 | 5 | State machine принимает любые remote statuses, но fail-closed при anomaly; grace/recovery проверены? | **yes** — таблица §5 и fail-closed покрыты unit+integration; live dunning (test clocks) — cannot-verify. |

@@ -22,10 +22,10 @@ vi.mock("./stripe-client", () => ({
 
 function subscription(overrides: Record<string, unknown> = {}) {
   return {
+    externalStatus: "active",
+    externalSubscriptionId: "sub_1",
+    externalSubscriptionItemId: "si_1",
     quantity: 2,
-    stripeStatus: "active",
-    stripeSubscriptionId: "sub_1",
-    stripeSubscriptionItemId: "si_1",
     ...overrides,
   };
 }
@@ -122,7 +122,7 @@ describe("syncWorkspaceSeats", () => {
   it("leaves a past_due subscription to dunning", async () => {
     arrange({
       members: 4,
-      subscription: subscription({ stripeStatus: "past_due" }),
+      subscription: subscription({ externalStatus: "past_due" }),
     });
 
     const result = await syncWorkspaceSeats({ requestId: REQUEST_ID, workspaceId: WORKSPACE_ID });
@@ -140,7 +140,7 @@ describe("syncWorkspaceSeats", () => {
       where: { workspaceId: WORKSPACE_ID },
     });
     expect(dbMock.billingSubscription.findFirst).toHaveBeenCalledWith({
-      select: expect.objectContaining({ stripeSubscriptionItemId: true }),
+      select: expect.objectContaining({ externalSubscriptionItemId: true }),
       where: { isCurrent: true, workspaceId: WORKSPACE_ID },
     });
   });

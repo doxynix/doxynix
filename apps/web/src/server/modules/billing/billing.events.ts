@@ -1,3 +1,4 @@
+import { BillingEventStatus } from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
 import { tasks } from "@trigger.dev/sdk";
 import type Stripe from "stripe";
@@ -5,9 +6,10 @@ import type Stripe from "stripe";
 import { appLogger } from "@/server/core/app-logger";
 import { upsertBillingIssue } from "@/server/core/billing/issue";
 import { captureBillingAlert, recordBillingMetric } from "@/server/core/billing/metrics";
+import { STRIPE_API_VERSION } from "@/server/core/billing/stripe-version";
 import { type DbClient, prisma } from "@/server/core/db";
 
-import { PROCESS_STRIPE_EVENT_TASK_ID, STRIPE_API_VERSION } from "./billing.constants";
+import { PROCESS_STRIPE_EVENT_TASK_ID } from "./billing.constants";
 import { NonRetryableBillingError } from "./billing.errors";
 import { applyInvoiceEvent, retrieveSubscriptionForInvoice } from "./billing.invoices";
 import { ownershipKeyFromPayload } from "./billing.ownership";
@@ -21,13 +23,7 @@ import {
 import { applyRiskEvent, isRiskObject, resolveRiskLinks } from "./billing.risk";
 import { projectSubscription } from "./billing.subscriptions";
 
-const EVENT_STATUS = {
-  DEAD_LETTER: "DEAD_LETTER",
-  ENQUEUED: "ENQUEUED",
-  PROCESSED: "PROCESSED",
-  PROCESSING: "PROCESSING",
-  RECEIVED: "RECEIVED",
-} as const;
+const EVENT_STATUS = BillingEventStatus;
 
 const STALE_EVENT_MS = 15 * 60 * 1000;
 // An ENQUEUED event whose run was lost (deploy, concurrency stall) needs a longer grace than a
@@ -91,7 +87,7 @@ async function knownWorkspaceFor(
 
   const row = await db.billingSubscription.findUnique({
     select: { workspaceId: true },
-    where: { stripeSubscriptionId: canonical.subscription.id },
+    where: { externalSubscriptionId: canonical.subscription.id },
   });
 
   return row?.workspaceId ?? null;
@@ -123,22 +119,22 @@ async function handleUnownedEvent(
     await upsertBillingIssue(tx, {
       dedupeKey: `unowned:${event.id}`,
       details: { type: event.type },
+      externalObjectId: event.data.object.id,
       kind: "UNOWNED_STRIPE_OBJECT",
       severity: "CRITICAL",
       source: "stripe_worker",
-      stripeObjectId: event.data.object.id,
       workspaceId: knownWorkspaceId,
     });
 
     await markProcessed(tx, billingEventId);
   });
 
-  captureBillingAlert("UNOWNED_STRIPE_OBJECT", { stripeObjectId: event.data.object.id });
+  captureBillingAlert("UNOWNED_STRIPE_OBJECT", { externalObjectId: event.data.object.id });
 
   appLogger.error({
     billingEventId,
+    externalObjectId: event.data.object.id,
     msg: "stripe_event_unowned_object",
-    stripeObjectId: event.data.object.id,
     type: event.type,
   });
 }
@@ -149,7 +145,7 @@ async function assertOwnerMatches(
 ): Promise<void> {
   const existing = await prisma.billingSubscription.findUnique({
     select: { workspaceId: true },
-    where: { stripeSubscriptionId: subscription.id },
+    where: { externalSubscriptionId: subscription.id },
   });
 
   if (existing != null && existing.workspaceId !== workspaceId) {
@@ -180,17 +176,17 @@ async function applyCheckoutSession(
   session: Stripe.Checkout.Session,
   eventType: string,
 ): Promise<void> {
-  const stripeStatus = checkoutSessionStatus(eventType, session);
+  const externalStatus = checkoutSessionStatus(eventType, session);
 
   await tx.billingCheckoutSession.upsert({
     create: {
-      stripeCheckoutSessionId: session.id,
-      stripeCustomerId: ownership.customerId ?? idOf(session.customer) ?? "",
-      stripeStatus,
+      externalCheckoutSessionId: session.id,
+      externalCustomerId: ownership.customerId ?? idOf(session.customer) ?? "",
+      externalStatus,
       workspaceId: ownership.workspaceId,
     },
-    update: { stripeStatus },
-    where: { stripeCheckoutSessionId: session.id },
+    update: { externalStatus },
+    where: { externalCheckoutSessionId: session.id },
   });
 }
 
@@ -282,7 +278,7 @@ export async function processStripeEvent(billingEventId: string): Promise<Stripe
 
 export async function markEventDeadLetter(billingEventId: string, error: unknown): Promise<void> {
   const stored = await prisma.billingEvent.findUnique({
-    select: { stripeEventId: true, type: true },
+    select: { externalEventId: true, type: true },
     where: { id: billingEventId },
   });
   const message = error instanceof Error ? error.message.slice(0, 500) : "UNKNOWN_ERROR";
@@ -294,12 +290,12 @@ export async function markEventDeadLetter(billingEventId: string, error: unknown
     });
 
     await upsertBillingIssue(tx, {
-      dedupeKey: `dead_letter:${stored?.stripeEventId ?? billingEventId}`,
+      dedupeKey: `dead_letter:${stored?.externalEventId ?? billingEventId}`,
       details: { type: stored?.type ?? "unknown" },
+      externalObjectId: stored?.externalEventId ?? null,
       kind: "EVENT_DEAD_LETTER",
       severity: "CRITICAL",
       source: "stripe_worker",
-      stripeObjectId: stored?.stripeEventId ?? null,
     });
   });
 
@@ -320,7 +316,7 @@ export async function sweepStaleStripeEvents(
 
   const stale = await prisma.billingEvent.findMany({
     orderBy: { receivedAt: "asc" },
-    select: { id: true, payload: true, replayCount: true, stripeEventId: true },
+    select: { externalEventId: true, id: true, payload: true, replayCount: true },
     take: SWEEP_BATCH_SIZE,
     where: {
       OR: [
@@ -342,7 +338,7 @@ export async function sweepStaleStripeEvents(
         { billingEventId: event.id },
         {
           concurrencyKey: ownershipKeyFromPayload(event.payload),
-          idempotencyKey: `${event.stripeEventId}:replay:${event.replayCount + 1}`,
+          idempotencyKey: `${event.externalEventId}:replay:${event.replayCount + 1}`,
         },
       );
 
@@ -364,8 +360,8 @@ export async function sweepStaleStripeEvents(
     } catch (error) {
       appLogger.error({
         error,
+        externalEventId: event.externalEventId,
         msg: "stripe_event_sweep_failed",
-        stripeEventId: event.stripeEventId,
       });
     }
   }

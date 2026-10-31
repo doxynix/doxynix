@@ -187,7 +187,7 @@ export async function resolveOwnership(
   if (canonical.kind === "checkout_session") {
     const sessionMapping = await db.billingCheckoutSession.findFirst({
       select: { workspaceId: true },
-      where: { stripeCheckoutSessionId: canonical.session.id },
+      where: { externalCheckoutSessionId: canonical.session.id },
     });
 
     if (sessionMapping != null) {

@@ -1,11 +1,9 @@
+import type { AccessState } from "@doxynix/shared";
 import { describe, expect, it } from "vitest";
 
-import {
-  type AccessState,
-  decideAccessState,
-  hasAccess,
-  type RemoteSubscriptionSnapshot,
-} from "./billing.state";
+import { hasAccess } from "@/server/core/entitlements/state";
+
+import { decideAccessState, type RemoteSubscriptionSnapshot } from "./billing.state";
 
 const NOW = new Date("2026-10-30T12:00:00.000Z");
 const FUTURE = new Date("2026-11-05T12:00:00.000Z");

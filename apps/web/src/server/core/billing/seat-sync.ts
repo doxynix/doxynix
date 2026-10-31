@@ -21,9 +21,9 @@ export async function syncWorkspaceSeats(input: {
 
   const subscription = await prisma.billingSubscription.findFirst({
     select: {
-      stripeStatus: true,
-      stripeSubscriptionId: true,
-      stripeSubscriptionItemId: true,
+      externalStatus: true,
+      externalSubscriptionId: true,
+      externalSubscriptionItemId: true,
     },
     where: { isCurrent: true, workspaceId: input.workspaceId },
   });
@@ -35,14 +35,16 @@ export async function syncWorkspaceSeats(input: {
 
   // Dunning owns the item while the subscription is not active; changing seats there breaks
   // retries and grace periods. Reconciliation still compares quantity with members and repairs it.
-  if (subscription.stripeStatus !== "active") {
+  if (subscription.externalStatus !== "active") {
     return { quantity, synced: false };
   }
 
   // Always send the absolute target. The local mirror only learns the new quantity from a webhook,
   // so "equal to the mirror" is not "equal to Stripe" — comparing against it silently skips the
   // update and leaves the customer paying for a seat that no longer exists.
-  const remote = await getStripeClient().subscriptions.retrieve(subscription.stripeSubscriptionId);
+  const remote = await getStripeClient().subscriptions.retrieve(
+    subscription.externalSubscriptionId,
+  );
   const currentQuantity = remote.items.data[0]?.quantity ?? 1;
 
   if (currentQuantity === quantity) {
@@ -50,9 +52,9 @@ export async function syncWorkspaceSeats(input: {
   }
 
   await getStripeClient().subscriptions.update(
-    subscription.stripeSubscriptionId,
+    subscription.externalSubscriptionId,
     {
-      items: [{ id: subscription.stripeSubscriptionItemId, quantity }],
+      items: [{ id: subscription.externalSubscriptionItemId, quantity }],
       proration_behavior: quantity > currentQuantity ? "always_invoice" : "create_prorations",
     },
     {

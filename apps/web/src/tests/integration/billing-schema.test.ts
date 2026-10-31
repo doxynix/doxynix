@@ -50,11 +50,11 @@ function subscriptionData(billingCustomerId: string, workspaceId: string, overri
     currency: "usd",
     currentPeriodEnd: new Date("2026-11-29T00:00:00.000Z"),
     currentPeriodStart: new Date("2026-10-29T00:00:00.000Z"),
+    externalPriceId: "price_pro_monthly_usd",
+    externalStatus: "active",
+    externalSubscriptionId: `sub_${Math.random().toString(36).slice(2)}`,
+    externalSubscriptionItemId: `si_${Math.random().toString(36).slice(2)}`,
     quantity: 1,
-    stripePriceId: "price_pro_monthly_usd",
-    stripeStatus: "active",
-    stripeSubscriptionId: `sub_${Math.random().toString(36).slice(2)}`,
-    stripeSubscriptionItemId: `si_${Math.random().toString(36).slice(2)}`,
     workspaceId,
     ...overrides,
   };
@@ -117,23 +117,23 @@ describe("billing schema", () => {
 
     const subscription = await prisma.billingSubscription.create({
       data: subscriptionData(customer.id, alice.workspace.id, {
-        stripePriceId: "price_from_a_future_catalog",
-        stripeStatus: "some_future_status",
+        externalPriceId: "price_from_a_future_catalog",
+        externalStatus: "some_future_status",
       }),
     });
 
-    expect(subscription.stripeStatus).toBe("some_future_status");
-    expect(subscription.stripePriceId).toBe("price_from_a_future_catalog");
+    expect(subscription.externalStatus).toBe("some_future_status");
+    expect(subscription.externalPriceId).toBe("price_from_a_future_catalog");
   });
 
   it("keeps the Stripe event id unique after the payload is purged", async () => {
     const event = await prisma.billingEvent.create({
       data: {
+        externalCreatedAt: new Date("2026-10-29T00:00:00.000Z"),
+        externalEventId: "evt_purge",
         livemode: false,
         payload: { id: "evt_purge" },
         payloadHash: "hash",
-        stripeCreatedAt: new Date("2026-10-29T00:00:00.000Z"),
-        stripeEventId: "evt_purge",
         type: "invoice.paid",
       },
     });
@@ -142,21 +142,21 @@ describe("billing schema", () => {
       data: { payload: Prisma.DbNull },
       where: { id: event.id },
     });
-    const rows = await prisma.$queryRaw<Array<{ payload: unknown; stripe_event_id: string }>>`
-      SELECT payload, stripe_event_id FROM billing_events WHERE id = ${event.id}::uuid
+    const rows = await prisma.$queryRaw<Array<{ payload: unknown; external_event_id: string }>>`
+      SELECT payload, external_event_id FROM billing_events WHERE id = ${event.id}::uuid
     `;
 
     expect(rows[0]?.payload).toBeNull();
-    expect(rows[0]?.stripe_event_id).toBe("evt_purge");
-    expect(purged.stripeEventId).toBe("evt_purge");
+    expect(rows[0]?.external_event_id).toBe("evt_purge");
+    expect(purged.externalEventId).toBe("evt_purge");
 
     await expect(
       prisma.billingEvent.create({
         data: {
+          externalCreatedAt: new Date("2026-10-29T00:00:01.000Z"),
+          externalEventId: "evt_purge",
           livemode: false,
           payloadHash: "other-hash",
-          stripeCreatedAt: new Date("2026-10-29T00:00:01.000Z"),
-          stripeEventId: "evt_purge",
           type: "invoice.paid",
         },
       }),
@@ -170,9 +170,9 @@ describe("billing schema", () => {
         amount: BigInt(1900),
         currency: "usd",
         entryKey: "INVOICE_PAID:in_test_1:paid",
+        externalObjectId: "in_test_1",
         kind: "INVOICE_PAID",
         occurredAt: new Date("2026-10-29T00:00:00.000Z"),
-        stripeObjectId: "in_test_1",
         workspaceId: alice.workspace.id,
       },
     });
@@ -195,9 +195,9 @@ describe("billing schema", () => {
           amount: BigInt(1),
           currency: "usd",
           entryKey: "FORGED",
+          externalObjectId: "in_forged",
           kind: "INVOICE_PAID",
           occurredAt: new Date(),
-          stripeObjectId: "in_forged",
           workspaceId: alice.workspace.id,
         },
       }),
@@ -232,11 +232,11 @@ describe("billing schema", () => {
 
     await prisma.billingEvent.create({
       data: {
+        externalCreatedAt: new Date("2026-10-29T00:00:00.000Z"),
+        externalEventId: "evt_admin_only",
         livemode: false,
         payload: { id: "evt_admin_only" },
         payloadHash: "hash",
-        stripeCreatedAt: new Date("2026-10-29T00:00:00.000Z"),
-        stripeEventId: "evt_admin_only",
         type: "customer.subscription.updated",
       },
     });

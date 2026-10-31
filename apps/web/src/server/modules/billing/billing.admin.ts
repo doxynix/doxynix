@@ -1,3 +1,4 @@
+import type { BillingIssueSeverity, BillingIssueStatus } from "@doxynix/shared";
 import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
@@ -22,7 +23,7 @@ export type BillingIssueSummary = {
   severity: string;
   source: string;
   status: string;
-  stripeObjectId: null | string;
+  externalObjectId: null | string;
   workspaceId: null | string;
 };
 
@@ -32,10 +33,10 @@ export async function replayBillingEvent(
 ): Promise<{ runId: string }> {
   const event = await db.billingEvent.findUnique({
     select: {
+      externalEventId: true,
       payload: true,
       replayCount: true,
       status: true,
-      stripeEventId: true,
     },
     where: { id: input.billingEventId },
   });
@@ -59,7 +60,7 @@ export async function replayBillingEvent(
     { billingEventId: input.billingEventId },
     {
       concurrencyKey: ownershipKeyFromPayload(event.payload),
-      idempotencyKey: `${event.stripeEventId}:replay:${event.replayCount + 1}`,
+      idempotencyKey: `${event.externalEventId}:replay:${event.replayCount + 1}`,
     },
   );
 
@@ -148,7 +149,11 @@ export async function resolveBillingIssue(
 
 export async function listBillingIssues(
   db: DbClient,
-  input: { cursor?: string; severity?: string; status?: string },
+  input: {
+    cursor?: string;
+    severity?: BillingIssueSeverity;
+    status?: BillingIssueStatus;
+  },
 ): Promise<{ items: Array<BillingIssueSummary>; nextCursor: null | string }> {
   const items = await db.billingIssue.findMany({
     orderBy: [{ lastSeenAt: "desc" }, { id: "desc" }],

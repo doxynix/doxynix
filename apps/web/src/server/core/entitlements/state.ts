@@ -1,21 +1,14 @@
-export const ACCESS_STATES = [
-  "NO_SUBSCRIPTION",
-  "PENDING",
-  "ACTIVE",
-  "GRACE",
-  "SUSPENDED",
-  "CANCELED",
-  "REVIEW",
-] as const;
+import { AccessState, AccessStateSchema } from "@doxynix/shared";
 
-export type AccessState = (typeof ACCESS_STATES)[number];
+// Column and code use the same generated enum, so a missing state cannot drift between them.
+export const ACCESS_STATES = Object.values(AccessState) as [AccessState, ...AccessState[]];
 
-export const DEFAULT_ACCESS_STATE: AccessState = "NO_SUBSCRIPTION";
+export const DEFAULT_ACCESS_STATE = AccessState.NO_SUBSCRIPTION;
 
 export function isAccessState(value: unknown): value is AccessState {
-  return typeof value === "string" && (ACCESS_STATES as readonly string[]).includes(value);
+  return AccessStateSchema.safeParse(value).success;
 }
 
 export function hasAccess(state: AccessState): boolean {
-  return state === "ACTIVE" || state === "GRACE";
+  return state === AccessState.ACTIVE || state === AccessState.GRACE;
 }

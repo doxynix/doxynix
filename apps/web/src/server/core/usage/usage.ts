@@ -1,18 +1,9 @@
+import { UsageEventKind as USAGE_EVENT_KIND } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
 
 import type { DbClient } from "@/server/core/db";
 
 import { costCentsFor, type TokenUsage, totalTokens } from "./price";
-
-export const USAGE_EVENT_KIND = {
-  ANALYSIS: "ANALYSIS",
-  ANALYSIS_RELEASE: "ANALYSIS_RELEASE",
-  CACHE_HIT: "CACHE_HIT",
-  RESERVE: "RESERVE",
-  SETTLE: "SETTLE",
-} as const;
-
-export type UsageEventKind = (typeof USAGE_EVENT_KIND)[keyof typeof USAGE_EVENT_KIND];
 
 export type UsageReservation = {
   idempotencyKey: string;

@@ -5,12 +5,13 @@ import { APP_URL } from "@/shared/config/env.client";
 import { IS_PROD } from "@/shared/config/env.flags";
 import { DEFAULT_LOCALE } from "@/shared/config/locales";
 
+import { stripeIdempotencyKey } from "@/server/core/billing/idempotency";
 import { getStripeClient, stripeEnvironment } from "@/server/core/billing/stripe-client";
 import type { DbClient } from "@/server/core/db";
 
 import { proPlan } from "./billing.catalog";
 import { STRIPE_PROVIDER } from "./billing.constants";
-import { runBillingOperation, stripeIdempotencyKey } from "./billing.operations";
+import { runBillingOperation } from "./billing.operations";
 import type { CreateCheckoutResult } from "./billing.schemas";
 import { requiredJurisdictions, runTaxPreflight } from "./billing.tax";
 
@@ -140,41 +141,41 @@ export async function createCheckoutSession(
 
           const recent = await tx.billingCheckoutSession.findFirst({
             orderBy: { createdAt: "desc" },
-            select: { createdAt: true, stripeCheckoutSessionId: true, stripeStatus: true },
+            select: { createdAt: true, externalCheckoutSessionId: true, externalStatus: true },
             where: {
               createdAt: { gte: new Date(Date.now() - CHECKOUT_SESSION_TTL_MS) },
-              stripeStatus: { in: ["complete", "open", "pending"] },
+              externalStatus: { in: ["complete", "open", "pending"] },
               workspaceId: input.workspaceId,
             },
           });
 
           if (recent != null) {
             const abandoned =
-              recent.stripeStatus === "pending" &&
+              recent.externalStatus === "pending" &&
               Date.now() - recent.createdAt.getTime() > PENDING_SESSION_TTL_MS;
 
             if (!abandoned) {
               return {
-                id: recent.stripeCheckoutSessionId,
+                id: recent.externalCheckoutSessionId,
                 kind:
-                  recent.stripeStatus === "open"
+                  recent.externalStatus === "open"
                     ? "open"
-                    : recent.stripeStatus === "complete"
+                    : recent.externalStatus === "complete"
                       ? "paid"
                       : "pending",
               };
             }
 
             await tx.billingCheckoutSession.delete({
-              where: { stripeCheckoutSessionId: recent.stripeCheckoutSessionId },
+              where: { externalCheckoutSessionId: recent.externalCheckoutSessionId },
             });
           }
 
           await tx.billingCheckoutSession.create({
             data: {
-              stripeCheckoutSessionId: pendingSessionId,
-              stripeCustomerId: "",
-              stripeStatus: "pending",
+              externalCheckoutSessionId: pendingSessionId,
+              externalCustomerId: "",
+              externalStatus: "pending",
               workspaceId: input.workspaceId,
             },
           });
@@ -190,8 +191,8 @@ export async function createCheckoutSession(
 
         if (existing?.status === "open" && existing.url != null) {
           return {
+            externalObjectId: existing.id,
             result: { sessionId: existing.id, url: existing.url },
-            stripeObjectId: existing.id,
           };
         }
       }
@@ -250,7 +251,7 @@ export async function createCheckoutSession(
       } catch (error) {
         // Never leave a placeholder behind: it would block the next attempt for its whole TTL.
         await input.db.billingCheckoutSession
-          .deleteMany({ where: { stripeCheckoutSessionId: pendingSessionId } })
+          .deleteMany({ where: { externalCheckoutSessionId: pendingSessionId } })
           .catch(() => undefined);
 
         throw error;
@@ -259,16 +260,16 @@ export async function createCheckoutSession(
       // The row is the Session↔Workspace link; Stripe metadata is not used for ownership.
       await input.db.billingCheckoutSession.update({
         data: {
-          stripeCheckoutSessionId: session.id,
-          stripeCustomerId: customerId,
-          stripeStatus: session.status ?? null,
+          externalCheckoutSessionId: session.id,
+          externalCustomerId: customerId,
+          externalStatus: session.status ?? null,
         },
-        where: { stripeCheckoutSessionId: pendingSessionId },
+        where: { externalCheckoutSessionId: pendingSessionId },
       });
 
       return {
+        externalObjectId: session.id,
         result: { sessionId: session.id, url: session.url },
-        stripeObjectId: session.id,
       };
     },
     operation: "CHECKOUT_CREATE",

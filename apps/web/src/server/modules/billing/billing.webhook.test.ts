@@ -86,10 +86,10 @@ describe("stripe webhook intake", () => {
     await expect(response.json()).resolves.toEqual({ ok: true });
     expect(dbMock.billingEvent.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
+        externalEventId: "evt_test_1",
         livemode: false,
         payloadHash: payloadHash(payload),
         status: "RECEIVED",
-        stripeEventId: "evt_test_1",
         type: "checkout.session.completed",
       }),
       select: expect.anything(),

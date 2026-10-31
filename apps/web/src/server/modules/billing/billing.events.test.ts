@@ -124,8 +124,8 @@ describe("stripe event worker", () => {
   it("projects the canonical object, not the event snapshot", async () => {
     dbMock.billingSubscription.findUnique.mockResolvedValue({
       activatedAt: new Date("2026-09-01T00:00:00.000Z"),
+      externalStatus: "active",
       graceEndsAt: null,
-      stripeStatus: "active",
       workspaceId: WORKSPACE_ID,
     });
     stripeMock.subscriptions.retrieve.mockResolvedValue(subscription({ status: "past_due" }));
@@ -139,8 +139,8 @@ describe("stripe event worker", () => {
       expand: ["latest_invoice"],
     });
     expect(mirror).toMatchObject({
-      create: { stripeStatus: "past_due" },
-      update: { stripeStatus: "past_due" },
+      create: { externalStatus: "past_due" },
+      update: { externalStatus: "past_due" },
     });
     expect(callArg(dbMock.workspaceEntitlement.upsert)).toMatchObject({
       update: { accessState: "SUSPENDED", planCode: "PRO", seatLimit: 2 },
@@ -158,7 +158,7 @@ describe("stripe event worker", () => {
 
     expect(outcome).toEqual({ status: "processed" });
     expect(mirror).toMatchObject({
-      create: { needsReview: true, stripeStatus: "some_future_status" },
+      create: { externalStatus: "some_future_status", needsReview: true },
     });
     expect(callArg(dbMock.workspaceEntitlement.upsert)).toMatchObject({
       update: { accessState: "REVIEW" },
@@ -236,7 +236,7 @@ describe("stripe event worker", () => {
 
     expect(outcome).toEqual({ status: "processed" });
     expect(callArg(dbMock.billingCheckoutSession.upsert)).toMatchObject({
-      create: { stripeStatus: "complete", workspaceId: WORKSPACE_ID },
+      create: { externalStatus: "complete", workspaceId: WORKSPACE_ID },
     });
     expect(dbMock.workspaceEntitlement.upsert).not.toHaveBeenCalled();
   });
@@ -267,7 +267,7 @@ describe("stripe event worker", () => {
 
   it("marks a failed event as DEAD_LETTER with a critical issue", async () => {
     dbMock.billingEvent.findUnique.mockResolvedValue({
-      stripeEventId: "evt_1",
+      externalEventId: "evt_1",
       type: "customer.subscription.updated",
     });
 
@@ -286,10 +286,10 @@ describe("stripe event worker", () => {
   it("requeues a stale event under a replay key", async () => {
     dbMock.billingEvent.findMany.mockResolvedValue([
       {
+        externalEventId: "evt_1",
         id: "be_1",
         payload: { data: { object: { customer: "cus_1" } } },
         replayCount: 2,
-        stripeEventId: "evt_1",
       },
     ]);
 
@@ -363,7 +363,7 @@ describe("stripe event worker", () => {
 
   it("requeues a stale ENQUEUED event whose run was lost", async () => {
     dbMock.billingEvent.findMany.mockResolvedValue([
-      { id: "be_lost", replayCount: 0, stripeEventId: "evt_lost" },
+      { externalEventId: "evt_lost", id: "be_lost", replayCount: 0 },
     ]);
 
     const result = await sweepStaleStripeEvents(new Date("2026-10-30T12:00:00.000Z"));

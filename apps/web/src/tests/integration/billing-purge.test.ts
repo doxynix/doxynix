@@ -7,15 +7,15 @@ import { cleanupDatabase } from "../helpers";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-async function createEvent(stripeEventId: string, receivedAt: Date) {
+async function createEvent(externalEventId: string, receivedAt: Date) {
   return prisma.billingEvent.create({
     data: {
+      externalCreatedAt: receivedAt,
+      externalEventId,
       livemode: false,
-      payload: { id: stripeEventId },
-      payloadHash: `hash-${stripeEventId}`,
+      payload: { id: externalEventId },
+      payloadHash: `hash-${externalEventId}`,
       receivedAt,
-      stripeCreatedAt: receivedAt,
-      stripeEventId,
       type: "invoice.paid",
     },
   });
@@ -36,7 +36,7 @@ describe("billing event payload purge", () => {
 
     expect(purged).toBe(1);
     expect(row?.payload).toBeNull();
-    expect(row?.stripeEventId).toBe("evt_old");
+    expect(row?.externalEventId).toBe("evt_old");
   });
 
   it("does not touch an already purged payload twice", async () => {

@@ -2,7 +2,7 @@ import Stripe from "stripe";
 
 import { STRIPE_API_KEY, STRIPE_PRICE_PRO_MONTHLY_USD } from "@/shared/config/env.server";
 
-import { STRIPE_API_VERSION } from "@/server/modules/billing/billing.constants";
+import { STRIPE_API_VERSION } from "@/server/core/billing/stripe-version";
 
 // The suite is opt-in: no key, a live key, or no catalog price means every scenario is reported as
 // `cannot-verify` instead of failing the run.

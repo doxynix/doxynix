@@ -1,6 +1,3 @@
-// Re-exported so the SDK version keeps living in one place for the webhook endpoint and scripts.
-export { STRIPE_API_VERSION } from "@/server/core/billing/stripe-version";
-
 // Value of `BillingCustomer.provider` for Stripe rows; the column exists so a second provider
 // does not need a schema change.
 export const STRIPE_PROVIDER = "stripe";

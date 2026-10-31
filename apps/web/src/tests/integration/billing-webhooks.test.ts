@@ -120,7 +120,7 @@ describe("billing webhooks against Postgres", () => {
     ]);
 
     const event = JSON.parse(body) as { id: string };
-    const rows = await prisma.billingEvent.findMany({ where: { stripeEventId: event.id } });
+    const rows = await prisma.billingEvent.findMany({ where: { externalEventId: event.id } });
     const keys = triggerMock.mock.calls.map(
       (call) => (call[2] as { idempotencyKey: string }).idempotencyKey,
     );

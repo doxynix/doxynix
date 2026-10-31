@@ -136,8 +136,8 @@ describe("cancel at period end", () => {
       billingSubscription: {
         findUnique: vi.fn().mockResolvedValue({
           activatedAt: NOW,
+          externalStatus: "active",
           graceEndsAt: null,
-          stripeStatus: "active",
         }),
         updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         upsert: vi.fn().mockResolvedValue({ id: "bs_1" }),

@@ -1,12 +1,4 @@
-export {
-  ACCESS_STATES,
-  type AccessState,
-  DEFAULT_ACCESS_STATE,
-  hasAccess,
-  isAccessState,
-} from "@/server/core/entitlements/state";
-
-import type { AccessState } from "@/server/core/entitlements/state";
+import type { AccessState } from "@doxynix/shared";
 
 const KNOWN_STATUSES = new Set([
   "active",

@@ -48,12 +48,12 @@ async function applyInvoicePaid(tx: DbClient, input: InvoiceEventInput): Promise
     billingEventId: input.billingEventId,
     currency: input.invoice.currency,
     details: { type: input.eventType },
+    externalObjectId: input.invoice.id,
     kind: "INVOICE_PAID",
     occurredAt: paidAt,
     relatedInvoiceId: input.invoice.id,
     relatedSubscriptionId: subscriptionId,
     status: "paid",
-    stripeObjectId: input.invoice.id,
     workspaceId: input.ownership.workspaceId,
   });
 
@@ -64,7 +64,7 @@ async function applyInvoicePaid(tx: DbClient, input: InvoiceEventInput): Promise
   // First paid invoice wins; a renewal must not move the timestamp that proves access began.
   await markSubscriptionActivated(tx, {
     activatedAt: paidAt,
-    stripeSubscriptionId: subscriptionId,
+    externalSubscriptionId: subscriptionId,
   });
 
   // Recovery is decided by the canonical subscription, not by an invoice: a paid invoice for an
@@ -94,7 +94,7 @@ async function applyInvoicePaymentFailed(tx: DbClient, input: InvoiceEventInput)
 
   const mirror = await tx.billingSubscription.findUnique({
     select: { pastDueStartedAt: true },
-    where: { stripeSubscriptionId: subscriptionId },
+    where: { externalSubscriptionId: subscriptionId },
   });
 
   // Only the first failure opens the grace window; later retries must not extend it.
@@ -104,7 +104,7 @@ async function applyInvoicePaymentFailed(tx: DbClient, input: InvoiceEventInput)
         graceEndsAt: new Date(input.eventCreatedAt.getTime() + GRACE_PERIOD_MS),
         pastDueStartedAt: input.eventCreatedAt,
       },
-      where: { stripeSubscriptionId: subscriptionId },
+      where: { externalSubscriptionId: subscriptionId },
     });
   }
 
@@ -149,17 +149,17 @@ async function applyInvoiceFinalizationFailed(
   if (subscriptionId != null) {
     await tx.billingSubscription.updateMany({
       data: { needsAction: "TAX_LOCATION" },
-      where: { stripeSubscriptionId: subscriptionId },
+      where: { externalSubscriptionId: subscriptionId },
     });
   }
 
   await upsertBillingIssue(tx, {
     dedupeKey: `tax_location:${input.invoice.id}`,
     details: { needsAction: "TAX_LOCATION" },
+    externalObjectId: input.invoice.id,
     kind: "TAX_LOCATION",
     severity: "CRITICAL",
     source: "stripe_tax",
-    stripeObjectId: input.invoice.id,
     workspaceId: input.ownership.workspaceId,
   });
 }
