@@ -20,10 +20,12 @@ import {
   isBinaryLikeContent,
 } from "../analysis.utils";
 
+type WorkspaceScopedAuditInput = FileActionInput & { workspaceId: string };
+
 // Lives outside `analysis.utils` on purpose: it needs the AI tool profile, which reaches the tRPC server
 export async function runQuickFileAudit(
   userId: string,
-  input: FileActionInput & { workspaceId: string },
+  input: WorkspaceScopedAuditInput,
 ): Promise<QuickFileAuditResult> {
   const rawContent = input.content.trim();
 

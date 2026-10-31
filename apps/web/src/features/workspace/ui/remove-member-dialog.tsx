@@ -5,15 +5,7 @@ import { UserMinus } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { AppButton } from "@/shared/ui/core/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/shared/ui/core/dialog";
+import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 
 import { useMemberActions } from "../model/use-member-actions";
 
@@ -29,11 +21,15 @@ export function RemoveMemberDialog({ memberName, userId }: Readonly<Props>) {
   const [open, setOpen] = useState(false);
 
   return (
-    <Dialog
+    <DangerActionDialog
+      confirmLabel={tCommon("remove")}
+      description={t("settings_members_remove_desc", { name: memberName })}
+      isLoading={remove.isPending}
+      onConfirm={() => remove.mutate({ userId }, { onSuccess: () => setOpen(false) })}
       onOpenChange={setOpen}
       open={open}
-    >
-      <DialogTrigger asChild>
+      title={t("settings_members_remove_title")}
+      trigger={
         <AppButton
           aria-label={tCommon("remove")}
           size="icon"
@@ -41,37 +37,7 @@ export function RemoveMemberDialog({ memberName, userId }: Readonly<Props>) {
         >
           <UserMinus />
         </AppButton>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("settings_members_remove_title")}</DialogTitle>
-          <DialogDescription>
-            {t("settings_members_remove_desc", { name: memberName })}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <AppButton
-            onClick={() => setOpen(false)}
-            variant="outline"
-          >
-            {tCommon("cancel")}
-          </AppButton>
-          <AppButton
-            disabled={remove.isPending}
-            onClick={() =>
-              remove.mutate(
-                { userId },
-                {
-                  onSuccess: () => setOpen(false),
-                },
-              )
-            }
-            variant="destructive"
-          >
-            {tCommon("remove")}
-          </AppButton>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      }
+    />
   );
 }
