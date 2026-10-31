@@ -726,7 +726,10 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
 `create` всем); N3 — открытая сессия переиспользуется вместо блокировки на 24 часа; N4 —
 self-removal и удаление аккаунта синкают места; N5 — TEAM не понижается, лимиты перезаписываются
 только при смене плана, `assertPlanFeature` требует `hasAccess`; N6 — терминальные статусы спора
-(`charge_refunded`, `prevented`, `warning_closed`), legacy-ключ и `won` без предшествующего open.
+(`charge_refunded`, `prevented`, `warning_closed`), legacy-ключ и `won` без предшествующего open;
+N8 — GRACE с живым дедлайном снова может добавлять места (синк отложен до recovery); N9 —
+`CHECKOUT_IN_PROGRESS` и `OWNER_OF_ACTIVE_SUBSCRIPTION` замаплены в UI на всех 12 локалях.
+Осталось: ручная карточка мест конфликтует с автосинком (убрать или превратить в предоплату).
 
 Осталось (medium, до запуска не блокирует):
 F10 (issue на REVIEW + reconciliation entitlement), F11 (`concurrency` у `processStripeEvent`),
