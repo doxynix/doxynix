@@ -530,7 +530,7 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
 
 ### Operations и проверка
 
-- [ ] **BILL-15 — Nightly reconciliation (1 день)**
+- [x] **BILL-15 — Nightly reconciliation (1 день)**
   - **Files touched:** Create `apps/web/src/server/modules/billing/billing.reconciliation.ts`, `billing.reconciliation.test.ts`, `tasks/reconcile-stripe.task.ts`; Modify `apps/web/src/server/utils/task-config.ts`; Create `apps/web/src/tests/integration/billing-reconciliation.test.ts`.
   - **Acceptance criteria:** Full pagination, one daily run, canonical mirror repair, unowned/extra fail-closed, append-only money correction, tax/queue checks, issues и >26h alert; zero Stripe writes.
   - **Проверка:** `bun --filter @doxynix/web test src/server/modules/billing/billing.reconciliation.test.ts && bun --filter @doxynix/web test:int src/tests/integration/billing-reconciliation.test.ts`

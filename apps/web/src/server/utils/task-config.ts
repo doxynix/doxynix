@@ -95,6 +95,17 @@ export const TASK_CONFIGS = {
     },
   },
 
+  reconcileStripe: {
+    machine: { preset: "small-1x" },
+    maxDuration: 60 * 15, // TIME: 15 minutes
+    retry: {
+      factor: 2,
+      maxAttempts: 2,
+      maxTimeoutInMs: 60_000,
+      minTimeoutInMs: 5000,
+    },
+  },
+
   sweepStripeEvents: {
     machine: { preset: "micro" },
     maxDuration: 60 * 5, // TIME: 5 minutes
