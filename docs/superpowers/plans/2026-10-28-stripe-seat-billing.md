@@ -560,7 +560,7 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
   - **Acceptance criteria:** Отдельный sandbox; initial/renewal/dunning/recovery/proration/cancel/refund/dispute/tax scenarios; poll processed state; suite не входит в default unit/CI; results задокументированы. Без sandbox credentials статус остаётся `cannot-verify`.
   - **Проверка:** `bun --filter @doxynix/web test:stripe`
 
-- [ ] **BILL-21 — Runbook, live checklist и final gate (0.5 дня)**
+- [x] **BILL-21 — Runbook, live checklist и final gate (0.5 дня)**
   - **Files touched:** Create `docs/runbooks/stripe-billing.md`; Modify `apps/web/.env.example`; Review все новые migrations и Trigger config; обновить ответы раздела 16 по факту.
   - **Acceptance criteria:** Задокументированы RAK least privilege, endpoint events/version, Product/Price/tax code, registrations, Smart Retries 8/2w+ cancellation, Stripe emails, portal limits, rotation/replay/reconciliation/alerts; migration review; format/lint/types/arch/tests зелёные.
   - **Проверка:** `bun run format && bun run validate && bun run test && bun --filter @doxynix/web test:int && bun run secretlint`
