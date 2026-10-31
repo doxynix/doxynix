@@ -80,18 +80,64 @@ function createFakeDb(
   const findById = (id: string) => [...operations.values()].find((row) => row.id === id);
 
   const db = {
+    $executeRaw: async () => 0,
     billingCheckoutSession: {
       create: async ({ data }: { data: SessionRow }) => {
         sessions.push(data);
 
         return data;
       },
+      delete: async ({ where }: { where: { stripeCheckoutSessionId: string } }) => {
+        const index = sessions.findIndex(
+          (row) => row.stripeCheckoutSessionId === where.stripeCheckoutSessionId,
+        );
+
+        if (index >= 0) {
+          sessions.splice(index, 1);
+        }
+
+        return {};
+      },
+      deleteMany: async ({ where }: { where: { stripeCheckoutSessionId: string } }) => {
+        const before = sessions.length;
+
+        for (let index = sessions.length - 1; index >= 0; index -= 1) {
+          if (sessions[index]?.stripeCheckoutSessionId === where.stripeCheckoutSessionId) {
+            sessions.splice(index, 1);
+          }
+        }
+
+        return { count: before - sessions.length };
+      },
       findFirst: async () =>
         options.openSession === true
-          ? { stripeCheckoutSessionId: "cs_open", stripeStatus: "open" }
+          ? { createdAt: new Date(), stripeCheckoutSessionId: "cs_open", stripeStatus: "open" }
           : options.completeSession === true
-            ? { stripeCheckoutSessionId: "cs_done", stripeStatus: "complete" }
+            ? {
+                createdAt: new Date(),
+                stripeCheckoutSessionId: "cs_done",
+                stripeStatus: "complete",
+              }
             : null,
+      update: async ({
+        data,
+        where,
+      }: {
+        data: Partial<SessionRow>;
+        where: { stripeCheckoutSessionId: string };
+      }) => {
+        const row = sessions.find(
+          (session) => session.stripeCheckoutSessionId === where.stripeCheckoutSessionId,
+        );
+
+        if (row == null) {
+          throw new Error("checkout session not found");
+        }
+
+        Object.assign(row, data);
+
+        return row;
+      },
     },
     billingCustomer: {
       findFirst: async ({ where }: { where: { provider: string; workspaceId: string } }) =>
@@ -188,8 +234,14 @@ function createFakeDb(
     workspaceMember: { count: async () => members },
   };
 
+  // The guard runs inside a transaction with an advisory lock; the fake just runs the callback.
+  const transactional = {
+    ...db,
+    $transaction: async (fn: (client: typeof db) => unknown) => fn(db),
+  };
+
   return {
-    db: db as unknown as DbClient,
+    db: transactional as unknown as DbClient,
     sessions,
     setMembers: (value: number) => {
       members = value;
@@ -248,6 +300,8 @@ describe("createCheckoutSession", () => {
     expect(options.idempotencyKey).toContain(":checkout:");
     expect(options.idempotencyKey).toContain(REQUEST_ID);
     expect(result).toEqual({ sessionId: "cs_new", url: CHECKOUT_URL });
+    expect(fake.sessions).toHaveLength(1);
+    expect(fake.sessions[0]?.stripeCheckoutSessionId).toBe("cs_new");
     expect(fake.sessions).toEqual([
       {
         stripeCheckoutSessionId: "cs_new",

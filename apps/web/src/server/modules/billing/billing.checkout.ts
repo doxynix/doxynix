@@ -15,6 +15,8 @@ import { getStripeClient, stripeEnvironment } from "./billing.stripe";
 const CHECKOUT_RETURN_PATH = "/dashboard/settings/members";
 // Stripe expires an open Checkout Session after 24 hours by default.
 const CHECKOUT_SESSION_TTL_MS = 24 * 60 * 60 * 1000;
+// A placeholder older than this belongs to a crashed request, not to a live tab.
+const PENDING_SESSION_TTL_MS = 10 * 60 * 1000;
 
 export type CreateCheckoutInput = {
   actorUserId: string;
@@ -124,35 +126,77 @@ export async function createCheckoutSession(
         throw new TRPCError({ code: "PRECONDITION_FAILED", message: "ALREADY_SUBSCRIBED" });
       }
 
-      // A second tab must not open a second Subscription. Two live Sessions on one customer can
-      // both be paid, and the loser would keep billing invisibly (it never becomes `isCurrent`).
-      // An open session is reused instead of blocking the purchase for its 24h lifetime.
-      const recentSession = await input.db.billingCheckoutSession.findFirst({
-        orderBy: { createdAt: "desc" },
-        select: { stripeCheckoutSessionId: true, stripeStatus: true },
-        where: {
-          createdAt: { gte: new Date(Date.now() - CHECKOUT_SESSION_TTL_MS) },
-          stripeStatus: { in: ["complete", "open"] },
-          workspaceId: input.workspaceId,
-        },
-      });
+      type Blocked = { id: string; kind: "open" | "paid" | "pending" };
+      const pendingSessionId = `pending:${input.requestId}`;
+      let blocked: Blocked | null = null;
 
-      if (recentSession != null) {
-        if (recentSession.stripeStatus === "open") {
-          const existing = await getStripeClient()
-            .checkout.sessions.retrieve(recentSession.stripeCheckoutSessionId)
-            .catch(() => null);
+      // Check and write inside one advisory-locked transaction: the row must exist before the
+      // Stripe call, otherwise two concurrent requests with different requestIds both pass.
+      if ("$transaction" in input.db) {
+        blocked = await input.db.$transaction(async (tx) => {
+          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`checkout:${input.workspaceId}`}))`;
 
-          if (existing?.status === "open" && existing.url != null) {
-            return {
-              result: { sessionId: existing.id, url: existing.url },
-              stripeObjectId: existing.id,
-            };
+          const recent = await tx.billingCheckoutSession.findFirst({
+            orderBy: { createdAt: "desc" },
+            select: { createdAt: true, stripeCheckoutSessionId: true, stripeStatus: true },
+            where: {
+              createdAt: { gte: new Date(Date.now() - CHECKOUT_SESSION_TTL_MS) },
+              stripeStatus: { in: ["complete", "open", "pending"] },
+              workspaceId: input.workspaceId,
+            },
+          });
+
+          if (recent != null) {
+            const abandoned =
+              recent.stripeStatus === "pending" &&
+              Date.now() - recent.createdAt.getTime() > PENDING_SESSION_TTL_MS;
+
+            if (!abandoned) {
+              return {
+                id: recent.stripeCheckoutSessionId,
+                kind:
+                  recent.stripeStatus === "open"
+                    ? "open"
+                    : recent.stripeStatus === "complete"
+                      ? "paid"
+                      : "pending",
+              };
+            }
+
+            await tx.billingCheckoutSession.delete({
+              where: { stripeCheckoutSessionId: recent.stripeCheckoutSessionId },
+            });
           }
-        }
 
-        // Paid, but the subscription webhook has not been projected yet: a second Session here
-        // would create a second subscription.
+          await tx.billingCheckoutSession.create({
+            data: {
+              stripeCheckoutSessionId: pendingSessionId,
+              stripeCustomerId: "",
+              stripeStatus: "pending",
+              workspaceId: input.workspaceId,
+            },
+          });
+
+          return null;
+        });
+      }
+
+      if (blocked?.kind === "open") {
+        const existing = await getStripeClient()
+          .checkout.sessions.retrieve(blocked.id)
+          .catch(() => null);
+
+        if (existing?.status === "open" && existing.url != null) {
+          return {
+            result: { sessionId: existing.id, url: existing.url },
+            stripeObjectId: existing.id,
+          };
+        }
+      }
+
+      if (blocked != null) {
+        // Paid-but-not-projected, a live request in another tab, or a cancel whose Session Stripe
+        // still holds: none of these may open a second Subscription.
         throw new TRPCError({ code: "CONFLICT", message: "CHECKOUT_IN_PROGRESS" });
       }
 
@@ -172,23 +216,34 @@ export async function createCheckoutSession(
         tax_id_collection: { enabled: true, required: "never" },
       };
 
-      const session = await getStripeClient().checkout.sessions.create(params, {
-        idempotencyKey: stripeIdempotencyKey({
-          environment: stripeEnvironment(),
-          operation: "checkout",
-          requestId: input.requestId,
-          workspaceId: input.workspaceId,
-        }),
-      });
+      let session: Stripe.Checkout.Session;
+
+      try {
+        session = await getStripeClient().checkout.sessions.create(params, {
+          idempotencyKey: stripeIdempotencyKey({
+            environment: stripeEnvironment(),
+            operation: "checkout",
+            requestId: input.requestId,
+            workspaceId: input.workspaceId,
+          }),
+        });
+      } catch (error) {
+        // Never leave a placeholder behind: it would block the next attempt for its whole TTL.
+        await input.db.billingCheckoutSession
+          .deleteMany({ where: { stripeCheckoutSessionId: pendingSessionId } })
+          .catch(() => undefined);
+
+        throw error;
+      }
 
       // The row is the Session↔Workspace link; Stripe metadata is not used for ownership.
-      await input.db.billingCheckoutSession.create({
+      await input.db.billingCheckoutSession.update({
         data: {
           stripeCheckoutSessionId: session.id,
           stripeCustomerId: customerId,
           stripeStatus: session.status ?? null,
-          workspaceId: input.workspaceId,
         },
+        where: { stripeCheckoutSessionId: pendingSessionId },
       });
 
       return {
