@@ -933,6 +933,26 @@ F18 снят, N8/N1/F15/F17 закрыты в шестом проходе — с
 - Прогоны: `src/server/modules/billing` — 17 файлов / 219 тестов; интеграция billing/entitlements
   — 4 файла / 14 тестов; `type-check` и `lint` — pass.
 
+### Остатки после девятого прохода (medium, не блокируют мерж)
+
+Вердикт ревьюера: blocker/high в дельте нет, мержить можно. В §23 как долг:
+
+1. **`DUPLICATE_ACTIVE_SUBSCRIPTION` закрывается только при `ownsAccess && ACTIVE`.** Takeover в
+   `PENDING`/`GRACE`/`SUSPENDED` оставляет CRITICAL issue открытым, хотя подписка уже current.
+   Минимальный фикс: закрывать `duplicate_active:<sub>` при `ownsAccess` независимо от
+   `accessState` (плюс `subscription_review` оставить как есть).
+2. **Legacy-дубли без issue.** Зеркала, созданные до этого прохода и уже синхронные со Stripe,
+   не репейрятся (`differs=false`, `needsReview=false`, takeover=false), поэтому issue для них
+   не появится. Нужен разовый backfill: `isCurrent = null` + живой `externalStatus` без
+   открытого `duplicate_active:<sub>`.
+3. **TOCTOU между `holderIsTerminal` и `projectSubscription`.** Держатель может «возродиться»
+   между canonical retrieve и транзакцией; окно узкое, а revival того же id упирается в
+   `REVIVED_TERMINAL_SUBSCRIPTION` → REVIEW, то есть доступ не теряется молча.
+4. После мержа: один ночной reconciliation под наблюдением — что
+   `DUPLICATE_ACTIVE_SUBSCRIPTION`/`SUBSCRIPTION_REVIEW` не идут пачками и закрываются при
+   переходе в `ACTIVE`.
+
+
 ## Self-check
 
 ### Пять утверждений с наименьшей уверенностью
