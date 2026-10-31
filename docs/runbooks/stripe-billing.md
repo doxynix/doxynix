@@ -56,6 +56,8 @@
   неудачных платежах включены (Stripe emails), свои dunning-шаблоны не делаем.
 - **Customer Portal**: включены payment method, invoices, tax IDs, cancellation; обновление
   plan/quantity выключено. Отмена — только через Portal, своего cancel-эндпоинта нет.
+  Код дополнительно проверяет `features.subscription_update.enabled` перед созданием сессии и
+  отдаёт `PORTAL_ALLOWS_PLAN_CHANGE`, если в Dashboard включили смену плана.
 - **Managed Payments**: должен быть **выключен**. Проверка:
   ```bash
   stripe subscriptions retrieve <sub_id> | grep -A2 managed_payments
@@ -71,6 +73,10 @@
   `${externalEventId}:replay:${replayCount + 1}`, `replayCount` инкрементится.
 - **Issue**: `billing.listIssues({ status, severity, cursor })`; закрыть —
   `billing.resolveIssue({ issueId, note? })` (note санитизируется, URL/email редактируются).
+  Повторный `SEAT_SYNC_FAILED` или `SUBSCRIPTION_REVIEW` переоткрывает закрытый issue сам:
+  закрытие — не «заглушка», а отметка «на момент проверки проблемы нет».
+  Для `SUBSCRIPTION_REVIEW` resolve снимает sticky-флаг у подписки — следующее событие
+  пересчитает доступ.
 - **Диагностика события**:
   ```sql
   SELECT id, type, status, attempts, replay_count, last_error, trigger_run_id, received_at

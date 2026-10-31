@@ -676,37 +676,44 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
 
 Не блокируют BILL-03…22, но нужны до первых платящих команд. Оценки — рабочие дни.
 
-- [ ] **WS-07 — Явный claim GitHub-установки (1–2 дня)**
+- [x] **WS-07 — Явный claim GitHub-установки (1–2 дня)**
   - Setup URL приложения → `/api/github/setup`; ветка `state == null` больше не показывает «success», а ведёт в выбор воркспейса; привязка только после проверки, что пользователь OWNER и реально владеет установкой в GitHub.
   - `syncInstallations` перестаёт создавать строки: только обновление уже привязанных.
   - `installation.created` с `affectedRows: 0` → warning/алерт (сейчас `info`).
   - **DoD:** установка с сайта GitHub без state не привязывается молча; MEMBER не может инициировать привязку; осиротевшая установка видна в логах.
+  - **Статус (1 ноября):** сделано — `state == null` → `missing_params`, `syncInstallations` только обновляет существующие строки, непроклеймленная установка пишется warning'ом.
 
 - [ ] **WS-08 — Консистентность воркспейса в agent chat (1 день)**
   - Один источник воркспейса для роута и тулов (сейчас роут берёт header, тулы — cookie через `ctxForRequest`).
   - `ChatSession` проверять через политику/членство, а не «raw prisma + userId».
   - `sessionId` генерировать на сервере (сейчас клиентский UUID как PK → `P2002` → 500 при коллизии).
   - **DoD:** чат не читает и не пишет сессии, привязанные к воркспейсу, где пользователь не состоит; CLI-ключ работает в своём воркспейсе.
+  - **Статус (1 ноября, частично):** роут пишет `workspaceId` в `RequestStore`, тулы читают его оттуда; коллизия `sessionId` отдаёт `409`, а не 500. Осталось: серверная генерация `sessionId` (протокол UI) и чтение `ChatSession` через политику вместо raw-запроса.
 
-- [ ] **WS-09 — Единый workspace в server callers (0.5 дня)**
+- [x] **WS-09 — Единый workspace в server callers (0.5 дня)**
   - `apiForUser(userId, workspaceId)`; `apiKeyWorkspaceId` в `RequestStore`.
   - Приоритет: `apiKeyWorkspaceId → x-workspace-id → cookie → fallback`.
   - **DoD:** AI-тулы и таски работают в воркспейсе payload, а не в первом по `createdAt`.
+  - **Статус (1 ноября):** `apiForUser(userId, workspaceId)`, `apiKeyWorkspaceId`/`store.workspaceId` приоритетнее cookie; agent-reply кладёт workspace из payload.
 
-- [ ] **WS-10 — Hardening GitHub claim (0.5–1 день)**  - State-поиск снова привязан к `userId` (сейчас ищется только по `valueHash`).
+- [x] **WS-10 — Hardening GitHub claim (0.5–1 день)**
+  - State-поиск снова привязан к `userId` (сейчас ищется только по `valueHash`).
   - `getMyRepos` принимает `workspaceId` (сейчас фильтрует по `userId` и показывает репозитории чужих воркспейсов того же пользователя).
   - `getInstallUrl` проверяет OWNER; гонка при claim отдаёт `409`, а не `500`.
   - **DoD:** репозитории в пикере только из активного воркспейса; state нельзя предъявить от другого пользователя.
+  - **Статус (1 ноября):** identifier проверяется вместе с `userId`; `getMyRepos` фильтрует установки по `workspaceId`; `getGithubInstallUrl` — `ownerProcedure`. Гонка claim обрабатывается внутри транзакции (P2002 → отказ), отдельный `409` не добавлялся.
 
-- [ ] **WS-11 — Инвалидация сессий при смене роли/бане (0.5 дня)**
+- [x] **WS-11 — Инвалидация сессий при смене роли/бане (0.5 дня)**
   - Смена `role`/`banned` в БД не действует до перелогина: снапшот пользователя живёт в cookie/session cache.
   - При смене роли или бане ревокать сессии пользователя (`revokeUserSessions`), иначе забаненный продолжает работать.
   - **DoD:** после бана следующий запрос пользователя получает 401/403 без ожидания TTL.
+  - **Статус (1 ноября):** бан ревокал сессии и раньше; `setRole` теперь тоже ревокает (системный клиент).
 
 - [ ] **WS-12 — Флейкиность integration-сьюта (0.5 дня)**
   - После прерванного прогона `test:int` падает в `user-accounts.test.ts` (17 кейсов); чистый прогон зелёный.
   - Нужен гарантированный сброс состояния: `db:push:test --force-reset` либо `cleanupDatabase()` в `beforeAll` каждого файла.
   - **DoD:** два прогона подряд, включая прогон после намеренно прерванного, зелёные.
+  - **Статус (1 ноября, частично):** `with-test-db.ts` делает `db push --force-reset` перед прогоном (`TEST_DB_RESET=0` отключает). Полный сьют всё ещё падает кросс-файлово (13–16 тестов), поодиночке файлы зелёные — нужен разбор состояния между файлами, а не стартовой БД.
 
 ## 22. Постревью фиксы (2026-10-31)
 
@@ -754,11 +761,89 @@ advisory-lock;
 **F17** — в prod пустой `STRIPE_TAX_REQUIRED_JURISDICTIONS` блокирует Checkout (`TAX_NOT_CONFIGURED`);
 **F10** — уход из REVIEW закрывает `SUBSCRIPTION_REVIEW`-issue.
 
-Осталось: F16 — `cannot-verify` (семантика `cachedInputTokens` у Gemini); аудит админки в БД
-(требует миграции); автоснятие REVIEW для «оживлённого» terminal-ID (нужен след истории статусов);
-`changeSeats` всё ещё держит Stripe внутри транзакции (N8-остаток); живой sandbox и Dashboard.
+Осталось: F16 — `cannot-verify` (семантика `cachedInputTokens` у Gemini); N6 legacy-данные
+(только dev, до прода нечего мигрировать); серверная генерация `sessionId` и policy-чтение
+`ChatSession` (WS-08); кросс-файловая флейкиность `test:int` (WS-12); живой sandbox и Dashboard.
+F18 снят, N8/N1/F15/F17 закрыты в шестом проходе — см. §23.
 
 ---
+
+## 23. Журнал изменений (1 ноября 2026)
+
+### Схема и провайдеры
+
+- `stripe_*` → `external_*` во всех общих таблицах; добавлен `provider` (default `stripe`) в
+  `BillingSubscription`, `BillingCheckoutSession`, `BillingEvent`, `BillingLedgerEntry`,
+  `BillingIssue`. Миграция `20261031191909_rename_external_identifiers` использует
+  `ALTER … RENAME COLUMN` (не drop/add), индексы переименованы.
+- 7 state-колонок переведены в Postgres enums: `AccessState`, `BillingEventStatus`,
+  `BillingOperationStatus`, `BillingReconciliationStatus`, `BillingIssueStatus`,
+  `BillingIssueSeverity`, `UsageEventKind`. Миграция `20261031193803_enum_billing_states`;
+  enum-генератор разложил значения в `packages/shared/src/enums/index.ts`, рукописные `as const`
+  в этих местах убраны. `planCode`, `provider`, `externalStatus`, `event.type` и ledger/issue
+  `kind` осознанно остались TEXT.
+- Проверка дрейфа: чистая БД → `migrate deploy` всех миграций → `migrate diff` против
+  `schema.prisma` = «empty migration».
+
+### Реэкспорты
+
+Удалены pass-through шимы: `billing.issues/price/stripe/usage`, `billing.state`,
+`billing.schemas` (`BillingOperationStatus`), `entitlements/state` (`AccessState`),
+`usage.ts` (`USAGE_EVENT_KIND`), `stripe-client` (`STRIPE_API_VERSION`), `billing.constants`;
+а также чужие `field-encryption/keyring`, `utils/handle-error` (`isOctokitError`),
+`features/high-five/model/high-five.types.ts`, `discovery.types` (`SymbolKind`),
+`analyze-context-builder`, `graph-navigator`, `node-explainer`, CLI `AnalyticsCliOptions`.
+Импортёры переведены на исходные модули.
+
+### Закрытые дефекты биллинга
+
+- **F3:** токен-квота проверяется в `entitlementProcedure` (file actions, fixes) и в
+  GitHub-reply.
+- **N2:** `upsertBillingIssue` переоткрывает `RESOLVED` при повторе.
+- **F10:** `REVIVED_TERMINAL` REVIEW липкий; `resolveIssue` снимает флаг, следующее событие лечит.
+- **F1/N5:** reconciliation пересчитывает entitlement при расхождении лимитов с тарифом.
+- **N4:** ошибка синка мест при удалении пользователя создаёт `SEAT_SYNC_FAILED`.
+- **N6:** алерт по спору отправляется только при новой блокировке; legacy `won`-записи не
+  мигрированы (данные только dev, до прода нечего исправлять).
+- **API мест:** `changeSeats`/`previewPlanChange` удалены из роутера и UI-хука; количество мест
+  меняется только синком по membership.
+- **N8:** floor-проверка внутри лока, Stripe-вызов вне транзакции/лока.
+- **N1:** seat-sync сериализован Redis-локом (best-effort, Redis down не блокирует биллинг).
+- **F15:** кеш проверяется до резерва (`getBranchHeadSha` + DONE-анализ того же SHA); если ветка
+  сдвинулась и ран всё же пошёл, задача доначисляет юнит.
+- **F17:** перед Portal-сессией проверяется `features.subscription_update.enabled`; включённый
+  plan switch → `PORTAL_ALLOWS_PLAN_CHANGE`.
+
+### Tenancy/agent
+
+- **WS-07** закрыт: `state == null` не отдаёт success, `syncInstallations` не создаёт строки.
+- **WS-09** закрыт: `apiForUser(userId, workspaceId)`, `store.workspaceId` приоритетнее cookie;
+  agent-reply передаёт workspace из payload.
+- **WS-10** закрыт: state привязан к `userId`, `getMyRepos` фильтрует по воркспейсу,
+  `getGithubInstallUrl` — `ownerProcedure`.
+- **WS-11** закрыт: `setRole` ревокает сессии (бан ревокал и раньше).
+- **WS-08** частично: workspace из header пишется в `RequestStore` и используется тулами;
+  коллизия `sessionId` → `409`. Осталось: серверная генерация `sessionId`, чтение `ChatSession`
+  через политику.
+- **WS-12** частично: `with-test-db.ts` делает `db push --force-reset` перед прогоном
+  (`TEST_DB_RESET=0` отключает); кросс-файловая флейкиность полного `test:int` осталась.
+
+### Решения
+
+- **F18** снят по запросу: отдельную таблицу аудита админки не добавляем.
+- **`AuditModel`** не расширяли биллингом: это дало бы поток системных записей и PII из
+  `BillingEvent.payload` в `AuditLog` (email/address не редактируются, таблица не чистится).
+- **Шифрование** не менялось: `BillingEvent.payload` остаётся JSON; редактирование PII перед
+  записью отложено до решения по шифрованию.
+
+### Проверки и известные ограничения
+
+- `unit` последний полный зелёный: 256 файлов / 2484; после F15/F17 — только таргетные 57/57.
+- `type-check`, `lint`, `arch:check` зелёные; drift-проверка миграций — пустая.
+- Полный `test:int` после WS-правок **не зелёный**: 13–16 падений в разных файлах, поодиночке
+  те же файлы проходят. Это известная флейкиность (WS-12), а не подтверждённая регрессия.
+- `test:stripe`, tax registrations, Portal settings, Managed Payments, цена 900 vs 2000 —
+  `cannot-verify` без sandbox/Dashboard.
 
 ## Self-check
 
