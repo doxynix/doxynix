@@ -713,13 +713,20 @@ Sentry alerts: любой DLQ, invalid signature hash reuse, invalid transition,
 Независимое ревью (16 инвариантов + 13 сценариев) дало вердикт «не мержить». Исправлено:
 
 - [x] **F1** — PRO-фичи и квоты пишутся в entitlement (`planEntitlements` в `billing.catalog.ts`); терминальная подписка возвращает HOBBY. `73879a83`
-- [x] **F2** — вторая открытая Checkout Session блокируется `CHECKOUT_IN_PROGRESS`. `346a8563`
-- [x] **F4/F6** — `quantity` синхронизируется с membership (`core/billing/seat-sync.ts`), entitlement читается под advisory-lock. `c9ee6a3f`
+- [x] **F2** — вторая открытая Checkout Session переиспользуется (возвращается её URL), `complete`-без-подписки → `CHECKOUT_IN_PROGRESS`. `346a8563`
+- [x] **F4/F6** — `quantity` синхронизируется с membership (`core/billing/seat-sync.ts`): системный клиент, абсолютное количество из Stripe, сверка в reconciliation; seatLimit читается под advisory-lock внутри membership-транзакции. `c9ee6a3f`
 - [x] **F3** — `documentFile`, `quickFileAudit`, `createFix`, `applyFix` переведены на `entitlementProcedure`. `ab5076eb`
 - [x] **F5** — `seatLimit=0` больше не «безлимит», не-ACTIVE workspace не добавляет места. `346a8563`
 - [x] **F7** — удаление владельца живой подписки блокируется (`OWNER_OF_ACTIVE_SUBSCRIPTION`). `404c1de6`
 - [x] **F8/F9** — `invoice.paid` при `past_due` не сбрасывает grace; спор даёт один минус, `won` возвращает сумму. `d842e4b3`
 - [x] **F13** — `getFileContent` переведён на объектный аргумент, workspaceId проброшен во все вызовы. `03eaaacd`
+
+Второй проход (по находкам повторного ревью): N1 — синк сверяется со Stripe, а не с отстающим
+зеркалом; N2 — `SEAT_SYNC_FAILED` пишется системным клиентом (политика `BillingIssue` запрещает
+`create` всем); N3 — открытая сессия переиспользуется вместо блокировки на 24 часа; N4 —
+self-removal и удаление аккаунта синкают места; N5 — TEAM не понижается, лимиты перезаписываются
+только при смене плана, `assertPlanFeature` требует `hasAccess`; N6 — терминальные статусы спора
+(`charge_refunded`, `prevented`, `warning_closed`), legacy-ключ и `won` без предшествующего open.
 
 Осталось (medium, до запуска не блокирует):
 F10 (issue на REVIEW + reconciliation entitlement), F11 (`concurrency` у `processStripeEvent`),
