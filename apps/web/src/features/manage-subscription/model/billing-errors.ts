@@ -50,6 +50,9 @@ export function billingErrorKey(error: unknown): string {
     case "ALREADY_SUBSCRIBED": {
       return "billing_error_already_subscribed";
     }
+    case "CHECKOUT_IN_PROGRESS": {
+      return "billing_error_checkout_in_progress";
+    }
     case "BILLING_CUSTOMER_NOT_FOUND": {
       return "billing_error_customer_missing";
     }

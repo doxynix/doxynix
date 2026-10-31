@@ -70,7 +70,12 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
 
   const deleteProfile = useMutation(
     trpc.user.deleteAccount.mutationOptions({
-      onError: (err) => toast.error(err.message),
+      onError: (err) =>
+        toast.error(
+          err.message === "OWNER_OF_ACTIVE_SUBSCRIPTION"
+            ? t("settings_danger_owned_subscription_error")
+            : err.message,
+        ),
       onSuccess: async () => {
         toast.success(t("settings_danger_delete_account_toast_success"));
         trackClientEvent("account_deleted");
