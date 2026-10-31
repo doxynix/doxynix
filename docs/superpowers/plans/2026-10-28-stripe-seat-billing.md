@@ -852,7 +852,8 @@ F18 снят, N8/N1/F15/F17 закрыты в шестом проходе — с
   current-slot строка считается исторической и не перетирает доступ. Тест: историческая canceled
   с drift → `mismatchCount 0`, `projectSubscription` не вызван.
 - **B2:** `resolveIssue` для `SUBSCRIPTION_REVIEW` после снятия sticky-флага делает canonical
-  retrieve и `projectSubscription`, иначе workspace оставался в REVIEW до следующего webhook.
+  retrieve и `projectSubscription` с `overrideRevivedTerminal: true`, иначе guard снова вернул бы
+  REVIEW; без этого workspace оставался бы без доступа до следующего webhook.
 - **B3:** guard `with-test-db` снова анкорированный (`/^test$|_test$/`) — `latest_prod` и
   `test_prod` больше не проходят, `--force-reset` не может снести prod-like БД.
 - **B4:** Portal проверяет **default** configuration, падает `PORTAL_NOT_CONFIGURED` при пустом
