@@ -49,7 +49,8 @@ type CurrentSubscription = {
 };
 
 // Seat changes for one workspace are serialized: two parallel commands must not interleave their
-// read-modify-write against Stripe. A transaction client has no `$transaction`, so it runs inline.
+// read-modify-write against Stripe. The lock is non-blocking on purpose — a second click gets a
+// retryable 409 instead of holding an HTTP request open for the duration of a Stripe call.
 async function withWorkspaceLock<T>(
   db: DbClient,
   workspaceId: string,
@@ -60,7 +61,13 @@ async function withWorkspaceLock<T>(
   }
 
   return db.$transaction(async (tx) => {
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${workspaceId}))`;
+    const rows = await tx.$queryRaw<Array<{ locked: boolean }>>`
+      SELECT pg_try_advisory_xact_lock(hashtext(${workspaceId})) AS locked
+    `;
+
+    if (rows[0]?.locked !== true) {
+      throw new TRPCError({ code: "CONFLICT", message: "CONCURRENT_SEAT_CHANGE" });
+    }
 
     return fn();
   });

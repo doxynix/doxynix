@@ -115,7 +115,7 @@ describe("billing command idempotency against Postgres", () => {
     expect(replay.url).toBeNull();
   });
 
-  it("serializes parallel seat changes for one workspace", async () => {
+  it("rejects the second parallel seat change with a retryable conflict", async () => {
     const alice = await createTestUser("Alice");
     await seedActiveSubscription(alice.workspace.id);
 
@@ -152,10 +152,16 @@ describe("billing command idempotency against Postgres", () => {
       }),
     ]);
 
-    expect(results.every((result) => result.status === "fulfilled")).toBe(true);
-    // The advisory lock means the second command starts only after the first commits.
+    const fulfilled = results.filter((result) => result.status === "fulfilled");
+    const rejected = results.filter((result) => result.status === "rejected");
+
+    expect(fulfilled).toHaveLength(1);
+    expect(rejected).toHaveLength(1);
+    expect(rejected[0]?.reason).toMatchObject({ message: "CONCURRENT_SEAT_CHANGE" });
     expect(maxInFlight).toBe(1);
-    expect(calls).toHaveLength(2);
-    expect(new Set(calls.map((call) => call.quantity))).toEqual(new Set([2, 3]));
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.quantity).toBe(
+      (fulfilled[0] as PromiseFulfilledResult<{ quantity: number }>).value.quantity,
+    );
   });
 });
