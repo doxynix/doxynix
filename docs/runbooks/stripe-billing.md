@@ -26,6 +26,7 @@
   - Tax Settings: read;
   - Tax Registrations: read;
   - Billing Portal Sessions: write;
+  - Billing Portal Configurations: read (preflight перед созданием сессии);
   - Test Clocks: write (только sandbox-ключ).
 - Ротация: создать новый ключ → положить в Doppler → задеплоить → убедиться, что
   `stripe balance.retrieve()` проходит → отозвать старый. Webhook secret ротируется через

@@ -16,6 +16,7 @@ const dbMock = vi.hoisted(() => ({
   billingLedgerEntry: { createMany: vi.fn(), findMany: vi.fn() },
   billingReconciliationRun: { create: vi.fn(), findFirst: vi.fn(), update: vi.fn() },
   billingSubscription: {
+    findFirst: vi.fn(),
     findMany: vi.fn(),
     findUnique: vi.fn(),
     updateMany: vi.fn(),
@@ -109,6 +110,7 @@ describe("runStripeReconciliation", () => {
     dbMock.billingReconciliationRun.create.mockResolvedValue({ id: "run_1" });
     dbMock.billingReconciliationRun.findFirst.mockResolvedValue(null);
     dbMock.billingReconciliationRun.update.mockResolvedValue({});
+    dbMock.billingSubscription.findFirst.mockResolvedValue(null);
     dbMock.billingSubscription.findMany.mockResolvedValue([]);
     dbMock.billingSubscription.findUnique.mockResolvedValue(null);
     dbMock.billingSubscription.updateMany.mockResolvedValue({ count: 1 });
@@ -251,6 +253,24 @@ describe("runStripeReconciliation", () => {
 
     expect(summary.mismatchCount).toBe(1);
     expect(projectMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("never lets a historical subscription rewrite the active entitlement", async () => {
+    dbMock.billingSubscription.findUnique.mockResolvedValue(
+      localSubscription({ isCurrent: null, stripeStatus: "canceled" }),
+    );
+    dbMock.workspaceEntitlement.findUnique.mockResolvedValue({
+      sourceSubscriptionId: "bs_current_other",
+    });
+    stripeMock.subscriptions.list.mockResolvedValue({
+      data: [subscription({ status: "canceled" })],
+      has_more: false,
+    });
+
+    const summary = await runStripeReconciliation(NOW);
+
+    expect(summary.mismatchCount).toBe(0);
+    expect(projectMock).not.toHaveBeenCalled();
   });
 
   it("does not count a matching mirror as a mismatch", async () => {

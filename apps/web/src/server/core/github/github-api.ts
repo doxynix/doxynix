@@ -104,7 +104,12 @@ export async function getMyRepos(
   try {
     const [installations, oauthAccounts] = await Promise.all([
       prisma.githubInstallation.findMany({
-        where: { isSuspended: false, userId, ...(workspaceId == null ? {} : { workspaceId }) },
+        // A claimed installation belongs to the workspace, not to the member who claimed it:
+        // filtering by userId would hide it from the rest of the team.
+        where: {
+          isSuspended: false,
+          ...(workspaceId == null ? { userId } : { workspaceId }),
+        },
       }),
       prisma.account.findMany({
         where: { accessToken: { not: null }, providerId: "github", userId },

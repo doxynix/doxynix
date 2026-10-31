@@ -180,6 +180,15 @@ async function reconcileSubscription(
   }
 
   if (local == null) {
+    const occupied = await prisma.billingSubscription.findFirst({
+      select: { id: true },
+      where: { isCurrent: true, workspaceId: mapping.workspaceId },
+    });
+
+    if (occupied != null) {
+      return false;
+    }
+
     await repair(
       subscription,
       { billingCustomerId: mapping.id, customerId, workspaceId: mapping.workspaceId },
@@ -201,6 +210,19 @@ async function reconcileSubscription(
     });
 
     return true;
+  }
+
+  // Only the subscription the entitlement actually points at may rewrite access. A historical
+  // (isCurrent=null) row drifting from Stripe must never downgrade the active plan.
+  const entitlement = await prisma.workspaceEntitlement.findUnique({
+    select: { sourceSubscriptionId: true },
+    where: { workspaceId: mapping.workspaceId },
+  });
+  const ownsEntitlement =
+    local.isCurrent === true || entitlement?.sourceSubscriptionId === local.id;
+
+  if (!ownsEntitlement) {
+    return false;
   }
 
   // Repair the mirror first: seat sync reads it to decide whether the subscription is billable,

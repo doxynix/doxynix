@@ -20,7 +20,7 @@ import { spawn, spawnSync } from "node:child_process";
 
 // Anchored on purpose: a bare `includes("test")` would wave through `latest_prod`, which does
 // contain those letters, and these tests TRUNCATE shared tables.
-const TEST_DB_NAME = /(^test($|[_-])|_test$)/;
+const TEST_DB_NAME = /^test$|_test$/;
 
 function derivedName(name: string): string {
   const base = name.replace(/_stress$/, "");
@@ -59,7 +59,7 @@ const override = process.env.TEST_DATABASE_URL;
 const target = override == null ? derived : new URL(override);
 const name = target.pathname.replace(/^\//, "");
 
-if (!name.includes("test")) {
+if (!TEST_DB_NAME.test(name)) {
   console.error(
     `refusing to run against "${name}": integration tests truncate shared tables, so the target ` +
       `database must contain "test" in its name`,

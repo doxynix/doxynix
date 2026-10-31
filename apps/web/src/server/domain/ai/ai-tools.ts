@@ -98,7 +98,7 @@ function buildRepositoryTools(userId: string, workspaceId: string, repoId: strin
       description:
         "Check the status (PENDING, COMPLETED, FAILED) and metadata of the latest static code analysis run for a repository.",
       execute: async ({ repoId: inputRepoId }) => {
-        const trpc = await apiForUser(userId);
+        const trpc = await apiForUser(userId, workspaceId);
         const targetRepoId = inputRepoId ?? repoId;
 
         return trpc.analysis.getLatest({ repoId: targetRepoId });
@@ -276,7 +276,7 @@ function buildRepositoryTools(userId: string, workspaceId: string, repoId: strin
       execute: async ({ search }) => {
         try {
           appLogger.info({ msg: "AI Tool: searchCode", repoId, search, userId });
-          const trpc = await apiForUser(userId);
+          const trpc = await apiForUser(userId, workspaceId);
           const results = await trpc.analysis.searchWorkspace({
             repoId,
             search,
@@ -316,7 +316,7 @@ function buildRepositoryTools(userId: string, workspaceId: string, repoId: strin
     triggerRepositoryAnalysis: tool({
       description: "Queue and start a complete static code analysis run for a repository.",
       execute: async ({ branch: inputBranch, repoId: inputRepoId }) => {
-        const trpc = await apiForUser(userId);
+        const trpc = await apiForUser(userId, workspaceId);
         const targetRepoId = inputRepoId ?? repoId;
         const targetBranch = inputBranch ?? branch;
 

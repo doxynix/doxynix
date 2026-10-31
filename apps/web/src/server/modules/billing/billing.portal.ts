@@ -52,15 +52,22 @@ export async function createPortalSession(input: PortalSessionInput): Promise<Po
 
   // The Portal must stay a payment-method/invoice surface: an enabled plan switch would bypass
   // the catalog, proration and seat checks that only Checkout performs.
-  const configurations = await stripe.billingPortal.configurations.list({ limit: 1 });
-  const configuration = configurations.data[0];
+  // Check the configuration the session will actually use, not just the first one in the list.
+  const configurations = await stripe.billingPortal.configurations.list({ limit: 100 });
+  const configuration =
+    configurations.data.find((item) => item.is_default) ?? configurations.data[0];
 
-  if (configuration?.features.subscription_update.enabled === true) {
+  if (configuration == null) {
+    throw new TRPCError({ code: "PRECONDITION_FAILED", message: "PORTAL_NOT_CONFIGURED" });
+  }
+
+  if (configuration.features.subscription_update.enabled) {
     throw new TRPCError({ code: "PRECONDITION_FAILED", message: "PORTAL_ALLOWS_PLAN_CHANGE" });
   }
 
   const session = await stripe.billingPortal.sessions.create(
     {
+      configuration: configuration.id,
       customer: customer.externalCustomerId,
       return_url: input.returnUrl,
     },

@@ -4,10 +4,12 @@ import { TRPCError } from "@trpc/server";
 
 import { appLogger } from "@/server/core/app-logger";
 import { recordBillingMetric } from "@/server/core/billing/metrics";
+import { getStripeClient } from "@/server/core/billing/stripe-client";
 import type { DbClient } from "@/server/core/db";
 
 import { PROCESS_STRIPE_EVENT_TASK_ID } from "./billing.constants";
 import { ownershipKeyFromPayload } from "./billing.ownership";
+import { projectSubscription } from "./billing.subscriptions";
 import type { processStripeEventTask } from "./tasks/process-stripe-event.task";
 
 const REPLAYABLE_STATUSES = new Set(["DEAD_LETTER", "ENQUEUED", "RECEIVED"]);
@@ -111,7 +113,13 @@ export async function resolveBillingIssue(
   input: { actorUserId: string; issueId: string; note?: string },
 ): Promise<{ resolved: boolean }> {
   const issue = await db.billingIssue.findUnique({
-    select: { details: true, externalObjectId: true, kind: true, status: true },
+    select: {
+      details: true,
+      externalObjectId: true,
+      kind: true,
+      status: true,
+      workspaceId: true,
+    },
     where: { id: input.issueId },
   });
 
@@ -137,13 +145,43 @@ export async function resolveBillingIssue(
     where: { id: input.issueId },
   });
 
-  // Clearing the review flag is what lets the next canonical event heal the projection; without it
-  // the sticky REVIEW guard would keep the workspace locked forever.
-  if (issue.kind === "SUBSCRIPTION_REVIEW" && issue.externalObjectId != null) {
+  // Clearing the review flag is not enough: the entitlement is still REVIEW, and reconciliation
+  // only repairs rows that differ. Recompute the projection from the canonical subscription here.
+  if (
+    issue.kind === "SUBSCRIPTION_REVIEW" &&
+    issue.externalObjectId != null &&
+    issue.workspaceId != null
+  ) {
     await db.billingSubscription.updateMany({
       data: { needsReview: false, reviewReason: null },
       where: { externalSubscriptionId: issue.externalObjectId },
     });
+
+    try {
+      const customer = await db.billingCustomer.findFirst({
+        select: { externalCustomerId: true, id: true },
+        where: { provider: "stripe", workspaceId: issue.workspaceId },
+      });
+
+      if (customer != null) {
+        const subscription = await getStripeClient().subscriptions.retrieve(
+          issue.externalObjectId,
+          { expand: ["latest_invoice"] },
+        );
+
+        await projectSubscription(db, {
+          now: new Date(),
+          ownership: {
+            billingCustomerId: customer.id,
+            customerId: customer.externalCustomerId,
+            workspaceId: issue.workspaceId,
+          },
+          subscription,
+        });
+      }
+    } catch (error) {
+      appLogger.error({ error, msg: "billing.review_projection_failed" });
+    }
   }
 
   appLogger.info({

@@ -845,6 +845,31 @@ F18 снят, N8/N1/F15/F17 закрыты в шестом проходе — с
 - `test:stripe`, tax registrations, Portal settings, Managed Payments, цена 900 vs 2000 —
   `cannot-verify` без sandbox/Dashboard.
 
+### Седьмой проход (по ревью 1 ноября)
+
+- **B1:** reconciliation больше не проецирует entitlement с не-current подписки
+  (`isCurrent === true` или `sourceSubscriptionId === local.id`); при `local == null` и занятом
+  current-slot строка считается исторической и не перетирает доступ. Тест: историческая canceled
+  с drift → `mismatchCount 0`, `projectSubscription` не вызван.
+- **B2:** `resolveIssue` для `SUBSCRIPTION_REVIEW` после снятия sticky-флага делает canonical
+  retrieve и `projectSubscription`, иначе workspace оставался в REVIEW до следующего webhook.
+- **B3:** guard `with-test-db` снова анкорированный (`/^test$|_test$/`) — `latest_prod` и
+  `test_prod` больше не проходят, `--force-reset` не может снести prod-like БД.
+- **B4:** Portal проверяет **default** configuration, падает `PORTAL_NOT_CONFIGURED` при пустом
+  списке и передаёт `configuration.id` в `sessions.create`; в RAK добавлен
+  `Billing Portal Configurations: read`.
+- **B5:** `ai-tools` передаёт `workspaceId` в `apiForUser`, поиск/анализ/запуск больше не уезжают
+  в первый workspace.
+- **B6:** `getMyRepos` фильтрует installations по `workspaceId`, а не по `userId` — установку,
+  заклеймленную одним участником, видят остальные участники команды.
+- **B7 (отложено):** уникальные ключи `external*` остаются одноколоночными. Для второго
+  провайдера нужны compound unique `[provider, external*]` и provider в `entryKey`/`dedupeKey`;
+  до подключения второго провайдера это не проявляется.
+
+Обновление по прогонам: полный `test:int` у ревьювера в этом раунде прошёл (31/186), прежние
+13–16 падений не воспроизвелись. После правок B1–B6 прогнаны только таргетные 60/60 и
+`type-check`; полный сьют не запускался.
+
 ## Self-check
 
 ### Пять утверждений с наименьшей уверенностью
