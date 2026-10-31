@@ -169,7 +169,9 @@ async function reconcileSubscription(
   // and a stale `past_due` row would make it skip while Stripe is already `active`.
   let changed = false;
 
-  if (differs(local, subscription)) {
+  // `needsReview` means the worker refused a transition; the canonical read has happened here, so
+  // a workspace stuck in REVIEW with a matching mirror must still be recomputed.
+  if (differs(local, subscription) || local.needsReview) {
     await repair(
       subscription,
       { billingCustomerId: mapping.id, customerId, workspaceId: mapping.workspaceId },

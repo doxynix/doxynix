@@ -334,6 +334,18 @@ describe("projectSubscription", () => {
     expect(callArg(tx.workspaceEntitlement.upsert)).toMatchObject({
       update: { accessState: "REVIEW" },
     });
+    // A review state without an issue is invisible to operators.
+    expect(tx.billingIssue.createMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: [
+          expect.objectContaining({
+            kind: "SUBSCRIPTION_REVIEW",
+            severity: "CRITICAL",
+            status: "OPEN",
+          }),
+        ],
+      }),
+    );
   });
 
   it("accepts a new subscription id after a cancellation", async () => {

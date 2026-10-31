@@ -201,6 +201,20 @@ export async function projectSubscription(
         : subscription.latest_invoice.id;
   const needsReview = decision.accessState === "REVIEW";
 
+  // A review state is not silent: without an issue nobody learns that a paying workspace lost
+  // access and reconciliation has nothing to resolve.
+  if (decision.reviewReason != null) {
+    await upsertBillingIssue(tx, {
+      dedupeKey: `subscription_review:${subscription.id}:${decision.reviewReason}`,
+      details: { reason: decision.reviewReason, status: subscription.status },
+      kind: "SUBSCRIPTION_REVIEW",
+      severity: "CRITICAL",
+      source: "stripe_worker",
+      stripeObjectId: subscription.id,
+      workspaceId: ownership.workspaceId,
+    });
+  }
+
   // Frees the single current slot before the upsert; history stays null, never false.
   if (isCurrent != null) {
     await tx.billingSubscription.updateMany({

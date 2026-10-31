@@ -206,6 +206,21 @@ describe("runStripeReconciliation", () => {
     expect(seatSyncMock).toHaveBeenCalled();
   });
 
+  it("recomputes a workspace stuck in review even when the mirror matches", async () => {
+    dbMock.billingSubscription.findUnique.mockResolvedValue(
+      localSubscription({ needsReview: true }),
+    );
+    stripeMock.subscriptions.list.mockResolvedValue({
+      data: [subscription()],
+      has_more: false,
+    });
+
+    const summary = await runStripeReconciliation(NOW);
+
+    expect(projectMock).toHaveBeenCalledTimes(1);
+    expect(summary.mismatchCount).toBe(1);
+  });
+
   it("does not count a matching mirror as a mismatch", async () => {
     dbMock.billingSubscription.findUnique.mockResolvedValue(localSubscription());
     stripeMock.subscriptions.list.mockResolvedValue({
