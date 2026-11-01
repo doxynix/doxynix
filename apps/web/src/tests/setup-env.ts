@@ -1,10 +1,14 @@
 import { randomBytes } from "node:crypto";
 
+import { MEMORY_REDIS_PORT } from "./memory-redis";
+
 const scheme = "k1";
 const cipher = "aesgcm256";
 const key = randomBytes(32).toString("base64url");
 
 process.env.PRISMA_FIELD_ENCRYPTION_KEY = `${scheme}.${cipher}.${key}`;
+process.env.UPSTASH_REDIS_REST_URL ??= `http://127.0.0.1:${MEMORY_REDIS_PORT}`;
+process.env.UPSTASH_REDIS_REST_TOKEN ??= "memory-redis-token";
 process.env.STRIPE_API_KEY ??= "sk_test_placeholder";
 process.env.STRIPE_WEBHOOK_SECRET ??= "whsec_placeholder";
 process.env.STRIPE_PRICE_PRO_MONTHLY_USD ??= "price_placeholder_pro_monthly_usd";

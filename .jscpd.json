@@ -16,7 +16,8 @@
     "**/messages/*.json",
     "**/.agents/**",
     "**/.continue/**",
-    "**/.claude/**"
+    "**/.claude/**",
+    "**/.opencode/**"
   ],
   "mode": "strict",
   "pattern": "**/*.{ts,tsx,js,jsx}",

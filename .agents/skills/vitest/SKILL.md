@@ -18,15 +18,15 @@ Vitest is a next-generation testing framework powered by Vite. It provides a Jes
 
 Vitest is **5.0.2 (stable, not beta)**, declared in the root `catalog` and pinned per-workspace.
 
-- Tests exist **only in `apps/web`**. `apps/siem-server`, `packages/cli`, `packages/config`
-  and `packages/shared` have no `test` script and no vitest dependency — do not try to run vitest there.
+- Tests live in `apps/web, `packages/cli` and
+  `packages/shared` (1). `apps/siem-server` and `packages/config` have no `test` script.
 - Everything below is executed with Bun. Never `npm`, `npx`, `pnpm` or `yarn`.
 
 | Command | Script |
 |---------|--------|
-| `bun --filter @doxynix/web test` | `cross-env TZ=UTC vitest run --config vitest.config.ts --no-file-parallelism` |
+| `bun --filter @doxynix/web test` | `cross-env TZ=UTC vitest run --config vitest.config.ts` |
 | `bun --filter @doxynix/web test:unit` | unit run scoped to `src` |
-| `bun --filter @doxynix/web test:coverage` | V8 coverage, same TZ/serial flags |
+| `bun --filter @doxynix/web test:coverage` | V8 coverage, same TZ flags |
 | `bun --filter @doxynix/web test:int` | `vitest run --config vitest.integration.config.ts` |
 
 Every `test*` script is wrapped by the workspace's `with-doppler` helper (which runs
@@ -40,8 +40,16 @@ Run a single file through the same wrapper:
 bun --filter @doxynix/web test src/server/modules/analysis/analysis.mapper.test.ts
 ```
 
-Do not reach for `bunx vitest` — it skips the Doppler wrapper, the `TZ=UTC` pin and
-`--no-file-parallelism`.
+Do not reach for `bunx vitest` — it skips the Doppler wrapper and the `TZ=UTC` pin.
+
+Unit files run in parallel and stay isolated. Disabling isolation (`--no-isolate`) fails ~38
+tests across 9 files because module-level mocks and `process.env` leak between files, so
+parallelism is the only safe lever.
+
+Both configs run `src/tests/global-setup.ts`, which stands up an in-memory Upstash-compatible
+Redis (`src/tests/memory-redis.ts`) on `127.0.0.1:18777`. Without it every Redis command fails
+after five retries (~4.2 s), which used to dominate the integration suite. If a real
+`UPSTASH_REDIS_REST_URL` is present (e.g. from Doppler), the stub is skipped.
 
 ### Unit vs integration
 

@@ -67,6 +67,7 @@ export default defineConfig({
       "src/tests/stripe/**/*",
       "node_modules/**/*",
     ],
+    globalSetup: ["./src/tests/global-setup.ts"],
     globals: true,
     include: [
       "prisma/**/*.{test,spec}.ts",
