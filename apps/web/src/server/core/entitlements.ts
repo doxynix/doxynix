@@ -4,6 +4,7 @@ import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
 import { periodStartOf } from "@/server/core/usage/usage";
 import { requestContext } from "@/server/utils/request-context";
+import { memoizeOnce } from "@/server/utils/request-memo";
 
 import { isAccessState } from "./entitlements/state";
 
@@ -87,23 +88,14 @@ export async function getWorkspaceEntitlement(
     return loadEntitlement(db, workspaceId, now);
   }
 
-  const memo = requestContext.getStore()?.entitlementMemo;
-
-  if (memo == null) {
-    return loadEntitlement(db, workspaceId, now);
-  }
-
-  const key = `${workspaceId}:${periodStartOf(now).toISOString()}`;
-  const cached = memo.get(key);
-
-  if (cached != null) {
-    return cached as Promise<null | WorkspaceEntitlementView>;
-  }
-
-  const pending = loadEntitlement(db, workspaceId, now);
-  memo.set(key, pending);
-
-  return pending;
+  // `now` is not a key part: only the quota period it falls in changes the result, and using the
+  // timestamp would make every call in one request a miss.
+  return memoizeOnce(
+    requestContext.getStore()?.entitlementMemo,
+    "entitlement",
+    [workspaceId, periodStartOf(now).toISOString()],
+    () => loadEntitlement(db, workspaceId, now),
+  );
 }
 
 export function analysisGate(entitlement: null | WorkspaceEntitlementView): AnalysisGate {

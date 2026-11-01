@@ -1,4 +1,4 @@
-import type { ApiKeyScope } from "@doxynix/shared";
+import { ApiKeyScope } from "@doxynix/shared";
 import { TRPCError } from "@trpc/server";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
@@ -115,7 +115,7 @@ export const apiKeyService = {
       );
     const normalize = (k: (typeof allKeys)[number]) => ({
       ...k,
-      scopes: (k.scopes.length > 0 ? k.scopes : (["FULL"] as ApiKeyScope[])) as ApiKeyScope[],
+      scopes: k.scopes.length > 0 ? k.scopes : [ApiKeyScope.FULL],
     });
 
     return {
@@ -206,7 +206,7 @@ export const apiKeyService = {
           description: input.description,
           ...(input.expiresAt !== undefined && { expiresAt: input.expiresAt }),
           ...(input.scopes !== undefined && {
-            scopes: input.scopes.length > 0 ? input.scopes : (["FULL"] as ApiKeyScope[]),
+            scopes: input.scopes.length > 0 ? input.scopes : [ApiKeyScope.FULL],
           }),
           name: input.name,
         },

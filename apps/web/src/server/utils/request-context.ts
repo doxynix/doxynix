@@ -8,7 +8,8 @@ import { APP_VERSION } from "@/shared/config/env.server";
 
 type RequestStore = {
   apiKeyScopes?: string[];
-  // Per-request memo for the entitlement reader; a batched tRPC call shares it across procedures.
+  // Per-request dedupe for the entitlement reader (see `utils/request-memo.ts`); a batched tRPC
+  // call shares it across procedures.
   entitlementMemo?: Map<string, Promise<unknown>>;
   appVersion?: string;
   country: string;
@@ -24,6 +25,8 @@ type RequestStore = {
   userId?: string;
   userRole?: string;
   workspaceId?: string;
+  // The same for workspace resolution: one membership read per request, not one per procedure.
+  workspaceMemo?: Map<string, Promise<unknown>>;
 };
 
 const globalForRequestContext = globalThis as unknown as {
@@ -175,6 +178,7 @@ export function buildRequestStore(input: RequestContextInput): RequestStore {
     userId: input.userId,
     userRole: input.userRole,
     workspaceId: input.workspaceId,
+    workspaceMemo: new Map(),
   };
 }
 

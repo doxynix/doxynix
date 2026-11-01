@@ -48,6 +48,7 @@ export async function getAnalysisContext(
         include: {
           analyses: {
             orderBy: { createdAt: "desc" },
+            select: { commitSha: true },
             take: 1,
             where: { status: "DONE" },
           },

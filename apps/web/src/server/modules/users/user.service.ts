@@ -200,7 +200,19 @@ export const userService = {
     return { accounts: mappedAccounts, user };
   },
   async getMe(db: DbClient, userId: string) {
-    const user = await db.user.findUnique({ where: { id: userId } });
+    const user = await db.user.findUnique({
+      select: {
+        createdAt: true,
+        email: true,
+        emailVerified: true,
+        id: true,
+        image: true,
+        name: true,
+        role: true,
+        updatedAt: true,
+      },
+      where: { id: userId },
+    });
 
     if (user == null) {
       throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });

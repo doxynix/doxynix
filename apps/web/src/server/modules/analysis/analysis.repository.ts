@@ -178,13 +178,10 @@ export const analysisRepo = {
 
   async getByRepoAndPRNumber(db: DbClient, repoId: string, prNumber: number, workspaceId: string) {
     return db.pullRequestAnalysis.findFirst({
-      include: {
-        comments: true,
-        generatedFixes: true,
-      },
       orderBy: {
         createdAt: "desc",
       },
+      select: { id: true },
       where: {
         prNumber,
         repo: {
@@ -282,7 +279,13 @@ export const analysisRepo = {
     aid?: string,
   ) {
     const repo = await db.repo.findUnique({
-      select: repoWithLatestAnalysisAndDocsSelect,
+      select: {
+        ...repoWithLatestAnalysisAndDocsSelect,
+        documents: {
+          ...repoWithLatestAnalysisAndDocsSelect.documents,
+          ...(aid == null ? {} : { where: { analysisId: aid } }),
+        },
+      },
       where: { id: repoId, workspaceId },
     });
 
@@ -295,7 +298,6 @@ export const analysisRepo = {
       return {
         ...repo,
         analyses: [target],
-        documents: repo.documents.filter((d) => d.analysis?.id === aid),
       };
     }
 

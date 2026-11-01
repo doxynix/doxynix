@@ -20,7 +20,7 @@ import {
 } from "@/server/utils/pagination";
 import { normalizeSearchInput, tokenizeSearchInput } from "@/server/utils/search";
 
-import { repoMapper } from "./repo.mapper";
+import { repoMapper, repoPageSelect, repoPublicSelect } from "./repo.mapper";
 import type { RepoFiltersInput, RepoSlimFiltersInput } from "./repo.schemas";
 
 function buildRepoSearchClause(term: string): Prisma.RepoWhereInput {
@@ -243,9 +243,7 @@ export const repoService = {
 
   async getByName(db: DbClient, owner: string, name: string, workspaceId: string) {
     const repo = await db.repo.findFirst({
-      include: {
-        analyses: { orderBy: { createdAt: "desc" }, take: 1 },
-      },
+      select: repoPageSelect,
       where: {
         name: { equals: name, mode: "insensitive" },
         owner: { equals: owner, mode: "insensitive" },
@@ -261,6 +259,7 @@ export const repoService = {
   },
   async getByOwner(db: DbClient, owner: string, workspaceId: string) {
     const repo = await db.repo.findFirst({
+      select: repoPublicSelect,
       where: {
         owner: { equals: owner, mode: "insensitive" },
         workspaceId,

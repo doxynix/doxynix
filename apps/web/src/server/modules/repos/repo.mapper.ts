@@ -19,7 +19,41 @@ export type RepoWithAnalyses = Prisma.RepoGetPayload<{
   };
 }>;
 
-export type RepoRecord = Prisma.RepoGetPayload<Record<string, never>>;
+// Every column `toPublicFields` reads, and nothing else: the JSON blobs on `analyses` are what
+// this projection exists to avoid.
+export const repoPublicSelect = {
+  createdAt: true,
+  defaultBranch: true,
+  description: true,
+  forks: true,
+  githubCreatedAt: true,
+  githubId: true,
+  id: true,
+  language: true,
+  license: true,
+  name: true,
+  openIssues: true,
+  owner: true,
+  ownerAvatarUrl: true,
+  pushedAt: true,
+  size: true,
+  stars: true,
+  topics: true,
+  updatedAt: true,
+  url: true,
+  visibility: true,
+} satisfies Prisma.RepoSelect;
+
+export const repoPageSelect = {
+  ...repoPublicSelect,
+  analyses: {
+    orderBy: { createdAt: "desc" },
+    select: { status: true },
+    take: 1,
+  },
+} satisfies Prisma.RepoSelect;
+
+export type RepoPublicRecord = Prisma.RepoGetPayload<{ select: typeof repoPublicSelect }>;
 
 export type SlimRepoRecord = Prisma.RepoGetPayload<{
   select: {
@@ -73,7 +107,7 @@ export const repoMapper = {
     };
   },
 
-  toPublicFields(repo: RepoRecord): Omit<PublicRepo, "status"> {
+  toPublicFields(repo: RepoPublicRecord): Omit<PublicRepo, "status"> {
     return {
       createdAt: repo.createdAt,
       defaultBranch: repo.defaultBranch,

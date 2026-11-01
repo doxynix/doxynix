@@ -1,3 +1,4 @@
+import type { AccessState } from "@doxynix/shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { DbClient } from "@/server/core/db";
@@ -16,7 +17,7 @@ const WORKSPACE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 const NOW = new Date("2026-10-30T12:00:00.000Z");
 
 type EntitlementRow = {
-  accessState: string;
+  accessState: AccessState;
   aiTokensPerMonth: null | number;
   analysesPerMonth: null | number;
   graceEndsAt: Date | null;

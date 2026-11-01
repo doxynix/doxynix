@@ -1,3 +1,4 @@
+import { ApiKeyScopeSchema, DocTypeSchema } from "@doxynix/shared";
 import type { inferRouterInputs } from "@trpc/server";
 import { tool } from "ai";
 import * as z from "zod";
@@ -95,7 +96,7 @@ export const getAgentTools = (currentRepoId?: string) => ({
       description: z.string().optional().describe("Optional description of the key's purpose"),
       name: z.string().min(1).describe("Friendly name for the key (e.g., 'CI-CD-key')"),
       scopes: z
-        .array(z.enum(["CLI", "FULL", "MCP"]))
+        .array(ApiKeyScopeSchema)
         .min(1)
         .describe(
           "Permissions for the key: CLI for tRPC/CLI access, MCP for MCP tools, FULL for both",
@@ -476,9 +477,7 @@ export const getAgentTools = (currentRepoId?: string) => ({
       return trpc.analysis.getDocumentContent({ repoId: targetRepoId, type: docType });
     },
     inputSchema: z.object({
-      docType: z
-        .enum(["README", "API", "ARCHITECTURE", "CONTRIBUTING", "CHANGELOG", "CODE_DOC"])
-        .describe("The type of document to read"),
+      docType: z.enum(DocTypeSchema.options).describe("The type of document to read"),
       repoId: z.uuid().optional().describe("The public UUID of the repository"),
     }),
   }),

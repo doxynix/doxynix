@@ -1,3 +1,4 @@
+import { DocTypeSchema } from "@doxynix/shared";
 import { type ToolSet, tool } from "ai";
 import * as z from "zod";
 
@@ -265,7 +266,7 @@ function buildRepositoryTools(userId: string, workspaceId: string, repoId: strin
       },
       inputSchema: z.object({
         docType: z
-          .enum(["README", "API", "ARCHITECTURE", "CONTRIBUTING", "CHANGELOG", "CODE_DOC"])
+          .enum(DocTypeSchema.options)
           .describe("The type of previous document to retrieve"),
       }),
     }),

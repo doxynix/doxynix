@@ -1,10 +1,12 @@
+import type { WorkspaceRole } from "@doxynix/shared";
 import { TRPCError } from "@trpc/server";
 import * as z from "zod";
 
+import { requestContext } from "@/server/utils/request-context";
+import { memoizeOnce } from "@/server/utils/request-memo";
+
 import { prisma } from "../db";
 import { createPersonalWorkspace } from "./personal-workspace";
-
-type WorkspaceRole = "MEMBER" | "OWNER";
 
 export type ResolvedWorkspace = {
   id: string;
@@ -12,12 +14,14 @@ export type ResolvedWorkspace = {
   role: WorkspaceRole;
 };
 
-export async function resolveWorkspace(input: {
+type ResolveWorkspaceInput = {
   headerWorkspaceId: null | string;
   name?: null | string;
   strict?: boolean;
   userId: string;
-}): Promise<ResolvedWorkspace> {
+};
+
+async function loadWorkspace(input: ResolveWorkspaceInput): Promise<ResolvedWorkspace> {
   const { headerWorkspaceId, name, strict = false, userId } = input;
 
   if (headerWorkspaceId != null && z.uuid().safeParse(headerWorkspaceId).success) {
@@ -55,4 +59,15 @@ export async function resolveWorkspace(input: {
   const workspaceId = await createPersonalWorkspace(userId, name);
 
   return { id: workspaceId, reset: headerWorkspaceId != null, role: "OWNER" };
+}
+
+// Mirrors the entitlement reader: request-scoped dedupe, not a cache. A page render opens several
+// workspace-scoped procedures and every agent tool call opens one; they all need the same answer.
+export async function resolveWorkspace(input: ResolveWorkspaceInput): Promise<ResolvedWorkspace> {
+  return memoizeOnce(
+    requestContext.getStore()?.workspaceMemo,
+    "workspace",
+    [input.userId, input.headerWorkspaceId, input.strict === true, input.name ?? null],
+    () => loadWorkspace(input),
+  );
 }
