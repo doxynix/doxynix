@@ -12,11 +12,12 @@ describe("Concurrency, Transactions & Integrity", () => {
   it("should handle Race Conditions on Unique Constraints", async () => {
     const alice = await createTestUser("Alice");
     const base = {
+      createdByUserId: alice.user.id,
       githubId: 999,
       owner: "a",
       url: "https://github.com/alice/race",
-      userId: alice.user.id,
       visibility: "PRIVATE" as const,
+      workspaceId: alice.workspace.id,
     };
 
     const p1 = alice.db.repo.create({ data: { ...base, name: "race1" } });
@@ -31,12 +32,13 @@ describe("Concurrency, Transactions & Integrity", () => {
     const alice = await createTestUser("Alice");
     const repo = await alice.db.repo.create({
       data: {
+        createdByUserId: alice.user.id,
         githubId: 1,
         name: "inc",
         owner: "a",
         stars: 0,
         url: "https://github.com/alice/inc",
-        userId: alice.user.id,
+        workspaceId: alice.workspace.id,
       },
     });
 
@@ -57,11 +59,12 @@ describe("Concurrency, Transactions & Integrity", () => {
       await prisma.$transaction(async (tx) => {
         await tx.repo.create({
           data: {
+            createdByUserId: alice.user.id,
             githubId: 500,
             name: repoName,
             owner: "a",
             url: "https://github.com/alice/rollback",
-            userId: alice.user.id,
+            workspaceId: alice.workspace.id,
           },
         });
         throw new Error("Boom");
@@ -78,11 +81,12 @@ describe("Concurrency, Transactions & Integrity", () => {
     const alice = await createTestUser("Alice");
     const repo = await alice.db.repo.create({
       data: {
+        createdByUserId: alice.user.id,
         githubId: 2,
         name: "b",
         owner: "a",
         url: "https://github.com/alice/b",
-        userId: alice.user.id,
+        workspaceId: alice.workspace.id,
       },
     });
 

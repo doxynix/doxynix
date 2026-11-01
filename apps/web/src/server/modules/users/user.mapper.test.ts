@@ -109,7 +109,7 @@ describe("userMapper.toAdminDetail", () => {
   it("lifts the relation counts out of `_count` and keeps the summary fields", () => {
     const mapped = userMapper.toAdminDetail({
       ...makeAdminUser(),
-      _count: { apiKeys: 2, chatSession: 1, notifications: 7, repos: 3, sessions: 4 },
+      _count: { apiKeys: 2, chatSession: 1, createdRepos: 3, notifications: 7, sessions: 4 },
     });
 
     expect(mapped.counts).toEqual({

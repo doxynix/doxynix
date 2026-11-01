@@ -7,7 +7,7 @@ import {
 } from "@doxynix/shared";
 import * as z from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
+import { createTRPCRouter, workspaceProcedure } from "@/server/core/trpc/init";
 
 import { repoMapper } from "./repo.mapper";
 import { RepoFilterSchema, RepoSlimFilterSchema } from "./repo.schemas";
@@ -26,7 +26,7 @@ const RepoWithMetricsSchema = z.object({
 });
 
 export const repoRouter = createTRPCRouter({
-  create: protectedProcedure
+  create: workspaceProcedure
     .input(CreateRepoSchema)
     .output(
       z.object({
@@ -35,7 +35,12 @@ export const repoRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const newRepo = await repoService.createRepo(ctx.db, ctx.session.user.id, input.url);
+      const newRepo = await repoService.createRepo(
+        ctx.db,
+        ctx.session.user.id,
+        ctx.workspace.id,
+        input.url,
+      );
 
       return {
         repo: { ...repoMapper.toPublicFields(newRepo), status: "NEW" },
@@ -43,21 +48,21 @@ export const repoRouter = createTRPCRouter({
       };
     }),
 
-  delete: protectedProcedure
+  delete: workspaceProcedure
     .input(z.object({ id: z.uuid() }))
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      return repoService.delete(ctx.db, input.id, ctx.session.user.id);
+      return repoService.delete(ctx.db, input.id, ctx.workspace.id, ctx.session.user.id);
     }),
 
-  deleteAll: protectedProcedure
+  deleteAll: workspaceProcedure
     .input(z.object({}).optional())
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx }) => {
-      return repoService.deleteAll(ctx.db, ctx.session.user.id);
+      return repoService.deleteAll(ctx.db, ctx.workspace.id, ctx.session.user.id);
     }),
 
-  deleteByOwner: protectedProcedure
+  deleteByOwner: workspaceProcedure
     .input(
       z.object({
         owner: z.string().trim().min(1).max(39),
@@ -70,10 +75,10 @@ export const repoRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return repoService.deleteByOwner(ctx.db, input.owner, ctx.session.user.id);
+      return repoService.deleteByOwner(ctx.db, input.owner, ctx.workspace.id, ctx.session.user.id);
     }),
 
-  getAll: protectedProcedure
+  getAll: workspaceProcedure
     .input(RepoFilterSchema)
     .output(
       z.object({
@@ -82,10 +87,10 @@ export const repoRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      return repoService.getAll(ctx.db, input, ctx.session.user.id);
+      return repoService.getAll(ctx.db, input, ctx.workspace.id);
     }),
 
-  getByName: protectedProcedure
+  getByName: workspaceProcedure
     .input(
       z.object({
         name: z.string().trim().min(1).max(255),
@@ -94,10 +99,10 @@ export const repoRouter = createTRPCRouter({
     )
     .output(z.nullable(PublicRepoSchema))
     .query(async ({ ctx, input }) => {
-      return repoService.getByName(ctx.db, input.owner, input.name);
+      return repoService.getByName(ctx.db, input.owner, input.name, ctx.workspace.id);
     }),
 
-  getByOwner: protectedProcedure
+  getByOwner: workspaceProcedure
     .input(
       z.object({
         owner: z.string().trim().min(1).max(39),
@@ -105,10 +110,10 @@ export const repoRouter = createTRPCRouter({
     )
     .output(z.nullable(PublicRepoSchema))
     .query(async ({ ctx, input }) => {
-      return repoService.getByOwner(ctx.db, input.owner);
+      return repoService.getByOwner(ctx.db, input.owner, ctx.workspace.id);
     }),
 
-  getSlim: protectedProcedure
+  getSlim: workspaceProcedure
     .input(RepoSlimFilterSchema)
     .output(
       z.object({
@@ -124,6 +129,6 @@ export const repoRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      return repoService.getSlim(ctx.db, input, ctx.session.user.id);
+      return repoService.getSlim(ctx.db, input, ctx.workspace.id);
     }),
 });

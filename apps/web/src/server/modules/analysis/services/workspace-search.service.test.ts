@@ -7,12 +7,25 @@ import { MAX_SEARCHABLE_DOCUMENT_FETCH } from "../analysis.utils";
 import { analysisRepoRouter } from "../analysis-repo.router";
 import { workspaceSearchService } from "./workspace-search.service";
 
+vi.mock("@/server/core/workspaces/resolve-workspace", () => ({
+  resolveWorkspace: async () => ({
+    id: "0195f000-0000-7000-8000-000000000002",
+    reset: false,
+    role: "OWNER",
+  }),
+}));
+
 const REPO_ID = "0195f000-0000-7000-8000-000000000002";
 
 function makeCtx() {
   return {
     db: {} as unknown as DbClient,
-    prisma: {},
+    prisma: {
+      workspaceMember: {
+        findFirst: async () => ({ role: "OWNER", workspaceId: REPO_ID }),
+        findUnique: async () => ({ role: "OWNER" }),
+      },
+    },
     redis: {},
     req: { headers: new Headers() } as never,
     requestInfo: { requestId: "req-test" },
@@ -25,7 +38,7 @@ describe("analysisRepo.loadLatestDocumentsWithContent", () => {
     const findMany = vi.fn<(args: { take?: number }) => Promise<never[]>>(async () => []);
     const db = { document: { findMany } } as unknown as DbClient;
 
-    await analysisRepo.loadLatestDocumentsWithContent(db, REPO_ID);
+    await analysisRepo.loadLatestDocumentsWithContent(db, REPO_ID, "workspace-1");
 
     expect(findMany.mock.calls[0]?.[0]?.take).toBe(MAX_SEARCHABLE_DOCUMENT_FETCH);
   });
@@ -34,7 +47,7 @@ describe("analysisRepo.loadLatestDocumentsWithContent", () => {
     const findMany = vi.fn<(args: { orderBy?: unknown }) => Promise<never[]>>(async () => []);
     const db = { document: { findMany } } as unknown as DbClient;
 
-    await analysisRepo.loadLatestDocumentsWithContent(db, REPO_ID);
+    await analysisRepo.loadLatestDocumentsWithContent(db, REPO_ID, "workspace-1");
 
     // Documents are versioned, so a cap ordered by recency alone can be filled
     // entirely by one type and starve the rest of the DocType enum.
@@ -56,7 +69,9 @@ describe("workspaceSearchService.search", () => {
   it("returns nothing when the repo snapshot is missing", async () => {
     const db = { repo: { findUnique: async () => null } } as unknown as DbClient;
 
-    await expect(workspaceSearchService.search(db, REPO_ID, "controller")).resolves.toEqual([]);
+    await expect(
+      workspaceSearchService.search(db, REPO_ID, "controller", "workspace-1"),
+    ).resolves.toEqual([]);
   });
 });
 

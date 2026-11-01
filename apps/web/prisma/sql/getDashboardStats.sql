@@ -15,7 +15,7 @@ WITH periods AS (
 user_repos AS (
     SELECT id, name, owner, created_at
     FROM repos
-    WHERE user_id = $1::uuid
+    WHERE created_by_user_id = $1::uuid
 ),
 base_data AS (
     SELECT

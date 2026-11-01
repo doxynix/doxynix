@@ -13,3 +13,11 @@ export const IS_ANALYZE = process.env.ANALYZE === "true";
  * and both are worth knowing. Defaults on; there is no reason to ship it off.
  */
 export const IS_RATE_LIMIT_ENABLED = process.env.RATE_LIMIT_ENABLED !== "false";
+
+/** Local PRO upgrade is a pre-billing placeholder; production uses Checkout in BILL-06. */
+export function isLocalBillingUpgradeEnabled(): boolean {
+  return (
+    process.env.BILLING_LOCAL_UPGRADE_ENABLED === "true" ||
+    (IS_DEV && process.env.BILLING_LOCAL_UPGRADE_ENABLED !== "false")
+  );
+}

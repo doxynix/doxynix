@@ -54,12 +54,13 @@ export const githubBrowseService = {
     db: DbClient,
     prisma: PrismaClientExtended,
     userId: string,
+    workspaceId: string,
     repoId: string,
     path: string,
     branch?: string,
   ) {
     const repo = await db.repo.findUnique({
-      where: { id: repoId, userId },
+      where: { id: repoId, workspaceId },
     });
 
     if (repo == null) {

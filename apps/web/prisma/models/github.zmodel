@@ -1,4 +1,5 @@
 import "./auth"
+import "./workspace"
 import "./review"
 import "./core"
 
@@ -35,8 +36,11 @@ model Repo {
   updatedAt        DateTime                   @default(now()) @updatedAt @map("updated_at")
 
   /// @zod.custom.omit(["model"])
-  userId           String                     @map("user_id") @db.Uuid @omit
-  user             User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId      String                     @map("workspace_id") @db.Uuid
+  workspace        Workspace                  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  /// @zod.custom.omit(["model"])
+  createdByUserId  String                     @map("created_by_user_id") @db.Uuid @omit
+  createdBy        User                       @relation("RepoCreatedBy", fields: [createdByUserId], references: [id], onDelete: Cascade)
 
   analyses         Analysis[]
   documents        Document[]
@@ -47,16 +51,26 @@ model Repo {
 
   prAnalysisConfig PullRequestAnalysisConfig?
 
-  @@allow('read,delete', auth() == user || auth().role == 'ADMIN')
-  @@allow('create', auth() != null && userId == auth().id)
-  @@allow('update', (auth() == user && future().userId == userId) || auth().role == 'ADMIN')
+  @@deny('all', auth() == null)
+  @@allow('read', workspace.members?[userId == auth().id] || auth().role == 'ADMIN')
+  @@allow(
+    'delete',
+    workspace.members?[userId == auth().id && role == OWNER] || auth().role == 'ADMIN'
+  )
+  @@allow('create', createdByUserId == auth().id && workspace.members?[userId == auth().id])
+  @@allow(
+    'update',
+    (workspace.members?[userId == auth().id] && future().workspaceId == workspaceId && future().createdByUserId == createdByUserId) ||
+    auth().role == 'ADMIN'
+  )
 
-  @@unique([owner, name, userId])
-  @@unique([githubId, userId])
-  @@index([userId, owner])
-  @@index([userId, name])
-  @@index([userId, visibility, createdAt(sort: Desc)])
-  @@index([userId, updatedAt(sort: Desc), id(sort: Desc)], map: "repos_user_id_updated_at_id_idx")
+  @@unique([owner, name, workspaceId])
+  @@unique([githubId, workspaceId])
+  @@index([workspaceId, owner])
+  @@index([workspaceId, name])
+  @@index([workspaceId, visibility, createdAt(sort: Desc)])
+  @@index([workspaceId, updatedAt(sort: Desc), id(sort: Desc)], map: "repos_workspace_id_updated_at_id_idx")
+  @@index([createdByUserId])
   @@index([updatedAt(sort: Desc), id(sort: Desc)], map: "repos_updated_at_id_idx")
   @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_name_trgm_idx")
   @@index([owner(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_owner_trgm_idx")
@@ -80,19 +94,23 @@ model GithubInstallation {
   createdAt           DateTime               @default(now()) @map("created_at")
   updatedAt           DateTime               @default(now()) @updatedAt @map("updated_at")
 
+  workspaceId         String                 @map("workspace_id") @db.Uuid
+  workspace           Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   userId              String?                @map("user_id") @db.Uuid @omit
   user                User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@allow('read', auth() != null && (userId == auth().id || auth().role == 'ADMIN'))
+  @@deny('all', auth() == null)
+  @@allow('read', workspace.members?[userId == auth().id] || auth().role == 'ADMIN')
   @@allow('delete', auth().role == 'ADMIN')
   @@allow('create', auth().role == 'ADMIN')
   @@allow(
     'update',
-    auth().role == 'ADMIN' || (userId == auth().id && future().userId == userId)
+    workspace.members?[userId == auth().id] || auth().role == 'ADMIN'
   )
 
-  @@index([userId, isSuspended, createdAt(sort: Asc)])
-  @@index([userId, isSuspended, accountLogin])
+  @@index([workspaceId, isSuspended, createdAt(sort: Asc)])
+  @@index([workspaceId, isSuspended, accountLogin])
+  @@index([userId])
 
   @@map("github_installations")
 }

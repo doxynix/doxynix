@@ -14,6 +14,7 @@ import { repoRouter } from "./repos/repo.router";
 import { healthRouter } from "./system/health.router";
 import { adminUserRouter } from "./users/admin-user.router";
 import { userRouter } from "./users/user.router";
+import { workspaceRouter } from "./workspaces/workspace.router";
 
 export const appRouter = createTRPCRouter({
   adminAudit: adminAuditRouter,
@@ -31,6 +32,7 @@ export const appRouter = createTRPCRouter({
   notification: notificationRouter,
   repo: repoRouter,
   user: userRouter,
+  workspace: workspaceRouter,
 });
 
 export type AppRouter = typeof appRouter;

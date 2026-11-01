@@ -1,4 +1,4 @@
-import type { InstallationTargetType, RepositorySelection } from "@doxynix/shared";
+import type { RepositorySelection } from "@doxynix/shared";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
@@ -22,24 +22,12 @@ export async function handleInstallationEvent(payload: InstallationPayload): Pro
   const githubAvatar = account.avatar_url;
   const githubRepoSelection =
     installation.repository_selection.toUpperCase() as RepositorySelection;
-  const githubTargetType = installation.target_type.toUpperCase() as InstallationTargetType;
   const githubHtmlUrl = installation.html_url;
 
   try {
     if (action === "created") {
-      await prisma.githubInstallation.upsert({
-        create: {
-          accountAvatar: githubAvatar,
-          accountLogin: githubLogin,
-          appId: installation.app_id,
-          htmlUrl: githubHtmlUrl,
-          id: instIdBigInt,
-          repositorySelection: githubRepoSelection,
-          targetId: BigInt(installation.target_id),
-          targetType: githubTargetType,
-          userId: null,
-        },
-        update: {
+      const result = await prisma.githubInstallation.updateMany({
+        data: {
           accountAvatar: githubAvatar,
           accountLogin: githubLogin,
           htmlUrl: githubHtmlUrl,
@@ -49,6 +37,7 @@ export async function handleInstallationEvent(payload: InstallationPayload): Pro
         where: { id: instIdBigInt },
       });
       appLogger.info({
+        affectedRows: result.count,
         installationId: instIdBigInt.toString(),
         msg: "GitHub installation created via webhook",
       });

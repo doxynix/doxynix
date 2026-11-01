@@ -13,3 +13,13 @@ export const emailSignInLimiter = new Ratelimit({
   redis: redisClient,
   timeout: 1500,
 });
+
+export const memberAddLimiter = new Ratelimit({
+  analytics: false,
+  enableProtection: true,
+  ephemeralCache: ephemeralCache,
+  limiter: Ratelimit.slidingWindow(10, "10 m"),
+  prefix: "@doxynix/ratelimit/member-add",
+  redis: redisClient,
+  timeout: 1500,
+});

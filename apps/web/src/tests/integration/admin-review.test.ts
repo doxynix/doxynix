@@ -9,13 +9,14 @@ async function createRepo(name: string) {
   const owner = await createTestUser(name);
   const repo = await owner.db.repo.create({
     data: {
+      createdByUserId: owner.user.id,
       defaultBranch: "main",
       githubId: Math.floor(Math.random() * 1_000_000_000),
       name: `repo-${name.toLowerCase()}`,
       owner: name.toLowerCase(),
       url: `https://github.com/${name.toLowerCase()}/repo`,
-      userId: owner.user.id,
       visibility: "PUBLIC",
+      workspaceId: owner.workspace.id,
     },
   });
 

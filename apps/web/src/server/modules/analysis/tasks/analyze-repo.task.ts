@@ -38,6 +38,7 @@ type TaskPayload = {
   selectedBranch?: string;
   selectedFiles: string[];
   userId: string;
+  workspaceId: string;
 };
 
 export const analyzeRepoTask = task({
@@ -53,6 +54,7 @@ export const analyzeRepoTask = task({
       selectedBranch,
       selectedFiles,
       userId,
+      workspaceId,
     } = payload;
 
     const startedAt = Date.now();
@@ -69,6 +71,7 @@ export const analyzeRepoTask = task({
       const { currentSha, repo, token } = await getAnalysisContext(
         analysisId,
         userId,
+        workspaceId,
         forceRefresh,
       );
 
@@ -221,6 +224,7 @@ export const analyzeRepoTask = task({
         repositoryFacts,
         repositoryFindings,
         userId,
+        workspaceId,
       });
 
       await analysisProgress.finalize(analysisId, Status.DONE, "Analysis completed successfully");

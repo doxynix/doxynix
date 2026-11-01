@@ -73,6 +73,14 @@ const SETTINGS_PAGES: MenuItems = [
     url: "/me",
   },
   {
+    href: "/dashboard/settings/members",
+    icon: Users2,
+    id: "members",
+    labelKey: "members",
+    shortcut: "G then T",
+    url: "/mt",
+  },
+  {
     href: "/dashboard/settings/appearance",
     icon: Palette,
     id: "appearance",

@@ -44,21 +44,25 @@ export const analysisProgress = {
         progress: 100,
         status,
       },
-      select: { repo: { select: { userId: true } } },
+      select: { repo: { select: { createdByUserId: true } } },
       where: { id: analysisId },
     });
 
     if (status === Status.DONE) {
       const activation = await prisma.user.updateMany({
         data: { activatedAt: new Date() },
-        where: { activatedAt: null, id: analysis.repo.userId },
+        where: { activatedAt: null, id: analysis.repo.createdByUserId },
       });
 
       if (activation.count > 0) {
         void realtimeService
-          .user(analysis.repo.userId)
+          .user(analysis.repo.createdByUserId)
           .publish(REALTIME_CONFIG.events.user.userUpdated, {});
-        trackServerEvent("onboarding_activated", { analysis_id: analysisId }, analysis.repo.userId);
+        trackServerEvent(
+          "onboarding_activated",
+          { analysis_id: analysisId },
+          analysis.repo.createdByUserId,
+        );
       }
     }
 
@@ -67,7 +71,7 @@ export const analysisProgress = {
       message: finalMsg,
       progress: 100,
       status,
-      userId: analysis.repo.userId,
+      userId: analysis.repo.createdByUserId,
     });
   },
 

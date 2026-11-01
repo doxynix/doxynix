@@ -57,23 +57,24 @@ export const analyzePrTask = task({
     prNumber: number;
     repoId: string;
     repoName: string;
+    workspaceId: string;
   }) => {
     let octokitInstance: null | Octokit = null;
     let userId: string | undefined;
     const startTime = Date.now();
 
     try {
-      const repo = await prisma.repo.findUnique({
-        select: { id: true, userId: true },
-        where: { id: payload.repoId },
+      const repo = await prisma.repo.findFirst({
+        select: { createdByUserId: true, id: true },
+        where: { id: payload.repoId, workspaceId: payload.workspaceId },
       });
 
       if (repo == null) {
         throw new Error(`Repo with ID ${payload.repoId} not found`);
       }
 
-      const { octokit } = await getClientContext(prisma, repo.userId, payload.owner);
-      userId = repo.userId;
+      const { octokit } = await getClientContext(prisma, repo.createdByUserId, payload.owner);
+      userId = repo.createdByUserId;
       octokitInstance = octokit;
 
       await updateCommitStatus(
@@ -98,7 +99,7 @@ export const analyzePrTask = task({
       const projectOverviewJson =
         lastFullAnalysis?.resultJson != null ? JSON.stringify(lastFullAnalysis.resultJson) : "{}";
 
-      const config = await PRConfigService.getConfig(repo.id, prisma);
+      const config = await PRConfigService.getConfig(repo.id, payload.workspaceId, prisma);
 
       await analysisRepo.updatePRAnalysisStatus(prisma, payload.prAnalysisId, "ANALYZING");
 
@@ -152,7 +153,7 @@ export const analyzePrTask = task({
         {
           branch: payload.headSha,
           repoId: repo.id,
-          userId: repo.userId,
+          userId: repo.createdByUserId,
         },
       );
 

@@ -38,7 +38,7 @@ describe("analysisLifecycleService.analyze analytics", () => {
   });
 
   it("tracks repo_analysis_queued with the analysis id and the caller's user", async () => {
-    await analysisLifecycleService.analyze(buildDb(), "user-1", {
+    await analysisLifecycleService.analyze(buildDb(), "user-1", "workspace-1", {
       branch: "main",
       docTypes: ["API", "README"],
       files: ["a.ts", "b.ts"],
@@ -63,7 +63,7 @@ describe("analysisLifecycleService.analyze analytics", () => {
   });
 
   it("nulls the branch and reports no custom instructions when omitted", async () => {
-    await analysisLifecycleService.analyze(buildDb(), "user-2", {
+    await analysisLifecycleService.analyze(buildDb(), "user-2", "workspace-1", {
       docTypes: [],
       files: [],
       language: "ru",
@@ -86,7 +86,7 @@ describe("analysisLifecycleService.analyze analytics", () => {
     vi.mocked(db.repo.findFirst).mockResolvedValue(null);
 
     await expect(
-      analysisLifecycleService.analyze(db, "user-1", {
+      analysisLifecycleService.analyze(db, "user-1", "workspace-1", {
         docTypes: [],
         files: [],
         language: "en",
@@ -101,7 +101,7 @@ describe("analysisLifecycleService.analyze analytics", () => {
     triggerMock.mockRejectedValue(new Error("queue unavailable"));
 
     await expect(
-      analysisLifecycleService.analyze(buildDb(), "user-1", {
+      analysisLifecycleService.analyze(buildDb(), "user-1", "workspace-1", {
         docTypes: [],
         files: [],
         language: "en",

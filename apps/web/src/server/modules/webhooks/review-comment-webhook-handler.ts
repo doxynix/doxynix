@@ -30,6 +30,6 @@ export async function handleReviewCommentEvent(
     prNumber: payload.pull_request.number,
     repoId: repo.id,
     repoName: payload.repository.name,
-    userId: repo.userId,
+    userId: repo.createdByUserId,
   }));
 }

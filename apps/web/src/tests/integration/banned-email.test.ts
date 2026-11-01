@@ -151,10 +151,16 @@ describe("bannedEmailService against ZenStack policies", () => {
     await cleanupDatabase();
 
     const admin = await createTestUser("Admin", "ADMIN");
-    const { db, email, user } = await createTestUser("Keyed", "USER");
+    const { db, email, user, workspace } = await createTestUser("Keyed", "USER");
 
     await db.apiKey.create({
-      data: { hashedKey: "hash-1", name: "ci", prefix: "dxnx_a", userId: user.id },
+      data: {
+        hashedKey: "hash-1",
+        name: "ci",
+        prefix: "dxnx_a",
+        userId: user.id,
+        workspaceId: workspace.id,
+      },
     });
     await expect(prisma.apiKey.count({ where: { revoked: false } })).resolves.toBe(1);
 
@@ -177,6 +183,7 @@ describe("bannedEmailService against ZenStack policies", () => {
           name: "ci",
           prefix: "dxnx_a",
           userId: account.user.id,
+          workspaceId: account.workspace.id,
         },
       });
     }

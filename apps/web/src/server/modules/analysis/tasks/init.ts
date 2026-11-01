@@ -121,14 +121,14 @@ async function cleanupFailsafeDatabaseState(taskName: string, payload: unknown, 
         },
         include: {
           repo: {
-            select: { userId: true },
+            select: { createdByUserId: true },
           },
         },
         where: { id: analysisId },
       });
 
       await realtimeService
-        .user(updated.repo.userId)
+        .user(updated.repo.createdByUserId)
         .publish(REALTIME_CONFIG.events.user.analysisProgress, {
           analysisId,
           message: `Task aborted on platform: ${errorMsg.slice(0, 80)}...`,
@@ -145,13 +145,13 @@ async function cleanupFailsafeDatabaseState(taskName: string, payload: unknown, 
           error: errorMsg,
           status: PRAnalysisStatus.FAILED,
         },
-        include: { repo: { select: { userId: true } } },
+        include: { repo: { select: { createdByUserId: true } } },
         where: { id: prAnalysisId },
       });
 
       await emitPlatformFailure({
         analysisId: prAnalysisId,
-        distinctId: prAnalysis.repo.userId,
+        distinctId: prAnalysis.repo.createdByUserId,
         fixId: undefined,
         stage: "analyze_pr",
         trigger: "platform_failure",
@@ -165,13 +165,13 @@ async function cleanupFailsafeDatabaseState(taskName: string, payload: unknown, 
         data: {
           status: "FAILED" as FixStatus,
         },
-        include: { repo: { select: { userId: true } } },
+        include: { repo: { select: { createdByUserId: true } } },
         where: { id: fixId },
       });
 
       await emitPlatformFailure({
         analysisId: undefined,
-        distinctId: fix.repo.userId,
+        distinctId: fix.repo.createdByUserId,
         fixId,
         stage: "generate_fix",
         trigger: "platform_failure",

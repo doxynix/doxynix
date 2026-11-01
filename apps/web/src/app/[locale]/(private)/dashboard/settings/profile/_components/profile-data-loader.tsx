@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { unauthorized } from "next/navigation";
 
-import { ProfileCard } from "@/features/profile/ui/profile-card";
+import { ProfileCard } from "@/features/settings/ui/profile/profile-card";
 
 import { auth } from "@/server/core/auth";
 

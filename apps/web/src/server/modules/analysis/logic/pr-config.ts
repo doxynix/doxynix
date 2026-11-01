@@ -22,17 +22,17 @@ const DEFAULT_PR_CONFIG: PRAnalysisConfig = {
 };
 
 export const PRConfigService = {
-  async disablePRAnalysis(repoId: string, db: DbClient): Promise<void> {
-    await this.updateConfig(repoId, { enabled: false }, db);
+  async disablePRAnalysis(repoId: string, workspaceId: string, db: DbClient): Promise<void> {
+    await this.updateConfig(repoId, { enabled: false }, workspaceId, db);
   },
 
-  async enablePRAnalysis(repoId: string, db: DbClient): Promise<void> {
-    await this.updateConfig(repoId, { enabled: true }, db);
+  async enablePRAnalysis(repoId: string, workspaceId: string, db: DbClient): Promise<void> {
+    await this.updateConfig(repoId, { enabled: true }, workspaceId, db);
   },
 
-  async getConfig(repoId: string, db: DbClient): Promise<PRAnalysisConfig> {
-    const config = await db.pullRequestAnalysisConfig.findUnique({
-      where: { repoId },
+  async getConfig(repoId: string, workspaceId: string, db: DbClient): Promise<PRAnalysisConfig> {
+    const config = await db.pullRequestAnalysisConfig.findFirst({
+      where: { repo: { workspaceId }, repoId },
     });
 
     if (config == null) {
@@ -52,18 +52,30 @@ export const PRConfigService = {
   async setFocusAreas(
     repoId: string,
     areas: PRAnalysisConfig["focusAreas"],
+    workspaceId: string,
     db: DbClient,
   ): Promise<void> {
-    await this.updateConfig(repoId, { focusAreas: areas }, db);
+    await this.updateConfig(repoId, { focusAreas: areas }, workspaceId, db);
   },
 
-  async setTokenBudget(repoId: string, budget: number, db: DbClient): Promise<void> {
-    await this.updateConfig(repoId, { tokenBudget: clamp(budget, 10_000, 100_000) }, db);
+  async setTokenBudget(
+    repoId: string,
+    budget: number,
+    workspaceId: string,
+    db: DbClient,
+  ): Promise<void> {
+    await this.updateConfig(
+      repoId,
+      { tokenBudget: clamp(budget, 10_000, 100_000) },
+      workspaceId,
+      db,
+    );
   },
 
   async updateConfig(
     repoId: string,
     config: Partial<PRAnalysisConfig>,
+    workspaceId: string,
     db: DbClient,
   ): Promise<PRAnalysisConfig> {
     const entries = Object.entries(config);
@@ -91,9 +103,9 @@ export const PRConfigService = {
           },
         },
       },
-      where: { id: repoId },
+      where: { id: repoId, workspaceId },
     });
 
-    return this.getConfig(repoId, db);
+    return this.getConfig(repoId, workspaceId, db);
   },
 };

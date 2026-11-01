@@ -93,15 +93,22 @@ describe("Users, Admin & Audit Flows", () => {
 
     const repo = await alice.db.repo.create({
       data: {
+        createdByUserId: alice.user.id,
         githubId: 1,
         name: "cascade",
         owner: "a",
         url: "https://github.com/alice/cascade",
-        userId: alice.user.id,
+        workspaceId: alice.workspace.id,
       },
     });
     await alice.db.apiKey.create({
-      data: { hashedKey: "h", name: "k", prefix: "p", userId: alice.user.id },
+      data: {
+        hashedKey: "h",
+        name: "k",
+        prefix: "p",
+        userId: alice.user.id,
+        workspaceId: alice.workspace.id,
+      },
     });
     await alice.db.analysis.create({
       data: { commitSha: "x", repo: { connect: { id: repo.id } }, status: "NEW" },

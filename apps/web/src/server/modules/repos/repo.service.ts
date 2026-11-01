@@ -83,7 +83,7 @@ export const repoService = {
     ]);
   },
 
-  async createRepo(db: DbClient, userId: string, url: string) {
+  async createRepo(db: DbClient, userId: string, workspaceId: string, url: string) {
     let repoInfo;
     try {
       repoInfo = parseUrl(url);
@@ -112,6 +112,7 @@ export const repoService = {
     try {
       const repo = await db.repo.create({
         data: {
+          createdByUserId: userId,
           defaultBranch: githubData.default_branch,
           description: githubData.description,
           forks: githubData.forks_count,
@@ -128,8 +129,8 @@ export const repoService = {
           stars: githubData.stargazers_count,
           topics: githubData.topics ?? [],
           url: githubData.html_url,
-          userId,
           visibility: githubData.private ? Visibility.PRIVATE : Visibility.PUBLIC,
+          workspaceId,
         },
       });
 
@@ -146,10 +147,10 @@ export const repoService = {
     }
   },
 
-  async delete(db: DbClient, id: string, userId: string) {
+  async delete(db: DbClient, id: string, workspaceId: string, userId: string) {
     try {
       await db.repo.delete({
-        where: { id, userId },
+        where: { id, workspaceId },
       });
 
       void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.repoUpdated, {});
@@ -160,9 +161,9 @@ export const repoService = {
     }
   },
 
-  async deleteAll(db: DbClient, userId: string) {
+  async deleteAll(db: DbClient, workspaceId: string, userId: string) {
     try {
-      await db.repo.deleteMany({ where: { userId } });
+      await db.repo.deleteMany({ where: { workspaceId } });
 
       void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.repoUpdated, {});
 
@@ -172,11 +173,11 @@ export const repoService = {
     }
   },
 
-  async deleteByOwner(db: DbClient, owner: string, userId: string) {
+  async deleteByOwner(db: DbClient, owner: string, workspaceId: string, userId: string) {
     const result = await db.repo.deleteMany({
       where: {
         owner: { equals: owner, mode: "insensitive" },
-        userId,
+        workspaceId,
       },
     });
 
@@ -185,10 +186,10 @@ export const repoService = {
     return { count: result.count, success: true };
   },
 
-  async getAll(db: DbClient, input: RepoFiltersInput, userId: string) {
+  async getAll(db: DbClient, input: RepoFiltersInput, workspaceId: string) {
     const { limit, owner, page, search, sortBy, sortOrder, status, visibility } = input;
 
-    const where = { userId, ...this.buildWhereClause({ owner, search, status, visibility }) };
+    const where = { workspaceId, ...this.buildWhereClause({ owner, search, status, visibility }) };
     const contextWhere: Prisma.RepoWhereInput =
       owner == null ? {} : { owner: { equals: owner, mode: "insensitive" } };
 
@@ -234,7 +235,7 @@ export const repoService = {
     return repoMapper.toPaginatedList(items, meta);
   },
 
-  async getByName(db: DbClient, owner: string, name: string) {
+  async getByName(db: DbClient, owner: string, name: string, workspaceId: string) {
     const repo = await db.repo.findFirst({
       include: {
         analyses: { orderBy: { createdAt: "desc" }, take: 1 },
@@ -242,6 +243,7 @@ export const repoService = {
       where: {
         name: { equals: name, mode: "insensitive" },
         owner: { equals: owner, mode: "insensitive" },
+        workspaceId,
       },
     });
 
@@ -251,10 +253,11 @@ export const repoService = {
 
     return { ...repoMapper.toPublicFields(repo), status: repoMapper.latestStatus(repo.analyses) };
   },
-  async getByOwner(db: DbClient, owner: string) {
+  async getByOwner(db: DbClient, owner: string, workspaceId: string) {
     const repo = await db.repo.findFirst({
       where: {
         owner: { equals: owner, mode: "insensitive" },
+        workspaceId,
       },
     });
 
@@ -265,10 +268,10 @@ export const repoService = {
     return { ...repoMapper.toPublicFields(repo), status: Status.NEW };
   },
 
-  async getSlim(db: DbClient, input: RepoSlimFiltersInput, userId: string) {
+  async getSlim(db: DbClient, input: RepoSlimFiltersInput, workspaceId: string) {
     const { cursor, limit, owner, search, status, visibility } = input;
 
-    const where = { userId, ...this.buildWhereClause({ owner, search, status, visibility }) };
+    const where = { workspaceId, ...this.buildWhereClause({ owner, search, status, visibility }) };
 
     const rows = await db.repo.findMany({
       ...keysetArgs(cursor, limit),

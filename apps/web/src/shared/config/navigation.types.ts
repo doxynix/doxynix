@@ -21,6 +21,7 @@ export type NavLabelKey =
   | "high_five"
   | "home"
   | "map"
+  | "members"
   | "notifications"
   | "overview"
   | "profile"

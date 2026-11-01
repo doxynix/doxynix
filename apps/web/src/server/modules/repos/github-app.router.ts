@@ -1,18 +1,18 @@
 import * as z from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
+import { createTRPCRouter, workspaceProcedure } from "@/server/core/trpc/init";
 import { githubAppService } from "@/server/modules/repos/github-app.service";
 
 export const githubAppRouter = createTRPCRouter({
-  getGithubInstallUrl: protectedProcedure.input(z.object({}).optional()).query(async ({ ctx }) => {
-    return githubAppService.getInstallUrl(ctx.prisma, ctx.session.user.id);
+  getGithubInstallUrl: workspaceProcedure.input(z.object({}).optional()).query(async ({ ctx }) => {
+    return githubAppService.getInstallUrl(ctx.prisma, ctx.session.user.id, ctx.workspace.id);
   }),
 
-  getMyGithubRepos: protectedProcedure.input(z.object({}).optional()).query(async ({ ctx }) => {
-    return githubAppService.getMyRepos(ctx.db, ctx.prisma, ctx.session.user.id);
+  getMyGithubRepos: workspaceProcedure.input(z.object({}).optional()).query(async ({ ctx }) => {
+    return githubAppService.getMyRepos(ctx.db, ctx.prisma, ctx.session.user.id, ctx.workspace.id);
   }),
 
-  saveInstallation: protectedProcedure
+  saveInstallation: workspaceProcedure
     .input(
       z.object({
         installationId: z.string().regex(/^\d+$/),

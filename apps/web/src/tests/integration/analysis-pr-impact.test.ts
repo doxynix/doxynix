@@ -7,26 +7,33 @@ type FixtureOwner = {
   db: Awaited<ReturnType<typeof createTestUser>>["db"];
   name: string;
   user: { id: string };
+  workspace: { id: string };
 };
 
 async function createRepoFixture(name: string) {
   const owner = await createTestUser(name);
   const repo = await owner.db.repo.create({
     data: {
+      createdByUserId: owner.user.id,
       defaultBranch: "main",
       githubId: Math.floor(Math.random() * 1_000_000_000),
       name: `repo-${name.toLowerCase()}`,
       owner: name.toLowerCase(),
       url: `https://github.com/${name.toLowerCase()}/repo`,
-      userId: owner.user.id,
       visibility: "PUBLIC",
+      workspaceId: owner.workspace.id,
     },
   });
 
   return {
     db: owner.db,
-    fixture: { owner: name.toLowerCase(), repoId: repo.id, repoName: repo.name },
-    owner: { db: owner.db, name, user: owner.user },
+    fixture: {
+      owner: name.toLowerCase(),
+      repoId: repo.id,
+      repoName: repo.name,
+      workspaceId: owner.workspace.id,
+    },
+    owner: { db: owner.db, name, user: owner.user, workspace: owner.workspace },
   };
 }
 
@@ -35,13 +42,14 @@ type TestDb = Awaited<ReturnType<typeof createTestUser>>["db"];
 async function createSecondRepo(owner: FixtureOwner, suffix: string) {
   const repo = await owner.db.repo.create({
     data: {
+      createdByUserId: owner.user.id,
       defaultBranch: "main",
       githubId: Math.floor(Math.random() * 1_000_000_000),
       name: `repo-${suffix}`,
       owner: owner.name.toLowerCase(),
       url: `https://github.com/${owner.name.toLowerCase()}/${suffix}`,
-      userId: owner.user.id,
       visibility: "PUBLIC",
+      workspaceId: owner.workspace.id,
     },
   });
 
@@ -50,13 +58,14 @@ async function createSecondRepo(owner: FixtureOwner, suffix: string) {
       owner: owner.name.toLowerCase(),
       repoId: repo.id,
       repoName: repo.name,
+      workspaceId: owner.workspace.id,
     },
   };
 }
 
 function createPullRequestAnalysis(
   db: TestDb,
-  fixture: { owner: string; repoId: string; repoName: string },
+  fixture: { owner: string; repoId: string; repoName: string; workspaceId: string },
   overrides: { prNumber?: number; riskScore?: number; status?: string } = {},
 ) {
   return db.pullRequestAnalysis.create({
@@ -95,7 +104,7 @@ describe("prImpactService.getAnalysis", () => {
     const { db, fixture } = await createRepoFixture("OwnerGet");
     const created = await createPullRequestAnalysis(db, fixture, { riskScore: 7 });
 
-    const found = await prImpactService.getAnalysis(db, created.id);
+    const found = await prImpactService.getAnalysis(db, created.id, fixture.workspaceId);
 
     expect(found.id).toBe(created.id);
     expect(found.prNumber).toBe(42);
@@ -108,7 +117,11 @@ describe("prImpactService.getAnalysis", () => {
     const { db } = await createRepoFixture("OwnerMissing");
 
     await expect(
-      prImpactService.getAnalysis(db, "00000000-0000-0000-0000-000000000000"),
+      prImpactService.getAnalysis(
+        db,
+        "00000000-0000-0000-0000-000000000000",
+        "00000000-0000-0000-0000-000000000001",
+      ),
     ).rejects.toThrow("Analysis not found");
   });
 });
@@ -121,7 +134,9 @@ describe("prImpactService.listByRepository", () => {
 
     // Shape matters as much as the values: an empty repo still reports a total, so the client
     // never has to distinguish "no rows" from "capped to nothing".
-    await expect(prImpactService.listByRepository(db, fixture.repoId)).resolves.toEqual({
+    await expect(
+      prImpactService.listByRepository(db, fixture.repoId, fixture.workspaceId),
+    ).resolves.toEqual({
       capped: false,
       items: [],
       total: 0,
@@ -153,7 +168,11 @@ describe("prImpactService.listByRepository", () => {
       },
     });
 
-    const { items } = await prImpactService.listByRepository(db, fixture.repoId);
+    const { items } = await prImpactService.listByRepository(
+      db,
+      fixture.repoId,
+      fixture.workspaceId,
+    );
     const [listed] = items;
 
     expect(listed).toMatchObject({
@@ -172,7 +191,11 @@ describe("prImpactService.listByRepository", () => {
     await createPullRequestAnalysis(db, fixture, { prNumber: 1 });
     await createPullRequestAnalysis(db, fixture, { prNumber: 2 });
 
-    const { capped, items, total } = await prImpactService.listByRepository(db, fixture.repoId);
+    const { capped, items, total } = await prImpactService.listByRepository(
+      db,
+      fixture.repoId,
+      fixture.workspaceId,
+    );
 
     expect(items.map((item) => item.prNumber).sort((a: number, b: number) => a - b)).toEqual([
       1, 2,
@@ -190,7 +213,7 @@ describe("prImpactService.listByRepository", () => {
     await createPullRequestAnalysis(db, mine, { prNumber: 7 });
     await createPullRequestAnalysis(db, other, { prNumber: 8 });
 
-    const { items } = await prImpactService.listByRepository(db, mine.repoId);
+    const { items } = await prImpactService.listByRepository(db, mine.repoId, mine.workspaceId);
 
     expect(items).toHaveLength(1);
     expect(items[0]?.prNumber).toBe(7);
@@ -221,14 +244,21 @@ describe("prImpactService.getByRepoAndPRNumber", () => {
   it("returns null when the repository has no analysis for that PR", async () => {
     const { db, fixture } = await createRepoFixture("OwnerNoPr");
 
-    await expect(prImpactService.getByRepoAndPRNumber(db, fixture.repoId, 999)).resolves.toBeNull();
+    await expect(
+      prImpactService.getByRepoAndPRNumber(db, fixture.repoId, 999, fixture.workspaceId),
+    ).resolves.toBeNull();
   });
 
   it("returns null for an unknown repository", async () => {
     const { db } = await createRepoFixture("OwnerNoRepo");
 
     await expect(
-      prImpactService.getByRepoAndPRNumber(db, "00000000-0000-0000-0000-000000000000", 1),
+      prImpactService.getByRepoAndPRNumber(
+        db,
+        "00000000-0000-0000-0000-000000000000",
+        1,
+        "00000000-0000-0000-0000-000000000001",
+      ),
     ).resolves.toBeNull();
   });
 
@@ -236,6 +266,8 @@ describe("prImpactService.getByRepoAndPRNumber", () => {
     const { db, fixture } = await createRepoFixture("OwnerPicked");
     await createPullRequestAnalysis(db, fixture, { prNumber: 3 });
 
-    await expect(prImpactService.getByRepoAndPRNumber(db, fixture.repoId, 4)).resolves.toBeNull();
+    await expect(
+      prImpactService.getByRepoAndPRNumber(db, fixture.repoId, 4, fixture.workspaceId),
+    ).resolves.toBeNull();
   });
 });

@@ -1,7 +1,7 @@
 import { DocTypeSchema } from "@doxynix/shared";
 import * as z from "zod";
 
-import { protectedProcedure } from "@/server/core/trpc/init";
+import { protectedProcedure, workspaceProcedure } from "@/server/core/trpc/init";
 
 import { AnalysisScopeInputSchema } from "./analysis.schemas";
 import {
@@ -26,15 +26,15 @@ const FileActionInputSchema = z.object({
 });
 
 export const analysisDocsRouter = {
-  documentFile: protectedProcedure.input(FileActionInputSchema).mutation(async ({ ctx, input }) => {
-    return fileActionsService.documentFile(ctx.db, ctx.session.user.id, input);
+  documentFile: workspaceProcedure.input(FileActionInputSchema).mutation(async ({ ctx, input }) => {
+    return fileActionsService.documentFile(ctx.db, ctx.session.user.id, input, ctx.workspace.id);
   }),
-  getAvailableDocs: protectedProcedure
+  getAvailableDocs: workspaceProcedure
     .input(AnalysisScopeInputSchema)
     .query(async ({ ctx, input }) => {
-      return docsService.getAvailableDocs(ctx.db, input.repoId, input.aid);
+      return docsService.getAvailableDocs(ctx.db, input.repoId, ctx.workspace.id, input.aid);
     }),
-  getDocumentContent: protectedProcedure
+  getDocumentContent: workspaceProcedure
     .input(
       z.object({
         aid: z.string().optional(),
@@ -48,6 +48,7 @@ export const analysisDocsRouter = {
         ctx.db,
         input.repoId,
         input.type,
+        ctx.workspace.id,
         input.aid,
         input.path,
       );
@@ -62,18 +63,18 @@ export const analysisDocsRouter = {
     .query(async ({ ctx, input }) => {
       return fileActionsService.getFileActionResult(ctx.redis, ctx.session.user.id, input);
     }),
-  getWithGraphLinks: protectedProcedure
+  getWithGraphLinks: workspaceProcedure
     .input(GetWithGraphLinksInput)
     .output(GetWithGraphLinksOutput)
     .query(async ({ ctx, input }) => {
-      return docsService.getWithGraphLinks(ctx.db, input);
+      return docsService.getWithGraphLinks(ctx.db, input, ctx.workspace.id);
     }),
   highlightFile: protectedProcedure
     .input(z.object({ content: z.string(), path: z.string() }))
     .query(async ({ input }) => {
       return docsService.highlightFile(input.content, input.path);
     }),
-  pinAuditToDocs: protectedProcedure
+  pinAuditToDocs: workspaceProcedure
     .input(
       z.object({
         path: z.string(),
@@ -82,11 +83,22 @@ export const analysisDocsRouter = {
     )
     .output(PinAuditToDocsOutput)
     .mutation(async ({ ctx, input }) => {
-      return docsService.pinAuditToDocs(ctx.db, ctx.redis, ctx.session.user.id, input);
+      return docsService.pinAuditToDocs(
+        ctx.db,
+        ctx.redis,
+        ctx.session.user.id,
+        input,
+        ctx.workspace.id,
+      );
     }),
-  quickFileAudit: protectedProcedure
+  quickFileAudit: workspaceProcedure
     .input(FileActionInputSchema)
     .mutation(async ({ ctx, input }) => {
-      return fileActionsService.quickFileAudit(ctx.db, ctx.session.user.id, input);
+      return fileActionsService.quickFileAudit(
+        ctx.db,
+        ctx.session.user.id,
+        input,
+        ctx.workspace.id,
+      );
     }),
 };

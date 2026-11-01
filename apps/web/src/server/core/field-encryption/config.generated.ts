@@ -33,6 +33,7 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
   ApiKey: {
     connections: {
       user: "User",
+      workspace: "Workspace",
     },
     fields: {},
   },
@@ -77,6 +78,7 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
   GithubInstallation: {
     connections: {
       user: "User",
+      workspace: "Workspace",
     },
     fields: {},
   },
@@ -117,12 +119,13 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
     connections: {
       analyses: "Analysis",
       chatSessions: "ChatSession",
+      createdBy: "User",
       documents: "Document",
       generatedFixes: "GeneratedFix",
       notifications: "Notification",
       prAnalysisConfig: "PullRequestAnalysisConfig",
       pullRequests: "PullRequestAnalysis",
-      user: "User",
+      workspace: "Workspace",
     },
     fields: {},
   },
@@ -146,12 +149,13 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
       apiKeys: "ApiKey",
       appearance: "UserAppearance",
       chatSession: "ChatSession",
+      createdRepos: "Repo",
       githubInstallations: "GithubInstallation",
       notifications: "Notification",
       passkeys: "Passkey",
-      repos: "Repo",
       sessions: "Session",
       twoFactors: "TwoFactor",
+      workspaceMemberships: "WorkspaceMember",
     },
     fields: {
       email: { hash: { normalize: ["lowercase", "trim"] } },
@@ -169,5 +173,28 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
       identifier: { hash: { normalize: ["lowercase", "trim"] } },
       value: { hash: { normalize: [] } },
     },
+  },
+  Workspace: {
+    connections: {
+      apiKeys: "ApiKey",
+      entitlement: "WorkspaceEntitlement",
+      githubInstallations: "GithubInstallation",
+      members: "WorkspaceMember",
+      repos: "Repo",
+    },
+    fields: {},
+  },
+  WorkspaceEntitlement: {
+    connections: {
+      workspace: "Workspace",
+    },
+    fields: {},
+  },
+  WorkspaceMember: {
+    connections: {
+      user: "User",
+      workspace: "Workspace",
+    },
+    fields: {},
   },
 };

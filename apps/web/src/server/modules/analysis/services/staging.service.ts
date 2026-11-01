@@ -44,14 +44,15 @@ export const stagingService = {
     redis: Redis,
     userId: string,
     input: { fixId: string; repoId: string },
+    workspaceId: string,
   ) {
-    const fix = await db.generatedFix.findUnique({
+    const fix = await db.generatedFix.findFirst({
       include: {
         repo: {
           select: { id: true },
         },
       },
-      where: { id: input.fixId },
+      where: { id: input.fixId, repo: { workspaceId } },
     });
 
     if (fix == null) {

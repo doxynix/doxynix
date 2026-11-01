@@ -7,7 +7,7 @@ import { getInstallationClient } from "@/server/core/github/github-client";
 import { markdownToHtml } from "@/server/modules/analysis/services/markdown-to-html";
 
 export const prCommentsService = {
-  async getComments(db: DbClient, analysisId: string) {
+  async getComments(db: DbClient, analysisId: string, workspaceId: string) {
     const comments = await db.pullRequestComment.findMany({
       orderBy: [{ filePath: "asc" }, { line: "asc" }],
       select: {
@@ -29,7 +29,7 @@ export const prCommentsService = {
         riskLevel: true,
       },
       where: {
-        analysis: { id: analysisId },
+        analysis: { id: analysisId, repo: { workspaceId } },
       },
     });
 
@@ -66,9 +66,13 @@ export const prCommentsService = {
     };
   },
 
-  async postCommentToPR(db: DbClient, input: { body: string; prNumber: number; repoId: string }) {
+  async postCommentToPR(
+    db: DbClient,
+    input: { body: string; prNumber: number; repoId: string },
+    workspaceId: string,
+  ) {
     const repo = await db.repo.findUnique({
-      where: { id: input.repoId },
+      where: { id: input.repoId, workspaceId },
     });
 
     if (repo == null) {
@@ -76,7 +80,7 @@ export const prCommentsService = {
     }
 
     const installation = await db.githubInstallation.findFirst({
-      where: { accountLogin: repo.owner, isSuspended: false },
+      where: { accountLogin: repo.owner, isSuspended: false, workspaceId },
     });
 
     if (installation == null) {
@@ -100,7 +104,7 @@ export const prCommentsService = {
       select: { id: true },
       where: {
         prNumber: input.prNumber,
-        repoId: repo.id,
+        repo: { id: repo.id, workspaceId },
       },
     });
 

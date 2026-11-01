@@ -265,6 +265,7 @@ function makeRepoRecord(overrides?: Record<string, unknown>) {
   };
 }
 
+const WORKSPACE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a71";
 const REPO_INPUT = {
   limit: 10,
   sortBy: "updatedAt",
@@ -330,7 +331,7 @@ describe("repoService.getAll page clamping", () => {
   ])("should translate a $label page into skip $expectedSkip", async ({ expectedSkip, page }) => {
     const { db, findMany } = createRepoDbMock();
 
-    await repoService.getAll(db, { ...REPO_INPUT, limit: 10, page }, "user-1");
+    await repoService.getAll(db, { ...REPO_INPUT, limit: 10, page }, WORKSPACE_ID);
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({ skip: expectedSkip, take: 10 }),
@@ -340,7 +341,7 @@ describe("repoService.getAll page clamping", () => {
   it("should cap a page above the maximum so skip cannot explode", async () => {
     const { db, findMany } = createRepoDbMock();
 
-    await repoService.getAll(db, { ...REPO_INPUT, limit: 100, page: MAX_PAGE + 1 }, "user-1");
+    await repoService.getAll(db, { ...REPO_INPUT, limit: 100, page: MAX_PAGE + 1 }, WORKSPACE_ID);
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({ skip: (MAX_PAGE - 1) * 100, take: 100 }),
@@ -350,7 +351,7 @@ describe("repoService.getAll page clamping", () => {
   it("should report the clamped page in the meta", async () => {
     const { db } = createRepoDbMock();
 
-    const result = await repoService.getAll(db, { ...REPO_INPUT, page: 0 }, "user-1");
+    const result = await repoService.getAll(db, { ...REPO_INPUT, page: 0 }, WORKSPACE_ID);
 
     expect(result.meta.currentPage).toBe(1);
     expect(result.meta.pageSize).toBe(10);
@@ -368,7 +369,7 @@ describe("repoService.getSlim keyset", () => {
         cursor: "0192f0c1-0000-7000-8000-000000000001",
         limit: 10,
       },
-      "user-1",
+      WORKSPACE_ID,
     );
 
     expect(findMany).toHaveBeenCalledWith(
@@ -386,7 +387,7 @@ describe("repoService.getSlim keyset", () => {
       Array.from({ length: 11 }, (_, i) => ({ id: `r${i}`, name: "n", owner: "o" })),
     );
 
-    const result = await repoService.getSlim(db, { ...REPO_INPUT, limit: 10 }, "user-1");
+    const result = await repoService.getSlim(db, { ...REPO_INPUT, limit: 10 }, WORKSPACE_ID);
 
     expect(result.items).toHaveLength(10);
     expect(result.meta.hasNextPage).toBe(true);
@@ -399,7 +400,7 @@ describe("repoService.getSlim keyset", () => {
       Array.from({ length: 3 }, (_, i) => ({ id: `r${i}`, name: "n", owner: "o" })),
     );
 
-    const result = await repoService.getSlim(db, { ...REPO_INPUT, limit: 10 }, "user-1");
+    const result = await repoService.getSlim(db, { ...REPO_INPUT, limit: 10 }, WORKSPACE_ID);
 
     expect(result.meta.hasNextPage).toBe(false);
     expect(result.meta.nextCursor).toBeUndefined();
@@ -417,7 +418,11 @@ describe("repoService.getSlim keyset", () => {
     let cursor: string | undefined;
 
     for (let page = 0; page < 5; page += 1) {
-      const result = await repoService.getSlim(db, { ...REPO_INPUT, cursor, limit: 3 }, "user-1");
+      const result = await repoService.getSlim(
+        db,
+        { ...REPO_INPUT, cursor, limit: 3 },
+        WORKSPACE_ID,
+      );
       seen.push(...result.items.map((item) => item.id));
       cursor = result.meta.nextCursor;
       if (cursor == null) {
@@ -433,12 +438,15 @@ describe("repoService.getByName", () => {
   it("should return null when no repo matches", async () => {
     const { db, findFirst } = createRepoDbMock([], null);
 
-    await expect(repoService.getByName(db, "test-owner", "test-repo")).resolves.toBeNull();
+    await expect(
+      repoService.getByName(db, "test-owner", "test-repo", WORKSPACE_ID),
+    ).resolves.toBeNull();
     expect(findFirst).toHaveBeenCalledWith(
       expect.objectContaining({
         where: {
           name: { equals: "test-repo", mode: "insensitive" },
           owner: { equals: "test-owner", mode: "insensitive" },
+          workspaceId: WORKSPACE_ID,
         },
       }),
     );
@@ -450,7 +458,7 @@ describe("repoService.getByName", () => {
       analyses: [{ status: Status.DONE }],
     });
 
-    const result = await repoService.getByName(db, "test-owner", "test-repo");
+    const result = await repoService.getByName(db, "test-owner", "test-repo", WORKSPACE_ID);
 
     expect(result?.status).toBe(Status.DONE);
     expect(result?.id).toBe("0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b");
@@ -459,7 +467,7 @@ describe("repoService.getByName", () => {
   it("should fall back to Status.NEW when there is no analysis", async () => {
     const { db } = createRepoDbMock([], { ...makeRepoRecord(), analyses: [] });
 
-    const result = await repoService.getByName(db, "test-owner", "test-repo");
+    const result = await repoService.getByName(db, "test-owner", "test-repo", WORKSPACE_ID);
 
     expect(result?.status).toBe(Status.NEW);
   });
@@ -467,7 +475,7 @@ describe("repoService.getByName", () => {
   it("should not return a message key", async () => {
     const { db } = createRepoDbMock([], { ...makeRepoRecord(), analyses: [] });
 
-    const result = await repoService.getByName(db, "test-owner", "test-repo");
+    const result = await repoService.getByName(db, "test-owner", "test-repo", WORKSPACE_ID);
 
     expect(result).not.toHaveProperty("message");
   });
@@ -475,7 +483,7 @@ describe("repoService.getByName", () => {
   it("should leak no internal column", async () => {
     const { db } = createRepoDbMock([], { ...makeRepoRecord(), analyses: [] });
 
-    const result = await repoService.getByName(db, "test-owner", "test-repo");
+    const result = await repoService.getByName(db, "test-owner", "test-repo", WORKSPACE_ID);
 
     expect(Object.keys(result ?? {})).not.toContain("publicId");
     expect(Object.keys(result ?? {})).not.toContain("userId");
@@ -485,7 +493,7 @@ describe("repoService.getByName", () => {
   it("should satisfy PublicRepoSchema", async () => {
     const { db } = createRepoDbMock([], { ...makeRepoRecord(), analyses: [] });
 
-    const result = await repoService.getByName(db, "test-owner", "test-repo");
+    const result = await repoService.getByName(db, "test-owner", "test-repo", WORKSPACE_ID);
 
     expect(() => PublicRepoSchema.parse(result)).not.toThrow();
   });
@@ -495,13 +503,13 @@ describe("repoService.getByOwner", () => {
   it("should return null when no repo matches", async () => {
     const { db } = createRepoDbMock([], null);
 
-    await expect(repoService.getByOwner(db, "test-owner")).resolves.toBeNull();
+    await expect(repoService.getByOwner(db, "test-owner", WORKSPACE_ID)).resolves.toBeNull();
   });
 
   it("should return status Status.NEW so the result validates against PublicRepoSchema", async () => {
     const { db } = createRepoDbMock([], makeRepoRecord());
 
-    const result = await repoService.getByOwner(db, "test-owner");
+    const result = await repoService.getByOwner(db, "test-owner", WORKSPACE_ID);
 
     expect(result).toHaveProperty("status", Status.NEW);
     expect(() => PublicRepoSchema.parse(result)).not.toThrow();
@@ -510,7 +518,7 @@ describe("repoService.getByOwner", () => {
   it("should not return a message key", async () => {
     const { db } = createRepoDbMock([], makeRepoRecord());
 
-    const result = await repoService.getByOwner(db, "test-owner");
+    const result = await repoService.getByOwner(db, "test-owner", WORKSPACE_ID);
 
     expect(result).not.toHaveProperty("message");
   });
@@ -518,7 +526,7 @@ describe("repoService.getByOwner", () => {
   it("should leak no internal column", async () => {
     const { db } = createRepoDbMock([], makeRepoRecord());
 
-    const result = await repoService.getByOwner(db, "test-owner");
+    const result = await repoService.getByOwner(db, "test-owner", WORKSPACE_ID);
 
     expect(Object.keys(result ?? {})).not.toContain("publicId");
     expect(Object.keys(result ?? {})).not.toContain("userId");
@@ -536,7 +544,7 @@ describe("repoService.deleteAll", () => {
   it("returns success when there is nothing to delete", async () => {
     const { db, deleteMany } = createDeleteAllDbMock();
 
-    const result = await repoService.deleteAll(db, "user-1");
+    const result = await repoService.deleteAll(db, WORKSPACE_ID, "user-1");
 
     expect(result).toStrictEqual({ success: true });
     expect(deleteMany).toHaveBeenCalledTimes(1);
@@ -549,9 +557,9 @@ describe("repoService.deleteAll", () => {
   it("never issues an unfiltered delete, even for an admin", async () => {
     const { db, deleteMany } = createDeleteAllDbMock();
 
-    await repoService.deleteAll(db, "admin-1");
+    await repoService.deleteAll(db, WORKSPACE_ID, "admin-1");
 
-    expect(deleteMany).toHaveBeenCalledWith({ where: { userId: "admin-1" } });
+    expect(deleteMany).toHaveBeenCalledWith({ where: { workspaceId: WORKSPACE_ID } });
     const args = deleteMany.mock.calls[0]?.[0] as { where?: unknown } | undefined;
     expect(args?.where).toBeDefined();
   });

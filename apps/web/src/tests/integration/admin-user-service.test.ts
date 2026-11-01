@@ -100,15 +100,22 @@ describe("adminUserService against ZenStack policies", () => {
 
     const repo = await bob.db.repo.create({
       data: {
+        createdByUserId: bob.user.id,
         githubId: 77,
         name: "spam-repo",
         owner: "bob",
         url: "https://github.com/bob/spam-repo",
-        userId: bob.user.id,
+        workspaceId: bob.workspace.id,
       },
     });
     await bob.db.apiKey.create({
-      data: { hashedKey: "h", name: "k", prefix: "p", userId: bob.user.id },
+      data: {
+        hashedKey: "h",
+        name: "k",
+        prefix: "p",
+        userId: bob.user.id,
+        workspaceId: bob.workspace.id,
+      },
     });
 
     await adminUserService.setBanned(
@@ -202,11 +209,12 @@ describe("adminUserService against ZenStack policies", () => {
 
     await bob.db.repo.create({
       data: {
+        createdByUserId: bob.user.id,
         githubId: 5,
         name: "counted",
         owner: "bob",
         url: "https://github.com/bob/counted",
-        userId: bob.user.id,
+        workspaceId: bob.workspace.id,
       },
     });
 
@@ -458,11 +466,12 @@ describe("adminUserService against ZenStack policies", () => {
 
     await bob.db.repo.create({
       data: {
+        createdByUserId: bob.user.id,
         githubId: 9,
         name: "doomed",
         owner: "bob",
         url: "https://github.com/bob/doomed",
-        userId: bob.user.id,
+        workspaceId: bob.workspace.id,
       },
     });
 

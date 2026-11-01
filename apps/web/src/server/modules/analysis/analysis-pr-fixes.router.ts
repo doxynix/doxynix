@@ -2,7 +2,7 @@ import { UpdatePRConfigInput } from "@doxynix/shared";
 import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
-import { protectedProcedure } from "@/server/core/trpc/init";
+import { workspaceProcedure } from "@/server/core/trpc/init";
 
 import {
   FindingForFixSchema,
@@ -15,7 +15,7 @@ import { fixesService } from "./services/fixes.service";
 import { stagingService } from "./services/staging.service";
 
 export const analysisPrFixesRouter = {
-  applyFix: protectedProcedure
+  applyFix: workspaceProcedure
     .input(FixApplicationPayloadSchema)
     .output(
       z.object({
@@ -26,14 +26,14 @@ export const analysisPrFixesRouter = {
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return fixesService.applyFix(ctx.db, ctx.redis, ctx.session.user.id, input);
+      return fixesService.applyFix(ctx.db, ctx.redis, ctx.session.user.id, input, ctx.workspace.id);
     }),
-  clearStaging: protectedProcedure
+  clearStaging: workspaceProcedure
     .input(z.object({ repoId: z.uuid() }))
     .mutation(async ({ ctx, input }) => {
       return stagingService.clearStaging(ctx.session.user.id, input.repoId);
     }),
-  configureRepository: protectedProcedure
+  configureRepository: workspaceProcedure
     .input(UpdatePRConfigInput)
     .mutation(async ({ ctx, input }) => {
       appLogger.info({
@@ -51,10 +51,11 @@ export const analysisPrFixesRouter = {
           focusAreas: input.focusAreas,
           tokenBudget: input.tokenBudget,
         },
+        ctx.workspace.id,
         ctx.db,
       );
     }),
-  createFix: protectedProcedure
+  createFix: workspaceProcedure
     .input(
       z.object({
         fileContents: z.record(z.string(), z.string()).optional().default({}),
@@ -72,31 +73,31 @@ export const analysisPrFixesRouter = {
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return fixesService.createFix(ctx.db, ctx.session.user.id, input);
+      return fixesService.createFix(ctx.db, ctx.session.user.id, input, ctx.workspace.id);
     }),
-  getById: protectedProcedure
+  getById: workspaceProcedure
     .input(z.object({ fixId: z.uuid() }))
     .output(GeneratedFixDetailedDTO)
     .query(async ({ ctx, input }) => {
-      return fixesService.getById(ctx.db, ctx.redis, input.fixId);
+      return fixesService.getById(ctx.db, ctx.redis, input.fixId, ctx.workspace.id);
     }),
-  getByRepository: protectedProcedure
+  getByRepository: workspaceProcedure
     .input(z.object({ repoId: z.uuid() }))
     .output(z.array(GeneratedFixDTO))
     .query(async ({ ctx, input }) => {
-      return fixesService.getByRepository(ctx.db, input.repoId);
+      return fixesService.getByRepository(ctx.db, input.repoId, ctx.workspace.id);
     }),
-  getRepoConfig: protectedProcedure
+  getRepoConfig: workspaceProcedure
     .input(z.object({ repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      return PRConfigService.getConfig(input.repoId, ctx.db);
+      return PRConfigService.getConfig(input.repoId, ctx.workspace.id, ctx.db);
     }),
-  getStagedFiles: protectedProcedure
+  getStagedFiles: workspaceProcedure
     .input(z.object({ repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
       return stagingService.getStagedFiles(ctx.session.user.id, input.repoId);
     }),
-  openPullRequest: protectedProcedure
+  openPullRequest: workspaceProcedure
     .input(
       z.object({
         branch: z.string().min(1),
@@ -105,9 +106,15 @@ export const analysisPrFixesRouter = {
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return fixesService.openPullRequest(ctx.db, ctx.redis, ctx.session.user.id, input);
+      return fixesService.openPullRequest(
+        ctx.db,
+        ctx.redis,
+        ctx.session.user.id,
+        input,
+        ctx.workspace.id,
+      );
     }),
-  stageFile: protectedProcedure
+  stageFile: workspaceProcedure
     .input(
       z.object({
         content: z.string(),
@@ -123,7 +130,7 @@ export const analysisPrFixesRouter = {
         input.content,
       );
     }),
-  stageGeneratedFix: protectedProcedure
+  stageGeneratedFix: workspaceProcedure
     .input(
       z.object({
         fixId: z.string(),
@@ -131,9 +138,15 @@ export const analysisPrFixesRouter = {
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return stagingService.stageGeneratedFix(ctx.db, ctx.redis, ctx.session.user.id, input);
+      return stagingService.stageGeneratedFix(
+        ctx.db,
+        ctx.redis,
+        ctx.session.user.id,
+        input,
+        ctx.workspace.id,
+      );
     }),
-  unstageFile: protectedProcedure
+  unstageFile: workspaceProcedure
     .input(z.object({ filePath: z.string(), repoId: z.uuid() }))
     .mutation(async ({ ctx, input }) => {
       return stagingService.unstageFile(ctx.session.user.id, input.repoId, input.filePath);
