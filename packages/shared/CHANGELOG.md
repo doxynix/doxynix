@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.0](https://github.com/doxynix/doxynix/compare/shared-v0.6.0...shared-v0.7.0) (2026-11-01)
+
+
+### Features
+
+* **db:** add workspace tenancy  ([#2354](https://github.com/doxynix/doxynix/issues/2354)) ([e431f76](https://github.com/doxynix/doxynix/commit/e431f761eff14a9ebaeec41317eca88b5978666e))
+* **web:** add stripe seat billing ([#2356](https://github.com/doxynix/doxynix/issues/2356)) ([311bd6a](https://github.com/doxynix/doxynix/commit/311bd6a784b942b42e868531f8b29d2df3b07ef4))
+
 ## [0.6.0](https://github.com/doxynix/doxynix/compare/shared-v0.5.0...shared-v0.6.0) (2026-10-26)
 
 

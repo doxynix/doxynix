@@ -1,6 +1,6 @@
 {
   "name": "@doxynix/cli",
-  "version": "5.4.10",
+  "version": "5.5.0",
   "description": "AI-powered repository analysis and documentation CLI.",
   "keywords": [
     "doxynix",

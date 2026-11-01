@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.5.0](https://github.com/doxynix/doxynix/compare/cli-v5.4.10...cli-v5.5.0) (2026-11-01)
+
+
+### Features
+
+* **web:** add stripe seat billing ([#2356](https://github.com/doxynix/doxynix/issues/2356)) ([311bd6a](https://github.com/doxynix/doxynix/commit/311bd6a784b942b42e868531f8b29d2df3b07ef4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/shared bumped to 0.7.0
+    * @doxynix/web bumped to 5.7.0
+
 ## [5.4.10](https://github.com/doxynix/doxynix/compare/cli-v5.4.9...cli-v5.4.10) (2026-10-26)
 
 
