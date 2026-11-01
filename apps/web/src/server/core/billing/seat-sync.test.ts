@@ -15,9 +15,12 @@ const stripeMock = vi.hoisted(() => ({
 }));
 
 vi.mock("@/server/core/db", () => ({ prisma: dbMock }));
+vi.mock("@/server/core/redis", () => ({
+  redisClient: { del: vi.fn().mockResolvedValue(1), set: vi.fn().mockResolvedValue("OK") },
+}));
 vi.mock("./stripe-client", () => ({
   getStripeClient: () => stripeMock,
-  stripeEnvironment: () => "test",
+  providerEnvironment: () => "test",
 }));
 
 function subscription(overrides: Record<string, unknown> = {}) {

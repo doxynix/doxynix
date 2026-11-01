@@ -1,27 +1,15 @@
 import type { AccessState } from "@doxynix/shared";
-import type Stripe from "stripe";
 
 import { upsertBillingIssue } from "@/server/core/billing/issue";
 import { recordBillingMetric } from "@/server/core/billing/metrics";
 import type { DbClient } from "@/server/core/db";
 import { DEFAULT_ACCESS_STATE, isAccessState } from "@/server/core/entitlements/state";
 
-import { BillingCatalogError, planEntitlements, resolvePlanForPrice } from "./billing.catalog";
+import { planEntitlements } from "./billing.catalog";
 import { NonRetryableBillingError } from "./billing.errors";
 import type { BillingOwnership } from "./billing.resolver";
+import type { SubscriptionSnapshot } from "./billing.snapshot";
 import { decideAccessState, isTerminalStatus } from "./billing.state";
-
-function paidInvoiceAt(subscription: Stripe.Subscription): Date | null {
-  const invoice = subscription.latest_invoice;
-
-  if (invoice == null || typeof invoice !== "object" || invoice.status !== "paid") {
-    return null;
-  }
-
-  const paidAt = invoice.status_transitions.paid_at;
-
-  return paidAt == null ? null : new Date(paidAt * 1000);
-}
 
 export type ProjectedSubscription = {
   accessState: AccessState;
@@ -39,24 +27,6 @@ function currentAccessState(value: null | string | undefined): AccessState {
   return isAccessState(value) ? value : "REVIEW";
 }
 
-function isPriceKnown(price: Stripe.Price): boolean {
-  try {
-    resolvePlanForPrice({
-      currency: price.currency,
-      id: price.id,
-      interval: price.recurring?.interval ?? null,
-    });
-
-    return true;
-  } catch (error) {
-    if (error instanceof BillingCatalogError) {
-      return false;
-    }
-
-    throw error;
-  }
-}
-
 // Projects the canonical Subscription into the mirror and the entitlement in one transaction. The
 // entitlement state is derived from the transition table, never from the snapshot in the event.
 export async function projectSubscription(
@@ -64,27 +34,22 @@ export async function projectSubscription(
   input: {
     now: Date;
     ownership: BillingOwnership;
-    subscription: Stripe.Subscription;
+    snapshot: SubscriptionSnapshot;
     // The caller (reconciliation) proved from Stripe that the current slot holder is terminal.
     allowCurrentTakeover?: boolean;
     // Operator resolution of a revoked terminal id: skip the revival guard for this projection.
     overrideRevivedTerminal?: boolean;
   },
 ): Promise<ProjectedSubscription> {
-  const { ownership, subscription } = input;
-  const item = subscription.items.data[0];
-
-  if (item == null) {
-    throw new NonRetryableBillingError(
-      "SUBSCRIPTION_ITEM_MISSING",
-      `Subscription ${subscription.id} has no items`,
-    );
-  }
+  const { ownership, snapshot } = input;
+  // An extra item (an add-on added in the Dashboard) would otherwise be ignored silently while the
+  // first one keeps deciding the plan and the seat count.
+  const multipleItems = snapshot.itemCount > 1;
 
   if (ownership.billingCustomerId == null) {
     throw new NonRetryableBillingError(
       "CUSTOMER_MAPPING_MISSING",
-      `No billing customer mapping for subscription ${subscription.id}`,
+      `No billing customer mapping for subscription ${snapshot.externalSubscriptionId}`,
     );
   }
 
@@ -98,7 +63,7 @@ export async function projectSubscription(
       needsReview: true,
       reviewReason: true,
     },
-    where: { externalSubscriptionId: subscription.id },
+    where: { externalSubscriptionId: snapshot.externalSubscriptionId },
   });
 
   const entitlement = await tx.workspaceEntitlement.findUnique({
@@ -118,11 +83,11 @@ export async function projectSubscription(
     where: { workspaceId: ownership.workspaceId },
   });
 
-  const terminal = isTerminalStatus(subscription.status);
+  const terminal = isTerminalStatus(snapshot.status);
   const otherCurrent = await tx.billingSubscription.findFirst({
     select: { externalStatus: true },
     where: {
-      externalSubscriptionId: { not: subscription.id },
+      externalSubscriptionId: { not: snapshot.externalSubscriptionId },
       isCurrent: true,
       workspaceId: ownership.workspaceId,
     },
@@ -142,19 +107,19 @@ export async function projectSubscription(
 
   // Lost `invoice.paid` must not leave a paying customer in PENDING for a month: a paid latest
   // invoice on an active subscription is proof enough, and activation stays idempotent.
-  const paidAt = paidInvoiceAt(subscription);
+  const paidAt = snapshot.paidAt;
   let activatedAt = existing?.activatedAt ?? null;
 
   if (
     activatedAt == null &&
     paidAt != null &&
-    (subscription.status === "active" || subscription.status === "trialing")
+    (snapshot.status === "active" || snapshot.status === "trialing")
   ) {
     // Records activation on an existing mirror; on the very first projection the row does not
     // exist yet, so the value is carried into the `create` below instead of being lost.
     await markSubscriptionActivated(tx, {
       activatedAt: paidAt,
-      externalSubscriptionId: subscription.id,
+      externalSubscriptionId: snapshot.externalSubscriptionId,
     });
 
     activatedAt = paidAt;
@@ -175,13 +140,18 @@ export async function projectSubscription(
       graceEndsAt: existing?.graceEndsAt ?? null,
       previousStatus:
         input.overrideRevivedTerminal === true ? null : (existing?.externalStatus ?? null),
-      priceKnown: isPriceKnown(item.price),
-      status: subscription.status,
+      priceKnown: snapshot.priceKnown,
+      status: snapshot.status,
     },
   });
 
   let accessState = decision.accessState;
   let reviewReason = decision.reviewReason;
+
+  if (multipleItems) {
+    accessState = "REVIEW";
+    reviewReason = "MULTIPLE_ITEMS";
+  }
 
   // A revived terminal id stays in REVIEW until an operator clears it: otherwise the next event
   // sees the already-overwritten mirror status and silently returns ACTIVE.
@@ -223,7 +193,7 @@ export async function projectSubscription(
       entitlement.prReviews !== plan.prReviews ||
       entitlement.reposLimit !== plan.reposLimit);
   const writePlan = planChanged || planStale;
-  const requestedSeats = item.quantity ?? 1;
+  const requestedSeats = snapshot.quantity;
   const activeMembers = await tx.workspaceMember.count({
     where: { workspaceId: ownership.workspaceId },
   });
@@ -232,26 +202,29 @@ export async function projectSubscription(
   // Dashboard). Paid seats are the billing truth: surface the gap instead of gifting capacity.
   if (ownsAccess && !terminal && requestedSeats < activeMembers) {
     await upsertBillingIssue(tx, {
-      dedupeKey: `seats_below_members:${subscription.id}`,
+      dedupeKey: `seats_below_members:${snapshot.externalSubscriptionId}`,
       details: { activeMembers, requestedSeats },
-      externalObjectId: subscription.id,
+      externalObjectId: snapshot.externalSubscriptionId,
       kind: "SEATS_BELOW_MEMBERS",
       severity: "WARNING",
-      source: "stripe_worker",
+      source: "worker",
       workspaceId: ownership.workspaceId,
     });
   }
 
   const seatLimit = terminal ? 0 : requestedSeats;
-  const cancelAt = subscription.cancel_at == null ? null : new Date(subscription.cancel_at * 1000);
-  const currentPeriodEnd = new Date(item.current_period_end * 1000);
-  const currentPeriodStart = new Date(item.current_period_start * 1000);
-  const latestInvoiceId =
-    subscription.latest_invoice == null
-      ? null
-      : typeof subscription.latest_invoice === "string"
-        ? subscription.latest_invoice
-        : subscription.latest_invoice.id;
+  const {
+    cancelAt,
+    cancelAtPeriodEnd,
+    currentPeriodEnd,
+    currentPeriodStart,
+    currency,
+    externalSubscriptionId,
+    externalSubscriptionItemId,
+    latestInvoiceId,
+    latestInvoiceStatus,
+    priceId,
+  } = snapshot;
   const needsReview = ownsAccess && accessState === "REVIEW";
   const persistedReviewReason = ownsAccess ? reviewReason : null;
 
@@ -259,12 +232,12 @@ export async function projectSubscription(
   // history and surfaced, otherwise Stripe keeps billing something nobody in the workspace sees.
   if (!ownsAccess && !terminal) {
     await upsertBillingIssue(tx, {
-      dedupeKey: `duplicate_active:${subscription.id}`,
-      details: { subscriptionStatus: subscription.status },
-      externalObjectId: subscription.id,
+      dedupeKey: `duplicate_active:${snapshot.externalSubscriptionId}`,
+      details: { subscriptionStatus: snapshot.status },
+      externalObjectId: snapshot.externalSubscriptionId,
       kind: "DUPLICATE_ACTIVE_SUBSCRIPTION",
       severity: "CRITICAL",
-      source: "stripe_worker",
+      source: "worker",
       workspaceId: ownership.workspaceId,
     });
   }
@@ -273,12 +246,12 @@ export async function projectSubscription(
   // access and reconciliation has nothing to resolve.
   if (ownsAccess && reviewReason != null) {
     await upsertBillingIssue(tx, {
-      dedupeKey: `subscription_review:${subscription.id}:${reviewReason}`,
-      details: { reason: reviewReason, status: subscription.status },
-      externalObjectId: subscription.id,
+      dedupeKey: `subscription_review:${snapshot.externalSubscriptionId}:${reviewReason}`,
+      details: { reason: reviewReason, status: snapshot.status },
+      externalObjectId: snapshot.externalSubscriptionId,
       kind: "SUBSCRIPTION_REVIEW",
       severity: "CRITICAL",
-      source: "stripe_worker",
+      source: "worker",
       workspaceId: ownership.workspaceId,
     });
   } else if (ownsAccess && accessState === "ACTIVE") {
@@ -287,7 +260,7 @@ export async function projectSubscription(
     await tx.billingIssue.updateMany({
       data: { resolvedAt: new Date(), status: "RESOLVED" },
       where: {
-        dedupeKey: { startsWith: `subscription_review:${subscription.id}:` },
+        dedupeKey: { startsWith: `subscription_review:${snapshot.externalSubscriptionId}:` },
         status: "OPEN",
       },
     });
@@ -298,7 +271,10 @@ export async function projectSubscription(
   if (ownsAccess) {
     await tx.billingIssue.updateMany({
       data: { resolvedAt: new Date(), status: "RESOLVED" },
-      where: { dedupeKey: `duplicate_active:${subscription.id}`, status: "OPEN" },
+      where: {
+        dedupeKey: `duplicate_active:${snapshot.externalSubscriptionId}`,
+        status: "OPEN",
+      },
     });
   }
 
@@ -307,7 +283,7 @@ export async function projectSubscription(
     await tx.billingSubscription.updateMany({
       data: { isCurrent: null },
       where: {
-        externalSubscriptionId: { not: subscription.id },
+        externalSubscriptionId: { not: snapshot.externalSubscriptionId },
         isCurrent: true,
         workspaceId: ownership.workspaceId,
       },
@@ -319,42 +295,44 @@ export async function projectSubscription(
       activatedAt,
       billingCustomerId: ownership.billingCustomerId,
       cancelAt,
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      currency: item.price.currency,
+      cancelAtPeriodEnd,
+      currency,
       currentPeriodEnd,
       currentPeriodStart,
-      externalPriceId: item.price.id,
-      externalStatus: subscription.status,
-      externalSubscriptionId: subscription.id,
-      externalSubscriptionItemId: item.id,
+      externalPriceId: priceId,
+      externalStatus: snapshot.status,
+      externalSubscriptionId,
+      externalSubscriptionItemId,
       isCurrent,
       latestInvoiceId,
+      latestInvoiceStatus,
       needsReview,
-      quantity: item.quantity ?? 1,
+      quantity: snapshot.quantity,
       reviewReason: persistedReviewReason,
       workspaceId: ownership.workspaceId,
     },
     update: {
       cancelAt,
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      currency: item.price.currency,
+      cancelAtPeriodEnd,
+      currency,
       currentPeriodEnd,
       currentPeriodStart,
       isCurrent,
       latestInvoiceId,
+      ...(latestInvoiceStatus == null ? {} : { latestInvoiceStatus }),
       needsReview,
-      quantity: item.quantity ?? 1,
+      quantity: snapshot.quantity,
       reviewReason: persistedReviewReason,
       // Only an ACTIVE canonical subscription ends the dunning window; a paid invoice alone does
       // not prove recovery while Stripe still reports `past_due`.
       ...(accessState === "ACTIVE"
         ? { graceEndsAt: null, needsAction: null, pastDueStartedAt: null }
         : {}),
-      externalPriceId: item.price.id,
-      externalStatus: subscription.status,
-      externalSubscriptionItemId: item.id,
+      externalPriceId: priceId,
+      externalStatus: snapshot.status,
+      externalSubscriptionItemId,
     },
-    where: { externalSubscriptionId: subscription.id },
+    where: { externalSubscriptionId },
   });
 
   const accessStateChanged = current !== accessState;

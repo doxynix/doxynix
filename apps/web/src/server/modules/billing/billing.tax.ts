@@ -37,7 +37,7 @@ export async function runTaxPreflight(
       },
       kind: "TAX_SETTINGS_INACTIVE",
       severity: "CRITICAL",
-      source: "stripe_tax",
+      source: "tax",
     });
   }
 
@@ -53,7 +53,7 @@ export async function runTaxPreflight(
       details: {},
       kind: "TAX_JURISDICTIONS_NOT_CONFIGURED",
       severity: "CRITICAL",
-      source: "stripe_tax",
+      source: "tax",
     });
   }
 
@@ -69,7 +69,7 @@ export async function runTaxPreflight(
       details: { country },
       kind: "TAX_REGISTRATION_MISSING",
       severity: "CRITICAL",
-      source: "stripe_tax",
+      source: "tax",
     });
   }
 
@@ -101,7 +101,7 @@ export async function recordTaxCollection(
       externalObjectId: invoice.id,
       kind: "TAX_NOT_COLLECTED",
       severity: "CRITICAL",
-      source: "stripe_tax",
+      source: "tax",
       workspaceId: input.workspaceId,
     });
   }

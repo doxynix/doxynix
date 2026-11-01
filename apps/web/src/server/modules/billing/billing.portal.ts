@@ -3,8 +3,8 @@ import { TRPCError } from "@trpc/server";
 import { APP_URL } from "@/shared/config/env.client";
 import { DEFAULT_LOCALE } from "@/shared/config/locales";
 
-import { stripeIdempotencyKey } from "@/server/core/billing/idempotency";
-import { getStripeClient, stripeEnvironment } from "@/server/core/billing/stripe-client";
+import { billingIdempotencyKey } from "@/server/core/billing/idempotency";
+import { getStripeClient, providerEnvironment } from "@/server/core/billing/stripe-client";
 import type { DbClient } from "@/server/core/db";
 
 import { PORTAL_RETURN_PATHS, STRIPE_PROVIDER } from "./billing.constants";
@@ -53,9 +53,10 @@ export async function createPortalSession(input: PortalSessionInput): Promise<Po
   // The Portal must stay a payment-method/invoice surface: an enabled plan switch would bypass
   // the catalog, proration and seat checks that only Checkout performs.
   // Check the configuration the session will actually use, not just the first one in the list.
+  // An inactive configuration cannot open a session, so it is never a candidate.
   const configurations = await stripe.billingPortal.configurations.list({ limit: 100 });
-  const configuration =
-    configurations.data.find((item) => item.is_default) ?? configurations.data[0];
+  const usable = configurations.data.filter((item) => item.active);
+  const configuration = usable.find((item) => item.is_default) ?? usable[0];
 
   if (configuration == null) {
     throw new TRPCError({ code: "PRECONDITION_FAILED", message: "PORTAL_NOT_CONFIGURED" });
@@ -72,8 +73,8 @@ export async function createPortalSession(input: PortalSessionInput): Promise<Po
       return_url: input.returnUrl,
     },
     {
-      idempotencyKey: stripeIdempotencyKey({
-        environment: stripeEnvironment(),
+      idempotencyKey: billingIdempotencyKey({
+        environment: providerEnvironment(),
         operation: "portal",
         requestId: input.requestId,
         workspaceId: input.workspaceId,

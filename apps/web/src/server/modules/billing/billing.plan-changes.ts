@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
-import { stripeIdempotencyKey } from "@/server/core/billing/idempotency";
-import { getStripeClient, stripeEnvironment } from "@/server/core/billing/stripe-client";
+import { billingIdempotencyKey } from "@/server/core/billing/idempotency";
+import { getStripeClient, providerEnvironment } from "@/server/core/billing/stripe-client";
 import type { DbClient } from "@/server/core/db";
 import { getWorkspaceEntitlement } from "@/server/core/entitlements";
 
@@ -187,8 +187,8 @@ export async function changeSeats(input: PlanChangeInput): Promise<SeatChangeRes
           proration_behavior: snapshot.prorationBehavior,
         },
         {
-          idempotencyKey: stripeIdempotencyKey({
-            environment: stripeEnvironment(),
+          idempotencyKey: billingIdempotencyKey({
+            environment: providerEnvironment(),
             operation: "subscription",
             requestId: input.requestId,
             workspaceId: input.workspaceId,

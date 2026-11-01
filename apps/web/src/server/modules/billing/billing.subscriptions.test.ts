@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { DbClient } from "@/server/core/db";
 
 import { proPlan } from "./billing.catalog";
+import { fromStripeSubscription } from "./billing.snapshot";
 import { markSubscriptionActivated, projectSubscription } from "./billing.subscriptions";
 
 const WORKSPACE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
@@ -89,7 +90,7 @@ describe("projectSubscription", () => {
     const result = await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription() as never,
+      snapshot: fromStripeSubscription(subscription() as never),
     });
 
     expect(result.accessState).toBe("ACTIVE");
@@ -120,7 +121,7 @@ describe("projectSubscription", () => {
     await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({ status: "canceled" }) as never,
+      snapshot: fromStripeSubscription(subscription({ status: "canceled" }) as never),
     });
 
     const mirror = callArg(tx.billingSubscription.upsert);
@@ -147,7 +148,7 @@ describe("projectSubscription", () => {
     await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription() as never,
+      snapshot: fromStripeSubscription(subscription() as never),
     });
 
     const entitlement = callArg(tx.workspaceEntitlement.upsert);
@@ -164,7 +165,7 @@ describe("projectSubscription", () => {
     await projectSubscription(unchangedTx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription() as never,
+      snapshot: fromStripeSubscription(subscription() as never),
     });
 
     const unchanged = callArg(unchangedTx.workspaceEntitlement.upsert);
@@ -183,7 +184,7 @@ describe("projectSubscription", () => {
     await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription() as never,
+      snapshot: fromStripeSubscription(subscription() as never),
     });
 
     const entitlement = callArg(tx.workspaceEntitlement.upsert);
@@ -223,7 +224,7 @@ describe("projectSubscription", () => {
     const result = await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({ status: "past_due" }) as never,
+      snapshot: fromStripeSubscription(subscription({ status: "past_due" }) as never),
     });
 
     expect(result.accessState).toBe("GRACE");
@@ -255,7 +256,7 @@ describe("projectSubscription", () => {
     await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription() as never,
+      snapshot: fromStripeSubscription(subscription() as never),
     });
 
     // The plan code did not change, but the limits did not match PRO: the row must be repaired.
@@ -277,7 +278,7 @@ describe("projectSubscription", () => {
     await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({ status: "canceled" }) as never,
+      snapshot: fromStripeSubscription(subscription({ status: "canceled" }) as never),
     });
 
     expect(callArg(tx.workspaceEntitlement.upsert)).toMatchObject({
@@ -301,13 +302,15 @@ describe("projectSubscription", () => {
     const result = await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({
-        latest_invoice: {
-          id: "in_1",
-          status: "paid",
-          status_transitions: { paid_at: Math.floor(paidAt.getTime() / 1000) },
-        },
-      }) as never,
+      snapshot: fromStripeSubscription(
+        subscription({
+          latest_invoice: {
+            id: "in_1",
+            status: "paid",
+            status_transitions: { paid_at: Math.floor(paidAt.getTime() / 1000) },
+          },
+        }) as never,
+      ),
     });
 
     expect(result.accessState).toBe("ACTIVE");
@@ -334,7 +337,7 @@ describe("projectSubscription", () => {
       now: NOW,
       overrideRevivedTerminal: true,
       ownership: ownership(),
-      subscription: subscription() as never,
+      snapshot: fromStripeSubscription(subscription() as never),
     });
 
     expect(result.accessState).toBe("ACTIVE");
@@ -355,7 +358,7 @@ describe("projectSubscription", () => {
     const result = await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription() as never,
+      snapshot: fromStripeSubscription(subscription() as never),
     });
 
     expect(result.accessState).toBe("REVIEW");
@@ -387,7 +390,7 @@ describe("projectSubscription", () => {
     const result = await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription() as never,
+      snapshot: fromStripeSubscription(subscription() as never),
     });
 
     expect(result.accessState).toBe("PENDING");
@@ -403,7 +406,7 @@ describe("projectSubscription", () => {
     const result = await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription() as never,
+      snapshot: fromStripeSubscription(subscription() as never),
     });
 
     expect(result.accessState).toBe("PENDING");
@@ -429,7 +432,9 @@ describe("projectSubscription", () => {
     const result = await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({ id: "sub_historical", status: "canceled" }) as never,
+      snapshot: fromStripeSubscription(
+        subscription({ id: "sub_historical", status: "canceled" }) as never,
+      ),
     });
 
     expect(result.ownsAccess).toBe(false);
@@ -462,7 +467,9 @@ describe("projectSubscription", () => {
     const result = await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({ id: "sub_historical", status: "canceled" }) as never,
+      snapshot: fromStripeSubscription(
+        subscription({ id: "sub_historical", status: "canceled" }) as never,
+      ),
     });
 
     expect(result.ownsAccess).toBe(false);
@@ -477,7 +484,7 @@ describe("projectSubscription", () => {
     const result = await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({ id: "sub_duplicate" }) as never,
+      snapshot: fromStripeSubscription(subscription({ id: "sub_duplicate" }) as never),
     });
 
     expect(result.ownsAccess).toBe(false);
@@ -493,7 +500,7 @@ describe("projectSubscription", () => {
       allowCurrentTakeover: true,
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({ id: "sub_new" }) as never,
+      snapshot: fromStripeSubscription(subscription({ id: "sub_new" }) as never),
     });
 
     expect(result.ownsAccess).toBe(true);
@@ -507,7 +514,7 @@ describe("projectSubscription", () => {
     const result = await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({ id: "sub_new" }) as never,
+      snapshot: fromStripeSubscription(subscription({ id: "sub_new" }) as never),
     });
 
     expect(result.ownsAccess).toBe(false);
@@ -531,7 +538,7 @@ describe("projectSubscription", () => {
       allowCurrentTakeover: true,
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({ id: "sub_new" }) as never,
+      snapshot: fromStripeSubscription(subscription({ id: "sub_new" }) as never),
     });
 
     // No paid invoice yet, so the takeover lands in PENDING rather than ACTIVE.
@@ -550,7 +557,7 @@ describe("projectSubscription", () => {
     const result = await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({ id: "sub_duplicate" }) as never,
+      snapshot: fromStripeSubscription(subscription({ id: "sub_duplicate" }) as never),
     });
 
     expect(result.ownsAccess).toBe(false);
@@ -579,7 +586,7 @@ describe("projectSubscription", () => {
     const result = await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({ status: "canceled" }) as never,
+      snapshot: fromStripeSubscription(subscription({ status: "canceled" }) as never),
     });
 
     expect(result.ownsAccess).toBe(true);
@@ -607,7 +614,9 @@ describe("projectSubscription", () => {
     const result = await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({ id: "sub_history", status: "canceled" }) as never,
+      snapshot: fromStripeSubscription(
+        subscription({ id: "sub_history", status: "canceled" }) as never,
+      ),
     });
 
     expect(result.ownsAccess).toBe(false);
@@ -626,7 +635,7 @@ describe("projectSubscription", () => {
     await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription() as never,
+      snapshot: fromStripeSubscription(subscription() as never),
     });
 
     const mirror = callArg(tx.billingSubscription.upsert);
@@ -636,13 +645,70 @@ describe("projectSubscription", () => {
     expect(mirror.create).toMatchObject({ activatedAt: OLD_ACTIVATION });
   });
 
+  it("reviews a subscription that carries more than one item", async () => {
+    const tx = createTx();
+    const addon = {
+      current_period_end: 1_800_000_000,
+      current_period_start: 1_790_000_000,
+      id: "si_addon",
+      price: { currency: "usd", id: "price_addon", recurring: { interval: "month" } },
+      quantity: 1,
+    };
+
+    const result = await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      snapshot: fromStripeSubscription(
+        subscription({
+          items: { data: [...subscription().items.data, addon] },
+        }) as never,
+      ),
+    });
+
+    expect(result.accessState).toBe("REVIEW");
+    expect(result.reviewReason).toBe("MULTIPLE_ITEMS");
+    expect(tx.billingIssue.createMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: [
+          expect.objectContaining({
+            kind: "SUBSCRIPTION_REVIEW",
+            severity: "CRITICAL",
+          }),
+        ],
+      }),
+    );
+  });
+
+  it("stores the expanded latest invoice status", async () => {
+    const tx = createTx();
+
+    await projectSubscription(tx as unknown as DbClient, {
+      now: NOW,
+      ownership: ownership(),
+      snapshot: fromStripeSubscription(
+        subscription({
+          latest_invoice: {
+            id: "in_1",
+            status: "open",
+            status_transitions: { paid_at: null },
+          },
+        }) as never,
+      ),
+    });
+
+    expect(callArg(tx.billingSubscription.upsert)).toMatchObject({
+      create: { latestInvoiceStatus: "open" },
+      update: { latestInvoiceStatus: "open" },
+    });
+  });
+
   it("stores an unknown status verbatim and reviews the entitlement", async () => {
     const tx = createTx();
 
     const result = await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({ status: "some_future_status" }) as never,
+      snapshot: fromStripeSubscription(subscription({ status: "some_future_status" }) as never),
     });
 
     expect(result.accessState).toBe("REVIEW");
@@ -665,7 +731,7 @@ describe("projectSubscription", () => {
     const result = await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: unknownPrice as never,
+      snapshot: fromStripeSubscription(unknownPrice as never),
     });
 
     expect(result.accessState).toBe("REVIEW");
@@ -709,9 +775,11 @@ describe("markSubscriptionActivated", () => {
     await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({
-        items: { data: [{ ...subscription().items.data[0], quantity: 2 }] },
-      }) as never,
+      snapshot: fromStripeSubscription(
+        subscription({
+          items: { data: [{ ...subscription().items.data[0], quantity: 2 }] },
+        }) as never,
+      ),
     });
 
     expect(callArg(tx.workspaceEntitlement.upsert)).toMatchObject({
@@ -736,12 +804,14 @@ describe("markSubscriptionActivated", () => {
     const result = await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({
-        latest_invoice: {
-          status: "paid",
-          status_transitions: { paid_at: Math.floor(paidAt.getTime() / 1000) },
-        },
-      }) as never,
+      snapshot: fromStripeSubscription(
+        subscription({
+          latest_invoice: {
+            status: "paid",
+            status_transitions: { paid_at: Math.floor(paidAt.getTime() / 1000) },
+          },
+        }) as never,
+      ),
     });
 
     expect(result.accessState).toBe("ACTIVE");
@@ -762,12 +832,14 @@ describe("markSubscriptionActivated", () => {
     await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription({
-        latest_invoice: {
-          status: "paid",
-          status_transitions: { paid_at: Math.floor(NOW.getTime() / 1000) },
-        },
-      }) as never,
+      snapshot: fromStripeSubscription(
+        subscription({
+          latest_invoice: {
+            status: "paid",
+            status_transitions: { paid_at: Math.floor(NOW.getTime() / 1000) },
+          },
+        }) as never,
+      ),
     });
 
     expect(tx.billingSubscription.updateMany).not.toHaveBeenCalledWith(
@@ -786,7 +858,7 @@ describe("markSubscriptionActivated", () => {
     await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: ownership(),
-      subscription: subscription() as never,
+      snapshot: fromStripeSubscription(subscription() as never),
     });
 
     expect(callArg(tx.workspaceEntitlement.upsert)).toMatchObject({

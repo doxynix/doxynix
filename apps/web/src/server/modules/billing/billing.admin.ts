@@ -1,4 +1,4 @@
-import type { BillingIssueSeverity, BillingIssueStatus } from "@doxynix/shared";
+import type { BillingEventStatus, BillingIssueSeverity, BillingIssueStatus } from "@doxynix/shared";
 import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 import type Stripe from "stripe";
@@ -8,13 +8,14 @@ import { recordBillingMetric } from "@/server/core/billing/metrics";
 import { getStripeClient } from "@/server/core/billing/stripe-client";
 import type { DbClient } from "@/server/core/db";
 
-import { PROCESS_STRIPE_EVENT_TASK_ID } from "./billing.constants";
+import { PROCESS_STRIPE_EVENT_TASK_ID, STRIPE_PROVIDER } from "./billing.constants";
 import { ownershipKeyFromPayload } from "./billing.ownership";
+import { fromStripeSubscription } from "./billing.snapshot";
 import type { ProjectedSubscription } from "./billing.subscriptions";
 import { projectSubscription } from "./billing.subscriptions";
 import type { processStripeEventTask } from "./tasks/process-stripe-event.task";
 
-const REPLAYABLE_STATUSES = new Set(["DEAD_LETTER", "ENQUEUED", "RECEIVED"]);
+const REPLAYABLE_STATUSES = new Set<BillingEventStatus>(["DEAD_LETTER", "ENQUEUED", "RECEIVED"]);
 const LIST_LIMIT = 50;
 
 export type BillingIssueSummary = {
@@ -127,7 +128,7 @@ async function loadReviewProjection(
 
   const customer = await db.billingCustomer.findFirst({
     select: { externalCustomerId: true, id: true },
-    where: { provider: "stripe", workspaceId: issue.workspaceId },
+    where: { provider: STRIPE_PROVIDER, workspaceId: issue.workspaceId },
   });
 
   if (customer == null) {
@@ -207,7 +208,7 @@ export async function resolveBillingIssue(
         now: new Date(),
         overrideRevivedTerminal: true,
         ownership: projection.ownership,
-        subscription: projection.subscription,
+        snapshot: fromStripeSubscription(projection.subscription),
       });
     }
 

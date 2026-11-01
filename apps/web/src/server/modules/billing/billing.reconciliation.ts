@@ -11,6 +11,7 @@ import { prisma } from "@/server/core/db";
 import { planEntitlements } from "./billing.catalog";
 import { STRIPE_PROVIDER } from "./billing.constants";
 import { appendLedgerEntry } from "./billing.ledger";
+import { fromStripeSubscription } from "./billing.snapshot";
 import { isTerminalStatus } from "./billing.state";
 import type { ProjectedSubscription } from "./billing.subscriptions";
 import { projectSubscription } from "./billing.subscriptions";
@@ -107,7 +108,7 @@ async function unownedIssue(externalObjectId: string): Promise<void> {
     externalObjectId,
     kind: "UNOWNED_STRIPE_OBJECT",
     severity: "CRITICAL",
-    source: "stripe_reconciliation",
+    source: "reconciliation",
   });
 }
 
@@ -122,7 +123,7 @@ async function repair(
       allowCurrentTakeover: options.allowTakeover === true,
       now,
       ownership,
-      subscription,
+      snapshot: fromStripeSubscription(subscription),
     }),
   );
 }
@@ -246,7 +247,7 @@ async function reconcileSubscription(
       externalObjectId: subscription.id,
       kind: "OWNER_MISMATCH",
       severity: "CRITICAL",
-      source: "stripe_reconciliation",
+      source: "reconciliation",
       workspaceId: local.workspaceId,
     });
 
@@ -375,7 +376,7 @@ async function reconcileMissingLocal(seen: Set<string>, now: Date): Promise<numb
         externalObjectId: local.externalSubscriptionId,
         kind: "MISSING_IN_STRIPE",
         severity: "CRITICAL",
-        source: "stripe_reconciliation",
+        source: "reconciliation",
         workspaceId: local.workspaceId,
       });
 
@@ -413,7 +414,7 @@ async function reconcileLedger(now: Date): Promise<number> {
         externalObjectId: entry.externalObjectId,
         kind: "MISSING_INVOICE",
         severity: "CRITICAL",
-        source: "stripe_reconciliation",
+        source: "reconciliation",
       });
       mismatches += 1;
       continue;
@@ -463,7 +464,7 @@ async function checkEventQueue(now: Date): Promise<void> {
     details: { receivedAt: oldest.receivedAt.toISOString() },
     kind: "EVENT_QUEUE_STALLED",
     severity: "WARNING",
-    source: "stripe_reconciliation",
+    source: "reconciliation",
   });
 }
 
@@ -500,7 +501,7 @@ async function assertPreviousRunFresh(now: Date): Promise<void> {
       details: { lastSuccess: previous.finishedAt.toISOString() },
       kind: "RECONCILIATION_STALE",
       severity: "CRITICAL",
-      source: "stripe_reconciliation",
+      source: "reconciliation",
     });
   }
 }

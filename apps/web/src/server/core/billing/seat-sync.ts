@@ -2,8 +2,8 @@ import type { Redis } from "@upstash/redis";
 
 import { prisma } from "@/server/core/db";
 
-import { stripeIdempotencyKey } from "./idempotency";
-import { getStripeClient, stripeEnvironment } from "./stripe-client";
+import { billingIdempotencyKey } from "./idempotency";
+import { getStripeClient, providerEnvironment } from "./stripe-client";
 
 export type SeatSyncResult = {
   quantity: number;
@@ -104,8 +104,8 @@ export async function syncWorkspaceSeats(input: {
         proration_behavior: quantity > currentQuantity ? "always_invoice" : "create_prorations",
       },
       {
-        idempotencyKey: stripeIdempotencyKey({
-          environment: stripeEnvironment(),
+        idempotencyKey: billingIdempotencyKey({
+          environment: providerEnvironment(),
           operation: "seats",
           requestId: input.requestId,
           workspaceId: input.workspaceId,

@@ -1,4 +1,3 @@
-import { BillingEventStatus } from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
 import { tasks } from "@trigger.dev/sdk";
 import type Stripe from "stripe";
@@ -21,9 +20,8 @@ import {
   type StoredStripeEvent,
 } from "./billing.resolver";
 import { applyRiskEvent, isRiskObject, resolveRiskLinks } from "./billing.risk";
+import { fromStripeSubscription } from "./billing.snapshot";
 import { projectSubscription } from "./billing.subscriptions";
-
-const EVENT_STATUS = BillingEventStatus;
 
 const STALE_EVENT_MS = 15 * 60 * 1000;
 // An ENQUEUED event whose run was lost (deploy, concurrency stall) needs a longer grace than a
@@ -72,7 +70,7 @@ function parseStoredEvent(payload: Prisma.JsonValue | null): StoredStripeEvent {
 
 async function markProcessed(tx: DbClient, billingEventId: string): Promise<void> {
   await tx.billingEvent.update({
-    data: { lastError: null, processedAt: new Date(), status: EVENT_STATUS.PROCESSED },
+    data: { lastError: null, processedAt: new Date(), status: "PROCESSED" },
     where: { id: billingEventId },
   });
 }
@@ -122,7 +120,7 @@ async function handleUnownedEvent(
       externalObjectId: event.data.object.id,
       kind: "UNOWNED_STRIPE_OBJECT",
       severity: "CRITICAL",
-      source: "stripe_worker",
+      source: "worker",
       workspaceId: knownWorkspaceId,
     });
 
@@ -203,12 +201,12 @@ export async function processStripeEvent(billingEventId: string): Promise<Stripe
     );
   }
 
-  if (stored.status === EVENT_STATUS.PROCESSED) {
+  if (stored.status === "PROCESSED") {
     return { status: "skipped" };
   }
 
   await prisma.billingEvent.update({
-    data: { attempts: { increment: 1 }, status: EVENT_STATUS.PROCESSING },
+    data: { attempts: { increment: 1 }, status: "PROCESSING" },
     where: { id: billingEventId },
   });
 
@@ -245,7 +243,7 @@ export async function processStripeEvent(billingEventId: string): Promise<Stripe
       await projectSubscription(tx, {
         now,
         ownership,
-        subscription: canonical.subscription,
+        snapshot: fromStripeSubscription(canonical.subscription),
       });
     } else if (canonical.kind === "checkout_session") {
       await applyCheckoutSession(tx, ownership, canonical.session, event.type);
@@ -285,7 +283,7 @@ export async function markEventDeadLetter(billingEventId: string, error: unknown
 
   await prisma.$transaction(async (tx) => {
     await tx.billingEvent.update({
-      data: { lastError: message, status: EVENT_STATUS.DEAD_LETTER },
+      data: { lastError: message, status: "DEAD_LETTER" },
       where: { id: billingEventId },
     });
 
@@ -295,7 +293,7 @@ export async function markEventDeadLetter(billingEventId: string, error: unknown
       externalObjectId: stored?.externalEventId ?? null,
       kind: "EVENT_DEAD_LETTER",
       severity: "CRITICAL",
-      source: "stripe_worker",
+      source: "worker",
     });
   });
 
@@ -321,10 +319,10 @@ export async function sweepStaleStripeEvents(
     where: {
       OR: [
         {
-          status: { in: [EVENT_STATUS.RECEIVED, EVENT_STATUS.PROCESSING] },
+          status: { in: ["RECEIVED", "PROCESSING"] },
           updatedAt: { lt: processingThreshold },
         },
-        { status: EVENT_STATUS.ENQUEUED, updatedAt: { lt: enqueuedThreshold } },
+        { status: "ENQUEUED", updatedAt: { lt: enqueuedThreshold } },
       ],
     },
   });
@@ -345,13 +343,13 @@ export async function sweepStaleStripeEvents(
       await prisma.billingEvent.update({
         data: {
           replayCount: { increment: 1 },
-          status: EVENT_STATUS.ENQUEUED,
+          status: "ENQUEUED",
           triggerRunId: runId.id,
         },
         where: {
           id: event.id,
           status: {
-            in: [EVENT_STATUS.RECEIVED, EVENT_STATUS.PROCESSING, EVENT_STATUS.ENQUEUED],
+            in: ["RECEIVED", "PROCESSING", "ENQUEUED"],
           },
         },
       });

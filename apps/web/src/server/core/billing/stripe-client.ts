@@ -7,7 +7,7 @@ import { STRIPE_API_KEY, STRIPE_LIVEMODE } from "@/shared/config/env.server";
 import { STRIPE_API_VERSION } from "./stripe-version";
 
 // Sandbox vs live is the meaningful environment for Stripe idempotency keys.
-export function stripeEnvironment(): "live" | "test" {
+export function providerEnvironment(): "live" | "test" {
   return STRIPE_LIVEMODE ? "live" : "test";
 }
 

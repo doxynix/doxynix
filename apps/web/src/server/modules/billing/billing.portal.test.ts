@@ -10,6 +10,7 @@ import type { DbClient } from "@/server/core/db";
 
 import { proPlan } from "./billing.catalog";
 import { createPortalSession, portalReturnUrl } from "./billing.portal";
+import { fromStripeSubscription } from "./billing.snapshot";
 import { projectSubscription } from "./billing.subscriptions";
 
 const WORKSPACE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
@@ -24,7 +25,7 @@ const stripeMock = vi.hoisted(() => ({
 
 vi.mock("@/server/core/billing/stripe-client", () => ({
   getStripeClient: () => stripeMock,
-  stripeEnvironment: () => "test",
+  providerEnvironment: () => "test",
 }));
 
 function createDb(customer: null | { externalCustomerId: string }) {
@@ -41,6 +42,7 @@ describe("createPortalSession", () => {
     stripeMock.billingPortal.configurations.list.mockReset().mockResolvedValue({
       data: [
         {
+          active: true,
           features: { subscription_update: { enabled: false } },
           id: "bpc_default",
           is_default: true,
@@ -90,6 +92,7 @@ describe("createPortalSession", () => {
     stripeMock.billingPortal.configurations.list.mockResolvedValue({
       data: [
         {
+          active: true,
           features: { subscription_update: { enabled: true } },
           id: "bpc_default",
           is_default: true,
@@ -118,6 +121,7 @@ describe("createPortalSession", () => {
           is_default: false,
         },
         {
+          active: true,
           features: { subscription_update: { enabled: true } },
           id: "bpc_default",
           is_default: true,
@@ -135,6 +139,62 @@ describe("createPortalSession", () => {
       }),
     ).rejects.toMatchObject({ code: "PRECONDITION_FAILED", message: "PORTAL_ALLOWS_PLAN_CHANGE" });
     expect(stripeMock.billingPortal.sessions.create).not.toHaveBeenCalled();
+  });
+
+  it("refuses to open a portal when every configuration is inactive", async () => {
+    stripeMock.billingPortal.configurations.list.mockResolvedValue({
+      data: [
+        {
+          active: false,
+          features: { subscription_update: { enabled: false } },
+          id: "bpc_default",
+          is_default: true,
+        },
+      ],
+    });
+    const db = createDb({ externalCustomerId: "cus_workspace" });
+
+    await expect(
+      createPortalSession({
+        db,
+        requestId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5e",
+        returnUrl: portalReturnUrl("/dashboard/settings/members"),
+        workspaceId: WORKSPACE_ID,
+      }),
+    ).rejects.toMatchObject({ code: "PRECONDITION_FAILED", message: "PORTAL_NOT_CONFIGURED" });
+    expect(stripeMock.billingPortal.sessions.create).not.toHaveBeenCalled();
+  });
+
+  it("skips an inactive default in favour of an active configuration", async () => {
+    stripeMock.billingPortal.configurations.list.mockResolvedValue({
+      data: [
+        {
+          active: false,
+          features: { subscription_update: { enabled: false } },
+          id: "bpc_off",
+          is_default: true,
+        },
+        {
+          active: true,
+          features: { subscription_update: { enabled: false } },
+          id: "bpc_on",
+          is_default: false,
+        },
+      ],
+    });
+    const db = createDb({ externalCustomerId: "cus_workspace" });
+
+    await createPortalSession({
+      db,
+      requestId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5e",
+      returnUrl: portalReturnUrl("/dashboard/settings/members"),
+      workspaceId: WORKSPACE_ID,
+    });
+
+    expect(stripeMock.billingPortal.sessions.create).toHaveBeenCalledWith(
+      expect.objectContaining({ configuration: "bpc_on" }),
+      expect.anything(),
+    );
   });
 
   it("refuses to open a portal when Stripe has no configuration", async () => {
@@ -241,7 +301,7 @@ describe("cancel at period end", () => {
     await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: { billingCustomerId: "bc_1", customerId: "cus_1", workspaceId: WORKSPACE_ID },
-      subscription: subscription() as never,
+      snapshot: fromStripeSubscription(subscription() as never),
     });
 
     const entitlement = tx.workspaceEntitlement.upsert.mock.calls[0]?.[0] as {
@@ -258,7 +318,9 @@ describe("cancel at period end", () => {
     await projectSubscription(tx as unknown as DbClient, {
       now: NOW,
       ownership: { billingCustomerId: "bc_1", customerId: "cus_1", workspaceId: WORKSPACE_ID },
-      subscription: subscription({ cancel_at_period_end: false, status: "canceled" }) as never,
+      snapshot: fromStripeSubscription(
+        subscription({ cancel_at_period_end: false, status: "canceled" }) as never,
+      ),
     });
 
     const entitlement = tx.workspaceEntitlement.upsert.mock.calls[0]?.[0] as {

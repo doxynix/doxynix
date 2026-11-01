@@ -5,8 +5,8 @@ import { APP_URL } from "@/shared/config/env.client";
 import { IS_PROD } from "@/shared/config/env.flags";
 import { DEFAULT_LOCALE } from "@/shared/config/locales";
 
-import { stripeIdempotencyKey } from "@/server/core/billing/idempotency";
-import { getStripeClient, stripeEnvironment } from "@/server/core/billing/stripe-client";
+import { billingIdempotencyKey } from "@/server/core/billing/idempotency";
+import { getStripeClient, providerEnvironment } from "@/server/core/billing/stripe-client";
 import type { DbClient } from "@/server/core/db";
 
 import { proPlan } from "./billing.catalog";
@@ -71,8 +71,8 @@ async function ensureCustomer(input: CreateCheckoutInput): Promise<string> {
   const customer = await getStripeClient().customers.create(
     {},
     {
-      idempotencyKey: stripeIdempotencyKey({
-        environment: stripeEnvironment(),
+      idempotencyKey: billingIdempotencyKey({
+        environment: providerEnvironment(),
         operation: "customer",
         requestId: input.requestId,
         workspaceId: input.workspaceId,
@@ -241,8 +241,8 @@ export async function createCheckoutSession(
         };
 
         session = await getStripeClient().checkout.sessions.create(params, {
-          idempotencyKey: stripeIdempotencyKey({
-            environment: stripeEnvironment(),
+          idempotencyKey: billingIdempotencyKey({
+            environment: providerEnvironment(),
             operation: "checkout",
             requestId: input.requestId,
             workspaceId: input.workspaceId,

@@ -1,6 +1,5 @@
 import { createHash } from "node:crypto";
 
-import { BillingEventStatus } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
 import { tasks } from "@trigger.dev/sdk";
 import type Stripe from "stripe";
@@ -40,8 +39,6 @@ const SUPPORTED_EVENT_TYPES = new Set<string>([
   "refund.failed",
   "refund.updated",
 ]);
-
-const EVENT_STATUS = BillingEventStatus;
 
 function jsonResponse(body: Record<string, unknown>, status: number): Response {
   return Response.json(body, { status });
@@ -87,7 +84,7 @@ async function recordHashMismatch(event: Stripe.Event): Promise<void> {
       externalObjectId: event.id,
       kind: "PAYLOAD_HASH_MISMATCH",
       severity: "CRITICAL",
-      source: "stripe_webhook",
+      source: "webhook",
     });
   } catch (error) {
     appLogger.error({ error, externalEventId: event.id, msg: "stripe_webhook_issue_write_failed" });
@@ -151,7 +148,7 @@ export async function handleStripeWebhook(req: Request): Promise<Response> {
         livemode: event.livemode,
         payload: JSON.parse(raw) as Prisma.InputJsonValue,
         payloadHash,
-        status: EVENT_STATUS.RECEIVED,
+        status: "RECEIVED",
         type: event.type,
       },
       select: { id: true, replayCount: true, status: true },
@@ -179,13 +176,13 @@ export async function handleStripeWebhook(req: Request): Promise<Response> {
       return jsonResponse({ duplicate: true, hashMismatch: true }, 200);
     }
 
-    if (existing.status === EVENT_STATUS.PROCESSED) {
+    if (existing.status === "PROCESSED") {
       return jsonResponse({ duplicate: true, ok: true }, 200);
     }
 
     // A dead-lettered event needs a fresh run: Trigger remembers `event.id` for 30 days and would
     // hand back the failed run instead of starting a new one.
-    replay = existing.status === EVENT_STATUS.DEAD_LETTER;
+    replay = existing.status === "DEAD_LETTER";
     billingEvent = existing;
   }
 
@@ -202,7 +199,7 @@ export async function handleStripeWebhook(req: Request): Promise<Response> {
     await prisma.billingEvent.update({
       data: {
         ...(replay ? { replayCount: { increment: 1 } } : {}),
-        status: EVENT_STATUS.ENQUEUED,
+        status: "ENQUEUED",
         triggerRunId: runId.id,
       },
       where: { id: billingEvent.id },

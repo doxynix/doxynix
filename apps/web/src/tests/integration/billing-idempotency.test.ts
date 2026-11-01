@@ -15,7 +15,7 @@ const stripeMock = vi.hoisted(() => ({
 
 vi.mock("@/server/core/billing/stripe-client", () => ({
   getStripeClient: () => stripeMock,
-  stripeEnvironment: () => "test",
+  providerEnvironment: () => "test",
 }));
 
 const REQUEST_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5e";

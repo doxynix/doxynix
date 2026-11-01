@@ -4,6 +4,7 @@ import { prisma } from "@/server/core/db";
 import { getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { proPlan } from "@/server/modules/billing/billing.catalog";
 import { applyInvoiceEvent } from "@/server/modules/billing/billing.invoices";
+import { fromStripeSubscription } from "@/server/modules/billing/billing.snapshot";
 import { projectSubscription } from "@/server/modules/billing/billing.subscriptions";
 
 import { cleanupDatabase, createTestUser } from "../helpers";
@@ -76,7 +77,7 @@ describe("billing grace window", () => {
       await projectSubscription(tx, {
         now: NOW,
         ownership,
-        subscription: subscription() as never,
+        snapshot: fromStripeSubscription(subscription() as never),
       });
     });
 

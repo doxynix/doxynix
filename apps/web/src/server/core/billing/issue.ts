@@ -1,3 +1,4 @@
+import type { BillingIssueSeverity } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
 
 import type { DbClient } from "@/server/core/db";
@@ -6,7 +7,7 @@ export type BillingIssueInput = {
   dedupeKey: string;
   details?: Prisma.InputJsonValue;
   kind: string;
-  severity: "CRITICAL" | "INFO" | "WARNING";
+  severity: BillingIssueSeverity;
   source: string;
   externalObjectId?: null | string;
   workspaceId?: null | string;

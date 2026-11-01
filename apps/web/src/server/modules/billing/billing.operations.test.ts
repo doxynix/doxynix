@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 
-import { stripeIdempotencyKey } from "@/server/core/billing/idempotency";
+import { billingIdempotencyKey } from "@/server/core/billing/idempotency";
 import type { DbClient } from "@/server/core/db";
 
 import { canonicalRequestHash, runBillingOperation } from "./billing.operations";
@@ -230,9 +230,9 @@ describe("canonicalRequestHash", () => {
   });
 });
 
-describe("stripeIdempotencyKey", () => {
+describe("billingIdempotencyKey", () => {
   it("builds a namespaced key from workspace and request ids", () => {
-    const key = stripeIdempotencyKey({
+    const key = billingIdempotencyKey({
       environment: "sandbox",
       operation: "checkout",
       requestId: REQUEST_ID,
@@ -245,7 +245,7 @@ describe("stripeIdempotencyKey", () => {
 
   it("refuses a key longer than Stripe accepts", () => {
     expect(() =>
-      stripeIdempotencyKey({
+      billingIdempotencyKey({
         environment: "x".repeat(300),
         operation: "checkout",
         requestId: REQUEST_ID,
@@ -256,7 +256,7 @@ describe("stripeIdempotencyKey", () => {
 
   it("refuses a key that contains an email address", () => {
     expect(() =>
-      stripeIdempotencyKey({
+      billingIdempotencyKey({
         environment: "ops@example.com",
         operation: "checkout",
         requestId: REQUEST_ID,

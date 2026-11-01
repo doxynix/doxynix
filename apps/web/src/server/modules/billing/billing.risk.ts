@@ -212,7 +212,7 @@ async function applyDispute(
     externalObjectId: dispute.id,
     kind: "DISPUTE_OPENED",
     severity: "CRITICAL",
-    source: "stripe_risk",
+    source: "risk",
     workspaceId: input.ownership.workspaceId,
   });
 }
@@ -270,7 +270,7 @@ export async function applyRiskEvent(
         externalObjectId: input.canonical.warning.id,
         kind: "EARLY_FRAUD_WARNING",
         severity: "CRITICAL",
-        source: "stripe_risk",
+        source: "risk",
         workspaceId: input.ownership.workspaceId,
       });
       break;

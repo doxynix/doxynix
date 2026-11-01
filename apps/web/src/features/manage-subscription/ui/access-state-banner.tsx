@@ -1,18 +1,17 @@
 "use client";
 
+import type { AccessState } from "@doxynix/shared";
 import { useLocale, useTranslations } from "next-intl";
 
 import { formatShortDate } from "@/shared/lib/date-utils";
 import { Alert, AlertDescription } from "@/shared/ui/core/alert";
 
-import type { BillingAccessState } from "../model/billing.types";
-
 type Props = {
-  accessState: BillingAccessState;
+  accessState: AccessState;
   graceEndsAt: Date | null;
 };
 
-function bannerKey(accessState: BillingAccessState): null | string {
+function bannerKey(accessState: AccessState): null | string {
   switch (accessState) {
     case "ACTIVE": {
       return null;

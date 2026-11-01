@@ -1,15 +1,11 @@
 "use client";
 
+import type { AccessState } from "@doxynix/shared";
 import { useTranslations } from "next-intl";
 
 import { AppBadge } from "@/shared/ui/core/badge";
 
-import type { BillingAccessState } from "../model/billing.types";
-
-const STATE_VARIANT: Record<
-  BillingAccessState,
-  "default" | "destructive" | "outline" | "secondary"
-> = {
+const STATE_VARIANT: Record<AccessState, "default" | "destructive" | "outline" | "secondary"> = {
   ACTIVE: "default",
   CANCELED: "destructive",
   GRACE: "secondary",
@@ -19,7 +15,7 @@ const STATE_VARIANT: Record<
   SUSPENDED: "destructive",
 };
 
-function stateKey(state: BillingAccessState): string {
+function stateKey(state: AccessState): string {
   switch (state) {
     case "ACTIVE": {
       return "billing_state_active";
@@ -45,7 +41,7 @@ function stateKey(state: BillingAccessState): string {
   }
 }
 
-export function BillingStateBadge({ state }: Readonly<{ state: BillingAccessState }>) {
+export function BillingStateBadge({ state }: Readonly<{ state: AccessState }>) {
   const t = useTranslations("Billing");
 
   return <AppBadge variant={STATE_VARIANT[state]}>{t(stateKey(state))}</AppBadge>;

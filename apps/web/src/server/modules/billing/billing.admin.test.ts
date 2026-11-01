@@ -53,6 +53,28 @@ function createDb() {
   return db;
 }
 
+function stripeSubscription() {
+  return {
+    cancel_at: null,
+    cancel_at_period_end: false,
+    customer: "cus_1",
+    id: "sub_1",
+    items: {
+      data: [
+        {
+          current_period_end: 1_800_000_000,
+          current_period_start: 1_790_000_000,
+          id: "si_1",
+          price: { currency: "usd", id: "price_pro", recurring: { interval: "month" } },
+          quantity: 1,
+        },
+      ],
+    },
+    latest_invoice: null,
+    status: "active",
+  };
+}
+
 function asDb(db: ReturnType<typeof createDb>): DbClient {
   return db as unknown as DbClient;
 }
@@ -182,7 +204,7 @@ describe("resolveBillingIssue", () => {
       externalCustomerId: "cus_1",
       id: "bc_1",
     });
-    stripeMock.subscriptions.retrieve.mockResolvedValue({ id: "sub_1" });
+    stripeMock.subscriptions.retrieve.mockResolvedValue(stripeSubscription());
     projectMock.mockResolvedValue({
       accessState: "ACTIVE",
       mirrorId: "bs_1",
@@ -202,7 +224,10 @@ describe("resolveBillingIssue", () => {
     });
     expect(projectMock).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ overrideRevivedTerminal: true, subscription: { id: "sub_1" } }),
+      expect.objectContaining({
+        overrideRevivedTerminal: true,
+        snapshot: expect.objectContaining({ externalSubscriptionId: "sub_1" }),
+      }),
     );
     const [flagOrder] = db.billingSubscription.updateMany.mock.invocationCallOrder;
     const [resolveOrder] = db.billingIssue.update.mock.invocationCallOrder;
@@ -248,7 +273,7 @@ describe("resolveBillingIssue", () => {
       externalCustomerId: "cus_1",
       id: "bc_1",
     });
-    stripeMock.subscriptions.retrieve.mockResolvedValue({ id: "sub_1" });
+    stripeMock.subscriptions.retrieve.mockResolvedValue(stripeSubscription());
     projectMock.mockRejectedValue(new Error("projection failed"));
 
     await expect(

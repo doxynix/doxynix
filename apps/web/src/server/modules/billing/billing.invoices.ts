@@ -6,6 +6,7 @@ import type { DbClient } from "@/server/core/db";
 
 import { appendLedgerEntry } from "./billing.ledger";
 import type { BillingOwnership } from "./billing.resolver";
+import { fromStripeSubscription } from "./billing.snapshot";
 import { markSubscriptionActivated, projectSubscription } from "./billing.subscriptions";
 import { recordTaxCollection } from "./billing.tax";
 
@@ -81,7 +82,7 @@ async function applyInvoicePaid(tx: DbClient, input: InvoiceEventInput): Promise
   await projectSubscription(tx, {
     now: input.now,
     ownership: input.ownership,
-    subscription: input.subscription,
+    snapshot: fromStripeSubscription(input.subscription),
   });
 }
 
@@ -115,7 +116,7 @@ async function applyInvoicePaymentFailed(tx: DbClient, input: InvoiceEventInput)
   await projectSubscription(tx, {
     now: input.now,
     ownership: input.ownership,
-    subscription: input.subscription,
+    snapshot: fromStripeSubscription(input.subscription),
   });
 }
 
@@ -159,7 +160,7 @@ async function applyInvoiceFinalizationFailed(
     externalObjectId: input.invoice.id,
     kind: "TAX_LOCATION",
     severity: "CRITICAL",
-    source: "stripe_tax",
+    source: "tax",
     workspaceId: input.ownership.workspaceId,
   });
 }

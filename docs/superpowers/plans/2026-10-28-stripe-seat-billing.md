@@ -954,6 +954,48 @@ F18 снят, N8/N1/F15/F17 закрыты в шестом проходе — с
    переходе в `ACTIVE`.
 
 
+### Десятый проход (нейтрализация + подготовка ко второму провайдеру)
+
+- **Переименования без изменения поведения:** `billing_issues.source` →
+  `worker`/`reconciliation`/`tax`/`risk`/`webhook`; `stripeIdempotencyKey` →
+  `billingIdempotencyKey`; `stripeEnvironment` → `providerEnvironment`; `billing.admin.ts`
+  использует `STRIPE_PROVIDER` вместо литерала `"stripe"`; константы ключа идемпотентности
+  и сообщения больше не называют провайдера (лимит 255 остался в комментарии).
+- **Осознанно оставлено:** Stripe SDK и типы, `stripe-signature`, `customer.subscription.*`,
+  `STRIPE_*` env, `STRIPE_PROVIDER = "stripe"`, лог-ключи, Trigger task id
+  (`billing-process-stripe-event`, `billing-reconcile-stripe`, `billing-sweep-stripe-events`),
+  `src/tests/stripe/**`, `getStripeClient`. Причина одна: это факты провайдера, а не наши
+  абстракции; нейтральное имя скрыло бы границу.
+- **`billing.snapshot.ts`:** `SubscriptionSnapshot` + `fromStripeSubscription`.
+  `projectSubscription` принимает снапшот, Stripe SDK остаётся за границей проекции.
+- **Находки из доков Stripe, закрытые кодом:** подписка с >1 item → `REVIEW`
+  (`MULTIPLE_ITEMS`); неактивная portal-конфигурация не выбирается; `latestInvoiceStatus`
+  пишется при развёрнутом инвойсе.
+- **Не закрыто:** прогон `test:stripe` в sandbox (нужны ключи; `stripe sandboxes create`
+  решает это без Dashboard), `proration_behavior: "none"` при неоплаченном инвойсе (не нужен,
+  пока `seat-sync` не трогает не-active подписки), переход на flexible billing mode.
+- Проверки: `type-check`, `lint`, `test src/server/modules/billing src/server/core/billing`
+  (19 файлов / 237), интеграционный `billing-grace`.
+
+## Подготовка ко второму провайдеру
+
+Провайдер добавляется в двух местах — адаптер снапшота и планировщик списаний. Проекция и
+entitlement от провайдера не зависят.
+
+- `billing.snapshot.ts` — `SubscriptionSnapshot` (провайдерно-нейтральный) и
+  `fromStripeSubscription`. `projectSubscription` принимает только снапшот, Stripe SDK остаётся
+  за границей проекции. Второй провайдер добавляет свой `from…`, проекция не меняется.
+- Осознанно остались Stripe-специфичными: `billing.resolver.ts` (канонический объект),
+  `billing.webhook.ts` (подпись `stripe-signature`, дедуп по `event.id`),
+  `billing.reconciliation.ts` (сверка со Stripe — у ЮKassa аналога нет), `getStripeClient`.
+- Кто владеет жизненным циклом: у Stripe — провайдер (subscription/invoice/proration/dunning);
+  у ЮKassa — мы (автоплатёж по `payment_method_id` из собственного планировщика, свои retry и
+  grace, свой прационал, чек 54-ФЗ вместо Stripe Tax). Поэтому второму провайдеру нужен не
+  `reconcile`, а `charge-due-subscriptions`-таск.
+- Каталог сейчас USD-only (`STRIPE_PRICE_PRO_MONTHLY_USD`). Перед вторым провайдером ключ плана
+  должен стать `(provider, currency, planCode)`, иначе RUB-цену некуда положить.
+- Вебхуки ЮKassa не подписываются: вместо `constructEvent` нужен fetch-by-id и доверие ответу API.
+
 ## Self-check
 
 ### Пять утверждений с наименьшей уверенностью
