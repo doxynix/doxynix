@@ -1,3 +1,4 @@
+import { StatusSchema } from "@doxynix/shared";
 import * as z from "zod/mini";
 
 // Ably types data as any, so these parse instead of asserting; they live here (not in the client provider) so node tests can import them, and are keyed by REALTIME_CONFIG.events.user.*.
@@ -7,7 +8,7 @@ export const RealtimeUserPayloads = {
     analysisId: z.string(),
     message: z.string(),
     progress: z.number(),
-    status: z.enum(["DONE", "FAILED", "NEW", "PENDING"]),
+    status: StatusSchema,
   }),
   "analysis-updated": z.object({}),
   "api-key-updated": z.object({}),

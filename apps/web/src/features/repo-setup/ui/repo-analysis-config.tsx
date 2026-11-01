@@ -61,7 +61,12 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
       id: "README",
       label: t("setup_doc_readme_label"),
     },
-    { desc: t("setup_doc_api_desc"), icon: Code2, id: "API", label: t("setup_doc_api_label") },
+    {
+      desc: t("setup_doc_api_desc"),
+      icon: Code2,
+      id: "API",
+      label: t("setup_doc_api_label"),
+    },
     {
       desc: t("setup_doc_architecture_desc"),
       icon: GitGraph,

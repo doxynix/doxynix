@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts";
-import { UpdatePRConfigInput } from "@doxynix/shared";
+import { type PRCommentStyle, UpdatePRConfigInput } from "@doxynix/shared";
 import type { Command } from "commander";
 
 import { describeLocalFileError, readLocalFile, writeLocalFile } from "@/core/fs";
@@ -385,7 +385,7 @@ export function registerAnalyzeCommand(program: Command) {
         () =>
           analyzeService.configureRepository({
             ciSkip: Boolean(ciSkip),
-            commentStyle: commentStyle as "CONCISE" | "DETAILED" | "OFF",
+            commentStyle: commentStyle as PRCommentStyle,
             enabled: Boolean(enabled),
             repoId: repoContext.repo.id,
             tokenBudget: Number(tokenBudgetInput),
