@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
+import { formatShortDate } from "@/shared/lib/date-utils";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,
@@ -17,13 +18,63 @@ import { Input } from "@/shared/ui/core/input";
 import { Label } from "@/shared/ui/core/label";
 
 import { useMemberActions } from "../model/use-member-actions";
+import { useSeatPreview } from "../model/use-seat-preview";
+
+function formatPrice(cents: null | number, currency: null | string, locale: string): null | string {
+  if (cents == null || currency == null) {
+    return null;
+  }
+
+  try {
+    return new Intl.NumberFormat(locale, {
+      currency: currency.toUpperCase(),
+      maximumFractionDigits: 2,
+      style: "currency",
+    }).format(cents / 100);
+  } catch {
+    return null;
+  }
+}
 
 export function AddMemberDialog() {
   const t = useTranslations("Dashboard");
   const tCommon = useTranslations("Common");
+  const locale = useLocale();
   const { add } = useMemberActions();
   const [email, setEmail] = useState("");
   const [open, setOpen] = useState(false);
+  const preview = useSeatPreview(open);
+
+  const price = formatPrice(
+    preview.data?.amountPerSeatCents ?? null,
+    preview.data?.currency ?? null,
+    locale,
+  );
+  const periodEnd = preview.data?.periodEnd ?? null;
+  const needsCharge = preview.data?.needsCharge === true;
+
+  // A seat is billed the moment the person is saved, so the price is stated before the click. The
+  // preview is the only source of that number: the catalog deliberately does not store amounts.
+  const costLine = () => {
+    if (preview.isLoading) {
+      return null;
+    }
+
+    if (!needsCharge) {
+      return preview.isError || preview.data == null
+        ? t("settings_members_add_cost_unknown")
+        : t("settings_members_add_cost_free");
+    }
+
+    if (price != null && periodEnd != null) {
+      return t("settings_members_add_cost", {
+        date: formatShortDate(periodEnd, locale),
+        price,
+      });
+    }
+
+    return t("settings_members_add_cost_unknown");
+  };
 
   const submit = () => {
     const normalized = email.trim();
@@ -65,6 +116,7 @@ export function AddMemberDialog() {
             type="email"
             value={email}
           />
+          <p className="text-muted-foreground text-xs">{costLine()}</p>
         </div>
         <DialogFooter>
           <AppButton
@@ -74,10 +126,10 @@ export function AddMemberDialog() {
             {tCommon("cancel")}
           </AppButton>
           <AppButton
-            disabled={add.isPending || email.trim().length === 0}
+            disabled={add.isPending || preview.isLoading || email.trim().length === 0}
             onClick={submit}
           >
-            {t("settings_members_add")}
+            {needsCharge ? t("settings_members_add_pay") : t("settings_members_add")}
           </AppButton>
         </DialogFooter>
       </DialogContent>

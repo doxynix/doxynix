@@ -39,6 +39,14 @@ export const RemoveWorkspaceMemberSchema = z.object({
   userId: z.uuid(),
 });
 
+export const SeatAdditionPreviewSchema = z.object({
+  amountPerSeatCents: z.number().int().nullable(),
+  currency: z.string().nullable(),
+  needsCharge: z.boolean(),
+  periodEnd: z.date().nullable(),
+  quantity: z.number().int(),
+});
+
 export const SwitchWorkspaceSchema = z.object({
   workspaceId: z.uuid(),
 });

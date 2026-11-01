@@ -8,6 +8,10 @@ import { cn } from "@/shared/lib/cn";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { AppButton } from "@/shared/ui/core/button";
 
+// Must match the Stripe price behind STRIPE_PRICE_PRO_MONTHLY_USD. A marketing page cannot read the
+// real amount without calling Stripe on render, so the number lives here and nowhere else.
+const PRO_SEAT_PRICE_USD = "$20";
+
 export function PricingSection() {
   const t = useTranslations("Landing");
 
@@ -20,9 +24,11 @@ export function PricingSection() {
         t("section_pricing_plan_hobby_f2"),
         t("section_pricing_plan_hobby_f3"),
         t("section_pricing_plan_hobby_f4"),
+        t("section_pricing_plan_hobby_f5"),
       ],
       href: "/auth",
       name: t("section_pricing_plan_hobby_name"),
+      per: null,
       popular: false,
       price: "$0",
     },
@@ -35,26 +41,13 @@ export function PricingSection() {
         t("section_pricing_plan_pro_f3"),
         t("section_pricing_plan_pro_f4"),
         t("section_pricing_plan_pro_f5"),
+        t("section_pricing_plan_pro_f6"),
       ],
       href: "/auth",
       name: t("section_pricing_plan_pro_name"),
+      per: t("section_pricing_interval"),
       popular: true,
-      price: "$9",
-    },
-    {
-      cta: t("section_pricing_plan_team_cta"),
-      desc: t("section_pricing_plan_team_desc"),
-      features: [
-        t("section_pricing_plan_team_f1"),
-        t("section_pricing_plan_team_f2"),
-        t("section_pricing_plan_team_f3"),
-        t("section_pricing_plan_team_f4"),
-        t("section_pricing_plan_team_f5"),
-      ],
-      href: "/auth",
-      name: t("section_pricing_plan_team_name"),
-      popular: false,
-      price: "Custom",
+      price: PRO_SEAT_PRICE_USD,
     },
   ];
 
@@ -65,7 +58,7 @@ export function PricingSection() {
           {t("section_pricing_title_prefix")}{" "}
           <span className="text-muted-foreground">{t("section_pricing_title_highlight")}</span>
         </h2>
-        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 md:grid-cols-3">
+        <div className="mx-auto grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
           {PLANS.map((plan) => (
             <div
               className={cn(
@@ -84,9 +77,7 @@ export function PricingSection() {
               <h3 className="mb-2 font-bold text-xl">{plan.name}</h3>
               <div className="mb-2 flex items-baseline gap-1">
                 <span className="font-bold text-4xl">{plan.price}</span>
-                <span className="text-muted-foreground">
-                  {plan.price === "Custom" ? "" : t("section_pricing_interval")}
-                </span>
+                {plan.per != null && <span className="text-muted-foreground">{plan.per}</span>}
               </div>
               <p className="mb-6 min-h-10 text-muted-foreground text-sm">{plan.desc}</p>
               <AppButton

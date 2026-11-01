@@ -1,4 +1,4 @@
-import { PlanCode, PlanCodeSchema } from "@doxynix/shared";
+import { PlanCode, PlanCodeSchema, type WorkspaceRole } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
@@ -12,8 +12,6 @@ import { normalizeEmail } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
 
 import type { WorkspaceSummary } from "./workspace.schemas";
-
-type WorkspaceRole = "MEMBER" | "OWNER";
 
 type WorkspaceWithEntitlement = Prisma.WorkspaceGetPayload<{
   include: { entitlement: true };
