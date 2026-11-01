@@ -6,6 +6,10 @@ are in the `_bm` table there.
 
 **Baseline at board creation:** 9 of 64 query shapes over 100 ms, worst 8824 ms.
 
+Round 2 — the layer above this board (Prisma extensions, API-key gate, Redis/Ably fan-out,
+Trigger.dev task lifecycle, unbounded payloads) — is tracked in
+[`db-query-review-2026-11.md`](./db-query-review-2026-11.md).
+
 ## Status
 
 | ID | Change | Type | Effort | Before | After | Status |
