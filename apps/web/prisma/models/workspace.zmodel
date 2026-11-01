@@ -1,4 +1,5 @@
 import "./auth"
+import "./billing"
 import "./github"
 
 model Workspace {
@@ -13,6 +14,15 @@ model Workspace {
   repos               Repo[]
   githubInstallations GithubInstallation[]
   apiKeys             ApiKey[]
+
+  billingCustomers        BillingCustomer[]
+  billingSubscriptions    BillingSubscription[]
+  billingCheckoutSessions BillingCheckoutSession[]
+  billingOperations       BillingOperation[]
+  billingLedgerEntries    BillingLedgerEntry[]
+  billingIssues           BillingIssue[]
+  usageEvents             UsageEvent[]
+  usage                   WorkspaceUsage[]
 
   @@deny('all', auth() == null)
   @@allow('create', true)
@@ -51,6 +61,11 @@ model WorkspaceEntitlement {
   id                  String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
   workspaceId         String   @unique @map("workspace_id") @db.Uuid
   planCode            String   @default("HOBBY") @map("plan_code")
+  accessState         AccessState @default(NO_SUBSCRIPTION) @map("access_state")
+  sourceSubscriptionId String? @map("source_subscription_id") @db.Uuid
+  activatedAt         DateTime? @map("activated_at")
+  graceEndsAt         DateTime? @map("grace_ends_at")
+  revision            BigInt   @default(0)
   /// @zod.number.int().min(0)
   seatLimit           Int      @default(1) @map("seat_limit") @gte(0)
   /// @zod.number.int().min(0)
@@ -75,12 +90,23 @@ model WorkspaceEntitlement {
   @@allow('delete', false)
 
   @@index([planCode])
+  @@index([accessState, graceEndsAt])
   @@map("workspace_entitlements")
 }
 
 enum WorkspaceRole {
   OWNER
   MEMBER
+}
+
+enum AccessState {
+  NO_SUBSCRIPTION
+  PENDING
+  ACTIVE
+  GRACE
+  SUSPENDED
+  CANCELED
+  REVIEW
 }
 
 model ApiKey {

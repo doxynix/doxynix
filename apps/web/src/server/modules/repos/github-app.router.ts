@@ -1,10 +1,10 @@
 import * as z from "zod";
 
-import { createTRPCRouter, workspaceProcedure } from "@/server/core/trpc/init";
+import { createTRPCRouter, ownerProcedure, workspaceProcedure } from "@/server/core/trpc/init";
 import { githubAppService } from "@/server/modules/repos/github-app.service";
 
 export const githubAppRouter = createTRPCRouter({
-  getGithubInstallUrl: workspaceProcedure.input(z.object({}).optional()).query(async ({ ctx }) => {
+  getGithubInstallUrl: ownerProcedure.input(z.object({}).optional()).query(async ({ ctx }) => {
     return githubAppService.getInstallUrl(ctx.prisma, ctx.session.user.id, ctx.workspace.id);
   }),
 

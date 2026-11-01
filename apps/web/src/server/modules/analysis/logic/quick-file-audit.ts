@@ -68,13 +68,23 @@ export async function runQuickFileAudit(
   const activeModels = await getActiveModels();
 
   const result = await callWithFallback<z.infer<typeof QuickFileAuditSchema>>({
-    attemptMetadata: { filePath: input.path, operation: "quick-file-audit" },
+    attemptMetadata: {
+      filePath: input.path,
+      operation: "quick-file-audit",
+      repoId: input.repoId,
+    },
     models: activeModels.POWERFUL,
     outputSchema: QuickFileAuditSchema,
     prompt: userPrompt,
     system: systemPrompt,
     taskType: "classification",
-    tools: buildRepositoryToolProfile("file_action", userId, input.repoId, input.branch),
+    tools: buildRepositoryToolProfile(
+      "file_action",
+      userId,
+      input.workspaceId,
+      input.repoId,
+      input.branch,
+    ),
   });
 
   return {

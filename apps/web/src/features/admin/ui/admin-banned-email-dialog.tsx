@@ -42,11 +42,11 @@ export function AdminBannedEmailDialog({ actions, trigger }: Readonly<Props>) {
 
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
-  const [reason, setReason] = useState<string>("MANUAL");
+  const [reason, setReason] = useState<BannedEmailReason>("MANUAL");
 
   const submit = () => {
     actions.create.mutate(
-      { email: email.trim(), reason: reason as BannedEmailReason },
+      { email: email.trim(), reason },
       {
         onSuccess: () => {
           setEmail("");
@@ -85,7 +85,7 @@ export function AdminBannedEmailDialog({ actions, trigger }: Readonly<Props>) {
           <Label className="flex flex-col gap-2">
             {t("create_reason_label")}
             <Select
-              onValueChange={setReason}
+              onValueChange={(value) => setReason(value as BannedEmailReason)}
               value={reason}
             >
               <SelectTrigger aria-label={t("create_reason_label")}>

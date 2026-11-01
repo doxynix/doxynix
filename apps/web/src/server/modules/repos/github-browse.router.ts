@@ -25,15 +25,15 @@ export const githubBrowseRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      return githubBrowseService.getFileContent(
-        ctx.db,
-        ctx.prisma,
-        ctx.session.user.id,
-        ctx.workspace.id,
-        input.repoId,
-        input.path,
-        input.branch,
-      );
+      return githubBrowseService.getFileContent({
+        branch: input.branch,
+        db: ctx.db,
+        path: input.path,
+        prisma: ctx.prisma,
+        repoId: input.repoId,
+        userId: ctx.session.user.id,
+        workspaceId: ctx.workspace.id,
+      });
     }),
 
   getRepoFiles: protectedProcedure

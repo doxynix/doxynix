@@ -1,7 +1,11 @@
 import { DocTypeSchema } from "@doxynix/shared";
 import * as z from "zod";
 
-import { protectedProcedure, workspaceProcedure } from "@/server/core/trpc/init";
+import {
+  entitlementProcedure,
+  protectedProcedure,
+  workspaceProcedure,
+} from "@/server/core/trpc/init";
 
 import { AnalysisScopeInputSchema } from "./analysis.schemas";
 import {
@@ -26,9 +30,11 @@ const FileActionInputSchema = z.object({
 });
 
 export const analysisDocsRouter = {
-  documentFile: workspaceProcedure.input(FileActionInputSchema).mutation(async ({ ctx, input }) => {
-    return fileActionsService.documentFile(ctx.db, ctx.session.user.id, input, ctx.workspace.id);
-  }),
+  documentFile: entitlementProcedure
+    .input(FileActionInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      return fileActionsService.documentFile(ctx.db, ctx.session.user.id, input, ctx.workspace.id);
+    }),
   getAvailableDocs: workspaceProcedure
     .input(AnalysisScopeInputSchema)
     .query(async ({ ctx, input }) => {
@@ -91,7 +97,7 @@ export const analysisDocsRouter = {
         ctx.workspace.id,
       );
     }),
-  quickFileAudit: workspaceProcedure
+  quickFileAudit: entitlementProcedure
     .input(FileActionInputSchema)
     .mutation(async ({ ctx, input }) => {
       return fileActionsService.quickFileAudit(

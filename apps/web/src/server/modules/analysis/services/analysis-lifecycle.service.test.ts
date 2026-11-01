@@ -17,6 +17,36 @@ vi.mock("@trigger.dev/sdk", () => ({
   tasks: { trigger: triggerMock },
 }));
 
+vi.mock("@/server/core/entitlements", () => ({
+  assertAnalysisAllowed: vi.fn(),
+  getWorkspaceEntitlement: vi.fn().mockResolvedValue({ hasAccess: true }),
+}));
+
+vi.mock("@/server/core/github/github-api", () => ({
+  getBranchHeadSha: vi.fn().mockResolvedValue(null),
+}));
+
+vi.mock("@/server/core/usage/usage", () => ({
+  recordAnalysisUsage: vi.fn().mockResolvedValue(undefined),
+  recordCacheHitUsage: vi.fn().mockResolvedValue(undefined),
+  releaseAnalysisUsage: vi.fn().mockResolvedValue(undefined),
+}));
+
+const prismaMock = vi.hoisted(() => ({
+  $executeRaw: vi.fn().mockResolvedValue(0),
+  $transaction: vi.fn(async (fn: (tx: unknown) => unknown) => fn(prismaMock)),
+}));
+
+vi.mock("@/server/core/db", async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>;
+
+  return { ...actual, prisma: prismaMock };
+});
+
+import { AppError } from "@/server/core/api-error";
+import { assertAnalysisAllowed } from "@/server/core/entitlements";
+import { releaseAnalysisUsage } from "@/server/core/usage/usage";
+
 import { analysisLifecycleService } from "./analysis-lifecycle.service";
 
 function buildDb(): DbClient {
@@ -79,6 +109,43 @@ describe("analysisLifecycleService.analyze analytics", () => {
       }),
       "user-2",
     );
+  });
+
+  it("does not release a unit that was never reserved", async () => {
+    vi.mocked(assertAnalysisAllowed).mockImplementationOnce(() => {
+      throw new AppError({ code: "FORBIDDEN", publicMessage: "LIMIT_EXCEEDED" });
+    });
+    const db = buildDb();
+
+    await expect(
+      analysisLifecycleService.analyze(db, "user-1", "workspace-1", {
+        docTypes: [],
+        files: [],
+        language: "en",
+        repoId: "repo-1",
+      }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+
+    expect(db.analysis.create).not.toHaveBeenCalled();
+    expect(triggerMock).not.toHaveBeenCalled();
+    // A rejected request never took a unit, so releasing one would make the quota porous.
+    expect(releaseAnalysisUsage).not.toHaveBeenCalled();
+  });
+
+  it("returns the reserved unit when the queue call fails", async () => {
+    triggerMock.mockRejectedValueOnce(new Error("trigger down"));
+    const db = buildDb();
+
+    await expect(
+      analysisLifecycleService.analyze(db, "user-1", "workspace-1", {
+        docTypes: [],
+        files: [],
+        language: "en",
+        repoId: "repo-1",
+      }),
+    ).rejects.toThrow("trigger down");
+
+    expect(releaseAnalysisUsage).toHaveBeenCalled();
   });
 
   it("does not track when repository access is denied", async () => {

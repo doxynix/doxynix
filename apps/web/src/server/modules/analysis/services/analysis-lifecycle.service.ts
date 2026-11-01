@@ -7,8 +7,15 @@ import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import { type DbClient, prisma } from "@/server/core/db";
+import { assertAnalysisAllowed, getWorkspaceEntitlement } from "@/server/core/entitlements";
+import { getBranchHeadSha } from "@/server/core/github/github-api";
 import { trackServerEvent } from "@/server/core/posthog-events";
 import { realtimeService } from "@/server/core/realtime";
+import {
+  recordAnalysisUsage,
+  recordCacheHitUsage,
+  releaseAnalysisUsage,
+} from "@/server/core/usage/usage";
 import { safeJsonClone } from "@/server/utils/safe-json";
 
 const HISTORY_LIMIT = 500;
@@ -43,6 +50,31 @@ export type SaveResultsParams = {
   workspaceId: string;
 };
 
+async function findCachedSha(
+  repo: Repo,
+  userId: string,
+  branch: string | undefined,
+): Promise<null | string> {
+  const sha = await getBranchHeadSha(
+    prisma,
+    userId,
+    repo.owner,
+    repo.name,
+    branch ?? repo.defaultBranch,
+  );
+
+  if (sha == null) {
+    return null;
+  }
+
+  const existing = await prisma.analysis.findFirst({
+    select: { id: true },
+    where: { commitSha: sha, repoId: repo.id, status: Status.DONE },
+  });
+
+  return existing == null ? null : sha;
+}
+
 export const analysisLifecycleService = {
   async analyze(
     db: DbClient,
@@ -57,47 +89,104 @@ export const analysisLifecycleService = {
       repoId: string;
     },
   ) {
-    await this.assertRepoAccess(db, workspaceId, input.repoId);
+    const repo = await this.assertRepoAccess(db, workspaceId, input.repoId);
 
-    const analysis = await db.analysis.create({
-      data: {
-        repo: {
-          connect: {
-            id: input.repoId,
+    // A repeated SHA is free and must not even reserve a unit: the worker would otherwise skip the
+    // run after charging, leaving a transient 403 window for a parallel request.
+    const cachedSha = await findCachedSha(repo, userId, input.branch);
+
+    // The reservation and the quota check share one advisory lock: reading `workspace_usage` and
+    // incrementing it later lets two parallel requests both pass a limit of one.
+    const usageKey = `analysis:reserve:${crypto.randomUUID()}`;
+    let analysisId: null | string = null;
+    let handle: null | { id: string; publicAccessToken: string } = null;
+    let reserved = false;
+
+    try {
+      if (cachedSha == null) {
+        await prisma.$transaction(async (tx) => {
+          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`analysis-quota:${workspaceId}`}))`;
+          // `fresh` is mandatory here: the request memo already holds the pre-lock snapshot that
+          // the router middleware read, so the quota check would pass on stale counters.
+          assertAnalysisAllowed(
+            await getWorkspaceEntitlement(tx, workspaceId, new Date(), { fresh: true }),
+          );
+
+          // The quota unit is taken before enqueue and returned if the enqueue fails.
+          await recordAnalysisUsage(tx, {
+            idempotencyKey: usageKey,
+            workspaceId,
+          });
+        });
+        reserved = true;
+      }
+
+      const analysis = await db.analysis.create({
+        data: {
+          repo: {
+            connect: {
+              id: input.repoId,
+            },
           },
+          status: "PENDING",
         },
-        status: "PENDING",
-      },
-    });
+      });
+      analysisId = analysis.id;
 
-    const handle = await tasks.trigger(
-      "analyze-repo",
-      {
-        analysisId: analysis.id,
-        docTypes: input.docTypes,
-        instructions: input.instructions,
-        language: input.language,
-        selectedBranch: input.branch,
-        selectedFiles: input.files,
-        userId,
-        workspaceId,
-      },
-      {
-        // concurrencyKey: `user-${userId}`,
-        // idempotencyKey: `analysis-${analysis.id}`,
-        ttl: "30m",
-      },
-    );
+      if (cachedSha != null) {
+        await recordCacheHitUsage(prisma, {
+          analysisId: analysis.id,
+          idempotencyKey: `cache-hit:${analysis.id}`,
+          workspaceId,
+        });
+      }
 
-    await db.analysis.update({
-      data: { jobId: handle.id },
-      where: { id: analysis.id },
-    });
+      handle = await tasks.trigger(
+        "analyze-repo",
+        {
+          analysisId: analysis.id,
+          docTypes: input.docTypes,
+          instructions: input.instructions,
+          language: input.language,
+          quotaReserved: cachedSha == null,
+          selectedBranch: input.branch,
+          selectedFiles: input.files,
+          userId,
+          workspaceId,
+        },
+        {
+          // concurrencyKey: `user-${userId}`,
+          // idempotencyKey: `analysis-${analysis.id}`,
+          ttl: "30m",
+        },
+      );
+
+      await db.analysis.update({
+        data: { jobId: handle.id },
+        where: { id: analysis.id },
+      });
+    } catch (error) {
+      if (reserved) {
+        await releaseAnalysisUsage(prisma, {
+          analysisId,
+          idempotencyKey: usageKey,
+          workspaceId,
+        }).catch((releaseError: unknown) => {
+          appLogger.error({
+            error: releaseError,
+            msg: "Analysis quota release failed",
+            workspaceId,
+          });
+        });
+      }
+
+      throw error;
+    }
 
     trackServerEvent(
       "repo_analysis_queued",
       {
-        analysis_id: analysis.id,
+        analysis_id: analysisId,
         doc_types_count: input.docTypes.length,
         has_custom_instructions: (input.instructions?.length ?? 0) > 0,
         language: input.language,

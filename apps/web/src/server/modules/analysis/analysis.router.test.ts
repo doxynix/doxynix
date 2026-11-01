@@ -87,11 +87,12 @@ describe("analysisRouter", () => {
     expect(new Set(union).size).toBe(union.length);
   });
 
+  // Imports the whole app router graph, which is the slowest single import in the suite.
   it("registers the router under the flat `analysis` key in the app router", async () => {
     const { appRouter } = await import("@/server/modules");
 
     expect(Object.keys(appRouter)).toContain("analysis");
     // The app router re-creates the procedures, so this is the exact surface the typed client sees.
     expect(Object.keys(appRouter.analysis).sort()).toEqual(ALL_PROCEDURES);
-  });
+  }, 30_000);
 });

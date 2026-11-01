@@ -1,6 +1,8 @@
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
+import { analysisGate, getWorkspaceEntitlement, hasPlanFeature } from "@/server/core/entitlements";
 import type { PullRequestPayload } from "@/server/core/github/github-webhook.types";
+import { recordAnalysisUsage, releaseAnalysisUsage } from "@/server/core/usage/usage";
 import { PRConfigService } from "@/server/modules/analysis/logic/pr-config";
 
 import { analysisRepo } from "../analysis.repository";
@@ -13,6 +15,29 @@ async function analyzeRepoForEvent(
   pullRequest: PullRequestPayload["pull_request"],
   repository: PullRequestPayload["repository"],
 ): Promise<void> {
+  const entitlement = await getWorkspaceEntitlement(prisma, workspaceId);
+  const gate = analysisGate(entitlement);
+
+  if (!gate.allowed) {
+    appLogger.warn({
+      msg: "pr_webhook_analysis_blocked",
+      prNumber: pullRequest.number,
+      reason: gate.reason,
+      repoId,
+    });
+    return;
+  }
+
+  if (!hasPlanFeature(entitlement, "prReviews")) {
+    appLogger.info({
+      msg: "pr_webhook_pr_reviews_disabled",
+      planCode: entitlement?.planCode,
+      prNumber: pullRequest.number,
+      repoId,
+    });
+    return;
+  }
+
   const config = await PRConfigService.getConfig(repoId, workspaceId, prisma);
   if (!config.enabled) {
     appLogger.debug({
@@ -67,16 +92,44 @@ async function analyzeRepoForEvent(
     prAnalysisId = updatedAnalysis.id;
   }
 
-  await analyzePrTask.trigger({
-    baseSha: pullRequest.base.sha,
-    headSha: pullRequest.head.sha,
-    owner: repository.owner.login,
-    prAnalysisId,
-    prNumber: pullRequest.number,
-    repoId,
-    repoName: repository.name,
-    workspaceId,
-  });
+  const usageKey = `pr-analysis:${prAnalysisId}:${pullRequest.head.sha}`;
+  let quotaReserved = false;
+
+  try {
+    await recordAnalysisUsage(prisma, {
+      analysisId: prAnalysisId,
+      idempotencyKey: usageKey,
+      workspaceId,
+    });
+    quotaReserved = true;
+
+    await analyzePrTask.trigger({
+      baseSha: pullRequest.base.sha,
+      headSha: pullRequest.head.sha,
+      owner: repository.owner.login,
+      prAnalysisId,
+      prNumber: pullRequest.number,
+      repoId,
+      repoName: repository.name,
+      workspaceId,
+    });
+  } catch (error) {
+    if (quotaReserved) {
+      await releaseAnalysisUsage(prisma, {
+        analysisId: prAnalysisId,
+        idempotencyKey: usageKey,
+        workspaceId,
+      }).catch((releaseError: unknown) => {
+        appLogger.error({
+          error: releaseError,
+          msg: "PR analysis quota release failed",
+          workspaceId,
+        });
+      });
+    }
+
+    throw error;
+  }
 }
 
 export async function handlePullRequestEvent(payload: PullRequestPayload): Promise<void> {

@@ -1,3 +1,4 @@
+import { DocTypeSchema } from "@doxynix/shared";
 import { type ToolSet, tool } from "ai";
 import * as z from "zod";
 
@@ -42,17 +43,24 @@ const TOOL_KEYS_BY_PROFILE: Record<RepositoryToolProfile, readonly string[]> = {
 
 async function readRepoFileForTool(
   path: string,
-  ctx: { branch: string; repoId: string; shouldSkeletonize: boolean; userId: string },
+  ctx: {
+    branch: string;
+    repoId: string;
+    shouldSkeletonize: boolean;
+    userId: string;
+    workspaceId: string;
+  },
   maxChars: number,
 ): Promise<{ content: string; path: string; skeletonized: boolean }> {
-  const fileData = await githubBrowseService.getFileContent(
-    prisma,
-    prisma,
-    ctx.userId,
-    ctx.repoId,
+  const fileData = await githubBrowseService.getFileContent({
+    branch: ctx.branch,
+    db: prisma,
     path,
-    ctx.branch,
-  );
+    prisma,
+    repoId: ctx.repoId,
+    userId: ctx.userId,
+    workspaceId: ctx.workspaceId,
+  });
 
   const processedContent = ctx.shouldSkeletonize
     ? await CodeOptimizer.optimize(fileData.content, path)
@@ -65,7 +73,7 @@ async function readRepoFileForTool(
   };
 }
 
-function buildRepositoryTools(userId: string, repoId: string, branch: string) {
+function buildRepositoryTools(userId: string, workspaceId: string, repoId: string, branch: string) {
   return {
     getBranches: tool({
       description: "Get all available git branches for this repository.",
@@ -91,7 +99,7 @@ function buildRepositoryTools(userId: string, repoId: string, branch: string) {
       description:
         "Check the status (PENDING, COMPLETED, FAILED) and metadata of the latest static code analysis run for a repository.",
       execute: async ({ repoId: inputRepoId }) => {
-        const trpc = await apiForUser(userId);
+        const trpc = await apiForUser(userId, workspaceId);
         const targetRepoId = inputRepoId ?? repoId;
 
         return trpc.analysis.getLatest({ repoId: targetRepoId });
@@ -154,7 +162,7 @@ function buildRepositoryTools(userId: string, repoId: string, branch: string) {
 
           return await readRepoFileForTool(
             path,
-            { branch, repoId, shouldSkeletonize, userId },
+            { branch, repoId, shouldSkeletonize, userId, workspaceId },
             50_000,
           );
         } catch (error) {
@@ -192,7 +200,7 @@ function buildRepositoryTools(userId: string, repoId: string, branch: string) {
                 return {
                   ...(await readRepoFileForTool(
                     path,
-                    { branch, repoId, shouldSkeletonize, userId },
+                    { branch, repoId, shouldSkeletonize, userId, workspaceId },
                     15_000,
                   )),
                   success: true,
@@ -258,7 +266,7 @@ function buildRepositoryTools(userId: string, repoId: string, branch: string) {
       },
       inputSchema: z.object({
         docType: z
-          .enum(["README", "API", "ARCHITECTURE", "CONTRIBUTING", "CHANGELOG", "CODE_DOC"])
+          .enum(DocTypeSchema.options)
           .describe("The type of previous document to retrieve"),
       }),
     }),
@@ -269,7 +277,7 @@ function buildRepositoryTools(userId: string, repoId: string, branch: string) {
       execute: async ({ search }) => {
         try {
           appLogger.info({ msg: "AI Tool: searchCode", repoId, search, userId });
-          const trpc = await apiForUser(userId);
+          const trpc = await apiForUser(userId, workspaceId);
           const results = await trpc.analysis.searchWorkspace({
             repoId,
             search,
@@ -309,7 +317,7 @@ function buildRepositoryTools(userId: string, repoId: string, branch: string) {
     triggerRepositoryAnalysis: tool({
       description: "Queue and start a complete static code analysis run for a repository.",
       execute: async ({ branch: inputBranch, repoId: inputRepoId }) => {
-        const trpc = await apiForUser(userId);
+        const trpc = await apiForUser(userId, workspaceId);
         const targetRepoId = inputRepoId ?? repoId;
         const targetBranch = inputBranch ?? branch;
 
@@ -335,10 +343,11 @@ function buildRepositoryTools(userId: string, repoId: string, branch: string) {
 export function buildRepositoryToolProfile(
   profile: RepositoryToolProfile,
   userId: string,
+  workspaceId: string,
   repoId: string,
   branch: string,
 ): ToolSet {
-  const allTools: ToolSet = buildRepositoryTools(userId, repoId, branch);
+  const allTools: ToolSet = buildRepositoryTools(userId, workspaceId, repoId, branch);
   const selectedTools: ToolSet = {};
 
   for (const key of TOOL_KEYS_BY_PROFILE[profile]) {

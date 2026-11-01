@@ -14,8 +14,6 @@ import type {
   StructureNodePayload,
 } from "./structure-shared";
 
-export type { AnalyzeEntityContext } from "./analyze-context.types";
-
 class AnalyzeContextBuilder implements AnalyzeContext {
   private readonly analysisRef: AnalysisRef | null;
   private readonly explainByNodeId = new Map<string, NodeExplainPayload | null>();

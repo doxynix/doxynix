@@ -1,7 +1,7 @@
 import type { Status } from "@doxynix/shared";
 import Ably from "ably";
 
-import { IS_PROD } from "@/shared/config/env.flags";
+import { IS_PROD, IS_TEST } from "@/shared/config/env.flags";
 import { ABLY_API_KEY } from "@/shared/config/env.server";
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
@@ -72,6 +72,11 @@ async function safePublish(
   data: unknown,
   meta?: Record<string, unknown>,
 ): Promise<boolean> {
+  // Test credentials are placeholders, so the request always 401s after a ~1s round trip.
+  if (IS_TEST) {
+    return false;
+  }
+
   try {
     await realtimeServer.channels.get(channelName).publish(event, data);
     return true;

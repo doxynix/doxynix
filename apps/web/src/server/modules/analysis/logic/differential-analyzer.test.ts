@@ -71,7 +71,12 @@ const makeDiffInfo = (
 });
 
 const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
-const PR_METADATA = { branch: "main", repoId: "repo-1", userId: USER_ID };
+const PR_METADATA = {
+  branch: "main",
+  repoId: "repo-1",
+  userId: USER_ID,
+  workspaceId: "workspace-1",
+};
 
 describe("DifferentialAnalyzer.analyzePRDiff", () => {
   beforeEach(() => {

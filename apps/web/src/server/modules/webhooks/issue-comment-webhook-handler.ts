@@ -104,6 +104,7 @@ export async function handleIssueCommentEvent(
           repoId: repo.id,
           repoName: payload.repository.name,
           userId: repo.createdByUserId,
+          workspaceId: repo.workspaceId,
         };
       }
     }),

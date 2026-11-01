@@ -1,0 +1,52 @@
+import type { BillingIssueSeverity } from "@doxynix/shared";
+import { Prisma } from "@prisma/client";
+
+import type { DbClient } from "@/server/core/db";
+
+export type BillingIssueInput = {
+  dedupeKey: string;
+  details?: Prisma.InputJsonValue;
+  kind: string;
+  severity: BillingIssueSeverity;
+  source: string;
+  externalObjectId?: null | string;
+  workspaceId?: null | string;
+};
+
+export async function resolveBillingIssue(db: DbClient, dedupeKey: string): Promise<void> {
+  await db.billingIssue.updateMany({
+    data: { resolvedAt: new Date(), status: "RESOLVED" },
+    where: { dedupeKey, status: "OPEN" },
+  });
+}
+
+// Issues are deduplicated by key, so a repeated webhook bumps `lastSeenAt` instead of flooding.
+export async function upsertBillingIssue(db: DbClient, input: BillingIssueInput): Promise<void> {
+  const now = new Date();
+
+  // Same reason as the ledger: ON CONFLICT DO NOTHING cannot abort the caller's transaction.
+  await db.billingIssue.createMany({
+    data: [
+      {
+        dedupeKey: input.dedupeKey,
+        details: input.details ?? Prisma.DbNull,
+        externalObjectId: input.externalObjectId ?? null,
+        firstSeenAt: now,
+        kind: input.kind,
+        lastSeenAt: now,
+        severity: input.severity,
+        source: input.source,
+        status: "OPEN",
+        workspaceId: input.workspaceId ?? null,
+      },
+    ],
+    skipDuplicates: true,
+  });
+
+  await db.billingIssue.updateMany({
+    // A recurrence of a resolved condition must be visible again: keeping RESOLVED would hide a
+    // repeated seat-sync or tax failure until an operator happens to look at old issues.
+    data: { lastSeenAt: now, resolvedAt: null, status: "OPEN" },
+    where: { dedupeKey: input.dedupeKey },
+  });
+}

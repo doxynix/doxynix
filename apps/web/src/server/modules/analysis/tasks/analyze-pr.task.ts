@@ -154,6 +154,7 @@ export const analyzePrTask = task({
           branch: payload.headSha,
           repoId: repo.id,
           userId: repo.createdByUserId,
+          workspaceId: payload.workspaceId,
         },
       );
 

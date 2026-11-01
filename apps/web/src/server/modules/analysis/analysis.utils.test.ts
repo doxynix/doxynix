@@ -294,6 +294,7 @@ describe("buildContextSection", () => {
       language: "ts",
       path: "src/a.ts",
       repoId: "r1",
+      workspaceId: "w1",
     };
     expect(buildContextSection(input)).toBe("");
     expect(buildContextSection({ ...input, contextBlock: "   " })).toBe("");
@@ -308,6 +309,7 @@ describe("buildContextSection", () => {
       nodeContext: fullContext,
       path: "src/billing.ts",
       repoId: "r1",
+      workspaceId: "w1",
     };
 
     const section = buildContextSection(input);

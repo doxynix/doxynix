@@ -1,0 +1,111 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { DbClient } from "@/server/core/db";
+
+import { appendLedgerEntry, ledgerEntryKey } from "./billing.ledger";
+
+const WORKSPACE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
+const OCCURRED_AT = new Date("2026-10-30T12:00:00.000Z");
+
+type LedgerRow = {
+  amount: bigint;
+  currency: string;
+  entryKey: string;
+  kind: string;
+  externalObjectId: string;
+};
+
+function createDb() {
+  const rows = new Map<string, LedgerRow>();
+
+  const db = {
+    billingLedgerEntry: {
+      createMany: vi.fn(async ({ data }: { data: Array<LedgerRow> }) => {
+        let count = 0;
+
+        for (const row of data) {
+          if (!rows.has(row.entryKey)) {
+            rows.set(row.entryKey, row);
+            count += 1;
+          }
+        }
+
+        return { count };
+      }),
+    },
+  };
+
+  return { db: db as unknown as DbClient, rows };
+}
+
+describe("ledgerEntryKey", () => {
+  it("builds the natural key from kind, object and status", () => {
+    expect(ledgerEntryKey("INVOICE_PAID", "in_1", "paid")).toBe("INVOICE_PAID:in_1:paid");
+  });
+});
+
+describe("appendLedgerEntry", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("appends a signed entry with its natural key", async () => {
+    const fake = createDb();
+
+    const appended = await appendLedgerEntry(fake.db, {
+      amount: BigInt(1900),
+      currency: "usd",
+      externalObjectId: "in_1",
+      kind: "INVOICE_PAID",
+      occurredAt: OCCURRED_AT,
+      relatedInvoiceId: "in_1",
+      status: "paid",
+      workspaceId: WORKSPACE_ID,
+    });
+
+    expect(appended).toBe(true);
+    expect(fake.rows.get("INVOICE_PAID:in_1:paid")).toMatchObject({
+      amount: BigInt(1900),
+      currency: "usd",
+      externalObjectId: "in_1",
+      kind: "INVOICE_PAID",
+    });
+  });
+
+  it("does not duplicate a replayed object in the same state", async () => {
+    const fake = createDb();
+    const input = {
+      amount: BigInt(1900),
+      currency: "usd",
+      externalObjectId: "in_1",
+      kind: "INVOICE_PAID",
+      occurredAt: OCCURRED_AT,
+      status: "paid",
+      workspaceId: WORKSPACE_ID,
+    };
+
+    const first = await appendLedgerEntry(fake.db, input);
+    const second = await appendLedgerEntry(fake.db, input);
+
+    expect(first).toBe(true);
+    expect(second).toBe(false);
+    expect(fake.rows.size).toBe(1);
+  });
+
+  it("appends a separate entry for a different status", async () => {
+    const fake = createDb();
+    const base = {
+      amount: BigInt(1900),
+      currency: "usd",
+      externalObjectId: "re_1",
+      kind: "REFUND_SUCCEEDED",
+      occurredAt: OCCURRED_AT,
+      workspaceId: WORKSPACE_ID,
+    };
+
+    await appendLedgerEntry(fake.db, { ...base, status: "pending" });
+    await appendLedgerEntry(fake.db, { ...base, status: "succeeded" });
+
+    expect(fake.rows.size).toBe(2);
+  });
+});

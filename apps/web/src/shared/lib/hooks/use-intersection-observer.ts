@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 export function useIntersectionObserver(
   callback: (entries: IntersectionObserverEntry[]) => void,
@@ -28,14 +28,14 @@ export function useIntersectionObserver(
     };
   }, []);
 
-  // Stable identity: callers keep these in effect dependencies.
-  const observe = useCallback((element: Element) => {
+  // Stable identity without useCallback: React Compiler memoizes these (no reactive deps).
+  const observe = (element: Element) => {
     observerRef.current?.observe(element);
-  }, []);
+  };
 
-  const unobserve = useCallback((element: Element) => {
+  const unobserve = (element: Element) => {
     observerRef.current?.unobserve(element);
-  }, []);
+  };
 
   return { observe, unobserve };
 }

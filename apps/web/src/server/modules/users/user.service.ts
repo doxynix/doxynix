@@ -17,6 +17,11 @@ import {
 import { realtimeService } from "@/server/core/realtime";
 import { handlePrismaError } from "@/server/utils/handle-error";
 
+import {
+  assertNotSubscriptionOwner,
+  listMemberWorkspaceIds,
+  syncSeatsAfterUserDeletion,
+} from "./owned-subscription";
 import { userMapper } from "./user.mapper";
 
 export function assertCanDisconnectAccount(input: {
@@ -97,6 +102,8 @@ async function runSerializableTransaction(
 
 export const userService = {
   async deleteAccount(db: DbClient, userId: string) {
+    await assertNotSubscriptionOwner(userId);
+
     const user = await prisma.user.findUnique({
       select: { imageKey: true },
       where: { id: userId },
@@ -106,7 +113,11 @@ export const userService = {
       throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
     }
 
+    const workspaceIds = await listMemberWorkspaceIds(userId);
+
     await db.user.delete({ where: { id: userId } });
+
+    await syncSeatsAfterUserDeletion(workspaceIds, userId);
 
     if (user.imageKey != null) {
       await deleteAvatarBlob({
@@ -189,7 +200,19 @@ export const userService = {
     return { accounts: mappedAccounts, user };
   },
   async getMe(db: DbClient, userId: string) {
-    const user = await db.user.findUnique({ where: { id: userId } });
+    const user = await db.user.findUnique({
+      select: {
+        createdAt: true,
+        email: true,
+        emailVerified: true,
+        id: true,
+        image: true,
+        name: true,
+        role: true,
+        updatedAt: true,
+      },
+      where: { id: userId },
+    });
 
     if (user == null) {
       throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });

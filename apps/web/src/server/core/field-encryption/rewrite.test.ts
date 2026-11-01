@@ -1,8 +1,10 @@
+import { Prisma } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 
 import { encryptString, parseEncryptedString } from "./cipher";
 import { hashValue } from "./config";
-import { findKeyForMessage, makeKeychain, parseKey } from "./keyring";
+import { parseKey } from "./key-internal";
+import { findKeyForMessage, makeKeychain } from "./keyring";
 import { decryptOnRead, encryptOnWrite } from "./rewrite";
 
 vi.mock("@/shared/config/env.server", () => ({
@@ -22,6 +24,12 @@ const at = (root: unknown, ...keys: string[]): Record<string, unknown> => {
 };
 
 describe("encryptOnWrite", () => {
+  it("keeps Prisma null markers instead of collapsing them into empty JSON", () => {
+    const out = encryptOnWrite({ data: { payload: Prisma.DbNull } }, "BillingEvent", parsedKey);
+
+    expect((out.data as Record<string, unknown>).payload).toBe(Prisma.DbNull);
+  });
+
   it("encrypts a plaintext field on create", () => {
     const out = encryptOnWrite({ data: { email: "user@example.com" } }, "User", parsedKey);
 
@@ -80,6 +88,43 @@ describe("encryptOnWrite", () => {
     encryptOnWrite(args, "User", parsedKey);
 
     expect(args.data.email).toBe("user@example.com");
+  });
+
+  it("clones null-prototype maps instead of mutating the caller's object", () => {
+    const data = Object.assign(Object.create(null) as Record<string, unknown>, {
+      email: "user@example.com",
+    });
+
+    const out = encryptOnWrite({ data }, "User", parsedKey) as {
+      data: Record<string, unknown>;
+    };
+
+    expect(data.email).toBe("user@example.com");
+    expect(out.data.email).not.toBe("user@example.com");
+  });
+
+  it("keeps class instances such as Buffer by reference", () => {
+    const bytes = Buffer.from("abc");
+    const out = encryptOnWrite(
+      { data: { email: "user@example.com", resetToken: bytes } },
+      "User",
+      parsedKey,
+    ) as {
+      data: Record<string, unknown>;
+    };
+
+    expect(out.data.resetToken).toBe(bytes);
+  });
+
+  it("survives a cyclic args object", () => {
+    const data: Record<string, unknown> = { email: "user@example.com" };
+    data.self = data;
+
+    const out = encryptOnWrite({ data }, "User", parsedKey) as {
+      data: Record<string, unknown>;
+    };
+
+    expect(out.data.self).toBe(out.data);
   });
 
   it("ignores models with no encrypted fields", () => {

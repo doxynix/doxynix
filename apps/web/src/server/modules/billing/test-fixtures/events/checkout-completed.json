@@ -1,0 +1,142 @@
+{
+  "api_version": "2026-09-30.endive",
+  "context": "acct_1UUpzKRQIt7yVLoI",
+  "created": 1793390812,
+  "data": {
+    "object": {
+      "adaptive_pricing": {
+        "enabled": true
+      },
+      "after_expiration": null,
+      "allow_promotion_codes": null,
+      "allowed_payment_method_types": null,
+      "amount_subtotal": 4000,
+      "amount_total": 4000,
+      "automatic_tax": {
+        "enabled": true,
+        "liability": {
+          "type": "stripe"
+        },
+        "provider": "stripe",
+        "status": "complete"
+      },
+      "billing_address_collection": "required",
+      "branding_settings": {
+        "background_color": "#ffffff",
+        "border_style": "rounded",
+        "button_color": "#0074d4",
+        "display_name": "Doxynix sandbox",
+        "font_family": "default",
+        "icon": null,
+        "logo": null
+      },
+      "cancel_url": "http://localhost:3000/en/dashboard/settings/members?checkout=cancel",
+      "client_reference_id": null,
+      "client_secret": null,
+      "collected_information": {
+        "business_name": null,
+        "individual_name": null,
+        "shipping_details": null
+      },
+      "consent": null,
+      "consent_collection": null,
+      "created": 1793390369,
+      "currency": "usd",
+      "currency_conversion": null,
+      "custom_fields": [],
+      "custom_text": {
+        "after_submit": null,
+        "shipping_address": null,
+        "submit": null,
+        "terms_of_service_acceptance": null
+      },
+      "customer": "cus_VXQhLSfHv3IOWN",
+      "customer_account": null,
+      "customer_creation": null,
+      "customer_details": {
+        "address": {
+          "city": "redacted",
+          "country": "AM",
+          "line1": "redacted",
+          "line2": null,
+          "postal_code": "redacted",
+          "state": null
+        },
+        "business_name": null,
+        "email": "customer@example.com",
+        "individual_name": null,
+        "name": "Test Customer",
+        "phone": null,
+        "tax_exempt": "none",
+        "tax_ids": []
+      },
+      "customer_email": null,
+      "discounts": [],
+      "expires_at": 1793476769,
+      "id": "cs_test_a1fc8DXDjJFKWP1YZTWnqtlSH2RQACekXn1ZeKf8VMVv2aG0jElGnR2JCh",
+      "integration_identifier": null,
+      "invoice": "in_1UWM4aRQIt7yVLoI51Bj2WhC",
+      "invoice_creation": null,
+      "livemode": false,
+      "locale": null,
+      "managed_payments": {
+        "enabled": true
+      },
+      "marketing_attributions": null,
+      "metadata": {},
+      "mode": "subscription",
+      "object": "checkout.session",
+      "origin_context": null,
+      "payment_intent": null,
+      "payment_link": null,
+      "payment_method_collection": "always",
+      "payment_method_configuration_details": null,
+      "payment_method_options": {
+        "card": {
+          "request_three_d_secure": "automatic"
+        }
+      },
+      "payment_method_types": ["card", "cashapp"],
+      "payment_status": "paid",
+      "permissions": null,
+      "phone_number_collection": {
+        "enabled": false
+      },
+      "recovered_from": null,
+      "saved_payment_method_options": {
+        "allow_redisplay_filters": ["always"],
+        "payment_method_remove": "disabled",
+        "payment_method_save": null
+      },
+      "setup_intent": null,
+      "shipping_address_collection": null,
+      "shipping_cost": null,
+      "shipping_options": [],
+      "status": "complete",
+      "submit_type": null,
+      "subscription": "sub_1UWM4cRQIt7yVLoILHdJ4KCf",
+      "success_url": "http://localhost:3000/en/dashboard/settings/members?checkout=success",
+      "tax_id_collection": {
+        "enabled": true,
+        "required": "never"
+      },
+      "total_details": {
+        "amount_discount": 0,
+        "amount_shipping": 0,
+        "amount_tax": 0
+      },
+      "ui_mode": "hosted_page",
+      "url": null,
+      "wallet_options": null
+    }
+  },
+  "id": "evt_1UWM4fRQIt7yVLoIQ026qpBN",
+  "livemode": false,
+  "object": "event",
+  "pending_webhooks": 0,
+  "request": {
+    "id": null,
+    "idempotency_key": null
+  },
+  "type": "checkout.session.completed"
+}

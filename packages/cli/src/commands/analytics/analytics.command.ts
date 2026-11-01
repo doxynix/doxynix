@@ -12,8 +12,6 @@ import { renderDashboardStats, renderTrendsTable } from "./analytics.formatter";
 import { type AnalyticsCliOptions, buildAnalyticsInput } from "./analytics.input";
 import { analyticsService } from "./analytics.service";
 
-export type { AnalyticsCliOptions };
-
 export function registerAnalyticsCommand(program: Command) {
   const analytics = program
     .command("analytics")

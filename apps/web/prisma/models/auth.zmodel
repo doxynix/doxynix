@@ -1,6 +1,7 @@
 import "./github"
 import "./core"
 import "./workspace"
+import "./billing"
 
 model User {
   /// @zod.custom.omit(["model"])
@@ -44,6 +45,7 @@ model User {
   passkeys             Passkey[]
   twoFactors           TwoFactor[]
   appearance           UserAppearance?
+  billingOperations    BillingOperation[]   @relation("BillingOperationActor")
 
   @@allow('create', role == USER || auth().role == 'ADMIN')
   @@allow(

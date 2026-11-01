@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import * as z from "zod";
 
+import { previewSeatAddition } from "@/server/core/billing/seat-preview";
 import { memberAddLimiter } from "@/server/core/ratelimit";
 import {
   createTRPCRouter,
@@ -12,6 +13,7 @@ import {
 import {
   AddWorkspaceMemberSchema,
   RemoveWorkspaceMemberSchema,
+  SeatAdditionPreviewSchema,
   SwitchWorkspaceSchema,
   WorkspaceMemberSummarySchema,
   WorkspaceSummarySchema,
@@ -66,14 +68,15 @@ export const workspaceRouter = createTRPCRouter({
       return { success: true };
     }),
 
+  // A seat is a paid resource: the owner sees the price before the person is saved.
+  seatPreview: ownerProcedure
+    .output(SeatAdditionPreviewSchema)
+    .query(async ({ ctx }) => previewSeatAddition({ db: ctx.db, workspaceId: ctx.workspace.id })),
+
   switchWorkspace: protectedProcedure
     .input(SwitchWorkspaceSchema)
     .output(WorkspaceSummarySchema)
     .mutation(async ({ ctx, input }) => {
       return workspaceService.switchWorkspace(ctx.db, input.workspaceId, ctx.session.user.id);
     }),
-
-  upgradeToPro: ownerProcedure.output(WorkspaceSummarySchema).mutation(async ({ ctx }) => {
-    return workspaceService.upgradeToPro(ctx.db, ctx.workspace.id, ctx.workspace.role);
-  }),
 });

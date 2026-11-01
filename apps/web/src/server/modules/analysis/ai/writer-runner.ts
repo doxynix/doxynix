@@ -14,6 +14,7 @@ export type WriterInput = {
   repoId: string;
   selectedTokens: number;
   userId: string;
+  workspaceId: string;
 };
 
 const WRITER_TIMEOUT_MS = 12 * 60 * 1000;

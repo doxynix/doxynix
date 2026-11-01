@@ -7,6 +7,7 @@ import { apiKeyRouter } from "./api-keys/api-key.router";
 import { adminAuditRouter } from "./audit-logs/admin-audit.router";
 import { auditRouter } from "./audit-logs/audit.router";
 import { bannedEmailRouter } from "./banned-emails/banned-email.router";
+import { billingRouter } from "./billing/billing.router";
 import { notificationRouter } from "./notifications/notifications.router";
 import { githubAppRouter } from "./repos/github-app.router";
 import { githubBrowseRouter } from "./repos/github-browse.router";
@@ -26,6 +27,7 @@ export const appRouter = createTRPCRouter({
   apikey: apiKeyRouter,
   audit: auditRouter,
   bannedEmail: bannedEmailRouter,
+  billing: billingRouter,
   githubApp: githubAppRouter,
   githubBrowse: githubBrowseRouter,
   health: healthRouter,

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect } from "react";
+import type { PRAnalysisStatus } from "@doxynix/shared";
 import { skipToken, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
@@ -47,8 +48,6 @@ type Props = {
   repoId: string;
 };
 
-type StatusConfigKey = "ANALYZING" | "COMPLETED" | "FAILED" | "PENDING";
-
 type PrDetailsItem =
   | { isCopy: true; isStatus?: false; isTime?: false; label: string; value: string | undefined }
   | { isStatus: true; isCopy?: false; isTime?: false; label: string; value: unknown }
@@ -67,7 +66,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
   const t = useTranslations("Dashboard");
   const queryClient = useQueryClient();
 
-  const STATUS_CONFIG: Record<StatusConfigKey, { className: string; label: string }> = {
+  const STATUS_CONFIG: Record<PRAnalysisStatus, { className: string; label: string }> = {
     ANALYZING: { className: "text-foreground", label: t("repo_pull_status_analyzing") },
     COMPLETED: { className: "text-success", label: t("repo_pull_status_completed") },
     FAILED: { className: "text-destructive", label: tCommon("failed") },

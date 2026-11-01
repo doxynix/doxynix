@@ -5,9 +5,8 @@ import { sumBy } from "es-toolkit";
 
 import type { RepoItemFields } from "@/shared/api/repo.types";
 
-import { AppError } from "@/server/core/api-error";
+import { AppError, isOctokitError } from "@/server/core/api-error";
 import { isIgnored } from "@/server/core/git/ignore-rules";
-import { isOctokitError } from "@/server/utils/handle-error";
 import { getLanguageColor } from "@/server/utils/language-metadata";
 import { taskLogger } from "@/server/utils/task-logger";
 
@@ -97,11 +96,20 @@ async function fetchOauthRepos(account: { accessToken: null | string; id: string
   }
 }
 
-export async function getMyRepos(prisma: DbClient, userId: string): Promise<RepoItemFields[]> {
+export async function getMyRepos(
+  prisma: DbClient,
+  userId: string,
+  workspaceId?: string,
+): Promise<RepoItemFields[]> {
   try {
     const [installations, oauthAccounts] = await Promise.all([
       prisma.githubInstallation.findMany({
-        where: { isSuspended: false, userId },
+        // A claimed installation belongs to the workspace, not to the member who claimed it:
+        // filtering by userId would hide it from the rest of the team.
+        where: {
+          isSuspended: false,
+          ...(workspaceId == null ? { userId } : { workspaceId }),
+        },
       }),
       prisma.account.findMany({
         where: { accessToken: { not: null }, providerId: "github", userId },
@@ -203,6 +211,36 @@ export async function getRepoBranches(
 
     return branches.map((b) => b.name);
   });
+}
+
+export async function getBranchHeadSha(
+  prisma: DbClient,
+  userId: string,
+  owner: string,
+  name: string,
+  branch: string,
+): Promise<null | string> {
+  try {
+    const context = await resolveClientContext(prisma, userId, {
+      allowPublicFallback: true,
+      allowSystemFallback: true,
+      owner,
+    });
+
+    return await executeWithFallback(
+      prisma,
+      userId,
+      context.octokit,
+      context.type,
+      async (client) => {
+        const response = await client.rest.repos.getBranch({ branch, owner, repo: name });
+
+        return response.data.commit.sha;
+      },
+    );
+  } catch {
+    return null;
+  }
 }
 
 export async function getRepoTree(

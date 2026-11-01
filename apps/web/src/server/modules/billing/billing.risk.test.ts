@@ -1,0 +1,357 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { DbClient } from "@/server/core/db";
+
+import { applyRiskEvent, type RiskLinks, resolveRiskLinks } from "./billing.risk";
+
+const WORKSPACE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
+const OWNERSHIP = {
+  billingCustomerId: "bc_1",
+  customerId: "cus_1",
+  workspaceId: WORKSPACE_ID,
+};
+
+const stripeMock = vi.hoisted(() => ({
+  charges: { retrieve: vi.fn() },
+  disputes: { retrieve: vi.fn() },
+  invoicePayments: { list: vi.fn() },
+  invoices: { retrieve: vi.fn() },
+  radar: { earlyFraudWarnings: { retrieve: vi.fn() } },
+  refunds: { retrieve: vi.fn() },
+}));
+
+vi.mock("@/server/core/billing/stripe-client", () => ({ getStripeClient: () => stripeMock }));
+
+type LedgerRow = { amount: bigint; entryKey: string; kind: string };
+
+function asyncIterable<T>(items: Array<T>) {
+  return {
+    async *[Symbol.asyncIterator]() {
+      for (const item of items) {
+        yield item;
+      }
+    },
+  };
+}
+
+function createFakeTx() {
+  const ledger = new Map<string, LedgerRow>();
+
+  const tx = {
+    billingIssue: {
+      createMany: vi.fn().mockResolvedValue({ count: 1 }),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+    },
+    billingLedgerEntry: {
+      createMany: vi.fn(async ({ data }: { data: Array<LedgerRow> }) => {
+        let count = 0;
+
+        for (const row of data) {
+          if (!ledger.has(row.entryKey)) {
+            ledger.set(row.entryKey, row);
+            count += 1;
+          }
+        }
+
+        return { count };
+      }),
+      findFirst: vi.fn().mockResolvedValue(null),
+    },
+  };
+
+  return { issues: tx.billingIssue.createMany, ledger, tx: tx as unknown as DbClient };
+}
+
+function refund(overrides: Record<string, unknown> = {}) {
+  return {
+    amount: 1900,
+    charge: "ch_1",
+    created: 1_790_000_000,
+    currency: "usd",
+    id: "re_1",
+    payment_intent: "pi_1",
+    status: "succeeded",
+    ...overrides,
+  };
+}
+
+function dispute(overrides: Record<string, unknown> = {}) {
+  return {
+    amount: 1900,
+    charge: "ch_1",
+    created: 1_790_000_000,
+    currency: "usd",
+    id: "dp_1",
+    payment_intent: "pi_1",
+    status: "needs_response",
+    ...overrides,
+  };
+}
+
+const LINKS: RiskLinks = {
+  invoiceId: "in_1",
+  paymentIntentId: "pi_1",
+  subscriptionId: "sub_1",
+};
+
+describe("resolveRiskLinks", () => {
+  beforeEach(() => {
+    stripeMock.charges.retrieve.mockReset();
+    stripeMock.invoicePayments.list.mockReset();
+    stripeMock.invoices.retrieve.mockReset();
+  });
+
+  it("resolves a null PaymentIntent through the charge", async () => {
+    stripeMock.charges.retrieve.mockResolvedValue({ payment_intent: "pi_1" });
+    stripeMock.invoicePayments.list.mockReturnValue(
+      asyncIterable([
+        {
+          invoice: {
+            id: "in_1",
+            parent: {
+              subscription_details: { subscription: "sub_1" },
+              type: "subscription_details",
+            },
+          },
+        },
+      ]),
+    );
+
+    const links = await resolveRiskLinks({
+      kind: "refund",
+      refund: refund({ payment_intent: null }) as never,
+    });
+
+    expect(stripeMock.charges.retrieve).toHaveBeenCalledWith("ch_1");
+    expect(links).toEqual({
+      invoiceId: "in_1",
+      paymentIntentId: "pi_1",
+      subscriptionId: "sub_1",
+    });
+  });
+
+  it("skips non-subscription invoices and keeps paginating", async () => {
+    stripeMock.invoicePayments.list.mockReturnValue(
+      asyncIterable([
+        {
+          invoice: {
+            id: "in_one_off",
+            parent: { quote_details: null, subscription_details: null, type: "quote_details" },
+          },
+        },
+        {
+          invoice: {
+            id: "in_sub",
+            parent: {
+              subscription_details: { subscription: "sub_9" },
+              type: "subscription_details",
+            },
+          },
+        },
+      ]),
+    );
+
+    const links = await resolveRiskLinks({ kind: "refund", refund: refund() as never });
+
+    expect(links).toEqual({
+      invoiceId: "in_sub",
+      paymentIntentId: "pi_1",
+      subscriptionId: "sub_9",
+    });
+  });
+
+  it("returns no links when there is no PaymentIntent at all", async () => {
+    stripeMock.charges.retrieve.mockResolvedValue({ payment_intent: null });
+
+    const links = await resolveRiskLinks({
+      dispute: dispute({ payment_intent: null }) as never,
+      kind: "dispute",
+    });
+
+    expect(links).toEqual({ invoiceId: null, paymentIntentId: null, subscriptionId: null });
+    expect(stripeMock.invoicePayments.list).not.toHaveBeenCalled();
+  });
+});
+
+describe("applyRiskEvent", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("writes a negative entry for a successful refund", async () => {
+    const fake = createFakeTx();
+
+    await applyRiskEvent(fake.tx, {
+      billingEventId: "be_1",
+      canonical: { kind: "refund", refund: refund() as never },
+      links: LINKS,
+      ownership: OWNERSHIP,
+    });
+
+    expect(fake.ledger.get("REFUND_SUCCEEDED:re_1:succeeded")?.amount).toBe(BigInt(-1900));
+  });
+
+  it("records a failed refund without removing or replacing anything", async () => {
+    const fake = createFakeTx();
+
+    await applyRiskEvent(fake.tx, {
+      billingEventId: "be_1",
+      canonical: { kind: "refund", refund: refund({ status: "failed" }) as never },
+      links: LINKS,
+      ownership: OWNERSHIP,
+    });
+
+    expect(fake.ledger.get("REFUND_FAILED:re_1:failed")?.amount).toBe(BigInt(0));
+    expect(fake.ledger.has("REFUND_SUCCEEDED:re_1:succeeded")).toBe(false);
+  });
+
+  it("does not duplicate a replayed refund", async () => {
+    const fake = createFakeTx();
+    const input = {
+      billingEventId: "be_1",
+      canonical: { kind: "refund", refund: refund() } as never,
+      links: LINKS,
+      ownership: OWNERSHIP,
+    };
+
+    await applyRiskEvent(fake.tx, input);
+    await applyRiskEvent(fake.tx, input);
+
+    expect(fake.ledger.size).toBe(1);
+  });
+
+  it("opens a dispute with a negative entry and a critical issue", async () => {
+    const fake = createFakeTx();
+
+    await applyRiskEvent(fake.tx, {
+      billingEventId: "be_1",
+      canonical: { dispute: dispute() as never, kind: "dispute" },
+      links: LINKS,
+      ownership: OWNERSHIP,
+    });
+
+    expect(fake.ledger.get("DISPUTE_OPENED:dp_1:open")?.amount).toBe(BigInt(-1900));
+    expect(fake.issues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: [expect.objectContaining({ kind: "DISPUTE_OPENED", severity: "CRITICAL" })],
+      }),
+    );
+  });
+
+  it("records won and lost disputes as separate entries without an issue", async () => {
+    const fake = createFakeTx();
+
+    await applyRiskEvent(fake.tx, {
+      billingEventId: "be_1",
+      canonical: { dispute: dispute({ status: "won" }) as never, kind: "dispute" },
+      links: LINKS,
+      ownership: OWNERSHIP,
+    });
+    await applyRiskEvent(fake.tx, {
+      billingEventId: "be_1",
+      canonical: { dispute: dispute({ status: "lost" }) as never, kind: "dispute" },
+      links: LINKS,
+      ownership: OWNERSHIP,
+    });
+
+    // No open entry was ever written, so a `won` here must not invent a refund.
+    expect(fake.ledger.get("DISPUTE_WON:dp_1:won")?.amount).toBe(BigInt(0));
+    expect(fake.ledger.get("DISPUTE_LOST:dp_1:lost")?.amount).toBe(BigInt(0));
+    expect(fake.issues).not.toHaveBeenCalled();
+  });
+
+  it("returns the held amount when a dispute is won and resolves the issue", async () => {
+    const fake = createFakeTx();
+    const findFirst = (
+      fake.tx as unknown as {
+        billingLedgerEntry: { findFirst: ReturnType<typeof vi.fn> };
+      }
+    ).billingLedgerEntry.findFirst;
+    findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: "ledger_1" });
+
+    await applyRiskEvent(fake.tx, {
+      billingEventId: "be_1",
+      canonical: { dispute: dispute({ status: "needs_response" }) as never, kind: "dispute" },
+      links: LINKS,
+      ownership: OWNERSHIP,
+    });
+    await applyRiskEvent(fake.tx, {
+      billingEventId: "be_1",
+      canonical: { dispute: dispute({ status: "won" }) as never, kind: "dispute" },
+      links: LINKS,
+      ownership: OWNERSHIP,
+    });
+
+    const total = [...fake.ledger.values()].reduce((sum, row) => sum + row.amount, BigInt(0));
+
+    expect(total).toBe(BigInt(0));
+    expect(fake.issues).toHaveBeenCalled();
+  });
+
+  it("closes the dispute issue for statuses that are not won or lost", async () => {
+    const fake = createFakeTx();
+
+    await applyRiskEvent(fake.tx, {
+      billingEventId: "be_1",
+      canonical: { dispute: dispute({ status: "warning_closed" }) as never, kind: "dispute" },
+      links: LINKS,
+      ownership: OWNERSHIP,
+    });
+
+    expect(fake.ledger.get("DISPUTE_WARNING_CLOSED:dp_1:warning_closed")?.amount).toBe(BigInt(0));
+    expect(fake.issues).not.toHaveBeenCalled();
+  });
+
+  it("holds the disputed amount once across intermediate dispute statuses", async () => {
+    const fake = createFakeTx();
+
+    for (const status of ["needs_response", "under_review", "warning_under_review"]) {
+      await applyRiskEvent(fake.tx, {
+        billingEventId: "be_1",
+        canonical: { dispute: dispute({ status }) as never, kind: "dispute" },
+        links: LINKS,
+        ownership: OWNERSHIP,
+      });
+    }
+
+    expect(fake.ledger.size).toBe(1);
+    const total = [...fake.ledger.values()].reduce((sum, row) => sum + row.amount, BigInt(0));
+
+    expect(total).toBe(BigInt(-1900));
+  });
+
+  it("raises a critical issue for an early fraud warning without a ledger entry", async () => {
+    const fake = createFakeTx();
+
+    await applyRiskEvent(fake.tx, {
+      billingEventId: "be_1",
+      canonical: {
+        kind: "early_fraud_warning",
+        warning: { charge: "ch_1", created: 1_790_000_000, id: "efw_1" } as never,
+      },
+      links: LINKS,
+      ownership: OWNERSHIP,
+    });
+
+    expect(fake.ledger.size).toBe(0);
+    expect(fake.issues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: [expect.objectContaining({ kind: "EARLY_FRAUD_WARNING", severity: "CRITICAL" })],
+      }),
+    );
+  });
+
+  it("never touches the subscription or the entitlement", async () => {
+    const fake = createFakeTx();
+
+    await applyRiskEvent(fake.tx, {
+      billingEventId: "be_1",
+      canonical: { kind: "refund", refund: refund() as never },
+      links: LINKS,
+      ownership: OWNERSHIP,
+    });
+
+    expect(fake.tx).not.toHaveProperty("billingSubscription");
+    expect(fake.tx).not.toHaveProperty("workspaceEntitlement");
+  });
+});

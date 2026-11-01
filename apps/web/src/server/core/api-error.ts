@@ -7,8 +7,9 @@ import { IS_PROD } from "@/shared/config/env.flags";
 
 import { requestContext } from "@/server/utils/request-context";
 
-// Reuses tRPC's union so the HTTP and tRPC adapters are two serializers over one normalizer, not two taxonomies.
-export type ErrorCode = TRPCError["code"];
+// Reuses tRPC's union so the HTTP and tRPC adapters are two serializers over one normalizer, not two
+// taxonomies. PAYMENT_REQUIRED is billing's 402, which tRPC's union does not carry.
+export type ErrorCode = TRPCError["code"] | "PAYMENT_REQUIRED";
 
 const GENERIC_MESSAGE = "An unexpected error occurred, please try again later.";
 
@@ -19,6 +20,7 @@ const PUBLIC_CODES = new Set<ErrorCode>([
   "FORBIDDEN",
   "NOT_FOUND",
   "PARSE_ERROR",
+  "PAYMENT_REQUIRED",
   "PRECONDITION_FAILED",
   "TOO_MANY_REQUESTS",
   "UNAUTHORIZED",
@@ -27,6 +29,10 @@ const PUBLIC_CODES = new Set<ErrorCode>([
 
 // Delegates to tRPC's own table so this module cannot drift from what tRPC procedures already return for the same code.
 export function statusForCode(code: ErrorCode): number {
+  if (code === "PAYMENT_REQUIRED") {
+    return 402;
+  }
+
   return getHTTPStatusCodeFromError(new TRPCError({ code }));
 }
 

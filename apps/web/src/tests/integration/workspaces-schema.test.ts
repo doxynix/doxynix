@@ -101,6 +101,22 @@ describe("Workspace tenancy schema", () => {
     ).rejects.toThrow(/unique/i);
   });
 
+  it("defaults a bare entitlement to NO_SUBSCRIPTION and personal workspaces to ACTIVE", async () => {
+    const alice = await createTestUser("Alice");
+    const personal = await prisma.workspaceEntitlement.findUnique({
+      where: { workspaceId: alice.workspace.id },
+    });
+    const bare = await prisma.workspace.create({
+      data: { entitlement: { create: {} }, name: "Bare workspace" },
+    });
+    const bareEntitlement = await prisma.workspaceEntitlement.findUnique({
+      where: { workspaceId: bare.id },
+    });
+
+    expect(personal?.accessState).toBe("ACTIVE");
+    expect(bareEntitlement?.accessState).toBe("NO_SUBSCRIPTION");
+  });
+
   it("truncates workspace tables through cleanupDatabase", async () => {
     await prisma.workspace.create({ data: { name: "Disposable" } });
 

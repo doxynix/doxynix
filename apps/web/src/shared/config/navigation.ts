@@ -4,6 +4,7 @@ import {
   Book,
   BookOpen,
   Code2,
+  CreditCard,
   FileText,
   GitPullRequest,
   HandHeartIcon,
@@ -79,6 +80,14 @@ const SETTINGS_PAGES: MenuItems = [
     labelKey: "members",
     shortcut: "G then T",
     url: "/mt",
+  },
+  {
+    href: "/dashboard/settings/billing",
+    icon: CreditCard,
+    id: "billing",
+    labelKey: "billing",
+    shortcut: "G then B",
+    url: "/b",
   },
   {
     href: "/dashboard/settings/appearance",

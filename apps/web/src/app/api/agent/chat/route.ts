@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { ApiKeyScope, ChatRole } from "@doxynix/shared";
+import { Prisma } from "@prisma/client";
 import {
   convertToModelMessages,
   createUIMessageStreamResponse,
@@ -19,7 +20,9 @@ import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { resolveRequestUserId } from "@/server/core/auth/resolve-session";
 import { prisma } from "@/server/core/db";
+import { getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { realtimeService } from "@/server/core/realtime";
+import { releaseUsage, reserveUsage, settleUsage } from "@/server/core/usage/usage";
 import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import {
   AGENT_SYSTEM_PROMPT,
@@ -27,9 +30,13 @@ import {
 } from "@/server/modules/agent/agent.prompts";
 import { getAgentTools, MUTATION_TOOLS } from "@/server/modules/agent/agent.tools";
 import { processMessageParts } from "@/server/modules/agent/agent-storage";
+import { requestContext } from "@/server/utils/request-context";
 import { withApiHandler } from "@/server/utils/with-api-handler";
 
 export const maxDuration = 60;
+
+// Reservation for the whole streamed turn; `settleUsage` releases the difference on finish.
+const AGENT_TOKEN_ESTIMATE = 2000;
 
 async function handler(req: Request) {
   const { currentRepo, currentRepoId, messages, sessionId } = await req.json();
@@ -57,6 +64,19 @@ async function handler(req: Request) {
     strict: true,
     userId,
   });
+
+  // Pin the tools to the same workspace the route resolved from the header; otherwise they fall
+  // back to the browser cookie and can read another workspace.
+  const requestStore = requestContext.getStore();
+
+  if (requestStore != null) {
+    requestStore.workspaceId = workspace.id;
+  }
+
+  // The agent spends the same AI budget as analyses: a suspended or exhausted workspace must not
+  // reach the model at all. The reservation happens together with this check, just before the
+  // model call, so a plain read cannot be raced by a second chat.
+  const usageKey = `agent:${sessionId ?? "new"}:${crypto.randomUUID()}`;
 
   let resolvedRepoId: string | undefined;
   let internalRepoId: null | string = null;
@@ -99,14 +119,24 @@ async function handler(req: Request) {
         });
 
         if (sessionExists == null) {
-          await tx.chatSession.create({
-            data: {
-              id: sessionId,
-              repoId: internalRepoId,
-              title: "New Chat",
-              userId,
-            },
-          });
+          try {
+            await tx.chatSession.create({
+              data: {
+                id: sessionId,
+                repoId: internalRepoId,
+                title: "New Chat",
+                userId,
+              },
+            });
+          } catch (error) {
+            // A client-generated id can collide with another user's session: surface a conflict
+            // instead of leaking a raw P2002 as a 500.
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+              throw new AppError({ code: "CONFLICT", publicMessage: "SESSION_ID_TAKEN" });
+            }
+
+            throw error;
+          }
         }
 
         await tx.chatMessage.create({
@@ -133,11 +163,73 @@ async function handler(req: Request) {
 - Automatically assume this repository for all tools requiring "repoId" (e.g., quickFileAudit, triggerRepositoryAnalysis, etc.). You do not need to ask the user or search for it.
 - Only prompt for a repository ID if the user explicitly wants to target a completely different project.`;
 
+  await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`agent-quota:${workspace.id}`}))`;
+
+    const fresh = await getWorkspaceEntitlement(tx, workspace.id, new Date(), { fresh: true });
+
+    if (fresh == null || !fresh.hasAccess) {
+      throw new AppError({ code: "PAYMENT_REQUIRED", publicMessage: "PAYMENT_REQUIRED" });
+    }
+
+    if (fresh.aiTokensPerMonth != null && fresh.usedTokens >= fresh.aiTokensPerMonth) {
+      throw new AppError({ code: "FORBIDDEN", publicMessage: "LIMIT_EXCEEDED" });
+    }
+
+    await reserveUsage(tx, {
+      estimatedTokens: AGENT_TOKEN_ESTIMATE,
+      idempotencyKey: usageKey,
+      workspaceId: workspace.id,
+    });
+  });
+
   const result = streamText({
+    abortSignal: req.signal,
     experimental_toolApprovalSecret: TOOL_APPROVAL_SECRET,
     instructions: dynamicSystemPrompt,
     messages: modelMessages,
     model: google(agentModelId),
+    onAbort: () => {
+      void releaseUsage(prisma, {
+        idempotencyKey: usageKey,
+        workspaceId: workspace.id,
+      }).catch((error: unknown) => {
+        appLogger.error({ error, msg: "agent.usage_release_failed" });
+      });
+    },
+    onEnd: async ({ usage }) => {
+      try {
+        await settleUsage(prisma, {
+          idempotencyKey: usageKey,
+          model: agentModelId,
+          provider: "google",
+          usage: {
+            cachedInputTokens: usage.inputTokenDetails.cacheReadTokens ?? 0,
+            inputTokens: usage.inputTokens ?? 0,
+            outputTokens: usage.outputTokens ?? 0,
+          },
+          workspaceId: workspace.id,
+        });
+      } catch (error) {
+        // An unpriced model or a DB hiccup must not leave the reservation behind.
+        appLogger.error({ error, msg: "agent.usage_settle_failed" });
+
+        await releaseUsage(prisma, {
+          idempotencyKey: usageKey,
+          workspaceId: workspace.id,
+        }).catch((releaseError: unknown) => {
+          appLogger.error({ error: releaseError, msg: "agent.usage_release_failed" });
+        });
+      }
+    },
+    onError: () => {
+      void releaseUsage(prisma, {
+        idempotencyKey: usageKey,
+        workspaceId: workspace.id,
+      }).catch((error: unknown) => {
+        appLogger.error({ error, msg: "agent.usage_release_failed" });
+      });
+    },
     stopWhen: isStepCount(10),
     timeout: { chunkMs: 20_000, stepMs: 55_000, toolMs: 40_000 },
     toolApproval: Object.fromEntries(

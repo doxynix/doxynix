@@ -27,7 +27,11 @@ export type FileActionRequest = {
   nodeId?: string;
   path: string;
   repoId: string;
+  workspaceId: string;
 };
+
+// What the router receives from the wire; the workspace is injected from the authenticated context.
+export type FileActionPayload = Omit<FileActionRequest, "workspaceId">;
 
 export const fileActionsService = {
   async buildFileActionRuntimeContext(
@@ -59,7 +63,7 @@ export const fileActionsService = {
     });
   },
 
-  async documentFile(db: DbClient, userId: string, input: FileActionRequest, workspaceId: string) {
+  async documentFile(db: DbClient, userId: string, input: FileActionPayload, workspaceId: string) {
     return this.runFileAction(db, userId, "document-single-file", input, workspaceId);
   },
 
@@ -89,7 +93,7 @@ export const fileActionsService = {
   async quickFileAudit(
     db: DbClient,
     userId: string,
-    input: FileActionRequest,
+    input: FileActionPayload,
     workspaceId: string,
   ) {
     return this.runFileAction(db, userId, "analyze-single-file", input, workspaceId);
@@ -99,7 +103,7 @@ export const fileActionsService = {
     db: DbClient,
     userId: string,
     taskId: "analyze-single-file" | "document-single-file",
-    input: FileActionRequest,
+    input: FileActionPayload,
     workspaceId: string,
   ) {
     await analysisLifecycleService.assertRepoAccess(db, workspaceId, input.repoId);

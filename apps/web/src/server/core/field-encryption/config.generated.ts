@@ -43,6 +43,54 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
       email: { hash: { normalize: ["lowercase", "trim"] } },
     },
   },
+  BillingCheckoutSession: {
+    connections: {
+      workspace: "Workspace",
+    },
+    fields: {},
+  },
+  BillingCustomer: {
+    connections: {
+      subscriptions: "BillingSubscription",
+      workspace: "Workspace",
+    },
+    fields: {},
+  },
+  BillingEvent: {
+    connections: {
+      ledgerEntries: "BillingLedgerEntry",
+    },
+    fields: {},
+  },
+  BillingIssue: {
+    connections: {
+      workspace: "Workspace",
+    },
+    fields: {},
+  },
+  BillingLedgerEntry: {
+    connections: {
+      billingEvent: "BillingEvent",
+      corrections: "BillingLedgerEntry",
+      corrects: "BillingLedgerEntry",
+      workspace: "Workspace",
+    },
+    fields: {},
+  },
+  BillingOperation: {
+    connections: {
+      actor: "User",
+      workspace: "Workspace",
+    },
+    fields: {},
+  },
+  BillingSubscription: {
+    connections: {
+      billingCustomer: "BillingCustomer",
+      workspace: "Workspace",
+    },
+    fields: {},
+  },
   ChatMessage: {
     connections: {
       session: "ChatSession",
@@ -143,11 +191,18 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
     },
     fields: {},
   },
+  UsageEvent: {
+    connections: {
+      workspace: "Workspace",
+    },
+    fields: {},
+  },
   User: {
     connections: {
       accounts: "Account",
       apiKeys: "ApiKey",
       appearance: "UserAppearance",
+      billingOperations: "BillingOperation",
       chatSession: "ChatSession",
       createdRepos: "Repo",
       githubInstallations: "GithubInstallation",
@@ -177,10 +232,18 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
   Workspace: {
     connections: {
       apiKeys: "ApiKey",
+      billingCheckoutSessions: "BillingCheckoutSession",
+      billingCustomers: "BillingCustomer",
+      billingIssues: "BillingIssue",
+      billingLedgerEntries: "BillingLedgerEntry",
+      billingOperations: "BillingOperation",
+      billingSubscriptions: "BillingSubscription",
       entitlement: "WorkspaceEntitlement",
       githubInstallations: "GithubInstallation",
       members: "WorkspaceMember",
       repos: "Repo",
+      usage: "WorkspaceUsage",
+      usageEvents: "UsageEvent",
     },
     fields: {},
   },
@@ -193,6 +256,12 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
   WorkspaceMember: {
     connections: {
       user: "User",
+      workspace: "Workspace",
+    },
+    fields: {},
+  },
+  WorkspaceUsage: {
+    connections: {
       workspace: "Workspace",
     },
     fields: {},

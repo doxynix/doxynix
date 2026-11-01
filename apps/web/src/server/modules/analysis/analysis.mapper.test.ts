@@ -33,11 +33,13 @@ import type { AIResult } from "./engine/core/analysis-result.schemas";
 import type { RepoMetrics } from "./engine/core/metrics.types";
 import defaultAiResult from "./fixtures/default-ai-result.json";
 import defaultMetrics from "./fixtures/default-metrics.json";
-import type { StructureNodePayload } from "./logic/graph-navigator";
-import type { NodeExplainPayload } from "./logic/node-explainer";
 import { coerceAnalysisPayload } from "./logic/payload";
 import type { PRImpactPayload } from "./logic/pr.types";
-import type { StoredDocument } from "./logic/structure-shared";
+import type {
+  NodeExplainPayload,
+  StoredDocument,
+  StructureNodePayload,
+} from "./logic/structure-shared";
 
 type TopLevelNode = {
   id: string;

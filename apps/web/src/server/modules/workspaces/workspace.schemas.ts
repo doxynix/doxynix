@@ -1,16 +1,5 @@
-import { PlanCode, PlanCodeSchema, WorkspaceRole } from "@doxynix/shared";
+import { PlanCodeSchema, WorkspaceRole } from "@doxynix/shared";
 import * as z from "zod";
-
-export const PRO_ENTITLEMENT = {
-  aiTokensPerMonth: 20_000_000,
-  analysesPerMonth: 500,
-  autoResync: true,
-  historyDays: 90,
-  planCode: PlanCode.PRO,
-  privateReposAllowed: true,
-  prReviews: true,
-  reposLimit: null,
-} as const;
 
 export const WorkspaceEntitlementSummarySchema = z.object({
   aiTokensPerMonth: z.number().int().nullable(),
@@ -48,6 +37,14 @@ export const AddWorkspaceMemberSchema = z.object({
 
 export const RemoveWorkspaceMemberSchema = z.object({
   userId: z.uuid(),
+});
+
+export const SeatAdditionPreviewSchema = z.object({
+  amountPerSeatCents: z.number().int().nullable(),
+  currency: z.string().nullable(),
+  needsCharge: z.boolean(),
+  periodEnd: z.date().nullable(),
+  quantity: z.number().int(),
 });
 
 export const SwitchWorkspaceSchema = z.object({

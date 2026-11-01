@@ -4,7 +4,8 @@ import { TRPCError } from "@trpc/server";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
-import type { DbClient } from "@/server/core/db";
+import { type DbClient, prisma } from "@/server/core/db";
+import { assertPlanFeature, getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { getRepoInfo } from "@/server/core/github/github-api";
 import { GitHubAuthRequiredError, parseUrl } from "@/server/core/github/github-client";
 import { realtimeService } from "@/server/core/realtime";
@@ -19,7 +20,7 @@ import {
 } from "@/server/utils/pagination";
 import { normalizeSearchInput, tokenizeSearchInput } from "@/server/utils/search";
 
-import { repoMapper } from "./repo.mapper";
+import { repoMapper, repoPageSelect, repoPublicSelect } from "./repo.mapper";
 import type { RepoFiltersInput, RepoSlimFiltersInput } from "./repo.schemas";
 
 function buildRepoSearchClause(term: string): Prisma.RepoWhereInput {
@@ -107,6 +108,11 @@ export const repoService = {
         });
       }
       throw toOctokitTrpcError(error) ?? error;
+    }
+
+    if (githubData.private) {
+      // The paywall is checked on the GitHub fact, before anything is written locally.
+      assertPlanFeature(await getWorkspaceEntitlement(prisma, workspaceId), "privateReposAllowed");
     }
 
     try {
@@ -237,9 +243,7 @@ export const repoService = {
 
   async getByName(db: DbClient, owner: string, name: string, workspaceId: string) {
     const repo = await db.repo.findFirst({
-      include: {
-        analyses: { orderBy: { createdAt: "desc" }, take: 1 },
-      },
+      select: repoPageSelect,
       where: {
         name: { equals: name, mode: "insensitive" },
         owner: { equals: owner, mode: "insensitive" },
@@ -255,6 +259,7 @@ export const repoService = {
   },
   async getByOwner(db: DbClient, owner: string, workspaceId: string) {
     const repo = await db.repo.findFirst({
+      select: repoPublicSelect,
       where: {
         owner: { equals: owner, mode: "insensitive" },
         workspaceId,

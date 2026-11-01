@@ -25,6 +25,16 @@ export async function cleanupDatabase() {
   await assertDisposableDatabase();
 
   const tablenames = [
+    "usage_events",
+    "workspace_usage",
+    "billing_ledger_entries",
+    "billing_events",
+    "billing_operations",
+    "billing_checkout_sessions",
+    "billing_subscriptions",
+    "billing_customers",
+    "billing_issues",
+    "billing_reconciliation_runs",
     "workspace_entitlements",
     "workspace_members",
     "workspaces",
@@ -50,9 +60,9 @@ export async function cleanupDatabase() {
     "webhook_deliveries",
   ];
 
-  for (const table of tablenames) {
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE;`);
-  }
+  // One statement instead of 33 round trips: each autocommit TRUNCATE still costs a commit.
+  const truncateTargets = tablenames.map((table) => `"${table}"`).join(", ");
+  await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${truncateTargets} CASCADE;`);
   await prisma.user.deleteMany({
     where: {
       OR: [{ email: { contains: "@test.com" } }, { email: { contains: "@git.hub" } }],

@@ -2,7 +2,7 @@ import { UpdatePRConfigInput } from "@doxynix/shared";
 import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
-import { workspaceProcedure } from "@/server/core/trpc/init";
+import { entitlementProcedure, workspaceProcedure } from "@/server/core/trpc/init";
 
 import {
   FindingForFixSchema,
@@ -15,7 +15,7 @@ import { fixesService } from "./services/fixes.service";
 import { stagingService } from "./services/staging.service";
 
 export const analysisPrFixesRouter = {
-  applyFix: workspaceProcedure
+  applyFix: entitlementProcedure
     .input(FixApplicationPayloadSchema)
     .output(
       z.object({
@@ -55,7 +55,7 @@ export const analysisPrFixesRouter = {
         ctx.db,
       );
     }),
-  createFix: workspaceProcedure
+  createFix: entitlementProcedure
     .input(
       z.object({
         fileContents: z.record(z.string(), z.string()).optional().default({}),

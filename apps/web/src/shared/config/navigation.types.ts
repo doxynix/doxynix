@@ -11,6 +11,7 @@ export type NavLabelKey =
   | "api_keys"
   | "appearance"
   | "audit_log"
+  | "billing"
   | "code"
   | "connections"
   | "create_repository"

@@ -67,13 +67,23 @@ export async function runDocumentFilePreview(
   const activeModels = await getActiveModels();
 
   const result = await callWithFallback<z.infer<typeof DocumentFilePreviewSchema>>({
-    attemptMetadata: { filePath: input.path, operation: "document-file-preview" },
+    attemptMetadata: {
+      filePath: input.path,
+      operation: "document-file-preview",
+      repoId: input.repoId,
+    },
     models: activeModels.WRITER,
     outputSchema: DocumentFilePreviewSchema,
     prompt: userPrompt,
     system: systemPrompt,
     taskType: "creative",
-    tools: buildRepositoryToolProfile("file_action", userId, input.repoId, input.branch),
+    tools: buildRepositoryToolProfile(
+      "file_action",
+      userId,
+      input.workspaceId,
+      input.repoId,
+      input.branch,
+    ),
   });
 
   let documentedCode = input.content;

@@ -1,8 +1,5 @@
 import { type ParsedKey, parseKey } from "./key-internal";
 
-export type { ParsedKey } from "./key-internal";
-export { fingerprintOf, parseKey } from "./key-internal";
-
 export type Keychain = Record<string, ParsedKey>;
 
 export function makeKeychain(keys: readonly string[]): Keychain {

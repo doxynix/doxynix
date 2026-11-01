@@ -1,24 +1,70 @@
-import { PlanCode, PlanCodeSchema } from "@doxynix/shared";
+import { PlanCode, PlanCodeSchema, type WorkspaceRole } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
-import { isLocalBillingUpgradeEnabled } from "@/shared/config/env.flags";
-
+import { AppError } from "@/server/core/api-error";
+import { appLogger } from "@/server/core/app-logger";
+import { upsertBillingIssue } from "@/server/core/billing/issue";
+import { syncWorkspaceSeats } from "@/server/core/billing/seat-sync";
 import { type DbClient, prisma } from "@/server/core/db";
 import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import { normalizeEmail } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
 
-import { PRO_ENTITLEMENT, type WorkspaceSummary } from "./workspace.schemas";
-
-type WorkspaceRole = "MEMBER" | "OWNER";
+import type { WorkspaceSummary } from "./workspace.schemas";
 
 type WorkspaceWithEntitlement = Prisma.WorkspaceGetPayload<{
   include: { entitlement: true };
 }>;
 
+// The membership is already committed, so a failing Stripe call or issue insert must never reach
+// the caller; it is logged and recorded instead.
+async function syncSeatsAfterMembershipChange(input: {
+  requestId: string;
+  workspaceId: string;
+}): Promise<void> {
+  try {
+    await syncWorkspaceSeats(input);
+  } catch (error) {
+    const details = {
+      error: error instanceof Error ? error.message : "unknown",
+      requestId: input.requestId,
+    };
+
+    appLogger.error({
+      error,
+      msg: "workspace.seat_sync_failed",
+      requestId: input.requestId,
+      workspaceId: input.workspaceId,
+    });
+
+    try {
+      // BillingIssue denies `create` to every policy role, so the issue must go through the
+      // system client; the enhanced one would silently drop it.
+      await upsertBillingIssue(prisma, {
+        dedupeKey: `seat_sync_failed:${input.workspaceId}`,
+        details,
+        kind: "SEAT_SYNC_FAILED",
+        severity: "WARNING",
+        source: "workspace",
+        workspaceId: input.workspaceId,
+      });
+    } catch (issueError) {
+      appLogger.error({
+        error: issueError,
+        msg: "workspace.seat_sync_issue_failed",
+        workspaceId: input.workspaceId,
+      });
+    }
+  }
+}
+
 function toSummary(workspace: WorkspaceWithEntitlement, role: WorkspaceRole): WorkspaceSummary {
   const { entitlement } = workspace;
+
+  // Fail closed: an unknown plan value degrades to HOBBY instead of throwing on read.
+  const parsedPlan = PlanCodeSchema.safeParse(entitlement?.planCode);
+  const planCode = parsedPlan.success ? parsedPlan.data : PlanCode.HOBBY;
 
   return {
     entitlement:
@@ -29,8 +75,7 @@ function toSummary(workspace: WorkspaceWithEntitlement, role: WorkspaceRole): Wo
             analysesPerMonth: entitlement.analysesPerMonth,
             autoResync: entitlement.autoResync,
             historyDays: entitlement.historyDays,
-            // Fail closed: an unknown plan value degrades to HOBBY instead of throwing on read.
-            planCode: PlanCodeSchema.catch(PlanCode.HOBBY).parse(entitlement.planCode),
+            planCode,
             privateReposAllowed: entitlement.privateReposAllowed,
             prReviews: entitlement.prReviews,
             reposLimit: entitlement.reposLimit,
@@ -57,6 +102,12 @@ export const workspaceService = {
       throw new TRPCError({ code: "PRECONDITION_FAILED", message: "UPGRADE_REQUIRED" });
     }
 
+    // A seat is a paid resource: §9.7 forbids raising seats while the subscription is not active,
+    // so grace keeps its existing seats but cannot grow. Suspended/review have no access at all.
+    if (workspace.entitlement.accessState !== "ACTIVE") {
+      throw new AppError({ code: "PAYMENT_REQUIRED", publicMessage: "PAYMENT_REQUIRED" });
+    }
+
     const emailHash = getNormalizedHash(normalizeEmail(email));
     // Membership lookup is a system read: a workspace owner must not be able to read the user row.
     const user = await prisma.user.findUnique({
@@ -76,7 +127,7 @@ export const workspaceService = {
     }
 
     try {
-      return await db.$transaction(async (tx) => {
+      const member = await db.$transaction(async (tx) => {
         // Serialises seat accounting per workspace; without it two concurrent adds both pass the
         // seatLimit check and create an unpaid seat.
         await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${workspaceId}))`;
@@ -90,20 +141,19 @@ export const workspaceService = {
           throw new TRPCError({ code: "CONFLICT", message: "ALREADY_MEMBER" });
         }
 
-        const activeMembers = await tx.workspaceMember.count({ where: { workspaceId } });
-        const seatLimit = workspace.entitlement?.seatLimit ?? 0;
-
-        if (seatLimit > 0 && activeMembers >= seatLimit) {
-          throw new TRPCError({ code: "FORBIDDEN", message: "LIMIT_EXCEEDED" });
-        }
-
-        const member = await tx.workspaceMember.create({
+        // Seats are not pre-purchased: the subscription quantity follows the membership count, and
+        // the sync below invoices the extra seat with `always_invoice`.
+        const created = await tx.workspaceMember.create({
           data: { role: "MEMBER", userId: user.id, workspaceId },
           select: { id: true, role: true, userId: true },
         });
 
-        return { ...member, user: { id: user.id, image: user.image, name: user.name } };
+        return { ...created, user: { id: user.id, image: user.image, name: user.name } };
       });
+
+      await syncSeatsAfterMembershipChange({ requestId: member.id, workspaceId });
+
+      return member;
     } catch (error) {
       if (error instanceof TRPCError) {
         throw error;
@@ -160,10 +210,10 @@ export const workspaceService = {
     }
 
     try {
-      await db.$transaction(
+      const removedId = await db.$transaction(
         async (tx) => {
           const members = await tx.workspaceMember.findMany({
-            select: { role: true, userId: true },
+            select: { id: true, role: true, userId: true },
             where: { workspaceId },
           });
 
@@ -179,12 +229,20 @@ export const workspaceService = {
             throw new TRPCError({ code: "PRECONDITION_FAILED", message: "LAST_OWNER" });
           }
 
-          await tx.workspaceMember.delete({
+          const deleted = await tx.workspaceMember.delete({
+            select: { id: true },
             where: { workspaceId_userId: { userId, workspaceId } },
           });
+
+          return deleted.id;
         },
         { isolationLevel: "Serializable" },
       );
+
+      await syncSeatsAfterMembershipChange({
+        requestId: `remove:${removedId}`,
+        workspaceId,
+      });
     } catch (error) {
       if (error instanceof TRPCError) {
         throw error;
@@ -209,35 +267,5 @@ export const workspaceService = {
     }
 
     return toSummary(membership.workspace, membership.role);
-  },
-
-  async upgradeToPro(db: DbClient, workspaceId: string, actorRole: WorkspaceRole) {
-    // TODO(DXNX-293): PLACEHOLDER for local dev only. seatLimit = members+1 is not a real
-    // quantity; BILL-06 replaces this path with Stripe Checkout and subscription quantity sync.
-    if (!isLocalBillingUpgradeEnabled()) {
-      throw new TRPCError({ code: "PRECONDITION_FAILED", message: "BILLING_NOT_READY" });
-    }
-
-    const workspace = await db.workspace.findUnique({
-      include: { entitlement: true, members: { select: { userId: true } } },
-      where: { id: workspaceId },
-    });
-
-    if (workspace == null) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Workspace access denied" });
-    }
-
-    const entitlement = await db.workspaceEntitlement.update({
-      data: {
-        ...PRO_ENTITLEMENT,
-        // Stripe owns the real quantity from BILL-06; one seat keeps the local upgrade usable.
-        seatLimit: Math.max(workspace.members.length + 1, 1),
-      },
-      where: { workspaceId },
-    });
-
-    const updated: WorkspaceWithEntitlement = { ...workspace, entitlement };
-
-    return toSummary(updated, actorRole);
   },
 };

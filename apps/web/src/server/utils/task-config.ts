@@ -83,6 +83,40 @@ export const TASK_CONFIGS = {
     },
   },
 
+  processStripeEvent: {
+    // Billing events mutate the same subscription and entitlement rows; a single worker per
+    // project keeps two events of one owner from projecting in parallel and losing a transition.
+    concurrency: { perKey: 1, total: 10 },
+    machine: { preset: "micro" },
+    maxDuration: 60 * 5, // TIME: 5 minutes
+    retry: {
+      factor: 2,
+      maxAttempts: 8,
+      maxTimeoutInMs: 60_000,
+      minTimeoutInMs: 1000,
+      randomize: true,
+    },
+  },
+
+  reconcileStripe: {
+    machine: { preset: "small-1x" },
+    maxDuration: 60 * 15, // TIME: 15 minutes
+    retry: {
+      factor: 2,
+      maxAttempts: 2,
+      maxTimeoutInMs: 60_000,
+      minTimeoutInMs: 5000,
+    },
+  },
+
+  sweepStripeEvents: {
+    machine: { preset: "micro" },
+    maxDuration: 60 * 5, // TIME: 5 minutes
+    retry: {
+      maxAttempts: 2,
+    },
+  },
+
   writers: {
     concurrency: { total: 2 },
     machine: { preset: "small-2x" },

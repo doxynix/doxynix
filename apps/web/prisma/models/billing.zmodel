@@ -1,0 +1,341 @@
+import "./auth"
+import "./workspace"
+
+enum BillingEventStatus {
+  RECEIVED
+  ENQUEUED
+  PROCESSING
+  PROCESSED
+  DEAD_LETTER
+}
+
+enum BillingOperationStatus {
+  STARTED
+  COMPLETED
+  FAILED
+}
+
+enum BillingReconciliationStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+enum BillingIssueStatus {
+  OPEN
+  RESOLVED
+}
+
+enum BillingIssueSeverity {
+  CRITICAL
+  WARNING
+  INFO
+}
+
+enum UsageEventKind {
+  ANALYSIS
+  ANALYSIS_RELEASE
+  CACHE_HIT
+  RESERVE
+  SETTLE
+}
+
+// Stripe mirror and operational tables. Every write goes through the billing server slice
+// (plain `prisma`), so client policies are read-only.
+
+model BillingCustomer {
+  /// @zod.custom.omit(["model"])
+  id                 String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId        String   @map("workspace_id") @db.Uuid
+  provider           String   @default("stripe") @map("provider")
+  externalCustomerId String   @map("external_customer_id")
+  // Stripe-specific: a second provider needs `mode` or a nullable column.
+  livemode           Boolean
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace     Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  subscriptions BillingSubscription[]
+
+  @@deny('all', auth() == null)
+  @@allow('read', workspace.members?[userId == auth().id && role == OWNER] || auth().role == 'ADMIN')
+  @@allow('create,update,delete', false)
+
+  @@unique([workspaceId, provider])
+  @@unique([provider, externalCustomerId])
+  @@map("billing_customers")
+}
+
+model BillingSubscription {
+  /// @zod.custom.omit(["model"])
+  id                      String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId             String    @map("workspace_id") @db.Uuid
+  provider                String    @default("stripe") @map("provider")
+  billingCustomerId       String    @map("billing_customer_id") @db.Uuid
+  externalSubscriptionId    String    @unique @map("external_subscription_id")
+  externalSubscriptionItemId String   @unique @map("external_subscription_item_id")
+  externalPriceId           String    @map("external_price_id")
+  externalStatus            String    @map("external_status")
+  /// @zod.number.int().min(1)
+  quantity                Int       @gte(1)
+  currency                String
+  currentPeriodStart      DateTime  @map("current_period_start") @db.Timestamptz(3)
+  currentPeriodEnd        DateTime  @map("current_period_end") @db.Timestamptz(3)
+  cancelAtPeriodEnd       Boolean   @default(false) @map("cancel_at_period_end")
+  cancelAt                DateTime? @map("cancel_at") @db.Timestamptz(3)
+  latestInvoiceId         String?   @map("latest_invoice_id")
+  latestInvoiceStatus     String?   @map("latest_invoice_status")
+  activatedAt             DateTime? @map("activated_at") @db.Timestamptz(3)
+  pastDueStartedAt        DateTime? @map("past_due_started_at") @db.Timestamptz(3)
+  graceEndsAt             DateTime? @map("grace_ends_at") @db.Timestamptz(3)
+  /// Nullable on purpose: UNIQUE(workspaceId, isCurrent) permits many NULLs and a single
+  /// true, which is the one-current-subscription invariant. Never write false.
+  isCurrent               Boolean?  @map("is_current")
+  needsReview             Boolean   @default(false) @map("needs_review")
+  needsAction             String?   @map("needs_action")
+  reviewReason            String?   @map("review_reason")
+  createdAt               DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt               DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace       Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  billingCustomer BillingCustomer @relation(fields: [billingCustomerId], references: [id], onDelete: Restrict)
+
+  @@deny('all', auth() == null)
+  @@allow('read', workspace.members?[userId == auth().id && role == OWNER] || auth().role == 'ADMIN')
+  @@allow('create,update,delete', false)
+
+  @@unique([workspaceId, isCurrent])
+  @@index([billingCustomerId, createdAt])
+  @@index([externalStatus, currentPeriodEnd])
+  @@map("billing_subscriptions")
+}
+
+model BillingCheckoutSession {
+  /// @zod.custom.omit(["model"])
+  id                    String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId           String   @map("workspace_id") @db.Uuid
+  provider              String   @default("stripe") @map("provider")
+  externalCheckoutSessionId String @unique @map("external_checkout_session_id")
+  externalCustomerId      String   @map("external_customer_id")
+  externalStatus          String?  @map("external_status")
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+
+  @@deny('all', auth() == null)
+  @@allow('read', workspace.members?[userId == auth().id && role == OWNER] || auth().role == 'ADMIN')
+  @@allow('create,update,delete', false)
+
+  @@index([workspaceId, createdAt])
+  @@map("billing_checkout_sessions")
+}
+
+model BillingOperation {
+  /// @zod.custom.omit(["model"])
+  id             String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId    String    @map("workspace_id") @db.Uuid
+  /// @zod.custom.omit(["model"])
+  actorUserId    String?   @map("actor_user_id") @db.Uuid @omit
+  operation      String
+  requestId      String    @map("request_id")
+  requestHash    String    @map("request_hash")
+  status         BillingOperationStatus
+  externalObjectId String?   @map("external_object_id")
+  resultJson     Json?     @map("result_json")
+  errorCode      String?   @map("error_code")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  actor     User?     @relation("BillingOperationActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@deny('all', auth() == null)
+  @@allow('read', workspace.members?[userId == auth().id && role == OWNER] || auth().role == 'ADMIN')
+  @@allow('create,update,delete', false)
+
+  @@unique([workspaceId, requestId])
+  @@index([status, updatedAt])
+  @@map("billing_operations")
+}
+
+model BillingEvent {
+  /// @zod.custom.omit(["model"])
+  id              String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  provider        String    @default("stripe") @map("provider")
+  externalEventId   String    @unique @map("external_event_id")
+  type            String
+  livemode        Boolean
+  apiVersion      String?   @map("api_version")
+  externalCreatedAt DateTime  @map("external_created_at") @db.Timestamptz(3)
+  /// @zod.custom.omit(["model"])
+  payload         Json?     @omit
+  payloadHash     String    @map("payload_hash")
+  status          BillingEventStatus    @default(RECEIVED)
+  /// @zod.number.int().min(0)
+  attempts        Int       @default(0) @gte(0)
+  /// @zod.number.int().min(0)
+  replayCount     Int       @default(0) @map("replay_count") @gte(0)
+  lastError       String?   @map("last_error") @db.Text
+  triggerRunId    String?   @map("trigger_run_id")
+  receivedAt      DateTime  @default(now()) @map("received_at") @db.Timestamptz(3)
+  processedAt     DateTime? @map("processed_at") @db.Timestamptz(3)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  ledgerEntries BillingLedgerEntry[]
+
+  @@deny('all', auth() == null)
+  @@allow('read', auth().role == 'ADMIN')
+  @@allow('create,update,delete', false)
+
+  @@index([status, receivedAt])
+  @@index([type, externalCreatedAt])
+  @@index([externalCreatedAt, id])
+  @@map("billing_events")
+}
+
+model BillingLedgerEntry {
+  /// @zod.custom.omit(["model"])
+  id                    String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId           String    @map("workspace_id") @db.Uuid
+  provider              String    @default("stripe") @map("provider")
+  /// @zod.custom.omit(["model"])
+  billingEventId        String?   @map("billing_event_id") @db.Uuid @omit
+  entryKey              String    @unique @map("entry_key")
+  kind                  String
+  externalObjectId        String    @map("external_object_id")
+  relatedInvoiceId      String?   @map("related_invoice_id")
+  relatedSubscriptionId String?   @map("related_subscription_id")
+  correctsEntryId       String?   @map("corrects_entry_id") @db.Uuid
+  amount                BigInt
+  currency              String
+  occurredAt            DateTime  @map("occurred_at") @db.Timestamptz(3)
+  details               Json?
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace    Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  billingEvent BillingEvent?       @relation(fields: [billingEventId], references: [id], onDelete: Restrict)
+  corrects     BillingLedgerEntry? @relation("BillingLedgerCorrections", fields: [correctsEntryId], references: [id], onDelete: Restrict)
+  corrections  BillingLedgerEntry[] @relation("BillingLedgerCorrections")
+
+  @@deny('all', auth() == null)
+  @@allow('read', workspace.members?[userId == auth().id && role == OWNER] || auth().role == 'ADMIN')
+  @@allow('create,update,delete', false)
+
+  @@index([workspaceId, occurredAt, id])
+  @@index([relatedInvoiceId, kind])
+  @@index([externalObjectId, kind])
+  @@map("billing_ledger_entries")
+}
+
+model BillingIssue {
+  /// @zod.custom.omit(["model"])
+  id             String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  source         String
+  provider       String    @default("stripe") @map("provider")
+  kind           String
+  severity       BillingIssueSeverity
+  dedupeKey      String    @unique @map("dedupe_key")
+  workspaceId    String?   @map("workspace_id") @db.Uuid
+  externalObjectId String?   @map("external_object_id")
+  status         BillingIssueStatus    @default(OPEN)
+  details        Json?
+  firstSeenAt    DateTime  @default(now()) @map("first_seen_at") @db.Timestamptz(3)
+  lastSeenAt     DateTime  @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  resolvedAt     DateTime? @map("resolved_at") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+
+  @@deny('all', auth() == null)
+  @@allow('read', auth().role == 'ADMIN')
+  @@allow('create,update,delete', false)
+
+  @@index([status, severity, lastSeenAt])
+  @@index([workspaceId, status])
+  @@map("billing_issues")
+}
+
+model BillingReconciliationRun {  /// @zod.custom.omit(["model"])
+  id                   String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  scheduledForDate     DateTime  @unique @map("scheduled_for_date") @db.Date
+  status               BillingReconciliationStatus
+  startedAt            DateTime  @map("started_at") @db.Timestamptz(3)
+  finishedAt           DateTime? @map("finished_at") @db.Timestamptz(3)
+  /// @zod.number.int().min(0)
+  checkedSubscriptions Int       @default(0) @map("checked_subscriptions") @gte(0)
+  /// @zod.number.int().min(0)
+  checkedMoneyObjects  Int       @default(0) @map("checked_money_objects") @gte(0)
+  /// @zod.number.int().min(0)
+  mismatchCount        Int       @default(0) @map("mismatch_count") @gte(0)
+  error                String?   @db.Text
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@deny('all', auth() == null)
+  @@allow('read', auth().role == 'ADMIN')
+  @@allow('create,update,delete', false)
+
+  @@map("billing_reconciliation_runs")
+}
+
+// Append-only metering: one row per reserved, settled or cache-hit unit. `workspace_usage` is the
+// per-month rollup the entitlement reader consumes; it is never recomputed from these rows.
+model UsageEvent {
+  /// @zod.custom.omit(["model"])
+  id                String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId       String   @map("workspace_id") @db.Uuid
+  analysisId        String?  @map("analysis_id") @db.Uuid
+  kind              UsageEventKind
+  idempotencyKey    String   @unique @map("idempotency_key")
+  provider          String?
+  model             String?
+  /// @zod.number.int().min(0)
+  inputTokens       Int      @default(0) @map("input_tokens") @gte(0)
+  /// @zod.number.int().min(0)
+  cachedInputTokens Int      @default(0) @map("cached_input_tokens") @gte(0)
+  /// @zod.number.int().min(0)
+  outputTokens      Int      @default(0) @map("output_tokens") @gte(0)
+  costCents         BigInt   @default(0) @map("cost_cents")
+  occurredAt        DateTime @map("occurred_at") @db.Timestamptz(3)
+  details           Json?
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+
+  @@deny('all', auth() == null)
+  @@allow('read', workspace.members?[userId == auth().id && role == OWNER] || auth().role == 'ADMIN')
+  @@allow('create,update,delete', false)
+
+  @@index([workspaceId, occurredAt, id])
+  @@index([analysisId])
+  @@map("usage_events")
+}
+
+model WorkspaceUsage {
+  /// @zod.custom.omit(["model"])
+  id            String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId   String   @map("workspace_id") @db.Uuid
+  periodStart   DateTime @map("period_start") @db.Date
+  /// @zod.number.int().min(0)
+  analysesCount Int      @default(0) @map("analyses_count") @gte(0)
+  /// @zod.number.int().min(0)
+  aiTokensUsed  Int      @default(0) @map("ai_tokens_used") @gte(0)
+  costCents     BigInt   @default(0) @map("cost_cents")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+
+  @@deny('all', auth() == null)
+  @@allow('read', workspace.members?[userId == auth().id && role == OWNER] || auth().role == 'ADMIN')
+  @@allow('create,update,delete', false)
+
+  @@unique([workspaceId, periodStart])
+  @@index([periodStart])
+  @@map("workspace_usage")
+}

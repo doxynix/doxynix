@@ -1,4 +1,4 @@
-import type { AuthorGroup } from "./high-five.types";
+import type { AuthorGroup } from "@/entities/high-five/model/high-five.types";
 
 export function filterAuthorGroups(groups: AuthorGroup[], search: string): AuthorGroup[] {
   const s = search.trim().toLowerCase();

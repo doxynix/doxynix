@@ -33,11 +33,6 @@ import {
   type StructureNodeType,
 } from "./structure-shared";
 
-export type {
-  LeafStructureMapPayload as StructureMapPayload,
-  LeafStructureNodePayload as StructureNodePayload,
-};
-
 const summarizeImportanceHelper = (input: {
   apiCount: number;
   changeCouplingCount: number;

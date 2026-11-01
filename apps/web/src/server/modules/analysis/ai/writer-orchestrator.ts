@@ -254,6 +254,7 @@ export async function orchestrateWriterTasks(
     branch: repo.defaultBranch,
     repoId: repo.id,
     userId,
+    workspaceId: repo.workspaceId,
   };
 
   const queueOptions = {

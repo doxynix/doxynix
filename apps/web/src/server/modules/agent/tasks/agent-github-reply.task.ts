@@ -5,6 +5,7 @@ import { dedent } from "es-toolkit";
 import { getActiveModels } from "@/server/core/ai/ai-constants";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
+import { getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { getInstallationClient } from "@/server/core/github/github-client";
 import { buildRepositoryToolProfile } from "@/server/domain/ai/ai-tools";
 import type { GithubMentionReply } from "@/server/domain/github-mention-reply";
@@ -26,6 +27,31 @@ export const agentGithubReplyTask = task({
     });
 
     const activeModels = await getActiveModels();
+
+    const entitlement = await getWorkspaceEntitlement(prisma, payload.workspaceId);
+
+    if (entitlement == null || !entitlement.hasAccess) {
+      appLogger.warn({
+        msg: "github_agent_reply_skipped_no_access",
+        repo: `${payload.owner}/${payload.repoName}`,
+        workspaceId: payload.workspaceId,
+      });
+
+      return;
+    }
+
+    if (
+      entitlement.aiTokensPerMonth != null &&
+      entitlement.usedTokens >= entitlement.aiTokensPerMonth
+    ) {
+      appLogger.warn({
+        msg: "github_agent_reply_skipped_quota_exhausted",
+        repo: `${payload.owner}/${payload.repoName}`,
+        workspaceId: payload.workspaceId,
+      });
+
+      return;
+    }
 
     const installation = await prisma.githubInstallation.findFirst({
       where: {
@@ -121,6 +147,7 @@ export const agentGithubReplyTask = task({
       req: taskRequest,
       requestId: `reply-${payload.commentId}`,
       userId: payload.userId,
+      workspaceId: payload.workspaceId,
     });
 
     return requestContext.run(store, async () => {
@@ -142,7 +169,7 @@ export const agentGithubReplyTask = task({
       `;
 
       const result = await callWithFallback<unknown>({
-        attemptMetadata: { operation: "agent-github-reply" },
+        attemptMetadata: { operation: "agent-github-reply", workspaceId: payload.workspaceId },
         models: activeModels.AGENT,
         outputSchema: null,
         prompt,
@@ -153,6 +180,7 @@ export const agentGithubReplyTask = task({
         tools: buildRepositoryToolProfile(
           "github_agent",
           payload.userId,
+          payload.workspaceId,
           payload.repoId,
           payload.branch,
         ),

@@ -35,6 +35,7 @@ const FILE_ACTION = {
   language: "English",
   path: "src/math/add.ts",
   repoId: "repo-1",
+  workspaceId: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d",
 };
 
 beforeEach(() => {

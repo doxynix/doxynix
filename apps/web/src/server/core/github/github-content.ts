@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
+import { isOctokitError } from "@/server/core/api-error";
 import { getFileScore } from "@/server/core/path-classify/score";
-import { isOctokitError } from "@/server/utils/handle-error";
 
 import { appLogger } from "../app-logger";
 import type { DbClient, PrismaClientExtended } from "../db";
@@ -35,6 +35,16 @@ function throwBrowseAccessError(params: {
   throw params.sourceError;
 }
 
+export type GetFileContentParams = {
+  branch?: string;
+  db: DbClient;
+  path: string;
+  prisma: PrismaClientExtended;
+  repoId: string;
+  userId: string;
+  workspaceId: string;
+};
+
 export const githubBrowseService = {
   async getBranches(prisma: PrismaClientExtended, userId: string, owner: string, name: string) {
     try {
@@ -50,15 +60,15 @@ export const githubBrowseService = {
     }
   },
 
-  async getFileContent(
-    db: DbClient,
-    prisma: PrismaClientExtended,
-    userId: string,
-    workspaceId: string,
-    repoId: string,
-    path: string,
-    branch?: string,
-  ) {
+  async getFileContent({
+    branch,
+    db,
+    path,
+    prisma,
+    repoId,
+    userId,
+    workspaceId,
+  }: GetFileContentParams) {
     const repo = await db.repo.findUnique({
       where: { id: repoId, workspaceId },
     });

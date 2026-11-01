@@ -83,16 +83,14 @@ describe("githubAppService.syncInstallations ownership", () => {
     expect(create).not.toHaveBeenCalled();
   });
 
-  it("creates the row when no row exists for that installation", async () => {
+  it("does not claim an installation that no workspace owns", async () => {
     const { create, db } = makeDb([]);
 
     await githubAppService.syncInstallations(db as never, "user-c", "workspace-c");
 
-    expect(create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ id: 4242n, userId: "user-c", workspaceId: "workspace-c" }),
-      }),
-    );
+    // Claiming happens only through /api/github/setup with a workspace state; a background sync
+    // must not silently bind an installation that GitHub reported.
+    expect(create).not.toHaveBeenCalled();
   });
 
   it("reads the existing installations once, not once per installation", async () => {

@@ -27,13 +27,67 @@ export function encryptOnWrite(
   key: { fingerprint: string; raw: Buffer },
 ): Record<string, unknown> {
   // No fast path here, unlike the read side: a model with no encrypted fields of its own can still own a relation that has them (`Analysis` -> `Document.content`).
-  const draft = structuredClone(args);
+  const draft = cloneForRewrite(args);
 
   for (const target of collectTargets(draft, model)) {
     rewriteTarget(draft, target, key);
   }
 
   return draft;
+}
+
+// `structuredClone` reduces Prisma's `DbNull`/`JsonNull` markers to `{}`, which writes JSON `{}`
+// instead of SQL NULL, and turns `Buffer`/`Decimal` into plain objects. Only plain objects and
+// arrays need copying, so other class instances are passed through by reference.
+function cloneForRewrite<T>(value: T, seen: WeakMap<object, unknown> = new WeakMap()): T {
+  if (Array.isArray(value)) {
+    const cached = seen.get(value);
+
+    if (cached != null) {
+      return cached as T;
+    }
+
+    const copy: unknown[] = [];
+    seen.set(value, copy);
+
+    for (const item of value) {
+      copy.push(cloneForRewrite(item, seen));
+    }
+
+    return copy as T;
+  }
+
+  if (value == null || typeof value !== "object") {
+    return value;
+  }
+
+  const prototype = Object.getPrototypeOf(value);
+
+  // `Object.create(null)` maps are plain data; every other class instance is passed through.
+  if (prototype !== Object.prototype && prototype !== null) {
+    return value;
+  }
+
+  const cached = seen.get(value);
+
+  if (cached != null) {
+    return cached as T;
+  }
+
+  const copy: Record<string, unknown> = {};
+  seen.set(value, copy);
+
+  for (const [key, nested] of Object.entries(value)) {
+    // `defineProperty` keeps an own `__proto__` key instead of triggering the prototype setter.
+    Object.defineProperty(copy, key, {
+      configurable: true,
+      enumerable: true,
+      value: cloneForRewrite(nested, seen),
+      writable: true,
+    });
+  }
+
+  return copy as T;
 }
 
 export function decryptOnRead(
