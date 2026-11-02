@@ -1,0 +1,16 @@
+# Vendored third-party skills; renovate.json already ignores this path.
+.agents/
+.claude/
+.cursor/
+.continue/
+
+# Local patches applied to dependencies.
+patches/
+
+# Generated: source of truth is *.zmodel / the generators.
+apps/web/prisma/schema.prisma
+apps/web/prisma/generated/
+apps/web/src/server/core/field-encryption/config.generated.ts
+apps/web/messages/en.d.json.ts
+packages/shared/src/enums/index.ts
+apps/siem-server/dist/
