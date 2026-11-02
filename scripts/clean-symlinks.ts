@@ -37,6 +37,7 @@ for (const baseDir of searchDirs) {
       }
     }
   } catch (error) {
+    // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring — error object, no user input
     console.error(`⚠️ [clean:symlinks] Error reading ${bunCacheDir}:`, error?.message ?? error);
   }
 
@@ -47,6 +48,7 @@ for (const baseDir of searchDirs) {
       console.log(`🧹 [clean:symlinks] Removed circular directory: ${directNested}`);
       cleanedCount++;
     } catch (error) {
+      // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring — error object, no user input
       console.error(`⚠️ [clean:symlinks] Error removing ${directNested}:`, error?.message ?? error);
     }
   }

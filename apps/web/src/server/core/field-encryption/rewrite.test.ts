@@ -18,6 +18,7 @@ const at = (root: unknown, ...keys: string[]): Record<string, unknown> => {
   let cursor: unknown = root;
   for (const key of keys) {
     expect(cursor).toBeTypeOf("object");
+    // nosemgrep: javascript.lang.security.audit.prototype-pollution.prototype-pollution-loop.prototype-pollution-loop — walks a local JSON fixture
     cursor = (cursor as Record<string, unknown>)[key];
   }
   return cursor as Record<string, unknown>;

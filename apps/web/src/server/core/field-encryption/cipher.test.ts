@@ -38,6 +38,7 @@ describe("field-encryption cipher", () => {
   it("round-trips arbitrary unicode payloads", () => {
     const plaintext = "Ünïcødé — 日本語 — emoji 🎯 — <script>alert(1)</script>";
 
+    // nosemgrep: javascript.lang.security.audit.unknown-value-with-script-tag.unknown-value-with-script-tag — test fixture, RAW_KEY is a literal Buffer
     expect(decryptString(encryptString(plaintext, RAW_KEY, "deadbeef"), RAW_KEY)).toBe(plaintext);
   });
 
