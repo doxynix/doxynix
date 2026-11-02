@@ -39,6 +39,7 @@ def api_get(url, token):
             "X-GitHub-Api-Version": "2022-11-28",
         },
     )
+    # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected — URL is built from the hardcoded GitHub API base
     with urllib.request.urlopen(request, timeout=30) as response:
         return json.load(response)
 

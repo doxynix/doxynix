@@ -86,11 +86,17 @@ export function decryptString(envelope: string, rawKey: Buffer): string {
   }
 
   const bytes = Buffer.from(parsed.ciphertext, "base64url");
+
+  if (bytes.length < AUTH_TAG_BYTES) {
+    throw new Error("[field-encryption] Ciphertext is shorter than the auth tag");
+  }
+
   const tagStart = bytes.length - AUTH_TAG_BYTES;
   const decipher = crypto.createDecipheriv(
     "aes-256-gcm",
     rawKey,
     Buffer.from(parsed.iv, "base64url"),
+    { authTagLength: AUTH_TAG_BYTES },
   );
   decipher.setAuthTag(bytes.subarray(tagStart));
 

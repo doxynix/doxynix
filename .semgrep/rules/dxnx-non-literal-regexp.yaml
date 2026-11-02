@@ -1,0 +1,37 @@
+rules:
+  - id: dxnx-non-literal-regexp
+    message: >-
+      RegExp() is built from a non-literal value. If that value is user-controlled this is a
+      ReDoS surface. Escaping or validation must be visible at the call site; vetted files are
+      listed in paths.exclude.
+    metadata:
+      cwe:
+        - "CWE-1333: Inefficient Regular Expression Complexity"
+      category: security
+      confidence: LOW
+      source-rule: javascript.lang.security.audit.detect-non-literal-regexp
+    languages:
+      - javascript
+      - typescript
+    severity: WARNING
+    mode: taint
+    paths:
+      exclude:
+        - "/apps/web/src/shared/lib/cookies.ts"
+        - "/apps/web/src/features/repo-setup/model/terminal-logs.ts"
+        - "/apps/web/src/server/modules/analysis/engine/core/framework-catalog.ts"
+        - "/apps/web/src/server/modules/analysis/engine/extractors/regex-signal-specs.test.ts"
+    pattern-sources:
+      - patterns:
+          - pattern-inside: |
+              function ... (...,$ARG,...) {...}
+          - focus-metavariable: $ARG
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: new RegExp($ARG, ...)
+              - pattern: RegExp($ARG, ...)
+          - pattern-not: RegExp("...", ...)
+          - pattern-not: new RegExp("...", ...)
+          - pattern-not: RegExp(/.../, ...)
+          - pattern-not: new RegExp(/.../, ...)

@@ -47,6 +47,7 @@ export function ConsoleEasterEgg() {
     ╚═════╝  ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
     `;
 
+    // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring — static banner, no user input
     console.info(`%c${asciiArt}`, asciiStyle);
   }, []);
 

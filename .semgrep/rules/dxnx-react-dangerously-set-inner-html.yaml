@@ -1,0 +1,58 @@
+rules:
+  - id: dxnx-react-dangerously-set-inner-html
+    message: >-
+      dangerouslySetInnerHTML is rendered from a non-constant value. Only reviewed sources may
+      reach this sink: shiki output, rehype-sanitize output (markdown-to-html.ts), mermaid strict
+      mode. A new render path must be added to paths.exclude with a one-line justification.
+    metadata:
+      cwe:
+        - "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+      category: security
+      confidence: LOW
+      technology:
+        - react
+      source-rule: typescript.react.security.audit.react-dangerouslysetinnerhtml
+    languages:
+      - typescript
+      - javascript
+    severity: WARNING
+    mode: taint
+    paths:
+      exclude:
+        - "/apps/web/src/entities/audit-log/ui/audit-log-sheet.tsx"
+        - "/apps/web/src/features/admin/ui/admin-audit-payload-sheet.tsx"
+        - "/apps/web/src/features/repo-code-viewer/ui/repo-code-browser.tsx"
+        - "/apps/web/src/features/repo-docs-viewer/ui/repo-docs-content.tsx"
+        - "/apps/web/src/shared/ui/core/mermaid.tsx"
+        - "/apps/web/src/shared/ui/kit/code-window.tsx"
+    pattern-sources:
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  function ...({..., $X, ...}) { ... }
+              - pattern-inside: |
+                  function ...(..., $X, ...) { ... }
+          - focus-metavariable: $X
+          - pattern-not-inside: |
+                $F. ... .$SANITIZEUNC(...)
+    pattern-sinks:
+      - patterns:
+          - focus-metavariable: $X
+          - pattern-either:
+              - pattern: |
+                  {...,dangerouslySetInnerHTML: {__html: $X},...}
+              - pattern: |
+                  <$Y ... dangerouslySetInnerHTML={{__html: $X}} />
+          - pattern-not: |
+              <$Y ... dangerouslySetInnerHTML={{__html: "..."}} />
+          - pattern-not: |
+              {...,dangerouslySetInnerHTML:{__html: "..."},...}
+          - metavariable-pattern:
+              patterns:
+                - pattern-not: |
+                    {...}
+              metavariable: $X
+          - pattern-not: |
+              <... {__html: "..."} ...>
+          - pattern-not: |
+              <... {__html: `...`} ...>

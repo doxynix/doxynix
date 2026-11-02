@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 
 console.log("🚀 Launching ZenStack via smart trigger...");
 
+// nosemgrep: javascript.lang.security.audit.spawn-shell-true.spawn-shell-true — hardcoded command; shell is the bunx shim
 const child = spawn(
   "bunx",
   ["--bun", "zenstack", "generate", "--schema", "prisma/schema.zmodel", "--offline"],

@@ -37,7 +37,6 @@ env:
   SKIP_ENV_VALIDATION: "true"
   NEXT_TELEMETRY_DISABLED: 1
   NODE_OPTIONS: "--max-old-space-size=6144"
-  PRISMA_FIELD_ENCRYPTION_KEY: ${{ secrets.PRISMA_FIELD_ENCRYPTION_KEY }}
   DATABASE_URL: postgresql://user:password@localhost:5432/test_db
   DIRECT_URL: postgresql://user:password@localhost:5432/test_db
   NEXTAUTH_URL: "http://localhost:3000"
@@ -145,6 +144,8 @@ jobs:
     if: github.actor != 'ImgBotApp'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      PRISMA_FIELD_ENCRYPTION_KEY: ${{ secrets.PRISMA_FIELD_ENCRYPTION_KEY }}
     services:
       postgres:
         image: postgres:18@sha256:3a4264520e121176619f54ff867d12774bc81e95e7b84db58d63bccdb6144b81
@@ -202,6 +203,9 @@ jobs:
       github.event_name == 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+
+    env:
+      PRISMA_FIELD_ENCRYPTION_KEY: ${{ secrets.PRISMA_FIELD_ENCRYPTION_KEY }}
 
     permissions:
       contents: read
@@ -266,6 +270,8 @@ jobs:
       github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      PRISMA_FIELD_ENCRYPTION_KEY: ${{ secrets.PRISMA_FIELD_ENCRYPTION_KEY }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
@@ -291,6 +297,8 @@ jobs:
     needs: [quality, types, tests, changes, init, migrations]
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      PRISMA_FIELD_ENCRYPTION_KEY: ${{ secrets.PRISMA_FIELD_ENCRYPTION_KEY }}
     services:
       postgres:
         image: postgres:18@sha256:3a4264520e121176619f54ff867d12774bc81e95e7b84db58d63bccdb6144b81

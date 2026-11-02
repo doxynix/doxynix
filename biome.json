@@ -80,7 +80,8 @@
       "!!**/prisma/generated",
       "!!**/prisma/json-schema",
       "!!**/bun.lock",
-      "!!**/.agents"
+      "!!**/.agents",
+      "!!**/.semgrep"
     ]
   },
   "formatter": {

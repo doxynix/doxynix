@@ -85,6 +85,19 @@ jobs:
       - name: Clean tree-sitter symlinks
         run: bun run clean:symlinks
 
+      - name: Install Semgrep
+        run: pipx install "semgrep==1.182.1"
+
+      - name: Semgrep (pull request, diff-aware)
+        if: github.event_name == 'pull_request'
+        env:
+          SEMGREP_BASELINE: ${{ github.event.pull_request.base.sha }}
+        run: bun run security:semgrep:diff
+
+      - name: Semgrep (push, full)
+        if: github.event_name != 'pull_request'
+        run: bun run security:semgrep
+
       - name: Run Secretlint
         run: bun run secretlint
 

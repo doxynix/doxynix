@@ -148,6 +148,7 @@ function run(command: unknown[]): unknown {
       return options.includes("get") ? previous : "OK";
     }
     default: {
+      // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring — test double, command name comes from the app under test
       console.warn(`memory redis: unsupported command "${String(name)}"`, command);
       throw new Error(`memory redis: unsupported command "${String(name)}"`);
     }

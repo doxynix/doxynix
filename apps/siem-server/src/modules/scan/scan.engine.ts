@@ -48,6 +48,7 @@ export function analyzeLogContent(content: string, activeRules: ScanRuleInput[])
       try {
         return {
           ...rule,
+          // nosemgrep: dxnx-non-literal-regexp — operator-authored SIEM pattern; ReDoS bound in DXNX-297
           regex: new RegExp(rule.pattern, "gi"),
         };
       } catch {

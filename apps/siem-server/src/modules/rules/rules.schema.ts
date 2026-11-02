@@ -6,6 +6,7 @@ import { rules, selectRuleSchema } from "@/core/db/schema";
 
 function isValidRegex(pattern: string): boolean {
   try {
+    // nosemgrep: dxnx-non-literal-regexp — operator-authored SIEM pattern; ReDoS bound in DXNX-297
     const regex = new RegExp(pattern);
     return regex instanceof RegExp;
   } catch {

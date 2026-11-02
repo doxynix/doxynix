@@ -70,6 +70,7 @@ const args = ["run", tempConfigPath, "--inPlace"];
 console.log(`🚀 Running targeted Stryker mutation test for: ${mutatePath}`);
 console.log(`🎯 Test target file: ${testPath}`);
 
+// nosemgrep: javascript.lang.security.audit.spawn-shell-true.spawn-shell-true — developer CLI args; shell is the Windows shim
 const strykerProcess = spawn(strykerBin, args, {
   cwd: webDir,
   shell: isWindows,
