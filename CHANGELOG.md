@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.8.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.7.0...doxynix-v6.8.0) (2026-11-02)
+
+
+### Features
+
+* **web:** add llms.txt and llms-full.txt  ([#2360](https://github.com/doxynix/doxynix/issues/2360)) ([3b8d632](https://github.com/doxynix/doxynix/commit/3b8d632036aabf63e4b48153b4eb9611a18d4fb5))
+
 ## [6.7.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.6.0...doxynix-v6.7.0) (2026-11-01)
 
 
