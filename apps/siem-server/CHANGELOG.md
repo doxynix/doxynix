@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.0](https://github.com/doxynix/doxynix/compare/siem-server-v0.4.4...siem-server-v0.5.0) (2026-11-02)
+
+
+### Features
+
+* **tooling:** add the semgrep security gate ([#2362](https://github.com/doxynix/doxynix/issues/2362)) ([f2d3bf1](https://github.com/doxynix/doxynix/commit/f2d3bf1cedc168fe86c41eb9df732cec89186186))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @doxynix/shared bumped to 0.8.0
+
 ## [0.4.4](https://github.com/doxynix/doxynix/compare/siem-server-v0.4.3...siem-server-v0.4.4) (2026-11-01)
 
 
