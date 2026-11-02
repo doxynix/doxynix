@@ -297,6 +297,8 @@ jobs:
     needs: [quality, types, tests, changes, init, migrations]
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      PRISMA_FIELD_ENCRYPTION_KEY: ${{ secrets.PRISMA_FIELD_ENCRYPTION_KEY }}
     services:
       postgres:
         image: postgres:18@sha256:3a4264520e121176619f54ff867d12774bc81e95e7b84db58d63bccdb6144b81
