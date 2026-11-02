@@ -21,6 +21,7 @@ Oxlint only).
 | Tests | `bun run test` — **only `apps/web` has tests**; the other workspaces have no `test` script |
 | One test file | `bun --filter @doxynix/web test src/server/modules/analysis/analysis.mapper.test.ts` |
 | Duplication / dead code | `bun run dup` (jscpd, fails over 5%) · `bun run knip` |
+| Security scan | `bun run security:semgrep` (full) · `bun run security:semgrep:diff` (PR diff) |
 | Spelling / secrets | `bun run spellcheck` (cspell) · `bun run secretlint` |
 
 ### Things that will bite you
