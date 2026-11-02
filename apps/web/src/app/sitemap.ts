@@ -2,22 +2,8 @@ import type { MetadataRoute } from "next";
 
 import { APP_URL } from "@/shared/config/env.client";
 import { DEFAULT_LOCALE, LOCALES } from "@/shared/config/locales";
+import { PUBLIC_ROUTES } from "@/shared/lib/public-routes";
 import { getSitemapUrl } from "@/shared/lib/sitemap.utils";
-
-type RouteConfig = {
-  changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
-  path: string;
-  priority: number;
-};
-
-const PUBLIC_ROUTES: RouteConfig[] = [
-  { changeFrequency: "daily", path: "", priority: 1.0 },
-  { changeFrequency: "weekly", path: "about", priority: 0.8 },
-  { changeFrequency: "weekly", path: "support", priority: 0.8 },
-  { changeFrequency: "weekly", path: "high-five", priority: 0.7 },
-  { changeFrequency: "monthly", path: "privacy", priority: 0.3 },
-  { changeFrequency: "monthly", path: "terms", priority: 0.3 },
-];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const sitemapEntries: MetadataRoute.Sitemap = [];
