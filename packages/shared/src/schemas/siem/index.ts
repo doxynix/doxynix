@@ -123,6 +123,7 @@ export type RulesQuery = z.infer<typeof RulesQuerySchema>;
 
 function isValidRegex(pattern: string): boolean {
   try {
+    // nosemgrep: dxnx-non-literal-regexp — operator-authored SIEM pattern; ReDoS bound in DXNX-297
     return new RegExp(pattern) instanceof RegExp;
   } catch {
     return false;

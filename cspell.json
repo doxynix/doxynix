@@ -573,6 +573,7 @@
     "nonoptional",
     "nonpositive",
     "normalised",
+    "nosemgrep",
     "notif",
     "notiz",
     "nowait",
