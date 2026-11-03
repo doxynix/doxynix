@@ -1,0 +1,85 @@
+---
+title: Your first analysis
+description: Pick a branch, documents and language, then follow the run from queue to generated docs.
+---
+
+## Before you start
+
+You need a repository connected through the GitHub App, and the branch you want to analyze must
+exist on the remote. Analyses are metered by plan: Hobby includes 20 analyses per month, Pro
+includes 500.
+
+## Choose documents
+
+Open the repository and press **Analyze**, then pick what to generate:
+
+| Type | What it produces |
+| --- | --- |
+| `README` | Overview, setup and an architecture summary |
+| `ARCHITECTURE` | Modules, data flow, dependency map and risks |
+| `API` | Endpoint reference built from detected routes |
+| `CONTRIBUTING` | Workflow, conventions and review rules |
+| `CHANGELOG` | Diff-driven release history |
+| `CODE_DOC` | Per-file documentation for the files you select |
+
+`dxnx analyze start` requests `README`, `ARCHITECTURE` and `CODE_DOC` by default. The dashboard lets
+you select any of the six types.
+
+## Choose a language
+
+Documentation is generated in English or Russian. The choice applies to the whole run.
+
+## Optional scope
+
+You can narrow a run to a list of files and add free-form instructions describing what the
+documentation should emphasize. Both are optional; leaving them empty analyzes the repository as a
+whole.
+
+## Follow the run
+
+The analysis is queued in Trigger.dev. The dashboard shows the current status and progress for the
+repository, and the CLI reports the same run:
+
+```bash
+dxnx analyze status owner/repo
+```
+
+Behind the scenes a temporary clone is created, parsed with Tree-sitter, passed through Sentinel →
+Mapper → Architect → Writer, and deleted when the run finishes.
+
+## Where the results land
+
+Generated files are stored in the workspace and shown in the Docs tab, separated by type. Their
+materialized paths are:
+
+| Type | Path |
+| --- | --- |
+| `README` | `README.md` |
+| `ARCHITECTURE` | `docs/ARCHITECTURE.md` |
+| `API` | `docs/API.md` |
+| `CONTRIBUTING` | `CONTRIBUTING.md` |
+| `CHANGELOG` | `CHANGELOG.md` |
+| `CODE_DOC` | `docs/code/<source-path>.md` |
+
+## Re-run and history
+
+Pressing **Analyze** again starts a new run against the current branch. Past runs are listed in the
+dashboard and with:
+
+```bash
+dxnx analyze history
+```
+
+History is kept for 7 days on Hobby and 90 days on Pro.
+
+## If it fails
+
+- **The branch is not found** — check the branch name and that it exists on the remote.
+- **The repository cannot be read** — confirm the GitHub App installation still has access to it.
+- **The plan quota is exhausted** — check the analyses used this month on your plan.
+
+For machine-readable details, add `--json`:
+
+```bash
+dxnx analyze status --json
+```

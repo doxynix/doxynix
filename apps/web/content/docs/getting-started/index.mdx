@@ -1,0 +1,46 @@
+---
+title: Quickstart
+description: Sign in, install the GitHub App, add a repository and run your first analysis.
+---
+
+## 1. Create an account
+
+Sign in at [doxynix.space/auth](https://doxynix.space/auth) with GitHub, Google or Yandex,
+or register a passkey.
+
+## 2. Install the GitHub App
+
+Open **Dashboard → Settings → Connections → GitHub Installations** and press **Configure**.
+Choose the repositories Doxynix can read. The app reads repository contents, metadata,
+pull requests and webhooks, and it writes only when you explicitly open a fix or
+documentation pull request.
+
+## 3. Add a repository
+
+Open **Dashboard → Repositories → Create Repository**, select the installation and the
+repository. Private repositories require the Pro plan.
+
+## 4. Run your first analysis
+
+Open the repository and press **Analyze**. Choose:
+
+- the branch to analyze;
+- the document types (`README`, `ARCHITECTURE`, `API`, `CONTRIBUTING`, `CHANGELOG`, `CODE_DOC`);
+- the documentation language (English or Russian);
+- optionally, a file list and free-form instructions.
+
+The job is queued in Trigger.dev. A temporary clone is created, parsed with Tree-sitter,
+passed through Sentinel → Mapper → Architect → Writer, and deleted when the run finishes.
+
+## 5. Read the results
+
+- **Overview** — health score and recent activity.
+- **Map** — dependency graph, entry points and cycles.
+- **Docs** — generated documents, separated by type.
+- **Analytics** — metrics and complexity charts.
+- **Pulls** — PR review findings on Pro.
+
+## 6. Take the output with you
+
+Copy or download a file from the Docs tab, export everything with `dxnx docs export`, or stage
+the files and open a pull request.

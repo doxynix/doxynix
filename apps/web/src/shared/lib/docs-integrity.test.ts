@@ -8,7 +8,13 @@ import { parse as parseYaml } from "yaml";
 
 const DOCS_ROOT = join(process.cwd(), "content", "docs");
 
-const REQUIRED_SLUGS = ["/docs"] as const;
+const REQUIRED_SLUGS = [
+  "/docs",
+  "/docs/getting-started",
+  "/docs/getting-started/github-app",
+  "/docs/getting-started/install-cli",
+  "/docs/getting-started/first-analysis",
+] as const;
 
 type DocPage = {
   description: string;

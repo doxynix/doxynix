@@ -1,0 +1,67 @@
+---
+title: Install the CLI
+description: Build dxnx from the repository, authenticate with an API key and verify the connection.
+---
+
+## Requirements
+
+Bun >= 1.3.14 and git.
+
+## Build from source
+
+```bash
+# Requirements: Bun >= 1.3.14 and git
+git clone https://github.com/doxynix/doxynix.git
+cd doxynix
+bun install
+bun run --filter @doxynix/cli build
+cd packages/cli && bun link
+dxnx --version
+```
+
+`bun link` puts the CLI on your `PATH`. The binary is available under two names: `dxnx` and
+`doxynix`.
+
+## Standalone binary
+
+If you do not want a linked workspace package, compile a single executable:
+
+```bash
+bun run --filter @doxynix/cli build:bin
+./packages/cli/dxnx --help
+```
+
+## Authenticate
+
+```bash
+dxnx login
+dxnx login --token "$DOXYNIX_API_KEY"
+dxnx me
+dxnx logout
+```
+
+`dxnx login` prompts for an API key and verifies it before saving. `dxnx login --token` skips the
+prompt, which is what you want in a script. `dxnx me` prints the current account (`whoami` is an
+alias), and `dxnx logout` removes the local credentials.
+
+The token is stored in `~/.config/dxnx/config.json` with `0600` permissions.
+
+## Use an API key in CI
+
+```bash
+export DOXYNIX_API_KEY="dxnx_..."
+export DOXYNIX_API_URL="https://doxynix.space"
+dxnx status
+```
+
+Environment variables take precedence over the config file: `DOXYNIX_API_KEY` and `DXNX_TOKEN` are
+read before `~/.config/dxnx/config.json`. Set `DOXYNIX_API_URL` when you talk to an API host other
+than `https://doxynix.space`.
+
+`dxnx status` checks the API health and reports whether a token was found, which makes it a quick
+smoke test in CI.
+
+## About the npm package
+
+The published `@doxynix/cli` package can lag behind the repository. Building from source, as above,
+always matches the current code.
