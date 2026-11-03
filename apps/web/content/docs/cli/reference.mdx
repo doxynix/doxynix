@@ -1,0 +1,154 @@
+---
+title: CLI reference
+description: Every dxnx command, its arguments and its most useful options.
+---
+
+Most commands follow `dxnx <domain> <command>`; `status` is top-level. A command marked *default*
+runs when you omit the subcommand. `--json` is listed only on commands that support it.
+
+Domain aliases: `stats` (`analytics`), `activity` (`audit`), `doc` (`docs`), `pull-request` (`pr`),
+`stage` (`staging`), `notif` (`notifications`), `gh` (`github`), `chat` (`agent`).
+
+## Auth
+
+| Command | Description | Key options |
+| --- | --- | --- |
+| `login` | Prompt for an API key, verify it and save it locally. | `-t, --token <token>` |
+| `logout` | Remove the stored token from this machine. | — |
+| `me` | Print the authenticated user. Alias: `whoami`. | `--json` |
+
+## Profile
+
+| Command | Description | Key options |
+| --- | --- | --- |
+| `profile` | Show name, email, creation date and user ID. | — |
+| `profile update` | Interactively update the profile name. | — |
+| `profile sessions` | List active sessions across devices. | `--json` |
+| `profile revoke-session [sessionId]` | Revoke a session by ID prefix or from a picker. | — |
+| `profile accounts` | List linked OAuth providers. | `--json` |
+| `profile disconnect <provider>` | Disconnect `github`, `google` or `yandex`. | — |
+| `profile remove-avatar` | Delete the custom avatar and reset to the default. | — |
+| `profile delete` | Permanently delete the account and its repositories. | — |
+
+## Keys
+
+| Command | Description | Key options |
+| --- | --- | --- |
+| `keys list` | List active keys. Default command. | `-a, --archived`, `-f, --full-id`, `--json` |
+| `keys create` | Create a key and print the secret once. Scopes: `CLI`, `MCP`, `FULL`. | `-n, --name`, `-d, --description`, `-s, --scopes` |
+| `keys revoke [id]` | Revoke a key by ID prefix or from a picker. | — |
+| `keys update [id]` | Rename or re-describe a key. | `-n, --name`, `-d, --description` |
+
+## Repos
+
+| Command | Description | Key options |
+| --- | --- | --- |
+| `repos list` | List connected repositories. Default command. | `-l, --limit`, `-p, --page`, `-s, --search`, `-o, --owner`, `--json` |
+| `repos add <url>` | Connect a GitHub repository by URL. | — |
+| `repos view <target>` | Show repository summary and metadata. | `--json` |
+| `repos delete [id]` | Delete a repository by ID prefix or from a picker. | — |
+| `repos owner <owner>` | Show the primary repository for an owner. | `--json` |
+| `repos purge-owner <owner>` | Delete every repository owned by `owner`. | — |
+| `repos purge-all` | Delete all connected repositories and their analyses. | — |
+| `repos slim` | Compact list for scripts. Alias: `quick`. | `-l, --limit`, `-s, --search`, `-o, --owner`, `-c, --cursor`, `--json` |
+
+## Analyze
+
+| Command | Description | Key options |
+| --- | --- | --- |
+| `analyze start [target]` | Queue an AST analysis for a branch. | `-b, --branch`, `-l, --language` |
+| `analyze status [target]` | Latest run status and security scores. | `--json` |
+| `analyze cancel [analysisId]` | Abort an in-flight run by ID prefix or from a picker. | `-r, --repo` |
+| `analyze history [target]` | List past runs for a repository. | `--json` |
+| `analyze audit <filePath>` | Run a one-file security and quality audit. | `-r, --repo`, `-b, --branch`, `-o, --output`, `--json` |
+| `analyze config [target]` | Show pull-request automation settings. | `--json` |
+| `analyze config-set [target]` | Interactively update pull-request automation settings. | — |
+| `analyze metrics [target]` | Inspect AST complexity and technical-debt metrics. | `-a, --aid`, `-r, --repo`, `--json` |
+| `analyze structure [target]` | Explore the structural map. Alias: `map`. | `-a, --aid`, `-r, --repo`, `--json` |
+| `analyze search <query> [target]` | Search symbols and modules in the latest run. | `-a, --aid`, `-r, --repo`, `--json` |
+
+## Analytics
+
+| Command | Description | Key options |
+| --- | --- | --- |
+| `analytics overview` | Workspace or per-repository health metrics. Default command. | `-r, --repo`, `--from`, `--to`, `--json` |
+| `analytics trends` | Security, tech-debt and complexity trends over time. | `-r, --repo`, `--from`, `--to`, `--json` |
+
+## Audit
+
+| Command | Description | Key options |
+| --- | --- | --- |
+| `audit list` | List workspace audit records. Default command. | `-l, --limit`, `-c, --cursor`, `--json` |
+| `audit view [logId]` | Inspect one event payload. Alias: `payload`. | `--json`, `--html` |
+
+## Docs
+
+| Command | Description | Key options |
+| --- | --- | --- |
+| `docs list [target]` | List generated documents for a repository. Default command. | `-a, --aid`, `--json` |
+| `docs view [target]` | Print or save a document. Alias: `cat`. | `-t, --type <README/ARCHITECTURE/API/CONTRIBUTING/CHANGELOG/CODE_DOC>`, `-p, --path`, `-a, --aid`, `-o, --output` |
+| `docs generate <filePath>` | Generate documentation for one file. | `-r, --repo`, `-b, --branch`, `-l, --language`, `-o, --output` |
+| `docs pin <filePath>` | Pin a file audit report into permanent documentation. | `-r, --repo` |
+| `docs export [target]` | Write every document to a local directory. | `-d, --dir` |
+
+## PR
+
+| Command | Description | Key options |
+| --- | --- | --- |
+| `pr list [target]` | List pull-request reviews and risk scores. Default command. | `--json` |
+| `pr view [target] [prNumberOrId]` | Inspect one analysis and its security impact. Alias: `inspect`. | `-r, --repo`, `--json` |
+| `pr comments [targetOrAnalysisId] [prNumber]` | Show review findings and inline comments. Alias: `findings`. | `-r, --repo`, `--json` |
+| `pr open [target]` | Open a pull request from the staged files. | `-b, --branch`, `-t, --title` |
+| `pr comment <prNumber> <body> [target]` | Post a comment on a GitHub pull request. | — |
+| `pr fixes [target]` | List AI-generated fixes. | `--json` |
+| `pr fix [fixId]` | Inspect a fix and its generated patches. Alias: `fix-view`. | `-r, --repo`, `--json` |
+| `pr fix-apply [fixId]` | Push patches and open a pull request. Alias: `apply-fix`. | `-r, --repo`, `-b, --branch`, `-t, --title` |
+| `pr fix-create [target]` | Request an AI fix for a finding. Alias: `fix-generate`. | `-f, --file`, `-l, --line`, `-m, --message`, `--findings-file`, `-p, --pr-analysis-id` |
+
+## Staging
+
+| Command | Description | Key options |
+| --- | --- | --- |
+| `staging list [target]` | List files staged for the next pull request. Default command. | `--json` |
+| `staging add <filePath>` | Upload a local file into staging. | `-r, --repo` |
+| `staging drop <filePath>` | Remove a file from staging. Alias: `unstage`. | `-r, --repo` |
+| `staging clear` | Discard everything staged for the repository. | `-r, --repo` |
+| `staging add-fix [fixId]` | Stage every file from an AI fix. Alias: `stage-fix`. | `-r, --repo` |
+
+## Notifications
+
+| Command | Description | Key options |
+| --- | --- | --- |
+| `notifications list` | List recent notifications. Default command. | `-a, --all`, `-p, --page`, `-l, --limit`, `--json` |
+| `notifications view [id]` | Show one notification from the recent page. | — |
+| `notifications clear` | Mark all unread notifications as read. | — |
+| `notifications stats` | Show read and unread counters. | `--json` |
+| `notifications read [id]` | Mark one notification as read. | — |
+| `notifications unread [id]` | Mark one notification as unread. | — |
+| `notifications delete [id]` | Delete one notification. | — |
+| `notifications prune` | Delete all read notifications. | — |
+
+## GitHub
+
+| Command | Description | Key options |
+| --- | --- | --- |
+| `github repos` | List repositories visible to the GitHub App; optionally connect one. Default command. | `--json` |
+| `github install` | Print the GitHub App installation URL. | — |
+| `github branches <target>` | List remote branches. | `--json` |
+| `github tree <target> [branch]` | Browse the remote file tree without cloning. | `--json` |
+| `github cat <target> <filePath>` | Print a remote file. | `-b, --branch` |
+| `github search <query>` | Search GitHub repositories. | `--json` |
+
+## Agent
+
+| Command | Description | Key options |
+| --- | --- | --- |
+| `agent [prompt...]` | Send a one-shot prompt; without a prompt, start a REPL session. | `-r, --repo` |
+| `agent sessions` | List previous chat sessions. | `-r, --repo`, `--json` |
+| `agent history [sessionId]` | Print one session's messages. | `--json` |
+
+## System
+
+| Command | Description | Key options |
+| --- | --- | --- |
+| `status` | Check API health, latency and token status. Alias: `ping`. | — |
