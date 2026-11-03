@@ -60,11 +60,11 @@ scripts and CI; the colored human output is meant for terminals and its shape is
 
 ## CI recipe
 
-Set the key from the CI secret store; the CLI reads `DOXYNIX_API_KEY`. `analyze start` only
-dispatches the job, so run the remaining commands after the run finishes.
+Set the key inline or inject it from your CI secret store; the CLI reads `DOXYNIX_API_KEY`.
+`analyze start` only dispatches the job, so run the remaining commands after the run finishes.
 
 ```bash
-export DOXYNIX_API_KEY="$DXNX_CI_SECRET"
+export DOXYNIX_API_KEY="dxnx_your_key_here"
 dxnx analyze start owner/repo --branch "$GITHUB_REF_NAME"
 # GitLab: dxnx analyze start owner/repo --branch "$CI_COMMIT_REF_NAME"
 

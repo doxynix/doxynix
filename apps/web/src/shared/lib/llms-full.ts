@@ -19,7 +19,7 @@ It is built for teams inheriting legacy code, onboarding new engineers, and keep
 2. Doxynix clones the repository into an ephemeral container.
 3. The AST scanner builds the structural model: files, modules, symbols, imports, dependency edges.
 4. The LLM stage writes documentation for the selected nodes using that structural context.
-5. Metrics are computed: documentation coverage, cyclomatic complexity, modularity index, onboarding score, Bus Factor.
+5. Metrics are computed: documentation density, cyclomatic complexity, modularity index, onboarding score, Bus Factor.
 6. Artifacts are stored and streamed to the dashboard in real time.
 7. The container and the cloned code are destroyed. Source code is not used to train models.
 
@@ -38,7 +38,7 @@ Outputs can be exported as Markdown, PDF or Notion pages, and can be refreshed f
 
 ## Metrics
 
-- Documentation coverage: share of public symbols with usable documentation.
+- Documentation density: share of comment lines among all scanned lines.
 - Cyclomatic complexity: branching density per function.
 - Modularity index: 0-100 score for module boundaries, penalized for dependency cycles and hotspots.
 - Onboarding score: how hard it is for a new engineer to start working in the repository.
@@ -89,7 +89,7 @@ The \`dxnx\` CLI is the primary integration surface for CI/CD. Most commands acc
 
 **Does it work with legacy code?** Yes. Bus Factor and complexity metrics surface the undocumented, high-risk modules first.
 
-**What metrics are generated?** Documentation coverage, cyclomatic complexity, modularity index, onboarding score and Bus Factor.
+**What metrics are generated?** Documentation density, cyclomatic complexity, modularity index, onboarding score and Bus Factor.
 
 ## Links
 
