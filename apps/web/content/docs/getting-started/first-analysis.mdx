@@ -20,11 +20,10 @@ Open the repository and press **Analyze**, then pick what to generate:
 | `API` | Endpoint reference built from detected routes |
 | `CONTRIBUTING` | Workflow, conventions and review rules |
 | `CHANGELOG` | Diff-driven release history |
-| `CODE_DOC` | Per-file documentation for the files you select |
 
-`dxnx analyze start` requests `README`, `ARCHITECTURE` and `CODE_DOC` by default. In the dashboard,
-`README` is preselected and the five checkboxes are `README`, `API`, `ARCHITECTURE`, `CONTRIBUTING`
-and `CHANGELOG`; `CODE_DOC` is generated for the files you select rather than toggled.
+`dxnx analyze start` requests `README` and `ARCHITECTURE` by default. In the dashboard, `README` is
+preselected and the five checkboxes are `README`, `API`, `ARCHITECTURE`, `CONTRIBUTING` and
+`CHANGELOG`.
 
 ## Choose a language
 
@@ -60,7 +59,19 @@ materialized paths are:
 | `API` | `docs/API.md` |
 | `CONTRIBUTING` | `CONTRIBUTING.md` |
 | `CHANGELOG` | `CHANGELOG.md` |
-| `CODE_DOC` | `docs/code/<source-path>.md` |
+| `CODE_DOC` | `docs/code/<source-path>.md` (on demand) |
+
+## Per-file docs
+
+`CODE_DOC` is created on demand, not by a full analysis run:
+
+```bash
+dxnx docs generate src/foo.ts
+dxnx docs pin src/foo.ts
+```
+
+`dxnx docs generate` documents a single file. `dxnx docs pin` pins an audit of that file into
+permanent documentation.
 
 ## Re-run and history
 

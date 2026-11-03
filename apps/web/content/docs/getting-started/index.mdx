@@ -25,8 +25,7 @@ repository. Private repositories require the Pro plan.
 Open the repository and press **Analyze**. Choose:
 
 - the branch to analyze;
-- the document types (`README`, `API`, `ARCHITECTURE`, `CONTRIBUTING`, `CHANGELOG`); per-file
-  `CODE_DOC` entries are generated for the files you select;
+- the document types (`README`, `API`, `ARCHITECTURE`, `CONTRIBUTING`, `CHANGELOG`);
 - the documentation language (English or Russian);
 - optionally, a file list and free-form instructions.
 
@@ -43,4 +42,6 @@ passed through Sentinel → Mapper → Architect → Writer, and deleted when th
 ## 6. Take the output with you
 
 Copy or download a file from the Docs tab, export everything with `dxnx docs export`, or stage
-the files and open a pull request.
+the files and open a pull request. Per-file docs are separate from a full analysis:
+`dxnx docs generate <file>` documents one file, and `dxnx docs pin <file>` pins a file audit into
+permanent documentation.
