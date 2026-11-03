@@ -2,12 +2,16 @@ import type { Metadata } from "next";
 
 import { APP_URL } from "@/shared/config/env.client";
 
+export function buildDocsCanonical(baseUrl: string, url: string): string {
+  return `${baseUrl.replace(/\/$/, "")}${url}`;
+}
+
 export function buildDocsMetadata(params: {
   description?: string;
   title: string;
   url: string;
 }): Metadata {
-  const canonical = `${APP_URL.replace(/\/$/, "")}${params.url}`;
+  const canonical = buildDocsCanonical(APP_URL, params.url);
 
   return {
     alternates: { canonical },
