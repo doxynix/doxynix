@@ -3,14 +3,14 @@
 -- @param {DateTime} $3:previous_period_start
 -- @param {DateTime} $4:period_end
 
--- `@prisma/adapter-pg` sends Date params as a zone-less UTC string, so the `::date`/`::timestamp`
--- casts below are session-TimeZone independent; casting one to `::timestamptz` would re-add it.
+-- Every column involved is `timestamptz`, so the period bounds are pinned to UTC explicitly;
+-- leaving them as bare `timestamp` would make the session TimeZone decide the boundary.
 WITH periods AS (
     SELECT
-        $2::timestamp AS cur_start,
-        ($4::date + interval '1 day')::timestamp AS cur_end,
-        $3::timestamp AS prev_start,
-        $2::timestamp AS prev_end
+        (($2::timestamp) AT TIME ZONE 'UTC') AS cur_start,
+        ((($4::date + interval '1 day')::timestamp) AT TIME ZONE 'UTC') AS cur_end,
+        (($3::timestamp) AT TIME ZONE 'UTC') AS prev_start,
+        (($2::timestamp) AT TIME ZONE 'UTC') AS prev_end
 ),
 user_repos AS (
     SELECT id, name, owner, created_at

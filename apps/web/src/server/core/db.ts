@@ -53,7 +53,9 @@ export async function runAsBackgroundTask(task: () => Promise<void>): Promise<vo
     } catch (error) {
       const isContextError =
         error instanceof Error &&
-        (error.message.includes("request context") || error.message.includes("lifecycle"));
+        (error.message.includes("request scope") ||
+          error.message.includes("request context") ||
+          error.message.includes("lifecycle"));
 
       if (!isContextError) {
         appLogger.warn({ error, msg: "afterFn failed unexpectedly, falling back to execution" });
