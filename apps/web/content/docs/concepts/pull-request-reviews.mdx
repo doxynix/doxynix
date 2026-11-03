@@ -1,11 +1,11 @@
 ---
 title: Pull request reviews
-description: Enable Pro PR reviews, choose focus areas and comment style, and apply generated fixes.
+description: Enable Pro and Team PR reviews, choose focus areas and comment style, and apply generated fixes.
 ---
 
 ## Availability
 
-PR reviews run on the Pro plan. Access is gated by the `prReviews` entitlement.
+PR reviews run on the Pro and Team plans. Both include the `prReviews` entitlement.
 
 The review runs when a pull request is opened, reopened, synchronized or marked ready for review.
 Draft pull requests are skipped, and so are pull requests opened by a bot.
@@ -18,8 +18,8 @@ Turn on pull request analysis for a repository from its settings, or configure i
 dxnx analyze config-set owner/repo
 ```
 
-`config-set` asks for the review toggle, comment style, `ciSkip` and the token budget, then saves
-them for the repository.
+`config-set` asks for the review toggle, comment style and token budget, then saves them for the
+repository.
 
 ## Focus areas
 
@@ -38,22 +38,13 @@ are posted.
 | Style | Behaviour |
 | --- | --- |
 | `DETAILED` | Full review with severity, code snippet and a suggested fix |
-| `CONCISE` | Only the finding type, severity and message |
+| `CONCISE` | Only the finding type, severity, score and message |
 | `OFF` | Run the analysis without posting review comments |
 
 ## Token budget
 
 Each pull request run has a token budget between 10,000 and 100,000. The default is 30,000. Values
 outside the range are clamped, so a large diff cannot consume an unbounded amount of context.
-
-## Skip a run
-
-When `ciSkip` is enabled, a commit message containing `[skip ci]` skips the analysis for that
-update. Use it for documentation-only or generated changes that do not need a review.
-
-```text
-chore: regenerate fixtures [skip ci]
-```
 
 ## What is analyzed
 
@@ -66,15 +57,16 @@ Only the diff is analyzed, never the whole repository:
 
 The exclusion list starts with Doxynix's own rules — ignore files, generated directories such as
 `dist`, `build`, `vendor` and `node_modules`, and asset files such as stylesheets, images and fonts.
-Custom patterns can be added on top. Individual changed files above a fixed line count are dropped
-too, so a single huge file cannot crowd out the rest of the change.
+Custom patterns can be added on top. Individual changed files with more than 1,000 changed lines
+(`additions + deletions`) are dropped too, so a single huge file cannot crowd out the rest of the
+change.
 
 ## Findings
 
 Findings are posted as one batched pull request review with inline comments, rather than as a stream
 of separate comments. Every finding carries a stable signature derived from its file, line, type and
 title. On a later run, a finding with the same signature is recognized, so the same issue is not
-posted twice.
+posted twice, and existing review comments are left unchanged.
 
 ## Fixes
 

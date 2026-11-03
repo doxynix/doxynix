@@ -14,8 +14,9 @@ description: Six document types, where they materialize, how to export them and 
 | `CHANGELOG` | `CHANGELOG.md` | Diff-driven release history |
 | `CODE_DOC` | `docs/code/<source-path>.md` | Per-file documentation for selected files |
 
-An analysis requests `README`, `ARCHITECTURE` and `CODE_DOC` by default. The dashboard lets you
-select any of the six types for a run.
+An analysis requests `README`, `ARCHITECTURE` and `CODE_DOC` by default from the CLI. The dashboard
+preselects `README` and offers five checkboxes — `README`, `API`, `ARCHITECTURE`, `CONTRIBUTING` and
+`CHANGELOG`. `CODE_DOC` is not a checkbox: it is generated for the files you select for the run.
 
 ## How a document is built
 
@@ -79,4 +80,5 @@ Pinning creates a document from the most recent audit of that file, so it surviv
 ## Regenerate
 
 Running an analysis again regenerates the selected document types for the current branch. Earlier
-runs stay in history — 7 days on Hobby and 90 days on Pro — and `dxnx analyze history` lists them.
+runs stay in history — 7 days on Hobby, 90 days on Pro and unlimited on Team — and
+`dxnx analyze history` lists them.
