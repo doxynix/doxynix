@@ -4,7 +4,7 @@ description: Create scoped keys for the CLI and MCP, store them safely and revok
 ---
 
 API keys authenticate non-browser clients: the CLI, the MCP server and CI jobs. Every key belongs to
-one user and grants access to the workspaces that user can already open.
+one workspace and can only reach that workspace's repositories.
 
 ## Scopes
 
@@ -57,9 +57,6 @@ The MCP server takes the same key as a bearer token:
 ```text
 Authorization: Bearer <key>
 ```
-
-Any other HTTP client can do the same against the API root, `https://doxynix.space/api`, as long as
-the key has the scope the endpoint requires.
 
 ## Security
 

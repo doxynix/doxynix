@@ -4,7 +4,7 @@ description: Connect an MCP client to Doxynix, authenticate with an API key and 
 ---
 
 Doxynix runs a [Model Context Protocol](https://modelcontextprotocol.io) server next to the API, so
-an agent can query your workspace with the same tools the in-app agent uses.
+an agent can query a workspace with the tools the in-app agent uses.
 
 ## Endpoint
 
@@ -28,7 +28,8 @@ The key must have the `MCP` scope, or `FULL`, which includes it. Create one on t
 
 ## Client configuration
 
-Add the server to the MCP client config. Most clients accept the same `mcpServers` shape:
+Add the server to the MCP client config. HTTP-transport MCP clients generally accept a server entry
+with `url` and `headers`; check your client's config format:
 
 ```json
 {
@@ -48,8 +49,8 @@ file you might commit.
 
 ## Tools
 
-The server exposes the same tool set as the in-app agent, minus the six mutation tools that change
-account or repository state:
+The server exposes the agent's tools that can run without an interactive chat, minus the six
+mutation tools that change account or repository state:
 
 - `applyFix`
 - `createApiKey`
@@ -75,9 +76,9 @@ Typical prompts map to a few tool calls:
 
 ## Scope
 
-The key is bound to your user and the workspaces you belong to. Every tool call runs with those
-permissions, so an agent can only reach repositories you can already open, and it cannot escalate by
-calling a tool with a repository id from another workspace.
+The key is bound to a single workspace. Every tool call runs inside that workspace, so an agent can
+only reach its repositories, and it cannot escalate by passing a repository id from another
+workspace.
 
 ## Troubleshooting
 
