@@ -1,0 +1,66 @@
+---
+title: How analysis works
+description: Follow a repository through AST extraction, graph construction, the four AI stages and metrics.
+---
+
+## AST first
+
+Every run starts with structure. Doxynix parses the checkout with Tree-sitter — `web-tree-sitter`
+compiled to WASM — and records files, symbols, imports and dependency edges exactly as they are
+written.
+
+LLMs never receive a raw file dump as their only context. They get parsed facts plus selected source
+excerpts, so a generated section can be checked against a symbol that actually exists.
+
+## The pipeline
+
+1. Start an analysis from the dashboard or with `dxnx analyze start owner/repo`.
+2. A Trigger.dev task clones the selected branch into a temporary directory.
+3. The AST scanner extracts files, symbols, imports and edges; the graph stage computes entry
+   points, cycles and module boundaries.
+4. Sentinel checks security invariants and dangerous sinks; Mapper builds the structural skeleton;
+   Architect synthesizes the domain model; Writer generates documents anchored to graph nodes.
+5. Metrics are computed — documentation density, complexity, duplication, modularity, bus factor,
+   security score and dependency cycles — and combined into the health score.
+6. Documents are stored in the workspace and streamed to the dashboard. The temporary clone is
+   deleted when the run finishes.
+
+## The graph
+
+The graph stage turns the extracted structure into a navigable model:
+
+- **Entry points** — where execution enters the codebase.
+- **Cycles** — dependency loops between modules.
+- **Module boundaries** — the zones and top-level groups that make up the system.
+
+Graph node IDs anchor generated sections. A section is written against a node rather than a file
+name, which keeps the document tied to the file, symbol or module it describes.
+
+## The four stages
+
+| Stage | Role | Output |
+| --- | --- | --- |
+| Sentinel | Security | Security invariants and dangerous-sink findings |
+| Mapper | Structure | The structural skeleton of files, modules and edges |
+| Architect | Domain model | A synthesized model of the system and its risks |
+| Writer | Documents | Markdown documents anchored to graph nodes |
+
+## Model cascade
+
+Stages request a model role instead of a hard-coded model. The Architect stage, for example, tries
+POWERFUL, then ARCHITECT, then FALLBACK. A provider error moves on to the next model, and a response
+that does not match the expected schema falls back to a deterministic result. Failures degrade the
+output instead of aborting the run.
+
+## Pull requests
+
+Pull request analysis is scoped to a diff. Only changed files that pass the exclusion patterns reach
+the stages, Sentinel and Mapper inspect that subset, and impact analysis maps the changed files to
+the graph nodes they touch. Findings carry a stable signature, so a later run can match them against
+what is already posted on the pull request.
+
+## Cleanup
+
+The clone exists for the duration of the run only and is deleted afterwards. Documents and metrics
+live in the workspace, not in the checkout, so nothing is pushed to the repository unless you stage
+the files and open a pull request yourself.

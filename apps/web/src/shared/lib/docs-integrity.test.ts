@@ -14,6 +14,10 @@ const REQUIRED_SLUGS = [
   "/docs/getting-started/github-app",
   "/docs/getting-started/install-cli",
   "/docs/getting-started/first-analysis",
+  "/docs/concepts/architecture",
+  "/docs/concepts/documents",
+  "/docs/concepts/metrics",
+  "/docs/concepts/pull-request-reviews",
 ] as const;
 
 type DocPage = {

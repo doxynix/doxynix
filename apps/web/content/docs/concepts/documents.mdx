@@ -1,0 +1,82 @@
+---
+title: Generated documents
+description: Six document types, where they materialize, how to export them and how to sync them back to GitHub.
+---
+
+## Document types
+
+| Type | Materialized path | Contents |
+| --- | --- | --- |
+| `README` | `README.md` | Overview, setup and architecture summary |
+| `ARCHITECTURE` | `docs/ARCHITECTURE.md` | Modules, data flow, dependency map and risks |
+| `API` | `docs/API.md` | Endpoint reference built from detected routes |
+| `CONTRIBUTING` | `CONTRIBUTING.md` | Workflow, conventions and review rules |
+| `CHANGELOG` | `CHANGELOG.md` | Diff-driven release history |
+| `CODE_DOC` | `docs/code/<source-path>.md` | Per-file documentation for selected files |
+
+An analysis requests `README`, `ARCHITECTURE` and `CODE_DOC` by default. The dashboard lets you
+select any of the six types for a run.
+
+## How a document is built
+
+Documents are assembled from parsed facts, not from a single free-form prompt:
+
+- Sections are anchored to graph nodes, so each one describes a file, module or symbol that exists.
+- Symbols, imports and routes come from the AST rather than from the model's memory of the code.
+- Architecture and data-flow sections include Mermaid diagrams generated from the dependency graph.
+- Code examples are taken from the parsed sources; the writer is not asked to invent them.
+
+## Read and copy
+
+Generated files appear in the **Docs** tab, grouped by type. Each file can be copied or downloaded on
+its own, which is handy when you only need the `ARCHITECTURE` page or one `CODE_DOC` entry.
+
+## Export
+
+The CLI writes every generated document for a repository into a local folder:
+
+```bash
+dxnx docs export owner/repo --dir ./docs
+```
+
+Files land under `./docs/<owner>-<repo>/...`. The owner is part of the directory name so that two
+repositories with the same name do not overwrite each other.
+
+From the dashboard you can copy or download Markdown, and export PDF and Notion pages. Static-site
+export is not part of v1.
+
+## Sync to GitHub
+
+Doxynix does not push to your branch on its own. To get generated files into the repository, stage
+them and open a pull request:
+
+```bash
+dxnx staging add <filePath>
+dxnx pr open owner/repo
+```
+
+`dxnx staging add` reads a local file and keeps the path you pass as its path in the repository.
+`dxnx staging list` shows what is currently staged, and `dxnx staging drop <filePath>` removes an
+entry. The dashboard offers the same staging and pull request flow.
+
+## Per-file docs
+
+Generate documentation for a single file without running a whole repository analysis:
+
+```bash
+dxnx docs generate src/foo.ts
+```
+
+The Markdown is printed to the terminal; `--output <file>` saves it instead. To keep a single-file
+audit as permanent repository documentation, pin it:
+
+```bash
+dxnx docs pin src/foo.ts
+```
+
+Pinning creates a document from the most recent audit of that file, so it survives later analyses.
+
+## Regenerate
+
+Running an analysis again regenerates the selected document types for the current branch. Earlier
+runs stay in history — 7 days on Hobby and 90 days on Pro — and `dxnx analyze history` lists them.

@@ -1,0 +1,78 @@
+---
+title: Metrics
+description: What documentation density, complexity, duplication, bus factor and the health score actually measure.
+---
+
+Metrics are computed from the parsed structure and the Sentinel results, then stored with the
+analysis. They describe the repository at the commit that was analyzed, so comparing two runs shows
+what changed between them.
+
+## Documentation density
+
+Documentation density is the share of comment lines in all scanned lines:
+
+```text
+comment / (source + comment) * 100
+```
+
+The result is rounded to a whole percent. A repository with 100 source lines and 25 comment lines
+scores `25 / 125 * 100 = 20`.
+
+## Cyclomatic complexity
+
+Cyclomatic complexity measures branching density per function. A function with more branches needs
+more test cases to cover, so a rising average points at functions that are getting harder to reason
+about.
+
+## Modularity index
+
+The modularity index is a score from 0 to 100. It starts from a clean score and is penalized for:
+
+- dependency cycles between modules;
+- orphan modules that nothing imports and that import nothing;
+- dependency hotspots, where a small number of modules carry a large share of the edges.
+
+A higher value means clearer module boundaries.
+
+## Onboarding score
+
+The onboarding score is a composite signal for how hard it is for a new engineer to start working in
+the repository.
+
+## Duplication
+
+Duplication is the percentage of lines that jscpd marks as duplicated. It counts copied blocks, not
+similar-looking code, so a high value usually means a shared helper is missing.
+
+## Security score
+
+The security score comes from Sentinel, which checks security invariants and dangerous sinks. Every
+finding it reports lowers the score; a clean run keeps it high.
+
+## Dependency cycles
+
+Dependency cycles count the circular dependencies found in the graph. Cycles make modules hard to
+test in isolation and hard to extract, so fewer is better.
+
+## Bus factor
+
+Bus factor measures how concentrated ownership and recent activity are. Higher is healthier: a
+project where knowledge and commits are spread across contributors can lose any one person without
+stalling.
+
+## Health score
+
+The health score is a 0–100 composite of security, tech debt, complexity, duplication,
+documentation, bus factor and dependency cycles. A recency bonus is added when the repository has
+been active recently. Component weights are fixed, so the same metrics always produce the same score
+apart from the recency bonus.
+
+## Where to see them
+
+Metrics are shown in the **Analytics** tab of a repository and in the CLI:
+
+```bash
+dxnx analyze metrics owner/repo
+```
+
+Add `--json` when you want the raw values for a dashboard or a script.
