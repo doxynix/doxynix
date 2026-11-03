@@ -1,5 +1,5 @@
 import { API_PREFIX } from "../config/env.client";
-import { LOCALE_REGEX_STR } from "../config/locales";
+import { DEFAULT_LOCALE, LOCALE_REGEX_STR } from "../config/locales";
 
 const protectedRoutes = ["/dashboard"];
 const authRoutes = ["/auth"];
@@ -60,4 +60,26 @@ export function resolvePageRedirect(pathname: string, hasToken: boolean): string
   }
 
   return null;
+}
+
+export type DocsPathDecision =
+  | { pathname: string; type: "redirect" }
+  | { pathname: string; type: "rewrite" };
+
+const DOCS_PREFIX = "/docs";
+
+export function resolveDocsPath(pathname: string): DocsPathDecision | null {
+  const localeRegex = new RegExp(`^/(${LOCALE_REGEX_STR})`);
+  const matchedLocale = pathname.match(localeRegex)?.[1];
+  const pathWithoutLocale = pathname.replace(localeRegex, "") || "/";
+
+  if (!hasPathBoundary(pathWithoutLocale, DOCS_PREFIX)) {
+    return null;
+  }
+
+  if (matchedLocale != null) {
+    return { pathname: pathWithoutLocale, type: "redirect" };
+  }
+
+  return { pathname: `/${DEFAULT_LOCALE}${pathWithoutLocale}`, type: "rewrite" };
 }
