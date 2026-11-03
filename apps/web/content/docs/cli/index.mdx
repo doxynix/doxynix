@@ -26,8 +26,9 @@ survive logout, so unset them as well when you really want to sign out.
 
 ## Configuration
 
-The token lives in `~/.config/dxnx/config.json` with `0600` permissions. `XDG_CONFIG_HOME` moves
-that directory on Linux. These environment variables take precedence over the file:
+The token lives in `~/.config/dxnx/config.json` with `0600` permissions. `XDG_CONFIG_HOME`
+relocates that directory on every platform, and Windows uses `%APPDATA%\dxnx\config.json`. These
+environment variables take precedence over the file:
 
 - `DOXYNIX_API_KEY` — API key, read first.
 - `DXNX_TOKEN` — alternative API key variable.
@@ -35,7 +36,7 @@ that directory on Linux. These environment variables take precedence over the fi
 
 ## Machine-readable output
 
-Most commands accept `--json` and print a single JSON document to stdout. Parse that output in
+Many commands accept `--json` and print a single JSON document to stdout. Parse that output in
 scripts and CI; the colored human output is meant for terminals and its shape is not stable.
 
 ## Command map
@@ -59,13 +60,19 @@ scripts and CI; the colored human output is meant for terminals and its shape is
 
 ## CI recipe
 
-Set the key from the CI secret store, then run the analysis and export the result:
+Set the key from the CI secret store; the CLI reads `DOXYNIX_API_KEY`. `analyze start` only
+dispatches the job, so run the remaining commands after the run finishes.
 
 ```bash
-export DOXYNIX_API_KEY="$DOXYNIX_API_KEY"
-dxnx analyze start owner/repo --branch "$CI_COMMIT_REF_NAME"
+export DOXYNIX_API_KEY="$DXNX_CI_SECRET"
+dxnx analyze start owner/repo --branch "$GITHUB_REF_NAME"
+# GitLab: dxnx analyze start owner/repo --branch "$CI_COMMIT_REF_NAME"
+
+# After the run finishes:
 dxnx analyze status owner/repo
 dxnx docs export owner/repo --dir ./docs
 ```
 
-The same flow is packaged as a GitHub Action: `uses: doxynix/action@v1.0.0`.
+The same flow is packaged as a GitHub Action:
+[`doxynix/action`](https://github.com/doxynix/action) (`uses: doxynix/action@v1.0.0`). Inputs are
+documented on the action repository.

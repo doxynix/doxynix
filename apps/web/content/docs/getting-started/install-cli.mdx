@@ -50,13 +50,13 @@ The token is stored in `~/.config/dxnx/config.json` with `0600` permissions.
 
 ```bash
 export DOXYNIX_API_KEY="dxnx_..."
-export DOXYNIX_API_URL="https://doxynix.space"
+export DOXYNIX_API_URL="https://doxynix.space/api"
 dxnx status
 ```
 
 Environment variables take precedence over the config file: `DOXYNIX_API_KEY` and `DXNX_TOKEN` are
-read before `~/.config/dxnx/config.json`. Set `DOXYNIX_API_URL` when you talk to an API host other
-than `https://doxynix.space`.
+read before `~/.config/dxnx/config.json`. Set `DOXYNIX_API_URL` to the API root, including `/api`,
+when yours differs from the default `https://doxynix.space/api`.
 
 `dxnx status` checks the API health and reports whether a token was found, which makes it a quick
 smoke test in CI.

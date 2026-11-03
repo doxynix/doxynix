@@ -3,11 +3,14 @@ title: CLI reference
 description: Every dxnx command, its arguments and its most useful options.
 ---
 
-Most commands follow `dxnx <domain> <command>`; `status` is top-level. A command marked *default*
-runs when you omit the subcommand. `--json` is listed only on commands that support it.
+Most commands follow `dxnx <domain> <command>`; `status` is top-level. The default subcommand is
+named in each table. `--json` is listed only on commands that support it.
 
 Domain aliases: `stats` (`analytics`), `activity` (`audit`), `doc` (`docs`), `pull-request` (`pr`),
 `stage` (`staging`), `notif` (`notifications`), `gh` (`github`), `chat` (`agent`).
+
+Global flags: `-y, --yes` and `--force` skip confirmation prompts on commands that ask for one
+(`--force` also covers destructive actions), and `-v, --version` prints the CLI version.
 
 ## Auth
 
@@ -87,9 +90,9 @@ Domain aliases: `stats` (`analytics`), `activity` (`audit`), `doc` (`docs`), `pu
 | --- | --- | --- |
 | `docs list [target]` | List generated documents for a repository. Default command. | `-a, --aid`, `--json` |
 | `docs view [target]` | Print or save a document. Alias: `cat`. | `-t, --type <README/ARCHITECTURE/API/CONTRIBUTING/CHANGELOG/CODE_DOC>`, `-p, --path`, `-a, --aid`, `-o, --output` |
-| `docs generate <filePath>` | Generate documentation for one file. | `-r, --repo`, `-b, --branch`, `-l, --language`, `-o, --output` |
+| `docs generate <filePath>` | Generate documentation for one file. Alias: `file`. | `-r, --repo`, `-b, --branch`, `-l, --language`, `-o, --output` |
 | `docs pin <filePath>` | Pin a file audit report into permanent documentation. | `-r, --repo` |
-| `docs export [target]` | Write every document to a local directory. | `-d, --dir` |
+| `docs export [target]` | Write every document under `<dir>/<owner>-<repo>/`. | `-d, --dir` |
 
 ## PR
 
