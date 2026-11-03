@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.9.1](https://github.com/doxynix/doxynix/compare/web-v5.9.0...web-v5.9.1) (2026-11-03)
+
+
+### Bug Fixes
+
+* **web:** encrypted-field filters, db indexes and retention ([#2367](https://github.com/doxynix/doxynix/issues/2367)) ([546a075](https://github.com/doxynix/doxynix/commit/546a07507af010c9a7faeb23cf3f05598bb07c6c))
+
 ## [5.9.0](https://github.com/doxynix/doxynix/compare/web-v5.8.0...web-v5.9.0) (2026-11-02)
 
 

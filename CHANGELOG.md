@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.9.1](https://github.com/doxynix/doxynix/compare/doxynix-v6.9.0...doxynix-v6.9.1) (2026-11-03)
+
+
+### Bug Fixes
+
+* **web:** encrypted-field filters, db indexes and retention ([#2367](https://github.com/doxynix/doxynix/issues/2367)) ([546a075](https://github.com/doxynix/doxynix/commit/546a07507af010c9a7faeb23cf3f05598bb07c6c))
+
 ## [6.9.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.8.0...doxynix-v6.9.0) (2026-11-02)
 
 
