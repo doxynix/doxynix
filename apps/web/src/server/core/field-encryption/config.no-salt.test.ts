@@ -25,7 +25,7 @@ describe("field-encryption config without a hash salt", () => {
   });
 
   it("agrees with getRawHash in the no-salt configuration", () => {
-    // `getRawHash` has its own explicit no-salt branch, so this cross-check fails if the two drift apart.
+    // `getRawHash` delegates to `hashValue(value, [])`, so this cross-check fails if callers start passing normalize options.
     for (const value of ["SESS_SECRET", "user@example.com", ""]) {
       expect(hashValue(value, [])).toBe(getRawHash(value));
     }

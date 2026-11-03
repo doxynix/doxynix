@@ -9,10 +9,12 @@ import { handlePrismaError } from "@/server/utils/handle-error";
 import {
   buildDateRangeWhere,
   cappedCount,
+  clampPage,
   getPaginatedList,
+  getPaginationMeta,
   ORDER_CREATED_AT_DESC,
 } from "@/server/utils/pagination";
-import { normalizeSearchInput } from "@/server/utils/search";
+import { matchesSearchTerm, normalizeSearchInput } from "@/server/utils/search";
 
 import type { BannedEmailCreateInput, BannedEmailFilterInput } from "./banned-email.schemas";
 
@@ -37,18 +39,13 @@ function toSummary(row: BannedEmailRow) {
   };
 }
 
-function buildSearchClause(term: string) {
-  return { email: { contains: term, mode: "insensitive" as const } };
-}
-
+// The address is ciphertext, so the extension can only answer exact hash lookups here; free-text
+// search runs after decryption over the capped row window in `getAll`.
 export const bannedEmailService = {
   buildWhereClause(filters: Partial<BannedEmailFilterInput>) {
-    const term = normalizeSearchInput(filters.search);
-
     return {
       ...(filters.reason != null ? { reason: filters.reason } : {}),
       ...buildDateRangeWhere(filters, "createdAt"),
-      ...(term != null ? buildSearchClause(term) : {}),
     };
   },
 
@@ -80,13 +77,41 @@ export const bannedEmailService = {
     const { limit } = input;
     const where = this.buildWhereClause(input);
     const isUnfiltered = Object.keys(where).length === 0;
-
+    const term = normalizeSearchInput(input.search);
     const cap = MAX_PAGE * limit;
+
     const countMatching = (filterWhere: Prisma.BannedEmailWhereInput) =>
       cappedCount(
         (take) => db.bannedEmail.findMany({ select: { id: true }, take, where: filterWhere }),
         cap,
       );
+
+    if (term != null) {
+      const [rows, totalCount] = await Promise.all([
+        db.bannedEmail.findMany({
+          orderBy: ORDER_CREATED_AT_DESC,
+          select: BANNED_EMAIL_SELECT,
+          take: cap,
+          where,
+        }),
+        countMatching({}),
+      ]);
+      const filtered = rows.filter((row) => matchesSearchTerm(row.email, term));
+      const page = clampPage(input.page);
+      const skip = (page - 1) * limit;
+
+      return {
+        items: filtered.slice(skip, skip + limit).map(toSummary),
+        meta: getPaginationMeta({
+          capped: rows.length >= cap,
+          filteredCount: filtered.length,
+          limit,
+          page,
+          search: input.search,
+          totalCount,
+        }),
+      };
+    }
 
     const { items, meta } = await getPaginatedList({
       countCap: cap,

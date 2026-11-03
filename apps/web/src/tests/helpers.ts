@@ -58,16 +58,13 @@ export async function cleanupDatabase() {
     "pr_analysis_configs",
     "two_factors",
     "webhook_deliveries",
+    "users",
   ];
 
-  // One statement instead of 33 round trips: each autocommit TRUNCATE still costs a commit.
+  // One statement instead of 33 round trips. `users` is included because
+  // `email` is ciphertext here, so the old `contains` cleanup could never match.
   const truncateTargets = tablenames.map((table) => `"${table}"`).join(", ");
   await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${truncateTargets} CASCADE;`);
-  await prisma.user.deleteMany({
-    where: {
-      OR: [{ email: { contains: "@test.com" } }, { email: { contains: "@git.hub" } }],
-    },
-  });
 }
 
 export async function createBareTestUser(name: string, role: "ADMIN" | "USER" = "USER") {

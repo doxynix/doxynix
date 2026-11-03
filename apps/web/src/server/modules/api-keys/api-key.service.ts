@@ -74,10 +74,9 @@ export const apiKeyService = {
       });
     } catch (error) {
       handlePrismaError(error, {
-        defaultConflict: "API Key with this name already exists",
+        defaultConflict: "Could not create the API key",
         uniqueConstraint: {
           hashedKey: "Incredible, but a duplicate key was generated. Try again.",
-          name: "API Key with this name already exists",
         },
       });
     }
@@ -140,39 +139,47 @@ export const apiKeyService = {
   },
 
   async rotate(db: DbClient, id: string, userId: string, workspaceId: string) {
-    const existing = await db.apiKey.findFirst({ where: { id, workspaceId } });
+    const rotateKey = async (client: DbClient) => {
+      const existing = await client.apiKey.findFirst({ where: { id, workspaceId } });
 
-    if (existing == null || isApiKeyDead(existing, Date.now())) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Key not found" });
-    }
+      if (existing == null || isApiKeyDead(existing, Date.now())) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Key not found" });
+      }
 
-    const fullKey = generateApiKey();
-    const payload = extractPayloadFromKey(fullKey);
+      const fullKey = generateApiKey();
+      const payload = extractPayloadFromKey(fullKey);
 
-    if (payload == null) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to process and validate generated API key integrity.",
+      if (payload == null) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to process and validate generated API key integrity.",
+        });
+      }
+
+      const replacement = await client.apiKey.create({
+        data: {
+          description: existing.description,
+          expiresAt: existing.expiresAt,
+          hashedKey: getApiKeyHash(payload),
+          name: existing.name,
+          prefix: fullKey.slice(0, 11),
+          scopes: existing.scopes,
+          userId,
+          workspaceId,
+        },
       });
-    }
 
-    const replacement = await db.apiKey.create({
-      data: {
-        description: existing.description,
-        expiresAt: existing.expiresAt,
-        hashedKey: getApiKeyHash(payload),
-        name: existing.name,
-        prefix: fullKey.slice(0, 11),
-        scopes: existing.scopes,
-        userId,
-        workspaceId,
-      },
-    });
+      await client.apiKey.update({
+        data: { revoked: true, revokedAfter: new Date(Date.now() + ROTATION_GRACE_MS) },
+        where: { id, workspaceId },
+      });
 
-    await db.apiKey.update({
-      data: { revoked: true, revokedAfter: new Date(Date.now() + ROTATION_GRACE_MS) },
-      where: { id },
-    });
+      return { fullKey, replacement };
+    };
+
+    // Create-then-revoke must be atomic: a crash between the two would leave the old key live forever.
+    const { fullKey, replacement } =
+      "$transaction" in db ? await db.$transaction(rotateKey) : await rotateKey(db);
 
     void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.apiKeyUpdated, {});
 
@@ -215,9 +222,7 @@ export const apiKeyService = {
       .then((result) => result.count)
       .catch((error) =>
         handlePrismaError(error, {
-          defaultConflict: "API Key with this name already exists",
           notFound: "Key not found or access denied",
-          uniqueConstraint: { name: "Name already taken" },
         }),
       );
 

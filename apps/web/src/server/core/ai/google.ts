@@ -1,5 +1,5 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { ProxyAgent, type RequestInit, fetch as undiciFetch } from "undici";
+import type { ProxyAgent, RequestInit } from "undici";
 
 import { IS_PROD } from "@/shared/config/env.flags";
 import {
@@ -10,8 +10,15 @@ import {
   GOOGLE_GENERATIVE_AI_API_KEY,
 } from "@/shared/config/env.server";
 
-const proxyAgent =
-  !IS_PROD && GEMINI_PROXY != null ? new ProxyAgent({ uri: GEMINI_PROXY }) : undefined;
+const proxyUrl = !IS_PROD ? GEMINI_PROXY : undefined;
+
+let proxyAgentPromise: Promise<ProxyAgent> | null = null;
+
+function getProxyAgent(uri: string): Promise<ProxyAgent> {
+  proxyAgentPromise ??= import("undici").then(({ ProxyAgent }) => new ProxyAgent({ uri }));
+
+  return proxyAgentPromise;
+}
 
 export const google = createGoogleGenerativeAI({
   apiKey: GOOGLE_GENERATIVE_AI_API_KEY,
@@ -19,12 +26,16 @@ export const google = createGoogleGenerativeAI({
 
   // Irreducible: undici's `Response` and the DOM `Response` the AI SDK declares are structurally incompatible, so the bridge between them has to stay a cast.
   fetch:
-    proxyAgent == null
+    proxyUrl == null
       ? undefined
-      : (url, options) => {
+      : async (url, options) => {
+          const [{ fetch: undiciFetch }, dispatcher] = await Promise.all([
+            import("undici"),
+            getProxyAgent(proxyUrl),
+          ]);
           const undiciOptions: RequestInit = {
             ...(options as Record<string, unknown>),
-            dispatcher: proxyAgent,
+            dispatcher,
           };
           return undiciFetch(url.toString(), undiciOptions) as unknown as Promise<Response>;
         },

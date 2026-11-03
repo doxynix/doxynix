@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { hashValue } from "@/server/core/field-encryption/config";
+
 import {
   extractPayloadFromKey,
   generateApiKey,
@@ -134,7 +136,7 @@ describe("Cryptographic Hash & API Key Utilities", () => {
       expect(hash).toBe(getRawHash(val));
     });
 
-    it("should normalize, trim, lower-case, and NFC-normalize strings before hashing", () => {
+    it("should trim and lower-case strings before hashing", () => {
       const rawInput1 = "   User@DOMAIN.com   ";
       const rawInput2 = "user@domain.com";
 
@@ -148,14 +150,13 @@ describe("Cryptographic Hash & API Key Utilities", () => {
       expect(hash1).toMatch(/^[\da-f]{64}$/);
     });
 
-    it("should handle Unicode NFC normalization correctly", () => {
+    it("does not NFC-normalize, matching the stored field-encryption hash", () => {
       const nfcString = "\u00E9";
       const nfdString = "e\u0301";
 
-      const hashNfc = getNormalizedHash(nfcString);
-      const hashNfd = getNormalizedHash(nfdString);
-
-      expect(hashNfc).toBe(hashNfd);
+      expect(getNormalizedHash(nfdString)).toBe(hashValue(nfdString, ["lowercase", "trim"]));
+      expect(getNormalizedHash(nfcString)).toBe(hashValue(nfcString, ["lowercase", "trim"]));
+      expect(getNormalizedHash(nfcString)).not.toBe(getNormalizedHash(nfdString));
     });
   });
 });

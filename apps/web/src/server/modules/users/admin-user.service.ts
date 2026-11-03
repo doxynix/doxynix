@@ -8,6 +8,7 @@ import { auth } from "@/server/core/auth";
 import { type DbClient, prisma } from "@/server/core/db";
 import { revokeUserSessions } from "@/server/utils/access-revocation";
 import { assertAdminTotpCode } from "@/server/utils/admin-access";
+import { normalizeEmail } from "@/server/utils/email-guard";
 import { handlePrismaError } from "@/server/utils/handle-error";
 import {
   buildDateRangeWhere,
@@ -88,7 +89,12 @@ export function assertNotLastAdmin(input: {
 }
 
 function buildSearchClause(term: string): Prisma.UserWhereInput {
-  const clauses: Prisma.UserWhereInput[] = [{ name: { contains: term, mode: "insensitive" } }];
+  const clauses: Prisma.UserWhereInput[] = [
+    { name: { contains: term, mode: "insensitive" } },
+    // Only exact addresses can match: the column is ciphertext and the rewrite resolves this to
+    // `emailHash`. The term is normalized the same way the address was stored.
+    { email: { equals: normalizeEmail(term) } },
+  ];
 
   if (z.uuid().safeParse(term).success) {
     clauses.push({ id: term });

@@ -3,20 +3,32 @@ import { type FieldSpec, getHashFieldName, getModelSpec, hashValue } from "./con
 import { findKeyForMessage, type Keychain } from "./keyring";
 import { type TreeNode, traverseTree } from "./traverse";
 
-// `{ field: { equals | not | set: value } }` wrappers Prisma accepts on input.
-const INPUT_SUB_FIELDS = ["equals", "not", "set"] as const;
+const HASH_FILTER_OPERATORS: readonly string[] = ["equals", "in", "not", "notIn"];
+const UNSUPPORTED_FILTER_OPERATORS = [
+  "contains",
+  "endsWith",
+  "gt",
+  "gte",
+  "lt",
+  "lte",
+  "search",
+  "startsWith",
+] as const;
 // Clauses that must compare against the deterministic hash column instead.
 const HASH_CLAUSES = ["connect", "cursor", "where"];
 const SORT_DIRECTIONS = new Set(["asc", "desc"]);
 
 type ModelState = { model: string };
 
+type Operator = "direct" | "equals" | "in" | "not" | "notIn" | "set";
+
 type Target = {
   field: string;
+  fieldPath: string[];
   fieldSpec: FieldSpec;
   model: string;
-  path: string[];
-  value: string;
+  operator: Operator;
+  value: string | string[];
 };
 
 export type HashConfig = NonNullable<FieldSpec["hash"]>;
@@ -133,47 +145,42 @@ function collectTargets(draft: Record<string, unknown>, model: string): Target[]
     (state, node) => {
       const nodeSpec = getModelSpec(state.model);
 
-      if (Object.hasOwn(nodeSpec.fields, node.key)) {
-        // `Object.hasOwn` rather than `in`: `in` would also match inherited members such as `toString`.
-        const fieldSpec = nodeSpec.fields[node.key];
+      if (!Object.hasOwn(nodeSpec.fields, node.key)) {
+        return nextModel(state, node, nodeSpec);
+      }
 
-        if (fieldSpec == null) {
-          return nextModel(state, node, nodeSpec);
-        }
+      const fieldSpec = nodeSpec.fields[node.key];
 
-        if (node.type === "string" && typeof node.value === "string") {
-          targets.push({
-            field: node.key,
-            fieldSpec,
-            model: state.model,
-            path: node.path,
-            value: node.value,
-          });
-          return state;
-        }
+      if (fieldSpec == null) {
+        return nextModel(state, node, nodeSpec);
+      }
 
-        if (node.type === "object") {
-          const wrapper = node.value as Record<string, unknown>;
-
-          for (const subField of INPUT_SUB_FIELDS) {
-            const nested = wrapper[subField];
-
-            if (typeof nested === "string") {
-              targets.push({
-                field: node.key,
-                fieldSpec,
-                model: state.model,
-                path: [...node.path, subField],
-                value: nested,
-              });
-            }
-          }
-        }
-
+      if (node.type === "string" && typeof node.value === "string") {
+        targets.push({
+          field: node.key,
+          fieldPath: node.path,
+          fieldSpec,
+          model: state.model,
+          operator: "direct",
+          value: node.value,
+        });
         return state;
       }
 
-      return nextModel(state, node, nodeSpec);
+      if (node.type === "object" && isPlainRecord(node.value)) {
+        collectWrapperTargets(
+          targets,
+          state.model,
+          node.key,
+          node.path,
+          fieldSpec,
+          node.value,
+          isHashClausePath(node.path),
+        );
+        return state;
+      }
+
+      return state;
     },
     { model },
   );
@@ -181,33 +188,295 @@ function collectTargets(draft: Record<string, unknown>, model: string): Target[]
   return targets;
 }
 
+function collectWrapperTargets(
+  targets: Target[],
+  model: string,
+  field: string,
+  fieldPath: string[],
+  fieldSpec: FieldSpec,
+  wrapper: Record<string, unknown>,
+  allowFilters: boolean,
+): void {
+  for (const [operator, raw] of Object.entries(wrapper)) {
+    if (operator === "set") {
+      if (typeof raw === "string") {
+        targets.push({ field, fieldPath, fieldSpec, model, operator: "set", value: raw });
+      }
+      continue;
+    }
+
+    if (!allowFilters) {
+      continue;
+    }
+
+    if (operator === "mode") {
+      assertModeSupported(model, field, fieldSpec, raw);
+      continue;
+    }
+
+    if (operator === "equals") {
+      if (raw == null) {
+        continue;
+      }
+      if (typeof raw !== "string") {
+        throw new Error(`[field-encryption] ${model}.${field}.equals must be a string`);
+      }
+      targets.push({ field, fieldPath, fieldSpec, model, operator: "equals", value: raw });
+      continue;
+    }
+
+    if (operator === "not") {
+      if (raw == null) {
+        continue;
+      }
+      if (typeof raw === "string") {
+        targets.push({ field, fieldPath, fieldSpec, model, operator: "not", value: raw });
+        continue;
+      }
+      if (isPlainRecord(raw)) {
+        collectNotObject(targets, model, field, fieldPath, fieldSpec, raw);
+        continue;
+      }
+      throw new Error(
+        `[field-encryption] ${model}.${field}.not must be a string or a nested filter object`,
+      );
+    }
+
+    if (operator === "in" || operator === "notIn") {
+      if (raw == null) {
+        continue;
+      }
+      if (!isStringArray(raw)) {
+        throw new Error(
+          `[field-encryption] ${model}.${field}.${operator} must be an array of strings`,
+        );
+      }
+      targets.push({
+        field,
+        fieldPath,
+        fieldSpec,
+        model,
+        operator: operator,
+        value: raw,
+      });
+      continue;
+    }
+
+    if (isUnsupportedFilterOperator(operator)) {
+      throw unsupportedOperator(model, field, operator);
+    }
+  }
+}
+
+function collectNotObject(
+  targets: Target[],
+  model: string,
+  field: string,
+  fieldPath: string[],
+  fieldSpec: FieldSpec,
+  nested: Record<string, unknown>,
+): void {
+  const entries = Object.entries(nested);
+
+  if (entries.length === 0) {
+    return;
+  }
+
+  if (entries.length !== 1) {
+    throw new Error(`[field-encryption] ${model}.${field}.not must contain exactly one operator`);
+  }
+
+  const [operator, raw] = entries[0] as [string, unknown];
+
+  if (raw == null) {
+    return;
+  }
+
+  if (operator === "equals") {
+    if (typeof raw !== "string") {
+      throw new Error(`[field-encryption] ${model}.${field}.not.equals must be a string`);
+    }
+    targets.push({ field, fieldPath, fieldSpec, model, operator: "not", value: raw });
+    return;
+  }
+
+  if (operator === "in") {
+    if (!isStringArray(raw)) {
+      throw new Error(`[field-encryption] ${model}.${field}.not.in must be an array of strings`);
+    }
+    targets.push({ field, fieldPath, fieldSpec, model, operator: "notIn", value: raw });
+    return;
+  }
+
+  if (operator === "notIn") {
+    if (!isStringArray(raw)) {
+      throw new Error(`[field-encryption] ${model}.${field}.not.notIn must be an array of strings`);
+    }
+    targets.push({ field, fieldPath, fieldSpec, model, operator: "in", value: raw });
+    return;
+  }
+
+  if (operator === "not") {
+    throw new Error(
+      `[field-encryption] ${model}.${field}.not.not is not supported; simplify the filter`,
+    );
+  }
+
+  if (isUnsupportedFilterOperator(operator)) {
+    throw unsupportedOperator(model, field, operator);
+  }
+
+  throw new Error(
+    `[field-encryption] ${model}.${field}.not has unsupported operator "${operator}"`,
+  );
+}
+
+function assertModeSupported(
+  model: string,
+  field: string,
+  fieldSpec: FieldSpec,
+  raw: unknown,
+): void {
+  if (raw == null || raw === "default") {
+    return;
+  }
+
+  if (raw !== "insensitive") {
+    throw new Error(`[field-encryption] ${model}.${field}.mode must be "insensitive" or "default"`);
+  }
+
+  if (fieldSpec.hash == null || !fieldSpec.hash.normalize.includes("lowercase")) {
+    throw new Error(
+      `[field-encryption] ${model}.${field} uses mode "insensitive" but its hash is not lowercase-normalized`,
+    );
+  }
+}
+
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  if (value == null || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function isUnsupportedFilterOperator(operator: string): boolean {
+  return (UNSUPPORTED_FILTER_OPERATORS as readonly string[]).includes(operator);
+}
+
+function unsupportedOperator(model: string, field: string, operator: string): Error {
+  return new Error(
+    `[field-encryption] Unsupported filter operator "${operator}" on hashed field ${model}.${field}. ` +
+      `Supported: ${HASH_FILTER_OPERATORS.join(", ")}.`,
+  );
+}
+
 function rewriteTarget(
   draft: Record<string, unknown>,
   target: Target,
   key: { fingerprint: string; raw: Buffer },
 ): void {
-  const { fieldSpec } = target;
-  const fieldPath = fieldPathOf(target.path);
+  const { fieldSpec, fieldPath } = target;
   const hashPath = siblingPath(fieldPath, getHashFieldName(target.field));
 
-  // Ciphertext cannot be searched: swap in the hash column and drop the wrapper, so `where.email.equals` becomes `where.emailHash`.
-  if (fieldSpec.hash != null && isHashClausePath(target.path)) {
-    writePath(draft, hashPath, hashFor(target.value, fieldSpec));
+  if (isHashClausePath(fieldPath)) {
+    if (fieldSpec.hash == null) {
+      throw new Error(
+        `[field-encryption] ${target.model}.${target.field} has no hash column; ` +
+          "filtering by ciphertext cannot match. Add @encryption:hash(...) or remove the filter.",
+      );
+    }
+
+    writeHashTarget(draft, hashPath, target);
     deletePath(draft, fieldPath);
     return;
   }
 
   // Sorting ciphertext is meaningless, and `'asc' | 'desc'` must not be encrypted.
-  if (isOrderByPath(target.path, target.value)) {
-    deletePath(draft, target.path);
+  if (
+    target.operator === "direct" &&
+    typeof target.value === "string" &&
+    isOrderByPath(fieldPath, target.value)
+  ) {
+    deletePath(draft, fieldPath);
     return;
   }
 
-  // A `{ field: { set | equals | not: value } }` wrapper is replaced wholesale: the encrypted column is a scalar and cannot hold a nested operator.
-  writePath(draft, fieldPath, encryptString(target.value, key.raw, key.fingerprint));
+  if (target.operator !== "direct" && target.operator !== "set") {
+    return;
+  }
+
+  const plaintext = target.value as string;
+  writePath(draft, fieldPath, encryptString(plaintext, key.raw, key.fingerprint));
 
   if (fieldSpec.hash != null) {
-    writePath(draft, hashPath, hashFor(target.value, fieldSpec));
+    writePath(draft, hashPath, hashFor(plaintext, fieldSpec));
+  }
+}
+
+function writeHashTarget(draft: Record<string, unknown>, hashPath: string[], target: Target): void {
+  if (target.operator === "direct") {
+    writePath(draft, hashPath, hashFor(target.value as string, target.fieldSpec));
+    return;
+  }
+
+  if (target.operator === "set") {
+    throw new Error(
+      `[field-encryption] ${target.model}.${target.field}.set is not a filter operator`,
+    );
+  }
+
+  if (target.operator === "in" || target.operator === "notIn") {
+    writeNestedPath(
+      draft,
+      [...hashPath, target.operator],
+      (target.value as string[]).map((value) => hashFor(value, target.fieldSpec)),
+    );
+    return;
+  }
+
+  writeNestedPath(
+    draft,
+    [...hashPath, target.operator],
+    hashFor(target.value as string, target.fieldSpec),
+  );
+}
+
+// `writePath` only walks existing objects; hash operators such as `not` need a new
+// `{ fieldHash: { not: ... } }` wrapper, so this variant creates missing intermediates.
+function writeNestedPath(root: unknown, path: string[], value: unknown): void {
+  const keys = [...path];
+  const final = keys.pop();
+
+  if (final == null) {
+    return;
+  }
+
+  let cursor = root as Record<string, unknown> | undefined;
+
+  for (const key of keys) {
+    if (cursor == null) {
+      return;
+    }
+
+    const next = cursor[key];
+
+    if (next != null && typeof next === "object") {
+      cursor = next as Record<string, unknown>;
+      continue;
+    }
+
+    const created: Record<string, unknown> = {};
+    cursor[key] = created;
+    cursor = created;
+  }
+
+  if (cursor != null) {
+    cursor[final] = value;
   }
 }
 
@@ -215,33 +484,18 @@ function hashFor(value: string, fieldSpec: FieldSpec): string {
   return hashValue(value, fieldSpec.hash?.normalize ?? []);
 }
 
-// The path of the field itself, with any `{ set | equals | not }` wrapper stripped.
-function fieldPathOf(path: string[]): string[] {
-  return isSubField(last(path)) ? path.slice(0, -1) : path;
-}
-
 // The hash column is a sibling of the encrypted column, not a child of it.
 function siblingPath(fieldPath: string[], name: string): string[] {
   return [...fieldPath.slice(0, -1), name];
 }
 
-function isSubField(segment: string | undefined): boolean {
-  return segment != null && (INPUT_SUB_FIELDS as readonly string[]).includes(segment);
-}
-
-// Mirrors the library's `rewriteHashedFieldPath` + `rewriteWritePath` clause set.
-function isHashClausePath(path: string[]): boolean {
-  const items = fieldPathOf(path);
-  return HASH_CLAUSES.some((clause) => items.includes(clause));
+function isHashClausePath(fieldPath: string[]): boolean {
+  return HASH_CLAUSES.some((clause) => fieldPath.includes(clause));
 }
 
 // Mirrors the library's `isOrderBy`.
-function isOrderByPath(path: string[], value: string): boolean {
-  return path.includes("orderBy") && SORT_DIRECTIONS.has(value.toLowerCase());
-}
-
-function last(items: string[]): string | undefined {
-  return items.at(-1);
+function isOrderByPath(fieldPath: string[], value: string): boolean {
+  return fieldPath.includes("orderBy") && SORT_DIRECTIONS.has(value.toLowerCase());
 }
 
 function safeDecrypt(

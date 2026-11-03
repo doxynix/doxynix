@@ -305,4 +305,27 @@ describe("bannedEmailService against ZenStack policies", () => {
       }),
     ).rejects.toMatchObject({ message: "EmailBanned", status: "FORBIDDEN" });
   });
+
+  it("searches the decrypted email instead of the ciphertext column", async () => {
+    await cleanupDatabase();
+
+    const admin = await createTestUser("Admin", "ADMIN");
+
+    await bannedEmailService.create(admin.db, { email: "spam@example.com" });
+    await bannedEmailService.create(admin.db, { email: "ham@example.com" });
+
+    const result = await bannedEmailService.getAll(admin.db, { limit: 10, search: "spam" });
+
+    expect(result.items.map((item) => item.email)).toEqual(["spam@example.com"]);
+    expect(result.meta.filteredCount).toBe(1);
+    expect(result.meta.totalCount).toBe(2);
+  });
+
+  it("cleanupDatabase removes users whose email is encrypted", async () => {
+    await cleanupDatabase();
+    await createTestUser("Cleanup", "USER");
+    await cleanupDatabase();
+
+    await expect(prisma.user.count()).resolves.toBe(0);
+  });
 });

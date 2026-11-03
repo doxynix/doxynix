@@ -231,7 +231,7 @@ model User {
   id                             String               @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   /// @encrypted
   /// @zod.string.email({ message: "Incorrect email" })
-  email                          String?              @db.Citext()
+  email                          String?
   /// @encryption:hash(email)?normalize=lowercase&normalize=trim
   /// @zod.custom.omit(["model"])
   emailHash                      String?              @unique() @map("email_hash")
@@ -245,15 +245,15 @@ model User {
   role                           UserRole             @default(USER)
   banned                         Boolean              @default(false) @map("banned")
   banReason                      String?              @map("ban_reason")
-  banExpires                     DateTime?            @map("ban_expires")
+  banExpires                     DateTime?            @map("ban_expires") @db.Timestamptz(3)
   twoFactorEnabled               Boolean              @default(false) @map("two_factor_enabled")
   lastLoginMethod                String?              @map("last_login_method")
   onboardingIntent               OnboardingIntent?    @map("onboarding_intent")
-  onboardingCompletedAt          DateTime?            @map("onboarding_completed_at")
-  onboardingChecklistDismissedAt DateTime?            @map("onboarding_checklist_dismissed_at")
-  activatedAt                    DateTime?            @map("activated_at")
-  createdAt                      DateTime             @default(now()) @map("created_at")
-  updatedAt                      DateTime             @default(now()) @updatedAt() @map("updated_at")
+  onboardingCompletedAt          DateTime?            @map("onboarding_completed_at") @db.Timestamptz(3)
+  onboardingChecklistDismissedAt DateTime?            @map("onboarding_checklist_dismissed_at") @db.Timestamptz(3)
+  activatedAt                    DateTime?            @map("activated_at") @db.Timestamptz(3)
+  createdAt                      DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                      DateTime             @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   accounts                       Account[]
   sessions                       Session[]
   createdRepos                   Repo[]               @relation("RepoCreatedBy")
@@ -281,7 +281,7 @@ model Account {
   providerId            String    @map("provider_id")
   /// @encrypted
   /// @zod.string.email({ message: "Incorrect email" })
-  email                 String?   @db.Citext()
+  email                 String?
   /// @encryption:hash(email)?normalize=lowercase&normalize=trim
   /// @zod.custom.omit(["model"])
   emailHash             String?   @map("email_hash")
@@ -295,9 +295,9 @@ model Account {
   /// @zod.custom.omit(["model"])
   accessToken           String?   @map("access_token") @db.Text()
   /// @zod.custom.omit(["model"])
-  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at") @db.Timestamptz(3)
   /// @zod.custom.omit(["model"])
-  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at") @db.Timestamptz(3)
   tokenType             String?   @map("token_type")
   scope                 String?
   /// @encrypted
@@ -305,8 +305,8 @@ model Account {
   idToken               String?   @map("id_token") @db.Text()
   /// @zod.custom.omit(["model"])
   impersonatedBy        String?   @map("impersonated_by")
-  createdAt             DateTime  @default(now()) @map("created_at")
-  updatedAt             DateTime  @default(now()) @updatedAt() @map("updated_at")
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime  @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([providerId, accountId])
@@ -333,8 +333,8 @@ model Passkey {
   transports   String?
   /// @zod.string.uuid()
   aaguid       String?
-  createdAt    DateTime? @default(now()) @map("created_at")
-  updatedAt    DateTime? @updatedAt() @map("updated_at")
+  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime? @updatedAt() @map("updated_at") @db.Timestamptz(3)
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -351,8 +351,8 @@ model TwoFactor {
   verified    Boolean  @default(false)
   /// @zod.custom.omit(["model"])
   userId      String   @unique() @map("user_id") @db.Uuid()
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @default(now()) @updatedAt() @map("updated_at")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("two_factors")
@@ -363,17 +363,17 @@ model Session {
   id        String   @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   /// @encrypted
   /// @zod.custom.omit(["model"])
-  token     String   @unique()
+  token     String
   /// @encryption:hash(token)
   /// @zod.custom.omit(["model"])
   tokenHash String?  @unique() @map("token_hash")
-  expiresAt DateTime @map("expires_at")
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(3)
   ipAddress String?  @map("ip_address")
   userAgent String?  @map("user_agent")
   /// @zod.custom.omit(["model"])
   userId    String   @map("user_id") @db.Uuid()
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -393,9 +393,9 @@ model Verification {
   /// @encryption:hash(value)
   /// @zod.custom.omit(["model"])
   valueHash      String   @unique() @default("") @map("value_hash")
-  expiresAt      DateTime @map("expires_at")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @default(now()) @updatedAt() @map("updated_at")
+  expiresAt      DateTime @map("expires_at") @db.Timestamptz(3)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
 
   @@unique([identifierHash, valueHash])
   @@index([expiresAt])
@@ -406,13 +406,13 @@ model BannedEmail {
   id        String            @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   /// @encrypted
   /// @zod.string.email({ message: "Incorrect email" })
-  email     String            @db.Citext()
+  email     String
   /// @encryption:hash(email)?normalize=lowercase&normalize=trim
   /// @zod.custom.omit(["model"])
   emailHash String?           @unique() @map("email_hash")
   reason    BannedEmailReason
-  createdAt DateTime          @default(now()) @map("created_at")
-  updatedAt DateTime          @default(now()) @updatedAt() @map("updated_at")
+  createdAt DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime          @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
 
   @@map("banned_emails")
 }
@@ -443,10 +443,10 @@ model Repo {
   /// @zod.number.int().min(0)
   size             Int                        @default(0)
   visibility       Visibility                 @default(PRIVATE)
-  pushedAt         DateTime?                  @map("pushed_at")
-  createdAt        DateTime                   @default(now()) @map("created_at")
-  githubCreatedAt  DateTime?                  @map("github_created_at")
-  updatedAt        DateTime                   @default(now()) @updatedAt() @map("updated_at")
+  pushedAt         DateTime?                  @map("pushed_at") @db.Timestamptz(3)
+  createdAt        DateTime                   @default(now()) @map("created_at") @db.Timestamptz(3)
+  githubCreatedAt  DateTime?                  @map("github_created_at") @db.Timestamptz(3)
+  updatedAt        DateTime                   @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   /// @zod.custom.omit(["model"])
   workspaceId      String                     @map("workspace_id") @db.Uuid()
   workspace        Workspace                  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -461,9 +461,8 @@ model Repo {
   chatSessions     ChatSession[]
   prAnalysisConfig PullRequestAnalysisConfig?
 
-  @@unique([owner, name, workspaceId])
+  @@unique([workspaceId, owner, name])
   @@unique([githubId, workspaceId])
-  @@index([workspaceId, owner])
   @@index([workspaceId, name])
   @@index([workspaceId, visibility, createdAt(sort: Desc)])
   @@index([workspaceId, updatedAt(sort: Desc), id(sort: Desc)], map: "repos_workspace_id_updated_at_id_idx")
@@ -485,8 +484,8 @@ model GithubInstallation {
   repositorySelection RepositorySelection    @map("repository_selection")
   isSuspended         Boolean                @default(false) @map("is_suspended")
   htmlUrl             String?                @map("html_url")
-  createdAt           DateTime               @default(now()) @map("created_at")
-  updatedAt           DateTime               @default(now()) @updatedAt() @map("updated_at")
+  createdAt           DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime               @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   workspaceId         String                 @map("workspace_id") @db.Uuid()
   workspace           Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   userId              String?                @map("user_id") @db.Uuid()
@@ -502,8 +501,8 @@ model Workspace {
   /// @zod.custom.omit(["model"])
   id                      String                   @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
   name                    String
-  createdAt               DateTime                 @default(now()) @map("created_at")
-  updatedAt               DateTime                 @default(now()) @updatedAt() @map("updated_at")
+  createdAt               DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt               DateTime                 @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   members                 WorkspaceMember[]
   entitlement             WorkspaceEntitlement?
   repos                   Repo[]
@@ -528,8 +527,8 @@ model WorkspaceMember {
   workspaceId String        @map("workspace_id") @db.Uuid()
   userId      String        @map("user_id") @db.Uuid()
   role        WorkspaceRole @default(MEMBER)
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @default(now()) @updatedAt() @map("updated_at")
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime      @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -546,8 +545,8 @@ model WorkspaceEntitlement {
   planCode             String      @default("HOBBY") @map("plan_code")
   accessState          AccessState @default(NO_SUBSCRIPTION) @map("access_state")
   sourceSubscriptionId String?     @map("source_subscription_id") @db.Uuid()
-  activatedAt          DateTime?   @map("activated_at")
-  graceEndsAt          DateTime?   @map("grace_ends_at")
+  activatedAt          DateTime?   @map("activated_at") @db.Timestamptz(3)
+  graceEndsAt          DateTime?   @map("grace_ends_at") @db.Timestamptz(3)
   revision             BigInt      @default(0)
   /// @zod.number.int().min(0)
   seatLimit            Int         @default(1) @map("seat_limit")
@@ -562,8 +561,8 @@ model WorkspaceEntitlement {
   aiTokensPerMonth     Int?        @map("ai_tokens_per_month")
   /// @zod.number.int().min(0)
   historyDays          Int?        @map("history_days")
-  createdAt            DateTime    @default(now()) @map("created_at")
-  updatedAt            DateTime    @default(now()) @updatedAt() @map("updated_at")
+  createdAt            DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime    @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   workspace            Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
 
   @@index([planCode])
@@ -580,13 +579,13 @@ model ApiKey {
   name         String
   /// @zod.string.trim().max(1000, { message: "The description must be less than 1000 characters" })
   description  String?       @db.Text()
-  lastUsed     DateTime?     @map("last_used")
-  expiresAt    DateTime?     @map("expires_at")
+  lastUsed     DateTime?     @map("last_used") @db.Timestamptz(3)
+  expiresAt    DateTime?     @map("expires_at") @db.Timestamptz(3)
   scopes       ApiKeyScope[] @default([])
   revoked      Boolean       @default(false)
-  revokedAfter DateTime?     @map("revoked_after")
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @default(now()) @updatedAt() @map("updated_at")
+  revokedAfter DateTime?     @map("revoked_after") @db.Timestamptz(3)
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime      @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   /// @zod.custom.omit(["model"])
   workspaceId  String        @map("workspace_id") @db.Uuid()
   workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -693,6 +692,7 @@ model BillingOperation {
 
   @@unique([workspaceId, requestId])
   @@index([status, updatedAt])
+  @@index([actorUserId])
   @@map("billing_operations")
 }
 
@@ -843,7 +843,6 @@ model WorkspaceUsage {
   workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
 
   @@unique([workspaceId, periodStart])
-  @@index([periodStart])
   @@map("workspace_usage")
 }
 
@@ -870,8 +869,8 @@ model Analysis {
   jobId           String?    @map("job_id")
   logs            String?    @db.Text()
   error           String?    @db.Text()
-  createdAt       DateTime   @default(now()) @map("created_at")
-  updatedAt       DateTime   @default(now()) @updatedAt() @map("updated_at")
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime   @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   /// @zod.custom.omit(["model"])
   repoId          String     @map("repo_id") @db.Uuid()
   repo            Repo       @relation(fields: [repoId], references: [id], onDelete: Cascade)
@@ -892,8 +891,8 @@ model Document {
   /// @zod.string.min(1, { message: "Content cannot be empty" })
   content    String    @db.Text()
   path       String?
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @default(now()) @updatedAt() @map("updated_at")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime  @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   /// @zod.custom.omit(["model"])
   repoId     String    @map("repo_id") @db.Uuid()
   repo       Repo      @relation(fields: [repoId], references: [id], onDelete: Cascade)
@@ -921,8 +920,8 @@ model PullRequestAnalysis {
   changedFilesJson Json?                @map("changed_files_json")
   jobId            String?              @map("job_id")
   error            String?              @db.Text()
-  createdAt        DateTime             @default(now()) @map("created_at")
-  updatedAt        DateTime             @default(now()) @updatedAt() @map("updated_at")
+  createdAt        DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime             @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   /// @zod.custom.omit(["model"])
   repoId           String               @map("repo_id") @db.Uuid()
   repo             Repo                 @relation("RepoPullRequests", fields: [repoId], references: [id], onDelete: Cascade)
@@ -947,8 +946,8 @@ model PullRequestAnalysisConfig {
   tokenBudget     Int            @default(30000)
   focusAreas      PRFocusArea[]  @default([SECURITY, PERFORMANCE]) @map("focus_areas")
   excludePatterns String[]       @default([]) @map("exclude_patterns")
-  createdAt       DateTime       @default(now()) @map("created_at")
-  updatedAt       DateTime       @default(now()) @updatedAt() @map("updated_at")
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime       @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   /// @zod.custom.omit(["model"])
   repoId          String         @unique() @map("repo_id") @db.Uuid()
   repo            Repo           @relation(fields: [repoId], references: [id], onDelete: Cascade)
@@ -967,8 +966,8 @@ model PullRequestComment {
   body            String              @db.Text()
   findingType     String              @map("finding_type")
   githubCommentId BigInt?             @map("github_comment_id")
-  createdAt       DateTime            @default(now()) @map("created_at")
-  updatedAt       DateTime            @default(now()) @updatedAt() @map("updated_at")
+  createdAt       DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime            @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   /// @zod.custom.omit(["model"])
   analysisId      String              @map("analysis_id") @db.Uuid()
   analysis        PullRequestAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
@@ -990,8 +989,8 @@ model GeneratedFix {
   estimatedImpact Int?                 @map("estimated_impact")
   githubPrUrl     String?              @map("github_pr_url")
   githubPrNumber  Int?                 @map("github_pr_number")
-  createdAt       DateTime             @default(now()) @map("created_at")
-  updatedAt       DateTime             @default(now()) @updatedAt() @map("updated_at")
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime             @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   createdByUser   Boolean              @default(false) @map("created_by_user")
   /// @zod.custom.omit(["model"])
   repoId          String               @map("repo_id") @db.Uuid()
@@ -1015,8 +1014,8 @@ model Notification {
   body      String
   type      NotifyType @default(INFO)
   isRead    Boolean    @default(false) @map("is_read")
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @default(now()) @updatedAt() @map("updated_at")
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime   @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   /// @zod.custom.omit(["model"])
   userId    String     @map("user_id") @db.Uuid()
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -1040,8 +1039,8 @@ model UserAppearance {
   /// @zod.custom.omit(["model"])
   userId      String   @unique() @map("user_id") @db.Uuid()
   preferences Json     @default("{}")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @default(now()) @updatedAt() @map("updated_at")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_appearances")
@@ -1054,8 +1053,8 @@ model WebhookDelivery {
   event      String?
   status     WebhookStatus @default(PROCESSING)
   error      String?       @db.Text()
-  createdAt  DateTime      @default(now()) @map("created_at")
-  updatedAt  DateTime      @default(now()) @updatedAt() @map("updated_at")
+  createdAt  DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime      @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
 
   @@unique([provider, deliveryId])
   @@index([createdAt(sort: Desc)])
@@ -1072,11 +1071,12 @@ model AuditLog {
   userId    String?        @map("user_id") @db.Uuid()
   ip        String?        @db.Inet()
   userAgent String?        @map("user_agent")
-  createdAt DateTime       @default(now()) @map("created_at")
+  createdAt DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
 
   @@index([requestId])
   @@index([createdAt(sort: Desc), id(sort: Desc)], map: "audit_logs_created_at_id_idx")
   @@index([userId, operation])
+  @@index([userId, createdAt(sort: Desc), id(sort: Desc)], map: "audit_logs_user_id_created_at_id_idx")
   @@index([operation, createdAt(sort: Desc)])
   @@map("audit_logs")
 }
@@ -1086,8 +1086,8 @@ model ChatSession {
   userId    String        @map("user_id") @db.Uuid()
   repoId    String?       @map("repo_id") @db.Uuid()
   title     String        @default("New Chat")
-  createdAt DateTime      @default(now()) @map("created_at")
-  updatedAt DateTime      @updatedAt() @map("updated_at")
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime      @updatedAt() @map("updated_at") @db.Timestamptz(3)
   user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   repo      Repo?         @relation(fields: [repoId], references: [id], onDelete: Cascade)
   messages  ChatMessage[]
@@ -1104,7 +1104,7 @@ model ChatMessage {
   role      ChatRole
   /// @encrypted
   parts     String
-  createdAt DateTime    @default(now()) @map("created_at")
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
 
   @@index([sessionId, createdAt(sort: Asc)])
   @@map("chat_messages")

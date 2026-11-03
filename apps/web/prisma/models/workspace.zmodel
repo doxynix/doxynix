@@ -6,8 +6,8 @@ model Workspace {
   /// @zod.custom.omit(["model"])
   id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
   name      String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   members             WorkspaceMember[]
   entitlement         WorkspaceEntitlement?
@@ -40,8 +40,8 @@ model WorkspaceMember {
   workspaceId String        @map("workspace_id") @db.Uuid
   userId      String        @map("user_id") @db.Uuid
   role        WorkspaceRole @default(MEMBER)
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @default(now()) @updatedAt @map("updated_at")
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -63,8 +63,8 @@ model WorkspaceEntitlement {
   planCode            String   @default("HOBBY") @map("plan_code")
   accessState         AccessState @default(NO_SUBSCRIPTION) @map("access_state")
   sourceSubscriptionId String? @map("source_subscription_id") @db.Uuid
-  activatedAt         DateTime? @map("activated_at")
-  graceEndsAt         DateTime? @map("grace_ends_at")
+  activatedAt         DateTime? @map("activated_at") @db.Timestamptz(3)
+  graceEndsAt         DateTime? @map("grace_ends_at") @db.Timestamptz(3)
   revision            BigInt   @default(0)
   /// @zod.number.int().min(0)
   seatLimit           Int      @default(1) @map("seat_limit") @gte(0)
@@ -79,8 +79,8 @@ model WorkspaceEntitlement {
   aiTokensPerMonth    Int?     @map("ai_tokens_per_month") @gte(0)
   /// @zod.number.int().min(0)
   historyDays         Int?     @map("history_days") @gte(0)
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
 
@@ -118,14 +118,14 @@ model ApiKey {
   name        String    @length(min: 1, max: 50, message: "The name must be between 1 and 50 characters long")
   /// @zod.string.trim().max(1000, { message: "The description must be less than 1000 characters" })
   description String?   @db.Text @length(max: 1000, message: "The description must be less than 1000 characters")
-  lastUsed    DateTime? @map("last_used")
-  expiresAt   DateTime? @map("expires_at")
+  lastUsed    DateTime? @map("last_used") @db.Timestamptz(3)
+  expiresAt   DateTime? @map("expires_at") @db.Timestamptz(3)
   scopes      ApiKeyScope[] @default([])
   revoked     Boolean   @default(false)
-  revokedAfter DateTime? @map("revoked_after")
+  revokedAfter DateTime? @map("revoked_after") @db.Timestamptz(3)
 
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   /// @zod.custom.omit(["model"])
   workspaceId String    @map("workspace_id") @db.Uuid
@@ -151,6 +151,8 @@ model ApiKey {
   )
   @@deny('delete', true)
 
+  // Names are deliberately not unique per workspace: rotation creates the replacement under the
+  // same name while the old key is still inside its grace window.
   @@index([workspaceId])
   @@index([userId])
   @@index([expiresAt])

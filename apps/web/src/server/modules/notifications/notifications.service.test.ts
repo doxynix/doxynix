@@ -69,8 +69,8 @@ describe("notificationsService.buildWhereClause", () => {
       isRead: false,
       repo: {
         is: {
-          name: { equals: "react-query", mode: "insensitive" },
-          owner: { equals: "TanStack", mode: "insensitive" },
+          name: "react-query",
+          owner: "TanStack",
         },
       },
       type: NotifyType.WARNING,

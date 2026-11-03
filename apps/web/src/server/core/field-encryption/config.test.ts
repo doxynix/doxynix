@@ -36,20 +36,20 @@ describe("field-encryption config", () => {
   });
 
   it("stays byte-compatible with getRawHash, the reference the repo already trusts", () => {
-    // `getRawHash` is an independent implementation (one-shot `crypto.hash`, documented in `src/server/utils/hash.ts` as byte-compatible with `prisma-field-encryption`), so this tests the compatibility claim instead of restating this function's own algorithm.
+    // `getRawHash` is the lookup-side hash used by the auth adapter; the literal digest above pins the
+    // wire format, so this loop only guards that both entry points agree on every value shape.
     for (const value of ["user@example.com", "SESS_SECRET", "Ünïcødé 🎯", ""]) {
       expect(hashValue(value, [])).toBe(getRawHash(value));
     }
   });
 
-  it("does not NFC-normalize, which is what separates it from getNormalizedHash", () => {
-    // The normalize vocabulary is only `lowercase`/`trim`, so a silently added Unicode pass must not change every non-ASCII digest; the NFC/NFD strings are built from code points so no formatter can collapse them.
+  it("matches getNormalizedHash for NFD input instead of silently NFC-normalizing", () => {
     const nfc = String.fromCodePoint(0x63, 0x61, 0x66, 0xe9);
     const nfd = String.fromCodePoint(0x63, 0x61, 0x66, 0x65, 0x3_01);
 
     expect(hashValue(nfc, ["lowercase", "trim"])).not.toBe(hashValue(nfd, ["lowercase", "trim"]));
     expect(hashValue(nfd, ["lowercase", "trim"])).toBe(getRawHash(nfd));
-    expect(getNormalizedHash(nfd)).toBe(getNormalizedHash(nfc));
+    expect(getNormalizedHash(nfd)).toBe(hashValue(nfd, ["lowercase", "trim"]));
   });
 
   it("applies normalize options before hashing", () => {

@@ -1,15 +1,23 @@
 import { appLogger } from "@/server/core/app-logger";
-import { prisma } from "@/server/core/db";
+import { prisma, runAsBackgroundTask } from "@/server/core/db";
 import { extractPayloadFromKey, getApiKeyHash, validateApiKeyChecksum } from "@/server/utils/hash";
 
+// Every API request used to write `lastUsed`; hour-level granularity is enough for the UI and
+// keeps a CI pipeline from turning each call into a row update plus WAL traffic.
+const LAST_USED_REFRESH_MS = 60 * 60 * 1000;
+
 function retireExpiredKey(keyId: string, msg: string) {
-  void prisma.apiKey.update({ data: { revoked: true }, where: { id: keyId } }).catch((error) =>
-    appLogger.error({
-      error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
-      keyId,
-      msg,
-    }),
-  );
+  void runAsBackgroundTask(async () => {
+    try {
+      await prisma.apiKey.update({ data: { revoked: true }, where: { id: keyId } });
+    } catch (error) {
+      appLogger.error({
+        error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
+        keyId,
+        msg,
+      });
+    }
+  });
 }
 
 // Checksum is checked on the CPU first so only the payload is hashed and looked up in the DB.
@@ -50,18 +58,16 @@ export async function verifyAndUseApiKey(token: string) {
     return null;
   }
 
-  void prisma.apiKey
-    .update({
-      data: { lastUsed: new Date() },
-      where: { id: keyRecord.id },
-    })
-    .catch((error) =>
-      appLogger.error({
-        error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
-        keyId: keyRecord.id,
-        msg: "Failed to update api key lastUsed",
-      }),
-    );
+  const lastUsedAt = keyRecord.lastUsed?.getTime() ?? 0;
+
+  if (now - lastUsedAt > LAST_USED_REFRESH_MS) {
+    void runAsBackgroundTask(async () => {
+      await prisma.apiKey.updateMany({
+        data: { lastUsed: new Date() },
+        where: { id: keyRecord.id },
+      });
+    });
+  }
 
   return keyRecord;
 }

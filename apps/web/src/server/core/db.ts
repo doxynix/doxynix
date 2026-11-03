@@ -43,7 +43,7 @@ async function getNextAfterApi() {
 }
 
 // Prefers Next.js `after()` and falls back to a direct await elsewhere; the import is dynamic so Trigger.dev tasks and builds, which have no Next.js request context, still work.
-async function runAsBackgroundTask(task: () => Promise<void>): Promise<void> {
+export async function runAsBackgroundTask(task: () => Promise<void>): Promise<void> {
   const afterFn = await getNextAfterApi();
 
   if (afterFn) {
@@ -53,7 +53,9 @@ async function runAsBackgroundTask(task: () => Promise<void>): Promise<void> {
     } catch (error) {
       const isContextError =
         error instanceof Error &&
-        (error.message.includes("request context") || error.message.includes("lifecycle"));
+        (error.message.includes("request scope") ||
+          error.message.includes("request context") ||
+          error.message.includes("lifecycle"));
 
       if (!isContextError) {
         appLogger.warn({ error, msg: "afterFn failed unexpectedly, falling back to execution" });
