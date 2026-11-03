@@ -12,11 +12,11 @@ description: Six document types, where they materialize, how to export them and 
 | `API` | `docs/API.md` | Endpoint reference built from detected routes |
 | `CONTRIBUTING` | `CONTRIBUTING.md` | Workflow, conventions and review rules |
 | `CHANGELOG` | `CHANGELOG.md` | Diff-driven release history |
-| `CODE_DOC` | `docs/code/<source-path>.md` | Per-file documentation generated on demand for a single file (`dxnx docs generate`) or pinned from a file audit (`dxnx docs pin`). Not part of a full analysis run. |
+| `CODE_DOC` | `docs/code/<source-path>.md` | Per-file documentation for the files selected during analysis; also available on demand with `dxnx docs generate`. |
 
-`dxnx analyze start` requests `README` and `ARCHITECTURE` by default. The dashboard defaults to
-`README` and offers five checkboxes — `README`, `API`, `ARCHITECTURE`, `CONTRIBUTING` and `CHANGELOG`.
-`CODE_DOC` is on demand and is not part of a full analysis run; see Per-file docs below.
+`dxnx analyze start` requests `README`, `ARCHITECTURE` and `CODE_DOC` by default. The dashboard
+defaults to `README` and lets you select the other repository-level types — `API`, `ARCHITECTURE`,
+`CONTRIBUTING` and `CHANGELOG`. `CODE_DOC` covers the files selected for the run.
 
 ## How a document is built
 

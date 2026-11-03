@@ -20,10 +20,11 @@ Open the repository and press **Analyze**, then pick what to generate:
 | `API` | Endpoint reference built from detected routes |
 | `CONTRIBUTING` | Workflow, conventions and review rules |
 | `CHANGELOG` | Diff-driven release history |
+| `CODE_DOC` | Per-file docs for the files you select |
 
-`dxnx analyze start` requests `README` and `ARCHITECTURE` by default. In the dashboard, `README` is
-preselected and the five checkboxes are `README`, `API`, `ARCHITECTURE`, `CONTRIBUTING` and
-`CHANGELOG`.
+`dxnx analyze start` requests `README`, `ARCHITECTURE` and `CODE_DOC` by default. In the dashboard,
+`README` is preselected and you choose the other repository-level types; `CODE_DOC` covers the files
+selected for the run.
 
 ## Choose a language
 
@@ -59,19 +60,20 @@ materialized paths are:
 | `API` | `docs/API.md` |
 | `CONTRIBUTING` | `CONTRIBUTING.md` |
 | `CHANGELOG` | `CHANGELOG.md` |
-| `CODE_DOC` | `docs/code/<source-path>.md` (on demand) |
+| `CODE_DOC` | `docs/code/<source-path>.md` |
 
 ## Per-file docs
 
-`CODE_DOC` is created on demand, not by a full analysis run:
+`CODE_DOC` can also be produced outside a full analysis. Run the sequence in this order:
 
 ```bash
+dxnx analyze audit src/foo.ts
 dxnx docs generate src/foo.ts
 dxnx docs pin src/foo.ts
 ```
 
-`dxnx docs generate` documents a single file. `dxnx docs pin` pins an audit of that file into
-permanent documentation.
+`dxnx analyze audit` creates the audit cache for the file, `dxnx docs generate` prints the generated
+preview, and `dxnx docs pin` stores it as permanent documentation.
 
 ## Re-run and history
 
@@ -82,7 +84,7 @@ dashboard and with:
 dxnx analyze history
 ```
 
-History is kept for 7 days on Hobby and 90 days on Pro.
+History is kept for 7 days on Hobby, 90 days on Pro and unlimited on Team.
 
 ## If it fails
 
