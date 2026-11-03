@@ -28,6 +28,7 @@ function toSlug(file: string): string {
 
 async function loadPages(): Promise<DocPage[]> {
   const files = await fg("**/*.mdx", { cwd: DOCS_ROOT });
+  expect(files.length, "no docs pages found").toBeGreaterThan(0);
 
   return Promise.all(
     files.map(async (file) => {
@@ -47,6 +48,18 @@ async function loadPages(): Promise<DocPage[]> {
         title: data.title ?? "",
       };
     }),
+  );
+}
+
+// `pages` also holds separators, ordered prefixes, link entries and folder names, not just pages.
+function isResolvableEntry(entry: string): boolean {
+  return !(
+    entry.startsWith("...") ||
+    entry.startsWith("---") ||
+    entry.startsWith("[") ||
+    entry.startsWith("!") ||
+    entry.startsWith("z...") ||
+    entry.startsWith("external:")
   );
 }
 
@@ -90,14 +103,15 @@ describe("docs content", () => {
       const folder = dirname(join(DOCS_ROOT, file));
 
       for (const entry of data.pages ?? []) {
-        if (typeof entry !== "string" || entry === "..." || entry.startsWith("---")) {
+        if (typeof entry !== "string" || !isResolvableEntry(entry)) {
           continue;
         }
 
         const asFile = join(folder, `${entry}.mdx`);
         const asIndex = join(folder, entry, "index.mdx");
+        const asFolder = join(folder, entry);
         expect(
-          existsSync(asFile) || existsSync(asIndex),
+          existsSync(asFile) || existsSync(asIndex) || existsSync(asFolder),
           `${file} references missing ${entry}`,
         ).toBe(true);
       }
