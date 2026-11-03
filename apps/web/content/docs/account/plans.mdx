@@ -1,0 +1,64 @@
+---
+title: Plans and limits
+description: Compare Hobby and Pro, understand seat billing and workspace limits.
+---
+
+Every workspace runs on one plan. The plan sets how many analyses and AI tokens the workspace can
+spend per month, whether private repositories and pull request reviews are available, and how long
+analysis history is kept.
+
+## Plans
+
+| Plan | Price | Analyses / month | AI tokens / month | Private repos | PR reviews | History |
+| --- | --- | --- | --- | --- | --- | --- |
+| Hobby | Free | 20 | 1,000,000 | No | No | 7 days |
+| Pro | Per seat, monthly | 500 | 20,000,000 | Yes | Yes | 90 days |
+| Team | Custom | Unlimited | Unlimited | Yes | Yes | Unlimited |
+
+## Seats
+
+Pro is billed per active member of the workspace: adding a member adds a seat, removing one frees it
+at the next billing cycle. Hobby covers a single member. The current per-seat price is on the
+[pricing page](https://doxynix.space/#pricing), because it changes with currency and billing period.
+
+## What counts as an analysis
+
+One analysis is one dispatched run: `dxnx analyze start`, a trigger from the dashboard, the GitHub
+Action, or an automatic resync. Re-running the same repository and branch still counts as a new
+analysis.
+
+History retention follows the plan: 7 days on Hobby and 90 days on Pro. Once a run falls outside
+that window its metrics stay aggregated in the analytics view, but the per-run report and its
+generated documents are gone.
+
+## AI tokens
+
+The token budget is monthly and shared by every model call in the workspace: document generation,
+pull request reviews, the in-app agent and MCP tool calls. When the budget is exhausted, further
+model work stops until the next cycle.
+
+## Private repositories
+
+Private repositories need Pro. A Hobby workspace can connect only public repositories through the
+GitHub App. Upgrading unlocks the private repositories the installation already has access to.
+
+## PR reviews
+
+Automatic pull request reviews need Pro. A Hobby workspace still gets analyses and generated
+documents, but Doxynix does not post findings on pull requests.
+
+## Pro auto-resync
+
+Pro workspaces can resync documentation when a commit lands on the default branch, so the workspace
+documents track the repository without a manual trigger. Hobby workspaces re-run an analysis or wire
+the [GitHub Action](/docs/integrations/github-action) into their workflow instead.
+
+## Team
+
+Team is sales-led: unlimited analyses, tokens and history for organizations that need them, with a
+contract instead of self-serve checkout. Contact support to start the conversation.
+
+## Manage billing
+
+Open **Settings → Billing** to see the current plan, change it, update the payment method and
+download invoices. Payments and invoices are handled by the Stripe billing portal.

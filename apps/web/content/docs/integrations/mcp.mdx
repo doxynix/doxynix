@@ -1,0 +1,88 @@
+---
+title: MCP server
+description: Connect an MCP client to Doxynix, authenticate with an API key and see which tools are exposed.
+---
+
+Doxynix runs a [Model Context Protocol](https://modelcontextprotocol.io) server next to the API, so
+an agent can query your workspace with the same tools the in-app agent uses.
+
+## Endpoint
+
+```text
+https://doxynix.space/api/mcp
+```
+
+The path is relative to the app root, so a deployment on another host serves the server at
+`${APP_URL}/api/mcp`. The transport is streamable HTTP; both `GET` and `POST` are accepted.
+
+## Authentication
+
+Send the key as a bearer token:
+
+```text
+Authorization: Bearer <API key>
+```
+
+The key must have the `MCP` scope, or `FULL`, which includes it. Create one on the
+[API keys](/docs/integrations/api-keys) page and give it only the scope the agent needs.
+
+## Client configuration
+
+Add the server to the MCP client config. Most clients accept the same `mcpServers` shape:
+
+```json
+{
+  "mcpServers": {
+    "doxynix": {
+      "url": "https://doxynix.space/api/mcp",
+      "headers": {
+        "Authorization": "Bearer ${DOXYNIX_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+Keep the key in the environment and interpolate it, as above, instead of pasting the secret into a
+file you might commit.
+
+## Tools
+
+The server exposes the same tool set as the in-app agent, minus the six mutation tools that change
+account or repository state:
+
+- `applyFix`
+- `createApiKey`
+- `revokeApiKey`
+- `updateApiKey`
+- `deleteRepository`
+- `openPullRequest`
+
+Everything else is available, including `triggerRepositoryAnalysis`, `stageFile` and
+`markNotificationAsRead`, so the server is not read-only. Staging a file writes to the Doxynix
+workspace, not to your repository; publishing still means opening a pull request you review.
+
+## What you can ask
+
+Typical prompts map to a few tool calls:
+
+- Inspect repositories, branches, trees and files.
+- Read the latest analysis, its metrics and the generated documents.
+- List pull request findings and existing review comments.
+- Search the workspace for a symbol, a file or a past finding.
+- Trigger a new analysis and poll it until it finishes.
+- Stage a generated document or fix so it is ready for a pull request.
+
+## Scope
+
+The key is bound to your user and the workspaces you belong to. Every tool call runs with those
+permissions, so an agent can only reach repositories you can already open, and it cannot escalate by
+calling a tool with a repository id from another workspace.
+
+## Troubleshooting
+
+- `401 Unauthorized` — the `Authorization` header is missing, malformed, or the key was revoked.
+- A tool fails with a permission error — the key has only `CLI` or the workspace role is too low for
+  that tool. Re-issue the key with `MCP` or `FULL`.
+- The client connects but lists no tools — it is speaking to the wrong path. The endpoint ends in
+  `/api/mcp`, not `/api`.

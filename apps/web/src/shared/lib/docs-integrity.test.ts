@@ -20,6 +20,11 @@ const REQUIRED_SLUGS = [
   "/docs/concepts/pull-request-reviews",
   "/docs/cli",
   "/docs/cli/reference",
+  "/docs/integrations/api-keys",
+  "/docs/integrations/mcp",
+  "/docs/integrations/github-action",
+  "/docs/account/plans",
+  "/docs/faq",
 ] as const;
 
 type DocPage = {
