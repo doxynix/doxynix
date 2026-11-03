@@ -64,8 +64,8 @@ async function handler(req: Request) {
 
   const dbRepo = await prisma.repo.findFirst({
     where: {
-      name: { equals: name, mode: "insensitive" },
-      owner: { equals: owner, mode: "insensitive" },
+      name,
+      owner,
       workspaceId: keyRecord.workspaceId,
     },
   });

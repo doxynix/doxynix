@@ -59,10 +59,19 @@ describe("adminUserService.buildWhereClause", () => {
     });
   });
 
-  it("searches name only, because email is encrypted and cannot be matched", () => {
+  it("searches name loosely and the encrypted email by exact match", () => {
     const clause = adminUserService.buildWhereClause({ search: "  Karen " });
 
-    expect(clause.OR).toEqual([{ name: { contains: "karen", mode: "insensitive" } }]);
+    expect(clause.OR).toEqual([
+      { name: { contains: "karen", mode: "insensitive" } },
+      { email: { equals: "karen" } },
+    ]);
+  });
+
+  it("normalizes the searched address the same way it was stored", () => {
+    const clause = adminUserService.buildWhereClause({ search: "User+Tag@GoogleMail.com" });
+
+    expect(clause.OR).toContainEqual({ email: { equals: "user@gmail.com" } });
   });
 
   it("matches the id exactly when the search term is a uuid, so admins can paste one", () => {
@@ -83,7 +92,7 @@ describe("adminUserService.buildWhereClause", () => {
 
   it("keeps the filters independent of a search", () => {
     expect(adminUserService.buildWhereClause({ role: "ADMIN", search: "karen" })).toEqual({
-      OR: [{ name: { contains: "karen", mode: "insensitive" } }],
+      OR: [{ name: { contains: "karen", mode: "insensitive" } }, { email: { equals: "karen" } }],
       role: "ADMIN",
     });
   });

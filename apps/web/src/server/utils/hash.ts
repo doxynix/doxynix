@@ -1,10 +1,8 @@
 import crypto from "node:crypto";
 
-import {
-  API_KEY_CHECKSUM_SECRET,
-  API_KEY_PEPPER,
-  PRISMA_FIELD_ENCRYPTION_HASH_SALT,
-} from "@/shared/config/env.server";
+import { API_KEY_CHECKSUM_SECRET, API_KEY_PEPPER } from "@/shared/config/env.server";
+
+import { hashValue } from "@/server/core/field-encryption/config";
 
 const BRAND_PREFIX = "dxnx_";
 const CHECKSUM_LENGTH = 8;
@@ -65,10 +63,7 @@ export function extractPayloadFromKey(apiKey: string): null | string {
 
 // PRISMA ONLY: must match the native hashing of the prisma-field-encryption library byte for byte.
 export function getRawHash(value: string): string {
-  const input = PRISMA_FIELD_ENCRYPTION_HASH_SALT
-    ? value + PRISMA_FIELD_ENCRYPTION_HASH_SALT
-    : value;
-  return crypto.hash("sha256", input);
+  return hashValue(value, []);
 }
 
 // HIGH-ENTROPY STRINGS ONLY: 192-bit payloads, peppered HMAC so a DB leak resists brute force.
@@ -77,8 +72,8 @@ export function getApiKeyHash(payload: string): string {
   return crypto.createHmac("sha256", API_KEY_PEPPER).update(payload).digest("hex");
 }
 
-// PRISMA ONLY: hashes the NFC-normalized form, not the raw value.
+// PRISMA ONLY: the field-encryption extension hashes lowercase + trim, without NFC.
+// Matching that byte-for-byte keeps stored and queried emailHash/identifierHash in sync.
 export function getNormalizedHash(value: string): string {
-  const normalized = value.trim().normalize("NFC").toLowerCase();
-  return getRawHash(normalized);
+  return hashValue(value, ["lowercase", "trim"]);
 }

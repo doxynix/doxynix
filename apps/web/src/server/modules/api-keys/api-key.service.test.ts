@@ -304,6 +304,34 @@ describe("apiKeyService mutations", () => {
     expect(retired.data.revokedAfter.getTime()).toBeGreaterThan(Date.now());
   });
 
+  it("should create the replacement and retire the old key in one transaction", async () => {
+    const txCreate = vi.fn().mockResolvedValue({ id: "replacement-id" });
+    const txFindFirst = vi.fn().mockResolvedValue(makeApiKeyRow());
+    const txUpdate = vi.fn().mockResolvedValue({});
+    const tx = { apiKey: { create: txCreate, findFirst: txFindFirst, update: txUpdate } };
+
+    const rootCreate = vi.fn();
+    const rootUpdate = vi.fn();
+    const $transaction = vi.fn(async (fn: (client: unknown) => Promise<unknown>) => fn(tx));
+
+    const db = {
+      $transaction,
+      apiKey: { create: rootCreate, findFirst: vi.fn(), update: rootUpdate },
+    } as unknown as DbClient;
+
+    await apiKeyService.rotate(db, KEY_ID, USER_ID, WORKSPACE_ID);
+
+    expect($transaction).toHaveBeenCalledOnce();
+    expect(txFindFirst).toHaveBeenCalledWith({ where: { id: KEY_ID, workspaceId: WORKSPACE_ID } });
+    expect(txCreate).toHaveBeenCalledOnce();
+    expect(txUpdate).toHaveBeenCalledWith({
+      data: expect.objectContaining({ revoked: true }),
+      where: { id: KEY_ID, workspaceId: WORKSPACE_ID },
+    });
+    expect(rootCreate).not.toHaveBeenCalled();
+    expect(rootUpdate).not.toHaveBeenCalled();
+  });
+
   it("should refuse to rotate an already retired key", async () => {
     const { db, findFirst } = createApiKeyDbMock([]);
     findFirst.mockResolvedValue(makeApiKeyRow({ revoked: true, revokedAfter: null }));

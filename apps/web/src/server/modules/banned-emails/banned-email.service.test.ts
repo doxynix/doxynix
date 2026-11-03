@@ -31,11 +31,36 @@ describe("bannedEmailService.buildWhereClause", () => {
     });
   });
 
-  it("searches the email case-insensitively and ignores a blank term", () => {
-    expect(bannedEmailService.buildWhereClause({ search: "  Spam@Example.com " })).toEqual({
-      email: { contains: "spam@example.com", mode: "insensitive" },
-    });
+  it("keeps the search term out of the where clause because email is ciphertext", () => {
+    expect(bannedEmailService.buildWhereClause({ search: "  Spam@Example.com " })).toEqual({});
     expect(bannedEmailService.buildWhereClause({ search: "   " })).toEqual({});
+  });
+});
+
+describe("bannedEmailService.getAll", () => {
+  it("filters a search term after decrypting the rows", async () => {
+    const rows = [
+      {
+        createdAt: new Date("2026-01-01"),
+        email: "spam@example.com",
+        id: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d",
+        reason: "MANUAL" as const,
+      },
+      {
+        createdAt: new Date("2026-01-02"),
+        email: "ham@example.com",
+        id: "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5e",
+        reason: "MANUAL" as const,
+      },
+    ];
+    const findMany = vi.fn().mockResolvedValue(rows);
+    const db = { bannedEmail: { findMany } };
+
+    const result = await bannedEmailService.getAll(db as never, { limit: 10, search: "spam" });
+
+    expect(result.items.map((item) => item.email)).toEqual(["spam@example.com"]);
+    expect(result.meta.filteredCount).toBe(1);
+    expect(result.meta.totalCount).toBe(2);
   });
 });
 

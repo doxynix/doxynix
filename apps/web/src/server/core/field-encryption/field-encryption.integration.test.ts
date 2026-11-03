@@ -6,6 +6,8 @@ vi.mock("@/shared/config/env.server", () => ({
   PRISMA_FIELD_ENCRYPTION_HASH_SALT: "integration-salt",
 }));
 
+import { getNormalizedHash } from "@/server/utils/hash";
+
 import { encryptString, parseEncryptedString } from "./cipher";
 import { COMPAT_FIXTURE } from "./compat-fixture";
 import { getModelSpec, hashValue } from "./config";
@@ -64,6 +66,14 @@ describe("field-encryption end to end", () => {
 
     expect(read.email).toBe("User@Example.com");
     expect(read.name).toBe("Ada");
+  });
+
+  it("writes the hash getNormalizedHash will query for NFD input", () => {
+    const email = `${String.fromCodePoint(0x63, 0x61, 0x66, 0x65, 0x3_01)}@example.com`;
+    const written = encryptOnWrite({ data: { email } }, "User", key);
+    const data = written.data as Record<string, unknown>;
+
+    expect(data.emailHash).toBe(getNormalizedHash(email));
   });
 
   it("reads a row written by prisma-field-encryption 1.6.0", () => {

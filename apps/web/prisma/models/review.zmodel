@@ -29,8 +29,8 @@ model Analysis {
   logs            String?    @db.Text
   error           String?    @db.Text
 
-  createdAt       DateTime   @default(now()) @map("created_at")
-  updatedAt       DateTime   @default(now()) @updatedAt @map("updated_at")
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   /// @zod.custom.omit(["model"])
   repoId          String     @map("repo_id") @db.Uuid @omit
@@ -57,8 +57,8 @@ model Document {
   content    String    @db.Text
   path       String?
 
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
   /// @zod.custom.omit(["model"])
   repoId     String    @map("repo_id") @db.Uuid @omit
   repo       Repo      @relation(fields: [repoId], references: [id], onDelete: Cascade)
@@ -69,6 +69,8 @@ model Document {
   @@deny('all', auth() == null)
   @@allow('all', repo.workspace.members?[userId == auth().id] || auth().role == 'ADMIN')
 
+  // Exactly one of `path` (manual code docs) or `analysisId` (analysis reports) identifies a row, so
+  // the nullable side is already covered by the other index; making nulls collide would break re-runs.
   @@unique([repoId, version, type, path])
   @@unique([repoId, version, type, analysisId])
   @@index([analysisId])
@@ -96,8 +98,8 @@ model PullRequestAnalysis {
   jobId            String?              @map("job_id")
   error            String?              @db.Text
 
-  createdAt        DateTime             @default(now()) @map("created_at")
-  updatedAt        DateTime             @default(now()) @updatedAt @map("updated_at")
+  createdAt        DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   /// @zod.custom.omit(["model"])
   repoId           String               @map("repo_id") @db.Uuid @omit
@@ -129,8 +131,8 @@ model PullRequestAnalysisConfig {
   focusAreas      PRFocusArea[]  @default([SECURITY, PERFORMANCE]) @map("focus_areas")
   excludePatterns String[]       @default([]) @map("exclude_patterns")
 
-  createdAt       DateTime       @default(now()) @map("created_at")
-  updatedAt       DateTime       @default(now()) @updatedAt @map("updated_at")
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   /// @zod.custom.omit(["model"])
   repoId          String         @unique @map("repo_id") @db.Uuid
@@ -155,8 +157,8 @@ model PullRequestComment {
 
   githubCommentId BigInt?             @map("github_comment_id")
 
-  createdAt       DateTime            @default(now()) @map("created_at")
-  updatedAt       DateTime            @default(now()) @updatedAt @map("updated_at")
+  createdAt       DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   /// @zod.custom.omit(["model"])
   analysisId      String              @map("analysis_id") @db.Uuid @omit
@@ -186,8 +188,8 @@ model GeneratedFix {
   githubPrUrl     String?              @map("github_pr_url") @url
   githubPrNumber  Int?                 @map("github_pr_number")
 
-  createdAt       DateTime             @default(now()) @map("created_at")
-  updatedAt       DateTime             @default(now()) @updatedAt @map("updated_at")
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
   createdByUser   Boolean              @default(false) @map("created_by_user")
 
   /// @zod.custom.omit(["model"])

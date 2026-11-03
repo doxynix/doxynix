@@ -56,7 +56,7 @@ describe("encryptOnWrite", () => {
     );
   });
 
-  it("rewrites where.email.equals into where.emailHash", () => {
+  it("rewrites where.email.equals into where.emailHash.equals", () => {
     const out = encryptOnWrite(
       { where: { email: { equals: "user@example.com" } } },
       "User",
@@ -65,7 +65,9 @@ describe("encryptOnWrite", () => {
 
     const where = out.where as Record<string, unknown>;
     expect(where.email).toBeUndefined();
-    expect(where.emailHash).toBe(hashValue("user@example.com", ["lowercase", "trim"]));
+    expect(where.emailHash).toEqual({
+      equals: hashValue("user@example.com", ["lowercase", "trim"]),
+    });
   });
 
   it("rewrites a bare where.email comparison too", () => {
@@ -74,6 +76,26 @@ describe("encryptOnWrite", () => {
     expect((out.where as Record<string, unknown>).emailHash).toBe(
       hashValue("user@example.com", ["lowercase", "trim"]),
     );
+  });
+
+  it("rewrites an equality nested inside OR, which admin search relies on", () => {
+    const out = encryptOnWrite(
+      {
+        where: {
+          OR: [{ name: { contains: "karen" } }, { email: { equals: "karen@example.com" } }],
+        },
+      },
+      "User",
+      parsedKey,
+    );
+
+    const [first, second] = at(out, "where", "OR") as unknown as Array<Record<string, unknown>>;
+
+    expect(first?.email).toBeUndefined();
+    expect(second?.email).toBeUndefined();
+    expect(second?.emailHash).toEqual({
+      equals: hashValue("karen@example.com", ["lowercase", "trim"]),
+    });
   });
 
   it("drops orderBy on an encrypted field because ciphertext cannot be sorted", () => {
@@ -170,6 +192,113 @@ describe("encryptOnWrite", () => {
 
     expect(some.email).toBeUndefined();
     expect(some.emailHash).toBe(hashValue("acct@example.com", ["lowercase", "trim"]));
+  });
+});
+
+describe("encryptOnWrite hashed filters", () => {
+  const hashOf = (value: string) => hashValue(value, ["lowercase", "trim"]);
+
+  it("preserves not instead of turning it into equality", () => {
+    const out = encryptOnWrite(
+      { where: { email: { not: "user@example.com" } } },
+      "User",
+      parsedKey,
+    );
+
+    expect(out.where).toEqual({ emailHash: { not: hashOf("user@example.com") } });
+  });
+
+  it("keeps equals and not as siblings on the hash field", () => {
+    const out = encryptOnWrite(
+      { where: { email: { equals: "a@example.com", not: "b@example.com" } } },
+      "User",
+      parsedKey,
+    );
+
+    expect(out.where).toEqual({
+      emailHash: { equals: hashOf("a@example.com"), not: hashOf("b@example.com") },
+    });
+  });
+
+  it("flattens not: { equals } to a negated hash comparison", () => {
+    const out = encryptOnWrite(
+      { where: { email: { not: { equals: "user@example.com" } } } },
+      "User",
+      parsedKey,
+    );
+
+    expect(out.where).toEqual({ emailHash: { not: hashOf("user@example.com") } });
+  });
+
+  it("hashes every element of in and notIn", () => {
+    const out = encryptOnWrite(
+      { where: { email: { in: ["a@example.com", "b@example.com"] } } },
+      "User",
+      parsedKey,
+    );
+
+    expect(out.where).toEqual({
+      emailHash: { in: [hashOf("a@example.com"), hashOf("b@example.com")] },
+    });
+  });
+
+  it("flattens not: { in } to notIn and not: { notIn } to in", () => {
+    const [a, b] = ["a@example.com", "b@example.com"];
+
+    expect(
+      encryptOnWrite({ where: { email: { not: { in: [a, b] } } } }, "User", parsedKey).where,
+    ).toEqual({ emailHash: { notIn: [hashOf(a), hashOf(b)] } });
+
+    expect(
+      encryptOnWrite({ where: { email: { not: { notIn: [a, b] } } } }, "User", parsedKey).where,
+    ).toEqual({ emailHash: { in: [hashOf(a), hashOf(b)] } });
+  });
+
+  it("allows mode: insensitive only when the hash is lowercase-normalized", () => {
+    const out = encryptOnWrite(
+      { where: { email: { equals: "USER@Example.com", mode: "insensitive" } } },
+      "User",
+      parsedKey,
+    );
+
+    expect(out.where).toEqual({ emailHash: { equals: hashOf("USER@Example.com") } });
+
+    expect(() =>
+      encryptOnWrite(
+        { where: { token: { equals: "x", mode: "insensitive" } } },
+        "Session",
+        parsedKey,
+      ),
+    ).toThrow(/mode "insensitive"/);
+  });
+
+  it("throws on operators a hash column cannot answer", () => {
+    for (const operator of [
+      "contains",
+      "startsWith",
+      "endsWith",
+      "gt",
+      "gte",
+      "lt",
+      "lte",
+      "search",
+    ]) {
+      expect(() =>
+        encryptOnWrite({ where: { email: { [operator]: "x" } } }, "User", parsedKey),
+      ).toThrow(new RegExp(`Unsupported filter operator "${operator}"`));
+    }
+  });
+
+  it("throws instead of hashing a filter on a field without a hash column", () => {
+    expect(() => encryptOnWrite({ where: { content: "secret" } }, "Document", parsedKey)).toThrow(
+      /has no hash column/,
+    );
+  });
+
+  it("leaves null filters on encrypted columns alone", () => {
+    const args = { where: { accessToken: { not: null } } };
+
+    expect(encryptOnWrite(args, "Account", parsedKey)).toEqual(args);
   });
 });
 

@@ -246,7 +246,7 @@ export const fixesService = {
 
     const installation = await db.githubInstallation.findFirst({
       where: {
-        accountLogin: { equals: repo.owner, mode: "insensitive" },
+        accountLogin: repo.owner,
         isSuspended: false,
         workspaceId,
       },

@@ -115,7 +115,7 @@ export async function getClientContext(
 ): Promise<GitHubClientContext> {
   if (owner != null) {
     const specificInstallation = await prisma.githubInstallation.findFirst({
-      where: { accountLogin: { equals: owner, mode: "insensitive" }, isSuspended: false, userId },
+      where: { accountLogin: owner, isSuspended: false, userId },
     });
 
     if (specificInstallation != null) {

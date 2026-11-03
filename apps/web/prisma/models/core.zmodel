@@ -11,8 +11,8 @@ model Notification {
   type      NotifyType @default(INFO)
   isRead    Boolean    @default(false) @map("is_read")
 
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @default(now()) @updatedAt @map("updated_at")
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   /// @zod.custom.omit(["model"])
   userId    String     @map("user_id") @db.Uuid @omit
@@ -44,8 +44,8 @@ model UserAppearance {
   /// @zod.custom.omit(["model"])
   userId      String   @unique @map("user_id") @db.Uuid @omit
   preferences Json     @default("{}")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -63,8 +63,8 @@ model WebhookDelivery {
   status     WebhookStatus @default(PROCESSING)
   error      String?       @db.Text
 
-  createdAt  DateTime      @default(now()) @map("created_at")
-  updatedAt  DateTime      @default(now()) @updatedAt @map("updated_at")
+  createdAt  DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   @@allow('create', true)
   @@allow('read', auth().role == 'ADMIN')
@@ -85,7 +85,7 @@ model AuditLog {
   userId    String?  @map("user_id") @db.Uuid @omit
   ip        String?  @db.Inet
   userAgent String?  @map("user_agent")
-  createdAt DateTime @default(now()) @map("created_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   @@allow('create', true)
   @@allow('read', auth().role == 'ADMIN' || (userId != null && auth().id == userId))
@@ -94,6 +94,7 @@ model AuditLog {
   @@index([requestId])
   @@index([createdAt(sort: Desc), id(sort: Desc)], map: "audit_logs_created_at_id_idx")
   @@index([userId, operation])
+  @@index([userId, createdAt(sort: Desc), id(sort: Desc)], map: "audit_logs_user_id_created_at_id_idx")
   @@index([operation, createdAt(sort: Desc)])
 
   @@map("audit_logs")
@@ -140,8 +141,8 @@ model ChatSession {
   repoId    String?       @map("repo_id") @db.Uuid
   title     String        @default("New Chat")
 
-  createdAt DateTime      @default(now()) @map("created_at")
-  updatedAt DateTime      @updatedAt @map("updated_at")
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   repo      Repo?         @relation(fields: [repoId], references: [id], onDelete: Cascade)
@@ -169,7 +170,7 @@ model ChatMessage {
   /// @encrypted
   parts     String
 
-  createdAt DateTime    @default(now()) @map("created_at")
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
 
   @@deny('all', auth() == null)
   @@allow(

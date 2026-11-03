@@ -83,6 +83,16 @@ export const TASK_CONFIGS = {
     },
   },
 
+  historyRetention: {
+    machine: { preset: "micro" },
+    maxDuration: 60 * 15, // TIME: 15 minutes
+    retry: {
+      factor: 2,
+      maxAttempts: 3,
+      minTimeoutInMs: 30_000,
+    },
+  },
+
   processStripeEvent: {
     // Billing events mutate the same subscription and entitlement rows; a single worker per
     // project keeps two events of one owner from projecting in parallel and losing a transition.

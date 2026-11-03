@@ -30,10 +30,10 @@ model Repo {
   size             Int                        @default(0) @gte(0)
   visibility       Visibility                 @default(PRIVATE)
 
-  pushedAt         DateTime?                  @map("pushed_at")
-  createdAt        DateTime                   @default(now()) @map("created_at")
-  githubCreatedAt  DateTime?                  @map("github_created_at")
-  updatedAt        DateTime                   @default(now()) @updatedAt @map("updated_at")
+  pushedAt         DateTime?                  @map("pushed_at") @db.Timestamptz(3)
+  createdAt        DateTime                   @default(now()) @map("created_at") @db.Timestamptz(3)
+  githubCreatedAt  DateTime?                  @map("github_created_at") @db.Timestamptz(3)
+  updatedAt        DateTime                   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   /// @zod.custom.omit(["model"])
   workspaceId      String                     @map("workspace_id") @db.Uuid
@@ -64,9 +64,8 @@ model Repo {
     auth().role == 'ADMIN'
   )
 
-  @@unique([owner, name, workspaceId])
+  @@unique([workspaceId, owner, name])
   @@unique([githubId, workspaceId])
-  @@index([workspaceId, owner])
   @@index([workspaceId, name])
   @@index([workspaceId, visibility, createdAt(sort: Desc)])
   @@index([workspaceId, updatedAt(sort: Desc), id(sort: Desc)], map: "repos_workspace_id_updated_at_id_idx")
@@ -91,8 +90,8 @@ model GithubInstallation {
   isSuspended         Boolean                @default(false) @map("is_suspended")
   htmlUrl             String?                @map("html_url")
 
-  createdAt           DateTime               @default(now()) @map("created_at")
-  updatedAt           DateTime               @default(now()) @updatedAt @map("updated_at")
+  createdAt           DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   workspaceId         String                 @map("workspace_id") @db.Uuid
   workspace           Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)

@@ -38,15 +38,15 @@ describe("repoService.buildWhereClause", () => {
   });
 
   describe("owner", () => {
-    it("should match owner case-insensitively", () => {
+    it("should pass owner through so citext handles case-insensitivity", () => {
       expect(repoService.buildWhereClause({ owner: "acme" })).toEqual({
-        owner: { equals: "acme", mode: "insensitive" },
+        owner: "acme",
       });
     });
 
     it("should trim surrounding whitespace from owner", () => {
       expect(repoService.buildWhereClause({ owner: "  acme  " })).toEqual({
-        owner: { equals: "acme", mode: "insensitive" },
+        owner: "acme",
       });
     });
 
@@ -60,7 +60,7 @@ describe("repoService.buildWhereClause", () => {
 
     it("should preserve owner casing rather than lowercasing it", () => {
       expect(repoService.buildWhereClause({ owner: "AcMe" })).toEqual({
-        owner: { equals: "AcMe", mode: "insensitive" },
+        owner: "AcMe",
       });
     });
   });
@@ -201,7 +201,7 @@ describe("repoService.buildWhereClause", () => {
       ).toEqual({
         AND: [
           { visibility: Visibility.PUBLIC },
-          { owner: { equals: "AcMe", mode: "insensitive" } },
+          { owner: "AcMe" },
           { analyses: { some: { status: Status.DONE } } },
           {
             OR: [
@@ -215,7 +215,7 @@ describe("repoService.buildWhereClause", () => {
 
     it("should combine owner and the Status.NEW special filter", () => {
       expect(repoService.buildWhereClause({ owner: "acme", status: Status.NEW })).toEqual({
-        AND: [{ owner: { equals: "acme", mode: "insensitive" } }, NEW_STATUS_FILTER],
+        AND: [{ owner: "acme" }, NEW_STATUS_FILTER],
       });
     });
 
@@ -444,8 +444,8 @@ describe("repoService.getByName", () => {
     expect(findFirst).toHaveBeenCalledWith(
       expect.objectContaining({
         where: {
-          name: { equals: "test-repo", mode: "insensitive" },
-          owner: { equals: "test-owner", mode: "insensitive" },
+          name: "test-repo",
+          owner: "test-owner",
           workspaceId: WORKSPACE_ID,
         },
       }),

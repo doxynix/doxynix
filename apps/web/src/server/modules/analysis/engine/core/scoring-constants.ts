@@ -1,5 +1,3 @@
-import { appLogger } from "@/server/core/app-logger";
-
 // All penalties are subtracted from a 100 base score.
 export const COMPLEXITY_SCORING = {
   averageComplexityMultiplier: 1.6,
@@ -243,44 +241,3 @@ export const DOC_PIPELINE_THRESHOLDS = {
   // Confidence threshold below which the "Unknown" or "Low Confidence" badge is shown
   minConfidenceForStrength: 75,
 } as const;
-
-export function validateScoringConstants(): string[] {
-  const errors: string[] = [];
-
-  const metricsToValidate = [
-    { name: "COMPLEXITY_SCORING.averagePenaltyMax", value: COMPLEXITY_SCORING.averagePenaltyMax },
-    {
-      name: "TECH_DEBT_SCORING.duplicationPenaltyMax",
-      value: TECH_DEBT_SCORING.duplicationPenaltyMax,
-    },
-    {
-      name: "STRUCTURAL_MODULARITY_SCORING.cyclePenaltyMax",
-      value: STRUCTURAL_MODULARITY_SCORING.cyclePenaltyMax,
-    },
-  ];
-
-  for (const metric of metricsToValidate) {
-    if (metric.value < 0) {
-      errors.push(`${metric.name} < 0`);
-    }
-    if (metric.value > 100) {
-      errors.push(`${metric.name} > 100`);
-    }
-  }
-
-  const cycleMultipliers = [
-    COMPLEXITY_SCORING.cycleMultiplier,
-    TECH_DEBT_SCORING.cycleMultiplier,
-    STRUCTURAL_MODULARITY_SCORING.cycleMultiplier,
-  ];
-
-  const uniqueCycleMultipliers = new Set(cycleMultipliers);
-  if (uniqueCycleMultipliers.size > 1) {
-    appLogger.warn({
-      cycleMultipliers,
-      msg: "Cycle multipliers differ across modules; review if intentional",
-    });
-  }
-
-  return errors;
-}

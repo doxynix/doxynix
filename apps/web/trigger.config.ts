@@ -3,8 +3,7 @@ import fs from "node:fs";
 
 import { additionalFiles, additionalPackages } from "@trigger.dev/build/extensions/core";
 import { prismaExtension } from "@trigger.dev/build/extensions/prisma";
-import { defineConfig, type TriggerConfig } from "@trigger.dev/sdk";
-import { join } from "pathe";
+import { defineConfig } from "@trigger.dev/sdk";
 
 if (!process.env.DATABASE_URL!) {
   process.env.DATABASE_URL = "postgresql://postgres:password@localhost:5432/db";
@@ -15,63 +14,9 @@ if (!process.env.DIRECT_URL) {
   process.env.DIRECT_URL = "postgresql://postgres:password@localhost:5432/db";
 }
 
-type PackageJson = {
-  dependencies?: Record<string, string>;
-  devDependencies?: Record<string, string>;
-  optionalDependencies?: Record<string, string>;
-  patchedDependencies?: Record<string, string>;
-  workspaces?: unknown;
-};
-
-// TODO(DXNX-290): the "bun" runtime breaks on Bun 1.4.3 (`--no-warnings` takes no value). Switch
-// back to "bun-1.4" after upgrading Trigger to >=4.8.2.
-const RUNTIME: NonNullable<TriggerConfig["runtime"]> = "node";
-
-function sanitizeDeployPackageJson(packageJson: PackageJson) {
-  delete packageJson.patchedDependencies;
-  delete packageJson.workspaces;
-
-  for (const field of ["dependencies", "devDependencies", "optionalDependencies"] as const) {
-    const dependencies = packageJson[field];
-
-    if (dependencies == null) {
-      continue;
-    }
-
-    for (const [name, version] of Object.entries(dependencies)) {
-      if (version.startsWith("workspace:")) {
-        delete dependencies[name];
-      }
-    }
-  }
-}
-
-function patchPackageJsonForBun(path: string) {
-  if (!fs.existsSync(path)) {
-    return;
-  }
-
-  const packageJson = JSON.parse(fs.readFileSync(path, "utf8")) as PackageJson;
-  sanitizeDeployPackageJson(packageJson);
-  fs.writeFileSync(path, `${JSON.stringify(packageJson, null, 2)}\n`);
-}
-
 export default defineConfig({
   build: {
     extensions: [
-      {
-        name: "bun-workspace-install",
-        onBuildStart: (context) => {
-          if (context.target === "dev" || !RUNTIME.startsWith("bun")) {
-            return;
-          }
-
-          // Trigger copies the project package.json into the Bun image before `bun install`;
-          // Bun validates workspaces and patched dependencies that are absent from the bundle.
-          patchPackageJsonForBun(join(process.cwd(), "package.json"));
-          patchPackageJsonForBun(join(process.cwd(), "..", "..", "package.json"));
-        },
-      },
       additionalFiles({
         files: [
           "node_modules/web-tree-sitter/tree-sitter.wasm",
@@ -129,5 +74,5 @@ export default defineConfig({
   maxDuration: 1_000_000,
 
   project: "proj_whmkduzdqfzcgoyuhdyp",
-  runtime: RUNTIME,
+  runtime: "bun-1.4",
 });

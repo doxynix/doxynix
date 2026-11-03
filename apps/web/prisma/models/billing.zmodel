@@ -156,6 +156,7 @@ model BillingOperation {
 
   @@unique([workspaceId, requestId])
   @@index([status, updatedAt])
+  @@index([actorUserId])
   @@map("billing_operations")
 }
 
@@ -336,6 +337,5 @@ model WorkspaceUsage {
   @@allow('create,update,delete', false)
 
   @@unique([workspaceId, periodStart])
-  @@index([periodStart])
   @@map("workspace_usage")
 }

@@ -75,8 +75,8 @@ export const notificationsService = {
         ? {
             repo: {
               is: {
-                name: { equals: normalizedRepoName, mode: "insensitive" },
-                owner: { equals: normalizedRepoOwner, mode: "insensitive" },
+                name: normalizedRepoName,
+                owner: normalizedRepoOwner,
               },
             },
           }

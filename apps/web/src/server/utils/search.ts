@@ -29,3 +29,7 @@ export function tokenizeSearchInput(search?: string): string[] {
 
   return [...uniqueTerms];
 }
+
+export function matchesSearchTerm(value: string, normalizedTerm: string): boolean {
+  return value.normalize("NFC").toLowerCase().includes(normalizedTerm);
+}

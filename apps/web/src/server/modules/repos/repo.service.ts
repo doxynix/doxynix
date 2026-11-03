@@ -24,6 +24,8 @@ import { repoMapper, repoPageSelect, repoPublicSelect } from "./repo.mapper";
 import type { RepoFiltersInput, RepoSlimFiltersInput } from "./repo.schemas";
 
 function buildRepoSearchClause(term: string): Prisma.RepoWhereInput {
+  // `mode` is required on citext here: without it Prisma emits `"name"::text LIKE $1`, which is
+  // case-sensitive (prisma/orm#14440); the trigram index only serves the ILIKE form.
   return {
     OR: [
       { name: { contains: term, mode: "insensitive" } },
@@ -75,9 +77,9 @@ export const repoService = {
 
     return mergeClauses([
       filters.visibility != null ? { visibility: filters.visibility } : {},
-      normalizedOwner != null && normalizedOwner.length > 0
-        ? { owner: { equals: normalizedOwner, mode: "insensitive" } }
-        : {},
+      // `owner` is citext, so plain equality is already case-insensitive and stays index-friendly;
+      // `mode: "insensitive"` would make Prisma emit ILIKE, which cannot use the btree index.
+      normalizedOwner != null && normalizedOwner.length > 0 ? { owner: normalizedOwner } : {},
       buildDateRangeWhere(filters, "updatedAt"),
       statusFilter,
       searchFilter,
@@ -182,7 +184,7 @@ export const repoService = {
   async deleteByOwner(db: DbClient, owner: string, workspaceId: string, userId: string) {
     const result = await db.repo.deleteMany({
       where: {
-        owner: { equals: owner, mode: "insensitive" },
+        owner,
         workspaceId,
       },
     });
@@ -196,8 +198,7 @@ export const repoService = {
     const { limit, owner, page, search, sortBy, sortOrder, status, visibility } = input;
 
     const where = { workspaceId, ...this.buildWhereClause({ owner, search, status, visibility }) };
-    const contextWhere: Prisma.RepoWhereInput =
-      owner == null ? {} : { owner: { equals: owner, mode: "insensitive" } };
+    const contextWhere: Prisma.RepoWhereInput = owner == null ? {} : { owner };
 
     const orderBy = orderWithTiebreak(sortBy, sortOrder);
 
@@ -245,8 +246,8 @@ export const repoService = {
     const repo = await db.repo.findFirst({
       select: repoPageSelect,
       where: {
-        name: { equals: name, mode: "insensitive" },
-        owner: { equals: owner, mode: "insensitive" },
+        name,
+        owner,
         workspaceId,
       },
     });
@@ -261,7 +262,7 @@ export const repoService = {
     const repo = await db.repo.findFirst({
       select: repoPublicSelect,
       where: {
-        owner: { equals: owner, mode: "insensitive" },
+        owner,
         workspaceId,
       },
     });
