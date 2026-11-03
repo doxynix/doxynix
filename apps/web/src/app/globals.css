@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "remark-github-blockquote-alert/alert.css";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
 @plugin "tailwind-scrollbar";
 @plugin "@tailwindcss/typography";
 

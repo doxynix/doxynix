@@ -49,8 +49,6 @@ const config: IConfiguration = {
           "^src/app/global-error[.]tsx$",
           "^src/app/api/\\[\\.\\.\\.[^\\]]+\\]/route[.]ts$",
           "^src/app/\\[locale\\]/\\[\\.\\.\\.[^\\]]+\\]/page[.]tsx$",
-          // The /docs route imports the loader; the route itself lands later in DXNX-300.
-          "^src/shared/lib/docs-source[.]ts$",
         ],
       },
       name: "no-orphans",

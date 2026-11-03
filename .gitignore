@@ -53,6 +53,7 @@ lerna-debug.log*
 !.env.example
 
 /apps/web/.vercel
+/apps/web/.source/
 /apps/web/prisma/generated/
 /apps/web/prisma/dbml/
 /apps/web/prisma/json-schema/
