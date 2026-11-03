@@ -60,7 +60,7 @@ The \`dxnx\` CLI is the primary integration surface for CI/CD. Most commands acc
 
 - Auth: \`dxnx login\`, \`dxnx logout\`, \`dxnx me\`.
 - Repositories: \`dxnx repos list\`, \`dxnx repos add <url>\`, \`dxnx repos view <target>\`.
-- Analysis: \`dxnx analyze start\`, \`dxnx analyze status\`, \`dxnx analyze cancel\`, \`dxnx analyze history\`, \`dxnx analyze metrics\`, \`dxnx analyze structure\`, \`dxnx analyze search\`, \`dxnx analyze audit\`, \`dxnx analyze config\`, \`dxnx analyze config-set\`.
+- Analysis: \`dxnx analyze start\`, \`dxnx analyze status\`, \`dxnx analyze cancel\`, \`dxnx analyze history\`, \`dxnx analyze metrics\`, \`dxnx analyze structure\`, \`dxnx analyze search <query>\`, \`dxnx analyze audit <filePath>\`, \`dxnx analyze config\`, \`dxnx analyze config-set\`.
 - Documents: \`dxnx docs list\`, \`dxnx docs view\`, \`dxnx docs generate <filePath>\`, \`dxnx docs pin <filePath>\`, \`dxnx docs export\`.
 - Pull requests: \`dxnx pr list\`, \`dxnx pr view\`, \`dxnx pr comments\`, \`dxnx pr fixes\`, \`dxnx pr fix-apply\`.
 - Staging: \`dxnx staging list\`, \`dxnx staging add <filePath>\`, \`dxnx staging drop <filePath>\`, \`dxnx staging clear\`, \`dxnx staging add-fix\`.
@@ -71,7 +71,7 @@ The \`dxnx\` CLI is the primary integration surface for CI/CD. Most commands acc
 
 - API keys are issued in the dashboard under Settings, API keys, and are scoped to a workspace.
 - The Model Context Protocol endpoint lives at ${site("api/mcp")} and exposes the analysis agent as tools. Authenticate with a Doxynix API key.
-- CI triggers analyses with the CLI or with \`doxynix/action@v1\`, passing the API key as a \`DOXYNIX_TOKEN\` secret. Only the major tag \`v1\` is published, so \`@v1.0.0\` does not resolve. Source: ${site("https://github.com/doxynix/action")}.
+- CI triggers analyses with the CLI or with \`doxynix/action@v1\` (pin the major tag), passing the API key as a \`DOXYNIX_TOKEN\` secret. Source: ${site("https://github.com/doxynix/action")}.
 
 ## Security and data handling
 

@@ -45,6 +45,14 @@ describe("buildLlmsFullTxt", () => {
     }
   });
 
+  it("should describe CI without retired output claims", () => {
+    const txt = buildLlmsFullTxt(BASE_URL);
+
+    expect(txt).toContain("doxynix/action@v1");
+    expect(txt).not.toContain("static site");
+    expect(txt).not.toContain("maintainability index");
+  });
+
   it("should not reference the base url as undefined", () => {
     expect(buildLlmsFullTxt(BASE_URL)).not.toContain("undefined");
   });
