@@ -19,7 +19,7 @@ It is built for teams inheriting legacy code, onboarding new engineers, and keep
 2. Doxynix clones the repository into an ephemeral container.
 3. The AST scanner builds the structural model: files, modules, symbols, imports, dependency edges.
 4. The LLM stage writes documentation for the selected nodes using that structural context.
-5. Metrics are computed: documentation coverage, cyclomatic complexity, maintainability index, Bus Factor.
+5. Metrics are computed: documentation coverage, cyclomatic complexity, modularity index, onboarding score, Bus Factor.
 6. Artifacts are stored and streamed to the dashboard in real time.
 7. The container and the cloned code are destroyed. Source code is not used to train models.
 
@@ -34,13 +34,14 @@ It is built for teams inheriting legacy code, onboarding new engineers, and keep
 | CONTRIBUTING | Contribution and review workflow |
 | CODE_DOC | Per-file documentation for individual source files |
 
-Outputs can be exported as Markdown, PDF, Notion pages or a static site, and can be refreshed from CI with the CLI or the GitHub Action.
+Outputs can be exported as Markdown, PDF or Notion pages, and can be refreshed from CI with the CLI or the GitHub Action.
 
 ## Metrics
 
 - Documentation coverage: share of public symbols with usable documentation.
 - Cyclomatic complexity: branching density per function.
-- Maintainability index: composite health score for a module.
+- Modularity index: 0-100 score for module boundaries, penalized for dependency cycles and hotspots.
+- Onboarding score: how hard it is for a new engineer to start working in the repository.
 - Bus Factor: how much of the codebase depends on knowledge held by too few people.
 
 ## Plans and limits
@@ -57,18 +58,20 @@ Hobby is limited to one workspace member. The current Pro price is shown on ${si
 
 The \`dxnx\` CLI is the primary integration surface for CI/CD. Most commands accept \`--json\` for machine-readable output.
 
-- Auth: \`dxnx auth login\`, \`dxnx auth logout\`, \`dxnx auth me\`.
+- Auth: \`dxnx login\`, \`dxnx logout\`, \`dxnx me\`.
 - Repositories: \`dxnx repos list\`, \`dxnx repos add <url>\`, \`dxnx repos view <target>\`.
-- Analysis: \`dxnx analyze start [target]\`, \`dxnx analyze status [target]\`, \`dxnx analyze cancel [analysisId]\`, \`dxnx analyze history [target]\`.
-- Inspection: \`dxnx analyze metrics [target]\`, \`dxnx analyze structure [target]\`, \`dxnx analyze search <query> [target]\`, \`dxnx analyze audit <filePath>\`.
-- Configuration: \`dxnx analyze config [target]\`, \`dxnx analyze config-set [target]\`.
+- Analysis: \`dxnx analyze start\`, \`dxnx analyze status\`, \`dxnx analyze cancel\`, \`dxnx analyze history\`, \`dxnx analyze metrics\`, \`dxnx analyze structure\`, \`dxnx analyze search\`, \`dxnx analyze audit\`, \`dxnx analyze config\`, \`dxnx analyze config-set\`.
 - Documents: \`dxnx docs list\`, \`dxnx docs view\`, \`dxnx docs generate <filePath>\`, \`dxnx docs pin <filePath>\`, \`dxnx docs export\`.
-- Pull requests: \`dxnx pr list\`, \`dxnx pr comments\`, \`dxnx pr fixes\`, \`dxnx pr fix-apply\`.
+- Pull requests: \`dxnx pr list\`, \`dxnx pr view\`, \`dxnx pr comments\`, \`dxnx pr fixes\`, \`dxnx pr fix-apply\`.
+- Staging: \`dxnx staging list\`, \`dxnx staging add <filePath>\`, \`dxnx staging drop <filePath>\`, \`dxnx staging clear\`, \`dxnx staging add-fix\`.
+- Workspace: \`dxnx notifications list\`, \`dxnx notifications stats\`, \`dxnx keys list\`, \`dxnx keys create\`, \`dxnx analytics overview\`, \`dxnx analytics trends\`.
+- GitHub and agent: \`dxnx github repos\`, \`dxnx github tree\`, \`dxnx github cat\`, \`dxnx agent\`, \`dxnx agent sessions\`, \`dxnx agent history\`, \`dxnx status\`.
 
 ## API and MCP
 
 - API keys are issued in the dashboard under Settings, API keys, and are scoped to a workspace.
 - The Model Context Protocol endpoint lives at ${site("api/mcp")} and exposes the analysis agent as tools. Authenticate with a Doxynix API key.
+- CI triggers analyses with the CLI or with \`doxynix/action@v1\`, passing the API key as a \`DOXYNIX_TOKEN\` secret. Only the major tag \`v1\` is published, so \`@v1.0.0\` does not resolve. Source: ${site("https://github.com/doxynix/action")}.
 
 ## Security and data handling
 
@@ -82,18 +85,20 @@ The \`dxnx\` CLI is the primary integration surface for CI/CD. Most commands acc
 
 **How accurate is the documentation?** AST parsing supplies the exact structure (names, parameters, relationships); the LLM only explains logic on top of it, which keeps hallucinations low.
 
-**Can I run this in CI/CD?** Yes. Use the \`dxnx\` CLI or the GitHub Action to refresh documentation on every merge to the main branch.
+**Can I run this in CI/CD?** Yes. Use the \`dxnx\` CLI or the GitHub Action (\`doxynix/action@v1\`) to refresh documentation on every merge to the main branch.
 
 **Does it work with legacy code?** Yes. Bus Factor and complexity metrics surface the undocumented, high-risk modules first.
 
-**What metrics are generated?** Documentation coverage, cyclomatic complexity, maintainability index and Bus Factor.
+**What metrics are generated?** Documentation coverage, cyclomatic complexity, modularity index, onboarding score and Bus Factor.
 
 ## Links
 
 - [Product](${site("")})
 - [How it works](${site("about")})
 - [Pricing](${site("", "#pricing")})
-- [Documentation](${site("https://docs.doxynix.space")})
+- [Documentation](${site("docs")})
+- [CLI reference](${site("docs/cli/reference")})
+- [GitHub Action](${site("https://github.com/doxynix/action")})
 - [Support](${site("support")})
 - [Status](${site("https://status.doxynix.space")})
 - [GitHub](${site("https://github.com/doxynix/doxynix")})

@@ -32,7 +32,10 @@ export type NavLabelKey =
   | "settings"
   | "support";
 
-export type PublicNavLabelKey = Extract<NavLabelKey, "about" | "help" | "high_five" | "home">;
+export type PublicNavLabelKey = Extract<
+  NavLabelKey,
+  "about" | "documentation" | "help" | "high_five" | "home"
+>;
 
 export type MenuItem = {
   actionId?: string;

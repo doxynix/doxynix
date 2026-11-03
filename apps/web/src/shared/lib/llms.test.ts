@@ -6,7 +6,7 @@ import { PUBLIC_ROUTES } from "./public-routes";
 const BASE_URL = "https://doxynix.space";
 
 // Не страницы, но публичные внутренние пути, которые агент может открыть.
-const NON_PAGE_PATHS = new Set(["api/mcp"]);
+const NON_PAGE_PATHS = new Set(["api/mcp", "docs", "docs/cli/reference"]);
 
 function collectUrls(txt: string): string[] {
   return [...txt.matchAll(/\]\(([^)]+)\)/g)].map((match) => match[1] ?? "");

@@ -50,7 +50,7 @@ export default async function SupportPage() {
     {
       action: t("channel_docs_action"),
       description: t("channel_docs_desc"),
-      href: "https://docs.doxynix.space",
+      href: "/docs",
       icon: BookOpen,
       title: t("channel_docs_title"),
     },
