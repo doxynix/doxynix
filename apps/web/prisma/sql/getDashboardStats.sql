@@ -122,7 +122,10 @@ SELECT
 
     -- Activity
     (SELECT COALESCE(jsonb_agg(ra ORDER BY ra."createdAt" DESC, ra.id DESC), '[]'::jsonb) FROM (
-        SELECT prt.id, prt.progress, prt.status, prt.created_at AS "createdAt",
+        SELECT prt.id, prt.progress, prt.status,
+               -- Canonical UTC so the dashboard payload cannot depend on the session TimeZone;
+               -- the fixed-width ISO text also keeps the ORDER BY below chronological.
+               TO_CHAR(prt.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS "createdAt",
                ur.name AS "repoName", ur.owner AS "repoOwner"
         FROM per_repo_top prt
         JOIN user_repos ur ON ur.id = prt.repo_id
