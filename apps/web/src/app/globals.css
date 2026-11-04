@@ -21,6 +21,35 @@
   }
 }
 
+#nd-docs-layout {
+  --color-fd-muted-foreground: #5f5f5f;
+}
+
+.dark #nd-docs-layout {
+  --color-fd-muted-foreground: #b3b3b3;
+}
+
+#nd-docs-layout .prose {
+  --tw-prose-body: var(--color-fd-foreground);
+  --tw-prose-headings: var(--color-fd-foreground);
+  --tw-prose-lead: var(--color-fd-muted-foreground);
+  --tw-prose-links: var(--color-fd-primary);
+  --tw-prose-bold: var(--color-fd-foreground);
+  --tw-prose-counters: var(--color-fd-muted-foreground);
+  --tw-prose-bullets: var(--color-fd-muted-foreground);
+  --tw-prose-hr: var(--color-fd-border);
+  --tw-prose-quotes: var(--color-fd-foreground);
+  --tw-prose-quote-borders: var(--color-fd-border);
+  --tw-prose-captions: var(--color-fd-muted-foreground);
+  --tw-prose-kbd: var(--color-fd-foreground);
+  --tw-prose-code: var(--color-fd-foreground);
+  --tw-prose-pre-code: var(--color-fd-foreground);
+  --tw-prose-pre-bg: var(--color-fd-muted);
+  --tw-prose-th-borders: var(--color-fd-border);
+  --tw-prose-td-borders: var(--color-fd-border);
+  color: var(--color-fd-foreground);
+}
+
 @utility transition-standard {
   transition-timing-function: var(--tw-ease, cubic-bezier(0.4, 0, 0.2, 1));
   transition-duration: var(--tw-duration, 150ms);

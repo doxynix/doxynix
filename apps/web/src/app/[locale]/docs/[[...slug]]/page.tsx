@@ -42,6 +42,8 @@ export default async function DocsPageRoute(props: DocsPageProps) {
   return (
     <DocsPage
       full={page.data.full}
+      id="main-content"
+      tabIndex={-1}
       toc={page.data.toc}
     >
       <DocsTitle>{page.data.title}</DocsTitle>

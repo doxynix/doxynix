@@ -15,10 +15,13 @@ const baseOptions: BaseLayoutProps = {
   ],
   nav: {
     title: (
-      <Logo
-        className="h-6 w-20"
-        isInteractive={false}
-      />
+      <>
+        <Logo
+          className="h-6 w-20"
+          isInteractive={false}
+        />
+        <span className="sr-only">Doxynix documentation</span>
+      </>
     ),
     url: "/",
   },
@@ -36,7 +39,6 @@ export default function DocsRouteLayout({ children }: Readonly<{ children: React
       }}
     >
       <DocsLayout
-        containerProps={{ id: "main-content" }}
         tree={docsSource.getPageTree()}
         {...baseOptions}
       >
