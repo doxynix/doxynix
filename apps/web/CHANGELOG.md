@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.11.1](https://github.com/doxynix/doxynix/compare/web-v5.11.0...web-v5.11.1) (2026-11-04)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2364](https://github.com/doxynix/doxynix/issues/2364)) ([32c7725](https://github.com/doxynix/doxynix/commit/32c77250a53a8a02db0d1fc3b95c7c3c0db9909f))
+
 ## [5.11.0](https://github.com/doxynix/doxynix/compare/web-v5.10.0...web-v5.11.0) (2026-11-04)
 
 
