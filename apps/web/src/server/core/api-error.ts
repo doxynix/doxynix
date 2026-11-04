@@ -348,17 +348,23 @@ type ErrorResponseBody = {
   error: {
     code: ErrorCode;
     message: string;
+    messageCode: MessageCode | null;
+    params: MessageParams | null;
     requestId: string;
   };
 };
 
 // `requestId` is always present so a user can quote it and it can be matched against the requestContext fields appLogger merges into every log line.
 export function toErrorResponse(error: AppError): NextResponse<ErrorResponseBody> {
+  const isPublic = isPublicCode(error.code);
+
   return NextResponse.json(
     {
       error: {
         code: error.code,
         message: error.clientMessage(),
+        messageCode: isPublic ? (error.messageCode ?? null) : null,
+        params: isPublic ? (error.params ?? null) : null,
         requestId: requestContext.getStore()?.requestId ?? "unknown",
       },
     },
