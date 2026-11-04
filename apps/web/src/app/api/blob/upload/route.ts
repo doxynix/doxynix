@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { MessageCode } from "@doxynix/shared";
 import { del } from "@vercel/blob";
 import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
 import * as z from "zod";
@@ -20,11 +21,19 @@ async function handler(request: Request) {
   try {
     rawBody = await request.json();
   } catch {
-    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Invalid upload request" });
+    throw new AppError({
+      code: "BAD_REQUEST",
+      messageCode: MessageCode.REQUEST_INVALID,
+      publicMessage: "Invalid upload request",
+    });
   }
 
   if (typeof rawBody !== "object" || rawBody == null) {
-    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Invalid upload request" });
+    throw new AppError({
+      code: "BAD_REQUEST",
+      messageCode: MessageCode.REQUEST_INVALID,
+      publicMessage: "Invalid upload request",
+    });
   }
 
   const body = rawBody as HandleUploadBody;
@@ -39,7 +48,11 @@ async function handler(request: Request) {
 
         if (session?.user == null) {
           appLogger.warn({ msg: "Blob upload rejected: Unauthorized" });
-          throw new AppError({ code: "UNAUTHORIZED", publicMessage: "Unauthorized" });
+          throw new AppError({
+            code: "UNAUTHORIZED",
+            messageCode: MessageCode.UNAUTHORIZED,
+            publicMessage: "Unauthorized",
+          });
         }
 
         const callbackUrl = `${VERCEL_BLOB_CALLBACK_URL}/api/blob/upload`;
@@ -121,6 +134,7 @@ async function handler(request: Request) {
     throw new AppError({
       cause: error,
       code: "BAD_REQUEST",
+      messageCode: MessageCode.REQUEST_INVALID,
       publicMessage:
         error instanceof Error && error.message.length > 0
           ? error.message
