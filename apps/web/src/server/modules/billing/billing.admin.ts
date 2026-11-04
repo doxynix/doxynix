@@ -98,7 +98,7 @@ const EMAIL_IN_TEXT = /[^\s@]+@[^\s@]+\.[^\s@]+/g;
 
 // The note is operator free text, so strip links and addresses before it reaches JSONB.
 function sanitizeNote(note: string): string {
-  return note.replace(URL_IN_TEXT, "[redacted]").replace(EMAIL_IN_TEXT, "[redacted]");
+  return note.replaceAll(URL_IN_TEXT, "[redacted]").replaceAll(EMAIL_IN_TEXT, "[redacted]");
 }
 
 function mergeResolutionNote(details: unknown, note: string): Record<string, unknown> {
