@@ -1431,19 +1431,11 @@ The namespace was added in Task 5 Step 0. Tasks 6–8 may have introduced codes 
 
 If Task 8 added a `NOT_FOUND` code, add `not_found` here — it is already listed.
 
-- [ ] **Step 2: Copy the key shape into the other 12 locales**
+- [ ] **Step 2: Translate the `Errors` namespace into the other 11 locales**
 
-```bash
-cd apps/web
-for f in messages/ru.json messages/de.json messages/es.json messages/zh-CN.json \
-         messages/pt-BR.json messages/fr.json messages/it.json messages/ja.json \
-         messages/ko.json messages/pl.json messages/tr.json; do
-  jq --slurpfile en messages/en.json \
-     '.Errors = ($en[0].Errors | with_entries(.value = .value))' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
-done
-```
+Every locale gets real copy, not the English source. English left in a non-English file is a defect, not a placeholder — `lint:locales` only checks key shape and placeholders, so it will happily pass a file that nobody translated.
 
-This copies the English values as placeholders so `lint:locales` stays green while translation is pending. Translation is a follow-up batch; `github_app_not_installed_owner` must keep the `{owner}` placeholder in every file — `check-locales.ts` fails the build if it does not.
+`github_app_not_installed_owner` must keep the `{owner}` placeholder in every file; `check-locales.ts` fails the build if it does not. Keys keep English ordering only for convenience — Biome sorts them.
 
 - [ ] **Step 3: Run the locale gates**
 
