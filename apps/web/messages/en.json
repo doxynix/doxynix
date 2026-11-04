@@ -1539,6 +1539,7 @@
     "github_install_claim_forbidden": "You do not have permission to claim this GitHub installation.",
     "github_install_verify_failed": "Could not verify installation ownership via GitHub.",
     "github_link_required": "Link your GitHub account before installing the app.",
+    "github_rate_limited": "GitHub rate limit exceeded. Please try again later.",
     "github_state_invalid": "The security state is invalid or expired. Please try installing again.",
     "github_state_used": "This security state was already used or expired.",
     "member_add_failed": "The member could not be added.",

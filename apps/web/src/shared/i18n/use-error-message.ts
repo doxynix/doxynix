@@ -56,6 +56,7 @@ export const ERROR_MESSAGE_KEYS = {
   GITHUB_INSTALL_CLAIM_FORBIDDEN: "github_install_claim_forbidden",
   GITHUB_INSTALL_VERIFY_FAILED: "github_install_verify_failed",
   GITHUB_LINK_REQUIRED: "github_link_required",
+  GITHUB_RATE_LIMITED: "github_rate_limited",
   GITHUB_STATE_INVALID: "github_state_invalid",
   GITHUB_STATE_USED: "github_state_used",
   MEMBER_ADD_FAILED: "member_add_failed",

@@ -183,7 +183,7 @@ const OCTOKIT_STATUS_MAP: Record<
   429: {
     code: "TOO_MANY_REQUESTS",
     message: "GitHub API limit exceeded",
-    messageCode: MessageCode.API_KEY_SCOPE_MISSING,
+    messageCode: MessageCode.GITHUB_RATE_LIMITED,
   },
 };
 
