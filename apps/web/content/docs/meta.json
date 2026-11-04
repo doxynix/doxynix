@@ -1,0 +1,4 @@
+{
+  "pages": ["index", "getting-started", "concepts", "cli", "integrations", "account", "faq"],
+  "title": "Documentation"
+}

@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { API_PREFIX } from "@/shared/config/env.client";
-import { hasPathBoundary, isBypassRoute, resolvePageRedirect } from "@/shared/lib/proxy-routing";
+import { DEFAULT_LOCALE } from "@/shared/config/locales";
+import {
+  hasPathBoundary,
+  isBypassRoute,
+  resolveDocsPath,
+  resolvePageRedirect,
+} from "@/shared/lib/proxy-routing";
 
 describe("shared/lib/middleware-routing:hasPathBoundary", () => {
   it("matches the exact prefix", () => {
@@ -104,5 +110,36 @@ describe("shared/lib/middleware-routing:resolvePageRedirect", () => {
 
   it("treats a partial locale match as a path prefix, not a locale (legacy behavior)", () => {
     expect(resolvePageRedirect("/en-US/dashboard", false)).toBeNull();
+  });
+});
+
+describe("shared/lib/middleware-routing:resolveDocsPath", () => {
+  it("rewrites an unprefixed docs url to the default locale", () => {
+    expect(resolveDocsPath("/docs")).toEqual({
+      pathname: `/${DEFAULT_LOCALE}/docs`,
+      type: "rewrite",
+    });
+    expect(resolveDocsPath("/docs/cli")).toEqual({
+      pathname: `/${DEFAULT_LOCALE}/docs/cli`,
+      type: "rewrite",
+    });
+  });
+
+  it("redirects an explicit default-locale prefix to the unprefixed url", () => {
+    expect(resolveDocsPath(`/${DEFAULT_LOCALE}/docs`)).toEqual({
+      pathname: "/docs",
+      type: "redirect",
+    });
+  });
+
+  it("redirects other locales to the unprefixed url", () => {
+    expect(resolveDocsPath("/ru/docs")).toEqual({ pathname: "/docs", type: "redirect" });
+    expect(resolveDocsPath("/ru/docs/cli")).toEqual({ pathname: "/docs/cli", type: "redirect" });
+  });
+
+  it("ignores non-docs paths", () => {
+    expect(resolveDocsPath("/about")).toBeNull();
+    expect(resolveDocsPath("/ru/dashboard")).toBeNull();
+    expect(resolveDocsPath("/docsx")).toBeNull();
   });
 });

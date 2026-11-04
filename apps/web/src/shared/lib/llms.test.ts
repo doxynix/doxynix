@@ -5,8 +5,8 @@ import { PUBLIC_ROUTES } from "./public-routes";
 
 const BASE_URL = "https://doxynix.space";
 
-// Не страницы, но публичные внутренние пути, которые агент может открыть.
-const NON_PAGE_PATHS = new Set(["api/mcp"]);
+// `api/mcp` is an endpoint and `docs*` are fumadocs pages; none are in PUBLIC_ROUTES.
+const KNOWN_INTERNAL_PATHS = new Set(["api/mcp", "docs", "docs/cli/reference"]);
 
 function collectUrls(txt: string): string[] {
   return [...txt.matchAll(/\]\(([^)]+)\)/g)].map((match) => match[1] ?? "");
@@ -40,10 +40,18 @@ describe("buildLlmsTxt", () => {
           continue;
         }
 
-        const isKnown = knownPaths.has(entry.href) || NON_PAGE_PATHS.has(entry.href);
+        const isKnown = knownPaths.has(entry.href) || KNOWN_INTERNAL_PATHS.has(entry.href);
         expect(isKnown, `unknown internal href: ${entry.href}`).toBe(true);
       }
     }
+  });
+
+  it("should link the docs pages and the GitHub Action", () => {
+    const urls = collectUrls(buildLlmsTxt(BASE_URL));
+
+    expect(urls).toContain("https://doxynix.space/docs");
+    expect(urls).toContain("https://doxynix.space/docs/cli/reference");
+    expect(urls).toContain("https://github.com/doxynix/action");
   });
 
   it("should not duplicate urls", () => {

@@ -20,7 +20,7 @@ const HEADER = `# Doxynix
 
 > Doxynix turns an existing codebase into up-to-date documentation: it parses the AST for exact structure, uses LLMs to explain logic, and generates onboarding guides, architecture maps, API references and changelogs.
 
-Doxynix works with any Git repository and ships as a web app, a CLI (\`dxnx\`) and a GitHub Action. Analysis runs in ephemeral containers under a zero data retention policy: source code is never used to train models. Outputs: Markdown, PDF, Notion and static sites. It also tracks documentation coverage, cognitive complexity and Bus Factor.`;
+Doxynix works with any Git repository and ships as a web app, a CLI (\`dxnx\`), a GitHub Action and an MCP server. Analysis runs in ephemeral containers under a zero data retention policy: source code is never used to train models. Outputs: Markdown, PDF and Notion exports, plus pull-request sync. It also tracks documentation density, cyclomatic complexity and Bus Factor.`;
 
 export const LLMS_SECTIONS: LlmsSection[] = [
   {
@@ -51,8 +51,18 @@ export const LLMS_SECTIONS: LlmsSection[] = [
     entries: [
       {
         description: "Full product and CLI documentation.",
-        href: "https://docs.doxynix.space",
+        href: "docs",
         title: "Doxynix Docs",
+      },
+      {
+        description: "Every dxnx command, its arguments and options.",
+        href: "docs/cli/reference",
+        title: "CLI reference",
+      },
+      {
+        description: "GitHub Action that triggers a repository analysis from CI.",
+        href: "https://github.com/doxynix/action",
+        title: "Doxynix GitHub Action",
       },
       {
         description:

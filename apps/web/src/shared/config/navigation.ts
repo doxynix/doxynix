@@ -228,6 +228,12 @@ export const publicHeaderMenu: PublicMenuItem[] = [
     labelKey: "about",
   },
   {
+    href: "/docs",
+    icon: BookOpen,
+    id: "Docs",
+    labelKey: "documentation",
+  },
+  {
     href: "/support",
     icon: Headset,
     id: "Help",

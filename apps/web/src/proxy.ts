@@ -9,7 +9,7 @@ import { redisClient } from "./server/core/redis";
 import { generateRequestId, getIp, sanitizeRequestId } from "./server/utils/request-context";
 import { routing } from "./shared/i18n/routing";
 import { getCookieName } from "./shared/lib/cookies";
-import { isBypassRoute, resolvePageRedirect } from "./shared/lib/proxy-routing";
+import { isBypassRoute, resolveDocsPath, resolvePageRedirect } from "./shared/lib/proxy-routing";
 
 const cookieName = getCookieName();
 
@@ -71,27 +71,28 @@ async function handleRateLimitAndSize(
   return null;
 }
 
+function attachRequestMeta(response: NextResponse, requestId: string): NextResponse {
+  response.headers.set("x-request-id", requestId);
+  response.cookies.set("last_request_id", requestId, {
+    httpOnly: false,
+    maxAge: 60,
+    path: "/",
+    sameSite: "lax",
+    secure: IS_PROD,
+  });
+  return response;
+}
+
 async function handleApiRequest(
   request: NextRequest,
   requestId: string,
   ip: string,
 ): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
-  const attachRequestMeta = (response: NextResponse): NextResponse => {
-    response.headers.set("x-request-id", requestId);
-    response.cookies.set("last_request_id", requestId, {
-      httpOnly: false,
-      maxAge: 60,
-      path: "/",
-      sameSite: "lax",
-      secure: IS_PROD,
-    });
-    return response;
-  };
 
   const rateLimitResponse = await handleRateLimitAndSize(request, pathname, ip);
   if (rateLimitResponse) {
-    return attachRequestMeta(rateLimitResponse);
+    return attachRequestMeta(rateLimitResponse, requestId);
   }
 
   const requestHeaders = new Headers(request.headers);
@@ -102,11 +103,26 @@ async function handleApiRequest(
       headers: requestHeaders,
     },
   });
-  return attachRequestMeta(response);
+  return attachRequestMeta(response, requestId);
 }
 
 function handlePageRequest(request: NextRequest, requestId: string): NextResponse {
   const { pathname } = request.nextUrl;
+
+  const docsDecision = resolveDocsPath(pathname);
+
+  if (docsDecision != null) {
+    const url = request.nextUrl.clone();
+    url.pathname = docsDecision.pathname;
+
+    const response =
+      docsDecision.type === "redirect"
+        ? NextResponse.redirect(url, 308)
+        : NextResponse.rewrite(url);
+
+    return attachRequestMeta(response, requestId);
+  }
+
   const token = request.cookies.get(cookieName)?.value;
   const redirectPath = resolvePageRedirect(pathname, token != null);
 
@@ -118,16 +134,7 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
 
   const response = intlMiddleware(request);
 
-  response.headers.set("x-request-id", requestId);
-  response.cookies.set("last_request_id", requestId, {
-    httpOnly: false,
-    maxAge: 60,
-    path: "/",
-    sameSite: "lax",
-    secure: IS_PROD,
-  });
-
-  return response;
+  return attachRequestMeta(response, requestId);
 }
 
 export async function proxy(request: NextRequest): Promise<NextResponse> {

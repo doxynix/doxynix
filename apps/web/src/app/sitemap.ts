@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 
 import { APP_URL } from "@/shared/config/env.client";
 import { DEFAULT_LOCALE, LOCALES } from "@/shared/config/locales";
+import { buildDocsCanonical } from "@/shared/lib/docs-metadata";
+import { docsSource } from "@/shared/lib/docs-source";
 import { PUBLIC_ROUTES } from "@/shared/lib/public-routes";
 import { getSitemapUrl } from "@/shared/lib/sitemap.utils";
 
@@ -30,5 +32,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
   });
 
-  return sitemapEntries;
+  const docsEntries: MetadataRoute.Sitemap = docsSource.getPages().map((page) => ({
+    changeFrequency: "weekly",
+    lastModified: new Date(),
+    priority: page.url === "/docs" ? 0.9 : 0.7,
+    url: buildDocsCanonical(APP_URL, page.url),
+  }));
+
+  return [...sitemapEntries, ...docsEntries];
 }

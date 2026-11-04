@@ -187,9 +187,8 @@ export function AppSidebar() {
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarLink
-                href="https://docs.doxynix.space"
+                href="/docs"
                 icon={BookText}
-                isBlank
                 label={t("sidebar_documentation")}
               />
             </SidebarMenuItem>
