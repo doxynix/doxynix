@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { STRIPE_WEBHOOK_SECRET } from "@/shared/config/env.server";
 
 import { getStripeClient } from "@/server/core/billing/stripe-client";
+import { STRIPE_API_VERSION } from "@/server/core/billing/stripe-version";
 
 import { handleStripeWebhook } from "./billing.webhook";
 
@@ -24,7 +25,7 @@ vi.mock("@trigger.dev/sdk", () => ({ tasks: { trigger: triggerMock } }));
 
 function eventBody(overrides: Record<string, unknown> = {}) {
   return JSON.stringify({
-    api_version: "2026-09-30.endive",
+    api_version: STRIPE_API_VERSION,
     created: Math.floor(Date.now() / 1000),
     data: { object: { customer: "cus_test", id: "cs_test", object: "checkout.session" } },
     id: "evt_test_1",

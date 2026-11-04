@@ -59,6 +59,8 @@
   "files": {
     "includes": [
       "**",
+      "!!**/*.md",
+      "!!**/*.mdx",
       "!!**/node_modules",
       "!!**/.next",
       "!!**/out",
