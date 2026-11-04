@@ -22,11 +22,27 @@
 }
 
 #nd-docs-layout {
-  --color-fd-muted-foreground: #5f5f5f;
-}
-
-.dark #nd-docs-layout {
-  --color-fd-muted-foreground: #b3b3b3;
+  --color-fd-background: var(--background);
+  --color-fd-foreground: var(--foreground);
+  --color-fd-card: var(--card);
+  --color-fd-card-foreground: var(--card-foreground);
+  --color-fd-popover: var(--popover);
+  --color-fd-popover-foreground: var(--popover-foreground);
+  --color-fd-primary: var(--primary);
+  --color-fd-primary-foreground: var(--primary-foreground);
+  --color-fd-secondary: var(--secondary);
+  --color-fd-secondary-foreground: var(--secondary-foreground);
+  --color-fd-muted: var(--muted);
+  --color-fd-muted-foreground: var(--muted-foreground);
+  --color-fd-accent: var(--accent);
+  --color-fd-accent-foreground: var(--accent-foreground);
+  --color-fd-border: var(--border);
+  --color-fd-ring: var(--ring);
+  --color-fd-overlay: var(--overlay);
+  --color-fd-success: var(--status-success);
+  --color-fd-warning: var(--status-warning);
+  --color-fd-error: var(--status-error);
+  --color-fd-info: var(--status-info);
 }
 
 #nd-docs-layout .prose {
