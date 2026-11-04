@@ -4,15 +4,17 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 
 export function useAdminUserActions() {
   const trpc = useTRPC();
   const t = useTranslations("AdminUsers");
   const queryClient = useQueryClient();
+  const errorMessage = useErrorMessage();
 
   const invalidate = () => void queryClient.invalidateQueries(trpc.adminUser.list.pathFilter());
 
-  const onError = (error: { message: string }) => toast.error(error.message);
+  const onError = (error: { message: string }) => toast.error(errorMessage(error));
 
   const revokeSession = useMutation(
     trpc.adminUser.revokeSession.mutationOptions({

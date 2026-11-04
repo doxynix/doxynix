@@ -8,6 +8,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { authClient } from "@/shared/lib/auth-client";
 import { AppButton } from "@/shared/ui/core/button";
 import {
@@ -35,6 +36,7 @@ import { ConnectionCard } from "@/entities/connection/ui/connection-card";
 export function TwoFactorCard() {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
+  const errorMessage = useErrorMessage();
   const { data: sessionContext, refetch: refetchSession } = authClient.useSession();
   const user = sessionContext?.user;
   const queryClient = useQueryClient();
@@ -69,7 +71,7 @@ export function TwoFactorCard() {
         }
       })
       .catch((error: unknown) => {
-        toast.error(error instanceof Error ? error.message : t("settings_2fa_setup_failed"));
+        toast.error(errorMessage(error));
         setIsSetupOpen(false);
       })
       .finally(() => {
@@ -86,7 +88,7 @@ export function TwoFactorCard() {
       return data;
     },
     onError: (err) => {
-      toast.error(err.message);
+      toast.error(errorMessage(err));
     },
     onSuccess: () => {
       toast.success(t("settings_2fa_activated_success"));
@@ -102,7 +104,7 @@ export function TwoFactorCard() {
         throw new Error(error.message);
       }
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => toast.error(errorMessage(err)),
     onSuccess: () => {
       toast.success(t("settings_2fa_disabled_success"));
       void refetchSession();

@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
@@ -43,6 +44,7 @@ type Props = {
 export function PrDraftSheet({ repoId }: Readonly<Props>) {
   const trpc = useTRPC();
   const t = useTranslations("Dashboard");
+  const errorMessage = useErrorMessage();
   const [open, setOpen] = useState(false);
   const [removingFiles, setRemovingFiles] = useState<Set<string>>(new Set());
   const queryClient = useQueryClient();
@@ -55,7 +57,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
 
   const openPrMutation = useMutation(
     trpc.analysis.openPullRequest.mutationOptions({
-      onError: (err) => toast.error(t("repo_pr_draft_create_error", { message: err.message })),
+      onError: (err) => toast.error(errorMessage(err)),
       onSuccess: (data) => {
         if (data.success) {
           toast.success(t("repo_pr_draft_created"), {
@@ -82,7 +84,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
 
   const unstageMutation = useMutation(
     trpc.analysis.unstageFile.mutationOptions({
-      onError: (err) => toast.error(t("repo_pr_draft_unstage_error", { message: err.message })),
+      onError: (err) => toast.error(errorMessage(err)),
       onSuccess: () => {
         void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
       },

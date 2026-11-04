@@ -5,40 +5,13 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
-
-function errorKey(message: string) {
-  switch (message) {
-    case "ALREADY_MEMBER": {
-      return "settings_members_error_already_member";
-    }
-    case "LAST_OWNER": {
-      return "settings_members_error_last_owner";
-    }
-    case "LIMIT_EXCEEDED": {
-      return "settings_members_error_limit";
-    }
-    case "Owner rights required": {
-      return "settings_members_error_owner_only";
-    }
-    case "UPGRADE_REQUIRED": {
-      return "settings_members_error_upgrade_required";
-    }
-    case "MEMBER_ADD_FAILED": {
-      return "settings_members_error_user_not_found";
-    }
-    case "RATE_LIMITED": {
-      return "settings_members_error_rate_limited";
-    }
-    default: {
-      return "settings_members_error_generic";
-    }
-  }
-}
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 
 export function useMemberActions() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const t = useTranslations("Dashboard");
+  const errorMessage = useErrorMessage();
 
   const invalidate = () => {
     void queryClient.invalidateQueries(trpc.workspace.members.pathFilter());
@@ -46,7 +19,7 @@ export function useMemberActions() {
   };
 
   const onError = (error: { message: string }) => {
-    toast.error(t(errorKey(error.message)));
+    toast.error(errorMessage(error));
   };
 
   const add = useMutation(

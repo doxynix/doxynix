@@ -19,6 +19,7 @@ import type { TreeApi } from "react-arborist";
 import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { authClient } from "@/shared/lib/auth-client";
 import { saveFile } from "@/shared/lib/file-saver";
 import { useTypewriter } from "@/shared/lib/hooks/use-typewriter";
@@ -63,6 +64,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
   const t = useTranslations("Dashboard");
   const { data: session } = authClient.useSession();
   const userId = session?.user.id;
+  const errorMessage = useErrorMessage();
 
   const [mode, setMode] = useState<"edit" | "view">("view");
   const [view, setView] = useState<EditorView | null>(null);
@@ -146,7 +148,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
   const stageMutation = useMutation(
     trpc.analysis.stageFile.mutationOptions({
       onError: (error) => {
-        toast.error(t("repo_code_stage_failed", { message: error.message }));
+        toast.error(errorMessage(error));
       },
       onSuccess: (data) => {
         toast.success(t("repo_code_stage_success", { count: data.stagedCount }));
@@ -231,7 +233,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
 
   const pinMutation = useMutation(
     trpc.analysis.pinAuditToDocs.mutationOptions({
-      onError: (err) => toast.error(tCommon("save_failed", { message: err.message })),
+      onError: (err) => toast.error(errorMessage(err)),
       onSuccess: () => {
         toast.success(t("repo_code_pin_success"));
       },
