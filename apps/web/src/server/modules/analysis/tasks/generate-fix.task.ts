@@ -1,7 +1,8 @@
+import { MessageCode } from "@doxynix/shared";
 import { task } from "@trigger.dev/sdk";
-import { TRPCError } from "@trpc/server";
 import { uniq } from "es-toolkit";
 
+import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { githubBrowseService } from "@/server/core/github/github-content";
@@ -35,9 +36,10 @@ export const generateFixTask = task({
       });
 
       if (repo == null) {
-        throw new TRPCError({
+        throw new AppError({
           code: "NOT_FOUND",
-          message: "Repository not found",
+          messageCode: MessageCode.REPO_NOT_FOUND,
+          publicMessage: "Repository not found",
         });
       }
 

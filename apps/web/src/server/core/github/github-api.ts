@@ -1,4 +1,4 @@
-import { Visibility } from "@doxynix/shared";
+import { MessageCode, Visibility } from "@doxynix/shared";
 import type { RestEndpointMethodTypes } from "@octokit/rest";
 import type { Repo } from "@prisma/client";
 import { sumBy } from "es-toolkit";
@@ -329,7 +329,11 @@ export async function getFileContent(
 
     if (Array.isArray(data) || data.type !== "file") {
       // Typed so the caller gets a 400 with an explanation instead of a masked 500; reachable from the browse route and the agent file tools alike.
-      throw new AppError({ code: "BAD_REQUEST", publicMessage: "Target path is not a file" });
+      throw new AppError({
+        code: "BAD_REQUEST",
+        messageCode: MessageCode.TARGET_NOT_A_FILE,
+        publicMessage: "Target path is not a file",
+      });
     }
 
     return {

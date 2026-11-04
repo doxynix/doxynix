@@ -1,7 +1,8 @@
-import { TRPCError } from "@trpc/server";
+import { MessageCode } from "@doxynix/shared";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
+import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
 
@@ -41,9 +42,10 @@ export const agentService = {
       });
 
       if (repo == null) {
-        throw new TRPCError({
+        throw new AppError({
           code: "NOT_FOUND",
-          message: "Repository not found or access denied",
+          messageCode: MessageCode.REPO_NOT_FOUND_OR_DENIED,
+          publicMessage: "Repository not found or access denied",
         });
       }
 

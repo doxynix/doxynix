@@ -6,6 +6,7 @@ import { ServerCrash } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { IS_DEV } from "@/shared/config/env.flags";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { getClientCookie } from "@/shared/lib/cookies";
 import { AppButton } from "@/shared/ui/core/button";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
@@ -21,6 +22,7 @@ export default function ErrorPage({
 }>) {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Error");
+  const errorMessage = useErrorMessage();
 
   const [requestId, setRequestId] = useState<null | string>(null);
 
@@ -96,7 +98,7 @@ export default function ErrorPage({
           {IS_DEV && (
             <div className="border-border border-t pt-2">
               <p className="font-semibold text-destructive text-xs uppercase">{t("debug_error")}</p>
-              <p className="truncate text-destructive text-xs">{error.message}</p>
+              <p className="truncate text-destructive text-xs">{errorMessage(error)}</p>
             </div>
           )}
         </div>

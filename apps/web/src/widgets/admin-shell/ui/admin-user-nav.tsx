@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { useNavLabels } from "@/shared/config/navigation-labels";
 import { Link, useRouter } from "@/shared/i18n/navigation";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { authClient } from "@/shared/lib/auth-client";
 import { useMounted } from "@/shared/lib/hooks/use-mounted";
 import { AppButton } from "@/shared/ui/core/button";
@@ -29,6 +30,7 @@ export function AdminUserNav() {
   const t = useTranslations("Auth");
   const tCommon = useTranslations("Common");
   const navLabels = useNavLabels();
+  const errorMessage = useErrorMessage();
 
   const user = session?.user ?? null;
   const [loading, setLoading] = useState(false);
@@ -41,7 +43,7 @@ export function AdminUserNav() {
       .signOut({
         fetchOptions: {
           onError: (ctx) => {
-            toast.error(ctx.error.message);
+            toast.error(errorMessage(ctx.error));
           },
           onSuccess: () => {
             router.push("/auth");
@@ -49,7 +51,7 @@ export function AdminUserNav() {
         },
       })
       .catch((error: unknown) => {
-        toast.error(error instanceof Error ? error.message : t("sign_out_failed"));
+        toast.error(errorMessage(error));
       })
       .finally(() => {
         setLoading(false);

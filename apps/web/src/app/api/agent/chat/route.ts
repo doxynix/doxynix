@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { ApiKeyScope, ChatRole } from "@doxynix/shared";
+import { ApiKeyScope, ChatRole, MessageCode } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
 import {
   convertToModelMessages,
@@ -47,6 +47,7 @@ async function handler(req: Request) {
   if (agentModelId == null) {
     throw new AppError({
       code: "INTERNAL_SERVER_ERROR",
+      messageCode: MessageCode.AGENT_UNAVAILABLE,
       publicMessage: "No model configured for AGENT role",
       unexpected: true,
     });
@@ -56,7 +57,11 @@ async function handler(req: Request) {
   const userId = await resolveRequestUserId(requestHeaders, ApiKeyScope.CLI);
 
   if (userId == null) {
-    throw new AppError({ code: "UNAUTHORIZED", publicMessage: "Sign in to use the agent" });
+    throw new AppError({
+      code: "UNAUTHORIZED",
+      messageCode: MessageCode.AGENT_SIGN_IN_REQUIRED,
+      publicMessage: "Sign in to use the agent",
+    });
   }
 
   const workspace = await resolveWorkspace({
@@ -132,7 +137,11 @@ async function handler(req: Request) {
             // A client-generated id can collide with another user's session: surface a conflict
             // instead of leaking a raw P2002 as a 500.
             if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-              throw new AppError({ code: "CONFLICT", publicMessage: "SESSION_ID_TAKEN" });
+              throw new AppError({
+                code: "CONFLICT",
+                messageCode: MessageCode.SESSION_ID_TAKEN,
+                publicMessage: "SESSION_ID_TAKEN",
+              });
             }
 
             throw error;
@@ -169,11 +178,19 @@ async function handler(req: Request) {
     const fresh = await getWorkspaceEntitlement(tx, workspace.id, new Date(), { fresh: true });
 
     if (fresh == null || !fresh.hasAccess) {
-      throw new AppError({ code: "PAYMENT_REQUIRED", publicMessage: "PAYMENT_REQUIRED" });
+      throw new AppError({
+        code: "PAYMENT_REQUIRED",
+        messageCode: MessageCode.PAYMENT_REQUIRED,
+        publicMessage: "PAYMENT_REQUIRED",
+      });
     }
 
     if (fresh.aiTokensPerMonth != null && fresh.usedTokens >= fresh.aiTokensPerMonth) {
-      throw new AppError({ code: "FORBIDDEN", publicMessage: "LIMIT_EXCEEDED" });
+      throw new AppError({
+        code: "FORBIDDEN",
+        messageCode: MessageCode.AI_LIMIT_EXCEEDED,
+        publicMessage: "LIMIT_EXCEEDED",
+      });
     }
 
     await reserveUsage(tx, {

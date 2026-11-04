@@ -19,6 +19,7 @@ import { parseAsString, useQueryState } from "nuqs";
 import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { formatFullDate } from "@/shared/lib/date-utils";
 import { saveFile } from "@/shared/lib/file-saver";
 import { useIntersectionObserver } from "@/shared/lib/hooks/use-intersection-observer";
@@ -97,6 +98,7 @@ export function RepoDocs({
 }: Readonly<Props>) {
   const trpc = useTRPC();
   const t = useTranslations("Dashboard");
+  const errorMessage = useErrorMessage();
   const [apiMode, setApiMode] = useState<"md" | "swagger">("md");
   const [activePath] = useQueryState("path", parseAsString);
   const { aid } = useRepoParams();
@@ -121,7 +123,7 @@ export function RepoDocs({
   const stageMutation = useMutation(
     trpc.analysis.stageFile.mutationOptions({
       onError: (error) => {
-        toast.error(t("repo_docs_stage_failed", { error: error.message }));
+        toast.error(errorMessage(error));
       },
       onSuccess: (data) => {
         void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());

@@ -1,3 +1,4 @@
+import { MessageCode } from "@doxynix/shared";
 import {
   convertToModelMessages,
   createUIMessageStreamResponse,
@@ -51,19 +52,31 @@ async function handler(req: Request) {
   try {
     body = (await req.json()) as { messages?: IncomingMessage[] };
   } catch {
-    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Invalid JSON body" });
+    throw new AppError({
+      code: "BAD_REQUEST",
+      messageCode: MessageCode.REQUEST_BODY_INVALID,
+      publicMessage: "Invalid JSON body",
+    });
   }
 
   const messages = body.messages;
 
   if (!Array.isArray(messages) || messages.length === 0 || messages.length > MAX_MESSAGES) {
-    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Invalid messages" });
+    throw new AppError({
+      code: "BAD_REQUEST",
+      messageCode: MessageCode.REQUEST_INVALID,
+      publicMessage: "Invalid messages",
+    });
   }
 
   const question = readQuestion(messages);
 
   if (question.trim().length === 0 || question.length > MAX_QUESTION_LENGTH) {
-    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Invalid question" });
+    throw new AppError({
+      code: "BAD_REQUEST",
+      messageCode: MessageCode.REQUEST_INVALID,
+      publicMessage: "Invalid question",
+    });
   }
 
   const ip = getIp(req);
@@ -77,6 +90,7 @@ async function handler(req: Request) {
     if (!perIp.success || !global.success) {
       throw new AppError({
         code: "TOO_MANY_REQUESTS",
+        messageCode: MessageCode.AGENT_TOO_MANY_QUESTIONS,
         publicMessage: "Too many questions. Please try again later.",
       });
     }
@@ -89,6 +103,7 @@ async function handler(req: Request) {
 
     throw new AppError({
       code: "INTERNAL_SERVER_ERROR",
+      messageCode: MessageCode.AGENT_UNAVAILABLE,
       publicMessage: "The assistant is temporarily unavailable.",
       unexpected: true,
     });
@@ -100,6 +115,7 @@ async function handler(req: Request) {
   if (modelId == null) {
     throw new AppError({
       code: "INTERNAL_SERVER_ERROR",
+      messageCode: MessageCode.AGENT_UNAVAILABLE,
       publicMessage: "The assistant is temporarily unavailable.",
       unexpected: true,
     });

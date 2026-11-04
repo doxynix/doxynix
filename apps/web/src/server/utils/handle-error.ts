@@ -7,7 +7,7 @@ import { type AppError, type ErrorMapping, normalizeError } from "../core/api-er
 // Mapping tables live in `core/api-error` so HTTP route handlers and tRPC procedures cannot drift apart.
 function toTrpcError(error: AppError): TRPCError {
   return new TRPCError({
-    cause: error.zodIssues,
+    cause: error,
     code: error.code,
     message: error.publicMessage,
   });

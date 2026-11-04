@@ -1,10 +1,10 @@
-import { generateBranchName } from "@doxynix/shared";
-import { TRPCError } from "@trpc/server";
+import { generateBranchName, MessageCode } from "@doxynix/shared";
 import type { Redis } from "@upstash/redis";
 import type * as z from "zod";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
+import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import type { DbClient } from "@/server/core/db";
 import { getClientContext, getInstallationClient } from "@/server/core/github/github-client";
@@ -43,9 +43,10 @@ export const fixesService = {
       });
 
       if (repo == null) {
-        throw new TRPCError({
+        throw new AppError({
           code: "NOT_FOUND",
-          message: "Repository not found",
+          messageCode: MessageCode.REPO_NOT_FOUND,
+          publicMessage: "Repository not found",
         });
       }
 
@@ -54,7 +55,11 @@ export const fixesService = {
       const fix = await analysisRepo.getById(db, input.fixId, workspaceId);
 
       if (fix == null) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Fix not found" });
+        throw new AppError({
+          code: "NOT_FOUND",
+          messageCode: MessageCode.FIX_NOT_FOUND,
+          publicMessage: "Fix not found",
+        });
       }
 
       const fixService = new FixService();
@@ -90,7 +95,7 @@ export const fixesService = {
         msg: "fix_apply_failed",
       });
 
-      if (error instanceof TRPCError) {
+      if (error instanceof AppError) {
         throw error;
       }
 
@@ -137,9 +142,10 @@ export const fixesService = {
       });
 
       if (repo == null) {
-        throw new TRPCError({
+        throw new AppError({
           code: "NOT_FOUND",
-          message: "Repository not found",
+          messageCode: MessageCode.REPO_NOT_FOUND,
+          publicMessage: "Repository not found",
         });
       }
 
@@ -198,9 +204,10 @@ export const fixesService = {
     const fix = await analysisRepo.getById(db, fixId, workspaceId);
 
     if (fix == null) {
-      throw new TRPCError({
+      throw new AppError({
         code: "NOT_FOUND",
-        message: "Fix not found",
+        messageCode: MessageCode.FIX_NOT_FOUND,
+        publicMessage: "Fix not found",
       });
     }
 
@@ -238,9 +245,10 @@ export const fixesService = {
     });
 
     if (repo == null) {
-      throw new TRPCError({
+      throw new AppError({
         code: "NOT_FOUND",
-        message: "Repository not found",
+        messageCode: MessageCode.REPO_NOT_FOUND,
+        publicMessage: "Repository not found",
       });
     }
 
@@ -253,9 +261,11 @@ export const fixesService = {
     });
 
     if (installation == null) {
-      throw new TRPCError({
+      throw new AppError({
         code: "PRECONDITION_FAILED",
-        message: `GitHub App is not installed for ${repo.owner}. Please install it first.`,
+        messageCode: MessageCode.GITHUB_APP_NOT_INSTALLED_OWNER,
+        params: { owner: repo.owner },
+        publicMessage: `GitHub App is not installed for ${repo.owner}. Please install it first.`,
       });
     }
 
@@ -265,9 +275,10 @@ export const fixesService = {
     const staged = await redis.hgetall<Record<string, string>>(cacheKey);
 
     if (staged == null || Object.keys(staged).length === 0) {
-      throw new TRPCError({
+      throw new AppError({
         code: "BAD_REQUEST",
-        message: "No staged files available for pull request creation",
+        messageCode: MessageCode.FIX_NO_STAGED_FILES,
+        publicMessage: "No staged files available for pull request creation",
       });
     }
 
@@ -321,7 +332,7 @@ export const fixesService = {
 
       await analysisRepo.updateStatus(db, fix.id, "FAILED");
 
-      if (error instanceof TRPCError) {
+      if (error instanceof AppError) {
         throw error;
       }
 

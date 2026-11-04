@@ -115,6 +115,8 @@ describe("Proxy API Route — SSRF Prevention Suite", () => {
         error: {
           code: "FORBIDDEN",
           message: "Forbidden: Unsafe protocol",
+          messageCode: "PROXY_UNSAFE_TARGET",
+          params: null,
           requestId: expect.any(String),
         },
       });
@@ -135,6 +137,8 @@ describe("Proxy API Route — SSRF Prevention Suite", () => {
         error: {
           code: "BAD_GATEWAY",
           message: "Proxy Error",
+          messageCode: null,
+          params: null,
           requestId: expect.any(String),
         },
       });

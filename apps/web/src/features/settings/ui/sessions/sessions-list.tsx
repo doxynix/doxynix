@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { authClient } from "@/shared/lib/auth-client";
 import { formatFullDate } from "@/shared/lib/date-utils";
 import { AppButton } from "@/shared/ui/core/button";
@@ -48,6 +49,7 @@ export function SessionsList() {
   const { data: currentSessionContext } = authClient.useSession();
   const currentSessionId = currentSessionContext?.session.id;
   const t = useTranslations("Sessions");
+  const errorMessage = useErrorMessage();
 
   const [revokingSessionId, setRevokingSessionId] = useState<null | string>(null);
 
@@ -57,7 +59,7 @@ export function SessionsList() {
 
   const revokeSession = useMutation(
     trpc.user.revokeSession.mutationOptions({
-      onError: (err) => toast.error(err.message),
+      onError: (err) => toast.error(errorMessage(err)),
       onSuccess: () => {
         toast.success(t("device_session_revoked"));
         setRevokingSessionId(null);
@@ -68,7 +70,7 @@ export function SessionsList() {
 
   const revokeOtherSessions = useMutation(
     trpc.user.revokeOtherSessions.mutationOptions({
-      onError: (err) => toast.error(err.message),
+      onError: (err) => toast.error(errorMessage(err)),
       onSuccess: () => {
         toast.success(t("logged_out_all_devices"));
         void queryClient.invalidateQueries(trpc.user.getActiveSessions.pathFilter());

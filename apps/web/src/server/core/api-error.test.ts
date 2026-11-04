@@ -89,6 +89,31 @@ describe("AppError", () => {
 
     expect(error.cause).toBe(cause);
   });
+
+  it("keeps messageCode and params on the AppError", () => {
+    const error = new AppError({
+      code: "NOT_FOUND",
+      messageCode: "REPO_NOT_FOUND",
+      publicMessage: "Repository not found",
+    });
+
+    expect(error.messageCode).toBe("REPO_NOT_FOUND");
+    expect(error.params).toBeUndefined();
+  });
+
+  it("survives normalization through a TRPCError cause chain", () => {
+    const cause = new AppError({
+      code: "PRECONDITION_FAILED",
+      messageCode: "GITHUB_APP_NOT_INSTALLED_OWNER",
+      params: { owner: "acme" },
+      publicMessage: "GitHub App is not installed for acme. Please install it first.",
+    });
+
+    const result = normalizeError(new TRPCError({ cause, code: "PRECONDITION_FAILED" }));
+
+    expect(result.messageCode).toBe("GITHUB_APP_NOT_INSTALLED_OWNER");
+    expect(result.params).toEqual({ owner: "acme" });
+  });
 });
 
 describe("normalizeError", () => {

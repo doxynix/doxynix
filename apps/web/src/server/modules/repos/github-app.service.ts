@@ -1,12 +1,12 @@
 import crypto from "node:crypto";
 
 import type { InstallationTargetType, RepositorySelection } from "@doxynix/shared";
-import { TRPCError } from "@trpc/server";
+import { MessageCode } from "@doxynix/shared";
 
 import { GITHUB_APP_ID } from "@/shared/config/env.server";
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
-import { isOctokitError } from "@/server/core/api-error";
+import { AppError, isOctokitError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import type { DbClient, PrismaClientExtended } from "@/server/core/db";
 import { githubTokenService } from "@/server/core/github/github-access-token";
@@ -116,9 +116,11 @@ export const githubAppService = {
 
     if (validState == null) {
       appLogger.warn({ msg: "CSRF/Replay attack or expired state", userId: userId });
-      throw new TRPCError({
+      throw new AppError({
         code: "FORBIDDEN",
-        message: "Invalid, expired, or already used security state. Please try installing again.",
+        messageCode: MessageCode.GITHUB_STATE_INVALID,
+        publicMessage:
+          "Invalid, expired, or already used security state. Please try installing again.",
       });
     }
 
@@ -129,9 +131,11 @@ export const githubAppService = {
     const stateUserId = identifierMatch?.[2];
 
     if (workspaceId == null || stateUserId !== userId) {
-      throw new TRPCError({
+      throw new AppError({
         code: "FORBIDDEN",
-        message: "Invalid, expired, or already used security state. Please try installing again.",
+        messageCode: MessageCode.GITHUB_STATE_INVALID,
+        publicMessage:
+          "Invalid, expired, or already used security state. Please try installing again.",
       });
     }
 
@@ -141,15 +145,20 @@ export const githubAppService = {
     });
 
     if (membership?.role !== "OWNER") {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Owner rights required" });
+      throw new AppError({
+        code: "FORBIDDEN",
+        messageCode: MessageCode.WORKSPACE_OWNER_REQUIRED,
+        publicMessage: "Owner rights required",
+      });
     }
 
     const validToken = await githubTokenService.getValidToken(userId);
 
     if (validToken == null) {
-      throw new TRPCError({
+      throw new AppError({
         code: "FORBIDDEN",
-        message: "You must link your GitHub account before installing the app.",
+        messageCode: MessageCode.GITHUB_LINK_REQUIRED,
+        publicMessage: "You must link your GitHub account before installing the app.",
       });
     }
 
@@ -166,14 +175,16 @@ export const githubAppService = {
       }
     } catch (error) {
       if (isOctokitError(error) && (error.status === 401 || error.status === 403)) {
-        throw new TRPCError({
+        throw new AppError({
           code: "FORBIDDEN",
-          message: "GitHub authorization expired. Please relink your GitHub account.",
+          messageCode: MessageCode.GITHUB_AUTH_EXPIRED,
+          publicMessage: "GitHub authorization expired. Please relink your GitHub account.",
         });
       }
-      throw new TRPCError({
+      throw new AppError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to verify installation ownership via GitHub.",
+        messageCode: MessageCode.GITHUB_INSTALL_VERIFY_FAILED,
+        publicMessage: "Failed to verify installation ownership via GitHub.",
       });
     }
 
@@ -183,9 +194,10 @@ export const githubAppService = {
         msg: "IDOR attempt: User tried to claim unowned installation",
         userId: userId,
       });
-      throw new TRPCError({
+      throw new AppError({
         code: "FORBIDDEN",
-        message: "You do not have permission to claim this GitHub installation.",
+        messageCode: MessageCode.GITHUB_INSTALL_CLAIM_FORBIDDEN,
+        publicMessage: "You do not have permission to claim this GitHub installation.",
       });
     }
 
@@ -209,9 +221,10 @@ export const githubAppService = {
         });
 
         if (consumed.count === 0) {
-          throw new TRPCError({
+          throw new AppError({
             code: "FORBIDDEN",
-            message: "Security state already used or expired.",
+            messageCode: MessageCode.GITHUB_STATE_USED,
+            publicMessage: "Security state already used or expired.",
           });
         }
 
@@ -221,9 +234,10 @@ export const githubAppService = {
         });
 
         if (existing != null && existing.workspaceId !== workspaceId) {
-          throw new TRPCError({
+          throw new AppError({
             code: "FORBIDDEN",
-            message: "This installation is already linked to another workspace.",
+            messageCode: MessageCode.GITHUB_INSTALL_ALREADY_LINKED,
+            publicMessage: "This installation is already linked to another workspace.",
           });
         }
 
@@ -257,14 +271,15 @@ export const githubAppService = {
         }
       });
     } catch (error) {
-      if (error instanceof TRPCError) {
+      if (error instanceof AppError) {
         throw error;
       }
 
       appLogger.error({ error, msg: "Failed to securely claim installation" });
-      throw new TRPCError({
+      throw new AppError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to securely claim installation.",
+        messageCode: MessageCode.GITHUB_INSTALL_CLAIM_FAILED,
+        publicMessage: "Failed to securely claim installation.",
       });
     }
 

@@ -6,6 +6,7 @@ import { Fingerprint, KeyRound, Plus, ShieldAlert, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { authClient } from "@/shared/lib/auth-client";
 import { useMounted } from "@/shared/lib/hooks/use-mounted";
 import { AppButton } from "@/shared/ui/core/button";
@@ -29,6 +30,7 @@ const PASSKEYS_QUERY_KEY = ["passkeys"] as const;
 export function PasskeysList() {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
+  const errorMessage = useErrorMessage();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [deviceName, setDeviceName] = useState("");
   const [deletingKeyId, setDeletingKeyId] = useState<null | string>(null);
@@ -63,7 +65,7 @@ export function PasskeysList() {
       return data;
     },
     onError: (err) => {
-      toast.error(err.message);
+      toast.error(errorMessage(err));
     },
     onSuccess: () => {
       toast.success(t("settings_passkey_link_success"));
@@ -81,7 +83,7 @@ export function PasskeysList() {
       }
     },
     onError: (err) => {
-      toast.error(err.message);
+      toast.error(errorMessage(err));
     },
     onSuccess: () => {
       toast.success(t("settings_passkey_remove_success"));

@@ -2,6 +2,7 @@ import dns from "node:dns";
 
 import { headers as getRequestHeaders } from "next/headers";
 import { NextResponse } from "next/server";
+import { MessageCode } from "@doxynix/shared";
 import ipaddr from "ipaddr.js";
 import { Agent } from "undici";
 
@@ -57,7 +58,11 @@ export function ssrfSafeLookup(
           range: ipaddr.process(address).range(),
         });
         callback(
-          new AppError({ code: "FORBIDDEN", publicMessage: UNSAFE_TARGET_MESSAGE }),
+          new AppError({
+            code: "FORBIDDEN",
+            messageCode: MessageCode.PROXY_UNSAFE_TARGET,
+            publicMessage: UNSAFE_TARGET_MESSAGE,
+          }),
           null,
           null,
         );
@@ -88,13 +93,21 @@ async function handler(req: Request) {
   });
 
   if (!session?.user) {
-    throw new AppError({ code: "UNAUTHORIZED", publicMessage: "Unauthorized" });
+    throw new AppError({
+      code: "UNAUTHORIZED",
+      messageCode: MessageCode.UNAUTHORIZED,
+      publicMessage: "Unauthorized",
+    });
   }
 
   const parsed = ProxyRequestBody.safeParse(await req.json());
 
   if (!parsed.success) {
-    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Invalid request body" });
+    throw new AppError({
+      code: "BAD_REQUEST",
+      messageCode: MessageCode.REQUEST_BODY_INVALID,
+      publicMessage: "Invalid request body",
+    });
   }
 
   const { body, headers, method, url } = parsed.data;
@@ -102,6 +115,7 @@ async function handler(req: Request) {
   if (url == null || method == null) {
     throw new AppError({
       code: "BAD_REQUEST",
+      messageCode: MessageCode.PROXY_MISSING_PARAMS,
       publicMessage: "Missing url or method parameters",
     });
   }
@@ -110,14 +124,22 @@ async function handler(req: Request) {
   try {
     const parsedUrl = new URL(url);
     if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
-      throw new AppError({ code: "FORBIDDEN", publicMessage: "Forbidden: Unsafe protocol" });
+      throw new AppError({
+        code: "FORBIDDEN",
+        messageCode: MessageCode.PROXY_UNSAFE_TARGET,
+        publicMessage: "Forbidden: Unsafe protocol",
+      });
     }
     validatedUrl = parsedUrl.toString();
   } catch (error) {
     if (error instanceof AppError) {
       throw error;
     }
-    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Invalid URL format" });
+    throw new AppError({
+      code: "BAD_REQUEST",
+      messageCode: MessageCode.PROXY_URL_INVALID,
+      publicMessage: "Invalid URL format",
+    });
   }
 
   const filteredHeaders: Record<string, string> = {};

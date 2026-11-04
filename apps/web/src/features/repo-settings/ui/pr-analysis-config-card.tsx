@@ -14,6 +14,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { cn } from "@/shared/lib/cn";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Checkbox } from "@/shared/ui/core/checkbox";
@@ -47,6 +48,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
   const locale = useLocale();
   const queryClient = useQueryClient();
+  const errorMessage = useErrorMessage();
 
   const AREAS: readonly Area[] = [
     {
@@ -81,7 +83,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
 
   const updateConfig = useMutation(
     trpc.analysis.configureRepository.mutationOptions({
-      onError: (error) => toast.error(error.message),
+      onError: (error) => toast.error(errorMessage(error)),
       onSuccess: () => {
         void queryClient.invalidateQueries(trpc.analysis.getRepoConfig.queryFilter({ repoId }));
       },

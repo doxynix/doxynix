@@ -33,7 +33,13 @@ describe("withApiHandler", () => {
 
     expect(res.status).toBe(404);
     await expect(res.json()).resolves.toEqual({
-      error: { code: "NOT_FOUND", message: "Repository not found", requestId: "req-1" },
+      error: {
+        code: "NOT_FOUND",
+        message: "Repository not found",
+        messageCode: null,
+        params: null,
+        requestId: "req-1",
+      },
     });
     expect(mocks.appLogger.warn).toHaveBeenCalledWith(
       expect.objectContaining({ code: "NOT_FOUND", kind: "app" }),
@@ -129,5 +135,40 @@ describe("withApiHandler", () => {
     await handler(req());
 
     expect(mocks.appLogger.flush).not.toHaveBeenCalled();
+  });
+
+  it("includes messageCode and params in the JSON body", async () => {
+    const handler = withApiHandler(async () => {
+      throw new AppError({
+        code: "PRECONDITION_FAILED",
+        messageCode: "GITHUB_APP_NOT_INSTALLED_OWNER",
+        params: { owner: "acme" },
+        publicMessage: "GitHub App is not installed for acme. Please install it first.",
+      });
+    });
+
+    const response = await handler(new Request("http://localhost/api/test"));
+    const body = (await response.json()) as {
+      error: { messageCode: string | null; params: Record<string, string> | null };
+    };
+
+    expect(body.error.messageCode).toBe("GITHUB_APP_NOT_INSTALLED_OWNER");
+    expect(body.error.params).toEqual({ owner: "acme" });
+  });
+
+  it("masks messageCode for a non-public code", async () => {
+    const handler = withApiHandler(async () => {
+      throw new AppError({
+        code: "INTERNAL_SERVER_ERROR",
+        messageCode: "ANALYSIS_FAILED",
+        publicMessage: "Analysis failed",
+        unexpected: true,
+      });
+    });
+
+    const response = await handler(new Request("http://localhost/api/test"));
+    const body = (await response.json()) as { error: { messageCode: string | null } };
+
+    expect(body.error.messageCode).toBeNull();
   });
 });

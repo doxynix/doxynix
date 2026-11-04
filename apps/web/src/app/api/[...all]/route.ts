@@ -1,7 +1,15 @@
-import { NextResponse } from "next/server";
+import { MessageCode } from "@doxynix/shared";
+
+import { AppError, toErrorResponse } from "@/server/core/api-error";
 
 const notFound = () => {
-  return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return toErrorResponse(
+    new AppError({
+      code: "NOT_FOUND",
+      messageCode: MessageCode.NOT_FOUND,
+      publicMessage: "Not found",
+    }),
+  );
 };
 
 export {

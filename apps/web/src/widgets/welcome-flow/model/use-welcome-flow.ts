@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import type { RepoItemFields } from "@/shared/api/repo.types";
 import { type RouterOutput, useTRPC } from "@/shared/api/trpc";
 import { useRouter } from "@/shared/i18n/navigation";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { authClient, type User } from "@/shared/lib/auth-client";
 import { deriveDefaultName, isPlaceholderName } from "@/shared/lib/default-name";
 import { intentToAnalyzeHref } from "@/shared/lib/onboarding-intent";
@@ -47,6 +48,7 @@ export function useWelcomeFlow({ initialState, user }: Input) {
   const trpc = useTRPC();
   const router = useRouter();
   const t = useTranslations("Welcome");
+  const errorMessage = useErrorMessage();
 
   const [step, setStep] = useState<OnboardingStep>(initialState.step);
   const [name, setName] = useState(() => initialName(user));
@@ -170,7 +172,7 @@ export function useWelcomeFlow({ initialState, user }: Input) {
         router.push(intentToAnalyzeHref(intent, parsed.owner, parsed.name));
       })
       .catch((error) => {
-        toast.error(error instanceof Error ? error.message : t("error_generic"));
+        toast.error(errorMessage(error));
       })
       .finally(() => {
         setIsImporting(false);
