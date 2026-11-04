@@ -1,6 +1,6 @@
 import { after } from "next/server";
 import { ApiKeyScope, MessageCode, type UserRole } from "@doxynix/shared";
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import { enhance } from "@zenstackhq/runtime";
 import superjson from "superjson";
 
@@ -140,9 +140,34 @@ const loggerMiddleware = t.middleware(async ({ next, path, type }) => {
   return result;
 });
 
+// tRPC passes only `TRPCError` through untouched; anything else becomes `INTERNAL_SERVER_ERROR` before
+// the formatter or a caller sees it. This is the single adapter between the domain error type and tRPC:
+// callers keep the original code, and `cause` carries the AppError that `errorFormatter` reads.
+// `next()` resolves with `{ ok: false }` instead of throwing, so the wrapper has to be unwrapped here.
+const adaptAppErrors = t.middleware(async ({ next }) => {
+  const result = await next();
+
+  if (result.ok) {
+    return result;
+  }
+
+  const original = result.error.cause;
+
+  if (original instanceof AppError && original.code !== "PAYMENT_REQUIRED") {
+    throw new TRPCError({
+      cause: original,
+      code: original.code,
+      message: original.publicMessage,
+    });
+  }
+
+  return result;
+});
+
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
 export const publicProcedure = t.procedure
+  .use(adaptAppErrors)
   .use(contextMiddleware)
   .use(loggerMiddleware)
   .use(withZenStack);

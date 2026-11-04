@@ -1,4 +1,4 @@
-import { ApiKeyScope } from "@doxynix/shared";
+import { ApiKeyScope, MessageCode } from "@doxynix/shared";
 import { getErrorShape, TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -284,6 +284,38 @@ describe("tRPC Error Formatting & Security Boundaries", () => {
       const caller = createCallerFactory(pingRouter())({ ...ctxFor({ banned: false }) });
 
       await expect(caller.ping()).resolves.toBe("pong");
+    });
+  });
+
+  describe("domain errors at the tRPC boundary", () => {
+    const boomRouter = () =>
+      createTRPCRouter({
+        boom: publicProcedure.query(() => {
+          throw new AppError({
+            code: "FORBIDDEN",
+            messageCode: MessageCode.WORKSPACE_ACCESS_DENIED,
+            publicMessage: "Workspace access denied",
+          });
+        }),
+      });
+
+    it("keeps the AppError code for callers, which never see the HTTP formatter", async () => {
+      const caller = createCallerFactory(boomRouter())(ctxFor({ banned: false }));
+
+      await expect(caller.boom()).rejects.toMatchObject({
+        code: "FORBIDDEN",
+        message: "Workspace access denied",
+      });
+    });
+
+    it("keeps the AppError on cause so the formatter still finds the message code", async () => {
+      const caller = createCallerFactory(boomRouter())(ctxFor({ banned: false }));
+
+      const error = await caller.boom().catch((error: unknown) => error);
+
+      expect(error).toBeInstanceOf(TRPCError);
+      expect((error as TRPCError).cause).toBeInstanceOf(AppError);
+      expect(buildShape(error).data.messageCode).toBe("WORKSPACE_ACCESS_DENIED");
     });
   });
 });
