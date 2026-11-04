@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { MessageCode, MessageParams } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { getHTTPStatusCodeFromError } from "@trpc/server/http";
@@ -54,6 +55,10 @@ export type ErrorMapping = {
 type AppErrorOptions = {
   cause?: unknown;
   code: ErrorCode;
+  /** Machine-readable reason the client localizes. Masked in prod unless the code is public. */
+  messageCode?: MessageCode;
+  /** ICU interpolation values for {@link messageCode}. */
+  params?: MessageParams;
   /** Message a client may see. Masked in prod unless the code is public. */
   publicMessage?: string;
   /** Set when the input was not a recognized, expected failure. */
@@ -70,6 +75,8 @@ export class AppError extends Error {
   public readonly code: ErrorCode;
   public readonly isUnexpected: boolean;
   public readonly kind: ErrorKind;
+  public readonly messageCode: MessageCode | undefined;
+  public readonly params: MessageParams | undefined;
   public readonly publicMessage: string;
   public readonly source: number | string | undefined;
   public readonly zodIssues: unknown;
@@ -80,6 +87,8 @@ export class AppError extends Error {
     this.code = options.code;
     this.isUnexpected = options.unexpected ?? false;
     this.kind = options.kind ?? "app";
+    this.messageCode = options.messageCode;
+    this.params = options.params;
     this.publicMessage = options.publicMessage ?? GENERIC_MESSAGE;
     this.source = options.source;
     this.zodIssues = options.zodIssues;
