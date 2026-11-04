@@ -1,8 +1,8 @@
-import { ApiKeyScope } from "@doxynix/shared";
-import { TRPCError } from "@trpc/server";
+import { ApiKeyScope, MessageCode } from "@doxynix/shared";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
+import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
 import { handlePrismaError } from "@/server/utils/handle-error";
@@ -51,9 +51,10 @@ export const apiKeyService = {
     const payload = extractPayloadFromKey(fullKey);
 
     if (payload == null) {
-      throw new TRPCError({
+      throw new AppError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to process and validate generated API key integrity.",
+        messageCode: MessageCode.API_KEY_INTEGRITY_FAILED,
+        publicMessage: "Failed to process and validate generated API key integrity.",
       });
     }
 
@@ -143,16 +144,21 @@ export const apiKeyService = {
       const existing = await client.apiKey.findFirst({ where: { id, workspaceId } });
 
       if (existing == null || isApiKeyDead(existing, Date.now())) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Key not found" });
+        throw new AppError({
+          code: "NOT_FOUND",
+          messageCode: MessageCode.API_KEY_NOT_FOUND,
+          publicMessage: "Key not found",
+        });
       }
 
       const fullKey = generateApiKey();
       const payload = extractPayloadFromKey(fullKey);
 
       if (payload == null) {
-        throw new TRPCError({
+        throw new AppError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to process and validate generated API key integrity.",
+          messageCode: MessageCode.API_KEY_INTEGRITY_FAILED,
+          publicMessage: "Failed to process and validate generated API key integrity.",
         });
       }
 
@@ -197,9 +203,10 @@ export const apiKeyService = {
       .catch((error) => handlePrismaError(error));
 
     if (count === 0) {
-      throw new TRPCError({
+      throw new AppError({
         code: "NOT_FOUND",
-        message: "API Key not found or access denied",
+        messageCode: MessageCode.API_KEY_NOT_FOUND_OR_DENIED,
+        publicMessage: "API Key not found or access denied",
       });
     }
 
@@ -227,9 +234,10 @@ export const apiKeyService = {
       );
 
     if (count === 0) {
-      throw new TRPCError({
+      throw new AppError({
         code: "NOT_FOUND",
-        message: "Key not found or access denied",
+        messageCode: MessageCode.API_KEY_NOT_FOUND_OR_DENIED,
+        publicMessage: "Key not found or access denied",
       });
     }
 

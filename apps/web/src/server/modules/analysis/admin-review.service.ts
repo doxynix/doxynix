@@ -1,7 +1,7 @@
-import { MAX_PAGE } from "@doxynix/shared";
+import { MAX_PAGE, MessageCode } from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
 
+import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
 import {
   buildDateRangeWhere,
@@ -124,7 +124,11 @@ export const adminReviewService = {
     });
 
     if (review == null) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Review not found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.REVIEW_NOT_FOUND,
+        publicMessage: "Review not found",
+      });
     }
 
     const { generatedFixes: fixes, repo, ...summary } = review;

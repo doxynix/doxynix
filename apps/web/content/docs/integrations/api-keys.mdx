@@ -1,0 +1,69 @@
+---
+title: API keys
+description: Create scoped keys for the CLI and MCP, store them safely and revoke them when needed.
+---
+
+API keys authenticate non-browser clients: the CLI, the MCP server and CI jobs. Every key belongs to
+one workspace and can only reach that workspace's repositories.
+
+## Scopes
+
+A key carries a set of scopes that bound what it can call.
+
+| Scope | Grants |
+| --- | --- |
+| `CLI` | The tRPC surface the CLI uses |
+| `MCP` | The MCP tools listed in [MCP server](/docs/integrations/mcp) |
+| `FULL` | A superset of every other scope |
+
+`FULL` is checked first, so a key with `FULL` passes every scope check. The backend also treats a
+key with no scopes as full access, which lets keys created before scopes existed keep working. Grant
+the narrowest scope that does the job: a CI key needs `CLI`, an agent key needs `MCP`.
+
+## Create in the dashboard
+
+Open **Settings → API keys** and create a key. Give it a name you will recognize in an audit log,
+such as `ci-docs` or `agent-local`, and pick the scopes.
+
+The secret is shown once, in the response to the create call. The dashboard and the CLI never
+display it again, only a short prefix, so copy it into your secret store before you close the
+dialog. If you lose it, revoke the key and create a new one.
+
+## Create from the CLI
+
+```bash
+dxnx keys create -n ci -s FULL
+dxnx keys list
+dxnx keys revoke <id>
+```
+
+`dxnx keys create` prompts for the name and scopes when you omit `-n` and `-s`. `dxnx keys list`
+prints the active keys with their prefix and scopes; add `--archived` to include revoked ones and
+`--json` for machine-readable output. `dxnx keys revoke <id>` archives a key immediately, which is
+the control to reach for when a key leaks.
+
+## Use a key
+
+The CLI reads the key from `dxnx login --token`, then from `DOXYNIX_API_KEY`, then from
+`DXNX_TOKEN`, then from `~/.config/dxnx/config.json`:
+
+```bash
+dxnx login --token "$DOXYNIX_API_KEY"
+dxnx status
+```
+
+The MCP server takes the same key as a bearer token:
+
+```text
+Authorization: Bearer <key>
+```
+
+## Security
+
+- Never commit a key. Keep it in the secret store of the platform that runs the job.
+- In CI, set `DOXYNIX_API_KEY` from the secret store rather than passing the value on a command
+  line, where it shows up in process listings and shell history.
+- Rotate by creating a new key, updating the consumer, then revoking the old one. Two valid keys
+  during the switch keep the pipeline green.
+- One key per consumer makes revocation cheap: a leaked CI key does not force you to re-issue the
+  key your laptop uses.

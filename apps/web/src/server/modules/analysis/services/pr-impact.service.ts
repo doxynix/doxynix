@@ -1,5 +1,6 @@
-import { TRPCError } from "@trpc/server";
+import { MessageCode } from "@doxynix/shared";
 
+import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
 
 import { analysisMapper } from "../analysis.mapper";
@@ -29,7 +30,11 @@ export const prImpactService = {
 
     if (analysis == null) {
       // NOT_FOUND, not a bare `Error`: the caller must distinguish "no such analysis" from a real failure, and a 500 is masked in production.
-      throw new TRPCError({ code: "NOT_FOUND", message: "Analysis not found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.ANALYSIS_NOT_FOUND,
+        publicMessage: "Analysis not found",
+      });
     }
 
     return analysis;

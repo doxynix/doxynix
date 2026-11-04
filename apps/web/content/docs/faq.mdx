@@ -1,0 +1,66 @@
+---
+title: FAQ
+description: Short answers about supported providers, languages, data handling, exports and limits.
+---
+
+## Which Git providers are supported?
+
+GitHub, connected through the GitHub App described in
+[Connect the GitHub App](/docs/getting-started/github-app). GitLab and Bitbucket are not supported.
+
+## Which languages can generated docs use?
+
+English and Russian. Documentation language is chosen per analysis run and applies to every document
+that run generates.
+
+## Does Doxynix store my source code?
+
+It clones the repository into a temporary directory for the duration of a run and deletes the
+checkout afterwards. What stays in the workspace is the parsed structure, the generated documents
+and the metrics, not the working tree.
+
+## Can I use private repositories?
+
+Yes, on the Pro or Team plan. See [Plans and limits](/docs/account/plans) for the full comparison.
+
+## How do I export documentation?
+
+Copy or download documents from the dashboard, run `dxnx docs export owner/repo --dir ./docs`,
+export to PDF or Notion from the dashboard, or stage the files and open a pull request. Formats and
+per-document behaviour are covered in [Documents](/docs/concepts/documents).
+
+## Does Doxynix write to my repository automatically?
+
+No. It stages generated files inside the workspace and opens a pull request only when you ask it to,
+so every change reaches your repository through a review you control.
+
+## Does Doxynix refresh docs on every push?
+
+Pro and Team workspaces can resync on pushes to the default branch. On Hobby, re-run an analysis
+or wire `doxynix/action@v1` into a workflow as shown in
+[GitHub Action](/docs/integrations/github-action).
+
+## What is the health score?
+
+A 0–100 composite of security, tech debt, complexity, duplication, documentation, bus factor,
+dependency cycles and a recency bonus. [Metrics](/docs/concepts/metrics) explains each component.
+
+## Can I use it from CI?
+
+Yes. Export `DOXYNIX_API_KEY` for the CLI, or pass the same key as `DOXYNIX_TOKEN` to
+`doxynix/action@v1`. Both need a key with the `CLI` or `FULL` scope.
+
+## Is there a REST API?
+
+The public integration surfaces are the CLI and the MCP server at `https://doxynix.space/api/mcp`.
+There is no documented REST API beyond what those two call.
+
+## Can I self-host?
+
+The repository is AGPL-3.0 licensed, and self-hosting is outside the scope of these docs. The hosted
+service at `https://doxynix.space` is what this documentation describes.
+
+## Where do I report a bug?
+
+Open an issue on [GitHub Issues](https://github.com/doxynix/doxynix/issues), or contact support from
+the dashboard if the report contains account details you would rather not post publicly.

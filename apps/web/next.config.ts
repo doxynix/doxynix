@@ -3,6 +3,7 @@ import filterWebpackStats from "@bundle-stats/plugin-webpack-filter";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 import { type SentryBuildOptions, withSentryConfig } from "@sentry/nextjs/config";
 import createWithVercelToolbar from "@vercel/toolbar/plugins/next";
+import { createMDX } from "fumadocs-mdx/next";
 import { withAxiom } from "next-axiom";
 import createNextIntlPlugin from "next-intl/plugin";
 import { join, relative } from "pathe";
@@ -448,4 +449,6 @@ const IS_CI_OR_VERCEL = Boolean(process.env.VERCEL != null || process.env.CI != 
 
 const finalConfig = IS_CI_OR_VERCEL ? withSentryConfig(baseConfig, sentryOptions) : baseConfig;
 
-export default finalConfig;
+const withMDX = createMDX();
+
+export default withMDX(finalConfig);

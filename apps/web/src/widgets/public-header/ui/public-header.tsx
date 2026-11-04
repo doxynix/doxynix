@@ -25,6 +25,7 @@ export async function PublicHeader() {
 
   const publicNavLabels: Record<PublicNavLabelKey, string> = {
     about: t("nav_about"),
+    documentation: t("nav_documentation"),
     help: t("nav_help"),
     high_five: t("nav_high_five"),
     home: t("nav_home"),

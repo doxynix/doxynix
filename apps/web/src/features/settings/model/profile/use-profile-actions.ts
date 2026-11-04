@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
 import { useRouter } from "@/shared/i18n/navigation";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { authClient } from "@/shared/lib/auth-client";
 import { compressImage } from "@/shared/lib/image-compression";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
@@ -29,12 +30,13 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const t = useTranslations("Dashboard");
+  const errorMessage = useErrorMessage();
 
   const [isProcessing, setIsProcessing] = useState(false);
 
   const updateProfile = useMutation(
     trpc.user.updateUser.mutationOptions({
-      onError: (err) => toast.error(err.message),
+      onError: (err) => toast.error(errorMessage(err)),
       onSuccess: async (data) => {
         toast.success(t("settings_profile_update_profile_toast_success"));
 
@@ -93,7 +95,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
   const removeAvatar = useMutation(
     trpc.user.removeAvatar.mutationOptions({
       onError: (err) => {
-        toast.error(err.message);
+        toast.error(errorMessage(err));
       },
       onSuccess: async () => {
         toast.success(t("settings_profile_remove_avatar_toast_success"));

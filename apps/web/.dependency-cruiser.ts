@@ -42,6 +42,7 @@ const config: IConfiguration = {
           "^src/server/modules/analysis/tasks/analyze-pr[.]task[.]test[.]ts$",
           "^src/server/modules/analysis/tasks/generate-fix[.]task[.]test[.]ts$",
           "^src/server/modules/analysis/tasks/init[.]test[.]ts$",
+          "^src/shared/lib/docs-integrity[.]test[.]ts$",
           "^src/server/modules/workspaces/workspace[.]router[.]test[.]ts$",
           "^src/app/\\[locale\\]/opengraph-image[.]tsx$",
           "^src/app/\\[locale\\]/\\(private\\)/dashboard/repo/\\[owner\\]/\\[name\\]/opengraph-image[.]tsx$",

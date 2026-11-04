@@ -1,7 +1,8 @@
 import type { WorkspaceRole } from "@doxynix/shared";
-import { TRPCError } from "@trpc/server";
+import { MessageCode } from "@doxynix/shared";
 import * as z from "zod";
 
+import { AppError } from "@/server/core/api-error";
 import { requestContext } from "@/server/utils/request-context";
 import { memoizeOnce } from "@/server/utils/request-memo";
 
@@ -41,7 +42,11 @@ async function loadWorkspace(input: ResolveWorkspaceInput): Promise<ResolvedWork
       });
 
       if (workspaceExists != null) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Workspace access denied" });
+        throw new AppError({
+          code: "FORBIDDEN",
+          messageCode: MessageCode.WORKSPACE_ACCESS_DENIED,
+          publicMessage: "Workspace access denied",
+        });
       }
     }
   }

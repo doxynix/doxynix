@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { authClient } from "@/shared/lib/auth-client";
 import { AppButton } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
@@ -35,6 +36,7 @@ type OAuthProvider = {
 export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
   const trpc = useTRPC();
   const t = useTranslations("Dashboard");
+  const errorMessage = useErrorMessage();
   const [disconnectingProvider, setDisconnectingProvider] = useState<null | string>(null);
   const [loadingProvider, setLoadingProvider] = useState<null | string>(null);
 
@@ -60,7 +62,7 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
   const queryClient = useQueryClient();
   const disconnect = useMutation(
     trpc.user.disconnectAccount.mutationOptions({
-      onError: (err) => toast.error(err.message),
+      onError: (err) => toast.error(errorMessage(err)),
       onSuccess: () => {
         toast.success(t("settings_auth_unlink_success"));
         void queryClient.invalidateQueries(trpc.user.getLinkedAccounts.pathFilter());

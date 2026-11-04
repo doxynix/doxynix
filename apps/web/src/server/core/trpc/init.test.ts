@@ -1,4 +1,4 @@
-import { ApiKeyScope } from "@doxynix/shared";
+import { ApiKeyScope, MessageCode } from "@doxynix/shared";
 import { getErrorShape, TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -58,6 +58,8 @@ vi.mock("@/server/utils/request-context", () => ({
 }));
 vi.mock("../app-logger", () => ({ appLogger: mocks.appLogger }));
 
+import { AppError } from "@/server/core/api-error";
+
 import { createCallerFactory, createTRPCRouter, protectedProcedure, publicProcedure } from "./init";
 
 function buildConfig() {
@@ -108,6 +110,10 @@ function runErrorFormatter(cause: unknown) {
     }),
     type: "query",
   });
+}
+
+function buildShape(error: unknown) {
+  return runErrorFormatter(error);
 }
 
 describe("tRPC Error Formatting & Security Boundaries", () => {
@@ -174,6 +180,33 @@ describe("tRPC Error Formatting & Security Boundaries", () => {
     expect(runErrorFormatter(prismaError("P2025")).data.kind).toBe("prisma");
   });
 
+  it("exposes messageCode and params for a public code", () => {
+    const shape = buildShape(
+      new AppError({
+        code: "NOT_FOUND",
+        messageCode: "REPO_NOT_FOUND",
+        publicMessage: "Repository not found",
+      }),
+    );
+
+    expect(shape.data.messageCode).toBe("REPO_NOT_FOUND");
+    expect(shape.data.params).toBeNull();
+  });
+
+  it("masks messageCode for a non-public code", () => {
+    const shape = buildShape(
+      new AppError({
+        code: "INTERNAL_SERVER_ERROR",
+        messageCode: "ANALYSIS_FAILED",
+        publicMessage: "Analysis failed",
+        unexpected: true,
+      }),
+    );
+
+    expect(shape.data.messageCode).toBeNull();
+    expect(shape.data.params).toBeNull();
+  });
+
   it("blocks unauthenticated callers on protectedProcedure with UNAUTHORIZED", async () => {
     const router = createTRPCRouter({ ping: protectedProcedure.query(() => "pong") });
     const caller = createCallerFactory(router)({
@@ -183,8 +216,7 @@ describe("tRPC Error Formatting & Security Boundaries", () => {
     } as any);
 
     await expect(caller.ping()).rejects.toMatchObject({
-      code: "UNAUTHORIZED",
-      message: "You are not logged in",
+      cause: { code: "UNAUTHORIZED", message: "You are not logged in" },
     });
   });
 
@@ -193,8 +225,7 @@ describe("tRPC Error Formatting & Security Boundaries", () => {
     const caller = createCallerFactory(router)(ctxFor({ banned: true }));
 
     await expect(caller.ping()).rejects.toMatchObject({
-      code: "FORBIDDEN",
-      message: "This account is banned and cannot use the API.",
+      cause: { code: "FORBIDDEN", message: "This account is banned and cannot use the API." },
     });
   });
 
@@ -223,8 +254,7 @@ describe("tRPC Error Formatting & Security Boundaries", () => {
       );
 
       await expect(caller.ping()).rejects.toMatchObject({
-        code: "FORBIDDEN",
-        message: "This API key lacks the required scope",
+        cause: { code: "FORBIDDEN", message: "This API key lacks the required scope" },
       });
     });
 
@@ -254,6 +284,38 @@ describe("tRPC Error Formatting & Security Boundaries", () => {
       const caller = createCallerFactory(pingRouter())({ ...ctxFor({ banned: false }) });
 
       await expect(caller.ping()).resolves.toBe("pong");
+    });
+  });
+
+  describe("domain errors at the tRPC boundary", () => {
+    const boomRouter = () =>
+      createTRPCRouter({
+        boom: publicProcedure.query(() => {
+          throw new AppError({
+            code: "FORBIDDEN",
+            messageCode: MessageCode.WORKSPACE_ACCESS_DENIED,
+            publicMessage: "Workspace access denied",
+          });
+        }),
+      });
+
+    it("keeps the AppError code for callers, which never see the HTTP formatter", async () => {
+      const caller = createCallerFactory(boomRouter())(ctxFor({ banned: false }));
+
+      await expect(caller.boom()).rejects.toMatchObject({
+        code: "FORBIDDEN",
+        message: "Workspace access denied",
+      });
+    });
+
+    it("keeps the AppError on cause so the formatter still finds the message code", async () => {
+      const caller = createCallerFactory(boomRouter())(ctxFor({ banned: false }));
+
+      const error = await caller.boom().catch((error: unknown) => error);
+
+      expect(error).toBeInstanceOf(TRPCError);
+      expect((error as TRPCError).cause).toBeInstanceOf(AppError);
+      expect(buildShape(error).data.messageCode).toBe("WORKSPACE_ACCESS_DENIED");
     });
   });
 });

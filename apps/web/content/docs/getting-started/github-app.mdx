@@ -1,0 +1,58 @@
+---
+title: GitHub App
+description: Install the Doxynix GitHub App, choose repository access and understand what it can read.
+---
+
+## Why a GitHub App
+
+Doxynix connects to GitHub through a GitHub App, not through a personal access token.
+
+- The installation is scoped to the repositories you choose, so Doxynix never sees the rest of
+  your account or organization.
+- The app receives webhooks, which is what lets it react to pull requests for PR reviews.
+- There is no long-lived personal token to create, rotate or leak.
+
+## Install it
+
+Open **Dashboard → Settings → Connections → GitHub Installations** and press **Configure**.
+The same flow is available from the repository dialog through **Install Doxynix on GitHub**.
+
+GitHub asks you to confirm the installation and then returns you to Doxynix.
+
+## Choose repositories
+
+You can grant access to all repositories or only to selected ones. Selected access is the safer
+default for organizations, because the installation only sees the repositories you name.
+
+If an organization owner has restricted third-party app installations, the install may wait for
+their approval before the repositories appear in Doxynix.
+
+## What Doxynix can access
+
+The app reads repository contents, metadata, pull requests and webhooks. That is enough to clone a
+branch during an analysis, map the code structure, and react to pull request events.
+
+It does not read Actions secrets. Writes happen only when you apply a fix or open a documentation
+pull request — Doxynix never pushes to a branch on its own.
+
+## Multiple workspaces
+
+One installation can be claimed by a workspace. If you work across several workspaces, install the
+app where the repositories live and connect the installation from the workspace that should own
+the analyses.
+
+`dxnx github install` prints the install URL if you prefer to start from the terminal.
+
+## Reconfigure or uninstall
+
+You can change the repository selection or remove the app from **GitHub → Settings → Applications**
+or from **Dashboard → Settings → Connections**. Existing generated documents stay in the workspace
+after you uninstall.
+
+## Troubleshooting
+
+- **No installations are listed** — install the GitHub App first, then reopen
+  **Settings → Connections → GitHub Installations**.
+- **A private repository cannot be added** — private repositories require the Pro or Team plan.
+- **An organization repository is missing** — grant the installation access to that repository in
+  GitHub, then refresh the repository list in Doxynix.

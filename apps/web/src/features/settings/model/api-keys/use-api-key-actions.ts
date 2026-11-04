@@ -3,17 +3,19 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
 
 export function useApiKeyActions() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const t = useTranslations("Dashboard");
+  const errorMessage = useErrorMessage();
   const invalidate = () => void queryClient.invalidateQueries(trpc.apikey.list.pathFilter());
 
   const create = useMutation(
     trpc.apikey.create.mutationOptions({
-      onError: (err) => toast.error(err.message),
+      onError: (err) => toast.error(errorMessage(err)),
       onSuccess: () => {
         toast.success(t("settings_api_keys_created_toast_success"));
         invalidate();
@@ -24,7 +26,7 @@ export function useApiKeyActions() {
 
   const revoke = useMutation(
     trpc.apikey.revoke.mutationOptions({
-      onError: (err) => toast.error(err.message),
+      onError: (err) => toast.error(errorMessage(err)),
       onSuccess: () => {
         toast.success(t("settings_api_keys_revoked_toast_success"));
         invalidate();
@@ -35,7 +37,7 @@ export function useApiKeyActions() {
 
   const rotate = useMutation(
     trpc.apikey.rotate.mutationOptions({
-      onError: (err) => toast.error(err.message),
+      onError: (err) => toast.error(errorMessage(err)),
       onSuccess: (data) => {
         toast.success(t("settings_api_keys_rotated_toast_success", { days: data.gracePeriodDays }));
         invalidate();
@@ -46,7 +48,7 @@ export function useApiKeyActions() {
 
   const update = useMutation(
     trpc.apikey.update.mutationOptions({
-      onError: (err) => toast.error(err.message),
+      onError: (err) => toast.error(errorMessage(err)),
       onSuccess: () => {
         toast.success(t("settings_api_keys_updated_toast_success"));
         invalidate();

@@ -1,0 +1,55 @@
+---
+title: GitHub Action
+description: Run a Doxynix analysis from a GitHub Actions workflow with doxynix/action.
+---
+
+[`doxynix/action`](https://github.com/doxynix/action) dispatches a repository analysis from a GitHub
+Actions workflow. It wraps the same API the CLI calls, so a run started from CI produces the same
+documents, metrics and pull request findings as one started from the dashboard.
+
+## What it does
+
+The action sends an analysis request for the checked-out repository and the given branch. It does
+not wait for the run to finish and it does not write to your repository; the generated documents
+land in the Doxynix workspace, ready to review or stage.
+
+## Workflow
+
+```yaml
+name: Rebuild AI Documentation
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  document:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trigger Doxynix Documenter
+        uses: doxynix/action@v1
+        with:
+          doxynix-token: ${{ secrets.DOXYNIX_TOKEN }}
+          branch: main
+```
+
+## Inputs
+
+| Input | Required | Default | Description |
+| --- | --- | --- | --- |
+| `doxynix-token` | Yes | — | API key used to authenticate the request |
+| `branch` | No | `main` | Branch to analyze |
+| `api-url` | No | `https://doxynix.space` | API host; override for a different deployment |
+
+## Secret
+
+Create an API key on the [API keys](/docs/integrations/api-keys) page and store it in the repository
+as `DOXYNIX_TOKEN` under **Settings → Secrets and variables → Actions**. Reference it as
+`${{ secrets.DOXYNIX_TOKEN }}` and never inline the value in the workflow file, where it would be
+visible to anyone who can read the repository.
+
+## API key scope
+
+The action calls the tRPC surface, so the key needs the `CLI` scope or `FULL`. An `MCP`-only key is
+rejected with a permission error.

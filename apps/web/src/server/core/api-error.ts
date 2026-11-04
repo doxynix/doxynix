@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { MessageCode, type MessageParams } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { getHTTPStatusCodeFromError } from "@trpc/server/http";
@@ -54,6 +55,10 @@ export type ErrorMapping = {
 type AppErrorOptions = {
   cause?: unknown;
   code: ErrorCode;
+  /** Machine-readable reason the client localizes. Masked in prod unless the code is public. */
+  messageCode?: MessageCode;
+  /** ICU interpolation values for {@link messageCode}. */
+  params?: MessageParams;
   /** Message a client may see. Masked in prod unless the code is public. */
   publicMessage?: string;
   /** Set when the input was not a recognized, expected failure. */
@@ -70,6 +75,8 @@ export class AppError extends Error {
   public readonly code: ErrorCode;
   public readonly isUnexpected: boolean;
   public readonly kind: ErrorKind;
+  public readonly messageCode: MessageCode | undefined;
+  public readonly params: MessageParams | undefined;
   public readonly publicMessage: string;
   public readonly source: number | string | undefined;
   public readonly zodIssues: unknown;
@@ -80,6 +87,8 @@ export class AppError extends Error {
     this.code = options.code;
     this.isUnexpected = options.unexpected ?? false;
     this.kind = options.kind ?? "app";
+    this.messageCode = options.messageCode;
+    this.params = options.params;
     this.publicMessage = options.publicMessage ?? GENERIC_MESSAGE;
     this.source = options.source;
     this.zodIssues = options.zodIssues;
@@ -152,11 +161,30 @@ const PRISMA_ERROR_MAP: Record<string, PrismaErrorMeta> = {
   P2054: { code: "BAD_REQUEST", defaultMessage: "A value provided to the query is not valid" },
 };
 
-const OCTOKIT_STATUS_MAP: Record<number, { code: ErrorCode; message: string }> = {
-  401: { code: "UNAUTHORIZED", message: "GitHub token expired" },
-  403: { code: "FORBIDDEN", message: "GitHub denied access to this repository" },
-  404: { code: "NOT_FOUND", message: "Repository not found on GitHub" },
-  429: { code: "TOO_MANY_REQUESTS", message: "GitHub API limit exceeded" },
+const OCTOKIT_STATUS_MAP: Record<
+  number,
+  { code: ErrorCode; message: string; messageCode: MessageCode }
+> = {
+  401: {
+    code: "UNAUTHORIZED",
+    message: "GitHub token expired",
+    messageCode: MessageCode.GITHUB_AUTH_EXPIRED,
+  },
+  403: {
+    code: "FORBIDDEN",
+    message: "GitHub denied access to this repository",
+    messageCode: MessageCode.GITHUB_CONNECTION_REQUIRED,
+  },
+  404: {
+    code: "NOT_FOUND",
+    message: "Repository not found on GitHub",
+    messageCode: MessageCode.REPO_NOT_FOUND,
+  },
+  429: {
+    code: "TOO_MANY_REQUESTS",
+    message: "GitHub API limit exceeded",
+    messageCode: MessageCode.GITHUB_RATE_LIMITED,
+  },
 };
 
 type OctokitError = { message: string; status: number };
@@ -292,6 +320,7 @@ export function normalizeError(error: unknown, map?: ErrorMapping): AppError {
       cause: error,
       code: "BAD_REQUEST",
       kind: "zod",
+      messageCode: MessageCode.REQUEST_INVALID,
       publicMessage: "Invalid request data",
       zodIssues: error.issues,
     });
@@ -305,6 +334,7 @@ export function normalizeError(error: unknown, map?: ErrorMapping): AppError {
       cause: error,
       code: mapped?.code ?? "INTERNAL_SERVER_ERROR",
       kind: "octokit",
+      messageCode: mapped?.messageCode,
       publicMessage: mapped?.message ?? GENERIC_MESSAGE,
       source: error.status,
       unexpected: mapped == null,
@@ -339,17 +369,23 @@ type ErrorResponseBody = {
   error: {
     code: ErrorCode;
     message: string;
+    messageCode: MessageCode | null;
+    params: MessageParams | null;
     requestId: string;
   };
 };
 
 // `requestId` is always present so a user can quote it and it can be matched against the requestContext fields appLogger merges into every log line.
 export function toErrorResponse(error: AppError): NextResponse<ErrorResponseBody> {
+  const isPublic = isPublicCode(error.code);
+
   return NextResponse.json(
     {
       error: {
         code: error.code,
         message: error.clientMessage(),
+        messageCode: isPublic ? (error.messageCode ?? null) : null,
+        params: isPublic ? (error.params ?? null) : null,
         requestId: requestContext.getStore()?.requestId ?? "unknown",
       },
     },

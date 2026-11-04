@@ -1,8 +1,8 @@
-import { MAX_PAGE } from "@doxynix/shared";
+import { MAX_PAGE, MessageCode } from "@doxynix/shared";
 import type { Prisma, UserRole } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
 import * as z from "zod";
 
+import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
 import { type DbClient, prisma } from "@/server/core/db";
@@ -67,9 +67,10 @@ const NOT_FOUND = "User not found";
 
 export function assertNotActor(input: { isSelf: boolean }): void {
   if (input.isSelf) {
-    throw new TRPCError({
+    throw new AppError({
       code: "BAD_REQUEST",
-      message:
+      messageCode: MessageCode.ADMIN_SELF_ACTION_FORBIDDEN,
+      publicMessage:
         "You cannot change your own role, ban status, or delete your own account as an admin.",
     });
   }
@@ -80,9 +81,10 @@ export function assertNotLastAdmin(input: {
   isTargetAdmin: boolean;
 }): void {
   if (input.isTargetAdmin && input.activeAdminCount <= 1) {
-    throw new TRPCError({
+    throw new AppError({
       code: "BAD_REQUEST",
-      message:
+      messageCode: MessageCode.ADMIN_LAST_ADMIN,
+      publicMessage:
         "This is the only active admin. Promote another admin before demoting or banning them.",
     });
   }
@@ -111,7 +113,11 @@ async function findTarget(db: DbClient, id: string): Promise<{ id: string; role:
   const target = await db.user.findUnique({ select: { id: true, role: true }, where: { id } });
 
   if (target == null) {
-    throw new TRPCError({ code: "NOT_FOUND", message: NOT_FOUND });
+    throw new AppError({
+      code: "NOT_FOUND",
+      messageCode: MessageCode.USER_NOT_FOUND,
+      publicMessage: NOT_FOUND,
+    });
   }
 
   return target;
@@ -149,9 +155,10 @@ async function assertFreshTotp(input: {
   } catch (error) {
     appLogger.warn({ error, msg: "Admin re-authentication failed" });
 
-    throw new TRPCError({
+    throw new AppError({
       code: "UNAUTHORIZED",
-      message: "That confirmation code is not valid.",
+      messageCode: MessageCode.ADMIN_2FA_CODE_INVALID,
+      publicMessage: "That confirmation code is not valid.",
     });
   }
 }
@@ -243,7 +250,11 @@ export const adminUserService = {
     });
 
     if (user == null) {
-      throw new TRPCError({ code: "NOT_FOUND", message: NOT_FOUND });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.USER_NOT_FOUND,
+        publicMessage: NOT_FOUND,
+      });
     }
 
     return userMapper.toAdminDetail(user);
@@ -282,7 +293,11 @@ export const adminUserService = {
     });
 
     if (session == null) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Session not found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.SESSION_NOT_FOUND,
+        publicMessage: "Session not found",
+      });
     }
 
     try {
@@ -309,9 +324,10 @@ export const adminUserService = {
       });
 
       if (input.banExpires != null && input.banExpires.getTime() <= Date.now()) {
-        throw new TRPCError({
+        throw new AppError({
           code: "BAD_REQUEST",
-          message: "A ban expiry must be in the future.",
+          messageCode: MessageCode.ADMIN_BAN_EXPIRY_INVALID,
+          publicMessage: "A ban expiry must be in the future.",
         });
       }
 

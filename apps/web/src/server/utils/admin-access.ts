@@ -1,4 +1,6 @@
-import { TRPCError } from "@trpc/server";
+import { MessageCode } from "@doxynix/shared";
+
+import { AppError } from "@/server/core/api-error";
 
 export type AdminSecondFactorInput = {
   passkeyCount: number;
@@ -7,9 +9,10 @@ export type AdminSecondFactorInput = {
 
 export function assertAdminSecondFactor(input: AdminSecondFactorInput): void {
   if (!(input.twoFactorEnabled || input.passkeyCount > 0)) {
-    throw new TRPCError({
+    throw new AppError({
       code: "FORBIDDEN",
-      message:
+      messageCode: MessageCode.ADMIN_2FA_ENROLL_REQUIRED,
+      publicMessage:
         "Admin access requires two-factor authentication or a passkey. Enable one under Settings → Connections.",
     });
   }
@@ -33,9 +36,10 @@ export function assertNotBanned(input: BanStateInput): void {
     return;
   }
 
-  throw new TRPCError({
+  throw new AppError({
     code: "FORBIDDEN",
-    message: "This account is banned and cannot use the API.",
+    messageCode: MessageCode.ACCOUNT_BANNED,
+    publicMessage: "This account is banned and cannot use the API.",
   });
 }
 
@@ -43,26 +47,29 @@ const TOTP_PATTERN = /^\d{6}$/;
 
 export function assertAdminTotpCode(input: { code?: string; twoFactorEnabled: boolean }): string {
   if (!input.twoFactorEnabled) {
-    throw new TRPCError({
+    throw new AppError({
       code: "FORBIDDEN",
-      message:
+      messageCode: MessageCode.ADMIN_2FA_NOT_ENROLLED,
+      publicMessage:
         "This action requires an authenticator app code. Enroll one under Settings → Connections.",
     });
   }
 
   if (input.code == null || input.code.trim() === "") {
-    throw new TRPCError({
+    throw new AppError({
       code: "BAD_REQUEST",
-      message: "Confirm this action with a code from your authenticator app.",
+      messageCode: MessageCode.ADMIN_2FA_REQUIRED,
+      publicMessage: "Confirm this action with a code from your authenticator app.",
     });
   }
 
   const code = input.code.trim();
 
   if (!TOTP_PATTERN.test(code)) {
-    throw new TRPCError({
+    throw new AppError({
       code: "BAD_REQUEST",
-      message: "The confirmation code must be six digits.",
+      messageCode: MessageCode.ADMIN_2FA_CODE_FORMAT,
+      publicMessage: "The confirmation code must be six digits.",
     });
   }
 

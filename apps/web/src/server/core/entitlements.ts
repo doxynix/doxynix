@@ -1,4 +1,4 @@
-import type { AccessState } from "@doxynix/shared";
+import { type AccessState, MessageCode } from "@doxynix/shared";
 
 import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
@@ -125,11 +125,19 @@ export function assertAnalysisAllowed(entitlement: null | WorkspaceEntitlementVi
   const gate = analysisGate(entitlement);
 
   if (gate.reason === "PAYMENT_REQUIRED") {
-    throw new AppError({ code: "PAYMENT_REQUIRED", publicMessage: "PAYMENT_REQUIRED" });
+    throw new AppError({
+      code: "PAYMENT_REQUIRED",
+      messageCode: MessageCode.PAYMENT_REQUIRED,
+      publicMessage: "PAYMENT_REQUIRED",
+    });
   }
 
   if (gate.reason === "LIMIT_EXCEEDED") {
-    throw new AppError({ code: "FORBIDDEN", publicMessage: "LIMIT_EXCEEDED" });
+    throw new AppError({
+      code: "FORBIDDEN",
+      messageCode: MessageCode.AI_LIMIT_EXCEEDED,
+      publicMessage: "LIMIT_EXCEEDED",
+    });
   }
 }
 
@@ -140,7 +148,11 @@ export function assertPlanFeature(
   feature: PlanFeature,
 ): void {
   if (entitlement == null || !entitlement.hasAccess || !entitlement[feature]) {
-    throw new AppError({ code: "FORBIDDEN", publicMessage: "FEATURE_NOT_IN_PLAN" });
+    throw new AppError({
+      code: "FORBIDDEN",
+      messageCode: MessageCode.FEATURE_NOT_IN_PLAN,
+      publicMessage: "FEATURE_NOT_IN_PLAN",
+    });
   }
 }
 

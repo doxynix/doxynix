@@ -4,12 +4,14 @@ import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
 import { useRouter } from "@/shared/i18n/navigation";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
 
 export function useRepoActions() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const t = useTranslations("Dashboard");
+  const errorMessage = useErrorMessage();
   const router = useRouter();
 
   const invalidate = () => {
@@ -21,7 +23,7 @@ export function useRepoActions() {
 
   const create = useMutation(
     trpc.repo.create.mutationOptions({
-      onError: (error) => toast.error(error.message),
+      onError: (error) => toast.error(errorMessage(error)),
       onSuccess: (data) => {
         toast.success(t("repo_added_toast_success"), {
           action: {
@@ -37,7 +39,7 @@ export function useRepoActions() {
 
   const deleteAll = useMutation(
     trpc.repo.deleteAll.mutationOptions({
-      onError: (error) => toast.error(error.message),
+      onError: (error) => toast.error(errorMessage(error)),
       onSuccess: () => {
         toast.success(t("settings_danger_delete_all_repos_toast_success"));
         invalidate();
@@ -48,7 +50,7 @@ export function useRepoActions() {
 
   const deleteByOwner = useMutation(
     trpc.repo.deleteByOwner.mutationOptions({
-      onError: (error) => toast.error(error.message),
+      onError: (error) => toast.error(errorMessage(error)),
       onSuccess: (data, variables) => {
         toast.success(
           t("settings_danger_delete_repos_by_owner_toast_success", {
@@ -64,7 +66,7 @@ export function useRepoActions() {
 
   const deleteRepo = useMutation(
     trpc.repo.delete.mutationOptions({
-      onError: (error) => toast.error(error.message),
+      onError: (error) => toast.error(errorMessage(error)),
       onSuccess: () => {
         toast.success(t("settings_danger_delete_repo_toast_success"));
         invalidate();

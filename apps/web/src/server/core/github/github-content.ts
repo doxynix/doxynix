@@ -1,6 +1,6 @@
-import { TRPCError } from "@trpc/server";
+import { MessageCode } from "@doxynix/shared";
 
-import { isOctokitError } from "@/server/core/api-error";
+import { AppError, isOctokitError } from "@/server/core/api-error";
 import { getFileScore } from "@/server/core/path-classify/score";
 
 import { appLogger } from "../app-logger";
@@ -15,21 +15,24 @@ function throwBrowseAccessError(params: {
   sourceError: unknown;
 }) {
   if (params.sourceError instanceof GitHubAuthRequiredError) {
-    throw new TRPCError({
+    throw new AppError({
       code: "FORBIDDEN",
-      message: params.authMessage,
+      messageCode: MessageCode.GITHUB_CONNECTION_REQUIRED,
+      publicMessage: params.authMessage,
     });
   }
   if (isOctokitError(params.sourceError) && params.sourceError.status === 404) {
-    throw new TRPCError({
+    throw new AppError({
       code: "NOT_FOUND",
-      message: params.notFoundMessage,
+      messageCode: MessageCode.NOT_FOUND,
+      publicMessage: params.notFoundMessage,
     });
   }
   if (isOctokitError(params.sourceError) && params.sourceError.status === 403) {
-    throw new TRPCError({
+    throw new AppError({
       code: "FORBIDDEN",
-      message: params.forbiddenMessage,
+      messageCode: MessageCode.GITHUB_CONNECTION_REQUIRED,
+      publicMessage: params.forbiddenMessage,
     });
   }
   throw params.sourceError;
@@ -74,7 +77,11 @@ export const githubBrowseService = {
     });
 
     if (repo == null) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.REPO_NOT_FOUND,
+        publicMessage: "Repository not found",
+      });
     }
 
     try {
@@ -106,9 +113,10 @@ export const githubBrowseService = {
       }
 
       if (!isOctokitError(error)) {
-        throw new TRPCError({
+        throw new AppError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Could not fetch file content from GitHub.",
+          messageCode: MessageCode.GITHUB_FILE_FETCH_FAILED,
+          publicMessage: "Could not fetch file content from GitHub.",
         });
       }
       throw error;
@@ -135,9 +143,10 @@ export const githubBrowseService = {
     }
 
     if (tree == null) {
-      throw new TRPCError({
+      throw new AppError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Could not fetch repository files from GitHub.",
+        messageCode: MessageCode.GITHUB_FILES_FETCH_FAILED,
+        publicMessage: "Could not fetch repository files from GitHub.",
       });
     }
 
@@ -154,9 +163,10 @@ export const githubBrowseService = {
       return await searchRepos(prisma, userId, query, 10);
     } catch (error) {
       if (error instanceof GitHubAuthRequiredError) {
-        throw new TRPCError({
+        throw new AppError({
           code: "FORBIDDEN",
-          message: "Connect your GitHub account or install the app to search repositories.",
+          messageCode: MessageCode.GITHUB_CONNECTION_SEARCH_REQUIRED,
+          publicMessage: "Connect your GitHub account or install the app to search repositories.",
         });
       }
       throw error;

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 
 import type { RepoMetricsItem } from "@/entities/repo/model/repo.types";
 import {
@@ -29,13 +30,14 @@ export function RepoMetrics({ data, repoId }: Readonly<Props>) {
     data;
   const queryClient = useQueryClient();
   const t = useTranslations("Dashboard");
+  const errorMessage = useErrorMessage();
 
   const [runningFixId, setRunningFixId] = useState<null | string>(null);
 
   const createFixMutation = useMutation(
     trpc.analysis.createFix.mutationOptions({
       onError: (err) => {
-        toast.error(t("repo_fix_trigger_failed", { error: err.message }));
+        toast.error(errorMessage(err));
       },
       onSuccess: (res) => {
         if (res.success === true && res.fixId != null) {
@@ -60,7 +62,7 @@ export function RepoMetrics({ data, repoId }: Readonly<Props>) {
   const stageGeneratedFixMutation = useMutation(
     trpc.analysis.stageGeneratedFix.mutationOptions({
       onError: (err) => {
-        toast.error(t("repo_fix_staging_failed", { error: err.message }));
+        toast.error(errorMessage(err));
         setRunningFixId(null);
       },
       onSuccess: (res) => {

@@ -67,6 +67,8 @@ describe("GET /api/realtime/auth — Capability Security Matrix", () => {
       error: {
         code: "INTERNAL_SERVER_ERROR",
         message: "Ably cluster timeout",
+        messageCode: null,
+        params: null,
         requestId: expect.any(String),
       },
     });

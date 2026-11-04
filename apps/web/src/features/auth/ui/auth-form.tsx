@@ -295,7 +295,6 @@ export function AuthForm() {
     setTurnstileToken(null);
     setIsVerifying(false);
     pendingDataRef.current = null;
-    // toast.error(t("error_verification_expired"));
   };
 
   const turnstileOptions = {
