@@ -198,7 +198,7 @@
     "react-hook-form": "catalog:",
     "react-hotkeys-hook": "5.3.3",
     "react-markdown": "10.1.0",
-    "react-resizable-panels": "4.16.0",
+    "react-resizable-panels": "4.16.1",
     "recharts": "catalog:",
     "rehype-autolink-headings": "7.1.0",
     "rehype-external-links": "3.0.0",
@@ -239,7 +239,7 @@
   "devDependencies": {
     "@axe-core/react": "4.14.0",
     "@boneskull/typedoc-plugin-mermaid": "0.2.1",
-    "@bundle-stats/plugin-webpack-filter": "4.22.3",
+    "@bundle-stats/plugin-webpack-filter": "4.23.0",
     "@doxynix/config": "workspace:*",
     "@eloqnt/cli": "0.6.33",
     "@faker-js/faker": "10.6.0",
