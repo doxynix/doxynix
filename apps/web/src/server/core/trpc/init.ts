@@ -6,7 +6,7 @@ import superjson from "superjson";
 
 import { IS_PROD } from "@/shared/config/env.flags";
 
-import { AppError, normalizeError } from "@/server/core/api-error";
+import { AppError, isPublicCode, normalizeError } from "@/server/core/api-error";
 import { hasApiKeyScope } from "@/server/core/auth/api-key-scopes";
 import { getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
@@ -29,6 +29,7 @@ const t = initTRPC.context<Context>().create({
       requestContext.getStore()?.requestId ?? resolveRequestId(ctx?.req) ?? "unknown";
 
     const normalized = normalizeError(error.cause ?? error);
+    const isPublic = isPublicCode(normalized.code);
 
     return {
       ...shape,
@@ -37,6 +38,8 @@ const t = initTRPC.context<Context>().create({
         code: normalized.code,
         httpStatus: normalized.status,
         kind: normalized.kind,
+        messageCode: isPublic ? (normalized.messageCode ?? null) : null,
+        params: isPublic ? (normalized.params ?? null) : null,
         requestId,
         stack: IS_PROD ? undefined : error.stack,
         zodError: normalized.code === "BAD_REQUEST" ? (normalized.zodIssues ?? null) : null,

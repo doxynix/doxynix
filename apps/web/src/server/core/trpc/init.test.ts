@@ -58,6 +58,8 @@ vi.mock("@/server/utils/request-context", () => ({
 }));
 vi.mock("../app-logger", () => ({ appLogger: mocks.appLogger }));
 
+import { AppError } from "@/server/core/api-error";
+
 import { createCallerFactory, createTRPCRouter, protectedProcedure, publicProcedure } from "./init";
 
 function buildConfig() {
@@ -108,6 +110,10 @@ function runErrorFormatter(cause: unknown) {
     }),
     type: "query",
   });
+}
+
+function buildShape(error: unknown) {
+  return runErrorFormatter(error);
 }
 
 describe("tRPC Error Formatting & Security Boundaries", () => {
@@ -172,6 +178,33 @@ describe("tRPC Error Formatting & Security Boundaries", () => {
     // `kind` is what separates an expired GitHub App token from a missing platform login, both
     // of which arrive as UNAUTHORIZED.
     expect(runErrorFormatter(prismaError("P2025")).data.kind).toBe("prisma");
+  });
+
+  it("exposes messageCode and params for a public code", () => {
+    const shape = buildShape(
+      new AppError({
+        code: "NOT_FOUND",
+        messageCode: "REPO_NOT_FOUND",
+        publicMessage: "Repository not found",
+      }),
+    );
+
+    expect(shape.data.messageCode).toBe("REPO_NOT_FOUND");
+    expect(shape.data.params).toBeNull();
+  });
+
+  it("masks messageCode for a non-public code", () => {
+    const shape = buildShape(
+      new AppError({
+        code: "INTERNAL_SERVER_ERROR",
+        messageCode: "ANALYSIS_FAILED",
+        publicMessage: "Analysis failed",
+        unexpected: true,
+      }),
+    );
+
+    expect(shape.data.messageCode).toBeNull();
+    expect(shape.data.params).toBeNull();
   });
 
   it("blocks unauthenticated callers on protectedProcedure with UNAUTHORIZED", async () => {
