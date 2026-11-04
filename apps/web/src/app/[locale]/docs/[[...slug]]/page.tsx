@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/layouts/docs/page";
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/layouts/notebook/page";
 import defaultMdxComponents, { createRelativeLink } from "fumadocs-ui/mdx";
 
 import { buildDocsMetadata } from "@/shared/lib/docs-metadata";

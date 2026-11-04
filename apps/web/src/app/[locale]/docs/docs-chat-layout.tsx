@@ -11,7 +11,7 @@ import {
   useAIChat,
 } from "@fumadocs/ai-chat";
 import { DefaultChatTransport } from "ai";
-import { DocsLayout, type DocsLayoutProps } from "fumadocs-ui/layouts/docs";
+import { DocsLayout, type DocsLayoutProps } from "fumadocs-ui/layouts/notebook";
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 
 type Props = {

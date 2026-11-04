@@ -22,7 +22,7 @@
   }
 }
 
-#nd-docs-layout {
+#nd-notebook-layout {
   --fd-layout-width: 100%;
   --color-fd-background: var(--background);
   --color-fd-foreground: var(--foreground);
@@ -47,7 +47,7 @@
   --color-fd-info: var(--status-info);
 }
 
-#nd-docs-layout .prose,
+#nd-notebook-layout .prose,
 #fd-search-list .prose {
   --tw-prose-body: var(--color-fd-foreground);
   --tw-prose-headings: var(--color-fd-foreground);
@@ -66,15 +66,14 @@
   --tw-prose-pre-bg: var(--color-fd-muted);
   --tw-prose-th-borders: var(--color-fd-border);
   --tw-prose-td-borders: var(--color-fd-border);
-  color: var(--color-fd-foreground);
 }
 
-#nd-docs-layout .prose :is(th, td) {
+#nd-notebook-layout .prose :is(th, td) {
   padding-inline: 1rem;
 }
 
 /* Shiki writes token colors inline; keep comments readable in both themes. */
-#nd-docs-layout .shiki .comment {
+#nd-notebook-layout .shiki .comment {
   color: var(--color-fd-muted-foreground) !important;
 }
 
