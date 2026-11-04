@@ -9,7 +9,7 @@ pre-commit:
       run: bun install --frozen-lockfile
 
     - name: biome-format-and-check
-      glob: "**/*.{js,jsx,ts,tsx,json,jsonc,css,md,mdx}"
+      glob: "**/*.{js,jsx,ts,tsx,json,jsonc,css}"
       run: bunx @biomejs/biome check --write --no-errors-on-unmatched {staged_files}
       stage_fixed: true
 

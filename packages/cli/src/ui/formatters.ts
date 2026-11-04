@@ -26,7 +26,7 @@ const esc = String.raw`\x1B`;
 const ANSI_REGEX = new RegExp(String.raw`${esc}(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])`, "g");
 
 export function stripAnsi(text: string): string {
-  return text.replace(ANSI_REGEX, "");
+  return text.replaceAll(ANSI_REGEX, "");
 }
 
 const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" });

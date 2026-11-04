@@ -672,10 +672,10 @@ html {
 :root[data-reduce-motion] *,
 :root[data-reduce-motion] *::before,
 :root[data-reduce-motion] *::after {
+  scroll-behavior: auto;
+  transition-duration: 0.01ms;
   animation-duration: 0.01ms;
   animation-iteration-count: 1;
-  transition-duration: 0.01ms;
-  scroll-behavior: auto;
 }
 
 :root[data-pointer-cursor] label,
@@ -856,10 +856,10 @@ body:has([data-public-theme="marketing-dark"]),
     *,
     ::before,
     ::after {
+      scroll-behavior: auto;
+      transition-duration: 0.01ms;
       animation-duration: 0.01ms;
       animation-iteration-count: 1;
-      transition-duration: 0.01ms;
-      scroll-behavior: auto;
     }
 
     ::view-transition-group(*),

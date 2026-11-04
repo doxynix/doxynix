@@ -5,6 +5,7 @@ import { join } from "pathe";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { purgeBillingEventPayloads } from "@/server/core/billing/purge";
+import { STRIPE_API_VERSION } from "@/server/core/billing/stripe-version";
 
 import { proPlan } from "./billing.catalog";
 import { NonRetryableBillingError } from "./billing.errors";
@@ -51,7 +52,7 @@ vi.mock("@/server/core/billing/stripe-client", () => ({ getStripeClient: () => s
 
 function storedEvent(overrides: Record<string, unknown> = {}) {
   return {
-    api_version: "2026-09-30.endive",
+    api_version: STRIPE_API_VERSION,
     data: { object: { id: "sub_1", object: "subscription", status: "active" } },
     id: "evt_1",
     type: "customer.subscription.updated",

@@ -35,8 +35,9 @@
 
 ## 2. Stripe Dashboard
 
-- **Webhook endpoint**: `https://<app>/api/webhooks/stripe`, API version `2026-09-30.endive`
-  (версия задаётся на endpoint'е, не только в SDK). Подписанные события:
+- **Webhook endpoint**: `https://<app>/api/webhooks/stripe`, API version `2026-10-28.endive`
+  (версия задаётся на endpoint'е, не только в SDK; она должна совпадать с `STRIPE_API_VERSION`,
+  иначе воркер отклоняет события как `UNKNOWN_API_VERSION`). Подписанные события:
   `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
   `checkout.session.async_payment_failed`, `checkout.session.expired`,
   `customer.subscription.created|updated|deleted|paused|resumed`,

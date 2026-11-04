@@ -5,6 +5,8 @@ import { Prisma } from "@prisma/client";
 import { join } from "pathe";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { STRIPE_API_VERSION } from "@/server/core/billing/stripe-version";
+
 import { handleStripeWebhook } from "./billing.webhook";
 import { signStripePayload } from "./test-fixtures/sign";
 
@@ -70,7 +72,7 @@ describe("recorded Stripe fixtures", () => {
     expect(dbMock.billingEvent.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          apiVersion: "2026-09-30.endive",
+          apiVersion: STRIPE_API_VERSION,
           payloadHash: hash(payload),
           type,
         }),
