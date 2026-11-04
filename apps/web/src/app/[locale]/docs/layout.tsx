@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
-import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import { Home, LayoutGrid } from "lucide-react";
 
 import { docsSource } from "@/shared/lib/docs-source";
 import { Logo } from "@/shared/ui/branding/doxynix-logo";
+
+import { DocsChatLayout } from "./docs-chat-layout";
 
 const baseOptions: BaseLayoutProps = {
   githubUrl: "https://github.com/doxynix/doxynix",
@@ -38,12 +39,12 @@ export default function DocsRouteLayout({ children }: Readonly<{ children: React
         storageKey: "doxynix-theme",
       }}
     >
-      <DocsLayout
+      <DocsChatLayout
+        baseOptions={baseOptions}
         tree={docsSource.getPageTree()}
-        {...baseOptions}
       >
         {children}
-      </DocsLayout>
+      </DocsChatLayout>
     </RootProvider>
   );
 }

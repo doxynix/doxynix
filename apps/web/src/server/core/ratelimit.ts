@@ -34,3 +34,23 @@ export const analysisStartLimiter = new Ratelimit({
   redis: redisClient,
   timeout: 1500,
 });
+
+export const docsChatLimiter = new Ratelimit({
+  analytics: false,
+  enableProtection: true,
+  ephemeralCache: ephemeralCache,
+  limiter: Ratelimit.slidingWindow(20, "10 m"),
+  prefix: "@doxynix/ratelimit/docs-chat",
+  redis: redisClient,
+  timeout: 1500,
+});
+
+export const docsChatGlobalLimiter = new Ratelimit({
+  analytics: false,
+  enableProtection: true,
+  ephemeralCache: ephemeralCache,
+  limiter: Ratelimit.slidingWindow(1000, "1 d"),
+  prefix: "@doxynix/ratelimit/docs-chat-global",
+  redis: redisClient,
+  timeout: 1500,
+});
