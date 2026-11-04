@@ -1,3 +1,4 @@
+import { MessageCode } from "@doxynix/shared";
 import { createAppAuth } from "@octokit/auth-app";
 import { paginateRest } from "@octokit/plugin-paginate-rest";
 import { retry } from "@octokit/plugin-retry";
@@ -188,7 +189,11 @@ export function parseUrl(input: string): { name: string; owner: string } {
   const trimmedInput = input.trim();
   if (trimmedInput === "") {
     // Typed rather than a bare `Error` so both transports agree: an empty string is a bad request, not a server fault.
-    throw new AppError({ code: "BAD_REQUEST", publicMessage: "Field cannot be empty" });
+    throw new AppError({
+      code: "BAD_REQUEST",
+      messageCode: MessageCode.FIELD_REQUIRED,
+      publicMessage: "Field cannot be empty",
+    });
   }
 
   try {
@@ -201,6 +206,7 @@ export function parseUrl(input: string): { name: string; owner: string } {
   } catch {
     throw new AppError({
       code: "BAD_REQUEST",
+      messageCode: MessageCode.REPO_FORMAT_INVALID,
       publicMessage: "Invalid format. Enter 'owner/repo' or repository URL",
     });
   }

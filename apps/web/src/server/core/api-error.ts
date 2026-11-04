@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { MessageCode, MessageParams } from "@doxynix/shared";
+import { MessageCode, type MessageParams } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { getHTTPStatusCodeFromError } from "@trpc/server/http";
@@ -161,11 +161,30 @@ const PRISMA_ERROR_MAP: Record<string, PrismaErrorMeta> = {
   P2054: { code: "BAD_REQUEST", defaultMessage: "A value provided to the query is not valid" },
 };
 
-const OCTOKIT_STATUS_MAP: Record<number, { code: ErrorCode; message: string }> = {
-  401: { code: "UNAUTHORIZED", message: "GitHub token expired" },
-  403: { code: "FORBIDDEN", message: "GitHub denied access to this repository" },
-  404: { code: "NOT_FOUND", message: "Repository not found on GitHub" },
-  429: { code: "TOO_MANY_REQUESTS", message: "GitHub API limit exceeded" },
+const OCTOKIT_STATUS_MAP: Record<
+  number,
+  { code: ErrorCode; message: string; messageCode: MessageCode }
+> = {
+  401: {
+    code: "UNAUTHORIZED",
+    message: "GitHub token expired",
+    messageCode: MessageCode.GITHUB_AUTH_EXPIRED,
+  },
+  403: {
+    code: "FORBIDDEN",
+    message: "GitHub denied access to this repository",
+    messageCode: MessageCode.GITHUB_CONNECTION_REQUIRED,
+  },
+  404: {
+    code: "NOT_FOUND",
+    message: "Repository not found on GitHub",
+    messageCode: MessageCode.REPO_NOT_FOUND,
+  },
+  429: {
+    code: "TOO_MANY_REQUESTS",
+    message: "GitHub API limit exceeded",
+    messageCode: MessageCode.API_KEY_SCOPE_MISSING,
+  },
 };
 
 type OctokitError = { message: string; status: number };
@@ -301,6 +320,7 @@ export function normalizeError(error: unknown, map?: ErrorMapping): AppError {
       cause: error,
       code: "BAD_REQUEST",
       kind: "zod",
+      messageCode: MessageCode.REQUEST_INVALID,
       publicMessage: "Invalid request data",
       zodIssues: error.issues,
     });
@@ -314,6 +334,7 @@ export function normalizeError(error: unknown, map?: ErrorMapping): AppError {
       cause: error,
       code: mapped?.code ?? "INTERNAL_SERVER_ERROR",
       kind: "octokit",
+      messageCode: mapped?.messageCode,
       publicMessage: mapped?.message ?? GENERIC_MESSAGE,
       source: error.status,
       unexpected: mapped == null,

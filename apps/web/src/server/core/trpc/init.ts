@@ -1,6 +1,6 @@
 import { after } from "next/server";
-import { ApiKeyScope, type UserRole } from "@doxynix/shared";
-import { initTRPC, TRPCError } from "@trpc/server";
+import { ApiKeyScope, MessageCode, type UserRole } from "@doxynix/shared";
+import { initTRPC } from "@trpc/server";
 import { enhance } from "@zenstackhq/runtime";
 import superjson from "superjson";
 
@@ -149,7 +149,11 @@ export const publicProcedure = t.procedure
 
 const isAuthed = t.middleware(({ ctx, next }) => {
   if (ctx.session?.user == null) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "You are not logged in" });
+    throw new AppError({
+      code: "UNAUTHORIZED",
+      messageCode: MessageCode.AUTH_NOT_LOGGED_IN,
+      publicMessage: "You are not logged in",
+    });
   }
 
   assertNotBanned({
@@ -158,7 +162,11 @@ const isAuthed = t.middleware(({ ctx, next }) => {
   });
 
   if (!hasApiKeyScope(ctx.apiKeyScopes, ApiKeyScope.CLI)) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "This API key lacks the required scope" });
+    throw new AppError({
+      code: "FORBIDDEN",
+      messageCode: MessageCode.API_KEY_SCOPE_MISSING,
+      publicMessage: "This API key lacks the required scope",
+    });
   }
 
   return next({
@@ -175,7 +183,11 @@ const isWorkspaceMember = t.middleware(async ({ ctx, next }) => {
   const userId = session?.user.id;
 
   if (session == null || userId == null) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "You are not logged in" });
+    throw new AppError({
+      code: "UNAUTHORIZED",
+      messageCode: MessageCode.AUTH_NOT_LOGGED_IN,
+      publicMessage: "You are not logged in",
+    });
   }
 
   const workspace = await resolveWorkspace({
@@ -202,7 +214,11 @@ export const entitlementProcedure = workspaceProcedure.use(async ({ ctx, next })
   const entitlement = await getWorkspaceEntitlement(ctx.prisma, ctx.workspace.id);
 
   if (entitlement == null || !entitlement.hasAccess) {
-    throw new AppError({ code: "PAYMENT_REQUIRED", publicMessage: "PAYMENT_REQUIRED" });
+    throw new AppError({
+      code: "PAYMENT_REQUIRED",
+      messageCode: MessageCode.PAYMENT_REQUIRED,
+      publicMessage: "PAYMENT_REQUIRED",
+    });
   }
 
   // Token quota binds every metered procedure, not only `analyze`: file actions and fixes spend
@@ -211,7 +227,11 @@ export const entitlementProcedure = workspaceProcedure.use(async ({ ctx, next })
     entitlement.aiTokensPerMonth != null &&
     entitlement.usedTokens >= entitlement.aiTokensPerMonth
   ) {
-    throw new AppError({ code: "FORBIDDEN", publicMessage: "LIMIT_EXCEEDED" });
+    throw new AppError({
+      code: "FORBIDDEN",
+      messageCode: MessageCode.AI_LIMIT_EXCEEDED,
+      publicMessage: "LIMIT_EXCEEDED",
+    });
   }
 
   return next({ ctx: { ...ctx, entitlement } });
@@ -219,7 +239,11 @@ export const entitlementProcedure = workspaceProcedure.use(async ({ ctx, next })
 
 export const ownerProcedure = workspaceProcedure.use(({ ctx, next }) => {
   if (ctx.workspace.role !== "OWNER") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Owner rights required" });
+    throw new AppError({
+      code: "FORBIDDEN",
+      messageCode: MessageCode.WORKSPACE_OWNER_REQUIRED,
+      publicMessage: "Owner rights required",
+    });
   }
 
   return next({ ctx });
@@ -227,7 +251,11 @@ export const ownerProcedure = workspaceProcedure.use(({ ctx, next }) => {
 
 const isAdmin = t.middleware(async ({ ctx, next }) => {
   if (ctx.session?.user.role !== "ADMIN") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Admin rights required" });
+    throw new AppError({
+      code: "FORBIDDEN",
+      messageCode: MessageCode.ADMIN_RIGHTS_REQUIRED,
+      publicMessage: "Admin rights required",
+    });
   }
 
   const adminUser = await ctx.prisma.user.findUnique({

@@ -216,8 +216,7 @@ describe("tRPC Error Formatting & Security Boundaries", () => {
     } as any);
 
     await expect(caller.ping()).rejects.toMatchObject({
-      code: "UNAUTHORIZED",
-      message: "You are not logged in",
+      cause: { code: "UNAUTHORIZED", message: "You are not logged in" },
     });
   });
 
@@ -226,8 +225,7 @@ describe("tRPC Error Formatting & Security Boundaries", () => {
     const caller = createCallerFactory(router)(ctxFor({ banned: true }));
 
     await expect(caller.ping()).rejects.toMatchObject({
-      code: "FORBIDDEN",
-      message: "This account is banned and cannot use the API.",
+      cause: { code: "FORBIDDEN", message: "This account is banned and cannot use the API." },
     });
   });
 
@@ -256,8 +254,7 @@ describe("tRPC Error Formatting & Security Boundaries", () => {
       );
 
       await expect(caller.ping()).rejects.toMatchObject({
-        code: "FORBIDDEN",
-        message: "This API key lacks the required scope",
+        cause: { code: "FORBIDDEN", message: "This API key lacks the required scope" },
       });
     });
 
