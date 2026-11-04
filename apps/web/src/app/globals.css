@@ -46,7 +46,8 @@
   --color-fd-info: var(--status-info);
 }
 
-#nd-docs-layout .prose {
+#nd-docs-layout .prose,
+#fd-search-list .prose {
   --tw-prose-body: var(--color-fd-foreground);
   --tw-prose-headings: var(--color-fd-foreground);
   --tw-prose-lead: var(--color-fd-muted-foreground);
