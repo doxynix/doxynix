@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { CodeBlock, type CodeBlockProps } from "fumadocs-ui/components/codeblock";
+import { CodeBlock, type CodeBlockProps, Pre } from "fumadocs-ui/components/codeblock";
 
 import { CopyButton } from "./copy-button";
 
@@ -34,7 +34,7 @@ export function DocsCodeBlock({ children, ...props }: CodeBlockProps) {
       ref={ref}
       {...props}
     >
-      {children}
+      <Pre>{children}</Pre>
     </CodeBlock>
   );
 }
