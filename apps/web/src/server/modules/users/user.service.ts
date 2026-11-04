@@ -1,11 +1,13 @@
 import { setTimeout as sleep } from "node:timers/promises";
 
+import { MessageCode } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { del } from "@vercel/blob";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
+import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
 import {
@@ -29,9 +31,11 @@ export function assertCanDisconnectAccount(input: {
   hasEmailAuth: boolean;
 }): void {
   if (input.accountCount <= 1 && !input.hasEmailAuth) {
-    throw new TRPCError({
+    throw new AppError({
       code: "BAD_REQUEST",
-      message: "You cannot disconnect your only authentication method. Add another one first.",
+      messageCode: MessageCode.AUTH_LAST_METHOD,
+      publicMessage:
+        "You cannot disconnect your only authentication method. Add another one first.",
     });
   }
 }
@@ -110,7 +114,11 @@ export const userService = {
     });
 
     if (user == null) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.USER_NOT_FOUND,
+        publicMessage: "User not found",
+      });
     }
 
     const workspaceIds = await listMemberWorkspaceIds(userId);
@@ -138,9 +146,10 @@ export const userService = {
       });
 
       if (accountToDelete == null) {
-        throw new TRPCError({
+        throw new AppError({
           code: "NOT_FOUND",
-          message: "Account not found or already disconnected.",
+          messageCode: MessageCode.ACCOUNT_NOT_FOUND,
+          publicMessage: "Account not found or already disconnected.",
         });
       }
 
@@ -215,7 +224,11 @@ export const userService = {
     });
 
     if (user == null) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.USER_NOT_FOUND,
+        publicMessage: "User not found",
+      });
     }
 
     return { user: userMapper.toPublic(user) };
@@ -272,7 +285,11 @@ export const userService = {
     });
 
     if (target == null) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Session not found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.SESSION_NOT_FOUND,
+        publicMessage: "Session not found",
+      });
     }
 
     const authContext = await auth.$context;

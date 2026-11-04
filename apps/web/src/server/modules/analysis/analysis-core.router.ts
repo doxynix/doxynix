@@ -1,7 +1,7 @@
-import { DocTypeSchema } from "@doxynix/shared";
-import { TRPCError } from "@trpc/server";
+import { DocTypeSchema, MessageCode } from "@doxynix/shared";
 import * as z from "zod";
 
+import { AppError } from "@/server/core/api-error";
 import { analysisStartLimiter } from "@/server/core/ratelimit";
 import { entitlementProcedure, workspaceProcedure } from "@/server/core/trpc/init";
 
@@ -27,7 +27,11 @@ export const analysisCoreRouter = {
       const { success } = await analysisStartLimiter.limit(`user:${ctx.session.user.id}`);
 
       if (!success) {
-        throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "RATE_LIMITED" });
+        throw new AppError({
+          code: "TOO_MANY_REQUESTS",
+          messageCode: MessageCode.MEMBER_RATE_LIMITED,
+          publicMessage: "RATE_LIMITED",
+        });
       }
 
       return analysisLifecycleService.analyze(ctx.db, ctx.session.user.id, ctx.workspace.id, input);

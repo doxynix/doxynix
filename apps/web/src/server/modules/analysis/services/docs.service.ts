@@ -1,6 +1,5 @@
 import { unstable_cache } from "next/cache";
-import { type DocType, DocTypeSchema } from "@doxynix/shared";
-import { TRPCError } from "@trpc/server";
+import { type DocType, DocTypeSchema, MessageCode } from "@doxynix/shared";
 import type { Redis } from "@upstash/redis";
 import { extname } from "pathe";
 import * as z from "zod";
@@ -8,6 +7,7 @@ import * as z from "zod";
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 import { highlightCode } from "@/shared/lib/shiki";
 
+import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
 import type { FileActionPreviewResult } from "@/server/core/redis.types";
@@ -72,12 +72,20 @@ export const docsService = {
   ) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, workspaceId, aid);
     if (repo == null) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.REPO_NOT_FOUND,
+        publicMessage: "Repository not found",
+      });
     }
     const analysis = repo.analyses[0];
 
     if (analysis == null) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Analysis not found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.ANALYSIS_NOT_FOUND,
+        publicMessage: "Analysis not found",
+      });
     }
 
     const doc = await db.document.findFirst({
@@ -98,7 +106,11 @@ export const docsService = {
 
     if (doc == null) {
       // No message means tRPC substitutes the code, so the client sees the literal string "NOT_FOUND".
-      throw new TRPCError({ code: "NOT_FOUND", message: "Document not found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.DOCUMENT_NOT_FOUND,
+        publicMessage: "Document not found",
+      });
     }
 
     const html = await unstable_cache(
@@ -151,7 +163,11 @@ export const docsService = {
 
     if (document == null) {
       // A bare `Error` is reported as a 500 and masked in production, so a missing document must throw NOT_FOUND.
-      throw new TRPCError({ code: "NOT_FOUND", message: "Document not found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.DOCUMENT_NOT_FOUND,
+        publicMessage: "Document not found",
+      });
     }
 
     // No graph to link against: `RepositoryEvidence.dependencyGraph` is computed per analysis but never persisted to `resultJson`/`metricsJson`, so reading it back always yields `undefined`; `withGraphLinks` accepts `null` for this. Persisting it is tracked separately.
@@ -185,9 +201,10 @@ export const docsService = {
     const cachedData = await redis.get<FileActionPreviewResult>(cacheKey);
 
     if (cachedData == null) {
-      throw new TRPCError({
+      throw new AppError({
         code: "NOT_FOUND",
-        message: "Audit result expired or not found. Please run audit again.",
+        messageCode: MessageCode.AUDIT_RESULT_EXPIRED,
+        publicMessage: "Audit result expired or not found. Please run audit again.",
       });
     }
 
@@ -208,7 +225,11 @@ export const docsService = {
     });
 
     if (repo == null) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.REPO_NOT_FOUND,
+        publicMessage: "Repository not found",
+      });
     }
 
     const markdownContent = cachedData.content;

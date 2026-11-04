@@ -1,9 +1,9 @@
-import type { SaveOnboardingIdentityInput } from "@doxynix/shared";
+import { MessageCode, type SaveOnboardingIdentityInput } from "@doxynix/shared";
 import { getOnboardingState } from "@prisma/client/sql";
-import { TRPCError } from "@trpc/server";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
+import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
 import { trackServerEvent } from "@/server/core/posthog-events";
 import { realtimeService } from "@/server/core/realtime";
@@ -26,7 +26,11 @@ export const onboardingService = {
     });
 
     if (user == null) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.USER_NOT_FOUND,
+        publicMessage: "User not found",
+      });
     }
 
     if (user.onboardingCompletedAt != null) {
@@ -52,7 +56,11 @@ export const onboardingService = {
     const [row] = await db.$queryRawTyped(getOnboardingState(userId));
 
     if (row == null) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.USER_NOT_FOUND,
+        publicMessage: "User not found",
+      });
     }
 
     const hasGithubInstallation = row.hasGithubInstallation === true;

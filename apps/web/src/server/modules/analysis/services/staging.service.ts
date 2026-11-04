@@ -1,9 +1,10 @@
-import { TRPCError } from "@trpc/server";
+import { MessageCode } from "@doxynix/shared";
 import type { Redis } from "@upstash/redis";
 import * as z from "zod";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
+import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
 import { redisService } from "@/server/core/redis";
@@ -56,16 +57,18 @@ export const stagingService = {
     });
 
     if (fix == null) {
-      throw new TRPCError({
+      throw new AppError({
         code: "NOT_FOUND",
-        message: "Generated fix not found",
+        messageCode: MessageCode.FIX_NOT_FOUND,
+        publicMessage: "Generated fix not found",
       });
     }
 
     if (fix.repo.id !== input.repoId) {
-      throw new TRPCError({
+      throw new AppError({
         code: "FORBIDDEN",
-        message: "Generated fix does not belong to the specified repository",
+        messageCode: MessageCode.FIX_REPO_MISMATCH,
+        publicMessage: "Generated fix does not belong to the specified repository",
       });
     }
 
@@ -73,9 +76,10 @@ export const stagingService = {
     const parsed = StagedFixResultSchema.safeParse(cachedResult);
 
     if (!parsed.success) {
-      throw new TRPCError({
+      throw new AppError({
         code: "BAD_REQUEST",
-        message: "Generated fix result is not ready for staging",
+        messageCode: MessageCode.FIX_NOT_READY,
+        publicMessage: "Generated fix result is not ready for staging",
       });
     }
 

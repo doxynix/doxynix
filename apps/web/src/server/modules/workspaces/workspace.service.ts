@@ -1,6 +1,5 @@
-import { PlanCode, PlanCodeSchema, type WorkspaceRole } from "@doxynix/shared";
+import { MessageCode, PlanCode, PlanCodeSchema, type WorkspaceRole } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
 
 import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
@@ -95,17 +94,29 @@ export const workspaceService = {
     });
 
     if (workspace == null) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Workspace access denied" });
+      throw new AppError({
+        code: "FORBIDDEN",
+        messageCode: MessageCode.WORKSPACE_ACCESS_DENIED,
+        publicMessage: "Workspace access denied",
+      });
     }
 
     if (workspace.entitlement == null || workspace.entitlement.planCode === "HOBBY") {
-      throw new TRPCError({ code: "PRECONDITION_FAILED", message: "UPGRADE_REQUIRED" });
+      throw new AppError({
+        code: "PRECONDITION_FAILED",
+        messageCode: MessageCode.FEATURE_NOT_IN_PLAN,
+        publicMessage: "UPGRADE_REQUIRED",
+      });
     }
 
     // A seat is a paid resource: §9.7 forbids raising seats while the subscription is not active,
     // so grace keeps its existing seats but cannot grow. Suspended/review have no access at all.
     if (workspace.entitlement.accessState !== "ACTIVE") {
-      throw new AppError({ code: "PAYMENT_REQUIRED", publicMessage: "PAYMENT_REQUIRED" });
+      throw new AppError({
+        code: "PAYMENT_REQUIRED",
+        messageCode: MessageCode.PAYMENT_REQUIRED,
+        publicMessage: "PAYMENT_REQUIRED",
+      });
     }
 
     const emailHash = getNormalizedHash(normalizeEmail(email));
@@ -116,13 +127,18 @@ export const workspaceService = {
     });
 
     if (user == null) {
-      throw new TRPCError({ code: "PRECONDITION_FAILED", message: "MEMBER_ADD_FAILED" });
+      throw new AppError({
+        code: "PRECONDITION_FAILED",
+        messageCode: MessageCode.MEMBER_ADD_FAILED,
+        publicMessage: "MEMBER_ADD_FAILED",
+      });
     }
 
     if (!("$transaction" in db)) {
-      throw new TRPCError({
+      throw new AppError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Workspace mutation requires a database client",
+        messageCode: MessageCode.WORKSPACE_DB_CLIENT_MISSING,
+        publicMessage: "Workspace mutation requires a database client",
       });
     }
 
@@ -138,7 +154,11 @@ export const workspaceService = {
         });
 
         if (existing != null) {
-          throw new TRPCError({ code: "CONFLICT", message: "ALREADY_MEMBER" });
+          throw new AppError({
+            code: "CONFLICT",
+            messageCode: MessageCode.MEMBER_ALREADY_EXISTS,
+            publicMessage: "ALREADY_MEMBER",
+          });
         }
 
         // Seats are not pre-purchased: the subscription quantity follows the membership count, and
@@ -155,12 +175,16 @@ export const workspaceService = {
 
       return member;
     } catch (error) {
-      if (error instanceof TRPCError) {
+      if (error instanceof AppError) {
         throw error;
       }
 
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-        throw new TRPCError({ code: "CONFLICT", message: "ALREADY_MEMBER" });
+        throw new AppError({
+          code: "CONFLICT",
+          messageCode: MessageCode.MEMBER_ALREADY_EXISTS,
+          publicMessage: "ALREADY_MEMBER",
+        });
       }
 
       throw error;
@@ -203,9 +227,10 @@ export const workspaceService = {
 
   async removeMember(db: DbClient, workspaceId: string, userId: string) {
     if (!("$transaction" in db)) {
-      throw new TRPCError({
+      throw new AppError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Workspace mutation requires a database client",
+        messageCode: MessageCode.WORKSPACE_DB_CLIENT_MISSING,
+        publicMessage: "Workspace mutation requires a database client",
       });
     }
 
@@ -220,13 +245,21 @@ export const workspaceService = {
           const target = members.find((member) => member.userId === userId);
 
           if (target == null) {
-            throw new TRPCError({ code: "NOT_FOUND", message: "Member not found" });
+            throw new AppError({
+              code: "NOT_FOUND",
+              messageCode: MessageCode.MEMBER_NOT_FOUND,
+              publicMessage: "Member not found",
+            });
           }
 
           const ownerCount = members.filter((member) => member.role === "OWNER").length;
 
           if (target.role === "OWNER" && ownerCount <= 1) {
-            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "LAST_OWNER" });
+            throw new AppError({
+              code: "PRECONDITION_FAILED",
+              messageCode: MessageCode.MEMBER_LAST_OWNER,
+              publicMessage: "LAST_OWNER",
+            });
           }
 
           const deleted = await tx.workspaceMember.delete({
@@ -244,12 +277,16 @@ export const workspaceService = {
         workspaceId,
       });
     } catch (error) {
-      if (error instanceof TRPCError) {
+      if (error instanceof AppError) {
         throw error;
       }
 
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
-        throw new TRPCError({ code: "CONFLICT", message: "CONCURRENT_WORKSPACE_UPDATE" });
+        throw new AppError({
+          code: "CONFLICT",
+          messageCode: MessageCode.REQUEST_INVALID,
+          publicMessage: "CONCURRENT_WORKSPACE_UPDATE",
+        });
       }
 
       throw error;
@@ -263,7 +300,11 @@ export const workspaceService = {
     });
 
     if (membership == null) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Workspace access denied" });
+      throw new AppError({
+        code: "FORBIDDEN",
+        messageCode: MessageCode.WORKSPACE_ACCESS_DENIED,
+        publicMessage: "Workspace access denied",
+      });
     }
 
     return toSummary(membership.workspace, membership.role);

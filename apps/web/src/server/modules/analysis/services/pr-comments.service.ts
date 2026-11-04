@@ -1,7 +1,8 @@
 import { unstable_cache } from "next/cache";
-import { TRPCError } from "@trpc/server";
+import { MessageCode } from "@doxynix/shared";
 import * as z from "zod";
 
+import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
 import { getInstallationClient } from "@/server/core/github/github-client";
 import { markdownToHtml } from "@/server/modules/analysis/services/markdown-to-html";
@@ -76,7 +77,11 @@ export const prCommentsService = {
     });
 
     if (repo == null) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.REPO_NOT_FOUND,
+        publicMessage: "Repository not found",
+      });
     }
 
     const installation = await db.githubInstallation.findFirst({
@@ -84,9 +89,10 @@ export const prCommentsService = {
     });
 
     if (installation == null) {
-      throw new TRPCError({
+      throw new AppError({
         code: "PRECONDITION_FAILED",
-        message: "GitHub App is not installed for this repository.",
+        messageCode: MessageCode.GITHUB_APP_NOT_INSTALLED,
+        publicMessage: "GitHub App is not installed for this repository.",
       });
     }
 
@@ -109,9 +115,10 @@ export const prCommentsService = {
     });
 
     if (prAnalysis == null) {
-      throw new TRPCError({
+      throw new AppError({
         code: "NOT_FOUND",
-        message: "PR analysis record not found for this repository and PR number",
+        messageCode: MessageCode.PR_ANALYSIS_NOT_FOUND,
+        publicMessage: "PR analysis record not found for this repository and PR number",
       });
     }
 

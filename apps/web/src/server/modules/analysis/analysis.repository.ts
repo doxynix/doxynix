@@ -1,9 +1,9 @@
-import { type FixStatus, PRAnalysisStatus } from "@doxynix/shared";
+import { type FixStatus, MessageCode, PRAnalysisStatus } from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
 import { uniq } from "es-toolkit";
 import type { z } from "zod";
 
+import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
 
 import type { persistedFindingSchema } from "./analysis.schemas";
@@ -266,7 +266,11 @@ export const analysisRepo = {
     }
 
     if (repo.analyses.length === 0) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "No completed analysis found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.ANALYSIS_NOT_COMPLETED,
+        publicMessage: "No completed analysis found",
+      });
     }
 
     return repo;
@@ -302,7 +306,11 @@ export const analysisRepo = {
     }
 
     if (repo.analyses.length === 0) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "No completed analysis found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.ANALYSIS_NOT_COMPLETED,
+        publicMessage: "No completed analysis found",
+      });
     }
 
     return repo;
@@ -459,7 +467,11 @@ export const analysisRepo = {
     });
 
     if (target == null) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Analysis version not found" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.ANALYSIS_VERSION_NOT_FOUND,
+        publicMessage: "Analysis version not found",
+      });
     }
 
     return target;

@@ -1,9 +1,9 @@
-import { MAX_PAGE, Status, Visibility } from "@doxynix/shared";
+import { MAX_PAGE, MessageCode, Status, Visibility } from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
+import { AppError } from "@/server/core/api-error";
 import { type DbClient, prisma } from "@/server/core/db";
 import { assertPlanFeature, getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { getRepoInfo } from "@/server/core/github/github-api";
@@ -91,9 +91,10 @@ export const repoService = {
     try {
       repoInfo = parseUrl(url);
     } catch {
-      throw new TRPCError({
+      throw new AppError({
         code: "BAD_REQUEST",
-        message: "Invalid URL. Use 'owner/repo' format or 'https://github.com/...'",
+        messageCode: MessageCode.REPO_URL_INVALID,
+        publicMessage: "Invalid URL. Use 'owner/repo' format or 'https://github.com/...'",
       });
     }
 
@@ -104,9 +105,11 @@ export const repoService = {
       githubData = await getRepoInfo(db, userId, owner, name);
     } catch (error) {
       if (error instanceof GitHubAuthRequiredError) {
-        throw new TRPCError({
+        throw new AppError({
           code: "FORBIDDEN",
-          message: "Connect your GitHub account or install the app to access this repository.",
+          messageCode: MessageCode.GITHUB_CONNECTION_REQUIRED,
+          publicMessage:
+            "Connect your GitHub account or install the app to access this repository.",
         });
       }
       throw toOctokitTrpcError(error) ?? error;

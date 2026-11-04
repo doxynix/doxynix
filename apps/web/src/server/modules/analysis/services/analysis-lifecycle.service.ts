@@ -1,10 +1,10 @@
-import { DocType, Status } from "@doxynix/shared";
+import { DocType, MessageCode, Status } from "@doxynix/shared";
 import type { Prisma, Repo } from "@prisma/client";
 import { auth, runs, tasks } from "@trigger.dev/sdk";
-import { TRPCError } from "@trpc/server";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
+import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { type DbClient, prisma } from "@/server/core/db";
 import { assertAnalysisAllowed, getWorkspaceEntitlement } from "@/server/core/entitlements";
@@ -208,7 +208,11 @@ export const analysisLifecycleService = {
 
     if (repo == null) {
       // No message means tRPC substitutes the code, so the client renders the literal string "NOT_FOUND".
-      throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found or access denied" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.REPO_NOT_FOUND_OR_DENIED,
+        publicMessage: "Repository not found or access denied",
+      });
     }
     return repo;
   },
@@ -220,9 +224,10 @@ export const analysisLifecycleService = {
     });
 
     if (analysis == null) {
-      throw new TRPCError({
+      throw new AppError({
         code: "NOT_FOUND",
-        message: "Analysis record not found",
+        messageCode: MessageCode.ANALYSIS_NOT_FOUND,
+        publicMessage: "Analysis record not found",
       });
     }
 
@@ -348,7 +353,11 @@ export const analysisLifecycleService = {
     } = params;
 
     if (repo.workspaceId !== workspaceId) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found or access denied" });
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.REPO_NOT_FOUND_OR_DENIED,
+        publicMessage: "Repository not found or access denied",
+      });
     }
 
     const teamRoles = calculateTeamRoles(rawContributors);

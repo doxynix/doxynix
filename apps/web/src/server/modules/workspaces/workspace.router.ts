@@ -1,6 +1,7 @@
-import { TRPCError } from "@trpc/server";
+import { MessageCode } from "@doxynix/shared";
 import * as z from "zod";
 
+import { AppError } from "@/server/core/api-error";
 import { previewSeatAddition } from "@/server/core/billing/seat-preview";
 import { memberAddLimiter } from "@/server/core/ratelimit";
 import {
@@ -28,7 +29,11 @@ export const workspaceRouter = createTRPCRouter({
       const { success } = await memberAddLimiter.limit(`user:${ctx.session.user.id}`);
 
       if (!success) {
-        throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "RATE_LIMITED" });
+        throw new AppError({
+          code: "TOO_MANY_REQUESTS",
+          messageCode: MessageCode.MEMBER_RATE_LIMITED,
+          publicMessage: "RATE_LIMITED",
+        });
       }
 
       return workspaceService.addMember(ctx.db, ctx.workspace.id, input.email);
