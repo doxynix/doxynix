@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.10.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.9.1...doxynix-v6.10.0) (2026-11-04)
+
+
+### Features
+
+* **web:** add fumadocs mdx pipeline ([#2369](https://github.com/doxynix/doxynix/issues/2369)) ([284fca6](https://github.com/doxynix/doxynix/commit/284fca62ec2da8b2b00084c79c992de8b2e63af1))
+
 ## [6.9.1](https://github.com/doxynix/doxynix/compare/doxynix-v6.9.0...doxynix-v6.9.1) (2026-11-03)
 
 
