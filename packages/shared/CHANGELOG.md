@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/doxynix/doxynix/compare/shared-v0.8.0...shared-v0.9.0) (2026-11-04)
+
+
+### Features
+
+* **web:** localize backend error messages ([#2372](https://github.com/doxynix/doxynix/issues/2372)) ([c24de8f](https://github.com/doxynix/doxynix/commit/c24de8fadc049f6b3289c6a90f43bd4bb9ec772c))
+
 ## [0.8.0](https://github.com/doxynix/doxynix/compare/shared-v0.7.0...shared-v0.8.0) (2026-11-02)
 
 

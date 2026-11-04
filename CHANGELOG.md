@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.11.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.10.0...doxynix-v6.11.0) (2026-11-04)
+
+
+### Features
+
+* **web:** localize backend error messages ([#2372](https://github.com/doxynix/doxynix/issues/2372)) ([c24de8f](https://github.com/doxynix/doxynix/commit/c24de8fadc049f6b3289c6a90f43bd4bb9ec772c))
+
 ## [6.10.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.9.1...doxynix-v6.10.0) (2026-11-04)
 
 

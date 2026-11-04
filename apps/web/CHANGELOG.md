@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.11.0](https://github.com/doxynix/doxynix/compare/web-v5.10.0...web-v5.11.0) (2026-11-04)
+
+
+### Features
+
+* **web:** localize backend error messages ([#2372](https://github.com/doxynix/doxynix/issues/2372)) ([c24de8f](https://github.com/doxynix/doxynix/commit/c24de8fadc049f6b3289c6a90f43bd4bb9ec772c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @doxynix/shared bumped to 0.9.0
+
 ## [5.10.0](https://github.com/doxynix/doxynix/compare/web-v5.9.1...web-v5.10.0) (2026-11-04)
 
 
