@@ -71,6 +71,11 @@
   padding-inline: 1rem;
 }
 
+/* Shiki writes token colors inline; keep comments readable in both themes. */
+#nd-docs-layout .shiki .comment {
+  color: var(--color-fd-muted-foreground) !important;
+}
+
 @utility transition-standard {
   transition-timing-function: var(--tw-ease, cubic-bezier(0.4, 0, 0.2, 1));
   transition-duration: var(--tw-duration, 150ms);
