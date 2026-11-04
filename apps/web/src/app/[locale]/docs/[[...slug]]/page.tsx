@@ -5,6 +5,7 @@ import defaultMdxComponents, { createRelativeLink } from "fumadocs-ui/mdx";
 
 import { buildDocsMetadata } from "@/shared/lib/docs-metadata";
 import { docsSource } from "@/shared/lib/docs-source";
+import { DocsCodeBlock } from "@/shared/ui/kit/docs-code-block";
 
 type DocsPageProps = {
   params: Promise<{ locale: string; slug?: string[] }>;
@@ -53,6 +54,7 @@ export default async function DocsPageRoute(props: DocsPageProps) {
           components={{
             ...defaultMdxComponents,
             a: createRelativeLink(docsSource, page),
+            pre: DocsCodeBlock,
           }}
         />
       </DocsBody>
