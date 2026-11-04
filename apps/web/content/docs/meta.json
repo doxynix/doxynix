@@ -1,4 +1,5 @@
 {
+  "description": "Learn how Doxynix turns a Git repository into up-to-date documentation.",
   "pages": ["index", "getting-started", "concepts", "cli", "integrations", "account", "faq"],
   "title": "Documentation"
 }
