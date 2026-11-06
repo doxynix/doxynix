@@ -46,7 +46,7 @@
     "es-toolkit": "catalog:",
     "hono": "catalog:",
     "ioredis": "catalog:",
-    "postgres": "3.4.9",
+    "postgres": "4.0.0",
     "temporal-polyfill": "catalog:",
     "zod": "catalog:"
   },
