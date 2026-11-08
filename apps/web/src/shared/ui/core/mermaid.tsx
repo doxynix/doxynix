@@ -174,7 +174,7 @@ export function AppMermaid({
       {status === "success" && svg && (
         <figure
           aria-label={tCommon("mermaid_diagram")}
-          className="fade-in not-prose flex h-full w-full animate-in cursor-pointer items-center justify-center overflow-auto duration-300 [&_svg]:h-auto [&_svg]:max-w-full"
+          className="fade-in not-prose flex h-full w-full animate-in cursor-pointer items-center justify-center overflow-auto duration-200 [&_svg]:h-auto [&_svg]:max-w-full"
           dangerouslySetInnerHTML={{ __html: svg }}
           ref={figureRef}
         />

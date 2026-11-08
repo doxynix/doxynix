@@ -37,7 +37,7 @@ export function AnimatedCircularProgressBar({
           "--offset-factor": "0",
           "--percent-to-deg": "3.6deg",
           "--percent-to-px": `${percentPx}px`,
-          "--transition-length": "1s",
+          "--transition-length": "400ms",
           "--transition-step": "200ms",
           transform: "translateZ(0)",
         } as CSSProperties
@@ -69,7 +69,8 @@ export function AnimatedCircularProgressBar({
                 transform:
                   "rotate(calc(1turn - 90deg - (var(--gap-percent) * var(--percent-to-deg) * var(--offset-factor-secondary)))) scaleY(-1)",
                 transformOrigin: "calc(var(--circle-size) / 2) calc(var(--circle-size) / 2)",
-                transition: "all var(--transition-length) ease var(--delay)",
+                transition:
+                  "stroke-dasharray var(--transition-length) var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) var(--delay)",
               } as CSSProperties
             }
           />
@@ -92,9 +93,10 @@ export function AnimatedCircularProgressBar({
               transform:
                 "rotate(calc(-90deg + var(--gap-percent) * var(--offset-factor) * var(--percent-to-deg)))",
               transformOrigin: "calc(var(--circle-size) / 2) calc(var(--circle-size) / 2)",
-              transition:
-                "var(--transition-length) ease var(--delay),stroke var(--transition-length) ease var(--delay)",
-              transitionProperty: "stroke-dasharray,transform",
+              transitionDelay: "var(--delay)",
+              transitionDuration: "var(--transition-length)",
+              transitionProperty: "stroke-dasharray",
+              transitionTimingFunction: "var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1))",
             } as CSSProperties
           }
         />

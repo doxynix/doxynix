@@ -36,6 +36,7 @@ import { redisService } from "@/server/core/redis";
 import { createPersonalWorkspace } from "@/server/core/workspaces/personal-workspace";
 import { maskEmail, normalizeEmail, validateEmailSafety } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
+import { REDIS_CONFIG } from "@/server/utils/redis";
 import { getIp } from "@/server/utils/request-context";
 
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // TIME: 30 days
@@ -43,7 +44,7 @@ const SESSION_UPDATE_AGE = 24 * 60 * 60; // TIME: 24 hours
 const MAGIC_LINK_MAX_AGE = 10 * 60; // TIME: 10 minutes
 export const IPV6_SUBNET = 56;
 
-const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
+const resend = new Resend(RESEND_API_KEY);
 
 // Unauthenticated sign-in bodies: only `email` is read, and it must be a string.
 const EmailRequestBody = z.object({
@@ -359,7 +360,7 @@ export const auth = betterAuth({
         const ip = ctx.request == null ? "127.0.0.1" : getIp(ctx.request);
 
         const { reason: limitReason, success } = await emailSignInLimiter.limit(
-          `${normalizedEmail}:${ip}`,
+          REDIS_CONFIG.rateLimit.emailAndIp(normalizedEmail, ip),
           { ip },
         );
         if (!success) {
@@ -409,11 +410,6 @@ export const auth = betterAuth({
         const { host } = new URL(url);
 
         try {
-          if (resend == null) {
-            appLogger.warn({ msg: "Resend disabled (no API key)", type: "auth.email_warn" });
-            return;
-          }
-
           const user = await prisma.user.findUnique({
             select: { emailVerified: true },
             where: { emailHash: getNormalizedHash(cleanEmail) },

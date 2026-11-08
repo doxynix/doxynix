@@ -26,7 +26,6 @@ const files = await fg(["src/server/**/*.ts", "src/app/api/**/*.ts"], {
     "**/*.test.ts",
     "src/app/api/webhooks/**",
     "src/server/modules/audit-logs/**",
-    "src/server/modules/billing/**",
     "src/server/modules/notifications/**",
     "src/server/modules/users/owned-subscription.ts",
     "src/server/modules/analysis/engine/**",

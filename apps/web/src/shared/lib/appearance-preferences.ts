@@ -1,5 +1,7 @@
 import * as z from "zod";
 
+import { EASING } from "@/shared/config/motion";
+
 export const CODE_THEMES_DARK = [
   "andromeeda",
   "aurora-x",
@@ -239,7 +241,7 @@ export function withThemeTransition(apply: () => void): void {
             ],
             {
               duration: THEME_TRANSITION_MS,
-              easing: "cubic-bezier(0.25, 0.8, 0.25, 1)",
+              easing: `cubic-bezier(${EASING.out.join(", ")})`,
               fill: "forwards",
               pseudoElement: "::view-transition-new(root)",
             },

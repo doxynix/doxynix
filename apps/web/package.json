@@ -199,6 +199,7 @@
     "react-hotkeys-hook": "5.3.3",
     "react-markdown": "10.1.0",
     "react-resizable-panels": "4.17.0",
+    "react-virtuoso": "4.18.20",
     "recharts": "catalog:",
     "rehype-autolink-headings": "7.1.0",
     "rehype-external-links": "3.0.0",

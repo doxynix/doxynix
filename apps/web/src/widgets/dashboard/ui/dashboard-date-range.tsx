@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { format, subDays, subHours, subMinutes } from "date-fns";
-import { Clock } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { subDays, subHours, subMinutes } from "date-fns";
+import { useLocale, useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 import type { DateRange } from "react-day-picker";
 
+import { formatShortDate } from "@/shared/lib/date-utils";
 import { AppDateRange } from "@/shared/ui/kit/app-date-range";
 
 import { dashboardParsers } from "@/features/repo-analytics/model/dashboard-parsers";
@@ -48,6 +48,8 @@ const DATE_PERIODS = [
 
 export function DashboardDatePeriod() {
   const t = useTranslations("Dashboard");
+  const tRange = useTranslations("DateRange");
+  const locale = useLocale();
   const [urlState, setUrlState] = useQueryStates(dashboardParsers);
 
   const [tempDate, setTempDate] = useState<DateRange | undefined>(() =>
@@ -94,12 +96,11 @@ export function DashboardDatePeriod() {
       presets={DATE_PERIODS}
       selected={tempDate}
       selectedPresetKey={activePeriod?.key ?? null}
-      triggerIcon={<Clock />}
       triggerLabel={
         activePeriod
-          ? t(activePeriod.key)
+          ? tRange(activePeriod.labelKey)
           : urlState.from && urlState.to
-            ? `${format(urlState.from, "dd MMM")} - ${format(urlState.to, "dd MMM, yyyy")}`
+            ? `${formatShortDate(urlState.from, locale)} — ${formatShortDate(urlState.to, locale)}`
             : undefined
       }
     />

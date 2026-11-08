@@ -49,7 +49,6 @@ export function RepoDetailsHeader({ repo }: Readonly<Props>) {
               {repo.name}
             </Link>
           </h1>
-          <PrDraftSheet repoId={repo.id} />
           <AppBadge
             className={visibility.color}
             variant="outline"
@@ -62,6 +61,7 @@ export function RepoDetailsHeader({ repo }: Readonly<Props>) {
           >
             {t(status.labelKey)}
           </AppBadge>
+          <PrDraftSheet repoId={repo.id} />
           <AppButton
             asChild
             variant="outline"

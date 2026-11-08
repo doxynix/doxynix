@@ -73,7 +73,7 @@ export function createLayoutEdges(sourceEdges: readonly RepoMapEdgeInput[]): Edg
       style: {
         stroke: isRisk || isCycle ? "var(--status-error)" : "var(--border-strong)",
         strokeWidth: computeStrokeWidth(e.weight),
-        transition: "opacity 0.3s ease-in-out",
+        transition: "opacity 120ms cubic-bezier(0.23, 1, 0.32, 1)",
       },
       target: e.target,
       type: "smoothstep",

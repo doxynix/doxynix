@@ -402,7 +402,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
   };
 
   return (
-    <div className="fade-in slide-in-from-bottom-2 animate-in duration-500">
+    <div className="fade-in slide-in-from-bottom-2 animate-in duration-200">
       <article
         aria-label={t("repo_docs_content_aria")}
         className="prose dark:prose-invert wrap-break-word min-w-0 max-w-none prose-pre:bg-transparent prose-pre:p-0"

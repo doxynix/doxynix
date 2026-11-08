@@ -234,7 +234,7 @@ export function RepoMap({
                 </Panel>
                 <Background gap={25} />
 
-                <div className={cn("transition-opacity duration-300")}>
+                <div>
                   <RepoMapCustomControls />
                   <MiniMap
                     nodeColor={(n: Node<RepoMapNodeData>) =>

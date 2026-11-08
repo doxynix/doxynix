@@ -41,7 +41,7 @@ export const ShimmerButton = forwardRef<ComponentRef<typeof Link>, ShimmerButton
       <AppButton
         asChild
         className={cn(
-          "group relative isolate flex items-center justify-center overflow-hidden whitespace-nowrap rounded-(--radius) border border-border bg-transparent px-6 py-3 text-primary-foreground shadow-sm transition-standard hover:border-border-accent hover:bg-transparent hover:text-primary-foreground hover:[box-shadow:var(--shadow-md)]",
+          "group relative isolate flex items-center justify-center overflow-hidden whitespace-nowrap rounded-(--radius) border border-border bg-transparent px-6 py-3 text-primary-foreground shadow-sm transition-[color,background-color,border-color,box-shadow] duration-150 ease-out hover:border-border-accent hover:bg-transparent hover:text-primary-foreground hover:[box-shadow:var(--shadow-md)]",
           "active:translate-y-px",
           className,
         )}
@@ -77,7 +77,7 @@ export const ShimmerButton = forwardRef<ComponentRef<typeof Link>, ShimmerButton
           <div
             className={cn(
               "absolute inset-0 z-20 size-full rounded-(--radius)",
-              "transform-gpu transition-standard",
+              "transform-gpu transition-[color,background-color,border-color,box-shadow] duration-150 ease-out",
               "group-hover:[box-shadow:inset_0_-6px_10px_color-mix(in_oklab,var(--primary-foreground)_25%,transparent)]",
               "group-active:[box-shadow:inset_0_-10px_10px_color-mix(in_oklab,var(--primary-foreground)_25%,transparent)]",
             )}

@@ -143,7 +143,7 @@ export function RepoCodeTree({
               openByDefault={false}
               overscanCount={30}
               ref={(api) => onTreeApiChange(api ?? undefined)}
-              rowHeight={32}
+              rowHeight={28}
               searchMatch={(node, term) =>
                 node.data.name.toLowerCase().includes(term.toLowerCase())
               }

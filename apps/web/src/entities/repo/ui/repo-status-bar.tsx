@@ -30,7 +30,7 @@ export function RepoStatusBar({ meta, readOnly, stats }: Readonly<Props>) {
         </span>
         <span>{meta.name}</span>
         {stats.isDirty && (
-          <span className="flex animate-pulse items-center gap-1 text-warning">
+          <span className="flex items-center gap-1 text-warning">
             <FileEdit className="size-3" />
             {t("repo_status_modified")}
           </span>

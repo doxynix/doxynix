@@ -22,7 +22,7 @@ export function AppTooltip({
   children,
   className,
   content,
-  delay = 400,
+  delay = 300,
   disableHoverableContent = true,
   hidden,
   open: controlledOpen,

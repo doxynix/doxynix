@@ -160,6 +160,7 @@ export function TrendsChart({ activeTab, chartConfig, data }: Props) {
           <Area
             dataKey="health"
             fill={`url(#${fillHealthId})`}
+            isAnimationActive={false}
             key="health"
             stroke={healthColor}
             type="monotone"
@@ -169,6 +170,7 @@ export function TrendsChart({ activeTab, chartConfig, data }: Props) {
           <Area
             dataKey="security"
             fill={`url(#${fillSecurityId})`}
+            isAnimationActive={false}
             key="security"
             stroke={securityColor}
             type="monotone"
@@ -179,6 +181,7 @@ export function TrendsChart({ activeTab, chartConfig, data }: Props) {
           <Area
             dataKey="complexity"
             fill={`url(#${fillComplexityId})`}
+            isAnimationActive={false}
             key="complexity"
             stroke={complexityColor}
             type="monotone"
@@ -188,6 +191,7 @@ export function TrendsChart({ activeTab, chartConfig, data }: Props) {
           <Area
             dataKey="onboarding"
             fill={`url(#${fillOnboardingId})`}
+            isAnimationActive={false}
             key="onboarding"
             stroke={onBoardingColor}
             type="monotone"
@@ -197,6 +201,7 @@ export function TrendsChart({ activeTab, chartConfig, data }: Props) {
           <Area
             dataKey="techDebt"
             fill={`url(#${fillTechDebtId})`}
+            isAnimationActive={false}
             key="techDebt"
             stroke={techDebtColor}
             type="monotone"

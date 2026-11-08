@@ -4,6 +4,7 @@ import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
+import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 type Props = {
   children: ReactNode;
@@ -12,6 +13,7 @@ type Props = {
   hidden?: boolean;
   hideTooltip?: boolean;
   href?: string;
+  isLoading?: boolean;
   onClick?: () => void;
   tooltipText: string;
   variant?: "default" | "ghost" | "outline";
@@ -24,6 +26,7 @@ export function RepoCodeActionButton({
   hidden,
   hideTooltip,
   href,
+  isLoading,
   onClick,
   tooltipText,
   variant = "ghost",
@@ -32,18 +35,31 @@ export function RepoCodeActionButton({
     return null;
   }
 
-  const buttonElement = (
-    <AppButton
-      aria-label={tooltipText}
-      className={cn("gap-1.5 text-xs", className)}
-      disabled={disabled}
-      onClick={onClick}
-      size="sm"
-      variant={variant}
-    >
-      {children}
-    </AppButton>
-  );
+  const buttonElement =
+    isLoading === true ? (
+      <LoadingButton
+        aria-label={tooltipText}
+        className={cn("gap-1.5 text-xs", className)}
+        disabled={disabled}
+        isLoading
+        onClick={onClick}
+        size="sm"
+        variant={variant}
+      >
+        {children}
+      </LoadingButton>
+    ) : (
+      <AppButton
+        aria-label={tooltipText}
+        className={cn("gap-1.5 text-xs", className)}
+        disabled={disabled}
+        onClick={onClick}
+        size="sm"
+        variant={variant}
+      >
+        {children}
+      </AppButton>
+    );
 
   return (
     <AppTooltip

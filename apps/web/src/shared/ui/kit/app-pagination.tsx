@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { type KeyboardEvent, useState, useTransition } from "react";
 import type { PaginationMeta } from "@doxynix/shared";
 import { useTranslations } from "next-intl";
 import { parseAsInteger, useQueryState } from "nuqs";
@@ -59,7 +59,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
     });
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
       const target = Number.parseInt(inputValue, 10);

@@ -4,7 +4,7 @@ import { type ComponentType, useEffect, useState } from "react";
 import { diagnosticCount } from "@codemirror/lint";
 import { getSearchQuery, setSearchQuery } from "@codemirror/search";
 import { EditorState, type Extension } from "@codemirror/state";
-import { EditorView } from "@codemirror/view";
+import type { EditorView } from "@codemirror/view";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import CodeMirror from "@uiw/react-codemirror";
 import { useTranslations } from "next-intl";
@@ -75,11 +75,7 @@ export function RepoCodeEditor({
   }, [path, t]);
 
   const isDiffMode = showDiff && compareValue != null;
-  const mergeExtensionsReadOnly = [
-    ...ext,
-    EditorView.editable.of(false),
-    EditorState.readOnly.of(true),
-  ];
+  const mergeExtensionsReadOnly = [...ext, EditorState.readOnly.of(true)];
   const mergeExtensionsEditable = readOnly ? mergeExtensionsReadOnly : ext;
 
   const Merge = CodeMirrorMerge as unknown as {
@@ -110,7 +106,6 @@ export function RepoCodeEditor({
           <Modified
             basicSetup={false}
             className="h-full text-xs"
-            editable={!readOnly}
             extensions={mergeExtensionsEditable}
             onChange={onChange}
             readOnly={readOnly}
@@ -149,7 +144,6 @@ export function RepoCodeEditor({
       <CodeMirror
         basicSetup={false}
         className="h-full text-xs"
-        editable={!readOnly}
         extensions={ext}
         height="100%"
         onChange={onChange}

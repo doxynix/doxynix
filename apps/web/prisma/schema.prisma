@@ -504,6 +504,7 @@ model Workspace {
   createdAt               DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt               DateTime                 @default(now()) @updatedAt() @map("updated_at") @db.Timestamptz(3)
   members                 WorkspaceMember[]
+  invites                 WorkspaceInvite[]
   entitlement             WorkspaceEntitlement?
   repos                   Repo[]
   githubInstallations     GithubInstallation[]
@@ -536,6 +537,23 @@ model WorkspaceMember {
   @@index([userId, workspaceId])
   @@index([workspaceId, role])
   @@map("workspace_members")
+}
+
+model WorkspaceInvite {
+  /// @zod.custom.omit(["model"])
+  id              String        @id() @default(dbgenerated("uuidv7()")) @db.Uuid()
+  workspaceId     String        @map("workspace_id") @db.Uuid()
+  createdByUserId String        @map("created_by_user_id") @db.Uuid()
+  tokenHash       String        @unique() @map("token_hash")
+  emailHash       String?       @map("email_hash")
+  role            WorkspaceRole @default(MEMBER)
+  expiresAt       DateTime      @map("expires_at") @db.Timestamptz(3)
+  acceptedAt      DateTime?     @map("accepted_at") @db.Timestamptz(3)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  workspace       Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@map("workspace_invites")
 }
 
 model WorkspaceEntitlement {

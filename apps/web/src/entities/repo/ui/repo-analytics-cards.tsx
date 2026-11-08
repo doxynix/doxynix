@@ -219,7 +219,7 @@ export function SecurityOverviewCard({
     <Card className="border-destructive/20 bg-background">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="flex items-center gap-2 font-bold text-xl tracking-tight">
-          <ShieldAlert className="size-5 animate-pulse text-destructive" />{" "}
+          <ShieldAlert className="size-5 text-destructive" />{" "}
           {t("repo_analytics_security_overview")}
         </CardTitle>
         <div className="flex flex-col items-end">

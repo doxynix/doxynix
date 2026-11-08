@@ -1,13 +1,13 @@
 "use client";
 
-import type * as React from "react";
+import type { ComponentProps } from "react";
 import { ChevronRightIcon } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./collapsible";
 
-function Trace({ className, ...props }: React.ComponentProps<"div">) {
+function Trace({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       className={cn(
@@ -24,7 +24,7 @@ function TraceLine({
   className,
   status,
   ...props
-}: React.ComponentProps<"span"> & {
+}: ComponentProps<"span"> & {
   status?: "running" | "error" | "pending";
 }) {
   return (
@@ -40,7 +40,7 @@ function TraceLine({
   );
 }
 
-function TraceIcon({ className, ...props }: React.ComponentProps<"span">) {
+function TraceIcon({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
       aria-hidden="true"
@@ -54,17 +54,17 @@ function TraceIcon({ className, ...props }: React.ComponentProps<"span">) {
   );
 }
 
-function TraceTitle({ className, ...props }: React.ComponentProps<"span">) {
+function TraceTitle({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
-      className={cn("min-w-0 truncate motion-reduce:shimmer-none", className)}
+      className={cn("min-w-0 truncate", className)}
       data-slot="trace-title"
       {...props}
     />
   );
 }
 
-function TraceDescription({ className, ...props }: React.ComponentProps<"span">) {
+function TraceDescription({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
       className={cn("shrink-0 text-muted-foreground/70 tabular-nums", className)}
@@ -77,12 +77,12 @@ function TraceDescription({ className, ...props }: React.ComponentProps<"span">)
 function TraceCollapsible({
   className,
   ...props
-}: Omit<React.ComponentProps<typeof Collapsible>, "asChild" | "open"> &
+}: Omit<ComponentProps<typeof Collapsible>, "asChild" | "open"> &
   (
     | { open?: undefined }
     | {
         open: boolean;
-        onOpenChange: NonNullable<React.ComponentProps<typeof Collapsible>["onOpenChange"]>;
+        onOpenChange: NonNullable<ComponentProps<typeof Collapsible>["onOpenChange"]>;
       }
   )) {
   return (
@@ -98,7 +98,7 @@ function TraceCollapsibleTrigger({
   className,
   children,
   ...props
-}: Omit<React.ComponentProps<typeof CollapsibleTrigger>, "asChild">) {
+}: Omit<ComponentProps<typeof CollapsibleTrigger>, "asChild">) {
   return (
     <CollapsibleTrigger
       className={cn(
@@ -120,7 +120,7 @@ function TraceCollapsibleContent({
   className,
   children,
   ...props
-}: Omit<React.ComponentProps<typeof CollapsibleContent>, "asChild">) {
+}: Omit<ComponentProps<typeof CollapsibleContent>, "asChild">) {
   return (
     <CollapsibleContent
       className="min-w-0 overflow-hidden duration-200 [--radix-accordion-content-height:var(--radix-collapsible-content-height)] data-open:animate-accordion-down data-closed:animate-accordion-up"

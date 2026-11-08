@@ -35,6 +35,7 @@ const config: IConfiguration = {
           "^src/instrumentation[.]ts$",
           "^src/instrumentation-client[.]ts$",
           // Source-text tests read their subject as a string, so `no-orphans` sees no inbound edge.
+          "(?:^|[/.])motion(?:-consumers|-policy)?[.]test[.]ts$",
           "^src/instrumentation-client[.]test[.]ts$",
           "^src/sentry[.]edge[.]config[.]test[.]ts$",
           "^src/sentry[.]server[.]config[.]test[.]ts$",

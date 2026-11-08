@@ -183,6 +183,7 @@ export function useRepoSetup(
       handleSelectRecommended,
       handleStartAnalysis,
       handleToggleSelection,
+      resetAnalysisError: () => analyzeMutation.reset(),
       setAnalysisLocale,
       setInstructions,
       setSearchTerm,
@@ -196,6 +197,7 @@ export function useRepoSetup(
     state: {
       analysisLocale,
       branches,
+      error: analyzeMutation.error,
       hasSearchMatches,
       instructions,
       isBranchesLoading,

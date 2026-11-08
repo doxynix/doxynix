@@ -47,6 +47,49 @@
   --color-fd-info: var(--status-info);
 }
 
+/* Documentation always uses neutral tokens: the accent themes are tuned for the dashboard, and a
+   tinted fumadocs palette looks like a different product. Scoping the functional tokens here keeps
+   the rest of the app themed and removes the color swap when the docs chunk hydrates. */
+#nd-notebook-layout,
+#fd-search-list {
+  --background: oklch(0.982 0.002 255);
+  --foreground: oklch(0.132 0.004 255);
+  --card: oklch(0.998 0.001 255);
+  --card-foreground: oklch(0.132 0.004 255);
+  --popover: oklch(1 0 0 / 0.96);
+  --popover-foreground: oklch(0.132 0.004 255);
+  --primary: oklch(0.45 0.015 50);
+  --primary-foreground: oklch(0.988 0.001 255);
+  --secondary: oklch(0.963 0.003 255);
+  --secondary-foreground: oklch(0.132 0.004 255);
+  --muted: oklch(0.973 0.002 255);
+  --muted-foreground: oklch(0.53 0.004 255);
+  --accent: oklch(0.963 0.003 255);
+  --accent-foreground: oklch(0.132 0.004 255);
+  --border: oklch(0 0 0 / 0.075);
+  --ring: oklch(0.22 0.004 255);
+}
+
+.dark #nd-notebook-layout,
+.dark #fd-search-list {
+  --background: oklch(0.128 0.004 255);
+  --foreground: oklch(0.972 0.002 255);
+  --card: oklch(0.188 0.004 255);
+  --card-foreground: oklch(0.972 0.002 255);
+  --popover: oklch(0.208 0.004 255 / 0.92);
+  --popover-foreground: oklch(0.972 0.002 255);
+  --primary: oklch(0.65 0.015 50);
+  --primary-foreground: oklch(0.972 0.002 255);
+  --secondary: oklch(0.244 0.003 255);
+  --secondary-foreground: oklch(0.972 0.002 255);
+  --muted: oklch(0.172 0.004 255);
+  --muted-foreground: oklch(0.68 0.004 255);
+  --accent: oklch(0.244 0.003 255);
+  --accent-foreground: oklch(0.972 0.002 255);
+  --border: oklch(1 0 0 / 0.095);
+  --ring: oklch(0.68 0.003 255);
+}
+
 #nd-notebook-layout .prose,
 #fd-search-list .prose {
   --tw-prose-body: var(--color-fd-foreground);
@@ -78,13 +121,16 @@
 }
 
 @utility transition-standard {
-  transition-timing-function: var(--tw-ease, cubic-bezier(0.4, 0, 0.2, 1));
+  transition-timing-function: var(--tw-ease, var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)));
   transition-duration: var(--tw-duration, 150ms);
-  transition-property:
-    color, background-color, border-color, opacity, box-shadow, transform, translate, rotate, scale;
+  transition-property: color, background-color, border-color, outline-color, opacity, transform;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* radix-rhea components target data-open/data-closed; Radix primitives set data-state. */
+@custom-variant data-open (&[data-state="open"], &[data-open]);
+@custom-variant data-closed (&[data-state="closed"], &[data-closed]);
 
 @theme inline {
   /* Base tokens */
@@ -186,8 +232,8 @@
 
   --animate-blink-cursor: blink-cursor 1.2s step-end infinite;
 
-  --animate-fade-in: fade-in 0.35s ease-out forwards;
-  --animate-fade-out: fade-out 0.35s ease-out forwards;
+  --animate-fade-in: fade-in 200ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) forwards;
+  --animate-fade-out: fade-out 150ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) forwards;
 
   --animate-float: float 5s ease-in-out infinite;
 
@@ -197,6 +243,14 @@
   --breakpoint-xs: 475px;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Motion contract, mirrored from src/shared/config/motion.ts */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
 
   @keyframes marquee {
     from {
@@ -643,7 +697,7 @@
 [data-appearance-transition] *,
 [data-appearance-transition] *::before,
 [data-appearance-transition] *::after {
-  transition-timing-function: ease-out !important;
+  transition-timing-function: var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) !important;
   transition-duration: 280ms !important;
   transition-property:
     color, background-color, border-color, outline-color, fill, stroke, box-shadow !important;
@@ -673,9 +727,28 @@ html {
 :root[data-reduce-motion] *::before,
 :root[data-reduce-motion] *::after {
   scroll-behavior: auto;
-  transition-duration: 0.01ms;
-  animation-duration: 0.01ms;
-  animation-iteration-count: 1;
+  transition-duration: 120ms !important;
+  transition-property: color, background-color, border-color, outline-color, opacity !important;
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+}
+
+:root[data-reduce-motion]
+  :is(
+    .shimmer,
+    .animate-marquee,
+    .animate-marquee-vertical,
+    .animate-shimmer-slide,
+    .animate-spin-around,
+    .animate-float,
+    .animate-skeleton-pulse
+  ) {
+  animation: none !important;
+}
+
+:root[data-reduce-motion] .animate-spin {
+  animation-duration: 1.2s !important;
+  animation-iteration-count: infinite !important;
 }
 
 :root[data-pointer-cursor] label,
@@ -857,9 +930,27 @@ body:has([data-public-theme="marketing-dark"]),
     ::before,
     ::after {
       scroll-behavior: auto;
-      transition-duration: 0.01ms;
-      animation-duration: 0.01ms;
-      animation-iteration-count: 1;
+      transition-duration: 120ms !important;
+      transition-property: color, background-color, border-color, outline-color, opacity !important;
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+    }
+
+    :is(
+        .shimmer,
+        .animate-marquee,
+        .animate-marquee-vertical,
+        .animate-shimmer-slide,
+        .animate-spin-around,
+        .animate-float,
+        .animate-skeleton-pulse
+      ) {
+      animation: none !important;
+    }
+
+    .animate-spin {
+      animation-duration: 1.2s !important;
+      animation-iteration-count: infinite !important;
     }
 
     ::view-transition-group(*),
@@ -991,7 +1082,7 @@ body:has([data-public-theme="marketing-dark"]),
   }
 
   .animate-skeleton-pulse {
-    animation: skeleton-pulse 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    animation: skeleton-pulse 1.8s var(--ease-in-out, cubic-bezier(0.77, 0, 0.175, 1)) infinite;
   }
 
   .animate-shimmer-slide {

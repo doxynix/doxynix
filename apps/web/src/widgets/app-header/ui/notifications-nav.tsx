@@ -20,6 +20,7 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
+import { LoadingButton } from "@/shared/ui/kit/loading-button";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
 import { notificationTypeConfig } from "@/entities/notification/model/notification-type-config";
@@ -110,14 +111,15 @@ export function NotificationsNav() {
       <DropdownMenuContent className="w-80">
         <div className="flex items-center justify-between p-2">
           <h2>{t("notifications_title")}</h2>
-          <AppButton
+          <LoadingButton
             className="text-xs"
-            disabled={markAllAsRead.isPending || unreadCount === 0}
+            disabled={unreadCount === 0}
+            isLoading={allReadPending || markAllAsRead.isPending}
             onClick={handleMarkAllAsRead}
             variant="link"
           >
             {t("notifications_mark_read")}
-          </AppButton>
+          </LoadingButton>
         </div>
         <DropdownMenuSeparator />
         {isLoading && notifications.length === 0 ? (

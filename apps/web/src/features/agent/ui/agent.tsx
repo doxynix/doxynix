@@ -1,30 +1,26 @@
 "use client";
 import { type ChangeEvent, type SyntheticEvent, useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
-import Image from "next/image";
 import { useChat } from "@ai-sdk/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { ToolUIPart, UIDataTypes, UIMessagePart, UITools } from "ai";
+import type { ChatStatus, UIMessage } from "ai";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
-import { ArrowDown, Bot, ChevronDown, FileText, Pencil, RotateCw, UserRound } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { ArrowDown } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
+import { type Components, Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { EASING } from "@/shared/config/motion";
 import { cn } from "@/shared/lib/cn";
 import { useAppearancePreferences } from "@/shared/lib/hooks/use-appearance-preferences";
-import { useAutoScroll } from "@/shared/lib/hooks/use-auto-scroll";
 import { usePanelLayout } from "@/shared/lib/hooks/use-panel-layout";
 import { DxnxLogo } from "@/shared/ui/branding/dxnx-logo";
 import { AppButton } from "@/shared/ui/core/button";
 import { Card } from "@/shared/ui/core/card";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/core/collapsible";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/shared/ui/core/empty";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ui/core/resizable";
-import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import { useSidebar } from "@/shared/ui/core/sidebar";
-import { Textarea } from "@/shared/ui/core/textarea";
-import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
-import { CopyButton } from "@/shared/ui/kit/copy-button";
+import { ActionErrorAlert } from "@/shared/ui/kit/action-error-alert";
 import { AnimatedShinyText } from "@/shared/ui/visuals/animated-shiny-text";
 
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
@@ -34,31 +30,59 @@ import type { AgentMessagePart, LocalFileAttachment } from "../model/agent-types
 import { useAgentIsOpen } from "../model/use-agent.store";
 import { AgentForm } from "./agent-form";
 import { AgentHeader } from "./agent-header";
+import { AgentMessageRow } from "./agent-message";
 import { AgentSidebar } from "./agent-sidebar";
-import { ToolCallIndicator, type ToolIndicatorPart } from "./tool-call-indicator";
+import { AgentSuggestions } from "./agent-suggestions";
 
-type SessionMessagePart = UIMessagePart<UIDataTypes, UITools>;
+function buildMessageParts(text: string, files: LocalFileAttachment[]): AgentMessagePart[] {
+  const parts: AgentMessagePart[] = [];
 
-type RenderedToolPart = ToolUIPart & ToolIndicatorPart;
+  if (text.trim() !== "") {
+    parts.push({ text, type: "text" });
+  }
 
-function isToolPart(part: SessionMessagePart): part is RenderedToolPart {
-  return part.type.startsWith("tool-");
+  for (const file of files) {
+    parts.push({
+      filename: file.name,
+      mediaType: file.contentType,
+      type: "file",
+      url: file.url,
+    });
+  }
+
+  return parts;
 }
 
-function MarkdownLoading() {
+function AgentListFooter({ context }: Readonly<{ context?: ChatStatus }>) {
   const t = useTranslations("Agent");
-  return <div className="animate-pulse text-muted-foreground text-xs">{t("agent_loading")}</div>;
+
+  if (context !== "submitted") {
+    return null;
+  }
+
+  return (
+    <div className="px-4 pb-2">
+      <AnimatedShinyText className="mx-0 self-start text-xs">{t("thinking")}</AnimatedShinyText>
+    </div>
+  );
 }
 
-const MarkdownRenderer = dynamic(() => import("./agent-text-message").then((mod) => mod.default), {
-  loading: () => <MarkdownLoading />,
-  ssr: false,
-});
+// Hoisted so Virtuoso never remounts its footer when the panel re-renders.
+const AGENT_LIST_COMPONENTS: Components<UIMessage, ChatStatus> = {
+  Footer: AgentListFooter,
+};
+
+const INCREASE_VIEWPORT_BY = { bottom: 400, top: 200 };
+
+const INITIAL_TOP_MOST_ITEM_INDEX = { align: "end", index: "LAST" } as const;
+
+function computeMessageKey(_: number, message: UIMessage) {
+  return message.id;
+}
 
 export function Agent() {
   const trpc = useTRPC();
   const t = useTranslations("Agent");
-  const tCommon = useTranslations("Common");
   const isOpen = useAgentIsOpen();
 
   const { defaultLayout, onLayoutChanged } = usePanelLayout("agent");
@@ -68,6 +92,9 @@ export function Agent() {
   const [editInput, setEditInput] = useState("");
   const [input, setInput] = useState("");
   const [attachments, setAttachments] = useState<LocalFileAttachment[]>([]);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
 
   const { name, owner } = useRepoParams();
   const currentRepo = owner && name ? { name, owner } : undefined;
@@ -77,6 +104,8 @@ export function Agent() {
   const lastLoadedSessionIdRef = useRef<null | string>(sessionId);
 
   const queryClient = useQueryClient();
+  // Guards against two submits in the same tick, where `status` from the last render is stale.
+  const submittingRef = useRef(false);
 
   const { data: sessions } = useQuery(
     trpc.agent.listSessions.queryOptions({ currentRepo }, { enabled: isOpen }),
@@ -91,32 +120,41 @@ export function Agent() {
     ),
   );
 
-  const { addToolApprovalResponse, messages, regenerate, sendMessage, setMessages, status } =
-    useChat({
-      id: sessionId ?? undefined,
-      messages:
-        history?.map((msg) => ({
-          createdAt: msg.createdAt,
-          id: msg.id,
-          parts: msg.parts,
-          role: msg.role as "assistant" | "system" | "user",
-        })) ?? [],
-      onFinish: () => {
-        void queryClient.invalidateQueries(trpc.agent.listSessions.pathFilter());
-        void queryClient.invalidateQueries(
-          trpc.agent.getSessionHistory.queryFilter({ sessionId: sessionId ?? "" }),
-        );
-      },
-      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
-      throttle: 32,
-      transport: new DefaultChatTransport({
-        api: "/api/agent/chat",
-        body: () => ({
-          currentRepo,
-          sessionId,
-        }),
+  const {
+    addToolApprovalResponse,
+    clearError,
+    error,
+    messages,
+    regenerate,
+    sendMessage,
+    setMessages,
+    status,
+    stop,
+  } = useChat({
+    id: sessionId ?? undefined,
+    messages:
+      history?.map((msg) => ({
+        createdAt: msg.createdAt,
+        id: msg.id,
+        parts: msg.parts,
+        role: msg.role as "assistant" | "system" | "user",
+      })) ?? [],
+    onFinish: () => {
+      void queryClient.invalidateQueries(trpc.agent.listSessions.pathFilter());
+      void queryClient.invalidateQueries(
+        trpc.agent.getSessionHistory.queryFilter({ sessionId: sessionId ?? "" }),
+      );
+    },
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
+    throttle: 32,
+    transport: new DefaultChatTransport({
+      api: "/api/agent/chat",
+      body: () => ({
+        currentRepo,
+        sessionId,
       }),
-    });
+    }),
+  });
 
   useEffect(() => {
     if (
@@ -134,6 +172,10 @@ export function Agent() {
         })),
       );
       lastLoadedSessionIdRef.current = sessionId;
+      setIsAtBottom(true);
+      requestAnimationFrame(() => {
+        virtuosoRef.current?.scrollToIndex({ align: "end", behavior: "auto", index: "LAST" });
+      });
     }
   }, [history, sessionId, isSessionSaved, setMessages]);
 
@@ -155,16 +197,17 @@ export function Agent() {
     });
   }, [messages, queryClient, trpc]);
 
-  const { scrollRef, scrollToBottom, showScrollButton } = useAutoScroll<HTMLDivElement>([messages]);
   const { open } = useSidebar();
   const { preferences } = useAppearancePreferences();
+  const reduceMotion = useReducedMotion();
 
-  useEffect(() => {
-    const element = scrollRef.current;
-    if (element != null) {
-      element.scrollTo({ top: element.scrollHeight });
-    }
-  }, [scrollRef]);
+  const scrollToBottom = (behavior?: "auto" | "smooth") => {
+    virtuosoRef.current?.scrollToIndex({
+      align: "end",
+      behavior: behavior ?? (reduceMotion ? "auto" : "smooth"),
+      index: "LAST",
+    });
+  };
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) {
@@ -195,41 +238,56 @@ export function Agent() {
     setAttachments((prev) => [...prev, ...newAttachments]);
   };
 
-  const handleCustomSubmit = async (e?: SyntheticEvent) => {
-    e?.preventDefault();
-    if (input.trim() === "" && attachments.length === 0) {
+  const submitMessage = async (parts: AgentMessagePart[]) => {
+    // A second sendMessage mid-stream opens a concurrent turn; ignore it instead.
+    if (submittingRef.current || status === "submitted" || status === "streaming") {
       return;
     }
 
-    const userMessage = input;
-    const currentAttachments = attachments;
-    setInput("");
-    setAttachments([]);
-
-    const messageParts: AgentMessagePart[] = [];
-    if (userMessage.trim() !== "") {
-      messageParts.push({ text: userMessage, type: "text" });
-    }
-    currentAttachments.forEach((file) => {
-      messageParts.push({
-        filename: file.name,
-        mediaType: file.contentType,
-        type: "file",
-        url: file.url,
-      });
-    });
+    submittingRef.current = true;
     await sendMessage({
       createdAt: new Date(),
-      parts: messageParts,
+      parts,
       role: "user",
+    }).catch(() => {
+      // useChat exposes the failure through its error state.
     });
+    submittingRef.current = false;
+  };
+
+  const handleCustomSubmit = async (e?: SyntheticEvent) => {
+    e?.preventDefault();
+    if (isHistoryLoading || (input.trim() === "" && attachments.length === 0)) {
+      return;
+    }
+
+    const parts = buildMessageParts(input, attachments);
+    setInput("");
+    setAttachments([]);
+    await submitMessage(parts);
+  };
+
+  const handleSuggestion = (prompt: string) => {
+    if (isHistoryLoading) {
+      return;
+    }
+
+    void submitMessage(buildMessageParts(prompt, []));
   };
 
   const handleNewChat = () => {
     const newId = crypto.randomUUID();
+    void stop();
     setSessionId(newId);
     setMessages([]);
+    setIsAtBottom(true);
     lastLoadedSessionIdRef.current = newId;
+  };
+
+  const handleSessionChange = (id: null | string) => {
+    void stop();
+    setSessionId(id);
+    setIsAtBottom(true);
   };
 
   const handleSessionDeleted = (deletedSessionId: string) => {
@@ -239,6 +297,34 @@ export function Agent() {
   };
 
   const isLoading = status === "submitted" || status === "streaming" || isHistoryLoading;
+
+  const renderMessage = (index: number, message: UIMessage) => {
+    const isLastMessage = index === messages.length - 1;
+
+    return (
+      <AgentMessageRow
+        addToolApprovalResponse={addToolApprovalResponse}
+        editInput={editInput}
+        isEditing={editingMessageId === message.id}
+        isLast={isLastMessage}
+        isStreaming={isLoading && message.role === "assistant" && isLastMessage}
+        message={message}
+        onCancelEdit={() => setEditingMessageId(null)}
+        onEdit={(text) => {
+          setEditingMessageId(message.id);
+          setEditInput(text);
+        }}
+        onEditInputChange={setEditInput}
+        onRegenerate={() => {
+          void regenerate({ messageId: message.id });
+        }}
+        onSaveEdit={(text) => {
+          void sendMessage({ messageId: message.id, text });
+        }}
+        toolLabelKeys={toolLabelKeys}
+      />
+    );
+  };
   const isRepoOwnerPage = owner !== "" && name !== "";
   const openLeft =
     preferences.sidebarVariant === "floating"
@@ -250,41 +336,29 @@ export function Agent() {
         ? "left-[calc(var(--sidebar-width-icon)+1.5rem+2px)]"
         : "left-[calc(var(--sidebar-width-icon)+1rem)]"
       : "left-4";
+
   const wrapperClasses = cn(
     "fixed z-50 flex overflow-hidden",
+    // The panel is position:fixed and out of flow, so this reflows its own subtree only.
     "transition-[left] duration-300 ease-out-expo",
     "group-data-[resizing]/sidebar-wrapper:transition-none",
     expanded ? (open ? openLeft : collapsedLeft) : "left-[calc(100vw-450px)]",
   );
 
+  const insets = expanded
+    ? { bottom: 16, right: 16, top: isRepoOwnerPage ? 126 : 86 }
+    : { bottom: 20, right: 20, top: "calc(100vh - 740px)" };
+
   return (
     <AnimatePresence>
       {isOpen ? (
         <motion.div
-          animate={{
-            bottom: expanded ? 16 : 20,
-            opacity: 1,
-            right: expanded ? 16 : 20,
-            top: expanded ? (isRepoOwnerPage ? 126 : 86) : "calc(100vh - 740px)",
-            y: 0,
-          }}
+          animate={{ opacity: 1, y: 0 }}
           className={wrapperClasses}
-          exit={{
-            opacity: 0,
-            y: 12,
-          }}
-          initial={{
-            bottom: 20,
-            opacity: 0,
-            right: 20,
-            top: "calc(100vh - 740px)",
-            y: 12,
-          }}
-          transition={{
-            duration: 0.45,
-            ease: [0.16, 1, 0.3, 1],
-            type: "tween",
-          }}
+          exit={{ opacity: 0, y: reduceMotion ? 0 : 8 }}
+          initial={{ opacity: 0, y: reduceMotion ? 0 : 8 }}
+          style={insets}
+          transition={{ duration: 0.2, ease: [...EASING.out] }}
         >
           <aside
             aria-label={t("assistant_name")}
@@ -312,7 +386,7 @@ export function Agent() {
                         onSessionDeleted={handleSessionDeleted}
                         sessionId={sessionId}
                         sessions={sessions}
-                        setSessionId={setSessionId}
+                        setSessionId={handleSessionChange}
                       />
                     </ResizablePanel>
                     <ResizableHandle className="z-[9999]" />
@@ -330,259 +404,58 @@ export function Agent() {
                   />
 
                   <div className="relative flex min-h-0 flex-1 flex-col">
-                    <ScrollArea
-                      className="h-full min-h-0 flex-1"
-                      ref={scrollRef}
-                    >
-                      {messages.length === 0 && (
-                        <div className="fade-in pointer-events-none flex animate-in select-none flex-col items-center gap-3 pt-24">
-                          <DxnxLogo className="size-64" />
-                          <p className="text-muted-foreground text-sm">
-                            {t("assistant_description")}
-                          </p>
-                        </div>
-                      )}
-                      <div className="flex flex-col gap-4 p-4">
-                        {messages.map((message) => {
-                          const fullMessageText =
-                            message.parts
-                              .filter((part) => part.type === "text")
-                              .map((part) => part.text)
-                              .join("\n") || "";
-
-                          const isAssistant = message.role === "assistant";
-                          const isEditing = editingMessageId === message.id;
-                          const isStreamingThis =
-                            isLoading && isAssistant && message.id === messages.at(-1)?.id;
-
-                          return (
-                            <div
-                              className="group fade-in flex w-full animate-in flex-col gap-2 border-b py-5 duration-300 last:border-0"
-                              key={message.id}
-                            >
-                              <div
-                                className={cn(
-                                  "flex items-center gap-2 font-semibold text-muted-foreground text-xs",
-                                  isAssistant ? "justify-start" : "justify-end",
-                                )}
-                              >
-                                {isAssistant ? <Bot /> : <UserRound />}
-                                <span>{isAssistant ? t("assistant_name") : t("you")}</span>
-                              </div>
-
-                              {isEditing ? (
-                                <div className="fade-in ml-auto flex w-full animate-in flex-col gap-2 duration-200">
-                                  <Textarea
-                                    className="max-h-32 min-h-16 resize-none rounded-xl border p-2 text-xs"
-                                    onChange={(e) => setEditInput(e.target.value)}
-                                    value={editInput}
-                                  />
-                                  <div className="flex items-center justify-end gap-1.5">
-                                    <AppButton
-                                      className="text-xs"
-                                      onClick={() => {
-                                        void (async () => {
-                                          if (editInput.trim() === "") {
-                                            return;
-                                          }
-                                          setEditingMessageId(null);
-                                          await sendMessage({
-                                            messageId: message.id,
-                                            text: editInput,
-                                          });
-                                        })();
-                                      }}
-                                      size="sm"
-                                    >
-                                      {t("save_and_submit")}
-                                    </AppButton>
-                                    <AppButton
-                                      className="text-xs"
-                                      onClick={() => setEditingMessageId(null)}
-                                      size="sm"
-                                      variant="ghost"
-                                    >
-                                      {tCommon("cancel")}
-                                    </AppButton>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div
-                                  className={cn(
-                                    "flex max-w-full flex-col gap-3 text-foreground text-sm",
-                                    isAssistant ? "mr-auto text-left" : "ml-auto text-right",
-                                  )}
-                                >
-                                  {message.parts.map((part, index) => {
-                                    if (part.type === "reasoning") {
-                                      const partKey = `${message.id}-reasoning-${index}`;
-                                      return (
-                                        <Collapsible
-                                          className="group/collapsible my-1 rounded-r-lg border-l-2 pl-3 text-muted-foreground text-xs italic"
-                                          defaultOpen={
-                                            isLoading && message.id === messages.at(-1)?.id
-                                          }
-                                          key={partKey}
-                                        >
-                                          <div className="flex items-center justify-between gap-1">
-                                            <div className="font-semibold text-xs uppercase">
-                                              {t("thinking_process")}
-                                            </div>
-                                            <CollapsibleTrigger asChild>
-                                              <AppButton
-                                                aria-label={t("thinking_process")}
-                                                size="icon"
-                                                variant="ghost"
-                                              >
-                                                <ChevronDown className="group-data-[state=open]/collapsible:rotate-180" />
-                                              </AppButton>
-                                            </CollapsibleTrigger>
-                                          </div>
-                                          <CollapsibleContent>
-                                            <MarkdownRenderer
-                                              content={part.text}
-                                              id={partKey}
-                                              isStreaming={isStreamingThis}
-                                              key={`${partKey}-md`}
-                                            />
-                                          </CollapsibleContent>
-                                        </Collapsible>
-                                      );
-                                    }
-
-                                    if (isToolPart(part)) {
-                                      return (
-                                        <ToolCallIndicator
-                                          addToolApprovalResponse={(e) =>
-                                            void addToolApprovalResponse(e)
-                                          }
-                                          key={`${message.id}-tool-${index}`}
-                                          part={part}
-                                          toolLabelKeys={toolLabelKeys}
-                                        />
-                                      );
-                                    }
-
-                                    if (part.type === "text") {
-                                      return (
-                                        <MarkdownRenderer
-                                          content={part.text}
-                                          id={`${message.id}-text-${index}`}
-                                          isStreaming={isStreamingThis}
-                                          key={`${message.id}-text-${index}`}
-                                        />
-                                      );
-                                    }
-
-                                    if (part.type === "file") {
-                                      const isImage = part.mediaType.startsWith("image/");
-
-                                      return (
-                                        <div
-                                          className={cn(
-                                            "my-2 max-w-50 overflow-hidden rounded-xl border bg-background",
-                                            isAssistant ? "mr-auto" : "ml-auto",
-                                          )}
-                                          key={`${message.id}-file-${index}`}
-                                        >
-                                          {isImage ? (
-                                            <Image
-                                              alt={part.filename ?? t("attachment_fallback")}
-                                              className="h-auto max-h-38 w-full object-cover"
-                                              height={200}
-                                              src={part.url}
-                                              width={200}
-                                            />
-                                          ) : (
-                                            <div className="flex items-center gap-2 p-3 text-foreground text-xs">
-                                              <FileText />
-                                              <span className="truncate font-medium">
-                                                {part.filename ?? t("document_fallback")}
-                                              </span>
-                                            </div>
-                                          )}
-                                        </div>
-                                      );
-                                    }
-
-                                    return null;
-                                  })}
-                                </div>
-                              )}
-
-                              <div
-                                className={cn(
-                                  "mt-1 flex items-center gap-1.5",
-                                  isAssistant ? "justify-start" : "justify-end",
-                                )}
-                              >
-                                {fullMessageText.trim() !== "" && (
-                                  <>
-                                    <CopyButton
-                                      className="size-9 px-3"
-                                      tooltipText={t("copy_response")}
-                                      value={fullMessageText}
-                                    />
-                                    <AppTooltip content={tCommon("retry")}>
-                                      <AppButton
-                                        aria-label={tCommon("retry")}
-                                        className="opacity-0 duration-300 group-hover:opacity-100"
-                                        disabled={isLoading}
-                                        onClick={() => {
-                                          void (async () => {
-                                            await regenerate({ messageId: message.id });
-                                          })();
-                                        }}
-                                        size="icon"
-                                        variant="ghost"
-                                      >
-                                        <RotateCw />
-                                      </AppButton>
-                                    </AppTooltip>
-                                  </>
-                                )}
-
-                                {!isAssistant && !isEditing && (
-                                  <AppButton
-                                    aria-label={tCommon("edit")}
-                                    className="opacity-0 duration-300 group-hover:opacity-100"
-                                    onClick={() => {
-                                      setEditingMessageId(message.id);
-                                      setEditInput(fullMessageText);
-                                    }}
-                                    size="icon"
-                                    variant="ghost"
-                                  >
-                                    <Pencil />
-                                  </AppButton>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                        {status === "submitted" && (
-                          <AnimatedShinyText className="mx-0 self-start text-xs">
-                            {t("thinking")}
-                          </AnimatedShinyText>
-                        )}
-                      </div>
-                    </ScrollArea>
+                    {messages.length === 0 ? (
+                      <Empty className="fade-in h-full animate-in border-0 pt-16">
+                        <EmptyHeader>
+                          <DxnxLogo className="size-40" />
+                          <EmptyTitle>{t("assistant_name")}</EmptyTitle>
+                          <EmptyDescription>{t("assistant_description")}</EmptyDescription>
+                        </EmptyHeader>
+                        <AgentSuggestions
+                          hasRepo={currentRepo != null}
+                          onSelect={handleSuggestion}
+                        />
+                      </Empty>
+                    ) : (
+                      <Virtuoso
+                        atBottomStateChange={setIsAtBottom}
+                        atBottomThreshold={80}
+                        className="min-h-0 flex-1"
+                        components={AGENT_LIST_COMPONENTS}
+                        computeItemKey={computeMessageKey}
+                        context={status}
+                        data={messages}
+                        followOutput="auto"
+                        increaseViewportBy={INCREASE_VIEWPORT_BY}
+                        initialTopMostItemIndex={INITIAL_TOP_MOST_ITEM_INDEX}
+                        itemContent={renderMessage}
+                        ref={virtuosoRef}
+                      />
+                    )}
 
                     <AppButton
                       aria-label={t("scroll_to_bottom")}
                       className={cn(
                         "absolute bottom-4 left-1/2 z-10 -translate-x-1/2",
-                        showScrollButton
+                        !isAtBottom
                           ? "pointer-events-auto scale-100 opacity-100"
                           : "pointer-events-none scale-90 opacity-0",
                       )}
-                      onClick={() => scrollToBottom("smooth")}
+                      onClick={() => scrollToBottom()}
                       size="icon"
                       variant="secondary"
                     >
                       <ArrowDown />
                     </AppButton>
                   </div>
+
+                  {error != null && (
+                    <ActionErrorAlert
+                      className="mx-4 mb-2"
+                      error={error}
+                      onDismiss={clearError}
+                    />
+                  )}
 
                   <AgentForm
                     attachments={attachments}
@@ -593,6 +466,9 @@ export function Agent() {
                     }}
                     input={input}
                     isLoading={isLoading}
+                    onStop={() => {
+                      void stop();
+                    }}
                     onSubmit={(e) => {
                       void (async () => {
                         await handleCustomSubmit(e);

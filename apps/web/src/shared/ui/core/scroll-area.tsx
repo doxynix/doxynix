@@ -36,7 +36,7 @@ const ScrollBar = forwardRef<
     className={cn(
       "flex touch-none select-none transition-colors",
       "data-[state=visible]:fade-in-0 data-[state=visible]:animate-in data-[state=visible]:duration-200",
-      "data-[state=hidden]:fade-out-0 data-[state=hidden]:animate-out data-[state=hidden]:duration-200",
+      "data-[state=hidden]:fade-out-0 data-[state=hidden]:animate-out fill-mode-forwards data-[state=hidden]:duration-200",
       orientation === "vertical" && "h-full w-1.5 border-l border-l-transparent p-px",
       orientation === "horizontal" && "h-1.5 flex-col border-t border-t-transparent p-px",
       className,

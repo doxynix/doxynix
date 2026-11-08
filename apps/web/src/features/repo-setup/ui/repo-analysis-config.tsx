@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/shared/ui/core/select";
 import { Textarea } from "@/shared/ui/core/textarea";
+import { ActionErrorAlert } from "@/shared/ui/kit/action-error-alert";
 import { FLAGS, Flag } from "@/shared/ui/kit/language-switcher";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
@@ -97,6 +98,13 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
         <CardDescription>{t("setup_analysis_desc")}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6 overflow-y-auto">
+        {state.error != null && (
+          <ActionErrorAlert
+            error={state.error}
+            onDismiss={actions.resetAnalysisError}
+          />
+        )}
+
         <div className="grid gap-4 md:grid-cols-2">
           <div className="flex flex-col gap-3">
             <Label

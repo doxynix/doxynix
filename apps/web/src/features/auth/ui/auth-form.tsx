@@ -24,6 +24,7 @@ import { authClient } from "@/shared/lib/auth-client";
 import { cn } from "@/shared/lib/cn";
 import { setClientCookie } from "@/shared/lib/cookies";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
+import { isPathname } from "@/shared/lib/safe-redirect";
 import { Logo } from "@/shared/ui/branding/doxynix-logo";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
@@ -73,7 +74,11 @@ const noopSubscribe = () => () => undefined;
 const getLastUsedLoginMethod = () => authClient.getLastUsedLoginMethod();
 const getNoLastUsedLogin = () => null;
 
-function armPasskeyAutofill(pending: RefObject<boolean>, router: ReturnType<typeof useRouter>) {
+function armPasskeyAutofill(
+  pending: RefObject<boolean>,
+  router: ReturnType<typeof useRouter>,
+  redirectTo: string,
+) {
   if (pending.current) {
     return;
   }
@@ -87,7 +92,7 @@ function armPasskeyAutofill(pending: RefObject<boolean>, router: ReturnType<type
         return;
       }
       trackClientEvent("sign_in_attempted", { provider: "passkey" });
-      router.replace("/dashboard");
+      router.replace(redirectTo);
     })
     .catch(() => {
       // An autofill attempt that finds no credential (or is dismissed) is not an error.
@@ -97,7 +102,8 @@ function armPasskeyAutofill(pending: RefObject<boolean>, router: ReturnType<type
     });
 }
 
-export function AuthForm() {
+export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }>) {
+  const newUserTarget = isPathname(target, "/dashboard") ? "/welcome" : target;
   const router = useRouter();
   const tCommon = useTranslations("Common");
   const t = useTranslations("Auth");
@@ -148,8 +154,8 @@ export function AuthForm() {
   const [isTwoFactorVerifying, setIsTwoFactorVerifying] = useState(false);
 
   useEffect(() => {
-    armPasskeyAutofill(passkeyPendingRef, router);
-  }, [router]);
+    armPasskeyAutofill(passkeyPendingRef, router, target);
+  }, [router, target]);
 
   const form = useForm<MagicLinkSchemaValue>({
     defaultValues: { email: "" },
@@ -166,14 +172,14 @@ export function AuthForm() {
 
     await authClient.signIn
       .magicLink({
-        callbackURL: "/dashboard",
+        callbackURL: target,
         email: values.email,
         fetchOptions: {
           headers: {
             "x-captcha-response": token,
           },
         },
-        newUserCallbackURL: "/welcome",
+        newUserCallbackURL: newUserTarget,
       })
       .then(() => {
         setSentEmail(values.email);
@@ -219,9 +225,9 @@ export function AuthForm() {
 
     await authClient.signIn
       .social({
-        callbackURL: "/dashboard",
+        callbackURL: target,
         loginHint: currentEmail || undefined,
-        newUserCallbackURL: "/welcome",
+        newUserCallbackURL: newUserTarget,
         provider,
       })
       .catch(() => {
@@ -260,7 +266,7 @@ export function AuthForm() {
       .then(() => {
         toast.success(t("success_authenticated"));
         void setTwoFactorParam(null);
-        router.replace("/dashboard");
+        router.replace(target);
       })
       .catch((error: unknown) => {
         const msg = error instanceof Error ? error.message : t("error_verification_failed");
@@ -449,7 +455,7 @@ export function AuthForm() {
                             placeholder="doxynix@example.com"
                             {...field}
                             onFocus={() => {
-                              armPasskeyAutofill(passkeyPendingRef, router);
+                              armPasskeyAutofill(passkeyPendingRef, router, target);
                             }}
                           />
                         </FormControl>

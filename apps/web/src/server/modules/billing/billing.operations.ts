@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
 
-import { BillingOperationStatus } from "@doxynix/shared";
+import { BillingOperationStatus, MessageCode } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
 
+import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
 
 import { BillingCatalogError } from "./billing.catalog";
@@ -169,12 +169,20 @@ export function sanitizeBillingResult(result: unknown): unknown {
   return sanitizeBillingValue(result, 0);
 }
 
-function idempotencyConflict(): TRPCError {
-  return new TRPCError({ code: "CONFLICT", message: "BILLING_IDEMPOTENCY_CONFLICT" });
+function idempotencyConflict(): AppError {
+  return new AppError({
+    code: "CONFLICT",
+    messageCode: MessageCode.BILLING_IDEMPOTENCY_CONFLICT,
+    publicMessage: "BILLING_IDEMPOTENCY_CONFLICT",
+  });
 }
 
-function operationInProgress(): TRPCError {
-  return new TRPCError({ code: "CONFLICT", message: "BILLING_OPERATION_IN_PROGRESS" });
+function operationInProgress(): AppError {
+  return new AppError({
+    code: "CONFLICT",
+    messageCode: MessageCode.BILLING_OPERATION_IN_PROGRESS,
+    publicMessage: "BILLING_OPERATION_IN_PROGRESS",
+  });
 }
 
 function isUniqueViolation(error: unknown): boolean {
@@ -182,8 +190,8 @@ function isUniqueViolation(error: unknown): boolean {
 }
 
 function errorCodeFor(error: unknown): string {
-  if (error instanceof TRPCError) {
-    return error.message.slice(0, 64);
+  if (error instanceof AppError) {
+    return error.messageCode ?? error.code;
   }
 
   if (error instanceof BillingCatalogError) {
@@ -201,7 +209,11 @@ function parseRequest(input: BeginBillingOperationInput): BillingOperationReques
   });
 
   if (!parsed.success) {
-    throw new TRPCError({ code: "BAD_REQUEST", message: "INVALID_BILLING_OPERATION_REQUEST" });
+    throw new AppError({
+      code: "BAD_REQUEST",
+      messageCode: MessageCode.INVALID_BILLING_OPERATION_REQUEST,
+      publicMessage: "INVALID_BILLING_OPERATION_REQUEST",
+    });
   }
 
   return parsed.data;

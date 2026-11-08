@@ -8,25 +8,40 @@ import {
   createTRPCRouter,
   ownerProcedure,
   protectedProcedure,
+  publicProcedure,
   workspaceProcedure,
 } from "@/server/core/trpc/init";
+import { REDIS_CONFIG } from "@/server/utils/redis";
 
 import {
   AddWorkspaceMemberSchema,
+  CreateWorkspaceInviteSchema,
   RemoveWorkspaceMemberSchema,
   SeatAdditionPreviewSchema,
   SwitchWorkspaceSchema,
+  WorkspaceInviteAcceptedSchema,
+  WorkspaceInviteCreatedSchema,
+  WorkspaceInvitePreviewSchema,
+  WorkspaceInviteTokenSchema,
   WorkspaceMemberSummarySchema,
   WorkspaceSummarySchema,
 } from "./workspace.schemas";
 import { workspaceService } from "./workspace.service";
 
 export const workspaceRouter = createTRPCRouter({
+  acceptInvite: protectedProcedure
+    .input(WorkspaceInviteTokenSchema)
+    .output(WorkspaceInviteAcceptedSchema)
+    .mutation(async ({ ctx, input }) => {
+      return workspaceService.acceptInvite(input.token, ctx.session.user.id);
+    }),
   addMember: ownerProcedure
     .input(AddWorkspaceMemberSchema)
     .output(WorkspaceMemberSummarySchema)
     .mutation(async ({ ctx, input }) => {
-      const { success } = await memberAddLimiter.limit(`user:${ctx.session.user.id}`);
+      const { success } = await memberAddLimiter.limit(
+        REDIS_CONFIG.rateLimit.user(ctx.session.user.id),
+      );
 
       if (!success) {
         throw new AppError({
@@ -37,6 +52,28 @@ export const workspaceRouter = createTRPCRouter({
       }
 
       return workspaceService.addMember(ctx.db, ctx.workspace.id, input.email);
+    }),
+
+  createInvite: ownerProcedure
+    .input(CreateWorkspaceInviteSchema)
+    .output(WorkspaceInviteCreatedSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { success } = await memberAddLimiter.limit(
+        REDIS_CONFIG.rateLimit.user(ctx.session.user.id),
+      );
+
+      if (!success) {
+        throw new AppError({
+          code: "TOO_MANY_REQUESTS",
+          messageCode: MessageCode.MEMBER_RATE_LIMITED,
+          publicMessage: "RATE_LIMITED",
+        });
+      }
+
+      return workspaceService.createInvite(ctx.workspace.id, ctx.session.user.id, {
+        email: input.email,
+        inviterName: ctx.session.user.name,
+      });
     }),
 
   members: workspaceProcedure
@@ -62,6 +99,13 @@ export const workspaceRouter = createTRPCRouter({
         ctx.req.headers.get("x-workspace-id"),
         ctx.session.user.name,
       );
+    }),
+
+  previewInvite: publicProcedure
+    .input(WorkspaceInviteTokenSchema)
+    .output(WorkspaceInvitePreviewSchema)
+    .query(async ({ input }) => {
+      return workspaceService.previewInvite(input.token);
     }),
 
   removeMember: ownerProcedure

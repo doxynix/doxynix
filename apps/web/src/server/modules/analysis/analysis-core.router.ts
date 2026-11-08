@@ -4,6 +4,7 @@ import * as z from "zod";
 import { AppError } from "@/server/core/api-error";
 import { analysisStartLimiter } from "@/server/core/ratelimit";
 import { entitlementProcedure, workspaceProcedure } from "@/server/core/trpc/init";
+import { REDIS_CONFIG } from "@/server/utils/redis";
 
 import { AnalysisScopeInputSchema } from "./analysis.schemas";
 import { AnalysisLatestOutputSchema } from "./analysis-latest.schemas";
@@ -24,7 +25,9 @@ export const analysisCoreRouter = {
     )
     .output(z.object({ jobId: z.string(), publicAccessToken: z.string(), status: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { success } = await analysisStartLimiter.limit(`user:${ctx.session.user.id}`);
+      const { success } = await analysisStartLimiter.limit(
+        REDIS_CONFIG.rateLimit.user(ctx.session.user.id),
+      );
 
       if (!success) {
         throw new AppError({

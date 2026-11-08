@@ -42,11 +42,14 @@ export function BillingSettingsPage() {
           entitlement={data.entitlement}
           subscription={data.subscription}
         />
-        <UsageCard entitlement={data.entitlement} />
+        <SeatsCard
+          activeMembers={data.activeMembers}
+          seatLimit={data.entitlement.seatLimit}
+        />
       </div>
-      <SeatsCard
-        activeMembers={data.activeMembers}
-        seatLimit={data.entitlement.seatLimit}
+      <UsageCard
+        entitlement={data.entitlement}
+        usage={data.usage}
       />
     </div>
   );
