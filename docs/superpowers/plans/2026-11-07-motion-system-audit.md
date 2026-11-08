@@ -114,7 +114,7 @@ Severity: **HIGH** = feels wrong or breaks a hard rule; **MED** = noticeably off
 | F14 | MED | `copy-button.tsx:66,73` | `scale-0` entrance — "nothing appears from nothing" | `scale-90` + opacity |
 | F15 | LOW | `input-otp.tsx:53` | `transition-all` | Explicit property list |
 | F16 | MED | `sidebar.tsx:337,350` | Offcanvas collapse animates `left`/`right` (layout) at 300 ms | `translate-x` (compositor) + keep `width` |
-| F17 | HIGH | `command.tsx:42` → `dialog.tsx:74` | `Ctrl+K` palette inherits the full 300 ms modal zoom. A keyboard action used 100+ times a day must not animate | `animate-none` on the palette content |
+| F17 | — | `command.tsx:42` → `dialog.tsx:74` | `Ctrl+K` palette inherited the full 300 ms modal zoom. An `animated={false}` opt-out was added, then **reversed on request** — the palette keeps the standard dialog animation | No opt-out; the `animated` prop was removed and `command.motion.test.ts` deleted |
 | F18 | — | `accordion.tsx:49`, `trace.tsx:126` | Height keyframes for accordions are the one tolerated layout animation | **No action** |
 | F19 | MED | `animated-circular-progress-bar.tsx:72,95-97` | `transition: all` inline; 1 s; animates `stroke-dasharray` (paint) | `stroke-dasharray` only, 400 ms, token curve |
 | F20 | — | `scroll-area.tsx:37-39`, `switch.tsx`, `slider.tsx`, `calendar.tsx` | Colour/transform only, sane durations | **No action** |
@@ -942,6 +942,8 @@ git commit -m "fix(web): name the transitioned properties in the otp input"
 ---
 
 ### Task 9: Command palette opens instantly
+
+> **Status: reversed.** The palette now keeps the standard dialog animation, so `DialogContent` has no `animated` prop and `command.motion.test.ts` was removed. Do not re-add the opt-out.
 
 Closes F17.
 
