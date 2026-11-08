@@ -11,6 +11,15 @@ export const REDIS_CONFIG = {
     prStaging: (userId: string, repoId: string): string => `pr-stage:${userId}:${repoId}`,
   },
 
+  rateLimit: {
+    docsChatGlobal: "global",
+    emailAndIp: (email: string, ip: string): string => `${email}:${ip}`,
+    ip: (ip: string): string => `ip:${ip}`,
+    llmTpm: "global-llm-tpm",
+    user: (userId: string): string => `user:${userId}`,
+    userToken: (token: string): string => `user:${token.slice(-16)}`,
+  },
+
   ttl: {
     fileAction: 86_400, // 24 hours
     fixResult: 3600, // 1 hour

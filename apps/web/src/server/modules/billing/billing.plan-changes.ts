@@ -1,5 +1,6 @@
-import { TRPCError } from "@trpc/server";
+import { MessageCode } from "@doxynix/shared";
 
+import { AppError } from "@/server/core/api-error";
 import { billingIdempotencyKey } from "@/server/core/billing/idempotency";
 import { getStripeClient, providerEnvironment } from "@/server/core/billing/stripe-client";
 import type { DbClient } from "@/server/core/db";
@@ -67,15 +68,23 @@ async function withWorkspaceLock<T>(
     `;
 
     if (rows[0]?.locked !== true) {
-      throw new TRPCError({ code: "CONFLICT", message: "CONCURRENT_SEAT_CHANGE" });
+      throw new AppError({
+        code: "CONFLICT",
+        messageCode: MessageCode.CONCURRENT_SEAT_CHANGE,
+        publicMessage: "CONCURRENT_SEAT_CHANGE",
+      });
     }
 
     return fn();
   });
 }
 
-function notChangeable(): TRPCError {
-  return new TRPCError({ code: "CONFLICT", message: "BILLING_NOT_CHANGEABLE" });
+function notChangeable(): AppError {
+  return new AppError({
+    code: "CONFLICT",
+    messageCode: MessageCode.BILLING_NOT_CHANGEABLE,
+    publicMessage: "BILLING_NOT_CHANGEABLE",
+  });
 }
 
 // Section 9: only an active, catalogued, single-item subscription can be changed. Delinquent or
@@ -127,7 +136,11 @@ async function assertSeatFloor(db: DbClient, workspaceId: string, quantity: numb
   const members = await db.workspaceMember.count({ where: { workspaceId } });
 
   if (quantity < members) {
-    throw new TRPCError({ code: "CONFLICT", message: "SEATS_BELOW_MEMBERS" });
+    throw new AppError({
+      code: "CONFLICT",
+      messageCode: MessageCode.SEATS_BELOW_MEMBERS,
+      publicMessage: "SEATS_BELOW_MEMBERS",
+    });
   }
 }
 

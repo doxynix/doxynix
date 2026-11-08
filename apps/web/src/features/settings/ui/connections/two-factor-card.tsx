@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ShieldAlert, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
@@ -30,6 +29,7 @@ import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
+import { QrCode } from "@/shared/ui/kit/qr-code";
 
 import { ConnectionCard } from "@/entities/connection/ui/connection-card";
 
@@ -149,12 +149,13 @@ export function TwoFactorCard() {
               {tCommon("disconnect")}
             </LoadingButton>
           ) : (
-            <AppButton
+            <LoadingButton
+              isLoading={isGenerating}
               onClick={() => void handleOpenSetup()}
               size="sm"
             >
               {tCommon("setup")}
-            </AppButton>
+            </LoadingButton>
           )
         }
         description={isEnabled ? t("settings_2fa_enabled_desc") : t("settings_2fa_disabled_desc")}
@@ -238,14 +239,7 @@ export function TwoFactorCard() {
               ) : (
                 totpUri && (
                   <>
-                    <div className="rounded-xl bg-white p-2">
-                      <QRCodeSVG
-                        level="M"
-                        marginSize={4}
-                        size={180}
-                        value={totpUri}
-                      />
-                    </div>
+                    <QrCode value={totpUri} />
                     <div className="flex w-full min-w-0 flex-col gap-2 rounded-xl border p-2">
                       <div className="flex min-w-0 items-center gap-2">
                         <ExternalLink

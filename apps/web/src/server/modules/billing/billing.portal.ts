@@ -1,8 +1,9 @@
-import { TRPCError } from "@trpc/server";
+import { MessageCode } from "@doxynix/shared";
 
 import { APP_URL } from "@/shared/config/env.client";
 import { DEFAULT_LOCALE } from "@/shared/config/locales";
 
+import { AppError } from "@/server/core/api-error";
 import { billingIdempotencyKey } from "@/server/core/billing/idempotency";
 import { getStripeClient, providerEnvironment } from "@/server/core/billing/stripe-client";
 import type { DbClient } from "@/server/core/db";
@@ -20,7 +21,11 @@ function assertAllowedReturnUrl(returnUrl: string): void {
   const allowed = PORTAL_RETURN_PATHS.map((path) => portalReturnUrl(path));
 
   if (!allowed.includes(returnUrl)) {
-    throw new TRPCError({ code: "BAD_REQUEST", message: "INVALID_RETURN_URL" });
+    throw new AppError({
+      code: "BAD_REQUEST",
+      messageCode: MessageCode.INVALID_RETURN_URL,
+      publicMessage: "INVALID_RETURN_URL",
+    });
   }
 }
 
@@ -43,7 +48,11 @@ export async function createPortalSession(input: PortalSessionInput): Promise<Po
   });
 
   if (customer == null) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "BILLING_CUSTOMER_NOT_FOUND" });
+    throw new AppError({
+      code: "FORBIDDEN",
+      messageCode: MessageCode.BILLING_CUSTOMER_NOT_FOUND,
+      publicMessage: "BILLING_CUSTOMER_NOT_FOUND",
+    });
   }
 
   assertAllowedReturnUrl(input.returnUrl);
@@ -59,11 +68,19 @@ export async function createPortalSession(input: PortalSessionInput): Promise<Po
   const configuration = usable.find((item) => item.is_default) ?? usable[0];
 
   if (configuration == null) {
-    throw new TRPCError({ code: "PRECONDITION_FAILED", message: "PORTAL_NOT_CONFIGURED" });
+    throw new AppError({
+      code: "PRECONDITION_FAILED",
+      messageCode: MessageCode.PORTAL_NOT_CONFIGURED,
+      publicMessage: "PORTAL_NOT_CONFIGURED",
+    });
   }
 
   if (configuration.features.subscription_update.enabled) {
-    throw new TRPCError({ code: "PRECONDITION_FAILED", message: "PORTAL_ALLOWS_PLAN_CHANGE" });
+    throw new AppError({
+      code: "PRECONDITION_FAILED",
+      messageCode: MessageCode.PORTAL_ALLOWS_PLAN_CHANGE,
+      publicMessage: "PORTAL_ALLOWS_PLAN_CHANGE",
+    });
   }
 
   const session = await stripe.billingPortal.sessions.create(

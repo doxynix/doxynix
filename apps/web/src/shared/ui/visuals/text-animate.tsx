@@ -1,7 +1,13 @@
 "use client";
 
 import { type ElementType, useState } from "react";
-import { AnimatePresence, type MotionProps, motion, type Variants } from "motion/react";
+import {
+  AnimatePresence,
+  type MotionProps,
+  motion,
+  useReducedMotion,
+  type Variants,
+} from "motion/react";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -44,6 +50,7 @@ const TextAnimateBase = ({
 }: TextAnimateProps) => {
   // Lazily built once per mount: keeps the render pure and avoids re-creating the component identity every render.
   const [MotionComponent] = useState(() => motion.create(Component));
+  const reduceMotion = useReducedMotion();
 
   let segments: string[] = [];
   switch (by) {
@@ -118,14 +125,14 @@ const TextAnimateBase = ({
   return (
     <AnimatePresence mode="popLayout">
       <MotionComponent
-        animate={startOnView ? undefined : "show"}
+        animate={startOnView || reduceMotion ? undefined : "show"}
         aria-label={accessible ? children : undefined}
         className={cn("whitespace-pre-wrap", className)}
         exit="exit"
-        initial="hidden"
+        initial={reduceMotion ? false : "hidden"}
         variants={finalVariants.container}
         viewport={{ once }}
-        whileInView={startOnView ? "show" : undefined}
+        whileInView={startOnView && !reduceMotion ? "show" : undefined}
         {...props}
       >
         {accessible && <span className="sr-only">{children}</span>}

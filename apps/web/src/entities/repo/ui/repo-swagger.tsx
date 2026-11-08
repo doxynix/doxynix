@@ -86,7 +86,7 @@ export function RepoSwagger({ spec }: Readonly<{ spec: string }>) {
           --scalar-radius-lg: var(--radius-lg, 14px) !important;
 
           --scalar-transition-speed: 150ms !important;
-          --scalar-transition-curve: cubic-bezier(0.4, 0, 0.2, 1) !important;
+          --scalar-transition-curve: cubic-bezier(0.23, 1, 0.32, 1) !important;
 
           --scalar-color-get: var(--color-info) !important;
           --scalar-color-post: var(--color-success) !important;

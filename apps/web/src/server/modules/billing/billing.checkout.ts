@@ -1,10 +1,11 @@
-import { TRPCError } from "@trpc/server";
+import { MessageCode } from "@doxynix/shared";
 import type Stripe from "stripe";
 
 import { APP_URL } from "@/shared/config/env.client";
 import { IS_PROD } from "@/shared/config/env.flags";
 import { DEFAULT_LOCALE } from "@/shared/config/locales";
 
+import { AppError } from "@/server/core/api-error";
 import { billingIdempotencyKey } from "@/server/core/billing/idempotency";
 import { getStripeClient, providerEnvironment } from "@/server/core/billing/stripe-client";
 import type { DbClient } from "@/server/core/db";
@@ -50,9 +51,10 @@ function checkoutResult(result: unknown): CreateCheckoutResult {
     };
   }
 
-  throw new TRPCError({
+  throw new AppError({
     code: "INTERNAL_SERVER_ERROR",
-    message: "BILLING_CHECKOUT_RESULT_MISSING",
+    messageCode: MessageCode.BILLING_CHECKOUT_RESULT_MISSING,
+    publicMessage: "BILLING_CHECKOUT_RESULT_MISSING",
   });
 }
 
@@ -111,7 +113,11 @@ export async function createCheckoutSession(
   });
 
   if (quantity < 1) {
-    throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_ACTIVE_MEMBERS" });
+    throw new AppError({
+      code: "PRECONDITION_FAILED",
+      messageCode: MessageCode.NO_ACTIVE_MEMBERS,
+      publicMessage: "NO_ACTIVE_MEMBERS",
+    });
   }
 
   // Customer and Session are one client command, so they share one operation row: the ledger is
@@ -126,7 +132,11 @@ export async function createCheckoutSession(
       });
 
       if (current != null) {
-        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "ALREADY_SUBSCRIBED" });
+        throw new AppError({
+          code: "PRECONDITION_FAILED",
+          messageCode: MessageCode.ALREADY_SUBSCRIBED,
+          publicMessage: "ALREADY_SUBSCRIBED",
+        });
       }
 
       type Blocked = { id: string; kind: "open" | "paid" | "pending" };
@@ -200,7 +210,11 @@ export async function createCheckoutSession(
       if (blocked != null) {
         // Paid-but-not-projected, a live request in another tab, or a cancel whose Session Stripe
         // still holds: none of these may open a second Subscription.
-        throw new TRPCError({ code: "CONFLICT", message: "CHECKOUT_IN_PROGRESS" });
+        throw new AppError({
+          code: "CONFLICT",
+          messageCode: MessageCode.CHECKOUT_IN_PROGRESS,
+          publicMessage: "CHECKOUT_IN_PROGRESS",
+        });
       }
 
       let session: Stripe.Checkout.Session;
@@ -214,13 +228,21 @@ export async function createCheckoutSession(
 
         if (required.length === 0) {
           if (IS_PROD) {
-            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "TAX_NOT_CONFIGURED" });
+            throw new AppError({
+              code: "PRECONDITION_FAILED",
+              messageCode: MessageCode.TAX_NOT_CONFIGURED,
+              publicMessage: "TAX_NOT_CONFIGURED",
+            });
           }
         } else {
           const preflight = await runTaxPreflight(input.db);
 
           if (!preflight.settingsActive || preflight.missingJurisdictions.length > 0) {
-            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "TAX_NOT_READY" });
+            throw new AppError({
+              code: "PRECONDITION_FAILED",
+              messageCode: MessageCode.TAX_NOT_READY,
+              publicMessage: "TAX_NOT_READY",
+            });
           }
         }
 

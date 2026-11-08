@@ -51,4 +51,27 @@ export const SwitchWorkspaceSchema = z.object({
   workspaceId: z.uuid(),
 });
 
+export const WorkspaceInviteTokenSchema = z.object({
+  token: z.string().trim().min(1).max(200),
+});
+
+export const WorkspaceInvitePreviewSchema = z.object({
+  valid: z.boolean(),
+  workspaceName: z.string().nullable(),
+});
+
+export const WorkspaceInviteCreatedSchema = z.object({
+  emailSent: z.boolean(),
+  expiresAt: z.date(),
+  token: z.string(),
+});
+
+export const CreateWorkspaceInviteSchema = z.object({
+  email: z.email().optional(),
+});
+
+export const WorkspaceInviteAcceptedSchema = z.object({
+  workspaceId: z.uuid(),
+});
+
 export type WorkspaceSummary = z.infer<typeof WorkspaceSummarySchema>;

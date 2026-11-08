@@ -17,6 +17,7 @@ import { google } from "@/server/core/ai/google";
 import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { docsChatGlobalLimiter, docsChatLimiter } from "@/server/core/ratelimit";
+import { REDIS_CONFIG } from "@/server/utils/redis";
 import { getIp } from "@/server/utils/request-context";
 import { withApiHandler } from "@/server/utils/with-api-handler";
 
@@ -83,8 +84,8 @@ async function handler(req: Request) {
 
   try {
     const [perIp, global] = await Promise.all([
-      docsChatLimiter.limit(`ip:${ip}`),
-      docsChatGlobalLimiter.limit("global"),
+      docsChatLimiter.limit(REDIS_CONFIG.rateLimit.ip(ip)),
+      docsChatGlobalLimiter.limit(REDIS_CONFIG.rateLimit.docsChatGlobal),
     ]);
 
     if (!perIp.success || !global.success) {

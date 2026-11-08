@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { type ComponentProps, useEffect, useState } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { CheckIcon, CopyIcon } from "lucide-react";
 
@@ -29,8 +29,7 @@ function CodeBlock({
   variant = "default",
   size = "default",
   ...props
-}: React.ComponentProps<"div"> &
-  VariantProps<typeof codeBlockVariants> & { size?: "default" | "sm" }) {
+}: ComponentProps<"div"> & VariantProps<typeof codeBlockVariants> & { size?: "default" | "sm" }) {
   return (
     <div
       className={cn(codeBlockVariants({ variant }), className)}
@@ -42,7 +41,7 @@ function CodeBlock({
   );
 }
 
-function CodeBlockHeader({ className, ...props }: React.ComponentProps<"div">) {
+function CodeBlockHeader({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       className={cn(
@@ -55,7 +54,7 @@ function CodeBlockHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function CodeBlockTitle({ className, ...props }: React.ComponentProps<"div">) {
+function CodeBlockTitle({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       className={cn(
@@ -68,7 +67,7 @@ function CodeBlockTitle({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function CodeBlockActions({ className, ...props }: React.ComponentProps<"div">) {
+function CodeBlockActions({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       className={cn(
@@ -88,10 +87,10 @@ function CodeBlockCopyButton({
   className,
   onClick,
   ...props
-}: React.ComponentProps<typeof AppButton> & { value: string }) {
-  const [copied, setCopied] = React.useState(false);
+}: ComponentProps<typeof AppButton> & { value: string }) {
+  const [copied, setCopied] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!copied) {
       return;
     }
@@ -130,6 +129,9 @@ function CodeBlockCopyButton({
   );
 }
 
+const codeBlockContentClass =
+  "min-h-0 min-w-0 scroll-fade-x overflow-auto px-4 py-4 text-start font-mono leading-relaxed outline-none group-has-data-[slot=code-block-footer]/code-block:pb-2 group-has-data-[slot=code-block-header]/code-block:pt-2 group-data-[size=sm]/code-block:px-3 group-data-[size=sm]/code-block:py-3 group-data-[size=sm]/code-block:group-has-data-[slot=code-block-header]/code-block:pt-1.5 data-wrap:scroll-fade-y data-wrap:wrap-break-word data-wrap:whitespace-pre-wrap";
+
 function CodeBlockContent({
   className,
   children,
@@ -138,17 +140,14 @@ function CodeBlockContent({
   lineNumbers = false,
   startLine = 1,
   ...props
-}: React.ComponentProps<"pre"> & {
+}: ComponentProps<"pre"> & {
   wrap?: boolean;
   lineNumbers?: boolean;
   startLine?: number;
 }) {
   return (
     <pre
-      className={cn(
-        "min-h-0 min-w-0 scroll-fade-x scrollbar-thin overflow-auto px-4 py-4 text-start font-mono leading-relaxed outline-none group-has-data-[slot=code-block-footer]/code-block:pb-2 group-has-data-[slot=code-block-header]/code-block:pt-2 group-data-[size=sm]/code-block:px-3 group-data-[size=sm]/code-block:py-3 group-data-[size=sm]/code-block:group-has-data-[slot=code-block-header]/code-block:pt-1.5 data-wrap:scroll-fade-y data-wrap:wrap-break-word data-wrap:whitespace-pre-wrap",
-        className,
-      )}
+      className={cn(codeBlockContentClass, className)}
       data-numbered={lineNumbers || undefined}
       data-slot="code-block-content"
       data-wrap={wrap || undefined}
@@ -170,6 +169,32 @@ function CodeBlockContent({
           : children}
       </code>
     </pre>
+  );
+}
+
+function CodeBlockHtml({
+  className,
+  html,
+  wrap = false,
+  ...props
+}: ComponentProps<"div"> & { html: string; wrap?: boolean }) {
+  return (
+    <div
+      className={cn(
+        codeBlockContentClass,
+        "[&_pre]:!m-0 [&_pre]:!bg-transparent [&_pre]:!p-0",
+        wrap && "[&_code]:whitespace-pre-wrap [&_pre]:whitespace-pre-wrap",
+        className,
+      )}
+      // Shiki marks its own <pre> focusable; the scroll container owns keyboard focus instead.
+      dangerouslySetInnerHTML={{ __html: html.replace(' tabindex="0"', "") }}
+      data-slot="code-block-content"
+      data-wrap={wrap || undefined}
+      dir="ltr"
+      // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable code region needs keyboard focus
+      tabIndex={0}
+      {...props}
+    />
   );
 }
 
@@ -195,7 +220,7 @@ function CodeBlockLine({
   variant = "default",
   children,
   ...props
-}: React.ComponentProps<"span"> & VariantProps<typeof codeBlockLineVariants>) {
+}: ComponentProps<"span"> & VariantProps<typeof codeBlockLineVariants>) {
   const empty =
     children === undefined ||
     children === null ||
@@ -219,7 +244,7 @@ function CodeBlockLine({
   );
 }
 
-function CodeBlockFooter({ className, ...props }: React.ComponentProps<"div">) {
+function CodeBlockFooter({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       className={cn(
@@ -239,6 +264,7 @@ export {
   CodeBlockCopyButton,
   CodeBlockFooter,
   CodeBlockHeader,
+  CodeBlockHtml,
   CodeBlockLine,
   CodeBlockTitle,
 };

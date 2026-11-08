@@ -8,11 +8,19 @@ import {
   type SyntheticEvent,
   useRef,
 } from "react";
-import { Paperclip, Send, Trash2 } from "lucide-react";
+import { FileText, Paperclip, Send, Square, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { AppBadge } from "@/shared/ui/core/badge";
-import { AppButton } from "@/shared/ui/core/button";
+import {
+  Attachment,
+  AttachmentAction,
+  AttachmentActions,
+  AttachmentContent,
+  AttachmentMedia,
+  AttachmentTitle,
+} from "@/shared/ui/core/attachment";
+import { InputGroup, InputGroupAddon, InputGroupButton } from "@/shared/ui/core/input-group";
+import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { AutosizeTextarea } from "@/shared/ui/kit/autosize-textrea";
 
 import type { LocalFileAttachment } from "../model/agent-types";
@@ -22,6 +30,7 @@ type InputProps = {
   handleFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
   input: string;
   isLoading: boolean;
+  onStop: () => void;
   onSubmit: (e?: SyntheticEvent) => void;
   setAttachments: Dispatch<SetStateAction<LocalFileAttachment[]>>;
   setInput: (v: string) => void;
@@ -32,6 +41,7 @@ export function AgentForm({
   handleFileChange,
   input,
   isLoading,
+  onStop,
   onSubmit,
   setAttachments,
   setInput,
@@ -44,41 +54,49 @@ export function AgentForm({
       className="w-full border-t p-4"
       onSubmit={onSubmit}
     >
-      {attachments.length > 0 && (
-        <div className="flex max-h-32 flex-wrap gap-2 overflow-y-auto pb-3">
-          {attachments.map((file, i) => (
-            <AppBadge
-              className="flex items-center gap-1.5 py-1 text-xs"
-              key={file.url}
-              variant="secondary"
-            >
-              <span className="max-w-30 truncate">{file.name}</span>
-              <AppButton
-                aria-label={t("delete_attachment", { name: file.name })}
-                className="size-4 p-0 text-muted-foreground hover:text-destructive"
-                onClick={() => setAttachments((prev) => prev.filter((_, idx) => idx !== i))}
-                size="icon"
-                type="button"
-                variant="ghost"
-              >
-                <Trash2 />
-              </AppButton>
-            </AppBadge>
-          ))}
-        </div>
-      )}
+      <input
+        className="hidden"
+        multiple
+        onChange={handleFileChange}
+        ref={fileInputRef}
+        type="file"
+      />
 
-      <div className="flex flex-col gap-1 transition-standard">
-        <input
-          className="hidden"
-          multiple
-          onChange={handleFileChange}
-          ref={fileInputRef}
-          type="file"
-        />
+      <InputGroup className="flex-col">
+        {attachments.length > 0 && (
+          <InputGroupAddon
+            align="block-start"
+            className="flex-wrap"
+          >
+            {attachments.map((file, i) => (
+              <Attachment
+                className="min-w-0"
+                key={file.url}
+                size="sm"
+              >
+                <AttachmentMedia>
+                  <FileText />
+                </AttachmentMedia>
+                <AttachmentContent>
+                  <AttachmentTitle>{file.name}</AttachmentTitle>
+                </AttachmentContent>
+                <AttachmentActions>
+                  <AttachmentAction
+                    aria-label={t("delete_attachment", { name: file.name })}
+                    onClick={() => setAttachments((prev) => prev.filter((_, idx) => idx !== i))}
+                    type="button"
+                  >
+                    <Trash2 />
+                  </AttachmentAction>
+                </AttachmentActions>
+              </Attachment>
+            ))}
+          </InputGroupAddon>
+        )}
 
         <AutosizeTextarea
-          className="no-scrollbar rounded-xl"
+          className="no-scrollbar flex-1 resize-none rounded-none border-0 bg-transparent px-3 py-2 text-base shadow-none ring-0 placeholder:text-muted-foreground focus-visible:ring-0 md:text-sm dark:bg-transparent"
+          data-slot="input-group-control"
           maxHeight={200}
           minHeight={52}
           name="prompt"
@@ -86,6 +104,9 @@ export function AgentForm({
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
+              if (isLoading) {
+                return;
+              }
               onSubmit();
             }
           }}
@@ -93,29 +114,32 @@ export function AgentForm({
           value={input}
         />
 
-        <div className="flex items-center justify-end px-1 pt-2">
-          <div className="flex items-center gap-1.5">
-            <AppButton
-              aria-label={t("upload_files")}
-              onClick={() => fileInputRef.current?.click()}
-              size="icon"
-              type="button"
-              variant="ghost"
-            >
-              <Paperclip />
-            </AppButton>
+        <InputGroupAddon
+          align="block-end"
+          className="justify-end gap-1.5"
+        >
+          <InputGroupButton
+            aria-label={t("upload_files")}
+            onClick={() => fileInputRef.current?.click()}
+            size="icon-sm"
+            variant="ghost"
+          >
+            <Paperclip />
+          </InputGroupButton>
 
-            <AppButton
-              aria-label={t("send_message")}
-              disabled={isLoading || !input.trim()}
-              size="icon"
-              type="submit"
+          <AppTooltip content={isLoading ? t("stop_response") : t("send_message")}>
+            <InputGroupButton
+              aria-label={isLoading ? t("stop_response") : t("send_message")}
+              disabled={!isLoading && !input.trim() && attachments.length === 0}
+              onClick={isLoading ? onStop : undefined}
+              size="icon-sm"
+              type={isLoading ? "button" : "submit"}
             >
-              <Send />
-            </AppButton>
-          </div>
-        </div>
-      </div>
+              {isLoading ? <Square /> : <Send />}
+            </InputGroupButton>
+          </AppTooltip>
+        </InputGroupAddon>
+      </InputGroup>
     </form>
   );
 }

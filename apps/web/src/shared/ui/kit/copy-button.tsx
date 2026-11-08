@@ -42,13 +42,13 @@ export function CopyButton({
       <AppButton
         aria-label={label}
         className={cn(
-          "relative size-6 not-md:opacity-100 transition-standard duration-300",
+          "relative size-6 not-md:opacity-100 transition-standard duration-200",
           "group/copy-btn",
           !isCopied &&
             (alwaysVisible
               ? "text-muted-foreground hover:text-foreground"
               : "text-muted-foreground opacity-0 hover:text-foreground group-hover:opacity-100"),
-          isCopied && "pointer-events-none text-success opacity-100",
+          isCopied && "pointer-events-none opacity-100",
           className,
         )}
         disabled={disabled}
@@ -63,14 +63,14 @@ export function CopyButton({
         <Copy
           className={cn(
             "absolute size-3.5 transition-standard duration-200",
-            isCopied ? "scale-0 opacity-0" : "scale-100 opacity-100",
+            isCopied ? "scale-90 opacity-0" : "scale-100 opacity-100",
           )}
         />
 
         <Check
           className={cn(
-            "absolute size-3.5 text-success transition-standard duration-200",
-            isCopied ? "scale-100 opacity-100" : "scale-0 opacity-0",
+            "absolute size-3.5 transition-standard duration-200",
+            isCopied ? "scale-100 opacity-100" : "scale-90 opacity-0",
           )}
         />
 

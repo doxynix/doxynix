@@ -33,6 +33,30 @@ describe("readErrorPayload", () => {
     expect(payload.messageCode).toBeUndefined();
   });
 
+  it("reads the HTTP envelope the AI SDK attaches as responseBody", () => {
+    const payload = readErrorPayload({
+      message: "raw body",
+      responseBody: JSON.stringify({
+        error: {
+          code: "FORBIDDEN",
+          message: "LIMIT_EXCEEDED",
+          messageCode: "AI_LIMIT_EXCEEDED",
+          params: null,
+          requestId: "req-1",
+        },
+      }),
+    });
+
+    expect(payload.messageCode).toBe("AI_LIMIT_EXCEEDED");
+    expect(payload.message).toBe("raw body");
+  });
+
+  it("survives a malformed responseBody", () => {
+    const payload = readErrorPayload({ message: "boom", responseBody: "not-json" });
+
+    expect(payload).toEqual({ message: "boom" });
+  });
+
   it("survives non-object input", () => {
     expect(readErrorPayload("boom")).toEqual({});
   });

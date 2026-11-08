@@ -121,7 +121,7 @@ export const RepoNode = ({ data }: Props) => {
   return (
     <div
       className={cn(
-        "group relative transition-opacity duration-300 ease-in-out",
+        "group relative transition-opacity duration-150 ease-out",
         dimByFilter || dimByHover || dimBySearch ? "z-1 opacity-50" : "z-10 opacity-100",
       )}
     >

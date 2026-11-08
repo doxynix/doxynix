@@ -132,6 +132,7 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
 
           <Scatter
             data={chartData}
+            isAnimationActive={false}
             name={t("chart_files")}
             shape={(props) => (
               <Symbols

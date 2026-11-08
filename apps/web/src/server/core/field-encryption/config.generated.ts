@@ -240,6 +240,7 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
       billingSubscriptions: "BillingSubscription",
       entitlement: "WorkspaceEntitlement",
       githubInstallations: "GithubInstallation",
+      invites: "WorkspaceInvite",
       members: "WorkspaceMember",
       repos: "Repo",
       usage: "WorkspaceUsage",
@@ -248,6 +249,12 @@ export const FIELD_ENCRYPTION_SPEC: Record<string, ModelSpec> = {
     fields: {},
   },
   WorkspaceEntitlement: {
+    connections: {
+      workspace: "Workspace",
+    },
+    fields: {},
+  },
+  WorkspaceInvite: {
     connections: {
       workspace: "Workspace",
     },

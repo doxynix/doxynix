@@ -2,6 +2,7 @@ import { Ratelimit } from "@upstash/ratelimit";
 
 import { appLogger } from "@/server/core/app-logger";
 import { redisClient } from "@/server/core/redis";
+import { REDIS_CONFIG } from "@/server/utils/redis";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -90,7 +91,7 @@ export const llmLimiter = {
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       try {
-        const { reset, success } = await llmTpmLimiter.limit("global-llm-tpm", {
+        const { reset, success } = await llmTpmLimiter.limit(REDIS_CONFIG.rateLimit.llmTpm, {
           rate: requestWeight,
         });
 

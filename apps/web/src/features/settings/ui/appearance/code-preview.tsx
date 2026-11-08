@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import type { CodeTheme } from "@/shared/lib/appearance-preferences";
-import { clientShiki } from "@/shared/lib/client-shiki";
+import { useShikiHighlight } from "@/shared/lib/hooks/use-shiki-highlight";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { CodeWindow } from "@/shared/ui/kit/code-window";
 
@@ -23,23 +21,9 @@ type Props = {
 };
 
 export function CodePreview({ code, lang, title, theme, tone }: Readonly<Props>) {
-  const [html, setHtml] = useState<string | null>();
+  const { html, pending } = useShikiHighlight(code, lang, theme);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    void clientShiki.highlight(code, lang, theme).then((result) => {
-      if (!cancelled) {
-        setHtml(result);
-      }
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [code, lang, theme]);
-
-  if (html === undefined) {
+  if (pending) {
     return <Skeleton className="h-44 w-full rounded-xl" />;
   }
 

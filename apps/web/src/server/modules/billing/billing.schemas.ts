@@ -63,12 +63,26 @@ export const BillingSubscriptionSummarySchema = z.object({
   status: z.string(),
 });
 
+export const BillingUsageDaySchema = z.object({
+  analyses: z.number().int(),
+  date: z.string(),
+  tokens: z.number().int(),
+});
+
+export const BillingUsageSchema = z.object({
+  days: z.array(BillingUsageDaySchema),
+  now: z.date(),
+  periodEnd: z.date(),
+  periodStart: z.date(),
+});
+
 // Both roles read this: MEMBER sees the plan, seats, usage and renewal date, while every mutation
 // stays on ownerProcedure.
 export const BillingStateSchema = z.object({
   activeMembers: z.number().int().min(0),
   entitlement: BillingEntitlementSummarySchema.nullable(),
   subscription: BillingSubscriptionSummarySchema.nullable(),
+  usage: BillingUsageSchema,
 });
 
 export type BillingState = z.infer<typeof BillingStateSchema>;

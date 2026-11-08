@@ -25,8 +25,8 @@ import { saveFile } from "@/shared/lib/file-saver";
 import { useTypewriter } from "@/shared/lib/hooks/use-typewriter";
 import { AppButton } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
-import { Spinner } from "@/shared/ui/core/spinner";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
+import { ActionErrorAlert } from "@/shared/ui/kit/action-error-alert";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
@@ -71,6 +71,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [actionError, setActionError] = useState<unknown>(null);
   const [showDiff, setShowDiff] = useState(false);
   const [isAuditDismissed, setIsAuditDismissed] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
@@ -112,6 +113,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
     setPrevExternalContent(fileData.content);
     setLocalContent(fileData.content);
     setMode("view");
+    setActionError(null);
     setIsAuditDismissed(false);
     setShowDiff(false);
     setShouldAnimate(false);
@@ -131,16 +133,28 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
 
   const auditMutation = useMutation(
     trpc.analysis.quickFileAudit.mutationOptions({
-      onError: () => setIsAiLoading(false),
-      onMutate: () => setIsAiLoading(true),
+      onError: (error) => {
+        setIsAiLoading(false);
+        setActionError(error);
+      },
+      onMutate: () => {
+        setActionError(null);
+        setIsAiLoading(true);
+      },
       onSuccess: () => toast.info(t("repo_code_audit_started")),
     }),
   );
 
   const documentMutation = useMutation(
     trpc.analysis.documentFile.mutationOptions({
-      onError: () => setIsAiLoading(false),
-      onMutate: () => setIsAiLoading(true),
+      onError: (error) => {
+        setIsAiLoading(false);
+        setActionError(error);
+      },
+      onMutate: () => {
+        setActionError(null);
+        setIsAiLoading(true);
+      },
       onSuccess: () => toast.info(t("repo_code_docgen_started")),
     }),
   );
@@ -159,9 +173,19 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.code === "KeyF") {
-        const isFocusInside = containerRef.current?.contains(document.activeElement);
+        const activeElement = document.activeElement;
+        const isFocusInside = containerRef.current?.contains(activeElement) === true;
+        // The read-only editor is not always focusable, so Ctrl+F must also work when the page
+        // itself has focus — but never while the user is typing in another field.
+        const isEditingElsewhere =
+          !isFocusInside &&
+          activeElement instanceof HTMLElement &&
+          (activeElement.isContentEditable ||
+            activeElement.tagName === "INPUT" ||
+            activeElement.tagName === "TEXTAREA" ||
+            activeElement.tagName === "SELECT");
 
-        if (isFocusInside === true) {
+        if (isFocusInside || !isEditingElsewhere) {
           e.preventDefault();
           e.stopPropagation();
           setIsSearchOpen(true);
@@ -249,6 +273,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
     {
       disabled: isAiLoading || auditMutation.isPending,
       icon: Sparkles,
+      isLoading: auditMutation.isPending,
       onClick: handleAudit,
       tooltipText: t("repo_code_action_audit"),
     },
@@ -260,6 +285,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
     {
       disabled: isAiLoading || documentMutation.isPending,
       icon: FileText,
+      isLoading: documentMutation.isPending,
       onClick: handleDocument,
       tooltipText: t("repo_code_action_document"),
     },
@@ -360,6 +386,14 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
         </div>
       </div>
 
+      {actionError != null && (
+        <ActionErrorAlert
+          className="mx-4 mt-3"
+          error={actionError}
+          onDismiss={() => setActionError(null)}
+        />
+      )}
+
       {isSearchOpen && view && (
         <RepoSearchPanel
           onClose={() => setIsSearchOpen(false)}
@@ -416,20 +450,16 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
                 dangerouslySetInnerHTML={{ __html: displayHtml }}
               />
               <div className="mt-4 flex items-center gap-1 border-t pt-3">
-                <AppButton
+                <LoadingButton
                   className="w-full"
-                  disabled={pinMutation.isPending}
+                  isLoading={pinMutation.isPending}
                   onClick={() => pinMutation.mutate({ path, repoId })}
                   size="sm"
                   variant="outline"
                 >
-                  {pinMutation.isPending ? (
-                    <Spinner className="size-3" />
-                  ) : (
-                    <Save className="size-3" />
-                  )}
+                  <Save className="size-3" />
                   {t("repo_code_pin_to_docs")}
-                </AppButton>
+                </LoadingButton>
               </div>
             </>
           )}

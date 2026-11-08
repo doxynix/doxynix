@@ -54,6 +54,7 @@ export function QualityRadar({ scores }: Readonly<QualityRadarProps>) {
             dataKey="value"
             fill="var(--foreground)"
             fillOpacity={0.3}
+            isAnimationActive={false}
             stroke="var(--background)"
           />
           <ChartTooltip content={<ChartTooltipContent />} />

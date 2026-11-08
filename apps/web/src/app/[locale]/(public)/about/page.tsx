@@ -108,7 +108,7 @@ export default async function AboutPage() {
             <p className="text-lg text-text-secondary">{t("cta_desc")}</p>
           </div>
           <Link
-            className="inline-flex justify-center items-center gap-3 rounded-xl bg-foreground px-5 py-4 font-semibold whitespace-nowrap text-background transition-standard hover:opacity-90 active:scale-95 sm:px-8"
+            className="inline-flex justify-center items-center gap-3 rounded-xl bg-foreground px-5 py-4 font-semibold whitespace-nowrap text-background transition-standard hover:opacity-90 sm:px-8"
             href="/auth"
           >
             {tCommon("get_started_free")}

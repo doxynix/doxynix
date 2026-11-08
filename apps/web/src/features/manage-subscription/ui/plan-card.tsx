@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { formatShortDate } from "@/shared/lib/date-utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import type { BillingEntitlement, BillingSubscription } from "../model/billing.types";
-import { billingErrorKey } from "../model/billing-errors";
 import { useSubscriptionActions } from "../model/use-subscription-actions";
 import { BillingStateBadge } from "./billing-state-badge";
 
@@ -36,8 +36,9 @@ type Props = {
 export function PlanCard({ canManage, entitlement, subscription }: Readonly<Props>) {
   const t = useTranslations("Billing");
   const locale = useLocale();
+  const errorMessage = useErrorMessage();
   const { checkout, portal } = useSubscriptionActions();
-  const [errorKey, setErrorKey] = useState<null | string>(null);
+  const [error, setError] = useState<null | string>(null);
 
   const isHobby = entitlement.planCode === "HOBBY";
   const canUpgrade = isHobby || subscription == null;
@@ -45,14 +46,14 @@ export function PlanCard({ canManage, entitlement, subscription }: Readonly<Prop
   const pending = checkout.isPending || portal.isPending;
 
   const startCheckout = () => {
-    setErrorKey(null);
+    setError(null);
     checkout.mutate(
       { requestId: crypto.randomUUID() },
       {
-        onError: (error) => setErrorKey(billingErrorKey(error)),
+        onError: (error) => setError(errorMessage(error)),
         onSuccess: ({ url }) => {
           if (url == null) {
-            setErrorKey("billing_error_checkout_url_missing");
+            setError(t("billing_error_checkout_url_missing"));
           }
         },
       },
@@ -60,10 +61,10 @@ export function PlanCard({ canManage, entitlement, subscription }: Readonly<Prop
   };
 
   const openPortal = () => {
-    setErrorKey(null);
+    setError(null);
     portal.mutate(
       { requestId: crypto.randomUUID(), returnPath: "/dashboard/settings/billing" },
-      { onError: (error) => setErrorKey(billingErrorKey(error)) },
+      { onError: (error) => setError(errorMessage(error)) },
     );
   };
 
@@ -107,7 +108,7 @@ export function PlanCard({ canManage, entitlement, subscription }: Readonly<Prop
         ) : (
           <p className="text-muted-foreground text-sm">{t("billing_read_only")}</p>
         )}
-        {errorKey != null && <p className="text-destructive text-sm">{t(errorKey)}</p>}
+        {error != null && <p className="text-destructive text-sm">{error}</p>}
       </CardContent>
     </Card>
   );

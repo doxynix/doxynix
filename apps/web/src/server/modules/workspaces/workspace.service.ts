@@ -1,5 +1,9 @@
+import { createHash, randomBytes } from "node:crypto";
+
 import { MessageCode, PlanCode, PlanCodeSchema, type WorkspaceRole } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
+
+import { APP_URL } from "@/shared/config/env.client";
 
 import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
@@ -7,7 +11,8 @@ import { upsertBillingIssue } from "@/server/core/billing/issue";
 import { syncWorkspaceSeats } from "@/server/core/billing/seat-sync";
 import { type DbClient, prisma } from "@/server/core/db";
 import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
-import { normalizeEmail } from "@/server/utils/email-guard";
+import { sendWorkspaceInviteEmail } from "@/server/core/workspaces/send-workspace-invite";
+import { maskEmail, normalizeEmail } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
 
 import type { WorkspaceSummary } from "./workspace.schemas";
@@ -86,7 +91,114 @@ function toSummary(workspace: WorkspaceWithEntitlement, role: WorkspaceRole): Wo
   };
 }
 
+const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+function hashInviteToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+function invalidInvite(): AppError {
+  return new AppError({
+    code: "NOT_FOUND",
+    messageCode: MessageCode.INVITE_INVALID,
+    publicMessage: "INVITE_INVALID",
+  });
+}
+
 export const workspaceService = {
+  async acceptInvite(token: string, userId: string) {
+    const invite = await prisma.workspaceInvite.findUnique({
+      where: { tokenHash: hashInviteToken(token) },
+    });
+
+    if (invite == null || invite.expiresAt.getTime() <= Date.now()) {
+      throw invalidInvite();
+    }
+
+    // Email invitations are identity-bound: only the invited address may redeem the link. Open
+    // share links have no emailHash and stay usable by anyone holding them.
+    if (invite.emailHash != null) {
+      const user = await prisma.user.findUnique({
+        select: { emailHash: true },
+        where: { id: userId },
+      });
+
+      if (user?.emailHash !== invite.emailHash) {
+        throw invalidInvite();
+      }
+    }
+
+    const workspace = await prisma.workspace.findUnique({
+      include: { entitlement: true },
+      where: { id: invite.workspaceId },
+    });
+
+    if (workspace == null) {
+      throw new AppError({
+        code: "FORBIDDEN",
+        messageCode: MessageCode.WORKSPACE_ACCESS_DENIED,
+        publicMessage: "Workspace access denied",
+      });
+    }
+
+    if (workspace.entitlement == null || workspace.entitlement.planCode === "HOBBY") {
+      throw new AppError({
+        code: "PRECONDITION_FAILED",
+        messageCode: MessageCode.FEATURE_NOT_IN_PLAN,
+        publicMessage: "UPGRADE_REQUIRED",
+      });
+    }
+
+    if (workspace.entitlement.accessState !== "ACTIVE") {
+      throw new AppError({
+        code: "PAYMENT_REQUIRED",
+        messageCode: MessageCode.PAYMENT_REQUIRED,
+        publicMessage: "PAYMENT_REQUIRED",
+      });
+    }
+
+    const memberId = await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${invite.workspaceId}))`;
+
+      // Single-use: the first accept wins, and a concurrent second one rolls back.
+      const claimed = await tx.$executeRaw`
+        UPDATE "workspace_invites"
+        SET "accepted_at" = now()
+        WHERE "id" = ${invite.id}::uuid AND "accepted_at" IS NULL
+      `;
+
+      if (claimed === 0) {
+        throw invalidInvite();
+      }
+
+      const existing = await tx.workspaceMember.findUnique({
+        select: { id: true },
+        where: { workspaceId_userId: { userId, workspaceId: invite.workspaceId } },
+      });
+
+      if (existing != null) {
+        return existing.id;
+      }
+
+      const created = await tx.workspaceMember.create({
+        data: { role: "MEMBER", userId, workspaceId: invite.workspaceId },
+        select: { id: true },
+      });
+
+      return created.id;
+    });
+
+    await syncSeatsAfterMembershipChange({ requestId: memberId, workspaceId: invite.workspaceId });
+
+    appLogger.info({
+      msg: "Workspace invite accepted",
+      type: "workspace.invite_accepted",
+      userId,
+      workspaceId: invite.workspaceId,
+    });
+
+    return { workspaceId: invite.workspaceId };
+  },
   async addMember(db: DbClient, workspaceId: string, email: string) {
     const workspace = await db.workspace.findUnique({
       include: { entitlement: true },
@@ -191,6 +303,101 @@ export const workspaceService = {
     }
   },
 
+  async createInvite(
+    workspaceId: string,
+    createdByUserId: string,
+    input: { email?: string; inviterName?: string } = {},
+  ) {
+    const workspace = await prisma.workspace.findUnique({
+      include: { entitlement: true },
+      where: { id: workspaceId },
+    });
+
+    if (workspace == null) {
+      throw new AppError({
+        code: "FORBIDDEN",
+        messageCode: MessageCode.WORKSPACE_ACCESS_DENIED,
+        publicMessage: "Workspace access denied",
+      });
+    }
+
+    if (workspace.entitlement == null || workspace.entitlement.planCode === "HOBBY") {
+      throw new AppError({
+        code: "PRECONDITION_FAILED",
+        messageCode: MessageCode.FEATURE_NOT_IN_PLAN,
+        publicMessage: "UPGRADE_REQUIRED",
+      });
+    }
+
+    if (workspace.entitlement.accessState !== "ACTIVE") {
+      throw new AppError({
+        code: "PAYMENT_REQUIRED",
+        messageCode: MessageCode.PAYMENT_REQUIRED,
+        publicMessage: "PAYMENT_REQUIRED",
+      });
+    }
+
+    const email =
+      input.email == null || input.email.trim() === "" ? undefined : normalizeEmail(input.email);
+    const emailHash = email == null ? undefined : getNormalizedHash(email);
+
+    if (email != null && emailHash != null) {
+      const existingUser = await prisma.user.findUnique({
+        select: { id: true },
+        where: { emailHash },
+      });
+
+      if (existingUser != null) {
+        const existingMember = await prisma.workspaceMember.findUnique({
+          select: { id: true },
+          where: { workspaceId_userId: { userId: existingUser.id, workspaceId } },
+        });
+
+        if (existingMember != null) {
+          throw new AppError({
+            code: "CONFLICT",
+            messageCode: MessageCode.MEMBER_ALREADY_EXISTS,
+            publicMessage: "ALREADY_MEMBER",
+          });
+        }
+      }
+    }
+
+    const token = randomBytes(24).toString("base64url");
+    const expiresAt = new Date(Date.now() + INVITE_TTL_MS);
+
+    await prisma.workspaceInvite.create({
+      data: {
+        createdByUserId,
+        emailHash,
+        expiresAt,
+        tokenHash: hashInviteToken(token),
+        workspaceId,
+      },
+    });
+
+    let emailSent = false;
+
+    if (email != null) {
+      emailSent = await sendWorkspaceInviteEmail({
+        expiresAt,
+        inviterName: input.inviterName?.trim() || "Doxynix",
+        to: email,
+        url: `${APP_URL}/invite/${token}`,
+        workspaceName: workspace.name,
+      });
+
+      appLogger.info({
+        email: maskEmail(email),
+        msg: "Workspace invite created",
+        type: "workspace.invite_created",
+        workspaceId,
+      });
+    }
+
+    return { emailSent, expiresAt, token };
+  },
+
   async listForUser(
     db: DbClient,
     userId: string,
@@ -223,6 +430,25 @@ export const workspaceService = {
       },
       where: { workspaceId },
     });
+  },
+
+  async previewInvite(token: string) {
+    const invite = await prisma.workspaceInvite.findUnique({
+      select: {
+        acceptedAt: true,
+        expiresAt: true,
+        workspace: { select: { name: true } },
+      },
+      where: { tokenHash: hashInviteToken(token) },
+    });
+
+    const valid =
+      invite != null && invite.acceptedAt == null && invite.expiresAt.getTime() > Date.now();
+
+    return {
+      valid,
+      workspaceName: invite?.workspace.name ?? null,
+    };
   },
 
   async removeMember(db: DbClient, workspaceId: string, userId: string) {

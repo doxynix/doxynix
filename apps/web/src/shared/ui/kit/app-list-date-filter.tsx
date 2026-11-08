@@ -1,7 +1,6 @@
 "use client";
 
 import { subDays } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 import type { parseAsInteger, parseAsIsoDate } from "nuqs/server";
@@ -9,8 +8,6 @@ import type { DateRange } from "react-day-picker";
 
 import { formatShortDate } from "@/shared/lib/date-utils";
 import { AppDateRange } from "@/shared/ui/kit/app-date-range";
-
-const ICON_STYLES = "size-4 text-muted-foreground";
 
 const PRESETS = [
   { getValue: () => ({ from: subDays(new Date(), 1), to: new Date() }), key: "last_24h" },
@@ -79,9 +76,7 @@ export function AppListDateFilter({ parsers }: Readonly<Props>) {
       presets={PRESETS}
       selected={selected}
       selectedPresetKey={presetKey ?? null}
-      triggerIcon={<CalendarIcon className={ICON_STYLES} />}
       triggerLabel={triggerLabel}
-      variant={selected == null ? "ghost" : "secondary"}
     />
   );
 }

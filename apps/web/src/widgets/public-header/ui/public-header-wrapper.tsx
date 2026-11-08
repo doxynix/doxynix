@@ -1,10 +1,11 @@
 "use client";
 
 import { type ReactNode, useRef, useState } from "react";
-import { motion, useMotionValueEvent, useScroll } from "motion/react";
+import { motion, useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
 
 export function PublicHeaderWrapper({ children }: Readonly<{ children: ReactNode }>) {
   const [isHidden, setIsHidden] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   const { scrollY } = useScroll();
   const lastScrollY = useRef(0);
@@ -50,7 +51,7 @@ export function PublicHeaderWrapper({ children }: Readonly<{ children: ReactNode
           hidden: {
             opacity: 0,
             pointerEvents: "none",
-            y: "-100%",
+            y: reduceMotion ? 0 : "-100%",
           },
           visible: {
             opacity: 1,

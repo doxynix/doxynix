@@ -6,6 +6,7 @@ import { IS_PROD, IS_RATE_LIMIT_ENABLED } from "@/shared/config/env.flags";
 
 import { appLogger } from "./server/core/app-logger";
 import { redisClient } from "./server/core/redis";
+import { REDIS_CONFIG } from "./server/utils/redis";
 import { generateRequestId, getIp, sanitizeRequestId } from "./server/utils/request-context";
 import { routing } from "./shared/i18n/routing";
 import { getCookieName } from "./shared/lib/cookies";
@@ -41,7 +42,8 @@ async function handleRateLimitAndSize(
 
   if (ratelimit != null) {
     const token = request.cookies.get(cookieName)?.value;
-    const identifier = token != null ? `user_${token.slice(-16)}` : `ip_${ip}`;
+    const identifier =
+      token != null ? REDIS_CONFIG.rateLimit.userToken(token) : REDIS_CONFIG.rateLimit.ip(ip);
 
     try {
       const { limit, remaining, reset, success } = await ratelimit.limit(identifier);

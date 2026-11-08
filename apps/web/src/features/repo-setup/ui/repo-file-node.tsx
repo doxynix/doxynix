@@ -56,14 +56,13 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
           )}
         </div>
 
-        <div
-          className="flex items-center px-1"
-          onPointerDown={(e) => e.stopPropagation()}
-        >
+        <div className="flex items-center px-1">
           <Checkbox
             aria-label={t("repo_file_node_select", { name: node.data.name })}
             checked={selectionState}
             onCheckedChange={() => onMyToggle(node.id, node.data)}
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
             tabIndex={-1}
           />
         </div>

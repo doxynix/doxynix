@@ -1,8 +1,13 @@
-import type { BillingEventStatus, BillingIssueSeverity, BillingIssueStatus } from "@doxynix/shared";
+import {
+  type BillingEventStatus,
+  type BillingIssueSeverity,
+  type BillingIssueStatus,
+  MessageCode,
+} from "@doxynix/shared";
 import { tasks } from "@trigger.dev/sdk";
-import { TRPCError } from "@trpc/server";
 import type Stripe from "stripe";
 
+import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { recordBillingMetric } from "@/server/core/billing/metrics";
 import { getStripeClient } from "@/server/core/billing/stripe-client";
@@ -47,15 +52,27 @@ export async function replayBillingEvent(
   });
 
   if (event == null) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "BILLING_EVENT_NOT_FOUND" });
+    throw new AppError({
+      code: "NOT_FOUND",
+      messageCode: MessageCode.BILLING_EVENT_NOT_FOUND,
+      publicMessage: "BILLING_EVENT_NOT_FOUND",
+    });
   }
 
   if (event.status === "PROCESSED") {
-    throw new TRPCError({ code: "CONFLICT", message: "BILLING_EVENT_ALREADY_PROCESSED" });
+    throw new AppError({
+      code: "CONFLICT",
+      messageCode: MessageCode.BILLING_EVENT_ALREADY_PROCESSED,
+      publicMessage: "BILLING_EVENT_ALREADY_PROCESSED",
+    });
   }
 
   if (!REPLAYABLE_STATUSES.has(event.status)) {
-    throw new TRPCError({ code: "CONFLICT", message: "BILLING_EVENT_NOT_REPLAYABLE" });
+    throw new AppError({
+      code: "CONFLICT",
+      messageCode: MessageCode.BILLING_EVENT_NOT_REPLAYABLE,
+      publicMessage: "BILLING_EVENT_NOT_REPLAYABLE",
+    });
   }
 
   // The suffix is mandatory: Trigger remembers the original key for 30 days and would hand back
@@ -132,7 +149,11 @@ async function loadReviewProjection(
   });
 
   if (customer == null) {
-    throw new TRPCError({ code: "PRECONDITION_FAILED", message: "BILLING_CUSTOMER_MISSING" });
+    throw new AppError({
+      code: "PRECONDITION_FAILED",
+      messageCode: MessageCode.BILLING_CUSTOMER_MISSING,
+      publicMessage: "BILLING_CUSTOMER_MISSING",
+    });
   }
 
   let subscription: Stripe.Subscription;
@@ -144,9 +165,10 @@ async function loadReviewProjection(
   } catch (error) {
     appLogger.error({ error, msg: "billing.review_projection_failed" });
 
-    throw new TRPCError({
+    throw new AppError({
       code: "PRECONDITION_FAILED",
-      message: "BILLING_SUBSCRIPTION_UNREADABLE",
+      messageCode: MessageCode.BILLING_SUBSCRIPTION_UNREADABLE,
+      publicMessage: "BILLING_SUBSCRIPTION_UNREADABLE",
     });
   }
 
@@ -176,7 +198,11 @@ export async function resolveBillingIssue(
   });
 
   if (issue == null) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "BILLING_ISSUE_NOT_FOUND" });
+    throw new AppError({
+      code: "NOT_FOUND",
+      messageCode: MessageCode.BILLING_ISSUE_NOT_FOUND,
+      publicMessage: "BILLING_ISSUE_NOT_FOUND",
+    });
   }
 
   if (issue.status === "RESOLVED") {

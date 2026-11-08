@@ -17,7 +17,7 @@ const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 
 const { sleepCalls } = vi.hoisted(() => ({ sleepCalls: [] as number[] }));
 
-const { authMock, prismaMock } = vi.hoisted(() => ({
+const { authMock, prismaMock, revokeUserSessionsMock } = vi.hoisted(() => ({
   authMock: {
     deleteSession: vi.fn(),
     listSessions: vi.fn(),
@@ -28,7 +28,31 @@ const { authMock, prismaMock } = vi.hoisted(() => ({
       findFirst: vi.fn(),
       findMany: vi.fn(),
     },
+    user: {
+      findUnique: vi.fn(),
+    },
   },
+  revokeUserSessionsMock: vi.fn(),
+}));
+
+const {
+  assertNotSubscriptionOwnerMock,
+  listMemberWorkspaceIdsMock,
+  syncSeatsAfterUserDeletionMock,
+} = vi.hoisted(() => ({
+  assertNotSubscriptionOwnerMock: vi.fn(),
+  listMemberWorkspaceIdsMock: vi.fn(),
+  syncSeatsAfterUserDeletionMock: vi.fn(),
+}));
+
+vi.mock("@/server/utils/access-revocation", () => ({
+  revokeUserSessions: revokeUserSessionsMock,
+}));
+
+vi.mock("./owned-subscription", () => ({
+  assertNotSubscriptionOwner: assertNotSubscriptionOwnerMock,
+  listMemberWorkspaceIds: listMemberWorkspaceIdsMock,
+  syncSeatsAfterUserDeletion: syncSeatsAfterUserDeletionMock,
 }));
 
 vi.mock("@/server/core/auth", () => ({
@@ -183,6 +207,30 @@ describe("disconnectAccount: P2034 backoff", () => {
     }
 
     expect(new Set(firstDelays).size).toBeGreaterThan(1);
+  });
+});
+
+describe("deleteAccount", () => {
+  const calls: string[] = [];
+
+  beforeEach(() => {
+    calls.length = 0;
+    assertNotSubscriptionOwnerMock.mockReset().mockResolvedValue(undefined);
+    listMemberWorkspaceIdsMock.mockReset().mockResolvedValue([]);
+    prismaMock.user.findUnique.mockReset().mockResolvedValue({ imageKey: null });
+    revokeUserSessionsMock.mockReset().mockImplementation(() => calls.push("revoke"));
+    syncSeatsAfterUserDeletionMock.mockReset().mockResolvedValue(undefined);
+  });
+
+  it("revokes Redis-backed sessions before deleting the user row", async () => {
+    const deleteUser = vi.fn().mockImplementation(() => calls.push("delete"));
+    const db = { user: { delete: deleteUser } } as unknown as DbClient;
+
+    await expect(userService.deleteAccount(db, USER_ID)).resolves.toEqual({ success: true });
+
+    expect(revokeUserSessionsMock).toHaveBeenCalledWith(db, USER_ID);
+    expect(deleteUser).toHaveBeenCalledWith({ where: { id: USER_ID } });
+    expect(calls).toEqual(["revoke", "delete"]);
   });
 });
 

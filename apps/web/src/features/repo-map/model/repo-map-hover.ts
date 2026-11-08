@@ -24,7 +24,7 @@ export function applyEdgeHover(edges: Edge[], hoveredNodeId: null | string): Edg
       style: {
         ...edge.style,
         opacity: isEdgeActive ? 1 : 0.05,
-        transition: "opacity 0.3s ease-in-out",
+        transition: "opacity 120ms cubic-bezier(0.23, 1, 0.32, 1)",
       },
     };
   });

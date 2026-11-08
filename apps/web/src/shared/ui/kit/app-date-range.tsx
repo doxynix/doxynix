@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { format } from "date-fns";
-import { Check } from "lucide-react";
+import { CalendarIcon, Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { DateRange } from "react-day-picker";
 
@@ -24,7 +24,7 @@ type Props = {
   presets: readonly DateRangePreset[];
   selected?: DateRange;
   selectedPresetKey?: null | string;
-  triggerIcon?: React.ReactNode;
+  triggerIcon?: ReactNode;
   triggerLabel?: string;
   variant?: "ghost" | "outline" | "secondary";
 };
@@ -63,7 +63,9 @@ export function AppDateRange({
           className={cn("shrink-0 gap-2", variant === "outline" && "bg-background")}
           variant={variant}
         >
-          {triggerIcon}
+          <span className="flex items-center [&_svg]:text-muted-foreground">
+            {triggerIcon ?? <CalendarIcon />}
+          </span>
           {triggerLabel ?? emptyLabel}
         </AppButton>
       </PopoverTrigger>

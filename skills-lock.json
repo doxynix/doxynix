@@ -6,6 +6,30 @@
       "source": "vercel/ai",
       "sourceType": "github"
     },
+    "animate": {
+      "computedHash": "f76ddd3d4446c3c56a143ea98650c370b3e8f88e6203d1e22082d2082bf1eed7",
+      "skillPath": "skills/animate/SKILL.md",
+      "source": "emilkowalski/skills",
+      "sourceType": "github"
+    },
+    "animation-performance": {
+      "computedHash": "333f6a387124d0eda927614671f8be3a00d1ddeb9f43cf8b7fa7032630414311",
+      "skillPath": "skills/animation-performance/SKILL.md",
+      "source": "emilkowalski/skills",
+      "sourceType": "github"
+    },
+    "animation-vocabulary": {
+      "computedHash": "0058036865ecbb864fd0c4132efcc62425355d6e99c7e6ef6a936742d62a5dea",
+      "skillPath": "skills/animation-vocabulary/SKILL.md",
+      "source": "emilkowalski/skills",
+      "sourceType": "github"
+    },
+    "ask-sonner": {
+      "computedHash": "8bd257b845985f4b35b603b510a126604176521094af79c4b7347ffeb8a8f7ab",
+      "skillPath": "skills/ask-sonner/SKILL.md",
+      "source": "emilkowalski/skills",
+      "sourceType": "github"
+    },
     "autofix": {
       "computedHash": "421f9102c20fb1c91d87a10ca9bee2e91c7e632e644dfdd3dc013e53865df6c1",
       "skillPath": "skills/autofix/SKILL.md",
@@ -36,6 +60,12 @@
       "source": "obra/superpowers",
       "sourceType": "github"
     },
+    "break-ui": {
+      "computedHash": "60ada67662925f4df5e3c6ff41cac3ab241b66f8898100a5ffcd7ba7196cb868",
+      "skillPath": "skills/break-ui/SKILL.md",
+      "source": "emilkowalski/skills",
+      "sourceType": "github"
+    },
     "documentation-writer": {
       "computedHash": "ee53d65b163cd7eb953a930c95841cfe398cc2c0bd24c06508bbaa07c432be35",
       "skillPath": "skills/documentation-writer/SKILL.md",
@@ -54,10 +84,22 @@
       "source": "kucherenko/jscpd",
       "sourceType": "github"
     },
+    "emil-design-eng": {
+      "computedHash": "2483020b5bbaab030d6b3463bfba49c8d9c2cd8dea4d9fba836dbd471f1fb706",
+      "skillPath": "skills/emil-design-eng/SKILL.md",
+      "source": "emilkowalski/skills",
+      "sourceType": "github"
+    },
     "feature-sliced-design": {
       "computedHash": "c82f20352d839903cff4cd4d686eca7fa2d2d22a0434e9ee63d3f20f182cd93d",
       "skillPath": "feature-sliced-design/SKILL.md",
       "source": "feature-sliced/skills",
+      "sourceType": "github"
+    },
+    "find-animation-opportunities": {
+      "computedHash": "465d087c41768e4f14ed640dd049036009f613feb55baaa5831b68b33178f9d2",
+      "skillPath": "skills/find-animation-opportunities/SKILL.md",
+      "source": "emilkowalski/skills",
       "sourceType": "github"
     },
     "finishing-a-development-branch": {
@@ -90,6 +132,18 @@
       "source": "honojs/skills",
       "sourceType": "github"
     },
+    "improve-animations": {
+      "computedHash": "f6652a3bb94950baa33c684cc0966c838eb65cf22ebb5769a4f51ea205c254fe",
+      "skillPath": "skills/improve-animations/SKILL.md",
+      "source": "emilkowalski/skills",
+      "sourceType": "github"
+    },
+    "improve-codebase-architecture": {
+      "computedHash": "f768cb44209e0d30e3449b8f95ea3dc8293093f73cfe02127d530db43412cf76",
+      "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
+      "source": "mattpocock/skills",
+      "sourceType": "github"
+    },
     "jscpd": {
       "computedHash": "38cd6b12c072c89f55f702f1b60e51957c0e2cc0c53ac1a7dd7b46c542677ee7",
       "skillPath": "skills/jscpd/SKILL.md",
@@ -112,6 +166,12 @@
       "computedHash": "b4fea42eecf1f803155ef7fa133d5286ee8f2dbba3e616954e9e43c6f0ffc144",
       "skillPath": "plugins/frontend-mobile-development/skills/nextjs-app-router-patterns/SKILL.md",
       "source": "wshobson/agents",
+      "sourceType": "github"
+    },
+    "pick-ui-library": {
+      "computedHash": "5d2a77bf0ecafbda85aa95fb49999b6d77945d9066ec83d970b62e5b388cd686",
+      "skillPath": "skills/pick-ui-library/SKILL.md",
+      "source": "emilkowalski/skills",
       "sourceType": "github"
     },
     "playwright-best-practices": {
@@ -138,6 +198,12 @@
       "source": "prisma/skills",
       "sourceType": "github"
     },
+    "react-virtuoso": {
+      "computedHash": "11d6d4267c913b430a222666d426d946833c1715d2aecf3b0a84ba68ce354560",
+      "skillPath": "react-virtuoso/SKILL.md",
+      "source": "virtuoso-dev/skills",
+      "sourceType": "github"
+    },
     "release-please": {
       "computedHash": "d3ab08b8a02ca41da5f92c004b81c69fb3ddb384977846f28792c77db1e492e3",
       "skillPath": "skills/release-please/SKILL.md",
@@ -148,6 +214,12 @@
       "computedHash": "b095ac8c980339436b41de9989328f3f288f2e2a70452df28452bbeb6531d604",
       "skillPath": "skills/requesting-code-review/SKILL.md",
       "source": "obra/superpowers",
+      "sourceType": "github"
+    },
+    "review-animations": {
+      "computedHash": "b1aca2c16876b8f00e2a1eb161714e63ec41099269d5f95c2f307230749b9dcd",
+      "skillPath": "skills/review-animations/SKILL.md",
+      "source": "emilkowalski/skills",
       "sourceType": "github"
     },
     "sentry-fix-issues": {
@@ -186,12 +258,6 @@
       "source": "deckardger/tanstack-agent-skills",
       "sourceType": "github"
     },
-    "trigger-tasks": {
-      "computedHash": "fc5371f0356358a13a07b8d5f72f7e537002d4b0c50f3d2dacd57d10a2163cfa",
-      "skillPath": "trigger-tasks/SKILL.md",
-      "source": "triggerdotdev/skills",
-      "sourceType": "github"
-    },
     "trpc": {
       "computedHash": "ebde0490a1cb88362f0ea27a091a4e3128c9d63a8882ff58943b0d6db27874d9",
       "skillPath": "toolchains/typescript/api/trpc/SKILL.md",
@@ -220,6 +286,12 @@
       "computedHash": "ef8670c2a2d8e2f6ed52d6f3219759903300ca13afc5ec2e25826a735112562b",
       "skillPath": "skills/using-superpowers/SKILL.md",
       "source": "obra/superpowers",
+      "sourceType": "github"
+    },
+    "vercel-composition-patterns": {
+      "computedHash": "f98931159fa9c7fed043bcd18a891a46dcf89ababa38df13a4c5b7b30dc0ce07",
+      "skillPath": "skills/composition-patterns/SKILL.md",
+      "source": "vercel-labs/agent-skills",
       "sourceType": "github"
     },
     "vercel-react-best-practices": {

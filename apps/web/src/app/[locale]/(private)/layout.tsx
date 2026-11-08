@@ -63,7 +63,7 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
 
             <div className="flex flex-1 overflow-hidden">
               <AppSidebar />
-              <div className="relative flex flex-1 flex-col overflow-y-auto">
+              <div className="relative flex flex-1 flex-col overflow-y-auto [scrollbar-gutter:stable]">
                 {/* <ScrollArea className="flex-1"> */}
                 <SidebarInset
                   className="mx-auto max-w-400 p-4"

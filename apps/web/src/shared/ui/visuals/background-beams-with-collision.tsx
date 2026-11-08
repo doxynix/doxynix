@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -133,6 +133,7 @@ const CollisionMechanism = forwardRef<
     parentRef: RefObject<HTMLDivElement | null>;
   }
 >(({ beamOptions = {}, containerRef, parentRef }, __) => {
+  const reduceMotion = useReducedMotion();
   const beamRef = useRef<HTMLDivElement>(null);
   const [collision, setCollision] = useState<{
     coordinates: null | { x: number; y: number };
@@ -145,6 +146,9 @@ const CollisionMechanism = forwardRef<
   const [cycleCollisionDetected, setCycleCollisionDetected] = useState(false);
 
   useEffect(() => {
+    if (reduceMotion) {
+      return;
+    }
     const checkCollision = () => {
       if (beamRef.current && containerRef.current && parentRef.current && !cycleCollisionDetected) {
         const beamRect = beamRef.current.getBoundingClientRect();
@@ -170,7 +174,7 @@ const CollisionMechanism = forwardRef<
     const animationInterval = setInterval(checkCollision, 50);
 
     return () => clearInterval(animationInterval);
-  }, [cycleCollisionDetected, containerRef, parentRef]);
+  }, [cycleCollisionDetected, containerRef, parentRef, reduceMotion]);
 
   useEffect(() => {
     if (collision.detected && collision.coordinates) {
@@ -188,7 +192,7 @@ const CollisionMechanism = forwardRef<
   return (
     <>
       <motion.div
-        animate="animate"
+        animate={reduceMotion ? undefined : "animate"}
         className={cn(
           "absolute top-20 left-0 m-auto h-14 w-px rounded-full bg-linear-to-t from-foreground/95 via-primary to-transparent",
           beamOptions.className,

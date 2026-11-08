@@ -1,5 +1,7 @@
 import type { Variants } from "motion/react";
 
+import { EASING } from "@/shared/config/motion";
+
 export type AnimationType = "character" | "line" | "text" | "word";
 export type AnimationVariant =
   | "blurIn"
@@ -38,8 +40,8 @@ export const defaultContainerVariants = {
   },
 };
 
-export const ENTER_EASING = [0.16, 1, 0.3, 1] as const;
-export const EXIT_EASING = [0.4, 0, 1, 1] as const;
+export const ENTER_EASING = [...EASING.expoOut] as const;
+export const EXIT_EASING = [...EASING.out] as const;
 export const ENTER_DURATION = 0.45;
 export const EXIT_DURATION = 0.25;
 
@@ -165,7 +167,7 @@ const rawItemAnimationVariants: Record<AnimationVariant, { container: Variants; 
           scale: 1.5,
           transition: { duration: 0.3 },
         },
-        hidden: { opacity: 0, scale: 1.5 },
+        hidden: { opacity: 0, scale: 1.08 },
         show: {
           opacity: 1,
           scale: 1,
@@ -188,7 +190,7 @@ const rawItemAnimationVariants: Record<AnimationVariant, { container: Variants; 
           scale: 0.5,
           transition: { duration: 0.3 },
         },
-        hidden: { opacity: 0, scale: 0.5 },
+        hidden: { opacity: 0, scale: 0.92 },
         show: {
           opacity: 1,
           scale: 1,

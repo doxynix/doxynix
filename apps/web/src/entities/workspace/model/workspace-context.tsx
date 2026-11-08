@@ -27,6 +27,18 @@ type WorkspaceContextValue = {
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
 
+// A repo route belongs to the old workspace; the new one may not contain it, and refreshing
+// would render a 404. Send the user to the new workspace's dashboard instead.
+function leaveRepoRoute(router: ReturnType<typeof useRouter>): boolean {
+  // `window` on purpose: called from an effect, so reading it adds no dependency.
+  if (!window.location.pathname.includes("/dashboard/repo/")) {
+    return false;
+  }
+
+  router.replace("/dashboard");
+  return true;
+}
+
 export function WorkspaceProvider({ children }: Readonly<{ children: ReactNode }>) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -46,6 +58,7 @@ export function WorkspaceProvider({ children }: Readonly<{ children: ReactNode }
       setWorkspaceCookie(data.activeWorkspaceId);
       queryClient.clear();
       toast.info(t("workspace_reset_notice"));
+      leaveRepoRoute(router);
       return;
     }
 
@@ -57,8 +70,9 @@ export function WorkspaceProvider({ children }: Readonly<{ children: ReactNode }
     if (!data.items.some((workspace) => workspace.id === cookie)) {
       setWorkspaceCookie(data.activeWorkspaceId);
       queryClient.clear();
+      leaveRepoRoute(router);
     }
-  }, [data, queryClient, t]);
+  }, [data, queryClient, router, t]);
 
   const switchWorkspace = (workspaceId: string) => {
     if (data == null || workspaceId === data.activeWorkspaceId) {
@@ -68,6 +82,9 @@ export function WorkspaceProvider({ children }: Readonly<{ children: ReactNode }
     setWorkspaceCookie(workspaceId);
     queryClient.clear();
     toast.success(t("workspace_switch_toast"));
+    if (leaveRepoRoute(router)) {
+      return;
+    }
     // The server tree was rendered with the previous cookie: without a refresh the page keeps
     // showing the old workspace until a full reload.
     router.refresh();

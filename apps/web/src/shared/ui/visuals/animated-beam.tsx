@@ -1,7 +1,7 @@
 "use client";
 
 import { type FC, type RefObject, useEffect, useId, useState } from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -49,6 +49,7 @@ export const AnimatedBeam: FC<AnimatedBeamProps> = ({
   toRef,
 }) => {
   const id = useId();
+  const reduceMotion = useReducedMotion();
   const [fallbackDuration] = useState(() => Math.random() * 3 + 4);
   const duration = durationProp ?? fallbackDuration;
 
@@ -132,7 +133,7 @@ export const AnimatedBeam: FC<AnimatedBeamProps> = ({
       <defs>
         <motion.linearGradient
           animate={
-            isActive
+            isActive && !reduceMotion
               ? {
                   x1: gradientCoordinates.x1,
                   x2: gradientCoordinates.x2,

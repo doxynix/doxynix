@@ -17,6 +17,7 @@ import {
   type TransactionClient,
 } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
+import { revokeUserSessions } from "@/server/utils/access-revocation";
 import { handlePrismaError } from "@/server/utils/handle-error";
 
 import {
@@ -122,6 +123,8 @@ export const userService = {
     }
 
     const workspaceIds = await listMemberWorkspaceIds(userId);
+
+    await revokeUserSessions(db, userId);
 
     await db.user.delete({ where: { id: userId } });
 

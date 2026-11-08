@@ -1,29 +1,29 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { UserMinus } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useTRPC } from "@/shared/api/trpc";
 import { Link } from "@/shared/i18n/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/core/avatar";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { AppAvatar } from "@/shared/ui/kit/app-avatar";
+import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { useWorkspace } from "@/entities/workspace/model/workspace-context";
 
-import { AddMemberDialog } from "./add-member-dialog";
+import { InviteMemberDialog } from "./invite-member-dialog";
 import { RemoveMemberDialog } from "./remove-member-dialog";
-
-function initials(name: null | string): string {
-  return (name ?? "?").slice(0, 2).toUpperCase();
-}
 
 export function WorkspaceMembersPage() {
   const trpc = useTRPC();
   const t = useTranslations("Dashboard");
   const { activeWorkspace, isOwner } = useWorkspace();
   const { data, isLoading } = useQuery(trpc.workspace.members.queryOptions());
+
+  const ownerCount = data?.items.filter((member) => member.role === "OWNER").length ?? 0;
 
   const planCode = activeWorkspace?.entitlement?.planCode ?? "HOBBY";
   const isHobby = planCode === "HOBBY";
@@ -38,7 +38,7 @@ export function WorkspaceMembersPage() {
               <Link href="/dashboard/settings/billing">{t("settings_members_upgrade")}</Link>
             </AppButton>
           ) : (
-            <AddMemberDialog />
+            <InviteMemberDialog />
           ))}
       </div>
 
@@ -63,10 +63,11 @@ export function WorkspaceMembersPage() {
               key={member.id}
             >
               <div className="flex min-w-0 items-center gap-3">
-                <Avatar>
-                  <AvatarImage src={member.user.image ?? undefined} />
-                  <AvatarFallback>{initials(member.user.name)}</AvatarFallback>
-                </Avatar>
+                <AppAvatar
+                  alt={member.user.name ?? t("settings_members_unnamed")}
+                  fallbackText={member.user.name ?? ""}
+                  src={member.user.image ?? undefined}
+                />
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate font-medium">
                     {member.user.name ?? t("settings_members_unnamed")}
@@ -84,12 +85,26 @@ export function WorkspaceMembersPage() {
                     ? t("settings_members_role_owner")
                     : t("settings_members_role_member")}
                 </AppBadge>
-                {isOwner && (
-                  <RemoveMemberDialog
-                    memberName={member.user.name ?? t("settings_members_unnamed")}
-                    userId={member.userId}
-                  />
-                )}
+                {isOwner &&
+                  (member.role === "OWNER" && ownerCount <= 1 ? (
+                    <AppTooltip content={t("settings_members_error_last_owner")}>
+                      <span className="inline-flex">
+                        <AppButton
+                          aria-label={t("settings_members_error_last_owner")}
+                          disabled
+                          size="icon"
+                          variant="ghost"
+                        >
+                          <UserMinus />
+                        </AppButton>
+                      </span>
+                    </AppTooltip>
+                  ) : (
+                    <RemoveMemberDialog
+                      memberName={member.user.name ?? t("settings_members_unnamed")}
+                      userId={member.userId}
+                    />
+                  ))}
               </div>
             </div>
           ))}

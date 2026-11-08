@@ -202,6 +202,8 @@ export const adminUserService = {
     const workspaceIds = await listMemberWorkspaceIds(input.id);
 
     try {
+      await revokeUserSessions(prisma, input.id);
+
       await db.user.delete({ where: { id: input.id } });
 
       await syncSeatsAfterUserDeletion(workspaceIds, input.id);
