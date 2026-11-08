@@ -55,12 +55,13 @@ function percentOf(value: number, limit: null | number): number {
 // A linear axis has to stay readable for any projection: choose a step that yields roughly five
 // ticks, then round the peak up to it. There is no fixed ceiling — a 311% forecast gets a 400%
 // axis, a 1.9T% forecast gets a 2T% axis.
+const AXIS_STEPS = [1, 2, 2.5, 5] as const;
+
 function niceAxisStep(peakPercent: number): number {
   const rough = Math.max(peakPercent, 100) / 5;
   const magnitude = 10 ** Math.floor(Math.log10(rough));
   const normalized = rough / magnitude;
-  const step =
-    normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 2.5 ? 2.5 : normalized <= 5 ? 5 : 10;
+  const step = AXIS_STEPS.find((candidate) => normalized <= candidate) ?? 10;
 
   return step * magnitude;
 }

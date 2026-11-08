@@ -1,25 +1,14 @@
 "use client";
 import { type ReactNode, useEffect, useState } from "react";
-import Image from "next/image";
-import { useQueryClient } from "@tanstack/react-query";
 import * as Ably from "ably";
 import { AblyProvider, ChannelProvider, useChannel } from "ably/react";
-import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
-import { useTRPC } from "@/shared/api/trpc";
 import { IS_PROD } from "@/shared/config/env.flags";
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
-import { useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
 
-import { useRepoActions } from "@/entities/repo/model/use-repo-actions";
-
-import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";
-
-import type { DashboardStats } from "@/widgets/dashboard/model/dashboard.types";
-
-import { parseRealtimePayload, RealtimeUserPayloads } from "./realtime-payloads";
+import { useRealtimeDeps } from "./realtime/deps";
+import { buildSystemHandlers, buildUserHandlers } from "./realtime/realtime-handlers";
 
 type Props = { children: ReactNode };
 
@@ -56,7 +45,7 @@ function RealtimeBridge({ userId }: { userId: string | undefined }) {
 
     // A client cannot exist during SSR, so the bridge needs one extra render to publish it. That
     // renders this component alone; `children` of RealtimeProvider stays at the same index.
-    // oxlint-disable-next-line react/set-state-in-effect
+    // oxlint-disable-next-line react/set-state-in-effect -- the Ably client exists only in the browser
     setClient(realtime);
 
     return () => {
@@ -81,165 +70,24 @@ function RealtimeBridge({ userId }: { userId: string | undefined }) {
 }
 
 function RealtimeSubscriptions({ userId }: { userId: string }) {
-  const trpc = useTRPC();
-  const router = useRouter();
-  const t = useTranslations("Dashboard");
-
-  const { invalidateAll } = useNotificationActions();
-  const { invalidate } = useRepoActions();
-  const queryClient = useQueryClient();
+  const deps = useRealtimeDeps();
+  const systemHandlers = buildSystemHandlers(deps);
+  const userHandlers = buildUserHandlers(deps);
 
   useChannel(REALTIME_CONFIG.channels.system, (message: Ably.Message) => {
-    if (message.name === REALTIME_CONFIG.events.system.maintenance) {
-      toast.warning(t("realtime_maintenance_warning"));
+    if (message.name == null) {
+      return;
     }
+
+    systemHandlers[message.name]?.(message);
   });
 
   useChannel(REALTIME_CONFIG.channels.user(userId), (message: Ably.Message) => {
-    if (message.name === REALTIME_CONFIG.events.user.apiKeyUpdated) {
-      void queryClient.invalidateQueries(trpc.apikey.list.pathFilter());
+    if (message.name == null) {
+      return;
     }
 
-    if (message.name === REALTIME_CONFIG.events.user.repoUpdated) {
-      invalidate();
-      void queryClient.invalidateQueries(trpc.repo.getByOwner.pathFilter());
-      void queryClient.invalidateQueries(trpc.user.getOnboardingState.pathFilter());
-    }
-
-    if (message.name === REALTIME_CONFIG.events.user.notificationUpdated) {
-      void invalidateAll();
-    }
-
-    if (message.name === REALTIME_CONFIG.events.user.userUpdated) {
-      void queryClient.invalidateQueries(trpc.user.me.pathFilter());
-      void queryClient.invalidateQueries(trpc.user.getActiveSessions.pathFilter());
-      void queryClient.invalidateQueries(trpc.user.getOnboardingState.pathFilter());
-    }
-
-    if (message.name === REALTIME_CONFIG.events.user.agentSessionUpdated) {
-      void queryClient.invalidateQueries(trpc.agent.listSessions.pathFilter());
-    }
-
-    if (message.name === REALTIME_CONFIG.events.user.analysisUpdated) {
-      void queryClient.invalidateQueries(trpc.analysis.getLatest.pathFilter());
-      void queryClient.invalidateQueries(trpc.analysis.getHistory.pathFilter());
-      void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
-      void queryClient.invalidateQueries(trpc.analysis.getByRepository.pathFilter());
-      void queryClient.invalidateQueries(trpc.user.getOnboardingState.pathFilter());
-    }
-
-    if (message.name === REALTIME_CONFIG.events.user.notification) {
-      const data = parseRealtimePayload(RealtimeUserPayloads.notification, message.data);
-      if (data == null) {
-        return;
-      }
-      toast.success(data.title, { description: data.body });
-      void invalidateAll();
-    }
-
-    if (message.name === REALTIME_CONFIG.events.user.fileActionCompleted) {
-      const payload = parseRealtimePayload(RealtimeUserPayloads.fileActionCompleted, message.data);
-      if (payload == null) {
-        return;
-      }
-
-      if (payload.type === "FIX_GENERATED" && payload.fixId != null) {
-        void queryClient.invalidateQueries(
-          trpc.analysis.getById.queryFilter({ fixId: payload.fixId }),
-        );
-        toast.success(t("realtime_fix_ready"));
-      } else if (payload.path != null) {
-        const action = payload.type === "AUDIT" ? "quick-file-audit" : "document-file-preview";
-        void queryClient.invalidateQueries(
-          trpc.analysis.getFileActionResult.queryFilter({ action, path: payload.path }),
-        );
-        toast.success(
-          payload.type === "AUDIT"
-            ? t("realtime_file_audit_done")
-            : t("realtime_file_document_done"),
-        );
-      }
-    }
-
-    if (message.name === REALTIME_CONFIG.events.user.prCommentReceived) {
-      const payload = parseRealtimePayload(
-        RealtimeUserPayloads[REALTIME_CONFIG.events.user.prCommentReceived],
-        message.data,
-      );
-      if (payload == null) {
-        return;
-      }
-
-      void queryClient.invalidateQueries(trpc.analysis.getComments.pathFilter());
-
-      toast.info(t("realtime_pr_comment_title", { number: payload.prNumber }), {
-        action: {
-          label: t("view"),
-          onClick: () => {
-            router.push(
-              `/dashboard/repo/${payload.repoOwner}/${payload.repoName}/pull/${payload.prNumber}`,
-            );
-          },
-        },
-        description: t("realtime_pr_comment_desc", {
-          author: payload.author,
-          title: payload.prTitle,
-        }),
-        icon: (
-          <Image
-            alt={payload.author}
-            className="size-4 rounded-full"
-            height={16}
-            src={payload.authorAvatarUrl}
-            width={16}
-          />
-        ),
-      });
-    }
-
-    if (message.name === REALTIME_CONFIG.events.user.analysisProgress) {
-      const payload = parseRealtimePayload(
-        RealtimeUserPayloads[REALTIME_CONFIG.events.user.analysisProgress],
-        message.data,
-      );
-      if (payload == null) {
-        return;
-      }
-
-      void queryClient.invalidateQueries(trpc.user.getOnboardingState.pathFilter());
-
-      queryClient.setQueriesData(
-        trpc.analytics.getDashboardStats.pathFilter(),
-        (oldData: DashboardStats | undefined) => {
-          if (oldData == null) {
-            return oldData;
-          }
-
-          return {
-            ...oldData,
-            recentActivity: oldData.recentActivity.map((activity) =>
-              activity.id === payload.analysisId
-                ? { ...activity, progress: payload.progress, status: payload.status }
-                : activity,
-            ),
-          };
-        },
-      );
-
-      if (payload.status === "DONE" || payload.status === "FAILED") {
-        invalidate();
-
-        void queryClient.invalidateQueries(trpc.analysis.getLatest.pathFilter());
-        void queryClient.invalidateQueries(trpc.analysis.getHistory.pathFilter());
-      }
-    }
-
-    if (message.name === REALTIME_CONFIG.events.user.auditUpdated) {
-      void queryClient.invalidateQueries(trpc.audit.getActivityLogs.pathFilter());
-    }
-    if (message.name === REALTIME_CONFIG.events.user.sessionUpdated) {
-      void queryClient.invalidateQueries(trpc.agent.listSessions.pathFilter());
-    }
+    userHandlers[message.name]?.(message);
   });
 
   return null;

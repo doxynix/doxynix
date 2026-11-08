@@ -8,6 +8,13 @@ async function loadSentry() {
   return import("@sentry/nextjs");
 }
 
+type TechInfo = {
+  screen: string;
+  time: string;
+  ua: string;
+  url: string;
+};
+
 export default function GlobalError({
   error,
   reset,
@@ -55,15 +62,19 @@ export default function GlobalError({
     };
   }, [error]);
 
-  const [techInfo] = useState(() => {
-    const isClient = typeof window !== "undefined";
-    return {
-      screen: isClient ? `${globalThis.window.innerWidth}x${globalThis.window.innerHeight}` : "N/A",
+  const [techInfo, setTechInfo] = useState<null | TechInfo>(null);
+
+  useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- browser-only values cannot be read during render
+    setTechInfo({
+      screen: `${window.innerWidth}x${window.innerHeight}`,
       time: new Date().toISOString(),
-      ua: isClient ? globalThis.navigator.userAgent : "",
-      url: isClient ? globalThis.location.href : "",
-    };
-  });
+      ua: navigator.userAgent,
+      url: window.location.href,
+    });
+  }, []);
+
+  const info = techInfo ?? { screen: "N/A", time: "N/A", ua: "", url: "" };
 
   const emailBody = `
     Describe what you were doing before the error (optional):
@@ -73,10 +84,10 @@ export default function GlobalError({
     Technical Information (Please, do not edit):
     ------------------------------------------------
     Error ID: ${finalId}
-    Page: ${techInfo.url}
-    Screen: ${techInfo.screen}
-    Time: ${techInfo.time}
-    User Agent: ${techInfo.ua}
+    Page: ${info.url}
+    Screen: ${info.screen}
+    Time: ${info.time}
+    User Agent: ${info.ua}
   `.trim();
 
   const mailtoLink = `mailto:support@doxynix.space?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;

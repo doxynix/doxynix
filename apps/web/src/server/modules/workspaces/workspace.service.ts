@@ -21,6 +21,44 @@ type WorkspaceWithEntitlement = Prisma.WorkspaceGetPayload<{
   include: { entitlement: true };
 }>;
 
+async function requirePaidWorkspace(
+  db: DbClient,
+  workspaceId: string,
+): Promise<WorkspaceWithEntitlement> {
+  const workspace = await db.workspace.findUnique({
+    include: { entitlement: true },
+    where: { id: workspaceId },
+  });
+
+  if (workspace == null) {
+    throw new AppError({
+      code: "FORBIDDEN",
+      messageCode: MessageCode.WORKSPACE_ACCESS_DENIED,
+      publicMessage: "Workspace access denied",
+    });
+  }
+
+  if (workspace.entitlement == null || workspace.entitlement.planCode === "HOBBY") {
+    throw new AppError({
+      code: "PRECONDITION_FAILED",
+      messageCode: MessageCode.FEATURE_NOT_IN_PLAN,
+      publicMessage: "UPGRADE_REQUIRED",
+    });
+  }
+
+  // A seat is a paid resource: §9.7 forbids raising seats while the subscription is not active,
+  // so grace keeps its existing seats but cannot grow. Suspended/review have no access at all.
+  if (workspace.entitlement.accessState !== "ACTIVE") {
+    throw new AppError({
+      code: "PAYMENT_REQUIRED",
+      messageCode: MessageCode.PAYMENT_REQUIRED,
+      publicMessage: "PAYMENT_REQUIRED",
+    });
+  }
+
+  return workspace;
+}
+
 // The membership is already committed, so a failing Stripe call or issue insert must never reach
 // the caller; it is logged and recorded instead.
 async function syncSeatsAfterMembershipChange(input: {
@@ -128,34 +166,7 @@ export const workspaceService = {
       }
     }
 
-    const workspace = await prisma.workspace.findUnique({
-      include: { entitlement: true },
-      where: { id: invite.workspaceId },
-    });
-
-    if (workspace == null) {
-      throw new AppError({
-        code: "FORBIDDEN",
-        messageCode: MessageCode.WORKSPACE_ACCESS_DENIED,
-        publicMessage: "Workspace access denied",
-      });
-    }
-
-    if (workspace.entitlement == null || workspace.entitlement.planCode === "HOBBY") {
-      throw new AppError({
-        code: "PRECONDITION_FAILED",
-        messageCode: MessageCode.FEATURE_NOT_IN_PLAN,
-        publicMessage: "UPGRADE_REQUIRED",
-      });
-    }
-
-    if (workspace.entitlement.accessState !== "ACTIVE") {
-      throw new AppError({
-        code: "PAYMENT_REQUIRED",
-        messageCode: MessageCode.PAYMENT_REQUIRED,
-        publicMessage: "PAYMENT_REQUIRED",
-      });
-    }
+    await requirePaidWorkspace(prisma, invite.workspaceId);
 
     const memberId = await prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${invite.workspaceId}))`;
@@ -200,36 +211,7 @@ export const workspaceService = {
     return { workspaceId: invite.workspaceId };
   },
   async addMember(db: DbClient, workspaceId: string, email: string) {
-    const workspace = await db.workspace.findUnique({
-      include: { entitlement: true },
-      where: { id: workspaceId },
-    });
-
-    if (workspace == null) {
-      throw new AppError({
-        code: "FORBIDDEN",
-        messageCode: MessageCode.WORKSPACE_ACCESS_DENIED,
-        publicMessage: "Workspace access denied",
-      });
-    }
-
-    if (workspace.entitlement == null || workspace.entitlement.planCode === "HOBBY") {
-      throw new AppError({
-        code: "PRECONDITION_FAILED",
-        messageCode: MessageCode.FEATURE_NOT_IN_PLAN,
-        publicMessage: "UPGRADE_REQUIRED",
-      });
-    }
-
-    // A seat is a paid resource: §9.7 forbids raising seats while the subscription is not active,
-    // so grace keeps its existing seats but cannot grow. Suspended/review have no access at all.
-    if (workspace.entitlement.accessState !== "ACTIVE") {
-      throw new AppError({
-        code: "PAYMENT_REQUIRED",
-        messageCode: MessageCode.PAYMENT_REQUIRED,
-        publicMessage: "PAYMENT_REQUIRED",
-      });
-    }
+    await requirePaidWorkspace(db, workspaceId);
 
     const emailHash = getNormalizedHash(normalizeEmail(email));
     // Membership lookup is a system read: a workspace owner must not be able to read the user row.
@@ -308,34 +290,7 @@ export const workspaceService = {
     createdByUserId: string,
     input: { email?: string; inviterName?: string } = {},
   ) {
-    const workspace = await prisma.workspace.findUnique({
-      include: { entitlement: true },
-      where: { id: workspaceId },
-    });
-
-    if (workspace == null) {
-      throw new AppError({
-        code: "FORBIDDEN",
-        messageCode: MessageCode.WORKSPACE_ACCESS_DENIED,
-        publicMessage: "Workspace access denied",
-      });
-    }
-
-    if (workspace.entitlement == null || workspace.entitlement.planCode === "HOBBY") {
-      throw new AppError({
-        code: "PRECONDITION_FAILED",
-        messageCode: MessageCode.FEATURE_NOT_IN_PLAN,
-        publicMessage: "UPGRADE_REQUIRED",
-      });
-    }
-
-    if (workspace.entitlement.accessState !== "ACTIVE") {
-      throw new AppError({
-        code: "PAYMENT_REQUIRED",
-        messageCode: MessageCode.PAYMENT_REQUIRED,
-        publicMessage: "PAYMENT_REQUIRED",
-      });
-    }
+    const workspace = await requirePaidWorkspace(prisma, workspaceId);
 
     const email =
       input.email == null || input.email.trim() === "" ? undefined : normalizeEmail(input.email);

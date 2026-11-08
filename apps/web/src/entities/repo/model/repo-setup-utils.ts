@@ -109,6 +109,9 @@ export const collectAllIds = (node: FileNode, ids: string[] = []) => {
   return ids;
 };
 
+export const collectTreeIds = (nodes: FileNode[]): string[] =>
+  nodes.flatMap((node) => collectAllIds(node));
+
 export const getFolderSelectionState = (node: FileNode, selectedIds: Set<string>) => {
   if (!node.children || node.children.length === 0) {
     return selectedIds.has(node.id);

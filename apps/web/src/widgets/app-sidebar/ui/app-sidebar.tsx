@@ -29,9 +29,8 @@ import {
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
+import { useNotificationStats } from "@/entities/notification/model/use-notification-stats";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
-
-import { useNotificationStats } from "@/features/notifications/model/use-notification-stats";
 
 import { SidebarLink } from "./sidebar-link";
 

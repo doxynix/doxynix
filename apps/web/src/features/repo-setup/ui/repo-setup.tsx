@@ -3,8 +3,8 @@
 import type { DocType } from "@doxynix/shared";
 
 import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
-import { useRepoSetup } from "@/entities/repo/model/use-repo-setup";
 
+import { useRepoSetup } from "../model/use-repo-setup";
 import { RepoAnalysisConfig } from "./repo-analysis-config";
 import { RepoFileTree } from "./repo-file-tree";
 

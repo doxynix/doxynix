@@ -1,4 +1,4 @@
-import { MessageCode } from "@doxynix/shared";
+import { isRecord, MessageCode } from "@doxynix/shared";
 import type Stripe from "stripe";
 
 import { APP_URL } from "@/shared/config/env.client";
@@ -28,10 +28,6 @@ export type CreateCheckoutInput = {
   requestId: string;
   workspaceId: string;
 };
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
 
 function checkoutUrls(): { cancelUrl: string; successUrl: string } {
   const base = `${APP_URL.replace(/\/+$/, "")}/${DEFAULT_LOCALE}${CHECKOUT_RETURN_PATH}`;

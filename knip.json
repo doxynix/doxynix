@@ -1,15 +1,36 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignore": [".agents/**", ".opencode/**"],
+  "ignoreBinaries": ["dot", "doppler", "licenses", "podman", "semgrep"],
+  "ignoreDependencies": [
+    "@secretlint/secretlint-rule-preset-recommend",
+    "hono",
+    "k6",
+    "prisma-dbml-generator",
+    "prisma-erd-generator",
+    "prisma-generator-fake-data",
+    "prisma-json-schema-generator",
+    "tree-sitter-wasms"
+  ],
+  "ignoreExportsUsedInFile": true,
   "workspaces": {
     "apps/siem-server": {
-      "entry": ["src/index.ts", "scripts/*.ts"]
+      "entry": ["scripts/*.ts"]
     },
     "apps/web": {
-      "entry": ["src/app/**/page.tsx", "src/app/api/**/route.ts", "prisma/seed.ts"],
-      "ignore": ["src/shared/i18n/request.ts"]
-    },
-    "packages/cli": {
-      "entry": ["src/commands/profile.ts"]
+      "entry": [
+        "src/app/**/page.tsx",
+        "src/app/api/**/route.ts",
+        "src/server/**/tasks/*.task.ts",
+        "src/server/**/tasks/{init,handle-task-error}.ts",
+        "scripts/**/*.{ts,mjs,js}",
+        "prisma/seed.ts",
+        "sentry.*.config.ts",
+        "steiger.config.mjs",
+        "trigger.config.ts",
+        "vitest.*.config.ts"
+      ],
+      "ignore": [".eloqnt/config.ts", "prisma/schema.prisma", "src/shared/i18n/request.ts"]
     }
   }
 }

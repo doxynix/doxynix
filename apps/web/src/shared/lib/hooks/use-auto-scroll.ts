@@ -1,6 +1,13 @@
 "use client";
 
-import { type DependencyList, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  type DependencyList,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 export function useAutoScroll<T extends HTMLElement>(
   deps: DependencyList,
@@ -20,13 +27,13 @@ export function useAutoScroll<T extends HTMLElement>(
 
   const throttleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const getContainer = (): HTMLElement | null => {
+  const getContainer = useCallback((): HTMLElement | null => {
     const root = scrollRef.current;
     if (root == null) {
       return null;
     }
     return root.querySelector(selector);
-  };
+  }, [selector]);
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     const container = getContainer();
@@ -41,7 +48,7 @@ export function useAutoScroll<T extends HTMLElement>(
     setIsAutoScroll(true);
   };
 
-  const handleScrollThrottled = () => {
+  const handleScrollThrottled = useCallback(() => {
     if (throttleTimeoutRef.current) {
       return;
     }
@@ -61,7 +68,7 @@ export function useAutoScroll<T extends HTMLElement>(
       setIsAutoScroll(isAtBottom);
       setShowScrollButton(!isAtBottom);
     }, throttleMs);
-  };
+  }, [getContainer, throttleMs]);
 
   useEffect(() => {
     const container = getContainer();
@@ -76,7 +83,6 @@ export function useAutoScroll<T extends HTMLElement>(
         clearTimeout(throttleTimeoutRef.current);
       }
     };
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [handleScrollThrottled, getContainer]);
 
   useEffect(() => {
@@ -104,7 +110,7 @@ export function useAutoScroll<T extends HTMLElement>(
     }
 
     return () => observer.disconnect();
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- callers own the dependency list
   }, [getContainer, ...deps]);
 
   return {

@@ -11,10 +11,10 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
 import type { ActionItem, FileNode } from "@/entities/repo/model/repo-setup.types";
-import type { ActionsType, StateType } from "@/entities/repo/model/use-repo-setup";
 import { RepoBranchSelector } from "@/entities/repo/ui/repo-branch-selector";
 import { RepoTreeSkeleton } from "@/entities/repo/ui/repo-tree-skeleton";
 
+import type { ActionsType, StateType } from "../model/use-repo-setup";
 import { RepoFileNode } from "./repo-file-node";
 
 type Props = {
@@ -71,6 +71,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
           <div className="relative">
             <Search className="absolute top-2.5 left-2.5 text-muted-foreground" />
             <Input
+              aria-label={t("repo_file_tree_search_placeholder")}
               className="pl-9"
               onChange={(e) => {
                 void actions.setSearchTerm(e.target.value);

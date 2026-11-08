@@ -167,9 +167,11 @@ export function InviteMemberDialog() {
           <Label htmlFor="invite-email">{t("settings_members_add_email_label")}</Label>
           <div className="flex items-center gap-2">
             <Input
+              autoComplete="off"
               id="invite-email"
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t("settings_members_add_email_placeholder")}
+              spellCheck={false}
               type="email"
               value={email}
             />

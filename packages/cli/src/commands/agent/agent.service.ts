@@ -1,3 +1,5 @@
+import { isRecord } from "@doxynix/shared";
+
 import { trpc } from "@/core/client";
 import { getApiUrl, getToken } from "@/core/config";
 
@@ -14,10 +16,6 @@ import type {
   UIMessagePart,
   UIMessageToolPart,
 } from "./agent.types";
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
 
 export const agentService = {
   async createSession(input: CreateSessionInput) {

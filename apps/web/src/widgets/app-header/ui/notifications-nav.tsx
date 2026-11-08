@@ -24,9 +24,9 @@ import { LoadingButton } from "@/shared/ui/kit/loading-button";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
 import { notificationTypeConfig } from "@/entities/notification/model/notification-type-config";
+import { useNotificationStats } from "@/entities/notification/model/use-notification-stats";
 
 import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";
-import { useNotificationStats } from "@/features/notifications/model/use-notification-stats";
 
 const PAGE_SIZE = 10;
 
@@ -39,7 +39,6 @@ export function NotificationsNav() {
 
   const [open, setOpen] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const [allReadPending, setAllReadPending] = useState(false);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
     trpc.notification.getFeed.infiniteQueryOptions(
@@ -55,15 +54,10 @@ export function NotificationsNav() {
   const notifications = data?.pages.flatMap((page) => page.items) ?? [];
 
   const { data: unreadData } = useNotificationStats();
-  const unreadCount = allReadPending ? 0 : (unreadData?.unread ?? 0);
+  const unreadCount = unreadData?.unread ?? 0;
 
   function handleSelectRead(id: string) {
     markAs.mutate(id, true);
-  }
-
-  function handleMarkAllAsRead() {
-    setAllReadPending(true);
-    markAllAsRead.mutate(undefined, { onSettled: () => setAllReadPending(false) });
   }
 
   const { observe, unobserve } = useIntersectionObserver(
@@ -114,8 +108,8 @@ export function NotificationsNav() {
           <LoadingButton
             className="text-xs"
             disabled={unreadCount === 0}
-            isLoading={allReadPending || markAllAsRead.isPending}
-            onClick={handleMarkAllAsRead}
+            isLoading={markAllAsRead.isPending}
+            onClick={() => markAllAsRead.mutate(undefined)}
             variant="link"
           >
             {t("notifications_mark_read")}
@@ -150,7 +144,7 @@ export function NotificationsNav() {
               </p>
             ) : (
               notifications.map((note) => {
-                const isRead = note.isRead || allReadPending;
+                const isRead = note.isRead;
                 const href =
                   note.repo != null ? `/dashboard/repo/${note.repo.owner}/${note.repo.name}` : null;
                 const { color, icon: Icon } = notificationTypeConfig[note.type];

@@ -4,17 +4,19 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/shared/lib/cn";
 import { formatSize } from "@/shared/lib/size-format";
 
+import { isReadOnly, type RepoCodeMode } from "../model/editor-mode";
 import type { EditorStats } from "../model/editor-stats.types";
 import type { FileMeta } from "../model/repo.types";
 
 type Props = {
   meta: FileMeta;
-  readOnly: boolean;
+  mode: RepoCodeMode;
   stats: EditorStats;
 };
 
-export function RepoStatusBar({ meta, readOnly, stats }: Readonly<Props>) {
+export function RepoStatusBar({ meta, mode, stats }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
+  const readOnly = isReadOnly(mode);
   return (
     <div className="flex items-center justify-between bg-card px-3 py-1.5 font-mono text-[11px]">
       <div className="flex items-center gap-3 font-semibold">

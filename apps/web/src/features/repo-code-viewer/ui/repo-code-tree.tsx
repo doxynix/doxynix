@@ -11,7 +11,8 @@ import { Input } from "@/shared/ui/core/input";
 
 import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
 import type { ActionItem, FileNode } from "@/entities/repo/model/repo-setup.types";
-import { useRepoSetup } from "@/entities/repo/model/use-repo-setup";
+import { useRepoBranch, useRepoBranches } from "@/entities/repo/model/use-repo-branch";
+import { useRepoTreeData } from "@/entities/repo/model/use-repo-tree-data";
 import { RepoBranchSelector } from "@/entities/repo/ui/repo-branch-selector";
 import { RepoCodeNode } from "@/entities/repo/ui/repo-code-node";
 import { RepoTreeSkeleton } from "@/entities/repo/ui/repo-tree-skeleton";
@@ -32,7 +33,9 @@ export function RepoCodeTree({
   treeApi,
 }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
-  const { actions, state } = useRepoSetup(repo);
+  const { branch, setBranch } = useRepoBranch(repo);
+  const { branches, isBranchesLoading } = useRepoBranches(repo);
+  const { isLoading, searchTerm, setSearchTerm, treeData } = useRepoTreeData(repo, branch);
 
   const [measureRef, size] = useResizeObserver<HTMLDivElement>();
 
@@ -75,24 +78,25 @@ export function RepoCodeTree({
           <div className="relative">
             <Search className="absolute top-2.75 left-2.5 size-3.5 text-muted-foreground" />
             <Input
+              aria-label={t("repo_code_tree_search_placeholder")}
               className="bg-background pl-7 text-xs"
               onChange={(e) => {
-                void actions.setSearchTerm(e.target.value);
+                void setSearchTerm(e.target.value);
               }}
               placeholder={t("repo_code_tree_search_placeholder")}
               type="search"
-              value={state.searchTerm}
+              value={searchTerm}
             />
           </div>
           <RepoBranchSelector
-            branches={state.branches}
+            branches={branches}
             defaultBranch={repo.defaultBranch}
-            isLoading={state.isBranchesLoading}
+            isLoading={isBranchesLoading}
             onSelect={(branch) => {
-              void actions.setSelectedBranch(branch);
+              void setBranch(branch);
               onSelect(null);
             }}
-            selectedBranch={state.selectedBranch}
+            selectedBranch={branch}
           />
         </div>
         <div className="flex items-center gap-4">
@@ -115,16 +119,16 @@ export function RepoCodeTree({
         className="min-h-0 flex-1 overflow-hidden p-2"
         ref={measureRef}
       >
-        {state.isLoading ? (
+        {isLoading ? (
           <RepoTreeSkeleton variant="tree" />
-        ) : state.treeData.length === 0 ? (
+        ) : treeData.length === 0 ? (
           <p className="flex h-full items-center justify-center text-muted-foreground text-sm">
             {t("repo_code_tree_no_files")}
           </p>
         ) : (
           size.height > 0 && (
             <Tree
-              data={state.treeData}
+              data={treeData}
               disableDrag
               disableDrop
               disableEdit
@@ -147,7 +151,7 @@ export function RepoCodeTree({
               searchMatch={(node, term) =>
                 node.data.name.toLowerCase().includes(term.toLowerCase())
               }
-              searchTerm={state.searchTerm}
+              searchTerm={searchTerm}
               selectionFollowsFocus={false}
               width="100%"
             >

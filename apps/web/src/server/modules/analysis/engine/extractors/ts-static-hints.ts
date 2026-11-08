@@ -1,5 +1,7 @@
 import { extname, normalize } from "pathe";
 
+import { appLogger } from "@/server/core/app-logger";
+
 import { COMPLEXITY_SCORING } from "../core/scoring-constants";
 
 const TS_LIKE = new Set([".cjs", ".cts", ".js", ".jsx", ".mjs", ".mts", ".ts", ".tsx"]);
@@ -113,7 +115,13 @@ export function collectTypeScriptStaticHints(
 
     try {
       analyzeLinesForHints(file.content, normalized, hints);
-    } catch {}
+    } catch (error) {
+      appLogger.warn({
+        error,
+        msg: "TypeScript static hints extraction failed",
+        path: normalized,
+      });
+    }
   }
 
   return hints;

@@ -13,9 +13,9 @@ import {
   NOTIFICATIONS_DEFAULT_LIMIT,
   notificationsParsers,
 } from "@/entities/notification/model/notifications-parsers";
+import { useNotificationStats } from "@/entities/notification/model/use-notification-stats";
 import { NotificationCardSkeleton } from "@/entities/notification/ui/notification-card-skeleton";
 
-import { useNotificationStats } from "../model/use-notification-stats";
 import { NotificationsHeader } from "./notifications-header";
 import { NotificationsList } from "./notifications-list";
 

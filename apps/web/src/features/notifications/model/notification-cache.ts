@@ -55,6 +55,28 @@ export function patchDeleteList(page: NotificationGetAll | undefined, id: string
   return page == null ? page : { ...page, items: page.items.filter((item) => item.id !== id) };
 }
 
+export function patchMarkAllFeed(data: FeedData | undefined) {
+  return data == null
+    ? data
+    : {
+        ...data,
+        pages: data.pages.map((page) => ({
+          ...page,
+          items: page.items.map((item) => ({ ...item, isRead: true })),
+        })),
+      };
+}
+
+export function patchMarkAllList(page: NotificationGetAll | undefined) {
+  return page == null
+    ? page
+    : { ...page, items: page.items.map((item) => ({ ...item, isRead: true })) };
+}
+
+export function patchMarkAllStats(stats: Stats | undefined) {
+  return stats == null ? stats : { ...stats, unread: 0 };
+}
+
 export function patchMarkAsStats(stats: Stats | undefined, wasRead: boolean, isRead: boolean) {
   if (stats == null || wasRead === isRead) {
     return stats;
