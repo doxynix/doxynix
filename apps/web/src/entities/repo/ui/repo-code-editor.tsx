@@ -13,29 +13,28 @@ import CodeMirrorMerge from "react-codemirror-merge";
 
 import { buildEditorExtensions } from "../model/editor-extensions";
 import { loadLanguageExtension } from "../model/editor-language-loader";
+import { isReadOnly, type RepoCodeDiff, type RepoCodeMode } from "../model/editor-mode";
 import type { EditorStats } from "../model/editor-stats.types";
 
 type Props = {
-  compareValue?: string;
+  diff?: RepoCodeDiff;
   initialValue?: string;
+  mode: RepoCodeMode;
   onChange?: (v: string) => void;
   onStats?: (stats: EditorStats) => void;
   onViewCreated?: (view: EditorView) => void;
   path: string;
-  readOnly?: boolean;
-  showDiff?: boolean;
   value: string;
 };
 
 export function RepoCodeEditor({
-  compareValue,
+  diff,
   initialValue,
+  mode,
   onChange,
   onStats,
   onViewCreated,
   path,
-  readOnly = false,
-  showDiff = false,
   value,
 }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
@@ -74,7 +73,7 @@ export function RepoCodeEditor({
     };
   }, [path, t]);
 
-  const isDiffMode = showDiff && compareValue != null;
+  const readOnly = isReadOnly(mode);
   const mergeExtensionsReadOnly = [...ext, EditorState.readOnly.of(true)];
   const mergeExtensionsEditable = readOnly ? mergeExtensionsReadOnly : ext;
 
@@ -85,7 +84,7 @@ export function RepoCodeEditor({
   const Original = Merge.Original;
   const Modified = Merge.Modified;
 
-  if (isDiffMode && Original && Modified) {
+  if (diff != null && Original && Modified) {
     return (
       <div className="group relative h-full w-full">
         <CodeMirrorMerge
@@ -101,7 +100,7 @@ export function RepoCodeEditor({
             editable={false}
             extensions={mergeExtensionsReadOnly}
             readOnly
-            value={compareValue}
+            value={diff.originalValue}
           />
           <Modified
             basicSetup={false}

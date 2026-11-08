@@ -1,5 +1,5 @@
 "use client";
-import { type ComponentType, useEffect, useState } from "react";
+import { type ComponentType, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import type { DocType } from "@doxynix/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -132,7 +132,7 @@ export function RepoDocs({
     }),
   );
 
-  const headings = (() => {
+  const headings = useMemo(() => {
     if (typeof window === "undefined" || docContent?.html == null) {
       return [];
     }
@@ -156,7 +156,7 @@ export function RepoDocs({
       console.error("DOMParser failed:", error);
       return [];
     }
-  })();
+  }, [docContent]);
 
   const [activeHeadingId, setActiveHeadingId] = useState<string>("");
 

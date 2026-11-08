@@ -77,6 +77,7 @@ export function AdminBannedEmailDialog({ actions, trigger }: Readonly<Props>) {
               autoComplete="off"
               onChange={(event) => setEmail(event.target.value)}
               placeholder={t("create_email_placeholder")}
+              spellCheck={false}
               type="email"
               value={email}
             />

@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageCode, type MessageParams } from "@doxynix/shared";
+import { isRecord, MessageCode, type MessageParams } from "@doxynix/shared";
 import { useTranslations } from "next-intl";
 
 import { IS_PROD } from "@/shared/config/env.flags";
@@ -125,10 +125,6 @@ type ErrorPayload = {
   params?: MessageParams;
 };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
 function applyFields(source: Record<string, unknown>, payload: ErrorPayload): void {
   if (typeof source.messageCode === "string" && KNOWN_CODES.has(source.messageCode)) {
     payload.messageCode = source.messageCode as MessageCode;
@@ -162,6 +158,10 @@ function readHttpErrorBody(error: Record<string, unknown>): Record<string, unkno
   }
 }
 
+function firstRecord(...values: unknown[]): Record<string, unknown> | undefined {
+  return values.find(isRecord);
+}
+
 export function readErrorPayload(error: unknown): ErrorPayload {
   if (!isRecord(error)) {
     return {};
@@ -174,13 +174,7 @@ export function readErrorPayload(error: unknown): ErrorPayload {
   }
 
   const body = readHttpErrorBody(error);
-  const source = isRecord(error.data)
-    ? error.data
-    : isRecord(body?.error)
-      ? body.error
-      : isRecord(error.error)
-        ? error.error
-        : undefined;
+  const source = firstRecord(error.data, body?.error, error.error);
 
   if (source != null) {
     applyFields(source, payload);

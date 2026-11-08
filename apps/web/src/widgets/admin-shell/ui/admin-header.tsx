@@ -4,7 +4,7 @@ import { useNavLabels } from "@/shared/config/navigation-labels";
 import { Logo } from "@/shared/ui/branding/doxynix-logo";
 import { SidebarTrigger } from "@/shared/ui/core/sidebar";
 
-import { AdminUserNav } from "./admin-user-nav";
+import { UserMenu } from "@/entities/user/ui/user-menu";
 
 export function AdminHeader() {
   const navLabels = useNavLabels();
@@ -19,7 +19,12 @@ export function AdminHeader() {
         </div>
 
         <div className="flex items-center gap-2">
-          <AdminUserNav />
+          <UserMenu
+            items={[
+              { href: "/dashboard", label: navLabels.dashboard },
+              { href: "/dashboard/settings/profile", label: navLabels.profile },
+            ]}
+          />
         </div>
       </div>
     </header>

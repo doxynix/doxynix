@@ -94,64 +94,74 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
       {isVisible && isQueryEnabled && (
         <div className="absolute z-20 mt-2 w-full rounded-lg border bg-card">
           <div className="flex max-h-80 flex-col overflow-y-auto p-2">
-            {isFetching && !hasResults ? (
-              <SkeletonList
-                className="flex flex-col"
-                count={3}
-                itemClassName="flex items-start gap-3 px-2 py-2"
-                renderItem={() => (
-                  <>
-                    <Skeleton className="mt-0.5 size-4 shrink-0" />
-                    <div className="flex min-w-0 flex-1 flex-col">
-                      <SkeletonText
-                        lines={1}
-                        widths={["w-full"]}
-                      />
-                      <SkeletonText
-                        lines={1}
-                        size="sm"
-                        widths={["w-2/3"]}
-                      />
-                    </div>
-                  </>
-                )}
-              />
-            ) : hasResults ? (
-              data?.map((result) => {
-                const Icon = RESULT_ICONS[result.kind];
-
+            {(() => {
+              if (isFetching && !hasResults) {
                 return (
-                  <AppButton
-                    className="h-auto items-start justify-start px-2 py-2 text-left"
-                    key={result.id}
-                    onClick={() => {
-                      setIsVisible(false);
-                      router.push(
-                        buildRepoSearchResultHref({
-                          aid,
-                          name,
-                          owner,
-                          result,
-                        }),
-                      );
-                    }}
-                    variant="ghost"
-                  >
-                    <div className="flex items-start gap-3">
-                      <Icon className="mt-0.5" />
-                      <div className="min-w-0">
-                        <div className="truncate text-sm">{result.label}</div>
-                        <div className="truncate text-muted-foreground text-xs">
-                          {result.description}
+                  <SkeletonList
+                    className="flex flex-col"
+                    count={3}
+                    itemClassName="flex items-start gap-3 px-2 py-2"
+                    renderItem={() => (
+                      <>
+                        <Skeleton className="mt-0.5 size-4 shrink-0" />
+                        <div className="flex min-w-0 flex-1 flex-col">
+                          <SkeletonText
+                            lines={1}
+                            widths={["w-full"]}
+                          />
+                          <SkeletonText
+                            lines={1}
+                            size="sm"
+                            widths={["w-2/3"]}
+                          />
+                        </div>
+                      </>
+                    )}
+                  />
+                );
+              }
+
+              if (hasResults) {
+                return data?.map((result) => {
+                  const Icon = RESULT_ICONS[result.kind];
+
+                  return (
+                    <AppButton
+                      className="h-auto items-start justify-start px-2 py-2 text-left"
+                      key={result.id}
+                      onClick={() => {
+                        setIsVisible(false);
+                        router.push(
+                          buildRepoSearchResultHref({
+                            aid,
+                            name,
+                            owner,
+                            result,
+                          }),
+                        );
+                      }}
+                      variant="ghost"
+                    >
+                      <div className="flex items-start gap-3">
+                        <Icon className="mt-0.5" />
+                        <div className="min-w-0">
+                          <div className="truncate text-sm">{result.label}</div>
+                          <div className="truncate text-muted-foreground text-xs">
+                            {result.description}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </AppButton>
-                );
-              })
-            ) : emptyLabel != null ? (
-              <div className="px-3 py-4 text-muted-foreground text-sm">{emptyLabel}</div>
-            ) : null}
+                    </AppButton>
+                  );
+                });
+              }
+
+              if (emptyLabel != null) {
+                return <div className="px-3 py-4 text-muted-foreground text-sm">{emptyLabel}</div>;
+              }
+
+              return null;
+            })()}
           </div>
         </div>
       )}

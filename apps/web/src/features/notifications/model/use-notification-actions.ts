@@ -15,6 +15,9 @@ import {
   patchDeleteFeed,
   patchDeleteList,
   patchDeleteStats,
+  patchMarkAllFeed,
+  patchMarkAllList,
+  patchMarkAllStats,
   patchMarkAsFeed,
   patchMarkAsList,
   patchMarkAsStats,
@@ -126,7 +129,25 @@ export function useNotificationActions() {
   );
 
   const markAllAsRead = useMutation(
-    trpc.notification.markAllAsRead.mutationOptions({
+    trpc.notification.markAllAsRead.mutationOptions<NotificationCacheSnapshot>({
+      onError: (_error, _variables, snapshot) => {
+        if (snapshot != null) {
+          rollback(snapshot);
+        }
+      },
+      onMutate: async () => {
+        const snapshot = await takeSnapshot();
+
+        queryClient.setQueriesData<NotificationGetAll>({ queryKey: listKey }, (page) =>
+          patchMarkAllList(page),
+        );
+        queryClient.setQueriesData<FeedData>({ queryKey: feedKey }, (data) =>
+          patchMarkAllFeed(data),
+        );
+        queryClient.setQueryData<Stats>(statsKey, (stats) => patchMarkAllStats(stats));
+
+        return snapshot;
+      },
       onSuccess: invalidateAll,
     }),
   );

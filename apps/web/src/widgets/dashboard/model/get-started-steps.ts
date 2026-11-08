@@ -15,6 +15,33 @@ export function isOnboardingActivated(state: State): boolean {
   return state.activatedAt != null || state.hasCompletedAnalysis;
 }
 
+function repoStepState(hasRepo: boolean, hasGithub: boolean): GettingStartedStepState {
+  if (hasRepo) {
+    return "done";
+  }
+  if (hasGithub) {
+    return "current";
+  }
+  return "pending";
+}
+
+function analysisStepState(
+  activated: boolean,
+  analysisFailed: boolean,
+  hasRepo: boolean,
+): GettingStartedStepState {
+  if (activated) {
+    return "done";
+  }
+  if (analysisFailed) {
+    return "error";
+  }
+  if (hasRepo) {
+    return "current";
+  }
+  return "pending";
+}
+
 export function getGettingStartedSteps(state: State): GettingStartedStep[] {
   const activated = isOnboardingActivated(state);
   const hasGithub = state.hasGithubInstallation;
@@ -28,11 +55,11 @@ export function getGettingStartedSteps(state: State): GettingStartedStep[] {
     },
     {
       id: "repo",
-      state: hasRepo ? "done" : hasGithub ? "current" : "pending",
+      state: repoStepState(hasRepo, hasGithub),
     },
     {
       id: "analysis",
-      state: activated ? "done" : analysisFailed ? "error" : hasRepo ? "current" : "pending",
+      state: analysisStepState(activated, analysisFailed, hasRepo),
     },
   ];
 }

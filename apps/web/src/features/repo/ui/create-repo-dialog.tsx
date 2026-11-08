@@ -267,6 +267,7 @@ export function CreateRepoDialog() {
                     ))}
                     <AppTooltip content={t("repo_add_new_tooltip")}>
                       <LoadingButton
+                        aria-label={t("repo_add_new_tooltip")}
                         className="size-6"
                         disabled={loading}
                         isLoading={loading}
@@ -283,122 +284,125 @@ export function CreateRepoDialog() {
               </div>
 
               <div className="flex flex-col gap-0.5">
-                {isFetchingMyRepos ? (
-                  <div className="h-70 rounded-xl border p-1">
-                    <SkeletonList
-                      count={3}
-                      itemClassName="flex flex-col gap-1 px-3 py-2"
-                      renderItem={() => (
-                        <>
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex min-w-0 items-center gap-1">
+                {(() => {
+                  if (isFetchingMyRepos) {
+                    return (
+                      <div className="h-70 rounded-xl border p-1">
+                        <SkeletonList
+                          count={3}
+                          itemClassName="flex flex-col gap-1 px-3 py-2"
+                          renderItem={() => (
+                            <>
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex min-w-0 items-center gap-1">
+                                  <SkeletonText
+                                    lines={1}
+                                    size="lg"
+                                    widths={["w-32"]}
+                                  />
+                                  <SkeletonText
+                                    lines={1}
+                                    widths={["w-12"]}
+                                  />
+                                </div>
+                                <div className="flex shrink-0 items-center gap-1">
+                                  <Skeleton className="size-3" />
+                                  <SkeletonText
+                                    lines={1}
+                                    widths={["w-8"]}
+                                  />
+                                  <Skeleton className="size-2.5 rounded-full" />
+                                  <SkeletonText
+                                    lines={1}
+                                    widths={["w-10"]}
+                                  />
+                                </div>
+                              </div>
                               <SkeletonText
                                 lines={1}
-                                size="lg"
-                                widths={["w-32"]}
+                                widths={["w-48"]}
                               />
                               <SkeletonText
                                 lines={1}
-                                widths={["w-12"]}
+                                widths={["w-24"]}
                               />
-                            </div>
-                            <div className="flex shrink-0 items-center gap-1">
-                              <Skeleton className="size-3" />
-                              <SkeletonText
-                                lines={1}
-                                widths={["w-8"]}
-                              />
-                              <Skeleton className="size-2.5 rounded-full" />
-                              <SkeletonText
-                                lines={1}
-                                widths={["w-10"]}
-                              />
-                            </div>
-                          </div>
-                          <SkeletonText
-                            lines={1}
-                            widths={["w-48"]}
-                          />
-                          <SkeletonText
-                            lines={1}
-                            widths={["w-24"]}
-                          />
-                        </>
-                      )}
-                    />
-                  </div>
-                ) : myGithubData == null ? (
-                  <div className="h-70 rounded-xl border p-1">
-                    <div className="flex h-full flex-col items-center justify-center p-4 text-center">
-                      <p className="mb-3 text-muted-foreground text-sm">{t("repo_failed_load")}</p>
-                      <AppButton
-                        className="h-8 gap-2"
-                        onClick={() => void refetchMyRepos()}
-                        size="sm"
-                        type="button"
-                        variant="outline"
-                      >
-                        <RefreshCcw className="h-3.5 w-3.5" /> {tCommon("retry")}
-                      </AppButton>
-                    </div>
-                  </div>
-                ) : !myGithubData.isConnected ? (
-                  <div className="h-70 rounded-xl border p-1">
-                    <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
-                      <p className="mb-3 text-muted-foreground text-sm">
-                        {t("repo_link_github_profile")}
-                      </p>
-                      <LoadingButton
-                        disabled={loadingOauth}
-                        isLoading={loadingOauth}
-                        onClick={() => void handleSignIn()}
-                        type="button"
-                        variant="outline"
-                      >
-                        <GitHubIcon /> {tCommon("link")}
-                      </LoadingButton>
-                    </div>
-                  </div>
-                ) : oauthStatus === "invalid" ? (
-                  <div className="h-70 rounded-xl border p-1">
-                    <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
-                      <p className="mb-3 text-muted-foreground text-sm">{t("repo_auth_expired")}</p>
-                      <LoadingButton
-                        disabled={loadingOauth}
-                        isLoading={loadingOauth}
-                        onClick={() => void handleSignIn()}
-                        type="button"
-                        variant="outline"
-                      >
-                        <GitHubIcon /> {tCommon("relink")}
-                      </LoadingButton>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="h-70 overflow-y-auto rounded-xl border p-1">
-                    {myGithubData.items.length > 0 && myGithubData.installations?.length === 0 && (
-                      <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
-                        <p className="mb-3 text-muted-foreground text-sm">
-                          {t("repo_install_github_prompt")}
-                        </p>
-                        <LoadingButton
-                          disabled={loading}
-                          isLoading={loading}
-                          onClick={() => void handleInstallGitHubApp()}
-                          type="button"
-                          variant="outline"
-                        >
-                          <GitHubIcon /> {tCommon("install")}
-                        </LoadingButton>
+                            </>
+                          )}
+                        />
                       </div>
-                    )}
+                    );
+                  }
 
-                    {myGithubData.items.length === 0 ? (
-                      <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
-                        {myGithubData.installations?.length === 0 ? (
-                          <>
-                            <p className="mb-3 font-medium text-muted-foreground text-sm">
-                              {t("repo_install_github_desc")}
+                  if (myGithubData == null) {
+                    return (
+                      <div className="h-70 rounded-xl border p-1">
+                        <div className="flex h-full flex-col items-center justify-center p-4 text-center">
+                          <p className="mb-3 text-muted-foreground text-sm">
+                            {t("repo_failed_load")}
+                          </p>
+                          <AppButton
+                            className="h-8 gap-2"
+                            onClick={() => void refetchMyRepos()}
+                            size="sm"
+                            type="button"
+                            variant="outline"
+                          >
+                            <RefreshCcw className="h-3.5 w-3.5" /> {tCommon("retry")}
+                          </AppButton>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  if (!myGithubData.isConnected) {
+                    return (
+                      <div className="h-70 rounded-xl border p-1">
+                        <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
+                          <p className="mb-3 text-muted-foreground text-sm">
+                            {t("repo_link_github_profile")}
+                          </p>
+                          <LoadingButton
+                            disabled={loadingOauth}
+                            isLoading={loadingOauth}
+                            onClick={() => void handleSignIn()}
+                            type="button"
+                            variant="outline"
+                          >
+                            <GitHubIcon /> {tCommon("link")}
+                          </LoadingButton>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  if (oauthStatus === "invalid") {
+                    return (
+                      <div className="h-70 rounded-xl border p-1">
+                        <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
+                          <p className="mb-3 text-muted-foreground text-sm">
+                            {t("repo_auth_expired")}
+                          </p>
+                          <LoadingButton
+                            disabled={loadingOauth}
+                            isLoading={loadingOauth}
+                            onClick={() => void handleSignIn()}
+                            type="button"
+                            variant="outline"
+                          >
+                            <GitHubIcon /> {tCommon("relink")}
+                          </LoadingButton>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="h-70 overflow-y-auto rounded-xl border p-1">
+                      {myGithubData.items.length > 0 &&
+                        myGithubData.installations?.length === 0 && (
+                          <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
+                            <p className="mb-3 text-muted-foreground text-sm">
+                              {t("repo_install_github_prompt")}
                             </p>
                             <LoadingButton
                               disabled={loading}
@@ -407,27 +411,47 @@ export function CreateRepoDialog() {
                               type="button"
                               variant="outline"
                             >
-                              <GitHubIcon /> {tCommon("install_app")}
+                              <GitHubIcon /> {tCommon("install")}
                             </LoadingButton>
-                          </>
-                        ) : (
-                          <p className="flex h-full items-center justify-center p-4 text-center text-muted-foreground text-sm">
-                            {t("repo_no_repos_found")}
-                          </p>
+                          </div>
                         )}
-                      </div>
-                    ) : (
-                      myGithubData.items.map((myRepo) => (
-                        <RepoItem
-                          disabled={create.isPending}
-                          key={myRepo.fullName}
-                          onClick={() => handleSelectRepo(myRepo.fullName)}
-                          repo={myRepo}
-                        />
-                      ))
-                    )}
-                  </div>
-                )}
+
+                      {myGithubData.items.length === 0 ? (
+                        <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
+                          {myGithubData.installations?.length === 0 ? (
+                            <>
+                              <p className="mb-3 font-medium text-muted-foreground text-sm">
+                                {t("repo_install_github_desc")}
+                              </p>
+                              <LoadingButton
+                                disabled={loading}
+                                isLoading={loading}
+                                onClick={() => void handleInstallGitHubApp()}
+                                type="button"
+                                variant="outline"
+                              >
+                                <GitHubIcon /> {tCommon("install_app")}
+                              </LoadingButton>
+                            </>
+                          ) : (
+                            <p className="flex h-full items-center justify-center p-4 text-center text-muted-foreground text-sm">
+                              {t("repo_no_repos_found")}
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        myGithubData.items.map((myRepo) => (
+                          <RepoItem
+                            disabled={create.isPending}
+                            key={myRepo.fullName}
+                            onClick={() => handleSelectRepo(myRepo.fullName)}
+                            repo={myRepo}
+                          />
+                        ))
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
             <DialogFooter>

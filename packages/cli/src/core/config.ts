@@ -1,16 +1,13 @@
 import fs from "node:fs";
 import os from "node:os";
 
+import { isRecord } from "@doxynix/shared";
 import { dirname, join } from "pathe";
 
 type DxnxConfig = {
   token?: string;
   apiUrl?: string;
 };
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
 
 export function getConfigDir(): string {
   if (process.env.XDG_CONFIG_HOME) {

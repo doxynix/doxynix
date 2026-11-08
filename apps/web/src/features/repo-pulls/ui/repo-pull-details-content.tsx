@@ -1,7 +1,4 @@
 "use client";
-import { useEffect } from "react";
-import type { PRAnalysisStatus } from "@doxynix/shared";
-import { skipToken, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
   FileCode,
@@ -14,22 +11,16 @@ import {
   ShieldCheck,
   Wand2,
 } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
-import { useTRPC } from "@/shared/api/trpc";
 import { Link } from "@/shared/i18n/navigation";
-import { cn } from "@/shared/lib/cn";
-import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
-import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
-import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
 import type { PRNumber } from "@/entities/pr/model/pr.types";
 import {
@@ -38,7 +29,9 @@ import {
   buildRepoMapHref,
 } from "@/entities/repo/model/repo-workspace-navigation";
 
-import { usePrStage } from "../model/use-pr-stage";
+import { buildImpactStats, buildPrDetailItems } from "../model/pr-details";
+import { usePrDetails } from "../model/use-pr-details";
+import { PrDetailsSummary } from "./pr-details-summary";
 
 type Props = {
   analysis: PRNumber;
@@ -48,79 +41,11 @@ type Props = {
   repoId: string;
 };
 
-type PrDetailsItem =
-  | { isCopy: true; isStatus?: false; isTime?: false; label: string; value: string | undefined }
-  | { isStatus: true; isCopy?: false; isTime?: false; label: string; value: unknown }
-  | { isTime: true; isCopy?: false; isStatus?: false; label: string; value: Date | null }
-  | { isCopy?: false; isStatus?: false; isTime?: false; label: string; value: number };
-
-type ImpactStat = {
-  label: string;
-  value: string | number;
-};
-
 export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }: Readonly<Props>) {
-  const trpc = useTRPC();
-  const locale = useLocale();
-  const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
-  const queryClient = useQueryClient();
-
-  const STATUS_CONFIG: Record<PRAnalysisStatus, { className: string; label: string }> = {
-    ANALYZING: { className: "text-foreground", label: t("repo_pull_status_analyzing") },
-    COMPLETED: { className: "text-success", label: t("repo_pull_status_completed") },
-    FAILED: { className: "text-destructive", label: tCommon("failed") },
-    PENDING: { className: "text-warning", label: t("repo_pull_status_pending") },
-  } as const;
-
-  const { data: comments, isLoading: isCommentsLoading } = useQuery(
-    trpc.analysis.getComments.queryOptions(
-      analysis?.analysis.id ? { analysisId: analysis.analysis.id } : skipToken,
-    ),
-  );
-
-  const { isStaging, stageFix } = usePrStage(repoId);
-
-  const findingsCount = impact?.summary.findings ?? 0;
-  const prAnalysisId = analysis?.analysis.id;
-  const riskScore = impact?.analysis.riskScore ?? analysis?.analysis.riskScore;
-
-  useEffect(() => {
-    if (prAnalysisId == null) {
-      return;
-    }
-
-    trackClientEvent("pr_findings_viewed", {
-      findings_count: findingsCount,
-      pr_analysis_id: prAnalysisId,
-      pr_number: analysis?.analysis.prNumber ?? 0,
-      repo_id: repoId,
-      risk_score: riskScore ?? 0,
-    });
-  }, [analysis?.analysis.prNumber, findingsCount, prAnalysisId, repoId, riskScore]);
-
-  const createFixMutation = useMutation(
-    trpc.analysis.createFix.mutationOptions({
-      onError: (err) => {
-        toast.error(t("repo_pull_fix_error"), {
-          description: err.message,
-        });
-      },
-      onSuccess: (data) => {
-        if (data.success === true && data.fixId != null) {
-          toast.success(t("repo_pull_fix_queued"), {
-            description: t("repo_pull_fix_queued_desc"),
-          });
-          trackClientEvent("fix_requested", {
-            findings_count: findingsCount,
-            fix_id: data.fixId,
-            repo_id: repoId,
-          });
-          void queryClient.invalidateQueries(trpc.analysis.getByRepository.queryFilter({ repoId }));
-        }
-      },
-    }),
-  );
+  const tCommon = useTranslations("Common");
+  const { comments, fixAll, fixOne, isCommentsLoading, isFixing, isStaging, stageFix } =
+    usePrDetails({ analysis, impact, repoId });
 
   const changedFiles = impact?.changedFiles ?? [];
   const affectedZones = impact?.affectedZones ?? [];
@@ -128,75 +53,32 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
   const topFindings = impact?.topFindings ?? [];
   const fixes = impact?.fixes ?? [];
 
-  type RenderedComment = NonNullable<typeof comments>["renderedComments"][number];
-
-  const handleFixSingle = (comment: RenderedComment) => {
-    createFixMutation.mutate({
-      findings: [
-        {
-          file: comment.filePath,
-          line: comment.line,
-          suggestion: comment.bodyHtml,
-          type: comment.findingType.toLowerCase(),
-        },
-      ],
-      prAnalysisId: analysis?.analysis.id,
-      repoId,
-    });
-  };
-
-  const handleFixAll = () => {
-    if (comments == null || comments.renderedComments.length === 0) {
-      return;
-    }
-
-    const findingsToFix = comments.renderedComments.map((comment) => ({
-      file: comment.filePath,
-      line: comment.line,
-      suggestion: comment.bodyHtml,
-      type: comment.findingType.toLowerCase(),
-    }));
-
-    createFixMutation.mutate({
-      findings: findingsToFix,
-      prAnalysisId: analysis?.analysis.id,
-      repoId,
-    });
-  };
-
-  const PR_DETAILS_ITEMS: PrDetailsItem[] = [
-    {
-      isCopy: true,
-      label: t("repo_pull_detail_base_sha"),
-      value: analysis?.analysis.baseSha.slice(0, 7),
+  const detailItems = buildPrDetailItems({
+    analysis,
+    impact,
+    labels: {
+      affectedZones: t("repo_pull_detail_affected_zones"),
+      baseSha: t("repo_pull_detail_base_sha"),
+      changedFiles: t("repo_pull_detail_changed_files"),
+      created: tCommon("created"),
+      status: tCommon("status"),
     },
-    { isStatus: true, label: tCommon("status"), value: analysis?.analysis.status },
-    { label: t("repo_pull_detail_changed_files"), value: impact?.summary.affectedFiles ?? 0 },
-    { label: t("repo_pull_detail_affected_zones"), value: impact?.summary.affectedZones ?? 0 },
-    {
-      isTime: true,
-      label: tCommon("created"),
-      value: analysis?.analysis.createdAt ?? null,
-    },
-  ];
+  });
 
-  const IMPACT_STATS: ImpactStat[] = [
-    { label: t("repo_pull_stat_nodes"), value: impact?.summary.affectedNodes ?? 0 },
-    { label: t("repo_pull_stat_findings"), value: impact?.summary.findings ?? 0 },
-    { label: t("repo_pull_stat_fixes"), value: impact?.summary.linkedFixes ?? 0 },
-    {
-      label: t("repo_pull_stat_primary_view"),
-      value: impact?.navigationHints.recommendedView ?? t("repo_pull_stat_primary_view_default"),
+  const impactStats = buildImpactStats({
+    commentsCount: comments?.renderedComments.length ?? 0,
+    fixesCount: fixes.length,
+    impact,
+    labels: {
+      findings: t("repo_pull_stat_findings"),
+      fixes: t("repo_pull_stat_fixes"),
+      generatedFixes: t("repo_pull_stat_generated_fixes"),
+      nodes: t("repo_pull_stat_nodes"),
+      primaryView: t("repo_pull_stat_primary_view"),
+      primaryViewFallback: t("repo_pull_stat_primary_view_default"),
+      totalIssues: t("repo_pull_stat_total_issues"),
     },
-    {
-      label: t("repo_pull_stat_total_issues"),
-      value: comments?.renderedComments.length ?? 0,
-    },
-    {
-      label: t("repo_pull_stat_generated_fixes"),
-      value: fixes.length,
-    },
-  ];
+  });
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -383,8 +265,8 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
               <LoadingButton
                 aria-label={t("repo_pull_autofix_all")}
                 className="bg-success font-semibold text-success-foreground hover:bg-success/90"
-                isLoading={createFixMutation.isPending}
-                onClick={handleFixAll}
+                isLoading={isFixing}
+                onClick={fixAll}
                 size="sm"
               >
                 <Wand2 className="size-3.5" />
@@ -449,15 +331,15 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     </div>
                     <article
                       className="prose dark:prose-invert wrap-break-word mb-4 min-w-0 max-w-none prose-pre:bg-transparent prose-pre:p-0 text-xs"
-                      dangerouslySetInnerHTML={{ __html: comment.bodyHtml }}
+                      dangerouslySetInnerHTML={{ __html: comment.bodyHtml }} // Sanitized by markdownToHtml (rehype-sanitize) on the server.
                     />
 
                     <div className="flex justify-end border-border border-t pt-3">
                       <LoadingButton
                         aria-label={t("repo_pull_autofix_single")}
                         className="font-medium text-xs transition-standard hover:border-success/30 hover:bg-success/5 hover:text-success"
-                        isLoading={createFixMutation.isPending}
-                        onClick={() => handleFixSingle(comment)}
+                        isLoading={isFixing}
+                        onClick={() => fixOne(comment)}
                         size="sm"
                         variant="outline"
                       >
@@ -475,49 +357,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
       </div>
 
       <div className="flex flex-col gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-bold text-sm">{t("repo_pull_details_title")}</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2 text-sm">
-            {PR_DETAILS_ITEMS.map((item) => (
-              <div
-                className="flex items-baseline justify-between"
-                key={item.label}
-              >
-                <span className="text-muted-foreground text-xs">{item.label}:</span>
-                <div className="flex items-center gap-1">
-                  {item.isCopy === true && (
-                    <CopyButton
-                      className="opacity-100"
-                      tooltipText={t("repo_pull_copy_sha")}
-                      value={analysis?.analysis.baseSha ?? ""}
-                    />
-                  )}
-                  {item.isStatus === true ? (
-                    <span
-                      className={cn(
-                        "font-bold",
-                        STATUS_CONFIG[item.value as keyof typeof STATUS_CONFIG].className,
-                      )}
-                    >
-                      {STATUS_CONFIG[item.value as keyof typeof STATUS_CONFIG].label}
-                    </span>
-                  ) : item.isTime === true ? (
-                    <TimeAgo
-                      date={item.value ?? ""}
-                      locale={locale}
-                    />
-                  ) : (
-                    <span className={cn("font-medium text-xs")}>
-                      {item.value ?? t("repo_pull_na")}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <PrDetailsSummary
+          items={detailItems}
+          title={t("repo_pull_details_title")}
+        />
 
         <Card>
           <CardHeader>
@@ -528,7 +371,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-3 text-sm">
-              {IMPACT_STATS.map((stat) => (
+              {impactStats.map((stat) => (
                 <div
                   className="rounded-lg border bg-muted p-3"
                   key={stat.label}
@@ -587,8 +430,8 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
             <LoadingButton
               aria-label={t("repo_pull_autofix_all")}
               className="bg-success font-semibold text-success-foreground hover:bg-success/90"
-              isLoading={createFixMutation.isPending}
-              onClick={handleFixAll}
+              isLoading={isFixing}
+              onClick={fixAll}
               size="sm"
             >
               <Wand2 className="size-3.5" />
@@ -610,7 +453,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                   </p>
                   <article
                     className="prose dark:prose-invert wrap-break-word min-w-0 max-w-none prose-pre:bg-transparent prose-pre:p-0 text-xs"
-                    dangerouslySetInnerHTML={{ __html: finding.messageHtml }}
+                    dangerouslySetInnerHTML={{ __html: finding.messageHtml }} // Sanitized by markdownToHtml (rehype-sanitize) on the server.
                   />
                 </div>
               ))

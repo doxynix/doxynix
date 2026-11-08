@@ -55,6 +55,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
       <AppTooltip content={t("view_raw")}>
         <SheetTrigger asChild>
           <AppButton
+            aria-label={t("view_raw")}
             className="opacity-0 transition-opacity group-hover:opacity-100"
             size="icon"
             variant="ghost"
@@ -157,7 +158,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
                       "[&_code]:break-all! [&_code]:whitespace-pre-wrap!",
                       "[&_.line]:inline! [&_.line]:break-all! [&_.line]:whitespace-pre-wrap!",
                     )}
-                    dangerouslySetInnerHTML={{ __html: html ?? "" }} // NOTE: no sanitization here, so keep this in mind if user input is ever rendered in the future
+                    dangerouslySetInnerHTML={{ __html: html ?? "" }} // Sanitized and highlighted server-side; shiki escapes the payload.
                   />
                 )}
               </div>

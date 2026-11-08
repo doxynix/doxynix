@@ -76,7 +76,7 @@ export function AdminAuditPayloadSheet({ logId, onOpenChange, open }: Readonly<P
                     "[&_code]:break-all! [&_code]:whitespace-pre-wrap!",
                     "[&_.line]:inline! [&_.line]:break-all! [&_.line]:whitespace-pre-wrap!",
                   )}
-                  dangerouslySetInnerHTML={{ __html: html ?? "" }} // NOTE: no sanitization here, so keep this in mind if user input is ever rendered in the future
+                  dangerouslySetInnerHTML={{ __html: html ?? "" }} // Sanitized and highlighted server-side; shiki escapes the payload.
                 />
               )}
             </div>

@@ -1,29 +1,15 @@
 "use client";
 
-import {
-  type ComponentType,
-  type RefObject,
-  type SubmitEvent,
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import type { ComponentType } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { ArrowRight, CheckCircle2, KeyRound, ShieldCheck, Sparkles, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useQueryState } from "nuqs";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import * as z from "zod/mini";
 
 import { TURNSTILE_SITE_KEY } from "@/shared/config/env.client";
-import { Link, useRouter } from "@/shared/i18n/navigation";
-import { authClient } from "@/shared/lib/auth-client";
+import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
-import { setClientCookie } from "@/shared/lib/cookies";
-import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { isPathname } from "@/shared/lib/safe-redirect";
 import { Logo } from "@/shared/ui/branding/doxynix-logo";
 import { AppBadge } from "@/shared/ui/core/badge";
@@ -40,23 +26,11 @@ import { Input } from "@/shared/ui/core/input";
 import { YandexIcon } from "@/shared/ui/icons/yandex-icon";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-function createMagicLinkSchema(invalidEmailError: string, emailTooLongError: string) {
-  return z.object({
-    email: z
-      .email({
-        error: invalidEmailError,
-      })
-      .check(
-        z.maxLength(254, {
-          error: emailTooLongError,
-        }),
-      ),
-  });
-}
-
-type MagicLinkSchemaValue = z.infer<ReturnType<typeof createMagicLinkSchema>>;
-
-type AllowedProviders = "yandex";
+import { createMagicLinkSchema, type MagicLinkSchemaValue } from "../model/magic-link";
+import { useLastUsedLoginMethod, usePasskeyAutofill } from "../model/passkey";
+import { codeLengthFor } from "../model/two-factor-code";
+import { useSignInSubmission } from "../model/use-sign-in-submission";
+import { useTwoFactorVerification } from "../model/use-two-factor-verification";
 
 type AuthProvider = {
   icon: ComponentType<{ className?: string }>;
@@ -70,52 +44,51 @@ type AuthBenefit = {
   title: string;
 };
 
-const noopSubscribe = () => () => undefined;
-const getLastUsedLoginMethod = () => authClient.getLastUsedLoginMethod();
-const getNoLastUsedLogin = () => null;
-
-function armPasskeyAutofill(
-  pending: RefObject<boolean>,
-  router: ReturnType<typeof useRouter>,
-  redirectTo: string,
-) {
-  if (pending.current) {
-    return;
-  }
-
-  pending.current = true;
-
-  void authClient.signIn
-    .passkey({ autoFill: true })
-    .then(({ error }) => {
-      if (error) {
-        return;
-      }
-      trackClientEvent("sign_in_attempted", { provider: "passkey" });
-      router.replace(redirectTo);
-    })
-    .catch(() => {
-      // An autofill attempt that finds no credential (or is dismissed) is not an error.
-    })
-    .finally(() => {
-      pending.current = false;
-    });
-}
-
 export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }>) {
   const newUserTarget = isPathname(target, "/dashboard") ? "/welcome" : target;
-  const router = useRouter();
   const tCommon = useTranslations("Common");
   const t = useTranslations("Auth");
-  const turnstileRef = useRef<TurnstileInstance>(null);
-  const pendingDataRef = useRef<MagicLinkSchemaValue | null>(null);
-  const passkeyPendingRef = useRef(false);
-  const [turnstileToken, setTurnstileToken] = useState<null | string>(null);
+
+  const lastLogin = useLastUsedLoginMethod();
+  const { arm: armPasskey } = usePasskeyAutofill(target);
 
   const MagicLinkSchema = createMagicLinkSchema(
     t("error_invalid_email"),
     t("error_email_too_long"),
   );
+
+  const form = useForm<MagicLinkSchemaValue>({
+    defaultValues: { email: "" },
+    resolver: zodResolver(MagicLinkSchema),
+  });
+
+  const submission = useSignInSubmission({ form, newUserTarget, target });
+  const twoFactor = useTwoFactorVerification({ target });
+
+  const {
+    isSent,
+    reset: resetSent,
+    loadingProvider,
+    isVerifying,
+    onSubmit,
+    signIn,
+    sentEmail,
+    turnstileRef,
+    onTurnstileError,
+    onTurnstileExpire,
+    onTurnstileSuccess,
+  } = submission;
+
+  const {
+    code: twoFactorCode,
+    isBackupMode,
+    isRequired: isTwoFactorRequired,
+    isVerifying: isTwoFactorVerifying,
+    setCode: setTwoFactorCode,
+    toggleBackupMode,
+    verify: verifyTwoFactor,
+    dismiss: dismissTwoFactor,
+  } = twoFactor;
 
   const BUTTONS = [
     { icon: YandexIcon, provider: "yandex" as const, text: t("continue_with_yandex") },
@@ -140,168 +113,8 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
     t("trust_cloudflare_protected"),
   ] as const;
 
-  const [isSent, setIsSent] = useState(false);
-  const [sentEmail, setSentEmail] = useState<string | null>(null);
-  const [loadingProvider, setLoadingProvider] = useState<null | string>(null);
-  const [isVerifying, setIsVerifying] = useState(false);
-
-  const lastLogin = useSyncExternalStore(noopSubscribe, getLastUsedLoginMethod, getNoLastUsedLogin);
-  const [twoFactorParam, setTwoFactorParam] = useQueryState("two_factor");
-  const isTwoFactorRequired = twoFactorParam === "true";
-
-  const [twoFactorCode, setTwoFactorCode] = useState("");
-  const [isBackupMode, setIsBackupMode] = useState(false);
-  const [isTwoFactorVerifying, setIsTwoFactorVerifying] = useState(false);
-
-  useEffect(() => {
-    armPasskeyAutofill(passkeyPendingRef, router, target);
-  }, [router, target]);
-
-  const form = useForm<MagicLinkSchemaValue>({
-    defaultValues: { email: "" },
-    resolver: zodResolver(MagicLinkSchema),
-  });
-
   const disabled = loadingProvider != null || isVerifying || isTwoFactorVerifying;
-
-  const proceedWithSignIn = async (values: MagicLinkSchemaValue, token: string) => {
-    setIsVerifying(false);
-    setLoadingProvider("email");
-
-    setClientCookie("cf-turnstile-response", token, 300);
-
-    await authClient.signIn
-      .magicLink({
-        callbackURL: target,
-        email: values.email,
-        fetchOptions: {
-          headers: {
-            "x-captcha-response": token,
-          },
-        },
-        newUserCallbackURL: newUserTarget,
-      })
-      .then(() => {
-        setSentEmail(values.email);
-        setIsSent(true);
-        toast.success(t("sent_toast_success"));
-        trackClientEvent("sign_in_email_sent", { provider: "email" });
-      })
-      .catch(() => {
-        toast.error(t("sent_toast_error"));
-        turnstileRef.current?.reset();
-        setTurnstileToken(null);
-      })
-      .finally(() => {
-        setLoadingProvider(null);
-        pendingDataRef.current = null;
-        setTurnstileToken(null);
-      });
-  };
-
-  const onSubmit = async (values: MagicLinkSchemaValue) => {
-    if (turnstileToken != null) {
-      await proceedWithSignIn(values, turnstileToken);
-      return;
-    }
-
-    setIsVerifying(true);
-    pendingDataRef.current = values;
-
-    if (turnstileRef.current == null) {
-      setIsVerifying(false);
-      pendingDataRef.current = null;
-      return;
-    }
-
-    turnstileRef.current.reset();
-  };
-
-  async function handleSignIn(provider: AllowedProviders) {
-    setLoadingProvider(provider);
-    trackClientEvent("sign_in_attempted", { provider });
-
-    const currentEmail = form.getValues("email");
-
-    await authClient.signIn
-      .social({
-        callbackURL: target,
-        loginHint: currentEmail || undefined,
-        newUserCallbackURL: newUserTarget,
-        provider,
-      })
-      .catch(() => {
-        toast.error(t("error_social_signin_failed"));
-      })
-      .finally(() => {
-        setLoadingProvider(null);
-      });
-  }
-
-  const handleTwoFactorVerify = async (e: SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const minLen = isBackupMode ? 8 : 6;
-    if (twoFactorCode.trim().length < minLen) {
-      toast.error(isBackupMode ? t("error_enter_backup_code") : t("error_enter_6digit_code"));
-      return;
-    }
-
-    setIsTwoFactorVerifying(true);
-
-    const verification = isBackupMode
-      ? authClient.twoFactor.verifyBackupCode({ code: twoFactorCode }).then(({ error }) => {
-          if (error) {
-            throw new Error(error.message);
-          }
-        })
-      : authClient.twoFactor
-          .verifyTotp({ code: twoFactorCode, trustDevice: true })
-          .then(({ error }) => {
-            if (error) {
-              throw new Error(error.message);
-            }
-          });
-
-    await verification
-      .then(() => {
-        toast.success(t("success_authenticated"));
-        void setTwoFactorParam(null);
-        router.replace(target);
-      })
-      .catch((error: unknown) => {
-        const msg = error instanceof Error ? error.message : t("error_verification_failed");
-        toast.error(msg);
-      })
-      .finally(() => {
-        setIsTwoFactorVerifying(false);
-      });
-  };
-
-  const onTurnstileSuccess = (token: string) => {
-    setTurnstileToken(token);
-
-    const data = pendingDataRef.current;
-    if (data) {
-      void proceedWithSignIn(data, token);
-    }
-  };
-
-  const onTurnstileError = () => {
-    setTurnstileToken(null);
-    setIsVerifying(false);
-    pendingDataRef.current = null;
-    toast.error(t("error_verification_service"));
-  };
-
-  const onTurnstileExpire = () => {
-    if (isSent || loadingProvider === "email") {
-      return;
-    }
-
-    setTurnstileToken(null);
-    setIsVerifying(false);
-    pendingDataRef.current = null;
-  };
+  const twoFactorCodeLength = codeLengthFor(isBackupMode);
 
   const turnstileOptions = {
     action: "auth",
@@ -399,7 +212,7 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
                     disabled={disabled}
                     isLoading={loadingProvider === item.provider}
                     key={item.provider}
-                    onClick={() => void handleSignIn(item.provider)}
+                    onClick={() => void signIn(item.provider)}
                     variant="outline"
                   >
                     <div className="flex w-full items-center justify-center gap-3">
@@ -453,9 +266,10 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
                             disabled={disabled}
                             inputMode="email"
                             placeholder="doxynix@example.com"
+                            spellCheck={false}
                             {...field}
                             onFocus={() => {
-                              armPasskeyAutofill(passkeyPendingRef, router, target);
+                              armPasskey();
                             }}
                           />
                         </FormControl>
@@ -524,7 +338,8 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
                 </div>
               </div>
               <AppButton
-                onClick={() => void setTwoFactorParam(null)}
+                aria-label={tCommon("close")}
+                onClick={() => dismissTwoFactor()}
                 size="icon"
                 variant="ghost"
               >
@@ -534,24 +349,24 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
 
             <form
               className="flex flex-col gap-4 py-2"
-              onSubmit={(e) => void handleTwoFactorVerify(e)}
+              onSubmit={(e) => void verifyTwoFactor(e)}
             >
               <Input
+                aria-label={isBackupMode ? t("backup_recovery") : t("two_factor_verification")}
+                autoComplete={isBackupMode ? "off" : "one-time-code"}
                 className="h-12 rounded-2xl text-center font-mono text-lg tracking-widest"
                 disabled={isTwoFactorVerifying}
-                maxLength={isBackupMode ? 10 : 6}
+                inputMode={isBackupMode ? "text" : "numeric"}
+                maxLength={twoFactorCodeLength}
                 onChange={(e) => setTwoFactorCode(e.target.value)}
-                placeholder={isBackupMode ? "XXXX-XXXX" : "000000"}
+                placeholder={isBackupMode ? "XXXXX-XXXXX" : "000000"}
+                spellCheck={false}
                 value={twoFactorCode}
               />
 
               <LoadingButton
                 className="h-12 w-full gap-2 rounded-2xl"
-                disabled={
-                  twoFactorCode.trim().length === 0 ||
-                  isTwoFactorVerifying ||
-                  twoFactorCode.trim().length < 6
-                }
+                disabled={isTwoFactorVerifying || twoFactorCode.trim().length < twoFactorCodeLength}
                 isLoading={isTwoFactorVerifying}
                 type="submit"
               >
@@ -561,10 +376,7 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
               <AppButton
                 className="mx-auto max-w-full whitespace-normal text-muted-foreground text-xs hover:text-foreground"
                 disabled={isTwoFactorVerifying}
-                onClick={() => {
-                  setIsBackupMode(!isBackupMode);
-                  setTwoFactorCode("");
-                }}
+                onClick={toggleBackupMode}
                 type="button"
                 variant="link"
               >
@@ -592,7 +404,7 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
             </p>
             <AppButton
               className="mt-2"
-              onClick={() => setIsSent(false)}
+              onClick={resetSent}
               variant="outline"
             >
               {t("enter_different_email")}

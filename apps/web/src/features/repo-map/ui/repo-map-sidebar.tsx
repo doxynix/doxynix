@@ -1,4 +1,5 @@
 "use client";
+import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { useTRPC } from "@/shared/api/trpc";
@@ -35,24 +36,28 @@ export function RepoMapSidebar({ nodeId, onClose, onNavigate, repoId }: Readonly
     repoId,
   });
 
-  return (
-    <aside className="flex h-full flex-col overflow-hidden bg-card">
-      {nodeId == null && isWorkspaceLoading ? (
-        <RepoMapSidebarSkeleton />
-      ) : nodeId == null && workspace != null ? (
-        <RepoMapOverview
-          onNavigate={onNavigate}
-          workspace={workspace}
-        />
-      ) : nodeId != null && isNodeContextLoading ? (
-        <RepoMapSidebarSkeleton />
-      ) : nodeContext != null ? (
-        <RepoNodeInspector
-          data={nodeContext}
-          onClose={onClose}
-          onNavigate={onNavigate}
-        />
-      ) : null}
-    </aside>
-  );
+  let body: ReactNode = null;
+
+  if (nodeId == null && isWorkspaceLoading) {
+    body = <RepoMapSidebarSkeleton />;
+  } else if (nodeId == null && workspace != null) {
+    body = (
+      <RepoMapOverview
+        onNavigate={onNavigate}
+        workspace={workspace}
+      />
+    );
+  } else if (nodeId != null && isNodeContextLoading) {
+    body = <RepoMapSidebarSkeleton />;
+  } else if (nodeContext != null) {
+    body = (
+      <RepoNodeInspector
+        data={nodeContext}
+        onClose={onClose}
+        onNavigate={onNavigate}
+      />
+    );
+  }
+
+  return <aside className="flex h-full flex-col overflow-hidden bg-card">{body}</aside>;
 }

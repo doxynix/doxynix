@@ -1,9 +1,12 @@
 "use client";
 
+import type { Route } from "next";
 import { Book, SlashIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { LOCALES, type Locale } from "@/shared/config/locales";
+import { userNavMenu } from "@/shared/config/navigation";
+import { useNavLabels } from "@/shared/config/navigation-labels";
 import { Link, usePathname } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { Logo } from "@/shared/ui/branding/doxynix-logo";
@@ -14,13 +17,13 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 import { RepoDetailsTabs } from "@/entities/repo/ui/repo-details-tabs";
+import { UserMenu, type UserMenuItem } from "@/entities/user/ui/user-menu";
 
 import { WorkspaceSwitcher } from "@/features/workspace/ui/workspace-switcher";
 
 import { AgentButton } from "./agent-button";
 import { AppCommandMenu } from "./app-command-menu";
 import { NotificationsNav } from "./notifications-nav";
-import { UserNav } from "./user-nav";
 
 function stripLocalePrefix(pathname: string) {
   const segments = pathname.split("/").filter(Boolean);
@@ -33,11 +36,21 @@ function stripLocalePrefix(pathname: string) {
 
 export function AppHeader() {
   const tCommon = useTranslations("Common");
+  const navLabels = useNavLabels();
   const { name, owner } = useRepoParams();
   const rawPathname = usePathname();
   const pathname = stripLocalePrefix(rawPathname);
   const segments = pathname.split("/").filter(Boolean);
   const isRepoOwnerPage = owner !== "" && name !== "";
+
+  const userMenuItems: UserMenuItem[] = userNavMenu
+    .filter((item): item is typeof item & { href: string } => item.href != null)
+    .map((item) => ({
+      href: item.href as Route,
+      icon: item.icon,
+      label: navLabels[item.labelKey],
+      shortcut: item.shortcut,
+    }));
 
   const breadcrumbItems = segments.map((segment, index) => {
     const label = /^\d+$/.test(segment) ? `#${segment}` : segment;
@@ -100,7 +113,7 @@ export function AppHeader() {
             </AppButton>
           </AppTooltip>
           <NotificationsNav />
-          <UserNav />
+          <UserMenu items={userMenuItems} />
         </div>
       </div>
       {isRepoOwnerPage && (

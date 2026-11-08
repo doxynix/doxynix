@@ -32,12 +32,14 @@ import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
+import type { RepoCodeMode } from "@/entities/repo/model/editor-mode";
 import type { EditorStats } from "@/entities/repo/model/editor-stats.types";
 import type { FileContent, UiRepoDetailed } from "@/entities/repo/model/repo.types";
 import type { FileNode } from "@/entities/repo/model/repo-setup.types";
-import { useRepoSetup } from "@/entities/repo/model/use-repo-setup";
+import { useRepoBranch } from "@/entities/repo/model/use-repo-branch";
 import { RepoStatusBar } from "@/entities/repo/ui/repo-status-bar";
 
+import { isBusy, type PendingAction, shouldShowAuditPanel } from "../model/repo-code-view";
 import { RepoCodeActionButton } from "./repo-code-action-button";
 import { RepoSearchPanel } from "./repo-code-search-panel";
 import { CodeSkeleton } from "./repo-code-skeleton";
@@ -66,11 +68,11 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
   const userId = session?.user.id;
   const errorMessage = useErrorMessage();
 
-  const [mode, setMode] = useState<"edit" | "view">("view");
+  const [mode, setMode] = useState<RepoCodeMode>("view");
   const [view, setView] = useState<EditorView | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [pending, setPending] = useState<PendingAction>(null);
   const [actionError, setActionError] = useState<unknown>(null);
   const [showDiff, setShowDiff] = useState(false);
   const [isAuditDismissed, setIsAuditDismissed] = useState(false);
@@ -79,7 +81,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
   const [localContent, setLocalContent] = useState(fileData.content);
   const [prevPath, setPrevPath] = useState(path);
   const [prevExternalContent, setPrevExternalContent] = useState(fileData.content);
-  const { state } = useRepoSetup(repo);
+  const { branch } = useRepoBranch(repo);
 
   const [editorStats, setEditorStats] = useState<EditorStats>({
     col: 1,
@@ -117,14 +119,19 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
     setIsAuditDismissed(false);
     setShowDiff(false);
     setShouldAnimate(false);
+    setPending(null);
   }
 
   const isAuditLoaded = auditResult?.action === "quick-file-audit" && auditResult.path === path;
   const isDocumentLoaded =
     documentResult?.action === "document-file-preview" && documentResult.path === path;
 
-  if (isAiLoading && (isAuditLoaded || isDocumentLoaded)) {
-    setIsAiLoading(false);
+  if (pending === "audit" && isAuditLoaded) {
+    setPending(null);
+  }
+
+  if (pending === "document" && isDocumentLoaded) {
+    setPending(null);
   }
 
   if (!showDiff && isDocumentLoaded) {
@@ -134,12 +141,11 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
   const auditMutation = useMutation(
     trpc.analysis.quickFileAudit.mutationOptions({
       onError: (error) => {
-        setIsAiLoading(false);
+        setPending(null);
         setActionError(error);
       },
       onMutate: () => {
         setActionError(null);
-        setIsAiLoading(true);
       },
       onSuccess: () => toast.info(t("repo_code_audit_started")),
     }),
@@ -148,12 +154,11 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
   const documentMutation = useMutation(
     trpc.analysis.documentFile.mutationOptions({
       onError: (error) => {
-        setIsAiLoading(false);
+        setPending(null);
         setActionError(error);
       },
       onMutate: () => {
         setActionError(null);
-        setIsAiLoading(true);
       },
       onSuccess: () => toast.info(t("repo_code_docgen_started")),
     }),
@@ -224,15 +229,15 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
 
   const handleAudit = () => {
     setIsAuditDismissed(false);
-    setIsAiLoading(true);
+    setPending("audit");
     setShouldAnimate(true);
-    auditMutation.mutate({ branch: state.selectedBranch, content: localContent, path, repoId });
+    auditMutation.mutate({ branch, content: localContent, path, repoId });
   };
 
   const handleDocument = () => {
-    setIsAiLoading(true);
+    setPending("document");
     setShowDiff(false);
-    documentMutation.mutate({ branch: state.selectedBranch, content: localContent, path, repoId });
+    documentMutation.mutate({ branch, content: localContent, path, repoId });
   };
 
   const handleAcceptDiff = (): void => {
@@ -271,7 +276,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
       tooltipText: t("repo_code_action_download"),
     },
     {
-      disabled: isAiLoading || auditMutation.isPending,
+      disabled: isBusy(pending) || auditMutation.isPending,
       icon: Sparkles,
       isLoading: auditMutation.isPending,
       onClick: handleAudit,
@@ -283,7 +288,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
       tooltipText: t("repo_code_action_edit"),
     },
     {
-      disabled: isAiLoading || documentMutation.isPending,
+      disabled: isBusy(pending) || documentMutation.isPending,
       icon: FileText,
       isLoading: documentMutation.isPending,
       onClick: handleDocument,
@@ -331,8 +336,11 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
     onClick: () => handleFolderClick(i),
   }));
 
-  const showAuditPanel =
-    !isAuditDismissed && (isAiLoading || auditResult?.action === "quick-file-audit");
+  const showAuditPanel = shouldShowAuditPanel({
+    isAuditDismissed,
+    isAuditLoaded,
+    pending,
+  });
 
   return (
     <div
@@ -410,6 +418,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
               {t("repo_code_audit_title")}
             </h3>
             <AppButton
+              aria-label={tCommon("close")}
               onClick={() => setIsAuditDismissed(true)}
               size="icon"
               variant="ghost"
@@ -418,7 +427,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
             </AppButton>
           </div>
 
-          {isAiLoading ? (
+          {pending === "audit" ? (
             <div className="flex flex-col gap-3 py-2">
               <SkeletonText
                 lines={1}
@@ -446,6 +455,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
           ) : (
             <>
               <article
+                aria-live="polite"
                 className="prose dark:prose-invert max-h-120 overflow-y-auto text-foreground text-xs"
                 dangerouslySetInnerHTML={{ __html: displayHtml }}
               />
@@ -500,14 +510,17 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
 
       <div className="relative flex-1 overflow-hidden">
         <Editor
-          compareValue={fileData.content}
+          diff={
+            showDiff && documentResult?.content != null
+              ? { originalValue: fileData.content }
+              : undefined
+          }
           initialValue={fileData.content}
+          mode={mode}
           onChange={setLocalContent}
           onStats={setEditorStats}
           onViewCreated={setView}
           path={path}
-          readOnly={mode === "view"}
-          showDiff={showDiff}
           value={
             showDiff && documentResult?.content != null ? documentResult.content : localContent
           }
@@ -516,7 +529,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
 
       <RepoStatusBar
         meta={fileData.meta}
-        readOnly={mode === "view"}
+        mode={mode}
         stats={editorStats}
       />
     </div>

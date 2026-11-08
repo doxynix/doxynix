@@ -411,7 +411,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
         {mounted ? (
           parse(data.html, parseOptions)
         ) : (
-          <div dangerouslySetInnerHTML={{ __html: data.html }} />
+          <div dangerouslySetInnerHTML={{ __html: data.html }} /> // Sanitized by markdownToHtml (rehype-sanitize) on the server.
         )}
       </article>
 

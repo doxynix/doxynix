@@ -1,13 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { type ComponentType, useState } from "react";
 import type { Route } from "next";
 import { LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { userNavMenu } from "@/shared/config/navigation";
-import { useNavLabels } from "@/shared/config/navigation-labels";
 import { Link, useRouter } from "@/shared/i18n/navigation";
 import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { authClient } from "@/shared/lib/auth-client";
@@ -27,19 +25,26 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 
-export function UserNav() {
+export type UserMenuItem = {
+  href: Route;
+  icon?: ComponentType<{ className?: string }>;
+  label: string;
+  shortcut?: string;
+};
+
+type Props = {
+  items: readonly UserMenuItem[];
+};
+
+export function UserMenu({ items }: Readonly<Props>) {
   const { data: session, isPending } = authClient.useSession();
   const isHydrated = useMounted();
   const router = useRouter();
   const user = session?.user ?? null;
   const tCommon = useTranslations("Common");
   const t = useTranslations("Auth");
-  const navLabels = useNavLabels();
   const errorMessage = useErrorMessage();
 
-  const avatar = user?.image;
-  const name = user?.name;
-  const email = user?.email;
   const [loading, setLoading] = useState(false);
   const [signOutOpen, setSignOutOpen] = useState(false);
 
@@ -84,7 +89,7 @@ export function UserNav() {
               fallbackClassName="text-xs"
               fallbackText={user?.name ?? user?.email ?? undefined}
               priority={true}
-              src={avatar}
+              src={user?.image}
             />
           </AppButton>
         </DropdownMenuTrigger>
@@ -94,13 +99,13 @@ export function UserNav() {
         >
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col gap-1">
-              <p className="truncate font-medium text-sm">{name}</p>
-              <p className="truncate text-muted-foreground text-xs">{email}</p>
+              <p className="truncate font-medium text-sm">{user?.name}</p>
+              <p className="truncate text-muted-foreground text-xs">{user?.email}</p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            {userNavMenu.map((item) => (
+            {items.map((item) => (
               <DropdownMenuItem
                 asChild
                 className="group"
@@ -108,10 +113,10 @@ export function UserNav() {
               >
                 <Link
                   className="flex items-center"
-                  href={item.href as Route}
+                  href={item.href}
                 >
                   {item.icon != null && <item.icon />}
-                  <span>{navLabels[item.labelKey]}</span>
+                  <span>{item.label}</span>
                   {item.shortcut != null && (
                     <DropdownMenuShortcut className="opacity-0 transition-opacity group-hover:opacity-100">
                       {item.shortcut}
