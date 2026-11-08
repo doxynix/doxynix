@@ -108,6 +108,13 @@
       "source": "obra/superpowers",
       "sourceType": "github"
     },
+    "frontend-design": {
+      "computedHash": "89496d5dd00f4810205f351759594fc2742bf8eea85a2f2b2d1de59f4bd91576",
+      "installMode": "copy",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "source": "anthropics/skills",
+      "sourceType": "github"
+    },
     "git-advanced-workflows": {
       "computedHash": "f4d0569096237c09b1c07896770fe487d7224c549f7aab0c6551a4f330fcf160",
       "skillPath": "plugins/developer-essentials/skills/git-advanced-workflows/SKILL.md",
@@ -160,6 +167,13 @@
       "computedHash": "0a0f4a9860b7d12b914fa2d167c322fbe8328fe53679210439023cd5ef95bfe8",
       "skillPath": "plugins/developer-essentials/skills/monorepo-management/SKILL.md",
       "source": "wshobson/agents",
+      "sourceType": "github"
+    },
+    "next-best-practices": {
+      "computedHash": "515ba75178bd44875812d9a560bdf14651f86709f89cf1d4f209638e879807f3",
+      "installMode": "copy",
+      "skillPath": "skills/next-best-practices/SKILL.md",
+      "source": "vercel-labs/next-skills",
       "sourceType": "github"
     },
     "nextjs-app-router-patterns": {
@@ -304,6 +318,13 @@
       "computedHash": "943d436114c677802426741980146c07560bf375297666b03062444f4b98a785",
       "skillPath": "skills/vitest/SKILL.md",
       "source": "antfu/skills",
+      "sourceType": "github"
+    },
+    "web-design-guidelines": {
+      "computedHash": "a6a44d5498f7e8f68289902f3dedfc6f38ae0cee1e96527c80724cf27f727c2a",
+      "installMode": "copy",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "source": "vercel-labs/agent-skills",
       "sourceType": "github"
     }
   },
