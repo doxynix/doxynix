@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.12.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.11.5...doxynix-v6.12.0) (2026-11-11)
+
+
+### Features
+
+* **web:** overhaul motion system and workspace collaboration ([#2386](https://github.com/doxynix/doxynix/issues/2386)) ([e8c8189](https://github.com/doxynix/doxynix/commit/e8c81891fc2a2867c9c92224e23f3ed60b241d72))
+* **web:** stage code viewer edits and show inline PR diffs ([#2389](https://github.com/doxynix/doxynix/issues/2389)) ([4d40210](https://github.com/doxynix/doxynix/commit/4d40210252c0bf87ca1deebc6af21a22f4a784d8))
+
 ## [6.11.5](https://github.com/doxynix/doxynix/compare/doxynix-v6.11.4...doxynix-v6.11.5) (2026-11-06)
 
 

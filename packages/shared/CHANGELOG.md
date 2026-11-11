@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/doxynix/doxynix/compare/shared-v0.9.0...shared-v0.10.0) (2026-11-11)
+
+
+### Features
+
+* **web:** overhaul motion system and workspace collaboration ([#2386](https://github.com/doxynix/doxynix/issues/2386)) ([e8c8189](https://github.com/doxynix/doxynix/commit/e8c81891fc2a2867c9c92224e23f3ed60b241d72))
+
 ## [0.9.0](https://github.com/doxynix/doxynix/compare/shared-v0.8.0...shared-v0.9.0) (2026-11-04)
 
 
