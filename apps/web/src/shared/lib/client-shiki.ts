@@ -1,9 +1,12 @@
-import { createHighlighterCore, type HighlighterCore } from "shiki/core";
+import { createHighlighterCore, type HighlighterCore, type ThemedToken } from "shiki/core";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 import { bundledLanguages, bundledLanguagesAlias } from "shiki/langs";
 import { bundledThemes } from "shiki/themes";
 
 import { type CodeTheme, codeThemeTone } from "@/shared/lib/appearance-preferences";
+
+export type ShikiToken = ThemedToken;
+export type ShikiTokenLines = ThemedToken[][];
 
 const PLAIN_LANGS = new Set(["text", "txt", "plaintext", "plain"]);
 
@@ -84,6 +87,33 @@ async function ensureLang(highlighter: HighlighterCore, lang: string): Promise<v
   return promise;
 }
 
+async function resolveConfig(
+  highlighter: HighlighterCore,
+  lang: string,
+  theme: "dark" | "light" | Exclude<CodeTheme, "auto">,
+): Promise<{ lang: string; theme: string } | null> {
+  const targetThemeId = (THEME_ALIASES as Record<string, string | undefined>)[theme] ?? theme;
+  const targetLang = EXTRA_ALIASES[lang] ?? lang;
+
+  await ensureTheme(highlighter, targetThemeId);
+
+  const resolvedTheme = highlighter.getLoadedThemes().includes(targetThemeId)
+    ? targetThemeId
+    : SYSTEM_FALLBACKS[codeThemeTone(targetThemeId)];
+
+  if (PLAIN_LANGS.has(targetLang)) {
+    return { lang: "text", theme: resolvedTheme };
+  }
+
+  await ensureLang(highlighter, targetLang);
+
+  if (!highlighter.getLoadedLanguages().includes(targetLang)) {
+    return null;
+  }
+
+  return { lang: targetLang, theme: resolvedTheme };
+}
+
 export const clientShiki = {
   async highlight(
     code: string,
@@ -92,27 +122,32 @@ export const clientShiki = {
   ): Promise<string | null> {
     try {
       const highlighter = await getHighlighter();
+      const config = await resolveConfig(highlighter, lang, theme);
 
-      const targetThemeId = (THEME_ALIASES as Record<string, string | undefined>)[theme] ?? theme;
-      const targetLang = EXTRA_ALIASES[lang] ?? lang;
-
-      await ensureTheme(highlighter, targetThemeId);
-
-      const resolvedTheme = highlighter.getLoadedThemes().includes(targetThemeId)
-        ? targetThemeId
-        : SYSTEM_FALLBACKS[codeThemeTone(targetThemeId)];
-
-      if (PLAIN_LANGS.has(targetLang)) {
-        return highlighter.codeToHtml(code, { lang: "text", theme: resolvedTheme });
-      }
-
-      await ensureLang(highlighter, targetLang);
-
-      if (!highlighter.getLoadedLanguages().includes(targetLang)) {
+      if (config == null) {
         return null;
       }
 
-      return highlighter.codeToHtml(code, { lang: targetLang, theme: resolvedTheme });
+      return highlighter.codeToHtml(code, config);
+    } catch {
+      return null;
+    }
+  },
+
+  async tokenizeLines(
+    code: string,
+    lang: string,
+    theme: "dark" | "light" | Exclude<CodeTheme, "auto">,
+  ): Promise<ShikiTokenLines | null> {
+    try {
+      const highlighter = await getHighlighter();
+      const config = await resolveConfig(highlighter, lang, theme);
+
+      if (config == null) {
+        return null;
+      }
+
+      return highlighter.codeToTokens(code, config).tokens;
     } catch {
       return null;
     }

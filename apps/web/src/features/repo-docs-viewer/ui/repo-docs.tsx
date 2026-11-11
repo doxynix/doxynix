@@ -1,5 +1,5 @@
 "use client";
-import { type ComponentType, useEffect, useMemo, useState } from "react";
+import { type ComponentType, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import type { DocType } from "@doxynix/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -132,7 +132,7 @@ export function RepoDocs({
     }),
   );
 
-  const headings = useMemo(() => {
+  const headings = (() => {
     if (typeof window === "undefined" || docContent?.html == null) {
       return [];
     }
@@ -156,7 +156,8 @@ export function RepoDocs({
       console.error("DOMParser failed:", error);
       return [];
     }
-  }, [docContent]);
+  })();
+  const headingIdKey = headings.map((heading) => heading.id).join("\u0000");
 
   const [activeHeadingId, setActiveHeadingId] = useState<string>("");
 
@@ -174,13 +175,19 @@ export function RepoDocs({
   );
 
   useEffect(() => {
-    const headingElements = headings
-      .map((h) => document.getElementById(h.id))
+    if (docContent?.html == null) {
+      return;
+    }
+
+    const headingElements = headingIdKey
+      .split("\u0000")
+      .filter((id) => id !== "")
+      .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => el !== null);
 
     headingElements.forEach(observe);
     return () => headingElements.forEach(unobserve);
-  }, [headings, observe, unobserve]);
+  }, [docContent, headingIdKey, observe, unobserve]);
 
   const handleDownload = () => {
     if (docContent?.raw == null) {

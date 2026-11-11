@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { type SubmitEvent, useEffect, useRef, useState } from "react";
 import { Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -51,7 +51,9 @@ export function RenameChatDialog({ session }: Readonly<Props>) {
     setOpen(value);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     if (trimmedTitle === "" || isUnchanged) {
       return;
     }
@@ -87,29 +89,29 @@ export function RenameChatDialog({ session }: Readonly<Props>) {
           <DialogDescription>{t("rename_chat_description")}</DialogDescription>
         </DialogHeader>
 
-        <Input
-          maxLength={200}
-          onChange={(e) => setTitle(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleSubmit();
-            }
-          }}
-          placeholder={t("rename_chat_placeholder")}
-          ref={inputRef}
-          value={title}
-        />
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={handleSubmit}
+        >
+          <Input
+            maxLength={200}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder={t("rename_chat_placeholder")}
+            ref={inputRef}
+            required
+            value={title}
+          />
 
-        <DialogFooter>
-          <LoadingButton
-            disabled={trimmedTitle === "" || isUnchanged}
-            isLoading={update.isPending}
-            onClick={handleSubmit}
-          >
-            {tCommon("save")}
-          </LoadingButton>
-        </DialogFooter>
+          <DialogFooter>
+            <LoadingButton
+              disabled={trimmedTitle === "" || isUnchanged}
+              isLoading={update.isPending}
+              type="submit"
+            >
+              {tCommon("save")}
+            </LoadingButton>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

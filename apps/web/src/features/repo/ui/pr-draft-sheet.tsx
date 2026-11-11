@@ -3,7 +3,7 @@ import { useState } from "react";
 import { CreatePrSchema, type CreatePrValues, generateBranchName } from "@doxynix/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileIcon, GitPullRequest, Trash2 } from "lucide-react";
+import { GitPullRequest } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -36,6 +36,8 @@ import {
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
+
+import { StagedFileDiff } from "./staged-file-diff";
 
 type Props = {
   repoId: string;
@@ -90,6 +92,27 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
       },
     }),
   );
+
+  const handleUnstage = (filePath: string) => {
+    setRemovingFiles((prev) => {
+      const next = new Set(prev);
+      next.add(filePath);
+      return next;
+    });
+
+    unstageMutation.mutate(
+      { filePath, repoId },
+      {
+        onSettled: () => {
+          setRemovingFiles((prev) => {
+            const next = new Set(prev);
+            next.delete(filePath);
+            return next;
+          });
+        },
+      },
+    );
+  };
 
   const form = useForm<CreatePrValues>({
     defaultValues: {
@@ -151,11 +174,11 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
         </SheetHeader>
 
         <div className="flex min-h-0 flex-1 flex-col gap-6">
-          <div className="flex flex-col gap-4">
+          <div className="flex min-h-0 flex-1 flex-col gap-4">
             <Label className="text-muted-foreground">
               {t("repo_pr_draft_staged_label", { count: filesCount })}
             </Label>
-            <ScrollArea className="h-75 rounded-xl border p-2">
+            <ScrollArea className="min-h-0 flex-1 rounded-xl border p-2">
               {isFilesLoading ? (
                 <SkeletonList
                   className="flex flex-col gap-2"
@@ -180,54 +203,15 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  {stagedFiles?.map((file) => {
-                    const isRemoving = removingFiles.has(file.filePath);
-
-                    return (
-                      <div
-                        className="flex items-center justify-between rounded-xl border p-1"
-                        key={file.filePath}
-                      >
-                        <div className="flex items-center gap-2 p-1">
-                          <FileIcon />
-                          <span className="truncate text-xs">{file.filePath}</span>
-                        </div>
-                        <LoadingButton
-                          aria-label={t("repo_pr_draft_unstage_aria")}
-                          className="hover:bg-destructive/10 hover:text-destructive"
-                          disabled={isRemoving}
-                          isLoading={isRemoving}
-                          onClick={() => {
-                            setRemovingFiles((prev) => {
-                              const next = new Set(prev);
-                              next.add(file.filePath);
-                              return next;
-                            });
-
-                            unstageMutation.mutate(
-                              {
-                                filePath: file.filePath,
-                                repoId,
-                              },
-                              {
-                                onSettled: () => {
-                                  setRemovingFiles((prev) => {
-                                    const next = new Set(prev);
-                                    next.delete(file.filePath);
-                                    return next;
-                                  });
-                                },
-                              },
-                            );
-                          }}
-                          size="icon"
-                          variant="ghost"
-                        >
-                          <Trash2 />
-                        </LoadingButton>
-                      </div>
-                    );
-                  })}
+                  {stagedFiles?.map((file) => (
+                    <StagedFileDiff
+                      file={file}
+                      isRemoving={removingFiles.has(file.filePath)}
+                      key={file.filePath}
+                      onUnstage={() => handleUnstage(file.filePath)}
+                      repoId={repoId}
+                    />
+                  ))}
                 </div>
               )}
             </ScrollArea>
@@ -235,7 +219,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
 
           <Form {...form}>
             <form
-              className="flex flex-col gap-4 border-t pt-4"
+              className="flex shrink-0 flex-col gap-4 border-t pt-4"
               id="pr-form"
               onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
             >

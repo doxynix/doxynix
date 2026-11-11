@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
 
@@ -23,8 +22,8 @@ export function useRepoTreeData(repo: UiRepoDetailed, branch: string) {
   );
 
   const files = data as FileTuple[] | undefined;
-  const treeData = useMemo(() => buildFileTree(files), [files]);
-  const hasSearchMatches = useMemo(() => matchesSearch(searchTerm, files), [files, searchTerm]);
+  const treeData = buildFileTree(files);
+  const hasSearchMatches = matchesSearch(searchTerm, files);
 
   return {
     files,

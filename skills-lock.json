@@ -1,4 +1,5 @@
 {
+  "version": 1,
   "skills": {
     "ai-sdk": {
       "computedHash": "0883204d11b055e968dee697c5858e68064c27dfd4deb6310212895daa65c5ad",
@@ -162,6 +163,12 @@
       "skillPath": "skills/mcp-builder/SKILL.md",
       "source": "anthropics/skills",
       "sourceType": "github"
+    },
+    "migrate-oxfmt": {
+      "source": "oxc-project/oxc",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/migrate-oxfmt/SKILL.md",
+      "computedHash": "53dfc68838b847cdcd8c310f1aad82631944e92b787c400fdbc9988c5a6d6ce3"
     },
     "monorepo-management": {
       "computedHash": "0a0f4a9860b7d12b914fa2d167c322fbe8328fe53679210439023cd5ef95bfe8",
@@ -327,6 +334,5 @@
       "source": "vercel-labs/agent-skills",
       "sourceType": "github"
     }
-  },
-  "version": 1
+  }
 }

@@ -53,4 +53,21 @@ describe("clientShiki", () => {
 
     expect(html).toContain("<pre");
   });
+
+  it("tokenizes code into per-line tokens", async () => {
+    const lines = await clientShiki.tokenizeLines(
+      "const a = 1;\nconst b = 2;",
+      "javascript",
+      "dark",
+    );
+
+    expect(lines).toHaveLength(2);
+    expect(lines?.[0]?.map((token) => token.content).join("")).toContain("const a = 1;");
+  });
+
+  it("returns null when tokenizing an unknown language", async () => {
+    const lines = await clientShiki.tokenizeLines("some text", "klingon", "dark");
+
+    expect(lines).toBeNull();
+  });
 });

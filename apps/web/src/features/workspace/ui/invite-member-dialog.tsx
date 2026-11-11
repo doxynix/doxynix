@@ -171,6 +171,7 @@ export function InviteMemberDialog() {
               id="invite-email"
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t("settings_members_add_email_placeholder")}
+              required
               spellCheck={false}
               type="email"
               value={email}

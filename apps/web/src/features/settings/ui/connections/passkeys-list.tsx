@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { type SubmitEvent, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Fingerprint, KeyRound, Plus, ShieldAlert, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -92,6 +92,17 @@ export function PasskeysList() {
     },
   });
 
+  const handleCreatePasskey = (event: SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const name = deviceName.trim();
+    if (name === "") {
+      return;
+    }
+
+    createPasskey.mutate(name);
+  };
+
   if (!isSupported) {
     return (
       <ConnectionCard
@@ -114,7 +125,12 @@ export function PasskeysList() {
     <div className="flex flex-col gap-4">
       <div className="flex justify-end">
         <Dialog
-          onOpenChange={setIsAddOpen}
+          onOpenChange={(open) => {
+            setIsAddOpen(open);
+            if (!open) {
+              setDeviceName("");
+            }
+          }}
           open={isAddOpen}
         >
           <DialogTrigger asChild>
@@ -127,27 +143,33 @@ export function PasskeysList() {
             </AppButton>
           </DialogTrigger>
           <DialogContent className="sm:max-w-105">
-            <DialogHeader>
-              <DialogTitle>{t("settings_passkey_link_dialog_title")}</DialogTitle>
-              <DialogDescription>{t("settings_passkey_link_dialog_desc")}</DialogDescription>
-            </DialogHeader>
-            <div className="flex flex-col gap-4 py-2">
-              <Input
-                disabled={createPasskey.isPending}
-                onChange={(e) => setDeviceName(e.target.value)}
-                placeholder={t("settings_passkey_device_name_placeholder")}
-                value={deviceName}
-              />
-            </div>
-            <DialogFooter>
-              <LoadingButton
-                disabled={deviceName.trim().length === 0 || createPasskey.isPending}
-                isLoading={createPasskey.isPending}
-                onClick={() => createPasskey.mutate(deviceName)}
-              >
-                {t("settings_passkey_register")}
-              </LoadingButton>
-            </DialogFooter>
+            <form
+              className="flex flex-col gap-4"
+              onSubmit={handleCreatePasskey}
+            >
+              <DialogHeader>
+                <DialogTitle>{t("settings_passkey_link_dialog_title")}</DialogTitle>
+                <DialogDescription>{t("settings_passkey_link_dialog_desc")}</DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-4 py-2">
+                <Input
+                  disabled={createPasskey.isPending}
+                  onChange={(e) => setDeviceName(e.target.value)}
+                  placeholder={t("settings_passkey_device_name_placeholder")}
+                  required
+                  value={deviceName}
+                />
+              </div>
+              <DialogFooter>
+                <LoadingButton
+                  disabled={deviceName.trim().length === 0 || createPasskey.isPending}
+                  isLoading={createPasskey.isPending}
+                  type="submit"
+                >
+                  {t("settings_passkey_register")}
+                </LoadingButton>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       </div>

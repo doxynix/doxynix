@@ -1,19 +1,21 @@
 "use client";
 
-import {
-  type DependencyList,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { type DependencyList, useEffect, useLayoutEffect, useRef, useState } from "react";
+
+function getScrollContainer(root: HTMLElement | null, selector: string): HTMLElement | null {
+  if (root == null) {
+    return null;
+  }
+
+  return root.querySelector(selector);
+}
 
 export function useAutoScroll<T extends HTMLElement>(
   deps: DependencyList,
   options: { selector?: string; throttleMs?: number } = {},
 ) {
-  const { selector = "[data-radix-scroll-area-viewport]", throttleMs = 100 } = options;
+  const selector = options.selector ?? "[data-radix-scroll-area-viewport]";
+  const throttleMs = options.throttleMs ?? 100;
 
   const scrollRef = useRef<null | T>(null);
   const [isAutoScroll, setIsAutoScroll] = useState(true);
@@ -27,16 +29,8 @@ export function useAutoScroll<T extends HTMLElement>(
 
   const throttleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const getContainer = useCallback((): HTMLElement | null => {
-    const root = scrollRef.current;
-    if (root == null) {
-      return null;
-    }
-    return root.querySelector(selector);
-  }, [selector]);
-
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
-    const container = getContainer();
+    const container = getScrollContainer(scrollRef.current, selector);
     if (container == null) {
       return;
     }
@@ -48,45 +42,46 @@ export function useAutoScroll<T extends HTMLElement>(
     setIsAutoScroll(true);
   };
 
-  const handleScrollThrottled = useCallback(() => {
-    if (throttleTimeoutRef.current) {
-      return;
-    }
-
-    throttleTimeoutRef.current = setTimeout(() => {
-      throttleTimeoutRef.current = null;
-
-      const container = getContainer();
-      if (container == null) {
-        return;
-      }
-
-      const { clientHeight, scrollHeight, scrollTop } = container;
-
-      const isAtBottom = isNearBottom(scrollHeight, scrollTop, clientHeight);
-
-      setIsAutoScroll(isAtBottom);
-      setShowScrollButton(!isAtBottom);
-    }, throttleMs);
-  }, [getContainer, throttleMs]);
-
   useEffect(() => {
-    const container = getContainer();
+    const container = getScrollContainer(scrollRef.current, selector);
     if (container == null) {
       return;
     }
 
-    container.addEventListener("scroll", handleScrollThrottled, { passive: true });
+    const handleScroll = () => {
+      if (throttleTimeoutRef.current) {
+        return;
+      }
+
+      throttleTimeoutRef.current = setTimeout(() => {
+        throttleTimeoutRef.current = null;
+
+        const currentContainer = getScrollContainer(scrollRef.current, selector);
+        if (currentContainer == null) {
+          return;
+        }
+
+        const { clientHeight, scrollHeight, scrollTop } = currentContainer;
+
+        const isAtBottom = isNearBottom(scrollHeight, scrollTop, clientHeight);
+
+        setIsAutoScroll(isAtBottom);
+        setShowScrollButton(!isAtBottom);
+      }, throttleMs);
+    };
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
-      container.removeEventListener("scroll", handleScrollThrottled);
+      container.removeEventListener("scroll", handleScroll);
       if (throttleTimeoutRef.current) {
         clearTimeout(throttleTimeoutRef.current);
+        throttleTimeoutRef.current = null;
       }
     };
-  }, [handleScrollThrottled, getContainer]);
+  }, [selector, throttleMs]);
 
   useEffect(() => {
-    const container = getContainer();
+    const container = getScrollContainer(scrollRef.current, selector);
     if (container == null || !isAutoScrollRef.current) {
       return;
     }
@@ -111,7 +106,7 @@ export function useAutoScroll<T extends HTMLElement>(
 
     return () => observer.disconnect();
     // oxlint-disable-next-line react-hooks/exhaustive-deps -- callers own the dependency list
-  }, [getContainer, ...deps]);
+  }, [selector, ...deps]);
 
   return {
     scrollRef,

@@ -28,7 +28,7 @@ export function useIntersectionObserver(
     };
   }, []);
 
-  // Stable identity without useCallback: React Compiler memoizes these (no reactive deps).
+  // Stable identity: React Compiler memoizes these (no reactive deps).
   const observe = (element: Element) => {
     observerRef.current?.observe(element);
   };
