@@ -83,7 +83,15 @@
       "!!**/prisma/json-schema",
       "!!**/bun.lock",
       "!!**/.agents",
-      "!!**/.semgrep"
+      "!!**/.semgrep",
+      "!!**/.github",
+      "!!**/.claude",
+      "!!**/.cursor",
+      "!!**/.continue",
+      "!!**/*.yml",
+      "!!**/*.yaml",
+      "!!**/.superpowers",
+      "!!**/skills-lock.json"
     ]
   },
   "formatter": {

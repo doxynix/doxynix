@@ -26,7 +26,10 @@
     "**/.stryker-tmp/**",
     "**/.trigger/**",
     "**/.opencode/**",
-    "**/.agents/**"
+    "**/.agents/**",
+    "**/.claude/**",
+    "**/.cursor/**",
+    "**/.continue/**"
   ],
   "options": {
     "typeAware": true

@@ -22,6 +22,7 @@
     "auto": false
   },
   "default_agent": "build",
+  "lsp": true,
   "mcp": {
     "servers": {
       "context7": {

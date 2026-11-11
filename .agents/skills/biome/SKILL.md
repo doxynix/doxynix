@@ -1,15 +1,21 @@
 ---
 name: biome
-description: Biome 2.5.14 in this repo — formatter and assist actions only; Oxlint is the linter. Covers biome.json structure (`assist.actions.source.organizeImports`, `files.includes`), the import group order Biome enforces on write, what it will silently rewrite, and the `format` / `format:check` scripts. Use when editing biome.json, fighting an import-order or sorted-keys diff, or deciding whether a rule belongs in Biome or Oxlint.
+description: Biome 2.6.4 in this repo — formatter and assist actions only; Oxlint is the linter. Covers biome.json structure (`assist.actions.source.organizeImports`, `files.includes`), the import group order Biome enforces on write, what it will silently rewrite, and the `format` / `format:check` scripts. Use when editing biome.json, fighting an import-order or sorted-keys diff, or deciding whether a rule belongs in Biome or Oxlint.
 ---
 
 # Biome
 
-Biome **2.5.14**, configured once at the repo root. It is the **formatter and assist engine**.
+Biome **2.6.4**, configured once at the repo root. It is the **formatter and assist engine**.
 **Oxlint is the linter.** Biome's `linter` block is deliberately almost empty — do not add lint
 rules there; add them to `.oxlintrc.json` instead.
 
 ESLint and Prettier are banned repo-wide. See `.agents/skills/turborepo/` for the full tool table.
+
+## Why not Oxfmt
+
+As of 2026-11-09 Oxfmt is 0.x and has no equivalent for `useSortedKeys`, `useSortedAttributes`,
+`useSortedEnumMembers` or `useSortedProperties`; `oxfmt --migrate biome` moves formatter options
+only. Do not migrate until those land — see `.agents/skills/migrate-oxfmt/`.
 
 ## Division of labour
 
@@ -46,7 +52,7 @@ Lefthook pre-commit runs Biome on staged files only:
 
 ```yaml
 - name: biome-format-and-check
-  glob: "**/*.{js,jsx,ts,tsx,json,jsonc,css,md,mdx}"
+  glob: "**/*.{js,jsx,ts,tsx,json,jsonc,css}"
   run: bunx @biomejs/biome check --write --no-errors-on-unmatched {staged_files}
   stage_fixed: true
 ```
@@ -95,7 +101,16 @@ The repo's actual configuration:
       "!!**/drizzle",
       "!!**/prisma/generated",
       "!!**/bun.lock",
-      "!!**/.agents"
+      "!!**/skills-lock.json",
+      "!!**/*.md",
+      "!!**/*.yml",
+      "!!**/*.yaml",
+      "!!**/.agents",
+      "!!**/.github",
+      "!!**/.claude",
+      "!!**/.cursor",
+      "!!**/.continue",
+      "!!**/.superpowers"
     ]
   },
   "formatter": { "indentWidth": 2, "lineWidth": 100, "lineEnding": "lf", "useEditorconfig": true },
@@ -116,6 +131,9 @@ The repo's actual configuration:
 
 `"preset": "none"` means: no recommended rule set, one hand-picked rule. Adding a Biome lint rule is
 a deliberate decision, not a flip of `"recommended": true`.
+
+YAML, Markdown, vendored skill dirs and lock files are excluded because the toolchain formats
+JS/TS/JSON/JSONC/CSS only and `biome check .` at the root has to stay green.
 
 `overrides` uses `includes` too:
 
