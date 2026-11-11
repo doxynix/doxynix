@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.12.1](https://github.com/doxynix/doxynix/compare/web-v5.12.0...web-v5.12.1) (2026-11-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency fast-xml-parser to v5.12.0 [security] ([#2390](https://github.com/doxynix/doxynix/issues/2390)) ([3960c09](https://github.com/doxynix/doxynix/commit/3960c093c754145137998df551aba4ca3c373eed))
+
 ## [5.12.0](https://github.com/doxynix/doxynix/compare/web-v5.11.5...web-v5.12.0) (2026-11-11)
 
 
