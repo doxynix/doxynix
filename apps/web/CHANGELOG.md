@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.12.0](https://github.com/doxynix/doxynix/compare/web-v5.11.5...web-v5.12.0) (2026-11-11)
+
+
+### Features
+
+* **web:** overhaul motion system and workspace collaboration ([#2386](https://github.com/doxynix/doxynix/issues/2386)) ([e8c8189](https://github.com/doxynix/doxynix/commit/e8c81891fc2a2867c9c92224e23f3ed60b241d72))
+* **web:** stage code viewer edits and show inline PR diffs ([#2389](https://github.com/doxynix/doxynix/issues/2389)) ([4d40210](https://github.com/doxynix/doxynix/commit/4d40210252c0bf87ca1deebc6af21a22f4a784d8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @doxynix/shared bumped to 0.10.0
+
 ## [5.11.5](https://github.com/doxynix/doxynix/compare/web-v5.11.4...web-v5.11.5) (2026-11-06)
 
 
