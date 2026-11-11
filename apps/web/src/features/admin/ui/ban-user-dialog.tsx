@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { type SubmitEvent, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
@@ -39,7 +39,13 @@ export function BanUserDialog({ actions, trigger, user }: Readonly<Props>) {
   const [expiresAt, setExpiresAt] = useState("");
   const [code, setCode] = useState("");
 
-  const ban = () => {
+  const ban = (event: SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (code.length !== 6) {
+      return;
+    }
+
     actions.setBanned.mutate(
       {
         banExpires: expiresAt || undefined,
@@ -67,55 +73,61 @@ export function BanUserDialog({ actions, trigger, user }: Readonly<Props>) {
           <DialogDescription>{t("ban_dialog_desc")}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4">
-          <Alert variant="destructive">
-            <AlertTitle>{tCommon("warning")}</AlertTitle>
-            <AlertDescription>{t("ban_dialog_alert")}</AlertDescription>
-          </Alert>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={ban}
+        >
+          <div className="flex flex-col gap-4">
+            <Alert variant="destructive">
+              <AlertTitle>{tCommon("warning")}</AlertTitle>
+              <AlertDescription>{t("ban_dialog_alert")}</AlertDescription>
+            </Alert>
 
-          <Label className="flex flex-col gap-2 ">
-            {t("ban_reason_label")}
-            <Textarea
-              maxLength={500}
-              onChange={(event) => setReason(event.target.value)}
-              placeholder={t("ban_reason_placeholder")}
-              rows={3}
-              value={reason}
+            <Label className="flex flex-col gap-2 ">
+              {t("ban_reason_label")}
+              <Textarea
+                maxLength={500}
+                onChange={(event) => setReason(event.target.value)}
+                placeholder={t("ban_reason_placeholder")}
+                rows={3}
+                value={reason}
+              />
+            </Label>
+
+            <Label className="flex flex-col gap-2 ">
+              {t("ban_expires_label")}
+              <Input
+                onChange={(event) => setExpiresAt(event.target.value)}
+                type="datetime-local"
+                value={expiresAt}
+              />
+              <span className="text-muted-foreground text-xs">{t("ban_expires_hint")}</span>
+            </Label>
+
+            <AdminTotpField
+              onChange={setCode}
+              value={code}
             />
-          </Label>
+          </div>
 
-          <Label className="flex flex-col gap-2 ">
-            {t("ban_expires_label")}
-            <Input
-              onChange={(event) => setExpiresAt(event.target.value)}
-              type="datetime-local"
-              value={expiresAt}
-            />
-            <span className="text-muted-foreground text-xs">{t("ban_expires_hint")}</span>
-          </Label>
-
-          <AdminTotpField
-            onChange={setCode}
-            value={code}
-          />
-        </div>
-
-        <DialogFooter>
-          <AppButton
-            onClick={() => setOpen(false)}
-            variant="outline"
-          >
-            {tCommon("cancel")}
-          </AppButton>
-          <LoadingButton
-            disabled={code.length !== 6}
-            isLoading={actions.setBanned.isPending}
-            onClick={ban}
-            variant="destructive"
-          >
-            {t("ban_confirm")}
-          </LoadingButton>
-        </DialogFooter>
+          <DialogFooter>
+            <AppButton
+              onClick={() => setOpen(false)}
+              type="button"
+              variant="outline"
+            >
+              {tCommon("cancel")}
+            </AppButton>
+            <LoadingButton
+              disabled={code.length !== 6}
+              isLoading={actions.setBanned.isPending}
+              type="submit"
+              variant="destructive"
+            >
+              {t("ban_confirm")}
+            </LoadingButton>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

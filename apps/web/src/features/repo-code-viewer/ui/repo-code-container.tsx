@@ -43,6 +43,14 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
     ),
   );
 
+  const { data: stagedFiles } = useQuery(
+    trpc.analysis.getStagedFiles.queryOptions({
+      repoId: repo.id,
+    }),
+  );
+
+  const stagedContent = stagedFiles?.find((file) => file.filePath === path)?.content;
+
   useEffect(() => {
     if (path != null && path.length > 0) {
       return;
@@ -98,6 +106,7 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
               path={path}
               repo={repo}
               repoId={repo.id}
+              stagedContent={stagedContent}
               treeApi={treeApi}
             />
           ) : (

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 
 import { type CodeTheme, codeThemeTone } from "@/shared/lib/appearance-preferences";
-import { clientShiki } from "@/shared/lib/client-shiki";
+import { clientShiki, type ShikiTokenLines } from "@/shared/lib/client-shiki";
 
 import { useCodeTheme } from "./use-appearance-preferences";
 
@@ -15,18 +15,27 @@ type Options = {
   enabled?: boolean;
 };
 
-type HighlightResult = {
-  html: null | string;
+type Loader<T> = (code: string, lang: string, theme: ShikiTheme) => Promise<T | null>;
+
+const highlightLoader: Loader<string> = (code, lang, theme) =>
+  clientShiki.highlight(code, lang, theme);
+
+const tokenizeLoader: Loader<ShikiTokenLines> = (code, lang, theme) =>
+  clientShiki.tokenizeLines(code, lang, theme);
+
+type HighlightResult<T> = {
+  html: null | T;
   key: string;
 };
 
-export function useShikiHighlight(
+function useShikiResult<T>(
   code: string,
   lang: string,
   theme: ShikiTheme,
+  loader: Loader<T>,
   { delay = 120, enabled = true }: Options = {},
 ) {
-  const [result, setResult] = useState<HighlightResult | null>(null);
+  const [result, setResult] = useState<HighlightResult<T> | null>(null);
   const key = `${theme}\u0000${lang}\u0000${code}`;
 
   useEffect(() => {
@@ -36,7 +45,7 @@ export function useShikiHighlight(
 
     let cancelled = false;
     const timer = setTimeout(() => {
-      void clientShiki.highlight(code, lang, theme).then((html) => {
+      void loader(code, lang, theme).then((html) => {
         if (!cancelled) {
           setResult({ html, key });
         }
@@ -47,12 +56,31 @@ export function useShikiHighlight(
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [code, delay, enabled, key, lang, theme]);
+  }, [code, delay, enabled, key, lang, loader, theme]);
 
   return {
     html: result?.key === key ? result.html : null,
     pending: enabled && code !== "" && result?.key !== key,
   };
+}
+
+export function useShikiHighlight(
+  code: string,
+  lang: string,
+  theme: ShikiTheme,
+  options: Options = {},
+) {
+  return useShikiResult(code, lang, theme, highlightLoader, options);
+}
+
+export function useShikiTokenLines(
+  code: string,
+  lang: string,
+  enabled = true,
+): ShikiTokenLines | null {
+  const theme = useShikiTheme();
+
+  return useShikiResult(code, lang, theme, tokenizeLoader, { enabled }).html;
 }
 
 export function useShikiTheme(): ShikiTheme {

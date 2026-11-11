@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { EditorView } from "@uiw/react-codemirror";
 import {
   Check,
@@ -10,8 +10,10 @@ import {
   FileChartLine,
   FileIcon,
   FileText,
+  GitCompare,
   Save,
   Sparkles,
+  Undo2,
   X,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -24,6 +26,14 @@ import { authClient } from "@/shared/lib/auth-client";
 import { saveFile } from "@/shared/lib/file-saver";
 import { useTypewriter } from "@/shared/lib/hooks/use-typewriter";
 import { AppButton } from "@/shared/ui/core/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/ui/core/dropdown-menu";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { ActionErrorAlert } from "@/shared/ui/kit/action-error-alert";
@@ -57,16 +67,27 @@ type Props = {
   path: string;
   repo: UiRepoDetailed;
   repoId: string;
+  stagedContent?: string;
   treeApi: TreeApi<FileNode> | undefined;
 };
 
-export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Readonly<Props>) {
+export function RepoCodeBrowser({
+  fileData,
+  path,
+  repo,
+  repoId,
+  stagedContent,
+  treeApi,
+}: Readonly<Props>) {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
   const { data: session } = authClient.useSession();
   const userId = session?.user.id;
   const errorMessage = useErrorMessage();
+  const savedContent = stagedContent ?? fileData.content;
+  const isStaged = stagedContent != null;
 
   const [mode, setMode] = useState<RepoCodeMode>("view");
   const [view, setView] = useState<EditorView | null>(null);
@@ -75,12 +96,14 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
   const [pending, setPending] = useState<PendingAction>(null);
   const [actionError, setActionError] = useState<unknown>(null);
   const [showDiff, setShowDiff] = useState(false);
+  const [isDiffDismissed, setIsDiffDismissed] = useState(false);
+  const [showStagedDiff, setShowStagedDiff] = useState(false);
   const [isAuditDismissed, setIsAuditDismissed] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
 
-  const [localContent, setLocalContent] = useState(fileData.content);
+  const [localContent, setLocalContent] = useState(savedContent);
   const [prevPath, setPrevPath] = useState(path);
-  const [prevExternalContent, setPrevExternalContent] = useState(fileData.content);
+  const [prevExternalContent, setPrevExternalContent] = useState(savedContent);
   const { branch } = useRepoBranch(repo);
 
   const [editorStats, setEditorStats] = useState<EditorStats>({
@@ -110,14 +133,17 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
   const typedAuditHtml = useTypewriter(auditResult?.html ?? "", 3);
   const displayHtml = shouldAnimate ? typedAuditHtml : (auditResult?.html ?? "");
 
-  if (path !== prevPath || fileData.content !== prevExternalContent) {
+  if (path !== prevPath || savedContent !== prevExternalContent) {
+    const pathChanged = path !== prevPath;
     setPrevPath(path);
-    setPrevExternalContent(fileData.content);
-    setLocalContent(fileData.content);
+    setPrevExternalContent(savedContent);
+    setLocalContent(savedContent);
     setMode("view");
     setActionError(null);
     setIsAuditDismissed(false);
+    setIsDiffDismissed(!pathChanged);
     setShowDiff(false);
+    setShowStagedDiff(false);
     setShouldAnimate(false);
     setPending(null);
   }
@@ -134,7 +160,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
     setPending(null);
   }
 
-  if (!showDiff && isDocumentLoaded) {
+  if (!showDiff && isDocumentLoaded && !isDiffDismissed) {
     setShowDiff(true);
   }
 
@@ -170,7 +196,26 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
         toast.error(errorMessage(error));
       },
       onSuccess: (data) => {
+        setMode("view");
+        setIsDiffDismissed(true);
+        void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
         toast.success(t("repo_code_stage_success", { count: data.stagedCount }));
+      },
+    }),
+  );
+
+  const unstageMutation = useMutation(
+    trpc.analysis.unstageFile.mutationOptions({
+      onError: (error) => {
+        toast.error(errorMessage(error));
+      },
+      onSuccess: () => {
+        setLocalContent(fileData.content);
+        setMode("view");
+        setIsDiffDismissed(true);
+        setShowStagedDiff(false);
+        void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
+        toast.success(t("repo_code_unstage_success"));
       },
     }),
   );
@@ -236,7 +281,9 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
 
   const handleDocument = () => {
     setPending("document");
+    setIsDiffDismissed(false);
     setShowDiff(false);
+    setShowStagedDiff(false);
     documentMutation.mutate({ branch, content: localContent, path, repoId });
   };
 
@@ -252,12 +299,30 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
 
       setLocalContent(proposedContent);
 
+      setIsDiffDismissed(true);
       setShowDiff(false);
     }
   };
 
   const handleDiscardDiff = () => {
+    setIsDiffDismissed(true);
     setShowDiff(false);
+  };
+
+  const handleSave = () => {
+    stageMutation.mutate({ content: localContent, filePath: path, repoId });
+  };
+
+  const handleUnstage = () => {
+    unstageMutation.mutate({ filePath: path, repoId });
+  };
+
+  const handleToggleStagedDiff = (next: boolean) => {
+    if (next) {
+      setIsDiffDismissed(true);
+      setShowDiff(false);
+    }
+    setShowStagedDiff(next);
   };
 
   const pinMutation = useMutation(
@@ -284,7 +349,11 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
     },
     {
       icon: Edit3,
-      onClick: () => setMode("edit"),
+      onClick: () => {
+        setMode("edit");
+        setShowDiff(false);
+        setShowStagedDiff(false);
+      },
       tooltipText: t("repo_code_action_edit"),
     },
     {
@@ -309,22 +378,23 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
 
   const EDIT_ACTIONS = [
     {
+      disabled: stageMutation.isPending,
       hideTooltip: true,
       icon: X,
       label: tCommon("cancel"),
       onClick: () => {
-        setLocalContent(fileData.content);
+        setLocalContent(savedContent);
         setMode("view");
       },
       tooltipText: t("repo_code_action_discard"),
     },
     {
+      disabled: !editorStats.isDirty || stageMutation.isPending,
       hideTooltip: true,
       icon: Save,
+      isLoading: stageMutation.isPending,
       label: t("repo_code_action_save_changes"),
-      onClick: () => {
-        setMode("view");
-      },
+      onClick: handleSave,
       tooltipText: t("repo_code_action_save_to_repo"),
       variant: "outline" as const,
     },
@@ -360,6 +430,39 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
             tooltipText={t("repo_code_copy_path")}
             value={path}
           />
+          {isStaged && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <AppButton
+                  aria-label={t("repo_pr_draft_staged_label")}
+                  className="h-6 shrink-0 gap-1 rounded-full px-2 text-[10px]"
+                  size="sm"
+                  variant="outline"
+                >
+                  <GitCompare className="size-3" />
+                  {t("repo_pr_draft_staged_label")}
+                </AppButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuCheckboxItem
+                  checked={showStagedDiff}
+                  onCheckedChange={(checked) => handleToggleStagedDiff(checked)}
+                >
+                  <GitCompare />
+                  {t("repo_code_compare_github")}
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  disabled={unstageMutation.isPending}
+                  onSelect={handleUnstage}
+                  variant="destructive"
+                >
+                  <Undo2 />
+                  {t("repo_pr_draft_unstage_aria")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
         <div className="flex items-center justify-end gap-2">
@@ -512,10 +615,12 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
         <Editor
           diff={
             showDiff && documentResult?.content != null
-              ? { originalValue: fileData.content }
-              : undefined
+              ? { originalValue: savedContent }
+              : showStagedDiff && isStaged
+                ? { originalValue: fileData.content }
+                : undefined
           }
-          initialValue={fileData.content}
+          initialValue={savedContent}
           mode={mode}
           onChange={setLocalContent}
           onStats={setEditorStats}

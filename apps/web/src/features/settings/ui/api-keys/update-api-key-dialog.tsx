@@ -44,8 +44,11 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
       name: apiKey.name,
       scopes: apiKey.scopes.length > 0 ? apiKey.scopes : [],
     },
+    mode: "onChange",
     resolver: zodResolver(CreateApiKeySchema),
   });
+
+  const { isDirty, isValid } = form.formState;
 
   const onSubmit = (values: CreateApiKeyInput) => {
     update.mutate(
@@ -107,7 +110,7 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
 
             <DialogFooter>
               <LoadingButton
-                disabled={!form.formState.isDirty || !form.formState.isValid || update.isPending}
+                disabled={!isDirty || !isValid || update.isPending}
                 isLoading={update.isPending}
                 type="submit"
               >

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { FileNode, FileTuple } from "./repo-setup.types";
 import {
@@ -35,7 +35,7 @@ export function useRepoSelection({ branch, files, selectRecommendedOnLoad, treeD
     setSelectedIds(new Set(getRecommendedPaths(files)));
   }, [files, selectRecommendedOnLoad]);
 
-  const toggleSelection = useCallback((_nodeId: string, nodeData: FileNode) => {
+  const toggleSelection = (_nodeId: string, nodeData: FileNode) => {
     const idsToToggle = collectAllIds(nodeData);
 
     setSelectedIds((prev) => {
@@ -53,7 +53,7 @@ export function useRepoSelection({ branch, files, selectRecommendedOnLoad, treeD
 
       return next;
     });
-  }, []);
+  };
 
   const selectAll = () => setSelectedIds(new Set(collectTreeIds(treeData)));
   const clearAll = () => setSelectedIds(new Set());

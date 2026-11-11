@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { type SubmitEvent, useState } from "react";
 import {
   type BannedEmailReason,
   BannedEmailReason as BannedEmailReasonValues,
@@ -44,9 +44,16 @@ export function AdminBannedEmailDialog({ actions, trigger }: Readonly<Props>) {
   const [email, setEmail] = useState("");
   const [reason, setReason] = useState<BannedEmailReason>("MANUAL");
 
-  const submit = () => {
+  const submit = (event: SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const trimmedEmail = email.trim();
+    if (trimmedEmail === "") {
+      return;
+    }
+
     actions.create.mutate(
-      { email: email.trim(), reason },
+      { email: trimmedEmail, reason },
       {
         onSuccess: () => {
           setEmail("");
@@ -70,57 +77,64 @@ export function AdminBannedEmailDialog({ actions, trigger }: Readonly<Props>) {
           <DialogDescription>{t("create_desc")}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4">
-          <Label className="flex flex-col gap-2">
-            {t("create_email_label")}
-            <Input
-              autoComplete="off"
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder={t("create_email_placeholder")}
-              spellCheck={false}
-              type="email"
-              value={email}
-            />
-          </Label>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={submit}
+        >
+          <div className="flex flex-col gap-4">
+            <Label className="flex flex-col gap-2">
+              {t("create_email_label")}
+              <Input
+                autoComplete="off"
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder={t("create_email_placeholder")}
+                required
+                spellCheck={false}
+                type="email"
+                value={email}
+              />
+            </Label>
 
-          <Label className="flex flex-col gap-2">
-            {t("create_reason_label")}
-            <Select
-              onValueChange={(value) => setReason(value as BannedEmailReason)}
-              value={reason}
+            <Label className="flex flex-col gap-2">
+              {t("create_reason_label")}
+              <Select
+                onValueChange={(value) => setReason(value as BannedEmailReason)}
+                value={reason}
+              >
+                <SelectTrigger aria-label={t("create_reason_label")}>
+                  <SelectValue placeholder={t("create_reason_label")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(BannedEmailReasonValues).map((value) => (
+                    <SelectItem
+                      key={value}
+                      value={value}
+                    >
+                      {t(`reason_${value.toLowerCase()}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Label>
+          </div>
+
+          <DialogFooter>
+            <AppButton
+              onClick={() => setOpen(false)}
+              type="button"
+              variant="outline"
             >
-              <SelectTrigger aria-label={t("create_reason_label")}>
-                <SelectValue placeholder={t("create_reason_label")} />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.keys(BannedEmailReasonValues).map((value) => (
-                  <SelectItem
-                    key={value}
-                    value={value}
-                  >
-                    {t(`reason_${value.toLowerCase()}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Label>
-        </div>
-
-        <DialogFooter>
-          <AppButton
-            onClick={() => setOpen(false)}
-            variant="outline"
-          >
-            {tCommon("cancel")}
-          </AppButton>
-          <LoadingButton
-            disabled={email.trim().length === 0}
-            isLoading={actions.create.isPending}
-            onClick={submit}
-          >
-            {t("create_confirm")}
-          </LoadingButton>
-        </DialogFooter>
+              {tCommon("cancel")}
+            </AppButton>
+            <LoadingButton
+              disabled={email.trim().length === 0}
+              isLoading={actions.create.isPending}
+              type="submit"
+            >
+              {t("create_confirm")}
+            </LoadingButton>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
