@@ -41,11 +41,16 @@ export type FrameworkFact = {
 
 export type SymbolRef = {
   confidence: number;
+  container?: string;
   exported: boolean;
   kind: SymbolKind;
   line?: number;
   name: string;
+  parameters?: string;
   path: string;
+  returnType?: string;
+  signature?: string;
+  visibility?: "internal" | "package" | "private" | "protected" | "public";
 };
 
 export type ImportKind =
@@ -161,6 +166,12 @@ export interface FileSignals extends BaseSignal {
   entrypointRefs?: EntrypointRef[];
   exports: number;
   frameworkHints?: FrameworkFact[];
+  functionComplexities?: Array<{
+    complexity: number;
+    line: number;
+    maxNesting: number;
+    name: string;
+  }>;
   importDetails?: ImportRef[];
   imports: string[];
   parseError?: boolean;

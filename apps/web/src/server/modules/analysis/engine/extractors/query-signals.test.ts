@@ -131,4 +131,20 @@ describe("collectQuerySignals", () => {
 
     expect(result).toBeNull();
   });
+
+  it("records the raw signature and parameters for a function", async () => {
+    const result = await collectQuerySignals(
+      {
+        content: "export function greet(name: string, age?: number): string { return name; }",
+        path: "src/sample.ts",
+      },
+      ".ts",
+      typescriptQuerySpec,
+    );
+
+    const symbol = result?.symbols?.find((item) => item.name === "greet");
+    expect(symbol?.signature).toContain("greet(name: string");
+    expect(symbol?.parameters).toBe("(name: string, age?: number)");
+    expect(symbol?.returnType).toBe(": string");
+  });
 });

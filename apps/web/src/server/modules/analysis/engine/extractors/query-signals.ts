@@ -195,14 +195,24 @@ export async function collectQuerySignals(
               exportedNames.has(name) ||
               querySpec.isExported?.(declaration ?? nameNode, name) === true ||
               declaration?.parent?.type === "export_statement";
+            const parameters = declaration?.childForFieldName("parameters")?.text;
+            const returnType = declaration?.childForFieldName("return_type")?.text;
+            const container =
+              kind === "method"
+                ? declaration?.parent?.parent?.childForFieldName("name")?.text
+                : undefined;
 
             symbols.push({
               confidence: CONFIDENCE_LEVELS.astSymbol,
+              container,
               exported,
               kind,
               line: (declaration ?? nameNode).startPosition.row + 1,
               name,
+              parameters,
               path: file.path,
+              returnType,
+              signature: parameters == null ? name : `${name}${parameters}${returnType ?? ""}`,
             });
           }
         }
