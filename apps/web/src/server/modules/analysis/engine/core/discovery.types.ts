@@ -48,6 +48,22 @@ export type SymbolRef = {
   path: string;
 };
 
+export type ImportKind =
+  | "default"
+  | "dynamic"
+  | "named"
+  | "namespace"
+  | "reexport"
+  | "require"
+  | "side-effect";
+
+export type ImportRef = {
+  kind: ImportKind;
+  line?: number;
+  names?: string[];
+  source: string;
+};
+
 export type RouteRef = {
   confidence: number;
   framework?: string;
@@ -145,6 +161,7 @@ export interface FileSignals extends BaseSignal {
   entrypointRefs?: EntrypointRef[];
   exports: number;
   frameworkHints?: FrameworkFact[];
+  importDetails?: ImportRef[];
   imports: string[];
   parseError?: boolean;
   routes?: RouteRef[];
