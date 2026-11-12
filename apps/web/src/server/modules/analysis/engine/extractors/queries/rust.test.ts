@@ -26,6 +26,17 @@ const FIXTURE = [
   "}",
 ].join("\n");
 
+const ROUTE_FIXTURE = ['#[get("/users")]', "fn route() {}"].join("\n");
+
+const SOURCE_SECTIONS = [
+  "symbols",
+  "imports",
+  "routes",
+  "entrypoints",
+  "complexity",
+  "calls",
+] as const;
+
 function rustSpec() {
   const spec = getSpecByExt(".rs");
   expect(spec).toBeDefined();
@@ -68,6 +79,50 @@ describe("rustQuerySpec", () => {
         }
       } finally {
         tree.delete();
+      }
+    } finally {
+      parser.delete();
+    }
+  });
+
+  it("captures Rust routes", async () => {
+    const parser = await createParser();
+    try {
+      const language = await loadLanguage(".rs", rustSpec());
+      parser.setLanguage(language);
+      const tree = parser.parse(ROUTE_FIXTURE);
+      try {
+        const routeQuery = language.query(rustQuerySpec.routes);
+        try {
+          const paths = routeQuery
+            .captures(tree.rootNode)
+            .filter((capture) => capture.name === "route.path")
+            .map((capture) => capture.node.text.replaceAll(/^"|"$/gu, ""));
+
+          expect(paths).toEqual(["/users"]);
+        } finally {
+          routeQuery.delete();
+        }
+      } finally {
+        tree.delete();
+      }
+    } finally {
+      parser.delete();
+    }
+  });
+
+  it("compiles every non-empty query section", async () => {
+    const parser = await createParser();
+    try {
+      const language = await loadLanguage(".rs", rustSpec());
+      for (const section of SOURCE_SECTIONS) {
+        const source = rustQuerySpec[section] ?? "";
+        expect(source.trim().length).toBeGreaterThan(0);
+        try {
+          expect(() => language.query(source).delete()).not.toThrow();
+        } catch (error) {
+          throw new Error(`query section "${section}" failed`, { cause: error });
+        }
       }
     } finally {
       parser.delete();

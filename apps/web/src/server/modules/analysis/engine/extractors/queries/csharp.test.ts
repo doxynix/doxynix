@@ -18,6 +18,23 @@ const FIXTURE = [
   "}",
 ].join("\n");
 
+const ROUTE_FIXTURE = [
+  "public class Routes",
+  "{",
+  '    [HttpGet("/users")]',
+  "    public void Route() { }",
+  "}",
+].join("\n");
+
+const SOURCE_SECTIONS = [
+  "symbols",
+  "imports",
+  "routes",
+  "entrypoints",
+  "complexity",
+  "calls",
+] as const;
+
 function csharpSpec() {
   const spec = getSpecByExt(".cs");
   expect(spec).toBeDefined();
@@ -60,6 +77,50 @@ describe("csharpQuerySpec", () => {
         }
       } finally {
         tree.delete();
+      }
+    } finally {
+      parser.delete();
+    }
+  });
+
+  it("captures C# routes", async () => {
+    const parser = await createParser();
+    try {
+      const language = await loadLanguage(".cs", csharpSpec());
+      parser.setLanguage(language);
+      const tree = parser.parse(ROUTE_FIXTURE);
+      try {
+        const routeQuery = language.query(csharpQuerySpec.routes);
+        try {
+          const paths = routeQuery
+            .captures(tree.rootNode)
+            .filter((capture) => capture.name === "route.path")
+            .map((capture) => capture.node.text.replaceAll(/^"|"$/gu, ""));
+
+          expect(paths).toEqual(["/users"]);
+        } finally {
+          routeQuery.delete();
+        }
+      } finally {
+        tree.delete();
+      }
+    } finally {
+      parser.delete();
+    }
+  });
+
+  it("compiles every non-empty query section", async () => {
+    const parser = await createParser();
+    try {
+      const language = await loadLanguage(".cs", csharpSpec());
+      for (const section of SOURCE_SECTIONS) {
+        const source = csharpQuerySpec[section] ?? "";
+        expect(source.trim().length).toBeGreaterThan(0);
+        try {
+          expect(() => language.query(source).delete()).not.toThrow();
+        } catch (error) {
+          throw new Error(`query section "${section}" failed`, { cause: error });
+        }
       }
     } finally {
       parser.delete();
