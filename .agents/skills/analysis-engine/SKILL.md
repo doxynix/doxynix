@@ -20,7 +20,7 @@ TOKEN BUDGETS MUST BE DYNAMIC (NO HARDCODING). DOCUMENT SECTIONS MUST ALWAYS ANC
 Background tasks run via **Trigger.dev v4**:
 ```text
 analyzeRepoTask (Trigger.dev, ~20min)
-  ├─ Phase 1: Sentinel Detection (AST injection & security findings via web-tree-sitter)
+  ├─ Phase 1: Sentinel Detection (prompt-injection check on user instructions; code security is secretlint plus rule-based sink checks)
   ├─ Phase 2: Mapper (Project structure, dependency metrics, and graph topology)
   └─ Phase 3: Architect (LLM synthesis, Swagger generation, and living documentation)
          └─ Model tiers: activeModels.POWERFUL → activeModels.ARCHITECT → activeModels.FALLBACK
