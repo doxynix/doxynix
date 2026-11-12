@@ -14,6 +14,7 @@ export const objcQuerySpec: LanguageQuerySpec = {
   imports: `
     (preproc_include path: (system_lib_string) @import.source) @import.statement
     (preproc_include path: (string_literal) @import.source) @import.statement
+    (module_import path: (identifier) @import.source) @import.statement
   `,
   isExported: () => true,
   nestingNodeTypes: [
@@ -27,7 +28,9 @@ export const objcQuerySpec: LanguageQuerySpec = {
   routes: "",
   symbols: `
     (class_interface . (identifier) @symbol.class.name) @symbol.class
+    (class_interface category: (identifier) @symbol.class.name) @symbol.class
     (class_implementation . (identifier) @symbol.class.name) @symbol.class
+    (class_implementation category: (identifier) @symbol.class.name) @symbol.class
     (method_definition (identifier) @symbol.method.name) @symbol.method
     (method_declaration (identifier) @symbol.method.name) @symbol.method
   `,
