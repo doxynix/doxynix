@@ -26,6 +26,10 @@ function extractNodeName(nodeText: string) {
   return /([A-Z_a-z]\w*)/.exec(firstLine)?.[1];
 }
 
+function nodeName(node: Parser.SyntaxNode): string | undefined {
+  return node.childForFieldName("name")?.text ?? extractNodeName(node.text);
+}
+
 function collectRoutes(file: RepositoryFile, spec: LanguageSpec) {
   const routes: RouteRef[] = [];
 
@@ -127,7 +131,6 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
 
       while (!reachedRoot) {
         const nodeType = cursor.nodeType;
-        const nodeText = cursor.nodeText;
 
         if (AST_COMPLEXITY_NODES.has(nodeType)) {
           complexity += 1 + currentNesting;
@@ -135,6 +138,7 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
         }
 
         if (spec.imports.types.includes(nodeType)) {
+          const nodeText = cursor.nodeText;
           spec.imports.patterns.forEach((re) => {
             const match = nodeText.match(re);
             if (match?.[1]) {
@@ -145,21 +149,22 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
 
         if (declarationTypes.has(nodeType)) {
           exports += 1;
-          const kind = declarationKindByType.get(nodeType) ?? "function";
-          const name = extractNodeName(nodeText);
+          const node = cursor.currentNode();
+          const name = nodeName(node);
           if (name != null) {
+            const kind = declarationKindByType.get(nodeType) ?? "function";
             symbols.push({
               confidence: CONFIDENCE_LEVELS.astSymbol,
               exported: true,
               kind,
-              line: lineOf(file.content, nodeText),
+              line: node.startPosition.row + 1,
               name,
               path: file.path,
             });
           }
         }
 
-        if (spec.api?.some((re) => re.test(nodeText))) {
+        if (spec.api?.some((re) => re.test(cursor.nodeText))) {
           apiSurface++;
         }
 

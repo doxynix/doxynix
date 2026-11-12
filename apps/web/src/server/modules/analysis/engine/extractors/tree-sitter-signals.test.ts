@@ -104,4 +104,27 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
     });
     expect(result?.frameworkHints).toBeDefined();
   });
+
+  it("extracts real symbol names and 1-based lines for TypeScript declarations", async () => {
+    const result = await collectTreeSitterSignals({
+      content: [
+        "export function greet(name: string) { return name; }",
+        "class UserService { run() {} }",
+        "interface UserRepo { find(): void }",
+        "type Id = string;",
+        "enum Role { Admin }",
+      ].join("\n"),
+      path: "src/sample.ts",
+    });
+
+    expect(result?.symbols?.map((symbol) => symbol.name)).toEqual([
+      "greet",
+      "UserService",
+      "run",
+      "UserRepo",
+      "Id",
+      "Role",
+    ]);
+    expect(result?.symbols?.map((symbol) => symbol.line)).toEqual([1, 2, 2, 3, 4, 5]);
+  });
 });
