@@ -6,6 +6,7 @@ import { pythonQuerySpec } from "./python";
 
 const FIXTURE = [
   "import os",
+  "import numpy as np",
   "from fastapi import FastAPI",
   "",
   '@app.get("/x")',
@@ -53,7 +54,7 @@ describe("pythonQuerySpec", () => {
             .filter((capture) => capture.name === "import.source")
             .map((capture) => capture.node.text);
 
-          expect(sources).toEqual(["os", "fastapi"]);
+          expect(sources).toEqual(["os", "numpy", "fastapi"]);
         } finally {
           importQuery.delete();
         }
