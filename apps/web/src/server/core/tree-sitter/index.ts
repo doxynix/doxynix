@@ -397,34 +397,35 @@ async function initRuntime() {
 export async function loadLanguage(ext: string, spec: LanguageSpec) {
   const { mod, Parser } = await initRuntime();
 
-  if (!languageCache.has(ext)) {
-    languageCache.set(
-      ext,
-      (async () => {
-        const wasmPath = resolveGrammarWasmPath(spec);
-
-        // Same runtime-vs-type mismatch as in `initRuntime`.
-        /* oxlint-disable-next-line typescript/no-unnecessary-condition */
-        const Language = Parser.Language || mod.Language || mod.default?.Language;
-
-        /* oxlint-disable-next-line typescript/no-unnecessary-condition */
-        if (!Language || typeof Language.load !== "function") {
-          throw new Error(`[TreeSitter] Language.load is missing!`);
-        }
-
-        // turbopackIgnore stops NFT from tracing the whole project for this path
-        const wasmBytes = fs.readFileSync(/* turbopackIgnore: true */ wasmPath);
-
-        return Language.load(wasmBytes);
-      })().catch((error) => {
-        languageCache.delete(ext);
-        appLogger.error({ error, ext, msg: "Failed to load language grammar" });
-        throw error;
-      }),
-    );
+  const cached = languageCache.get(ext);
+  if (cached != null) {
+    return cached;
   }
 
-  return languageCache.get(ext);
+  const loading = (async () => {
+    const wasmPath = resolveGrammarWasmPath(spec);
+
+    // Same runtime-vs-type mismatch as in `initRuntime`.
+    /* oxlint-disable-next-line typescript/no-unnecessary-condition */
+    const Language = Parser.Language || mod.Language || mod.default?.Language;
+
+    /* oxlint-disable-next-line typescript/no-unnecessary-condition */
+    if (!Language || typeof Language.load !== "function") {
+      throw new Error(`[TreeSitter] Language.load is missing!`);
+    }
+
+    // turbopackIgnore stops NFT from tracing the whole project for this path
+    const wasmBytes = fs.readFileSync(/* turbopackIgnore: true */ wasmPath);
+
+    return Language.load(wasmBytes);
+  })().catch((error) => {
+    languageCache.delete(ext);
+    appLogger.error({ error, ext, msg: "Failed to load language grammar" });
+    throw error;
+  });
+
+  languageCache.set(ext, loading);
+  return loading;
 }
 
 function resolveGrammarWasmPath(spec: LanguageSpec): string {
