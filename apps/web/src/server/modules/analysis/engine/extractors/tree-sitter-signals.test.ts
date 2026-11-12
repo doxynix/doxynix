@@ -166,4 +166,36 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
       ]),
     );
   });
+
+  it.each([
+    { framework: "Express", imports: 'import express from "express";', label: "express" },
+    { framework: "Fastify", imports: 'import Fastify from "fastify";', label: "fastify" },
+    {
+      framework: "Fastify",
+      imports: 'import fastifyPlugin from "fastify/plugin";',
+      label: "fastify subpath",
+    },
+    {
+      framework: "Hono",
+      imports: 'import { Hono } from "hono";\nimport express from "express";',
+      label: "hono alongside express",
+    },
+  ])("attributes routes from $label to $framework", async ({ framework, imports }) => {
+    const result = await collectTreeSitterSignals({
+      content: [imports, 'app.get("/users", handler);'].join("\n"),
+      path: "src/api.ts",
+    });
+
+    expect(result?.routes?.[0]?.framework).toBe(framework);
+  });
+
+  it("leaves the framework undefined when no known router import is present", async () => {
+    const result = await collectTreeSitterSignals({
+      content: 'app.get("/users", handler);',
+      path: "src/api.ts",
+    });
+
+    expect(result?.routes).toHaveLength(1);
+    expect(result?.routes?.[0]?.framework).toBeUndefined();
+  });
 });
