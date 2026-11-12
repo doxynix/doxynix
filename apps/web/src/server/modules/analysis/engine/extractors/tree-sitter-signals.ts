@@ -27,7 +27,12 @@ function extractNodeName(nodeText: string) {
 }
 
 function nodeName(node: Parser.SyntaxNode): string | undefined {
-  return node.childForFieldName("name")?.text ?? extractNodeName(node.text);
+  // Arrow functions have no `name` field; the enclosing declarator carries it.
+  return (
+    node.childForFieldName("name")?.text ??
+    node.parent?.childForFieldName("name")?.text ??
+    extractNodeName(node.text)
+  );
 }
 
 function collectRoutes(file: RepositoryFile, spec: LanguageSpec) {
@@ -92,6 +97,27 @@ const AST_NESTING_NODES = new Set([
   "while_statement",
 ]);
 
+function collectExportedNames(root: Parser.SyntaxNode): Set<string> {
+  const names = new Set<string>();
+
+  for (const statement of root.descendantsOfType("export_statement")) {
+    const declaration = statement.childForFieldName("declaration");
+    const declarationName = declaration?.childForFieldName("name")?.text;
+    if (declarationName != null) {
+      names.add(declarationName);
+    }
+
+    for (const specifier of statement.descendantsOfType("export_specifier")) {
+      const specifierName = specifier.childForFieldName("name")?.text;
+      if (specifierName != null) {
+        names.add(specifierName);
+      }
+    }
+  }
+
+  return names;
+}
+
 export async function collectTreeSitterSignals(file: RepositoryFile): Promise<FileSignals | null> {
   const ext = getFileExtension(file.path);
   const spec = getSpecByExt(ext);
@@ -109,9 +135,9 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
       parser.setLanguage(lang);
       tree = parser.parse(file.content);
       const root = tree.rootNode;
+      const exportedNames = collectExportedNames(root);
 
       let apiSurface = 0;
-      let exports = 0;
       const imports = new Set<string>();
       const symbols: SymbolRef[] = [];
 
@@ -148,14 +174,13 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
         }
 
         if (declarationTypes.has(nodeType)) {
-          exports += 1;
           const node = cursor.currentNode();
           const name = nodeName(node);
           if (name != null) {
             const kind = declarationKindByType.get(nodeType) ?? "function";
             symbols.push({
               confidence: CONFIDENCE_LEVELS.astSymbol,
-              exported: true,
+              exported: exportedNames.has(name) || node.parent?.type === "export_statement",
               kind,
               line: node.startPosition.row + 1,
               name,
@@ -198,6 +223,9 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
       }
 
       const routes = collectRoutes(file, spec);
+      const exportedCount = new Set(
+        symbols.filter((symbol) => symbol.exported).map((symbol) => symbol.name),
+      ).size;
       const frameworkHints = collectFrameworkFactsFromTokens(
         [...imports, file.path, ...symbols.map((symbol) => symbol.name)],
         file.path,
@@ -213,7 +241,7 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
         },
         confidence: CONFIDENCE_LEVELS.astStructure,
         entrypointHint: spec.entrypoints.some((re) => re.test(file.content)),
-        exports,
+        exports: exportedCount,
         frameworkHints,
         imports: Array.from(imports),
         path: file.path,

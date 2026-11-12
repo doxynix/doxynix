@@ -99,7 +99,7 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
     expect(result).toMatchObject({
       analysisMode: "tree-sitter",
       entrypointHint: true,
-      exports: 1,
+      exports: 0,
       source: "extraction",
     });
     expect(result?.frameworkHints).toBeDefined();
@@ -126,5 +126,25 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
       "Role",
     ]);
     expect(result?.symbols?.map((symbol) => symbol.line)).toEqual([1, 2, 2, 3, 4, 5]);
+  });
+
+  it("marks only exported declarations and counts unique exported names", async () => {
+    const result = await collectTreeSitterSignals({
+      content: [
+        "export function a() {}",
+        "function b() {}",
+        "const c = () => 1;",
+        "export { b as publicB };",
+        "export default class D {}",
+      ].join("\n"),
+      path: "src/exports.ts",
+    });
+
+    const byName = new Map((result?.symbols ?? []).map((symbol) => [symbol.name, symbol]));
+    expect(byName.get("a")?.exported).toBe(true);
+    expect(byName.get("b")?.exported).toBe(true);
+    expect(byName.get("c")?.exported).toBe(false);
+    expect(byName.get("D")?.exported).toBe(true);
+    expect(result?.exports).toBe(3);
   });
 });
