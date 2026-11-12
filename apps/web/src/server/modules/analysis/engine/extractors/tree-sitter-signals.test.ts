@@ -13,6 +13,7 @@ vi.mock("@/server/core/app-logger", () => ({
 import { getSpecByExt, TREE_SITTER_SUPPORTED_EXTENSIONS } from "@/server/core/tree-sitter";
 
 import { collectTreeSitterSignals } from "./tree-sitter-signals";
+import { collectTypeScriptSignals } from "./typescript-signals";
 
 describe("tree-sitter-signals: spec contract (without wasm)", () => {
   it("exports the expected list of supported extensions", () => {
@@ -94,6 +95,7 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
       analysisMode: "tree-sitter",
       entrypointHint: true,
       exports: 0,
+      parseError: false,
       source: "extraction",
     });
     expect(result?.frameworkHints).toBeDefined();
@@ -213,5 +215,15 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
 
     expect(result?.parseError).toBe(true);
     expect(result?.confidence).toBe(65);
+  });
+
+  it("propagates partial-parse confidence through the TypeScript adapter", async () => {
+    const result = await collectTypeScriptSignals({
+      content: "class A { accessor x = 1; }",
+      path: "src/partial.ts",
+    });
+
+    expect(result.parseError).toBe(true);
+    expect(result.confidence).toBe(65);
   });
 });
