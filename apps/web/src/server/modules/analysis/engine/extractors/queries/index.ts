@@ -2,6 +2,7 @@ import { csharpQuerySpec } from "./csharp";
 import { goQuerySpec } from "./go";
 import { javaQuerySpec } from "./java";
 import { javascriptQuerySpec } from "./javascript";
+import { phpQuerySpec } from "./php";
 import { pythonQuerySpec } from "./python";
 import { rustQuerySpec } from "./rust";
 import type { LanguageQuerySpec } from "./types";
@@ -17,6 +18,7 @@ export const QUERY_SPECS: Partial<Record<string, LanguageQuerySpec>> = {
   ".jsx": javascriptQuerySpec,
   ".mjs": javascriptQuerySpec,
   ".mts": typescriptQuerySpec,
+  ".php": phpQuerySpec,
   ".py": pythonQuerySpec,
   ".rs": rustQuerySpec,
   ".ts": typescriptQuerySpec,
