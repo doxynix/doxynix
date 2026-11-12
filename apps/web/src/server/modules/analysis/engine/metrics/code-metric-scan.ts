@@ -56,6 +56,7 @@ function buildAnalysisCoverage(
 
   for (const result of results) {
     const mode = result.signal.analysisMode;
+    // `typescript-ast` has no producer; kept for a future compiler adapter.
     if (mode === "typescript-ast") {
       languagesByMode.typeScriptAst.add(result.prettyName);
       typeScriptAstFiles++;

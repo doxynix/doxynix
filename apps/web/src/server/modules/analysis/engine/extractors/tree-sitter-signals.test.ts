@@ -17,6 +17,7 @@ import {
   TREE_SITTER_SUPPORTED_EXTENSIONS,
 } from "@/server/core/tree-sitter";
 
+import { QUERY_SPECS } from "./queries";
 import { collectTreeSitterSignals } from "./tree-sitter-signals";
 import { collectTypeScriptSignals } from "./typescript-signals";
 
@@ -263,5 +264,10 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
 
     const second = await getParserForExt(".ts");
     expect(second).not.toBe(first);
+  });
+
+  it("has a query spec for every advertised tree-sitter extension", () => {
+    const missing = TREE_SITTER_SUPPORTED_EXTENSIONS.filter((ext) => QUERY_SPECS[ext] == null);
+    expect(missing).toEqual([]);
   });
 });
