@@ -187,5 +187,9 @@ it("deduplicates route inventory by method and path", () => {
     ],
   });
 
+  expect(inventory.httpRoutes).toEqual([
+    { method: "GET", path: "/x", sourcePath: "src/a.ts" },
+    { method: "POST", path: "/x", sourcePath: "src/a.ts" },
+  ]);
   expect(inventory.estimatedOperations).toBe(2);
 });

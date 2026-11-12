@@ -51,7 +51,9 @@ export async function collectFileEvidence(
     throw new Error(`Missing pre-collected FileSignals for ${file.path}`);
   }
 
-  const importSpecifiers = signals.importDetails?.map((detail) => detail.source) ?? signals.imports;
+  const importSpecifiers = [
+    ...new Set(signals.importDetails?.map((detail) => detail.source) ?? signals.imports),
+  ];
   resolveImportEdges(file.path, importSpecifiers, lookups, tracking);
 
   const isConfig = ProjectPolicy.isConfigFile(file.path);

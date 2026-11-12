@@ -124,10 +124,13 @@ describe("collectFileEvidence", () => {
     expect(calls).toEqual([["src/app.ts", ["react", "./util"]]]);
   });
 
-  it("prefers importDetails sources over the legacy import list", async () => {
+  it("prefers importDetails sources over the legacy import list and deduplicates them", async () => {
     const file = { content: "", path: "src/app.ts" };
     const signals = makeSignals({
-      importDetails: [{ kind: "value", source: "./util" }],
+      importDetails: [
+        { kind: "named", source: "./util" },
+        { kind: "named", source: "./util" },
+      ],
       imports: ["react", "./util"],
     });
     const calls: Array<[string, string[]]> = [];
