@@ -26,6 +26,7 @@ const IMPORTS = `
     source: (string (string_fragment) @import.source)) @import.statement
   (call_expression function: (identifier) @import.require.fn arguments: (arguments (string (string_fragment) @import.source)) (#eq? @import.require.fn "require")) @import.require
   (call_expression function: (import) arguments: (arguments (string (string_fragment) @import.source))) @import.dynamic
+  (export_statement source: (string (string_fragment) @import.source)) @import.reexport
 `;
 
 const EXPORTS = `
@@ -33,7 +34,6 @@ const EXPORTS = `
   (export_statement declaration: (class_declaration name: (type_identifier) @export.name)) @export.statement
   (export_statement declaration: (lexical_declaration (variable_declarator name: (identifier) @export.name))) @export.statement
   (export_statement (export_clause (export_specifier name: (identifier) @export.name))) @export.statement
-  (export_statement source: (string (string_fragment) @export.source)) @export.statement
 `;
 
 const ROUTES = `

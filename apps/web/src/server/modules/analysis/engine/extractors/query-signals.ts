@@ -1,5 +1,7 @@
+import { uniq } from "es-toolkit";
 import type Parser from "web-tree-sitter";
 
+import { appLogger } from "@/server/core/app-logger";
 import {
   getParserForExt,
   getSpecByExt,
@@ -25,14 +27,22 @@ import type { LanguageQuerySpec } from "./queries/types";
 
 const ROUTE_METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"]);
 
-const IMPORT_KIND_BY_CAPTURE: Record<string, ImportKind> = {
-  "import.default": "default",
-  "import.dynamic": "dynamic",
-  "import.named": "named",
-  "import.namespace": "namespace",
-  "import.reexport": "reexport",
-  "import.require": "require",
-  "import.side_effect": "side-effect",
+const IMPORT_KIND_PRECEDENCE: ReadonlyArray<readonly [capture: string, kind: ImportKind]> = [
+  ["import.named", "named"],
+  ["import.default", "default"],
+  ["import.namespace", "namespace"],
+  ["import.require", "require"],
+  ["import.dynamic", "dynamic"],
+  ["import.reexport", "reexport"],
+];
+
+type ImportDraft = {
+  captureNames: Set<string>;
+  defaultNames: string[];
+  line: number;
+  namedNames: string[];
+  namespaceNames: string[];
+  source: string;
 };
 
 function stripQuotes(text: string): string {
@@ -72,13 +82,26 @@ async function collectExportedNames(
 }
 
 function importKindFromCaptures(names: Iterable<string>): ImportKind {
-  for (const name of names) {
-    const kind = IMPORT_KIND_BY_CAPTURE[name];
-    if (kind != null) {
+  const captured = new Set(names);
+  for (const [capture, kind] of IMPORT_KIND_PRECEDENCE) {
+    if (captured.has(capture)) {
       return kind;
     }
   }
   return "side-effect";
+}
+
+function importAnchor(captures: Map<string, Parser.SyntaxNode[]>): Parser.SyntaxNode | undefined {
+  return (
+    firstCapture(captures, "import.statement") ??
+    firstCapture(captures, "import.reexport") ??
+    firstCapture(captures, "import.require") ??
+    firstCapture(captures, "import.dynamic")
+  );
+}
+
+function importNames(captures: Map<string, Parser.SyntaxNode[]>, name: string): string[] {
+  return (captures.get(name) ?? []).map((node) => node.text);
 }
 
 function computeMaxNesting(root: Parser.SyntaxNode, nestingNodeTypes: string[]): number {
@@ -188,7 +211,7 @@ export async function collectQuerySignals(
 
     const importQuery = await compileOptionalQuery(ext, languageSpec, querySpec.imports);
     if (importQuery != null) {
-      const seenImportDetails = new Set<string>();
+      const drafts = new Map<number, ImportDraft>();
 
       for (const match of importQuery.matches(root)) {
         const captures = capturesByName(match.captures);
@@ -197,27 +220,37 @@ export async function collectQuerySignals(
           continue;
         }
 
+        const anchor = importAnchor(captures) ?? sourceNode;
+        const draft = drafts.get(anchor.id);
         const source = stripQuotes(sourceNode.text);
-        imports.add(source);
-        const line =
-          (firstCapture(captures, "import.statement") ?? sourceNode).startPosition.row + 1;
-        const names = [
-          ...(captures.get("import.default") ?? []),
-          ...(captures.get("import.named") ?? []),
-          ...(captures.get("import.namespace") ?? []),
-        ].map((node) => node.text);
-        const kind = importKindFromCaptures(captures.keys());
-        const key = `${kind}:${source}:${names.join(",")}`;
-        if (seenImportDetails.has(key)) {
+
+        if (draft == null) {
+          drafts.set(anchor.id, {
+            captureNames: new Set(captures.keys()),
+            defaultNames: importNames(captures, "import.default"),
+            line: anchor.startPosition.row + 1,
+            namedNames: importNames(captures, "import.named"),
+            namespaceNames: importNames(captures, "import.namespace"),
+            source,
+          });
           continue;
         }
-        seenImportDetails.add(key);
 
+        for (const captureName of captures.keys()) {
+          draft.captureNames.add(captureName);
+        }
+        draft.defaultNames.push(...importNames(captures, "import.default"));
+        draft.namedNames.push(...importNames(captures, "import.named"));
+        draft.namespaceNames.push(...importNames(captures, "import.namespace"));
+      }
+
+      for (const draft of drafts.values()) {
+        imports.add(draft.source);
         importDetails.push({
-          kind,
-          line,
-          names,
-          source,
+          kind: importKindFromCaptures(draft.captureNames),
+          line: draft.line,
+          names: uniq([...draft.defaultNames, ...draft.namedNames, ...draft.namespaceNames]),
+          source: draft.source,
         });
       }
     }
@@ -311,6 +344,14 @@ export async function collectQuerySignals(
       source: "extraction",
       symbols,
     };
+  } catch (error) {
+    appLogger.error({
+      error,
+      ext,
+      msg: "Tree-sitter query extraction failed",
+      path: file.path,
+    });
+    return null;
   } finally {
     tree?.delete();
   }
