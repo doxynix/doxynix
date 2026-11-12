@@ -485,15 +485,24 @@ export async function getParserForExt(ext: string): Promise<Parser> {
   });
 
   parserCache.set(ext, created);
+  // Mirrors `loadLanguage`: a transient failure must not poison the cache for this extension.
+  created.catch(() => {
+    if (parserCache.get(ext) === created) {
+      parserCache.delete(ext);
+    }
+  });
   return created;
 }
 
 export async function disposeTreeSitter(): Promise<void> {
+  // Settle an in-flight bootstrap before clearing it; a second `Parser.init()` is unsafe.
+  await runtimeInitPromise?.catch(() => null);
+  runtimeInitPromise = null;
+
   for (const parserPromise of parserCache.values()) {
     const parser = await parserPromise.catch(() => null);
     parser?.delete();
   }
   parserCache.clear();
   languageCache.clear();
-  runtimeInitPromise = null;
 }

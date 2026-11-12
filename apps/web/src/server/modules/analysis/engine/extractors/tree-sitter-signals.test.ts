@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/server/core/app-logger", () => ({
   appLogger: {
@@ -21,6 +21,10 @@ import { collectTreeSitterSignals } from "./tree-sitter-signals";
 import { collectTypeScriptSignals } from "./typescript-signals";
 
 describe("tree-sitter-signals: spec contract (without wasm)", () => {
+  afterAll(async () => {
+    await disposeTreeSitter();
+  });
+
   it("exports the expected list of supported extensions", () => {
     for (const ext of [
       ".ts",
@@ -238,7 +242,7 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
     expect(first).toBe(second);
   });
 
-  it("drops cached parsers on dispose and rebuilds them on demand", async () => {
+  it("evicts the parser cache on dispose and rebuilds parsers on demand", async () => {
     const first = await getParserForExt(".ts");
 
     await disposeTreeSitter();
