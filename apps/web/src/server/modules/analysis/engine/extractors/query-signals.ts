@@ -27,6 +27,13 @@ import type { LanguageQuerySpec } from "./queries/types";
 
 const ROUTE_METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"]);
 
+const CLASS_NODE_TYPES = new Set([
+  "abstract_class_declaration",
+  "class_declaration",
+  "class_definition",
+  "class_specifier",
+]);
+
 const IMPORT_KIND_PRECEDENCE: ReadonlyArray<readonly [capture: string, kind: ImportKind]> = [
   ["import.named", "named"],
   ["import.default", "default"],
@@ -47,6 +54,20 @@ type ImportDraft = {
 
 function stripQuotes(text: string): string {
   return text.replaceAll(/^["'`]|["'`]$/gu, "");
+}
+
+// Method declarations also occur in object literals, so only a real class ancestor counts.
+function findClassContainer(node: Parser.SyntaxNode | undefined): string | undefined {
+  let current = node?.parent ?? null;
+
+  while (current != null) {
+    if (CLASS_NODE_TYPES.has(current.type)) {
+      return current.childForFieldName("name")?.text;
+    }
+    current = current.parent;
+  }
+
+  return undefined;
 }
 
 async function compileOptionalQuery(
@@ -195,12 +216,14 @@ export async function collectQuerySignals(
               exportedNames.has(name) ||
               querySpec.isExported?.(declaration ?? nameNode, name) === true ||
               declaration?.parent?.type === "export_statement";
-            const parameters = declaration?.childForFieldName("parameters")?.text;
-            const returnType = declaration?.childForFieldName("return_type")?.text;
-            const container =
-              kind === "method"
-                ? declaration?.parent?.parent?.childForFieldName("name")?.text
-                : undefined;
+            // A declarator carries the name; its value node carries the signature.
+            const signatureNode =
+              declaration?.type === "variable_declarator"
+                ? (declaration.childForFieldName("value") ?? declaration)
+                : declaration;
+            const parameters = signatureNode?.childForFieldName("parameters")?.text;
+            const returnType = signatureNode?.childForFieldName("return_type")?.text;
+            const container = kind === "method" ? findClassContainer(declaration) : undefined;
 
             symbols.push({
               confidence: CONFIDENCE_LEVELS.astSymbol,

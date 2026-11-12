@@ -143,8 +143,36 @@ describe("collectQuerySignals", () => {
     );
 
     const symbol = result?.symbols?.find((item) => item.name === "greet");
-    expect(symbol?.signature).toContain("greet(name: string");
+    expect(symbol?.signature).toBe("greet(name: string, age?: number): string");
     expect(symbol?.parameters).toBe("(name: string, age?: number)");
     expect(symbol?.returnType).toBe(": string");
+  });
+
+  it("reads parameters and return type from an arrow function value", async () => {
+    const result = await collectQuerySignals(
+      { content: "const handler = (a: string): number => 1;", path: "src/handler.ts" },
+      ".ts",
+      typescriptQuerySpec,
+    );
+
+    const symbol = result?.symbols?.find((item) => item.name === "handler");
+    expect(symbol?.signature).toBe("handler(a: string): number");
+    expect(symbol?.parameters).toBe("(a: string)");
+    expect(symbol?.returnType).toBe(": number");
+  });
+
+  it("scopes method containers to the enclosing class only", async () => {
+    const result = await collectQuerySignals(
+      {
+        content: ["class UserService { run() {} }", "const x = { m() {} };"].join("\n"),
+        path: "src/containers.ts",
+      },
+      ".ts",
+      typescriptQuerySpec,
+    );
+
+    const byName = new Map((result?.symbols ?? []).map((symbol) => [symbol.name, symbol]));
+    expect(byName.get("run")?.container).toBe("UserService");
+    expect(byName.get("m")?.container).toBeUndefined();
   });
 });
