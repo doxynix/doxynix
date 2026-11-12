@@ -143,7 +143,7 @@ describe("remaining query specs", () => {
     try {
       const language = await loadLanguage(ext, specFor(ext));
       for (const section of REQUIRED_SECTIONS) {
-        const source = querySpec[section];
+        const source = querySpec[section] ?? "";
         expect(source.trim().length, `${ext} ${section} must not be empty`).toBeGreaterThan(0);
         compileSection(language, ext, section, source);
       }
