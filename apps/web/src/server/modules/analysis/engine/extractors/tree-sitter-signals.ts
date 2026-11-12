@@ -12,6 +12,8 @@ import { getFileExtension } from "@/server/utils/path-operations";
 import type { FileSignals, RepositoryFile, RouteRef, SymbolRef } from "../core/discovery.types";
 import { collectFrameworkFactsFromTokens } from "../core/framework-catalog";
 import { CONFIDENCE_LEVELS } from "../core/scoring-constants";
+import { QUERY_SPECS } from "./queries";
+import { collectQuerySignals } from "./query-signals";
 
 function lineOf(content: string, fragment: string) {
   const index = content.indexOf(fragment);
@@ -154,13 +156,11 @@ function collectExportedNames(root: Parser.SyntaxNode): Set<string> {
   return names;
 }
 
-export async function collectTreeSitterSignals(file: RepositoryFile): Promise<FileSignals | null> {
-  const ext = getFileExtension(file.path);
-  const spec = getSpecByExt(ext);
-  if (!spec) {
-    return null;
-  }
-
+async function collectLegacySignals(
+  file: RepositoryFile,
+  ext: string,
+  spec: LanguageSpec,
+): Promise<FileSignals | null> {
   try {
     const parser = await getParserForExt(ext);
     const lang = await loadLanguage(ext, spec);
@@ -305,6 +305,31 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
       error,
       ext,
       msg: "Tree-sitter unavailable; falling back to non-AST analysis",
+      path: file.path,
+    });
+    return null;
+  }
+}
+
+export async function collectTreeSitterSignals(file: RepositoryFile): Promise<FileSignals | null> {
+  const ext = getFileExtension(file.path);
+  const spec = getSpecByExt(ext);
+  if (spec == null) {
+    return null;
+  }
+
+  const querySpec = QUERY_SPECS[ext];
+
+  try {
+    if (querySpec != null) {
+      return await collectQuerySignals(file, ext, querySpec);
+    }
+    return await collectLegacySignals(file, ext, spec);
+  } catch (error) {
+    appLogger.error({
+      error,
+      ext,
+      msg: "Tree-sitter extraction failed; falling back to non-AST analysis",
       path: file.path,
     });
     return null;

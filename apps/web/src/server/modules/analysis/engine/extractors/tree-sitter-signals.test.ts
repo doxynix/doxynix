@@ -133,6 +133,20 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
     expect(result?.symbols?.map((symbol) => symbol.line)).toEqual([1, 2, 2, 3, 4, 5]);
   });
 
+  it("uses the query path for TypeScript and preserves exact names", async () => {
+    const result = await collectTreeSitterSignals({
+      content: 'import { Hono } from "hono"; export function greet(name: string) { return name; }',
+      path: "src/sample.ts",
+    });
+
+    expect(result?.analysisMode).toBe("tree-sitter");
+    expect(result?.symbols?.[0]?.name).toBe("greet");
+    expect(result?.parseError).toBe(false);
+    expect(result?.importDetails).toContainEqual(
+      expect.objectContaining({ kind: "named", source: "hono" }),
+    );
+  });
+
   it("marks only exported declarations and counts unique exported names", async () => {
     const result = await collectTreeSitterSignals({
       content: [
