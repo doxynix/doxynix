@@ -50,7 +50,7 @@
     "validate": "biome check . && oxlint && bun run arch:check && bun type-check"
   },
   "devDependencies": {
-    "@clack/prompts": "1.8.1",
+    "@clack/prompts": "1.9.0",
     "@doxynix/config": "workspace:*",
     "@doxynix/shared": "workspace:*",
     "@doxynix/web": "workspace:*",
