@@ -1,3 +1,4 @@
+import { csharpQuerySpec } from "./csharp";
 import { goQuerySpec } from "./go";
 import { javaQuerySpec } from "./java";
 import { javascriptQuerySpec } from "./javascript";
@@ -8,6 +9,7 @@ import { typescriptQuerySpec } from "./typescript";
 
 export const QUERY_SPECS: Partial<Record<string, LanguageQuerySpec>> = {
   ".cjs": javascriptQuerySpec,
+  ".cs": csharpQuerySpec,
   ".cts": typescriptQuerySpec,
   ".go": goQuerySpec,
   ".java": javaQuerySpec,
