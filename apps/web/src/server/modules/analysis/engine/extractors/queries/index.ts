@@ -1,4 +1,5 @@
 import { goQuerySpec } from "./go";
+import { javaQuerySpec } from "./java";
 import { javascriptQuerySpec } from "./javascript";
 import { pythonQuerySpec } from "./python";
 import { rustQuerySpec } from "./rust";
@@ -9,6 +10,7 @@ export const QUERY_SPECS: Partial<Record<string, LanguageQuerySpec>> = {
   ".cjs": javascriptQuerySpec,
   ".cts": typescriptQuerySpec,
   ".go": goQuerySpec,
+  ".java": javaQuerySpec,
   ".js": javascriptQuerySpec,
   ".jsx": javascriptQuerySpec,
   ".mjs": javascriptQuerySpec,
