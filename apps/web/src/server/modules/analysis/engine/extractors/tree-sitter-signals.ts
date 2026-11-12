@@ -2,7 +2,7 @@ import type Parser from "web-tree-sitter";
 
 import { appLogger } from "@/server/core/app-logger";
 import {
-  createParser,
+  getParserForExt,
   getSpecByExt,
   type LanguageSpec,
   loadLanguage,
@@ -162,10 +162,11 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
   }
 
   try {
-    const parser = await createParser();
+    const parser = await getParserForExt(ext);
     const lang = await loadLanguage(ext, spec);
 
     let tree: Parser.Tree | undefined;
+    let cursor: Parser.TreeCursor | undefined;
 
     try {
       parser.setLanguage(lang);
@@ -189,11 +190,12 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
         ),
       );
 
-      const cursor = root.walk();
+      const walker = root.walk();
+      cursor = walker;
       let reachedRoot = false;
 
       while (!reachedRoot) {
-        const nodeType = cursor.nodeType;
+        const nodeType = walker.nodeType;
 
         if (AST_COMPLEXITY_NODES.has(nodeType)) {
           complexity += 1 + currentNesting;
@@ -201,7 +203,7 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
         }
 
         if (spec.imports.types.includes(nodeType)) {
-          const nodeText = cursor.nodeText;
+          const nodeText = walker.nodeText;
           spec.imports.patterns.forEach((re) => {
             const match = nodeText.match(re);
             if (match?.[1]) {
@@ -211,7 +213,7 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
         }
 
         if (declarationTypes.has(nodeType)) {
-          const node = cursor.currentNode();
+          const node = walker.currentNode();
           const name = nodeName(node);
           if (name != null) {
             const kind = declarationKindByType.get(nodeType) ?? "function";
@@ -226,33 +228,33 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
           }
         }
 
-        if (spec.api?.some((re) => re.test(cursor.nodeText))) {
+        if (spec.api?.some((re) => re.test(walker.nodeText))) {
           apiSurface++;
         }
 
-        if (cursor.gotoFirstChild()) {
+        if (walker.gotoFirstChild()) {
           if (AST_NESTING_NODES.has(nodeType)) {
             currentNesting++;
           }
           continue;
         }
 
-        if (cursor.gotoNextSibling()) {
+        if (walker.gotoNextSibling()) {
           continue;
         }
 
         let backtrack = true;
         while (backtrack) {
-          if (!cursor.gotoParent()) {
+          if (!walker.gotoParent()) {
             reachedRoot = true;
             backtrack = false;
           } else {
-            const parentType = cursor.nodeType;
+            const parentType = walker.nodeType;
             if (AST_NESTING_NODES.has(parentType)) {
               currentNesting = Math.max(0, currentNesting - 1);
             }
 
-            if (cursor.gotoNextSibling()) {
+            if (walker.gotoNextSibling()) {
               backtrack = false;
             }
           }
@@ -294,9 +296,9 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
         symbols,
       };
     } finally {
-      // `tree` is undefined when `parser.parse` threw; `parser` always exists.
+      // `tree` and `cursor` are undefined when `parser.parse` threw; the parser is cached.
+      cursor?.delete();
       tree?.delete();
-      parser.delete();
     }
   } catch (error) {
     appLogger.error({

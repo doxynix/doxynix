@@ -327,9 +327,16 @@ type WebTreeSitterModule = typeof Parser & {
 };
 
 let runtimeInitPromise: null | Promise<{ mod: WebTreeSitterModule; Parser: typeof Parser }> = null;
+let initializedRuntime: null | { mod: WebTreeSitterModule; Parser: typeof Parser } = null;
 const languageCache = new Map<string, Promise<Parser.Language>>();
 
 async function initRuntime() {
+  // web-tree-sitter 0.20.8's CJS build cannot re-initialize, so the wasm runtime outlives
+  // `disposeTreeSitter`; only parsers, languages and the in-flight promise are dropped there.
+  if (initializedRuntime) {
+    return initializedRuntime;
+  }
+
   if (runtimeInitPromise) {
     return runtimeInitPromise;
   }
@@ -380,7 +387,8 @@ async function initRuntime() {
 
     appLogger.info({ msg: "Tree-sitter runtime ready", wasm: finalWasmPath });
 
-    return { mod, Parser };
+    initializedRuntime = { mod, Parser };
+    return initializedRuntime;
   })();
 
   return runtimeInitPromise;
@@ -461,4 +469,31 @@ export function getSpecByExt(ext: string) {
 export async function createParser(): Promise<Parser> {
   const { Parser: ParserCtor } = await initRuntime();
   return new ParserCtor();
+}
+
+const parserCache = new Map<string, Promise<Parser>>();
+
+export async function getParserForExt(ext: string): Promise<Parser> {
+  const cached = parserCache.get(ext);
+  if (cached != null) {
+    return cached;
+  }
+
+  const created = createParser().then((parser) => {
+    parser.setTimeoutMicros(1_000_000);
+    return parser;
+  });
+
+  parserCache.set(ext, created);
+  return created;
+}
+
+export async function disposeTreeSitter(): Promise<void> {
+  for (const parserPromise of parserCache.values()) {
+    const parser = await parserPromise.catch(() => null);
+    parser?.delete();
+  }
+  parserCache.clear();
+  languageCache.clear();
+  runtimeInitPromise = null;
 }

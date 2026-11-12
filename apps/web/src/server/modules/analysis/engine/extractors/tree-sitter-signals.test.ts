@@ -10,7 +10,12 @@ vi.mock("@/server/core/app-logger", () => ({
   },
 }));
 
-import { getSpecByExt, TREE_SITTER_SUPPORTED_EXTENSIONS } from "@/server/core/tree-sitter";
+import {
+  disposeTreeSitter,
+  getParserForExt,
+  getSpecByExt,
+  TREE_SITTER_SUPPORTED_EXTENSIONS,
+} from "@/server/core/tree-sitter";
 
 import { collectTreeSitterSignals } from "./tree-sitter-signals";
 import { collectTypeScriptSignals } from "./typescript-signals";
@@ -225,5 +230,20 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
 
     expect(result.parseError).toBe(true);
     expect(result.confidence).toBe(65);
+  });
+
+  it("reuses one parser per extension", async () => {
+    const first = await getParserForExt(".ts");
+    const second = await getParserForExt(".ts");
+    expect(first).toBe(second);
+  });
+
+  it("drops cached parsers on dispose and rebuilds them on demand", async () => {
+    const first = await getParserForExt(".ts");
+
+    await disposeTreeSitter();
+
+    const second = await getParserForExt(".ts");
+    expect(second).not.toBe(first);
   });
 });
