@@ -35,7 +35,7 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
     }
   });
 
-  it(".ts → declarations of all five SymbolKinds + 3 route patterns + typescript-wasm", () => {
+  it(".ts → declarations of all five SymbolKinds + 1 neutral route pattern + typescript-wasm", () => {
     const spec = getSpecByExt(".ts");
 
     expect(spec?.declarations.map((declaration) => declaration.kind)).toEqual([
@@ -45,11 +45,7 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
       "type",
       "enum",
     ]);
-    expect(spec?.routePatterns?.map((route) => route.framework)).toEqual([
-      "Hono",
-      "Express",
-      "Fastify",
-    ]);
+    expect(spec?.routePatterns?.map((route) => route.framework)).toEqual(["js-ts-router"]);
     expect(spec?.wasm).toBe("tree-sitter-typescript.wasm");
     expect(spec?.entrypoints.length).toBeGreaterThan(0);
   });
@@ -148,5 +144,26 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
     expect(byName.get("D")?.exported).toBe(true);
     expect(byName.get("e")?.exported).toBe(true);
     expect(result?.exports).toBe(4);
+  });
+
+  it("emits one route per method and path and attributes Hono from imports", async () => {
+    const result = await collectTreeSitterSignals({
+      content: [
+        'import { Hono } from "hono";',
+        "const app = new Hono();",
+        'app.get("/users", handler);',
+        'app.post("/users", handler);',
+        'app.get("/users", handler);',
+      ].join("\n"),
+      path: "src/api.ts",
+    });
+
+    expect(result?.routes).toHaveLength(2);
+    expect(result?.routes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ framework: "Hono", method: "GET", path: "/users" }),
+        expect.objectContaining({ framework: "Hono", method: "POST", path: "/users" }),
+      ]),
+    );
   });
 });

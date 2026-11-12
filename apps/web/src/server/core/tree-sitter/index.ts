@@ -59,19 +59,7 @@ const TS_DECLARATIONS = [
 
 const TS_ROUTE_PATTERNS = [
   {
-    framework: "Hono",
-    methodIndex: 1,
-    pathIndex: 2,
-    pattern: /\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']/g,
-  },
-  {
-    framework: "Express",
-    methodIndex: 1,
-    pathIndex: 2,
-    pattern: /\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']/g,
-  },
-  {
-    framework: "Fastify",
+    framework: "js-ts-router",
     methodIndex: 1,
     pathIndex: 2,
     pattern: /\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']/g,

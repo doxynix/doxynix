@@ -66,6 +66,32 @@ function collectRoutes(file: RepositoryFile, spec: LanguageSpec) {
   return routes;
 }
 
+function detectRouteFramework(imports: Iterable<string>): string | undefined {
+  const specifiers = [...imports];
+  if (specifiers.some((specifier) => specifier === "hono" || specifier.startsWith("hono/"))) {
+    return "Hono";
+  }
+  if (specifiers.includes("express")) {
+    return "Express";
+  }
+  if (specifiers.some((specifier) => specifier === "fastify" || specifier.startsWith("fastify/"))) {
+    return "Fastify";
+  }
+  return undefined;
+}
+
+function dedupeRoutes(routes: RouteRef[]): RouteRef[] {
+  const seen = new Set<string>();
+  return routes.filter((route) => {
+    const key = `${route.method ?? ""}:${route.path}`;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+}
+
 const AST_COMPLEXITY_NODES = new Set([
   "case_clause",
   "catch_clause",
@@ -232,7 +258,13 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
         }
       }
 
-      const routes = collectRoutes(file, spec);
+      const framework = detectRouteFramework(imports);
+      const routes = dedupeRoutes(
+        collectRoutes(file, spec).map((route) => ({
+          ...route,
+          framework: route.framework === "js-ts-router" ? framework : route.framework,
+        })),
+      );
       const exportedCount = new Set(
         symbols.filter((symbol) => symbol.exported).map((symbol) => symbol.name),
       ).size;
