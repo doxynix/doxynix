@@ -27,6 +27,8 @@ export async function compileQuery(
   return compiled;
 }
 
+// The cache owns every `Query`: callers must never `delete()` one, and a handle is invalid
+// the moment `disposeQueries()` runs, even if a caller is still holding the reference.
 export function disposeQueries(): void {
   for (const queryPromise of cache.values()) {
     queryPromise.then((query) => query.delete()).catch(() => undefined);
