@@ -146,6 +146,7 @@ export interface FileSignals extends BaseSignal {
   exports: number;
   frameworkHints?: FrameworkFact[];
   imports: string[];
+  parseError?: boolean;
   routes?: RouteRef[];
   source: "extraction";
   symbols?: SymbolRef[];

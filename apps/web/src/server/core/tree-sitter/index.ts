@@ -104,19 +104,13 @@ const SPECS: Record<string, LanguageSpec> = {
     ],
     entrypoints: [/\bstatic\s+void\s+Main\b/, /\bWebApplication\.CreateBuilder\b/],
     imports: { patterns: [/^using\s+([\w.]+);/m], types: ["using_directive"] },
-    wasm: "tree-sitter-c-sharp.wasm",
+    wasm: "tree-sitter-c_sharp.wasm",
   },
   ".cts": {
     declarations: TS_DECLARATIONS,
     entrypoints: [/\bbootstrap\(\)/],
     imports: { patterns: [/from\s+["']([^"']+)["']/], types: ["import_statement"] },
     wasm: "tree-sitter-typescript.wasm",
-  },
-  ".erl": {
-    declarations: [{ kind: "function", types: ["function", "export_attribute"] }],
-    entrypoints: [/-export\s*\(\s*\[\s*main/],
-    imports: { patterns: [/-include\s*\(\s*["']([^"']+)["']\s*\)/], types: ["pp_directive"] },
-    wasm: "tree-sitter-erlang.wasm",
   },
   ".go": {
     declarations: [
@@ -169,18 +163,6 @@ const SPECS: Record<string, LanguageSpec> = {
     ],
     wasm: "tree-sitter-java.wasm",
   },
-  ".jl": {
-    declarations: [
-      { kind: "function", types: ["function_definition"] },
-      { kind: "struct", types: ["struct_definition"] },
-    ],
-    entrypoints: [/\bmain\s*\(|Base\.run/],
-    imports: {
-      patterns: [/using\s+([\w ,]+)/m, /import\s+([\w ,]+)/m],
-      types: ["using_statement", "import_statement"],
-    },
-    wasm: "tree-sitter-julia.wasm",
-  },
   ".js": {
     declarations: [
       { kind: "function", types: ["function_declaration"] },
@@ -206,18 +188,6 @@ const SPECS: Record<string, LanguageSpec> = {
     entrypoints: [/\bcreateRoot\b/, /\bReactDOM\.render\b/],
     imports: { patterns: [/from\s+["']([^"']+)["']/], types: ["import_statement"] },
     wasm: "tree-sitter-javascript.wasm",
-  },
-  ".kt": {
-    declarations: [
-      {
-        kind: "class",
-        types: ["class_declaration", "object_declaration", "interface_declaration"],
-      },
-      { kind: "function", types: ["function_declaration"] },
-    ],
-    entrypoints: [/\bval\s+app\b/, /\bfun\s+main\b/],
-    imports: { patterns: [/^import\s+([\w.]+)/m], types: ["import_header"] },
-    wasm: "tree-sitter-kotlin.wasm",
   },
   ".lua": {
     declarations: [{ kind: "function", types: ["function_definition", "local_function"] }],
@@ -292,15 +262,6 @@ const SPECS: Record<string, LanguageSpec> = {
     ],
     wasm: "tree-sitter-python.wasm",
     wasmPackage: "tree-sitter-python",
-  },
-  ".rb": {
-    declarations: [
-      { kind: "class", types: ["class", "module"] },
-      { kind: "function", types: ["method"] },
-    ],
-    entrypoints: [/config\.ru/, /bin\/rails/],
-    imports: { patterns: [/require\s+["']([^"']+)["']/m], types: ["require"] },
-    wasm: "tree-sitter-ruby.wasm",
   },
   ".rs": {
     declarations: [

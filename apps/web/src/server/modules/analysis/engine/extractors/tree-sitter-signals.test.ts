@@ -25,10 +25,8 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
       ".py",
       ".rs",
       ".java",
-      ".rb",
       ".php",
       ".swift",
-      ".kt",
       ".cs",
     ]) {
       expect(TREE_SITTER_SUPPORTED_EXTENSIONS).toContain(ext);
@@ -197,5 +195,23 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
 
     expect(result?.routes).toHaveLength(1);
     expect(result?.routes?.[0]?.framework).toBeUndefined();
+  });
+
+  it("uses the real C# wasm filename and does not advertise broken grammars", () => {
+    expect(getSpecByExt(".cs")?.wasm).toBe("tree-sitter-c_sharp.wasm");
+    expect(getSpecByExt(".erl")).toBeUndefined();
+    expect(getSpecByExt(".jl")).toBeUndefined();
+    expect(getSpecByExt(".kt")).toBeUndefined();
+    expect(getSpecByExt(".rb")).toBeUndefined();
+  });
+
+  it("flags a partial parse instead of reporting full AST confidence", async () => {
+    const result = await collectTreeSitterSignals({
+      content: "class A { accessor x = 1; }",
+      path: "src/partial.ts",
+    });
+
+    expect(result?.parseError).toBe(true);
+    expect(result?.confidence).toBe(65);
   });
 });

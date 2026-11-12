@@ -171,6 +171,7 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
       parser.setLanguage(lang);
       tree = parser.parse(file.content);
       const root = tree.rootNode;
+      const parseError = root.hasError();
       const exportedNames = collectExportedNames(root);
 
       let apiSurface = 0;
@@ -281,11 +282,12 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
           complexity,
           maxNesting,
         },
-        confidence: CONFIDENCE_LEVELS.astStructure,
+        confidence: parseError ? CONFIDENCE_LEVELS.astPartial : CONFIDENCE_LEVELS.astStructure,
         entrypointHint: spec.entrypoints.some((re) => re.test(file.content)),
         exports: exportedCount,
         frameworkHints,
         imports: Array.from(imports),
+        parseError,
         path: file.path,
         routes,
         source: "extraction" as const,
