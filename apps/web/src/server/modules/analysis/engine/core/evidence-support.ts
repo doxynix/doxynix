@@ -68,8 +68,17 @@ export function buildRouteInventory(
     ProjectPolicy.isPrimaryApiSurface(route.sourcePath),
   );
   const rpcProcedures = primaryRoutes.filter((route) => route.kind === "rpc").length;
+  const seenRoutes = new Set<string>();
   const httpRoutes = primaryRoutes
     .filter((route) => route.kind === "http" && route.method != null)
+    .filter((route) => {
+      const key = `${route.method}:${route.path}`;
+      if (seenRoutes.has(key)) {
+        return false;
+      }
+      seenRoutes.add(key);
+      return true;
+    })
     .map((route) => ({
       method: route.method ?? "GET",
       path: route.path,
@@ -128,7 +137,7 @@ export function buildEvidenceLookups(
   };
 }
 
-function createDependencyTracking(): DependencyTracking {
+export function createDependencyTracking(): DependencyTracking {
   return {
     edges: [],
     graph: new Map<string, Set<string>>(),
