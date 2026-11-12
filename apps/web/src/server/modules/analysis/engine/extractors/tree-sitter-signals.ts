@@ -107,6 +107,16 @@ function collectExportedNames(root: Parser.SyntaxNode): Set<string> {
       names.add(declarationName);
     }
 
+    for (const declarator of declaration?.namedChildren ?? []) {
+      if (declarator.type !== "variable_declarator") {
+        continue;
+      }
+      const declaratorName = declarator.childForFieldName("name")?.text;
+      if (declaratorName != null) {
+        names.add(declaratorName);
+      }
+    }
+
     for (const specifier of statement.descendantsOfType("export_specifier")) {
       const specifierName = specifier.childForFieldName("name")?.text;
       if (specifierName != null) {

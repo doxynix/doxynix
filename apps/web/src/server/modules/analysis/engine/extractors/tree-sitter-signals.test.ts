@@ -134,6 +134,7 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
         "export function a() {}",
         "function b() {}",
         "const c = () => 1;",
+        "export const e = () => 1;",
         "export { b as publicB };",
         "export default class D {}",
       ].join("\n"),
@@ -145,6 +146,7 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
     expect(byName.get("b")?.exported).toBe(true);
     expect(byName.get("c")?.exported).toBe(false);
     expect(byName.get("D")?.exported).toBe(true);
-    expect(result?.exports).toBe(3);
+    expect(byName.get("e")?.exported).toBe(true);
+    expect(result?.exports).toBe(4);
   });
 });
