@@ -35,6 +35,9 @@ const CLASS_NODE_TYPES = new Set([
   "class_specifier",
 ]);
 
+// `const` covers arrow/function expressions captured as variable declarators.
+const FUNCTION_SYMBOL_KINDS = new Set<SymbolKind>(["const", "function", "method"]);
+
 const IMPORT_KIND_PRECEDENCE: ReadonlyArray<readonly [capture: string, kind: ImportKind]> = [
   ["import.named", "named"],
   ["import.default", "default"],
@@ -248,6 +251,7 @@ export async function collectQuerySignals(
     }
 
     const functionComplexities = symbols
+      .filter((symbol) => FUNCTION_SYMBOL_KINDS.has(symbol.kind))
       .map((symbol) => {
         const declaration = symbolDeclarations.get(`${symbol.name}:${symbol.line ?? 1}`);
         const body = declaration?.childForFieldName("body");

@@ -204,6 +204,39 @@ describe("collectQuerySignals", () => {
     ]);
   });
 
+  it("lists only callables, not their containers", async () => {
+    const result = await collectQuerySignals(
+      {
+        content: [
+          "interface Shape { area(): number; }",
+          "class A { m() { if (ready) { return; } } }",
+        ].join("\n"),
+        path: "src/containers.ts",
+      },
+      ".ts",
+      typescriptQuerySpec,
+    );
+
+    expect(result?.functionComplexities).toEqual([
+      expect.objectContaining({ complexity: 2, name: "m" }),
+    ]);
+  });
+
+  it("omits declarations without a body", async () => {
+    const result = await collectQuerySignals(
+      { content: "type Handler = () => void;", path: "src/ambient.ts" },
+      ".ts",
+      {
+        ...typescriptQuerySpec,
+        symbols:
+          "(type_alias_declaration name: (type_identifier) @symbol.function.name) @symbol.function",
+      },
+    );
+
+    expect(result?.symbols?.map((symbol) => symbol.name)).toContain("Handler");
+    expect(result?.functionComplexities).toEqual([]);
+  });
+
   it("scopes method containers to the enclosing class only", async () => {
     const result = await collectQuerySignals(
       {
