@@ -1,3 +1,4 @@
+import { resolveCallSites } from "./call-graph";
 import type {
   FileComplexity,
   FileSignals,
@@ -21,8 +22,9 @@ import {
   resolveImportEdges,
 } from "./evidence-support";
 import { selectRepositoryFrameworkFacts } from "./framework-catalog";
-import { findDependencyCycles } from "./graph";
+import { findDependencyCycles, resolveModuleImport, resolveRelativeImport } from "./graph";
 import { ProjectPolicy } from "./project-policy";
+import { buildSymbolIndex } from "./symbol-index";
 
 export async function collectRepositoryEvidence(
   files: RepositoryFile[],
@@ -54,6 +56,22 @@ export async function collectRepositoryEvidence(
 
     moduleByPath.set(file.path, moduleRef);
   }
+
+  const symbolIndex = buildSymbolIndex(assembly.modules);
+  const importDetailsByPath = new Map(
+    lookups.normalizedFiles.map((file) => [
+      file.path,
+      fileSignalsByPath.get(file.path)?.importDetails ?? [],
+    ]),
+  );
+  const calls = resolveCallSites(
+    assembly.modules.flatMap((module) => module.calls ?? []),
+    importDetailsByPath,
+    symbolIndex,
+    (fromPath, specifier) =>
+      resolveRelativeImport(fromPath, specifier, lookups.fileSet) ??
+      resolveModuleImport(specifier, lookups.fileSet, lookups.filesByBaseName, lookups.aliasRules),
+  );
 
   const entrypoints = inferEntrypoints({
     apiSurfaceByFile: assembly.apiSurfaceByFile,
@@ -96,6 +114,7 @@ export async function collectRepositoryEvidence(
   const fileCategoryBreakdown = buildFileCategoryBreakdown(assembly.modules);
 
   const evidence: RepositoryEvidence = {
+    calls,
     configs: dedupeConfigs(assembly.configs),
     dependencyCycles,
     dependencyGraph: {

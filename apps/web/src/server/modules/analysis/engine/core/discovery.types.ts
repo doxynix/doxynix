@@ -115,6 +115,7 @@ export type DependencyEdge = {
 
 export type ModuleRef = {
   apiSurface: number;
+  calls?: CallSite[];
   categories: FileCategory[];
   entrypointHints: EntrypointRef[];
   exports: number;
@@ -265,6 +266,7 @@ export type RiskFindingRef = {
 };
 
 export type RepositoryEvidence = {
+  calls?: ResolvedCallEdge[];
   configs: ConfigRef[];
   dependencyCycles: string[][];
   dependencyGraph: DependencyGraphEvidence;

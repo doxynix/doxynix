@@ -90,6 +90,7 @@ export function buildModuleRef(
 
   return {
     apiSurface: signals.apiSurface,
+    calls: signals.calls,
     categories,
     entrypointHints,
     exports: signals.exports,
