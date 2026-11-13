@@ -6,8 +6,8 @@ description: Follow a repository through AST extraction, graph construction, the
 ## AST first
 
 Every run starts with structure. Doxynix parses the checkout with Tree-sitter — `web-tree-sitter`
-compiled to WASM — and records files, symbols, imports and dependency edges exactly as they are
-written.
+compiled to WASM — and records files, top-level symbols, imports and file-level dependency edges
+exactly as they are written.
 
 LLMs never receive a raw file dump as their only context. They get parsed facts plus selected source
 excerpts, so a generated section can be checked against a symbol that actually exists.
@@ -16,10 +16,11 @@ excerpts, so a generated section can be checked against a symbol that actually e
 
 1. Start an analysis from the dashboard or with `dxnx analyze start owner/repo`.
 2. A Trigger.dev task clones the selected branch into a temporary directory.
-3. The AST scanner extracts files, symbols, imports and edges; the graph stage computes entry
-   points, cycles and module boundaries.
-4. Sentinel checks security invariants and dangerous sinks; Mapper builds the structural skeleton;
-   Architect synthesizes the domain model; Writer generates documents anchored to graph nodes.
+3. The AST scanner extracts files, top-level symbols, imports and file-level edges; the graph stage
+   computes entry points, cycles and module boundaries.
+4. Sentinel checks user instructions for prompt injection; security scanning uses secretlint and
+   rule-based sink checks. Mapper builds the structural skeleton; Architect synthesizes the domain
+   model; Writer generates documents anchored to graph nodes.
 5. Metrics are computed — documentation density, complexity, duplication, modularity, bus factor,
    security score and dependency cycles — and combined into the health score.
 6. Documents are stored in the workspace and streamed to the dashboard. The temporary clone is
@@ -34,13 +35,13 @@ The graph stage turns the extracted structure into a navigable model:
 - **Module boundaries** — the zones and top-level groups that make up the system.
 
 Graph node IDs anchor generated sections. A section is written against a node rather than a file
-name, which keeps the document tied to the file, symbol or module it describes.
+name, which keeps the document tied to the file or module it describes.
 
 ## The four stages
 
 | Stage | Role | Output |
 | --- | --- | --- |
-| Sentinel | Security | Security invariants and dangerous-sink findings |
+| Sentinel | Safety | Prompt-injection verdict on user instructions |
 | Mapper | Structure | The structural skeleton of files, modules and edges |
 | Architect | Domain model | A synthesized model of the system and its risks |
 | Writer | Documents | Markdown documents anchored to graph nodes |

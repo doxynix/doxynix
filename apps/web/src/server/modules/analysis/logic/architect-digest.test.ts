@@ -230,7 +230,15 @@ describe("buildArchitectDigest", () => {
       expect.objectContaining({
         dependencyCycles: 2,
         dependencyHotspots: [{ inbound: 1, outbound: 2, path: "dep.ts" }],
-        modules: [{ apiSurface: 2, categories: ["runtime-source"], exports: 3, path: "src/x" }],
+        modules: [
+          {
+            apiSurface: 2,
+            categories: ["runtime-source"],
+            exports: 3,
+            path: "src/x",
+            upstreamCallers: [],
+          },
+        ],
         primaryEntrypoints: ["e.ts"],
       }),
     );
@@ -265,6 +273,52 @@ describe("buildArchitectDigest", () => {
     const digest = buildArchitectDigest(makeDocInput(), makeMetrics(), makeProjectMap(), facts, []);
 
     expect(digest.facts).toHaveLength(30);
+  });
+
+  it("includes real upstream callers from resolved call edges", () => {
+    const docInput = makeDocInput();
+    const architecture = docInput.sections.architecture;
+
+    const digest = buildArchitectDigest(
+      {
+        ...docInput,
+        sections: {
+          ...docInput.sections,
+          architecture: {
+            ...architecture,
+            body: {
+              ...architecture.body,
+              modules: [
+                {
+                  apiSurface: 2,
+                  categories: ["runtime-source"],
+                  exports: 3,
+                  parseTier: "tree-sitter",
+                  path: "src/b.ts",
+                  upstreamCallers: [],
+                },
+              ],
+            },
+          },
+        },
+      },
+      makeMetrics(),
+      makeProjectMap(),
+      [],
+      [],
+      [
+        {
+          calleeName: "foo",
+          callerName: "main",
+          line: 1,
+          path: "src/a.ts",
+          resolved: true,
+          targetPath: "src/b.ts",
+        },
+      ],
+    );
+
+    expect(digest.sections.architecture.modules[0]?.upstreamCallers).toEqual(["src/a.ts:main"]);
   });
 });
 

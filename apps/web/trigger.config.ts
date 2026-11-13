@@ -18,9 +18,12 @@ export default defineConfig({
   build: {
     extensions: [
       additionalFiles({
+        // The recursive glob keeps the `out/<lang>/tree-sitter-<lang>.wasm` layout, which is
+        // exactly what resolveGrammarWasmPath reads from `process.cwd()` at runtime.
         files: [
-          "node_modules/web-tree-sitter/tree-sitter.wasm",
-          "node_modules/tree-sitter-wasms/out/*.wasm",
+          "node_modules/web-tree-sitter/web-tree-sitter.wasm",
+          "node_modules/tree-sitter-wasm/out/**/*.wasm",
+          "vendor/wasms/*.wasm",
         ],
       }),
       additionalPackages({

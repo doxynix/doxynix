@@ -80,6 +80,7 @@ export async function runAiPipeline(
     projectMap,
     repositoryFacts,
     repositoryFindings,
+    evidence.calls ?? [],
   );
 
   taskLogger.log("Invoking Lead Architect Agent...");

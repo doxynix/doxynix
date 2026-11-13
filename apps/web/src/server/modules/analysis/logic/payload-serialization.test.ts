@@ -15,6 +15,7 @@ const moduleSummary = (path: string) => ({
   exports: 2,
   parseTier: "heuristic",
   path,
+  upstreamCallers: [],
 });
 
 const documentationInput = {

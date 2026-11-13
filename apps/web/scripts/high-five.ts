@@ -376,7 +376,8 @@ try {
     ...Object.keys(pkgJson.devDependencies || {}),
   ]);
 
-  const output = execSync("bun licenses list --json", {
+  // The licenses subcommand lives under `bun pm` since Bun 1.1.
+  const output = execSync("bun pm licenses list --json", {
     maxBuffer: 1024 * 1024 * 50,
   }).toString();
 

@@ -259,12 +259,7 @@ const nextConfig: NextConfig = {
     pagesBufferLength: 2,
   },
   outputFileTracingExcludes: {
-    "*": [
-      "**/node_modules/tree-sitter-wasms/**",
-      "**/.bun/**/tree-sitter-wasms/**",
-      "./**/*.js.map",
-      "./**/*.mjs.map",
-    ],
+    "*": ["./**/*.js.map", "./**/*.mjs.map"],
   },
   poweredByHeader: false,
   productionBrowserSourceMaps: false, // Ensures clients cannot fetch raw sourcemaps from browser
@@ -356,22 +351,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  serverExternalPackages: [
-    "tree-sitter",
-    "tree-sitter-c",
-    "tree-sitter-c-sharp",
-    "tree-sitter-cpp",
-    "tree-sitter-go",
-    "tree-sitter-java",
-    "tree-sitter-json",
-    "tree-sitter-php",
-    "tree-sitter-python",
-    "tree-sitter-ruby",
-    "tree-sitter-rust",
-    "tree-sitter-typescript",
-    "tree-sitter-wasms",
-    "web-tree-sitter",
-  ],
+  serverExternalPackages: ["web-tree-sitter"],
   skipTrailingSlashRedirect: true,
   turbopack: {
     debugIds: true,

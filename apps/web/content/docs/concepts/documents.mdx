@@ -22,8 +22,9 @@ defaults to `README` and lets you select the other repository-level types — `A
 
 Documents are assembled from parsed facts, not from a single free-form prompt:
 
-- Sections are anchored to graph nodes, so each one describes a file, module or symbol that exists.
-- Symbols, imports and routes come from the AST rather than from the model's memory of the code.
+- Sections are anchored to graph nodes, so each one describes a file or module that exists.
+- Symbols and imports come from Tree-sitter; routes currently use the framework regex fallback until
+  Milestone 2 of the Tree-sitter query migration.
 - Architecture and data-flow sections include Mermaid diagrams generated from the dependency graph.
 - Code examples are taken from the parsed sources; the writer is not asked to invent them.
 

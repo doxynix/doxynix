@@ -169,11 +169,6 @@
       "allowedVersions": "<1.0.0",
       "description": "Restrict cookie to <1.0.0 for auth compatibility",
       "matchPackageNames": ["cookie"]
-    },
-    {
-      "description": "Freeze Tree-sitter packages due to custom WASM patch",
-      "enabled": false,
-      "matchPackageNames": ["web-tree-sitter", "tree-sitter-wasms"]
     }
   ],
   "prConcurrentLimit": 10,

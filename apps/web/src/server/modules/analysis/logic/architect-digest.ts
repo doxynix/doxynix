@@ -1,7 +1,13 @@
+import { uniq } from "es-toolkit";
+
 import { uniquePaths } from "@/server/modules/analysis/engine/core/array-utils";
 
 import type { ProjectMap } from "../engine/core/analysis-result.schemas";
-import type { RepositoryFact, RepositoryFinding } from "../engine/core/discovery.types";
+import type {
+  RepositoryFact,
+  RepositoryFinding,
+  ResolvedCallEdge,
+} from "../engine/core/discovery.types";
 import type { DocumentationInputModel } from "../engine/core/documentation.types";
 import type { RepoMetrics } from "../engine/core/metrics.types";
 
@@ -78,6 +84,7 @@ export type ArchitectDigest = {
         inbound?: number;
         outbound?: number;
         path: string;
+        upstreamCallers: string[];
       }>;
       orphanModules: string[];
       primaryEntrypoints: string[];
@@ -142,7 +149,19 @@ export function buildArchitectDigest(
   projectMap: ProjectMap,
   repositoryFacts: RepositoryFact[],
   repositoryFindings: RepositoryFinding[],
+  calls: ResolvedCallEdge[] = [],
 ): ArchitectDigest {
+  const callersByTargetPath = new Map<string, string[]>();
+
+  for (const call of calls) {
+    if (!call.resolved || call.targetPath == null || call.callerName == null) {
+      continue;
+    }
+    const bucket = callersByTargetPath.get(call.targetPath) ?? [];
+    bucket.push(`${call.path}:${call.callerName}`);
+    callersByTargetPath.set(call.targetPath, bucket);
+  }
+
   return {
     facts: limit(
       repositoryFacts.map((fact) => ({
@@ -269,6 +288,7 @@ export function buildArchitectDigest(
             categories: module.categories,
             exports: module.exports,
             path: module.path,
+            upstreamCallers: limit(uniq(callersByTargetPath.get(module.path) ?? []), 12),
           })),
           40,
         ),

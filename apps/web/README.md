@@ -24,13 +24,14 @@
 
 ### Key Capabilities
 
-* **Multi-Grammar AST Parsing:** Native `web-tree-sitter` (WASM) grammar execution extracts language-level symbols, interfaces, call trees, and import hierarchies without external network dependencies.
+* **Multi-Grammar AST Parsing:** Native `web-tree-sitter` (WASM) grammar execution extracts language-level symbols, imports, and file-level dependency edges without external network dependencies.
 * **Interactive Topological Canvas:** Builds directed dependency graphs (`graphology` + `@xyflow/react`) to expose application entrypoints, isolated subgraphs, and cyclic dependencies.
 * **Specialized 4-Stage AI Pipeline:**
-  * `Sentinel Stage`: Audits security invariants, auth guards, and sensitive sink paths.
+  * `Sentinel Stage`: Verifies user instructions for prompt injection before the AI pipeline runs.
   * `Mapper Stage`: Extracts structural skeletons, type hierarchies, and node boundaries.
   * `Architect Stage`: Computes high-level domain workflows and cross-boundary architecture.
   * `Writer Stage`: Generates contextual documentation anchored strictly to the selected node ID.
+* **Security Scan:** secretlint plus rule-based sink checks over the analyzed source.
 * **Database-Level Access Policies:** ZenStack (`schema.zmodel`, `models/*.zmodel`) compiles row-level security and ownership rules directly into Prisma queries.
 * **Enterprise Auth & Cryptography:** Better-Auth (GitHub, Google, Yandex, WebAuthn Passkeys) with field-level encryption for sensitive tokens via `prisma-field-encryption`.
 

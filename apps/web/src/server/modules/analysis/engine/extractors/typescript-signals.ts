@@ -62,7 +62,9 @@ export async function collectTypeScriptSignals(file: RepositoryFile): Promise<Fi
       ...signals,
       analysisMode: "tree-sitter",
       apiSurface: signals.apiSurface + extraApiSurface,
-      confidence: CONFIDENCE_LEVELS.astStructure,
+      confidence: signals.parseError
+        ? CONFIDENCE_LEVELS.astPartial
+        : CONFIDENCE_LEVELS.astStructure,
       entrypointHint: signals.entrypointHint || entrypointHint,
       entrypointRefs: [...(signals.entrypointRefs ?? []), ...entrypointRefs],
       frameworkHints: [...(signals.frameworkHints ?? []), ...extraFrameworkHints],

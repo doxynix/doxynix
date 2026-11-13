@@ -1,5 +1,7 @@
 import type { Octokit } from "@octokit/rest";
 import { task } from "@trigger.dev/sdk";
+import { normalize } from "pathe";
+import pm from "picomatch";
 import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
@@ -17,6 +19,10 @@ import { DifferentialAnalyzer } from "../logic/differential-analyzer";
 import { healAndPartitionFindings } from "../logic/patch-healer";
 import { mergePrBody } from "../logic/pr-body";
 import { PRConfigService } from "../logic/pr-config";
+
+const MAX_FILE_CONTENT_BYTES = 1_000_000;
+const MAX_FILE_CONTENTS_BYTES = 20_000_000;
+const MAX_FILE_CONTENTS_FILES = 100;
 
 async function updateCommitStatus(
   octokit: Octokit,
@@ -139,6 +145,70 @@ export const analyzePrTask = task({
         })),
       );
 
+      const isExcluded = pm(config.excludePatterns);
+      const fileContents = new Map<string, string>();
+      let fetchedBytes = 0;
+      let fetchCapped = false;
+
+      for (const file of changedFiles) {
+        if (file.patch == null || file.status === "removed") {
+          continue;
+        }
+        if (file.additions + file.deletions > 1000) {
+          continue;
+        }
+        if (isExcluded(normalize(file.filename))) {
+          continue;
+        }
+        if (
+          fileContents.size >= MAX_FILE_CONTENTS_FILES ||
+          fetchedBytes >= MAX_FILE_CONTENTS_BYTES
+        ) {
+          fetchCapped = true;
+          break;
+        }
+
+        try {
+          const response = await octokit.rest.repos.getContent({
+            owner: payload.owner,
+            path: file.filename,
+            ref: payload.headSha,
+            repo: payload.repoName,
+          });
+          if (Array.isArray(response.data) || response.data.type !== "file") {
+            continue;
+          }
+          if (response.data.encoding !== "base64" || response.data.size > MAX_FILE_CONTENT_BYTES) {
+            continue;
+          }
+          if (fetchedBytes + response.data.size > MAX_FILE_CONTENTS_BYTES) {
+            fetchCapped = true;
+            break;
+          }
+
+          fileContents.set(
+            file.filename,
+            Buffer.from(response.data.content, "base64").toString("utf8"),
+          );
+          fetchedBytes += response.data.size;
+        } catch (error) {
+          appLogger.warn({
+            error: error instanceof Error ? error.message : String(error),
+            msg: "pr_file_content_fetch_failed",
+            path: file.filename,
+          });
+        }
+      }
+
+      if (fetchCapped) {
+        appLogger.info({
+          bytes: fetchedBytes,
+          files: fileContents.size,
+          msg: "pr_file_contents_capped",
+          prNumber: payload.prNumber,
+        });
+      }
+
       const analyzer = new DifferentialAnalyzer(config);
       const result = await analyzer.analyzePRDiff(
         {
@@ -156,6 +226,7 @@ export const analyzePrTask = task({
           userId: repo.createdByUserId,
           workspaceId: payload.workspaceId,
         },
+        fileContents,
       );
 
       const { commentable: validatedInlineFindings, findings: healedFindings } =

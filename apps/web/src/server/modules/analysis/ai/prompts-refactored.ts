@@ -511,7 +511,7 @@ For each module found in the context, create a separate subsection using exactly
 ### Module: [[path/to/module.ext]]
 - **Responsibility**: Description of what this module does.
 - **Internal Logic**: Technical implementation details.
-- **Upstream Callers**: List of components calling this module.
+- **Upstream Callers**: Use the provided \`upstreamCallers\` list when it is non-empty. If it is empty, infer callers from \`module_dependency_context\` and mark the inference explicitly.
 - **Downstream Dependencies**: List of internal/external dependencies.
 
 ## Structural & Integration Risks

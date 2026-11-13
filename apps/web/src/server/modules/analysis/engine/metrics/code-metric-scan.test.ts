@@ -131,6 +131,43 @@ describe("aggregateScanResults", () => {
     ]);
   });
 
+  it("keeps the file score stable and records per-function complexity separately", () => {
+    const scan = aggregateScanResults([
+      {
+        comments: 0,
+        complexity: 3,
+        maxNesting: 2,
+        normalizedPath: "src/a.ts",
+        prettyName: "TypeScript",
+        securityFindings: [],
+        securityIssues: 0,
+        securityScanStatus: "ok",
+        signal: {
+          analysisMode: "tree-sitter",
+          apiSurface: 0,
+          complexityMetrics: { complexity: 3, maxNesting: 2 },
+          confidence: 80,
+          entrypointHint: false,
+          exports: 0,
+          functionComplexities: [
+            { complexity: 1, line: 1, maxNesting: 1, name: "a" },
+            { complexity: 2, line: 2, maxNesting: 2, name: "b" },
+          ],
+          imports: [],
+          path: "src/a.ts",
+          source: "extraction",
+          symbols: [],
+        },
+        size: 100,
+        source: 10,
+        todos: 0,
+      },
+    ]);
+
+    expect(scan.mostComplexFiles).toEqual(["src/a.ts"]);
+    expect(scan.fileSignalsByPath.get("src/a.ts")?.functionComplexities).toHaveLength(2);
+  });
+
   it("returns no complex files when no architecture-relevant file qualifies", () => {
     const aggregation = aggregateScanResults([
       makeResult({

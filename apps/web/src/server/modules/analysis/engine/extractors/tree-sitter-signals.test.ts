@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/server/core/app-logger", () => ({
   appLogger: {
@@ -10,11 +10,22 @@ vi.mock("@/server/core/app-logger", () => ({
   },
 }));
 
-import { getSpecByExt, TREE_SITTER_SUPPORTED_EXTENSIONS } from "@/server/core/tree-sitter";
+import {
+  disposeTreeSitter,
+  getParserForExt,
+  getSpecByExt,
+  TREE_SITTER_SUPPORTED_EXTENSIONS,
+} from "@/server/core/tree-sitter";
 
+import { QUERY_SPECS } from "./queries";
 import { collectTreeSitterSignals } from "./tree-sitter-signals";
+import { collectTypeScriptSignals } from "./typescript-signals";
 
 describe("tree-sitter-signals: spec contract (without wasm)", () => {
+  afterAll(async () => {
+    await disposeTreeSitter();
+  });
+
   it("exports the expected list of supported extensions", () => {
     for (const ext of [
       ".ts",
@@ -25,17 +36,19 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
       ".py",
       ".rs",
       ".java",
-      ".rb",
       ".php",
       ".swift",
-      ".kt",
       ".cs",
+      ".rb",
+      ".kt",
+      ".erl",
+      ".jl",
     ]) {
       expect(TREE_SITTER_SUPPORTED_EXTENSIONS).toContain(ext);
     }
   });
 
-  it(".ts → declarations of all five SymbolKinds + 3 route patterns + typescript-wasm", () => {
+  it(".ts → declarations of all five SymbolKinds + 1 neutral route pattern + typescript-wasm", () => {
     const spec = getSpecByExt(".ts");
 
     expect(spec?.declarations.map((declaration) => declaration.kind)).toEqual([
@@ -45,11 +58,7 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
       "type",
       "enum",
     ]);
-    expect(spec?.routePatterns?.map((route) => route.framework)).toEqual([
-      "Hono",
-      "Express",
-      "Fastify",
-    ]);
+    expect(spec?.routePatterns?.map((route) => route.framework)).toEqual(["js-ts-router"]);
     expect(spec?.wasm).toBe("tree-sitter-typescript.wasm");
     expect(spec?.entrypoints.length).toBeGreaterThan(0);
   });
@@ -62,7 +71,6 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
       "Django",
     ]);
     expect(spec?.wasm).toBe("tree-sitter-python.wasm");
-    expect(spec?.wasmPackage).toBe("tree-sitter-python");
   });
 
   it(".go → Gin/Echo route patterns and go-wasm", () => {
@@ -99,9 +107,173 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
     expect(result).toMatchObject({
       analysisMode: "tree-sitter",
       entrypointHint: true,
-      exports: 1,
+      exports: 0,
+      parseError: false,
       source: "extraction",
     });
     expect(result?.frameworkHints).toBeDefined();
+  });
+
+  it("extracts real symbol names and 1-based lines for TypeScript declarations", async () => {
+    const result = await collectTreeSitterSignals({
+      content: [
+        "export function greet(name: string) { return name; }",
+        "class UserService { run() {} }",
+        "interface UserRepo { find(): void }",
+        "type Id = string;",
+        "enum Role { Admin }",
+      ].join("\n"),
+      path: "src/sample.ts",
+    });
+
+    expect(result?.symbols?.map((symbol) => symbol.name)).toEqual([
+      "greet",
+      "UserService",
+      "run",
+      "UserRepo",
+      "Id",
+      "Role",
+    ]);
+    expect(result?.symbols?.map((symbol) => symbol.line)).toEqual([1, 2, 2, 3, 4, 5]);
+  });
+
+  it("uses the query path for TypeScript and preserves exact names", async () => {
+    const result = await collectTreeSitterSignals({
+      content: 'import { Hono } from "hono"; export function greet(name: string) { return name; }',
+      path: "src/sample.ts",
+    });
+
+    expect(result?.analysisMode).toBe("tree-sitter");
+    expect(result?.symbols?.[0]?.name).toBe("greet");
+    expect(result?.parseError).toBe(false);
+    expect(result?.importDetails).toContainEqual(
+      expect.objectContaining({ kind: "named", source: "hono" }),
+    );
+  });
+
+  it("marks only exported declarations and counts unique exported names", async () => {
+    const result = await collectTreeSitterSignals({
+      content: [
+        "export function a() {}",
+        "function b() {}",
+        "const c = () => 1;",
+        "export const e = () => 1;",
+        "export { b as publicB };",
+        "export default class D {}",
+      ].join("\n"),
+      path: "src/exports.ts",
+    });
+
+    const byName = new Map((result?.symbols ?? []).map((symbol) => [symbol.name, symbol]));
+    expect(byName.get("a")?.exported).toBe(true);
+    expect(byName.get("b")?.exported).toBe(true);
+    expect(byName.get("c")?.exported).toBe(false);
+    expect(byName.get("D")?.exported).toBe(true);
+    expect(byName.get("e")?.exported).toBe(true);
+    expect(result?.exports).toBe(4);
+  });
+
+  it("emits one route per method and path and attributes Hono from imports", async () => {
+    const result = await collectTreeSitterSignals({
+      content: [
+        'import { Hono } from "hono";',
+        "const app = new Hono();",
+        'app.get("/users", handler);',
+        'app.post("/users", handler);',
+        'app.get("/users", handler);',
+      ].join("\n"),
+      path: "src/api.ts",
+    });
+
+    expect(result?.routes).toHaveLength(2);
+    expect(result?.routes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ framework: "Hono", method: "GET", path: "/users" }),
+        expect.objectContaining({ framework: "Hono", method: "POST", path: "/users" }),
+      ]),
+    );
+  });
+
+  it.each([
+    { framework: "Express", imports: 'import express from "express";', label: "express" },
+    { framework: "Fastify", imports: 'import Fastify from "fastify";', label: "fastify" },
+    {
+      framework: "Fastify",
+      imports: 'import fastifyPlugin from "fastify/plugin";',
+      label: "fastify subpath",
+    },
+    {
+      framework: "Hono",
+      imports: 'import { Hono } from "hono";\nimport express from "express";',
+      label: "hono alongside express",
+    },
+  ])("attributes routes from $label to $framework", async ({ framework, imports }) => {
+    const result = await collectTreeSitterSignals({
+      content: [imports, 'app.get("/users", handler);'].join("\n"),
+      path: "src/api.ts",
+    });
+
+    expect(result?.routes?.[0]?.framework).toBe(framework);
+  });
+
+  it("leaves the framework undefined when no known router import is present", async () => {
+    const result = await collectTreeSitterSignals({
+      content: 'app.get("/users", handler);',
+      path: "src/api.ts",
+    });
+
+    expect(result?.routes).toHaveLength(1);
+    expect(result?.routes?.[0]?.framework).toBeUndefined();
+  });
+
+  it("loads every grammar from the tree-sitter-wasm bundle", () => {
+    expect(getSpecByExt(".cs")?.wasm).toBe("tree-sitter-c_sharp.wasm");
+    expect(getSpecByExt(".cs")?.wasmDir).toBe("c_sharp");
+    expect(getSpecByExt(".rb")?.wasmDir).toBe("ruby");
+    expect(getSpecByExt(".kt")?.wasmDir).toBe("kotlin");
+    expect(getSpecByExt(".erl")?.wasmDir).toBe("erlang");
+    expect(getSpecByExt(".jl")?.wasmDir).toBe("julia");
+    expect(getSpecByExt(".swift")?.wasmDir).toBe("swift");
+    expect(getSpecByExt(".lua")?.wasmDir).toBe("lua");
+  });
+
+  it("flags a partial parse instead of reporting full AST confidence", async () => {
+    const result = await collectTreeSitterSignals({
+      content: "class A { accessor x = ; }",
+      path: "src/partial.ts",
+    });
+
+    expect(result?.parseError).toBe(true);
+    expect(result?.confidence).toBe(65);
+  });
+
+  it("propagates partial-parse confidence through the TypeScript adapter", async () => {
+    const result = await collectTypeScriptSignals({
+      content: "class A { accessor x = ; }",
+      path: "src/partial.ts",
+    });
+
+    expect(result.parseError).toBe(true);
+    expect(result.confidence).toBe(65);
+  });
+
+  it("reuses one parser per extension", async () => {
+    const first = await getParserForExt(".ts");
+    const second = await getParserForExt(".ts");
+    expect(first).toBe(second);
+  });
+
+  it("evicts the parser cache on dispose and rebuilds parsers on demand", async () => {
+    const first = await getParserForExt(".ts");
+
+    await disposeTreeSitter();
+
+    const second = await getParserForExt(".ts");
+    expect(second).not.toBe(first);
+  });
+
+  it("has a query spec for every advertised tree-sitter extension", () => {
+    const missing = TREE_SITTER_SUPPORTED_EXTENSIONS.filter((ext) => QUERY_SPECS[ext] == null);
+    expect(missing).toEqual([]);
   });
 });

@@ -124,6 +124,31 @@ describe("collectFileEvidence", () => {
     expect(calls).toEqual([["src/app.ts", ["react", "./util"]]]);
   });
 
+  it("prefers importDetails sources over the legacy import list and deduplicates them", async () => {
+    const file = { content: "", path: "src/app.ts" };
+    const signals = makeSignals({
+      importDetails: [
+        { kind: "named", source: "./util" },
+        { kind: "named", source: "./util" },
+      ],
+      imports: ["react", "./util"],
+    });
+    const calls: Array<[string, string[]]> = [];
+
+    await collectFileEvidence(
+      file,
+      makeLookups(),
+      createEvidenceAssembly().dependencyTracking,
+      new Map([["src/app.ts", signals]]),
+      (filePath, imports) => {
+        calls.push([filePath, imports]);
+        return imports;
+      },
+    );
+
+    expect(calls).toEqual([["src/app.ts", ["./util"]]]);
+  });
+
   it("spreads entrypoint hints, routes, and symbols from the signals", async () => {
     const file = { content: "", path: "src/app.ts" };
     const entrypointRefs = [

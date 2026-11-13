@@ -41,11 +41,45 @@ export type FrameworkFact = {
 
 export type SymbolRef = {
   confidence: number;
+  container?: string;
   exported: boolean;
   kind: SymbolKind;
   line?: number;
   name: string;
+  parameters?: string;
   path: string;
+  returnType?: string;
+  signature?: string;
+  visibility?: "internal" | "package" | "private" | "protected" | "public";
+};
+
+export type ImportKind =
+  | "default"
+  | "dynamic"
+  | "named"
+  | "namespace"
+  | "reexport"
+  | "require"
+  | "side-effect";
+
+export type ImportRef = {
+  kind: ImportKind;
+  line?: number;
+  names?: string[];
+  source: string;
+};
+
+export type CallSite = {
+  calleeName: string;
+  callerName: string | null;
+  line: number;
+  path: string;
+  receiver?: string;
+};
+
+export type ResolvedCallEdge = CallSite & {
+  resolved: boolean;
+  targetPath?: string;
 };
 
 export type RouteRef = {
@@ -81,6 +115,7 @@ export type DependencyEdge = {
 
 export type ModuleRef = {
   apiSurface: number;
+  calls?: CallSite[];
   categories: FileCategory[];
   entrypointHints: EntrypointRef[];
   exports: number;
@@ -135,6 +170,7 @@ type BaseSignal = {
 export interface FileSignals extends BaseSignal {
   analysisMode: ParseTier;
   apiSurface: number;
+  calls?: CallSite[];
   categories?: FileCategory[];
   complexityMetrics: {
     complexity: number;
@@ -145,7 +181,15 @@ export interface FileSignals extends BaseSignal {
   entrypointRefs?: EntrypointRef[];
   exports: number;
   frameworkHints?: FrameworkFact[];
+  functionComplexities?: Array<{
+    complexity: number;
+    line: number;
+    maxNesting: number;
+    name: string;
+  }>;
+  importDetails?: ImportRef[];
   imports: string[];
+  parseError?: boolean;
   routes?: RouteRef[];
   source: "extraction";
   symbols?: SymbolRef[];
@@ -222,6 +266,7 @@ export type RiskFindingRef = {
 };
 
 export type RepositoryEvidence = {
+  calls?: ResolvedCallEdge[];
   configs: ConfigRef[];
   dependencyCycles: string[][];
   dependencyGraph: DependencyGraphEvidence;

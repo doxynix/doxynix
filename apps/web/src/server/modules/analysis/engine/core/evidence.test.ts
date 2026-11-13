@@ -156,4 +156,41 @@ describe("collectRepositoryEvidence", () => {
 
     expect(evidence.publicSurface.map((symbol) => symbol.name).sort()).toEqual(["boot", "helper"]);
   });
+
+  it("aggregates call edges from file signals", async () => {
+    const { evidence } = await collectRepositoryEvidence(
+      [
+        { content: 'import { foo } from "./b"; function main() { foo(); }', path: "src/a.ts" },
+        { content: "export function foo() {}", path: "src/b.ts" },
+      ],
+      [],
+      new Map<string, FileSignals>([
+        [
+          "src/a.ts",
+          makeSignals("src/a.ts", {
+            analysisMode: "tree-sitter",
+            calls: [{ calleeName: "foo", callerName: "main", line: 1, path: "src/a.ts" }],
+            importDetails: [{ kind: "named", names: ["foo"], source: "./b" }],
+            imports: ["./b"],
+          }),
+        ],
+        [
+          "src/b.ts",
+          makeSignals("src/b.ts", {
+            analysisMode: "tree-sitter",
+            exports: 1,
+            symbols: [
+              { confidence: 78, exported: true, kind: "function", name: "foo", path: "src/b.ts" },
+            ],
+          }),
+        ],
+      ]),
+    );
+
+    expect(evidence.calls).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ calleeName: "foo", resolved: true, targetPath: "src/b.ts" }),
+      ]),
+    );
+  });
 });

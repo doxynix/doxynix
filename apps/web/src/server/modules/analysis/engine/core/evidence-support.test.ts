@@ -4,6 +4,7 @@ import type { RouteRef } from "./discovery.types";
 import {
   buildEvidenceLookups,
   buildRouteInventory,
+  createDependencyTracking,
   createEvidenceAssembly,
   resolveImportEdges,
 } from "./evidence-support";
@@ -158,4 +159,37 @@ describe("resolveImportEdges", () => {
     expect(tracking.unresolvedImportSpecifiers).toBe(101);
     expect(tracking.unresolvedSamples).toHaveLength(100);
   });
+});
+
+it("prefers importDetails over the legacy import list", () => {
+  const tracking = createDependencyTracking();
+  resolveImportEdges(
+    "src/a.ts",
+    ["legacy-only", "./b"],
+    {
+      aliasRules: [],
+      fileSet: new Set(["src/a.ts", "src/b.ts"]),
+      filesByBaseName: new Map([["b.ts", ["src/b.ts"]]]),
+    },
+    tracking,
+  );
+
+  expect(tracking.edges.map((edge) => edge.specifier)).toContain("./b");
+});
+
+it("deduplicates route inventory by method and path", () => {
+  const inventory = buildRouteInventory({
+    frameworkFacts: [],
+    routes: [
+      { confidence: 70, kind: "http", method: "GET", path: "/x", sourcePath: "src/a.ts" },
+      { confidence: 70, kind: "http", method: "GET", path: "/x", sourcePath: "src/a.ts" },
+      { confidence: 70, kind: "http", method: "POST", path: "/x", sourcePath: "src/a.ts" },
+    ],
+  });
+
+  expect(inventory.httpRoutes).toEqual([
+    { method: "GET", path: "/x", sourcePath: "src/a.ts" },
+    { method: "POST", path: "/x", sourcePath: "src/a.ts" },
+  ]);
+  expect(inventory.estimatedOperations).toBe(2);
 });

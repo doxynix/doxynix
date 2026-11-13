@@ -13,6 +13,8 @@ import { callWithFallback } from "@/server/utils/call";
 import { buildPrReviewSystemPrompt, buildPrReviewUserPrompt } from "../ai/prompts-refactored";
 import { PrAiReviewOutputSchema } from "../analysis.schemas";
 import { PROJECT_POLICY_RULES } from "../engine/core/project-policy-rules";
+import { collectAstSecurityFindings } from "../engine/extractors/security-signals";
+import { DECLARATION_TYPES, mapAddedLinesToNodes } from "./diff-node-mapper";
 import type { DifferentialAnalysisResult, PRAnalysisConfig, PRFinding } from "./pr.types";
 
 type PRDiffInfo = {
@@ -50,6 +52,7 @@ export class DifferentialAnalyzer {
     diffInfo: PRDiffInfo,
     projectOverviewJson: string,
     metadata: PRAnalysisMetadata,
+    fileContents: Map<string, string> = new Map(),
   ): Promise<DifferentialAnalysisResult> {
     const startTime = Date.now();
     appLogger.info({
@@ -90,9 +93,17 @@ export class DifferentialAnalyzer {
         };
       }
 
-      const sentinelFindings = this.runSentinelPhase(relevantFiles, diffInfo.prNumber);
+      const sentinelFindings = await this.runSentinelPhase(
+        relevantFiles,
+        diffInfo.prNumber,
+        fileContents,
+      );
 
-      const mapperFindings = this.runMapperPhase(relevantFiles, diffInfo.prNumber);
+      const mapperFindings = await this.runMapperPhase(
+        relevantFiles,
+        diffInfo.prNumber,
+        fileContents,
+      );
 
       const { findings: aiFindings, summary: aiSummary } = await this.runAiReviewPhase(
         relevantFiles,
@@ -256,7 +267,11 @@ export class DifferentialAnalyzer {
     }
   }
 
-  private runMapperPhase(files: PRDiffInfo["changedFiles"], _prNumber: number): PRFinding[] {
+  private async runMapperPhase(
+    files: PRDiffInfo["changedFiles"],
+    _prNumber: number,
+    fileContents: Map<string, string>,
+  ): Promise<PRFinding[]> {
     const findings: PRFinding[] = compact(
       files.map((file) => {
         if (file.patch == null) {
@@ -281,11 +296,125 @@ export class DifferentialAnalyzer {
         return null;
       }),
     );
+
+    for (const file of files) {
+      if (file.patch == null) {
+        continue;
+      }
+
+      const content = fileContents.get(file.filename);
+      if (content == null) {
+        continue;
+      }
+
+      // One finding per changed declaration, not one per added line inside it.
+      const seenDeclarations = new Set<string>();
+      const sourceLines = content.split("\n");
+
+      try {
+        const addedLines = extractAddedLinesFromPatch(file.patch).map((change) => change.lineAfter);
+        const nodes = await mapAddedLinesToNodes({ content, path: file.filename }, addedLines);
+
+        for (const node of nodes) {
+          if (!DECLARATION_TYPES.has(node.nodeType)) {
+            continue;
+          }
+
+          const declarationKey = `${node.nodeType}:${node.name ?? node.line}`;
+          if (seenDeclarations.has(declarationKey)) {
+            continue;
+          }
+          seenDeclarations.add(declarationKey);
+
+          // A bare identifier as `codeSnippet` makes `healFindingLine` match the first line
+          // containing that name, moving the finding off its commentable line.
+          const sourceLine = sourceLines[node.line - 1]?.trim() ?? "";
+
+          findings.push(
+            this.createFinding(
+              file.filename,
+              node.line,
+              sourceLine.length > 0 ? sourceLine : (node.name ?? node.nodeType),
+              `Changed ${node.nodeType.replaceAll("_", " ")}: ${node.name ?? "(anonymous)"}`,
+              4,
+              "LOW",
+              "Review the changed declaration and its callers before merging.",
+              "ARCHITECTURE",
+            ),
+          );
+        }
+      } catch (error) {
+        appLogger.warn({
+          error: error instanceof Error ? error.message : String(error),
+          msg: "pr_ast_mapping_failed",
+          path: file.filename,
+        });
+      }
+    }
+
     return findings;
   }
 
-  private runSentinelPhase(files: PRDiffInfo["changedFiles"], _prNumber: number): PRFinding[] {
+  private async runSentinelPhase(
+    files: PRDiffInfo["changedFiles"],
+    _prNumber: number,
+    fileContents: Map<string, string>,
+  ): Promise<PRFinding[]> {
     const findings: PRFinding[] = [];
+    const astSinkLines = new Map<string, Set<number>>();
+
+    const astScanResults = await Promise.allSettled(
+      files.map(async (file) => {
+        if (file.patch == null) {
+          return [];
+        }
+
+        const content = fileContents.get(file.filename);
+        if (content == null) {
+          return [];
+        }
+
+        const addedLines = new Set(
+          extractAddedLinesFromPatch(file.patch).map((change) => change.lineAfter),
+        );
+        const astFindings = await collectAstSecurityFindings({
+          content,
+          path: file.filename,
+        });
+
+        return astFindings.filter((finding) => addedLines.has(finding.line ?? 1));
+      }),
+    );
+
+    for (const result of astScanResults) {
+      if (result.status === "rejected") {
+        appLogger.warn({
+          error: result.reason instanceof Error ? result.reason.message : String(result.reason),
+          msg: "pr_ast_security_scan_failed",
+        });
+        continue;
+      }
+
+      for (const finding of result.value) {
+        const line = finding.line ?? 1;
+        const claimed = astSinkLines.get(finding.path) ?? new Set<number>();
+        claimed.add(line);
+        astSinkLines.set(finding.path, claimed);
+
+        findings.push(
+          this.createFinding(
+            finding.path,
+            line,
+            finding.message,
+            finding.message,
+            8,
+            "HIGH",
+            "Replace the unsafe sink with a safe API or validate the input.",
+          ),
+        );
+      }
+    }
+
     const { SECRETS, SQL_INJECTION, todoPatterns, VULNERABILITIES } = PROJECT_POLICY_RULES.security;
 
     for (const file of files) {
@@ -298,9 +427,10 @@ export class DifferentialAnalyzer {
       for (const change of addedLines) {
         const lineContent = change.content;
         const lineNum = change.lineAfter;
+        const claimedByAst = astSinkLines.get(file.filename)?.has(lineNum) ?? false;
 
         for (const { pattern, title } of SECRETS) {
-          if (pattern.test(lineContent)) {
+          if (!claimedByAst && pattern.test(lineContent)) {
             findings.push(
               this.createFinding(
                 file.filename,
@@ -316,7 +446,7 @@ export class DifferentialAnalyzer {
         }
 
         for (const { pattern, title } of VULNERABILITIES) {
-          if (pattern.test(lineContent)) {
+          if (!claimedByAst && pattern.test(lineContent)) {
             findings.push(
               this.createFinding(
                 file.filename,
@@ -332,7 +462,7 @@ export class DifferentialAnalyzer {
         }
 
         for (const { pattern, title } of SQL_INJECTION) {
-          if (pattern.test(lineContent)) {
+          if (!claimedByAst && pattern.test(lineContent)) {
             findings.push(
               this.createFinding(
                 file.filename,

@@ -10,7 +10,7 @@
     "prisma-erd-generator",
     "prisma-generator-fake-data",
     "prisma-json-schema-generator",
-    "tree-sitter-wasms"
+    "tree-sitter-wasm"
   ],
   "ignoreExportsUsedInFile": true,
   "workspaces": {

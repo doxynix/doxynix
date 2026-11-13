@@ -1,0 +1,254 @@
+import { describe, expect, it } from "vitest";
+
+import type { ImportRef } from "../core/discovery.types";
+import { CONFIDENCE_LEVELS } from "../core/scoring-constants";
+import { typescriptQuerySpec } from "./queries/typescript";
+import { collectQuerySignals } from "./query-signals";
+
+const FIXTURE = [
+  'import { Hono } from "hono";',
+  "export function greet(name: string) { return name; }",
+  "function internal() {}",
+  "class UserService { run() {} }",
+  'const app = new Hono(); app.get("/users", handler);',
+].join("\n");
+
+const IMPORT_FIXTURE = [
+  'import { Hono } from "hono";',
+  'import DefaultExport, { named } from "x";',
+  'import "side-effect";',
+  'import * as ns from "y";',
+  'const z = require("./z");',
+  'const d = import("./dyn");',
+  'export { anything } from "./reexported";',
+].join("\n");
+
+const NESTING_FIXTURE = [
+  "function check(items: number[]) {",
+  "  if (items.length === 0) {",
+  "    return;",
+  "  }",
+  "  for (const item of items) {",
+  "    if (item > 0) {",
+  "      return;",
+  "    }",
+  "  }",
+  "}",
+].join("\n");
+
+const ENTRYPOINT_FIXTURE = ['import { Hono } from "hono";', "const app = new Hono();"].join("\n");
+
+function describeImport(details: readonly ImportRef[] | undefined) {
+  return (details ?? []).map(({ kind, names, source }) => ({ kind, names, source }));
+}
+
+describe("collectQuerySignals", () => {
+  it("normalizes symbols, imports, exports and routes", async () => {
+    const result = await collectQuerySignals(
+      { content: FIXTURE, path: "src/api.ts" },
+      ".ts",
+      typescriptQuerySpec,
+    );
+
+    expect(result).not.toBeNull();
+    expect(result?.analysisMode).toBe("tree-sitter");
+    expect(result?.confidence).toBe(CONFIDENCE_LEVELS.astStructure);
+    expect(result?.symbols?.map((symbol) => symbol.name)).toEqual([
+      "greet",
+      "internal",
+      "UserService",
+      "run",
+    ]);
+    expect(result?.symbols?.find((symbol) => symbol.name === "greet")?.exported).toBe(true);
+    expect(result?.symbols?.find((symbol) => symbol.name === "internal")?.exported).toBe(false);
+    expect(result?.imports).toEqual(["hono"]);
+    expect(result?.exports).toBe(1);
+    expect(result?.routes).toEqual([
+      expect.objectContaining({ framework: "Hono", method: "GET", path: "/users" }),
+    ]);
+    expect(result?.parseError).toBe(false);
+    expect(result?.entrypointHint).toBe(true);
+  });
+
+  it("groups one import detail per statement", async () => {
+    const result = await collectQuerySignals(
+      { content: IMPORT_FIXTURE, path: "src/imports.ts" },
+      ".ts",
+      typescriptQuerySpec,
+    );
+
+    expect(describeImport(result?.importDetails)).toEqual([
+      { kind: "named", names: ["Hono"], source: "hono" },
+      { kind: "named", names: ["DefaultExport", "named"], source: "x" },
+      { kind: "side-effect", names: [], source: "side-effect" },
+      { kind: "namespace", names: ["ns"], source: "y" },
+      { kind: "require", names: [], source: "./z" },
+      { kind: "dynamic", names: [], source: "./dyn" },
+      { kind: "reexport", names: [], source: "./reexported" },
+    ]);
+    expect(result?.imports).toEqual([
+      "hono",
+      "x",
+      "side-effect",
+      "y",
+      "./z",
+      "./dyn",
+      "./reexported",
+    ]);
+  });
+
+  it("counts complexity and nesting depth", async () => {
+    const result = await collectQuerySignals(
+      { content: NESTING_FIXTURE, path: "src/nesting.ts" },
+      ".ts",
+      typescriptQuerySpec,
+    );
+
+    expect(result?.complexityMetrics.complexity).toBeGreaterThanOrEqual(2);
+    expect(result?.complexityMetrics.maxNesting).toBeGreaterThanOrEqual(2);
+  });
+
+  it("flags runtime entrypoints", async () => {
+    const result = await collectQuerySignals(
+      { content: ENTRYPOINT_FIXTURE, path: "src/server.ts" },
+      ".ts",
+      typescriptQuerySpec,
+    );
+
+    expect(result?.entrypointHint).toBe(true);
+    expect(result?.entrypointRefs).toHaveLength(1);
+    expect(result?.entrypointRefs?.[0]).toEqual(
+      expect.objectContaining({ kind: "runtime", path: "src/server.ts" }),
+    );
+  });
+
+  it("keeps tree-sitter signals when the calls query fails to compile", async () => {
+    const result = await collectQuerySignals(
+      { content: "export function greet() {}", path: "src/calls-broken.ts" },
+      ".ts",
+      { ...typescriptQuerySpec, calls: "(not_a_node) @call.name" },
+    );
+
+    expect(result).not.toBeNull();
+    expect(result?.symbols?.map((symbol) => symbol.name)).toEqual(["greet"]);
+    expect(result?.calls).toEqual([]);
+  });
+
+  it("returns null for an unsupported extension", async () => {
+    const result = await collectQuerySignals(
+      { content: "module x", path: "src/module.unknown" },
+      ".unknown",
+      typescriptQuerySpec,
+    );
+
+    expect(result).toBeNull();
+  });
+
+  it("records the raw signature and parameters for a function", async () => {
+    const result = await collectQuerySignals(
+      {
+        content: "export function greet(name: string, age?: number): string { return name; }",
+        path: "src/sample.ts",
+      },
+      ".ts",
+      typescriptQuerySpec,
+    );
+
+    const symbol = result?.symbols?.find((item) => item.name === "greet");
+    expect(symbol?.signature).toBe("greet(name: string, age?: number): string");
+    expect(symbol?.parameters).toBe("(name: string, age?: number)");
+    expect(symbol?.returnType).toBe(": string");
+  });
+
+  it("reads parameters and return type from an arrow function value", async () => {
+    const result = await collectQuerySignals(
+      { content: "const handler = (a: string): number => 1;", path: "src/handler.ts" },
+      ".ts",
+      typescriptQuerySpec,
+    );
+
+    const symbol = result?.symbols?.find((item) => item.name === "handler");
+    expect(symbol?.signature).toBe("handler(a: string): number");
+    expect(symbol?.parameters).toBe("(a: string)");
+    expect(symbol?.returnType).toBe(": number");
+  });
+
+  it("computes complexity per function", async () => {
+    const result = await collectQuerySignals(
+      {
+        content: [
+          "function simple() { return 1; }",
+          "function branchy(a: number) { if (a) { return 1; } return 0; }",
+        ].join("\n"),
+        path: "src/complexity.ts",
+      },
+      ".ts",
+      typescriptQuerySpec,
+    );
+
+    expect(result?.functionComplexities).toEqual([
+      expect.objectContaining({ complexity: 1, name: "simple" }),
+      expect.objectContaining({ complexity: 2, name: "branchy" }),
+    ]);
+  });
+
+  it("computes complexity for an arrow function declared as a const", async () => {
+    const result = await collectQuerySignals(
+      { content: "const pick = (a: number) => (a > 0 ? a : 0);", path: "src/arrow.ts" },
+      ".ts",
+      typescriptQuerySpec,
+    );
+
+    expect(result?.functionComplexities).toEqual([
+      expect.objectContaining({ complexity: 2, line: 1, maxNesting: 0, name: "pick" }),
+    ]);
+  });
+
+  it("lists only callables, not their containers", async () => {
+    const result = await collectQuerySignals(
+      {
+        content: [
+          "interface Shape { area(): number; }",
+          "class A { m() { if (ready) { return; } } }",
+        ].join("\n"),
+        path: "src/containers.ts",
+      },
+      ".ts",
+      typescriptQuerySpec,
+    );
+
+    expect(result?.functionComplexities).toEqual([
+      expect.objectContaining({ complexity: 2, name: "m" }),
+    ]);
+  });
+
+  it("omits declarations without a body", async () => {
+    const result = await collectQuerySignals(
+      { content: "type Handler = () => void;", path: "src/ambient.ts" },
+      ".ts",
+      {
+        ...typescriptQuerySpec,
+        symbols:
+          "(type_alias_declaration name: (type_identifier) @symbol.function.name) @symbol.function",
+      },
+    );
+
+    expect(result?.symbols?.map((symbol) => symbol.name)).toContain("Handler");
+    expect(result?.functionComplexities).toEqual([]);
+  });
+
+  it("scopes method containers to the enclosing class only", async () => {
+    const result = await collectQuerySignals(
+      {
+        content: ["class UserService { run() {} }", "const x = { m() {} };"].join("\n"),
+        path: "src/containers.ts",
+      },
+      ".ts",
+      typescriptQuerySpec,
+    );
+
+    const byName = new Map((result?.symbols ?? []).map((symbol) => [symbol.name, symbol]));
+    expect(byName.get("run")?.container).toBe("UserService");
+    expect(byName.get("m")?.container).toBeUndefined();
+  });
+});

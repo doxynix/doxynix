@@ -182,6 +182,7 @@ export const SCHEMA_LIMITS = {
 
 // Deeper analysis methods score higher.
 export const CONFIDENCE_LEVELS = {
+  astPartial: 65,
   astRoute: 74,
   // Tree-sitter (good structural accuracy)
   astStructure: 80,
