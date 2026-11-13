@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.13.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.12.4...doxynix-v6.13.0) (2026-11-13)
+
+
+### Features
+
+* **web:** migrate tree-sitter to query API and AST intelligence ([#2397](https://github.com/doxynix/doxynix/issues/2397)) ([5898ea0](https://github.com/doxynix/doxynix/commit/5898ea0e3b4a1966d0297ea8b67937ac03eafa9e))
+
 ## [6.12.4](https://github.com/doxynix/doxynix/compare/doxynix-v6.12.3...doxynix-v6.12.4) (2026-11-13)
 
 
