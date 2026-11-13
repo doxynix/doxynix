@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.13.0](https://github.com/doxynix/doxynix/compare/web-v5.12.4...web-v5.13.0) (2026-11-13)
+
+
+### Features
+
+* **web:** migrate tree-sitter to query API and AST intelligence ([#2397](https://github.com/doxynix/doxynix/issues/2397)) ([5898ea0](https://github.com/doxynix/doxynix/commit/5898ea0e3b4a1966d0297ea8b67937ac03eafa9e))
+
 ## [5.12.4](https://github.com/doxynix/doxynix/compare/web-v5.12.3...web-v5.12.4) (2026-11-13)
 
 
