@@ -39,6 +39,10 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
       ".php",
       ".swift",
       ".cs",
+      ".rb",
+      ".kt",
+      ".erl",
+      ".jl",
     ]) {
       expect(TREE_SITTER_SUPPORTED_EXTENSIONS).toContain(ext);
     }
@@ -67,7 +71,6 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
       "Django",
     ]);
     expect(spec?.wasm).toBe("tree-sitter-python.wasm");
-    expect(spec?.wasmPackage).toBe("tree-sitter-python");
   });
 
   it(".go → Gin/Echo route patterns and go-wasm", () => {
@@ -223,17 +226,20 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
     expect(result?.routes?.[0]?.framework).toBeUndefined();
   });
 
-  it("uses the real C# wasm filename and does not advertise broken grammars", () => {
+  it("loads every grammar from the tree-sitter-wasm bundle", () => {
     expect(getSpecByExt(".cs")?.wasm).toBe("tree-sitter-c_sharp.wasm");
-    expect(getSpecByExt(".erl")).toBeUndefined();
-    expect(getSpecByExt(".jl")).toBeUndefined();
-    expect(getSpecByExt(".kt")).toBeUndefined();
-    expect(getSpecByExt(".rb")).toBeUndefined();
+    expect(getSpecByExt(".cs")?.wasmDir).toBe("c_sharp");
+    expect(getSpecByExt(".rb")?.wasmDir).toBe("ruby");
+    expect(getSpecByExt(".kt")?.wasmDir).toBe("kotlin");
+    expect(getSpecByExt(".erl")?.wasmDir).toBe("erlang");
+    expect(getSpecByExt(".jl")?.wasmDir).toBe("julia");
+    expect(getSpecByExt(".swift")?.wasmDir).toBe("swift");
+    expect(getSpecByExt(".lua")?.wasmDir).toBe("lua");
   });
 
   it("flags a partial parse instead of reporting full AST confidence", async () => {
     const result = await collectTreeSitterSignals({
-      content: "class A { accessor x = 1; }",
+      content: "class A { accessor x = ; }",
       path: "src/partial.ts",
     });
 
@@ -243,7 +249,7 @@ describe("tree-sitter-signals: spec contract (without wasm)", () => {
 
   it("propagates partial-parse confidence through the TypeScript adapter", async () => {
     const result = await collectTypeScriptSignals({
-      content: "class A { accessor x = 1; }",
+      content: "class A { accessor x = ; }",
       path: "src/partial.ts",
     });
 

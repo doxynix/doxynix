@@ -1,16 +1,21 @@
 import { describe, expect, it } from "vitest";
-import type Parser from "web-tree-sitter";
+import { type Language, Query, type QueryCapture } from "web-tree-sitter";
 
 import { createParser, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
 
 import { bashQuerySpec } from "./bash";
+import { erlangQuerySpec } from "./erlang";
 import { QUERY_SPECS } from "./index";
+import { juliaQuerySpec } from "./julia";
+import { kotlinQuerySpec } from "./kotlin";
 import { luaQuerySpec } from "./lua";
 import { objcQuerySpec } from "./objc";
+import { rubyQuerySpec } from "./ruby";
 import { swiftQuerySpec } from "./swift";
+import { parseFixture } from "./test-utils";
 import type { LanguageQuerySpec } from "./types";
 
-const REMAINING_EXTENSIONS = [".sh", ".lua", ".m", ".swift"] as const;
+const REMAINING_EXTENSIONS = [".sh", ".lua", ".m", ".swift", ".rb", ".kt", ".erl", ".jl"] as const;
 
 const REQUIRED_SECTIONS = ["symbols", "imports", "complexity", "calls"] as const;
 
@@ -39,15 +44,15 @@ async function queryTexts(
   spec: Parameters<typeof loadLanguage>[1],
   querySource: string,
   content: string,
-  predicate: (capture: Parser.QueryCapture) => boolean,
+  predicate: (capture: QueryCapture) => boolean,
 ) {
   const parser = await createParser();
   try {
     const language = await loadLanguage(ext, spec);
     parser.setLanguage(language);
-    const tree = parser.parse(content);
+    const tree = parseFixture(parser, content);
     try {
-      const query = language.query(querySource);
+      const query = new Query(language, querySource);
       try {
         return query
           .captures(tree.rootNode)
@@ -84,9 +89,9 @@ function importSourcesFor(
   );
 }
 
-function compileSection(language: Parser.Language, ext: string, section: string, source: string) {
+function compileSection(language: Language, ext: string, section: string, source: string) {
   try {
-    const query = language.query(source);
+    const query = new Query(language, source);
     query.delete();
   } catch (error) {
     throw new Error(`query section "${section}" failed for ${ext}`, { cause: error });
@@ -135,6 +140,52 @@ describe("remaining query specs", () => {
     await expect(importSourcesFor(".swift", swiftQuerySpec, content)).resolves.toEqual([
       "Foundation",
     ]);
+  });
+
+  it("captures ruby methods, classes, modules and require imports", async () => {
+    const content =
+      'require "foo"\nmodule Demo\n  class User\n    def run(x)\n      helper(x)\n    end\n  end\nend\n';
+    await expect(namesFor(".rb", rubyQuerySpec.symbols, content)).resolves.toEqual([
+      "Demo",
+      "User",
+      "run",
+    ]);
+    await expect(importSourcesFor(".rb", rubyQuerySpec, content)).resolves.toEqual(['"foo"']);
+  });
+
+  it("captures kotlin functions, classes and imports", async () => {
+    const content =
+      "package demo\nimport com.foo.Bar\nclass User {\n  fun run(x: Int): Int { return x }\n}\nfun main() { val u = User(1) }\n";
+    await expect(namesFor(".kt", kotlinQuerySpec.symbols, content)).resolves.toEqual([
+      "User",
+      "run",
+      "main",
+    ]);
+    await expect(importSourcesFor(".kt", kotlinQuerySpec, content)).resolves.toEqual([
+      "com.foo.Bar",
+    ]);
+  });
+
+  it("captures erlang functions, modules and include imports", async () => {
+    const content =
+      '-module(demo).\n-export([main/0]).\n-include("x.hrl").\nmain() -> run(1).\nrun(X) -> X.\n';
+    await expect(namesFor(".erl", erlangQuerySpec.symbols, content)).resolves.toEqual([
+      "demo",
+      "main",
+      "run",
+    ]);
+    await expect(importSourcesFor(".erl", erlangQuerySpec, content)).resolves.toEqual(['"x.hrl"']);
+  });
+
+  it("captures julia functions, structs, modules and imports", async () => {
+    const content =
+      "module Demo\nexport run\nusing Foo\nstruct Point\n  x::Int\nend\nfunction run(x)\n  return x\nend\nend\n";
+    await expect(namesFor(".jl", juliaQuerySpec.symbols, content)).resolves.toEqual([
+      "Demo",
+      "Point",
+      "run",
+    ]);
+    await expect(importSourcesFor(".jl", juliaQuerySpec, content)).resolves.toEqual(["Foo"]);
   });
 
   it.each(REMAINING_EXTENSIONS)("compiles every non-empty %s query section", async (ext) => {

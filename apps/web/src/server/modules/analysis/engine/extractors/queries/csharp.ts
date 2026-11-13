@@ -9,7 +9,7 @@ export const csharpQuerySpec: LanguageQuerySpec = {
   complexity: `
     (if_statement) @complexity.branch
     (for_statement) @complexity.branch
-    (for_each_statement) @complexity.branch
+    (foreach_statement) @complexity.branch
     (while_statement) @complexity.branch
     (do_statement) @complexity.branch
     (switch_statement) @complexity.branch
@@ -21,7 +21,7 @@ export const csharpQuerySpec: LanguageQuerySpec = {
   complexityNodeTypes: [
     "if_statement",
     "for_statement",
-    "for_each_statement",
+    "foreach_statement",
     "while_statement",
     "do_statement",
     "switch_statement",
@@ -44,7 +44,7 @@ export const csharpQuerySpec: LanguageQuerySpec = {
     "class_declaration",
     "if_statement",
     "for_statement",
-    "for_each_statement",
+    "foreach_statement",
     "while_statement",
     "do_statement",
     "switch_statement",
