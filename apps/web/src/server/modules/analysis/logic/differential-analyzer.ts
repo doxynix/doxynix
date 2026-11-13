@@ -13,6 +13,7 @@ import { callWithFallback } from "@/server/utils/call";
 import { buildPrReviewSystemPrompt, buildPrReviewUserPrompt } from "../ai/prompts-refactored";
 import { PrAiReviewOutputSchema } from "../analysis.schemas";
 import { PROJECT_POLICY_RULES } from "../engine/core/project-policy-rules";
+import { mapAddedLinesToNodes } from "./diff-node-mapper";
 import type { DifferentialAnalysisResult, PRAnalysisConfig, PRFinding } from "./pr.types";
 
 type PRDiffInfo = {
@@ -37,6 +38,12 @@ type PRAnalysisMetadata = {
   workspaceId: string;
 };
 
+const TRACKED_DECLARATION_TYPES = new Set([
+  "class_declaration",
+  "function_declaration",
+  "method_definition",
+]);
+
 export class DifferentialAnalyzer {
   private config: PRAnalysisConfig;
   private readonly isExcluded: (path: string) => boolean;
@@ -50,6 +57,7 @@ export class DifferentialAnalyzer {
     diffInfo: PRDiffInfo,
     projectOverviewJson: string,
     metadata: PRAnalysisMetadata,
+    fileContents: Map<string, string> = new Map(),
   ): Promise<DifferentialAnalysisResult> {
     const startTime = Date.now();
     appLogger.info({
@@ -90,9 +98,17 @@ export class DifferentialAnalyzer {
         };
       }
 
-      const sentinelFindings = this.runSentinelPhase(relevantFiles, diffInfo.prNumber);
+      const sentinelFindings = await this.runSentinelPhase(
+        relevantFiles,
+        diffInfo.prNumber,
+        fileContents,
+      );
 
-      const mapperFindings = this.runMapperPhase(relevantFiles, diffInfo.prNumber);
+      const mapperFindings = await this.runMapperPhase(
+        relevantFiles,
+        diffInfo.prNumber,
+        fileContents,
+      );
 
       const { findings: aiFindings, summary: aiSummary } = await this.runAiReviewPhase(
         relevantFiles,
@@ -256,7 +272,11 @@ export class DifferentialAnalyzer {
     }
   }
 
-  private runMapperPhase(files: PRDiffInfo["changedFiles"], _prNumber: number): PRFinding[] {
+  private async runMapperPhase(
+    files: PRDiffInfo["changedFiles"],
+    _prNumber: number,
+    fileContents: Map<string, string>,
+  ): Promise<PRFinding[]> {
     const findings: PRFinding[] = compact(
       files.map((file) => {
         if (file.patch == null) {
@@ -281,10 +301,65 @@ export class DifferentialAnalyzer {
         return null;
       }),
     );
+
+    for (const file of files) {
+      if (file.patch == null) {
+        continue;
+      }
+
+      const content = fileContents.get(file.filename);
+      if (content == null) {
+        continue;
+      }
+
+      // One finding per changed declaration, not one per added line inside it.
+      const seenDeclarations = new Set<string>();
+
+      try {
+        const addedLines = extractAddedLinesFromPatch(file.patch).map((change) => change.lineAfter);
+        const nodes = await mapAddedLinesToNodes({ content, path: file.filename }, addedLines);
+
+        for (const node of nodes) {
+          if (!TRACKED_DECLARATION_TYPES.has(node.nodeType)) {
+            continue;
+          }
+
+          const declarationKey = `${node.nodeType}:${node.name ?? node.line}`;
+          if (seenDeclarations.has(declarationKey)) {
+            continue;
+          }
+          seenDeclarations.add(declarationKey);
+
+          findings.push(
+            this.createFinding(
+              file.filename,
+              node.line,
+              node.name ?? node.nodeType,
+              `Changed ${node.nodeType.replaceAll("_", " ")}: ${node.name ?? "(anonymous)"}`,
+              4,
+              "LOW",
+              "Review the changed declaration and its callers before merging.",
+              "ARCHITECTURE",
+            ),
+          );
+        }
+      } catch (error) {
+        appLogger.warn({
+          error: error instanceof Error ? error.message : String(error),
+          msg: "pr_ast_mapping_failed",
+          path: file.filename,
+        });
+      }
+    }
+
     return findings;
   }
 
-  private runSentinelPhase(files: PRDiffInfo["changedFiles"], _prNumber: number): PRFinding[] {
+  private async runSentinelPhase(
+    files: PRDiffInfo["changedFiles"],
+    _prNumber: number,
+    _fileContents: Map<string, string>,
+  ): Promise<PRFinding[]> {
     const findings: PRFinding[] = [];
     const { SECRETS, SQL_INJECTION, todoPatterns, VULNERABILITIES } = PROJECT_POLICY_RULES.security;
 

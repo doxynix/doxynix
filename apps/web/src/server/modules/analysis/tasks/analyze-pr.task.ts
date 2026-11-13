@@ -139,6 +139,36 @@ export const analyzePrTask = task({
         })),
       );
 
+      const fileContents = new Map<string, string>();
+      for (const file of changedFiles) {
+        if (file.patch == null || file.status === "removed") {
+          continue;
+        }
+
+        try {
+          const response = await octokit.rest.repos.getContent({
+            owner: payload.owner,
+            path: file.filename,
+            ref: payload.headSha,
+            repo: payload.repoName,
+          });
+          if (Array.isArray(response.data) || response.data.type !== "file") {
+            continue;
+          }
+          if (response.data.size > 1_000_000) {
+            continue;
+          }
+          const content = Buffer.from(response.data.content, "base64").toString("utf8");
+          fileContents.set(file.filename, content);
+        } catch (error) {
+          appLogger.warn({
+            error: error instanceof Error ? error.message : String(error),
+            msg: "pr_file_content_fetch_failed",
+            path: file.filename,
+          });
+        }
+      }
+
       const analyzer = new DifferentialAnalyzer(config);
       const result = await analyzer.analyzePRDiff(
         {
@@ -156,6 +186,7 @@ export const analyzePrTask = task({
           userId: repo.createdByUserId,
           workspaceId: payload.workspaceId,
         },
+        fileContents,
       );
 
       const { commentable: validatedInlineFindings, findings: healedFindings } =

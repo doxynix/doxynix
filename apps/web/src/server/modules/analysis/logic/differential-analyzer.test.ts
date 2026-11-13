@@ -372,6 +372,60 @@ ${"+a\n".repeat(301)}`;
     expect(result.changedFiles).toBe(1);
   });
 
+  it("uses AST nodes for changed files when content is available", async () => {
+    const analyzer = new DifferentialAnalyzer(makeConfig());
+    const result = await analyzer.analyzePRDiff(
+      {
+        baseSha: "a",
+        changedFiles: [
+          {
+            additions: 1,
+            deletions: 0,
+            filename: "src/a.ts",
+            patch: "@@ -1,2 +1,3 @@\n function a() {\n+  return 1;\n }",
+          },
+        ],
+        headSha: "b",
+        owner: "o",
+        prNumber: 1,
+        repoName: "r",
+      },
+      "{}",
+      PR_METADATA,
+      new Map([["src/a.ts", "function a() {\n  return 1;\n}"]]),
+    );
+
+    expect(result.findings).toEqual(
+      expect.arrayContaining([expect.objectContaining({ file: "src/a.ts", type: "ARCHITECTURE" })]),
+    );
+  });
+
+  it("emits one ARCHITECTURE finding per changed declaration, not per line", async () => {
+    const analyzer = new DifferentialAnalyzer(makeConfig());
+    const result = await analyzer.analyzePRDiff(
+      {
+        baseSha: "a",
+        changedFiles: [
+          {
+            additions: 2,
+            deletions: 0,
+            filename: "src/a.ts",
+            patch: "@@ -1,3 +1,4 @@\n function a() {\n+  return 1;\n+  return 2;\n }",
+          },
+        ],
+        headSha: "b",
+        owner: "o",
+        prNumber: 1,
+        repoName: "r",
+      },
+      "{}",
+      PR_METADATA,
+      new Map([["src/a.ts", "function a() {\n  return 1;\n  return 2;\n}"]]),
+    );
+
+    expect(result.findings.filter((f) => f.type === "ARCHITECTURE")).toHaveLength(1);
+  });
+
   it("logs the start of analysis", async () => {
     const analyzer = new DifferentialAnalyzer(makeConfig({ tokenBudget: 40_000 }));
 
