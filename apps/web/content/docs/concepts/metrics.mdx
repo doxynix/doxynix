@@ -20,9 +20,10 @@ scores `25 / 125 * 100 = 20`.
 
 ## Cyclomatic complexity
 
-Complexity currently measures branching density per file; per-function complexity is added in
-Milestone 4 of the Tree-sitter query migration. A file with more branches needs more test cases to
-cover, so a rising average points at code that is getting harder to reason about.
+Cyclomatic complexity measures branching density per function. Doxynix computes a per-function
+score from the Tree-sitter AST and keeps those scores on the file signals. The file-level score
+shown in the dashboard remains the total branch count for the file, so historical comparisons stay
+stable.
 
 ## Modularity index
 
