@@ -487,8 +487,12 @@ export async function createParser(): Promise<Parser> {
 // indefinitely, so oversized sources are skipped instead of handed to the wasm parser.
 export const MAX_PARSE_BYTES = 5_000_000;
 
-export function parseSource(parser: Parser, source: string): null | Tree {
-  if (source.length > MAX_PARSE_BYTES) {
+export function parseSource(
+  parser: Parser,
+  source: string,
+  maxBytes = MAX_PARSE_BYTES,
+): null | Tree {
+  if (Buffer.byteLength(source, "utf8") > maxBytes) {
     return null;
   }
 

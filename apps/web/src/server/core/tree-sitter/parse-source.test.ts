@@ -9,33 +9,35 @@ import {
   parseSource,
 } from "./index";
 
+async function parserWithTypescript() {
+  const spec = getSpecByExt(".ts");
+  if (spec == null) {
+    throw new Error("missing grammar spec for .ts");
+  }
+
+  const parser = await createParser();
+  parser.setLanguage(await loadLanguage(".ts", spec));
+  return parser;
+}
+
 describe("parseSource", () => {
   afterAll(async () => {
     await disposeTreeSitter();
   });
 
-  it("returns null for sources above the size cap without throwing", async () => {
-    const parser = await createParser();
-    try {
-      const oversized = "a".repeat(MAX_PARSE_BYTES + 1);
-      expect(parseSource(parser, oversized)).toBeNull();
-    } finally {
-      parser.delete();
-    }
+  it("keeps the production cap at 5 MB", () => {
+    expect(MAX_PARSE_BYTES).toBe(5_000_000);
   });
 
-  it("parses a normal source", async () => {
-    const spec = getSpecByExt(".ts");
-    if (spec == null) {
-      throw new Error("missing grammar spec for .ts");
-    }
-
-    const parser = await createParser();
+  it("returns a tree just below the limit and null just above it", async () => {
+    const parser = await parserWithTypescript();
     try {
-      parser.setLanguage(await loadLanguage(".ts", spec));
-      const tree = parseSource(parser, "const x: number = 1;");
+      const source = "const x: number = 1;";
+      const limit = Buffer.byteLength(source, "utf8") + 1;
+
+      const tree = parseSource(parser, source, limit);
       if (tree == null) {
-        throw new Error("parseSource returned no tree for a normal source");
+        throw new Error("parseSource dropped a source below the limit");
       }
 
       try {
@@ -43,6 +45,21 @@ describe("parseSource", () => {
       } finally {
         tree.delete();
       }
+
+      expect(parseSource(parser, `${source}${" ".repeat(limit)}`, limit)).toBeNull();
+    } finally {
+      parser.delete();
+    }
+  });
+
+  it("counts UTF-8 bytes rather than UTF-16 code units", async () => {
+    const parser = await parserWithTypescript();
+    try {
+      const limit = 8;
+      const source = "é".repeat(limit);
+
+      expect(Buffer.byteLength(source, "utf8")).toBeGreaterThan(limit);
+      expect(parseSource(parser, source, limit)).toBeNull();
     } finally {
       parser.delete();
     }
