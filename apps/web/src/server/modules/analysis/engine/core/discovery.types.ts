@@ -77,6 +77,11 @@ export type CallSite = {
   receiver?: string;
 };
 
+export type ResolvedCallEdge = CallSite & {
+  resolved: boolean;
+  targetPath?: string;
+};
+
 export type RouteRef = {
   confidence: number;
   framework?: string;

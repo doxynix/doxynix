@@ -5,9 +5,10 @@ import { compileQuery } from "@/server/core/tree-sitter/query-cache";
 
 import { capturesByName, firstCapture } from "../extractors/queries/captures";
 import type { LanguageQuerySpec } from "../extractors/queries/types";
-import type { CallSite, RepositoryFile } from "./discovery.types";
+import type { CallSite, ImportRef, RepositoryFile, ResolvedCallEdge } from "./discovery.types";
+import { resolveExportedSymbol, type SymbolIndex } from "./symbol-index";
 
-export type { CallSite };
+export type { CallSite, ResolvedCallEdge };
 
 const FUNCTION_NODE_TYPES = new Set([
   "arrow_function",
@@ -82,4 +83,45 @@ export async function extractCallSites(
   } finally {
     tree?.delete();
   }
+}
+
+export function resolveCallSites(
+  sites: CallSite[],
+  importDetailsByPath: Map<string, ImportRef[]>,
+  index: SymbolIndex,
+  resolveImport: (fromPath: string, specifier: string) => string | null,
+): ResolvedCallEdge[] {
+  return sites.map((site) => {
+    if (site.receiver != null) {
+      return { ...site, resolved: false };
+    }
+
+    const imports = importDetailsByPath.get(site.path) ?? [];
+
+    for (const detail of imports) {
+      if (detail.kind === "side-effect" || detail.kind === "require") {
+        continue;
+      }
+
+      const names = detail.names ?? [];
+      const matchesImport =
+        detail.kind === "default" || detail.kind === "namespace" || names.includes(site.calleeName);
+
+      if (!matchesImport) {
+        continue;
+      }
+
+      const targetPath = resolveImport(site.path, detail.source);
+      if (targetPath == null) {
+        continue;
+      }
+
+      const symbol = resolveExportedSymbol(index, targetPath, site.calleeName);
+      if (symbol != null) {
+        return { ...site, resolved: true, targetPath };
+      }
+    }
+
+    return { ...site, resolved: false };
+  });
 }
