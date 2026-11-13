@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { Query } from "web-tree-sitter";
 
 import { createParser, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
 
 import { pythonQuerySpec } from "./python";
+import { parseFixture } from "./test-utils";
 
 const FIXTURE = [
   "import os",
@@ -33,9 +35,9 @@ describe("pythonQuerySpec", () => {
     try {
       const language = await loadLanguage(".py", pySpec());
       parser.setLanguage(language);
-      const tree = parser.parse(FIXTURE);
+      const tree = parseFixture(parser, FIXTURE);
       try {
-        const symbolQuery = language.query(pythonQuerySpec.symbols);
+        const symbolQuery = new Query(language, pythonQuerySpec.symbols);
         try {
           const names = symbolQuery
             .captures(tree.rootNode)
@@ -47,7 +49,7 @@ describe("pythonQuerySpec", () => {
           symbolQuery.delete();
         }
 
-        const importQuery = language.query(pythonQuerySpec.imports);
+        const importQuery = new Query(language, pythonQuerySpec.imports);
         try {
           const sources = importQuery
             .captures(tree.rootNode)

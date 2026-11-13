@@ -1,5 +1,5 @@
 import { uniq } from "es-toolkit";
-import type Parser from "web-tree-sitter";
+import type { Node, Query, Tree } from "web-tree-sitter";
 
 import { appLogger } from "@/server/core/app-logger";
 import {
@@ -61,7 +61,7 @@ function stripQuotes(text: string): string {
 }
 
 // Method declarations also occur in object literals, so only a real class ancestor counts.
-function findClassContainer(node: Parser.SyntaxNode | undefined): string | undefined {
+function findClassContainer(node: Node | undefined): string | undefined {
   let current = node?.parent ?? null;
 
   while (current != null) {
@@ -78,7 +78,7 @@ async function compileOptionalQuery(
   ext: string,
   spec: LanguageSpec,
   source: string,
-): Promise<Parser.Query | null> {
+): Promise<Query | null> {
   if (source.trim().length === 0) {
     return null;
   }
@@ -89,7 +89,7 @@ async function collectExportedNames(
   ext: string,
   spec: LanguageSpec,
   source: string,
-  root: Parser.SyntaxNode,
+  root: Node,
 ): Promise<Set<string>> {
   const names = new Set<string>();
   const query = await compileOptionalQuery(ext, spec, source);
@@ -116,7 +116,7 @@ function importKindFromCaptures(names: Iterable<string>): ImportKind {
   return "side-effect";
 }
 
-function importAnchor(captures: Map<string, Parser.SyntaxNode[]>): Parser.SyntaxNode | undefined {
+function importAnchor(captures: Map<string, Node[]>): Node | undefined {
   return (
     firstCapture(captures, "import.statement") ??
     firstCapture(captures, "import.reexport") ??
@@ -125,11 +125,11 @@ function importAnchor(captures: Map<string, Parser.SyntaxNode[]>): Parser.Syntax
   );
 }
 
-function importNames(captures: Map<string, Parser.SyntaxNode[]>, name: string): string[] {
+function importNames(captures: Map<string, Node[]>, name: string): string[] {
   return (captures.get(name) ?? []).map((node) => node.text);
 }
 
-function computeMaxNesting(root: Parser.SyntaxNode, nestingNodeTypes: string[]): number {
+function computeMaxNesting(root: Node, nestingNodeTypes: string[]): number {
   const nesting = new Set(nestingNodeTypes);
   let maxNesting = 0;
   let currentNesting = 0;
@@ -183,17 +183,20 @@ export async function collectQuerySignals(
     return null;
   }
 
-  let tree: Parser.Tree | undefined;
+  let tree: Tree | undefined;
 
   try {
     const parser = await getParserForExt(ext);
     const language = await loadLanguage(ext, languageSpec);
     parser.setLanguage(language);
-    tree = parser.parse(file.content);
+    tree = parser.parse(file.content) ?? undefined;
+    if (tree == null) {
+      return null;
+    }
     const root = tree.rootNode;
 
     const symbols: SymbolRef[] = [];
-    const symbolDeclarations = new Map<string, Parser.SyntaxNode>();
+    const symbolDeclarations = new Map<string, Node>();
     const imports = new Set<string>();
     const importDetails: ImportRef[] = [];
     const routes: RouteRef[] = [];
@@ -392,7 +395,7 @@ export async function collectQuerySignals(
         complexity,
         maxNesting: computeMaxNesting(root, querySpec.nestingNodeTypes),
       },
-      confidence: root.hasError() ? CONFIDENCE_LEVELS.astPartial : CONFIDENCE_LEVELS.astStructure,
+      confidence: root.hasError ? CONFIDENCE_LEVELS.astPartial : CONFIDENCE_LEVELS.astStructure,
       entrypointHint: entrypoints.length > 0,
       entrypointRefs: entrypoints,
       exports: new Set(symbols.filter((symbol) => symbol.exported).map((symbol) => symbol.name))
@@ -401,7 +404,7 @@ export async function collectQuerySignals(
       functionComplexities,
       importDetails,
       imports: Array.from(imports),
-      parseError: root.hasError(),
+      parseError: root.hasError,
       path: file.path,
       routes,
       source: "extraction",

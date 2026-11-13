@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { Query } from "web-tree-sitter";
 
 import { createParser, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
 
 import { goQuerySpec } from "./go";
+import { parseFixture } from "./test-utils";
 
 const FIXTURE = [
   "package main",
@@ -45,9 +47,9 @@ describe("goQuerySpec", () => {
     try {
       const language = await loadLanguage(".go", goSpec());
       parser.setLanguage(language);
-      const tree = parser.parse(FIXTURE);
+      const tree = parseFixture(parser, FIXTURE);
       try {
-        const symbolQuery = language.query(goQuerySpec.symbols);
+        const symbolQuery = new Query(language, goQuerySpec.symbols);
         try {
           const names = symbolQuery
             .captures(tree.rootNode)
@@ -59,7 +61,7 @@ describe("goQuerySpec", () => {
           symbolQuery.delete();
         }
 
-        const importQuery = language.query(goQuerySpec.imports);
+        const importQuery = new Query(language, goQuerySpec.imports);
         try {
           // The collector strips the literal's quotes before storing the module path.
           const sources = importQuery

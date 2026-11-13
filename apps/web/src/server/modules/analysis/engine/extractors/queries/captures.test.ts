@@ -1,17 +1,23 @@
 import { describe, expect, it } from "vitest";
-import type Parser from "web-tree-sitter";
+import type { Node, QueryCapture } from "web-tree-sitter";
 
 import { capturesByName, firstCapture } from "./captures";
 import type { LanguageQuerySpec } from "./types";
 
-const node = (text: string) => ({ text }) as Parser.SyntaxNode;
+const node = (text: string) => ({ text }) as Node;
+
+const capture = (name: string, text: string): QueryCapture => ({
+  name,
+  node: node(text),
+  patternIndex: 0,
+});
 
 describe("capturesByName", () => {
   it("groups captures by name and preserves order", () => {
     const map = capturesByName([
-      { name: "import.named", node: node("a") },
-      { name: "import.source", node: node("./x") },
-      { name: "import.named", node: node("b") },
+      capture("import.named", "a"),
+      capture("import.source", "./x"),
+      capture("import.named", "b"),
     ]);
 
     expect(map.get("import.named")?.map((item) => item.text)).toEqual(["a", "b"]);

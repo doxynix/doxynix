@@ -1,4 +1,4 @@
-import type Parser from "web-tree-sitter";
+import type { Node, Tree } from "web-tree-sitter";
 
 import { getParserForExt, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
 import { getFileExtension } from "@/server/utils/path-operations";
@@ -25,7 +25,7 @@ export const DECLARATION_TYPES: ReadonlySet<string> = new Set([
   "method_definition",
 ]);
 
-function resolveNodeName(node: Parser.SyntaxNode): string | undefined {
+function resolveNodeName(node: Node): string | undefined {
   const name = node.childForFieldName("name")?.text;
   if (name != null) {
     return name;
@@ -52,15 +52,18 @@ export async function mapAddedLinesToNodes(
   const language = await loadLanguage(ext, spec);
   parser.setLanguage(language);
 
-  let tree: Parser.Tree | undefined;
+  let tree: Tree | undefined;
 
   try {
-    tree = parser.parse(file.content);
+    tree = parser.parse(file.content) ?? undefined;
+    if (tree == null) {
+      return [];
+    }
     const seen = new Set<string>();
     const nodes: ChangedNode[] = [];
 
     for (const line of addedLines) {
-      let node: Parser.SyntaxNode | null = tree.rootNode.descendantForPosition({
+      let node: Node | null = tree.rootNode.descendantForPosition({
         column: 0,
         row: Math.max(0, line - 1),
       });

@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { Query } from "web-tree-sitter";
 
 import { createParser, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
 
 import { rustQuerySpec } from "./rust";
+import { parseFixture } from "./test-utils";
 
 const FIXTURE = [
   "use std::fmt;",
@@ -52,9 +54,9 @@ describe("rustQuerySpec", () => {
     try {
       const language = await loadLanguage(".rs", rustSpec());
       parser.setLanguage(language);
-      const tree = parser.parse(FIXTURE);
+      const tree = parseFixture(parser, FIXTURE);
       try {
-        const symbolQuery = language.query(rustQuerySpec.symbols);
+        const symbolQuery = new Query(language, rustQuerySpec.symbols);
         try {
           const names = symbolQuery
             .captures(tree.rootNode)
@@ -66,7 +68,7 @@ describe("rustQuerySpec", () => {
           symbolQuery.delete();
         }
 
-        const importQuery = language.query(rustQuerySpec.imports);
+        const importQuery = new Query(language, rustQuerySpec.imports);
         try {
           const sources = importQuery
             .captures(tree.rootNode)
@@ -90,9 +92,9 @@ describe("rustQuerySpec", () => {
     try {
       const language = await loadLanguage(".rs", rustSpec());
       parser.setLanguage(language);
-      const tree = parser.parse(ROUTE_FIXTURE);
+      const tree = parseFixture(parser, ROUTE_FIXTURE);
       try {
-        const routeQuery = language.query(rustQuerySpec.routes);
+        const routeQuery = new Query(language, rustQuerySpec.routes);
         try {
           const paths = routeQuery
             .captures(tree.rootNode)
@@ -119,7 +121,7 @@ describe("rustQuerySpec", () => {
         const source = rustQuerySpec[section] ?? "";
         expect(source.trim().length).toBeGreaterThan(0);
         try {
-          expect(() => language.query(source).delete()).not.toThrow();
+          expect(() => new Query(language, source).delete()).not.toThrow();
         } catch (error) {
           throw new Error(`query section "${section}" failed`, { cause: error });
         }

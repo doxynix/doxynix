@@ -1,14 +1,14 @@
-import type Parser from "web-tree-sitter";
+import { Query } from "web-tree-sitter";
 
 import { type LanguageSpec, loadLanguage } from "./index";
 
-const cache = new Map<string, Promise<Parser.Query>>();
+const cache = new Map<string, Promise<Query>>();
 
 export async function compileQuery(
   ext: string,
   spec: LanguageSpec,
   source: string,
-): Promise<Parser.Query> {
+): Promise<Query> {
   const key = `${ext}\u0000${source}`;
   const cached = cache.get(key);
   if (cached != null) {
@@ -17,7 +17,7 @@ export async function compileQuery(
 
   const compiled = (async () => {
     const language = await loadLanguage(ext, spec);
-    return language.query(source);
+    return new Query(language, source);
   })().catch((error: unknown) => {
     cache.delete(key);
     throw error;

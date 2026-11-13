@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { Query } from "web-tree-sitter";
 
 import { createParser, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
 
 import { phpQuerySpec } from "./php";
+import { parseFixture } from "./test-utils";
 
 const FIXTURE = [
   "<?php",
@@ -38,9 +40,9 @@ describe("phpQuerySpec", () => {
     try {
       const language = await loadLanguage(".php", phpSpec());
       parser.setLanguage(language);
-      const tree = parser.parse(FIXTURE);
+      const tree = parseFixture(parser, FIXTURE);
       try {
-        const symbolQuery = language.query(phpQuerySpec.symbols);
+        const symbolQuery = new Query(language, phpQuerySpec.symbols);
         try {
           const names = symbolQuery
             .captures(tree.rootNode)
@@ -52,7 +54,7 @@ describe("phpQuerySpec", () => {
           symbolQuery.delete();
         }
 
-        const importQuery = language.query(phpQuerySpec.imports);
+        const importQuery = new Query(language, phpQuerySpec.imports);
         try {
           const sources = importQuery
             .captures(tree.rootNode)
@@ -76,9 +78,9 @@ describe("phpQuerySpec", () => {
     try {
       const language = await loadLanguage(".php", phpSpec());
       parser.setLanguage(language);
-      const tree = parser.parse(ROUTE_FIXTURE);
+      const tree = parseFixture(parser, ROUTE_FIXTURE);
       try {
-        const routeQuery = language.query(phpQuerySpec.routes);
+        const routeQuery = new Query(language, phpQuerySpec.routes);
         try {
           const paths = routeQuery
             .captures(tree.rootNode)
@@ -106,7 +108,7 @@ describe("phpQuerySpec", () => {
         const source = phpQuerySpec[section] ?? "";
         expect(source.trim().length).toBeGreaterThan(0);
         try {
-          expect(() => language.query(source).delete()).not.toThrow();
+          expect(() => new Query(language, source).delete()).not.toThrow();
         } catch (error) {
           throw new Error(`query section "${section}" failed`, { cause: error });
         }

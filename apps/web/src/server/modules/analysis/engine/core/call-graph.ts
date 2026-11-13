@@ -1,4 +1,4 @@
-import type Parser from "web-tree-sitter";
+import type { Node, Tree } from "web-tree-sitter";
 
 import { appLogger } from "@/server/core/app-logger";
 import { getParserForExt, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
@@ -24,7 +24,7 @@ const FUNCTION_NODE_TYPES = new Set([
 ]);
 
 // Stops at the next function boundary so an anonymous callback is never attributed outward.
-function findDeclaratorName(fn: Parser.SyntaxNode): string | null {
+function findDeclaratorName(fn: Node): string | null {
   let current = fn.parent;
 
   while (current != null && !FUNCTION_NODE_TYPES.has(current.type)) {
@@ -37,8 +37,8 @@ function findDeclaratorName(fn: Parser.SyntaxNode): string | null {
   return null;
 }
 
-function findEnclosingFunction(node: Parser.SyntaxNode): string | null {
-  let current: Parser.SyntaxNode | null = node.parent;
+function findEnclosingFunction(node: Node): string | null {
+  let current: Node | null = node.parent;
 
   while (current != null) {
     if (FUNCTION_NODE_TYPES.has(current.type)) {
@@ -68,13 +68,16 @@ export async function extractCallSites(
     return [];
   }
 
-  let tree: Parser.Tree | undefined;
+  let tree: Tree | undefined;
 
   try {
     const parser = await getParserForExt(ext);
     const language = await loadLanguage(ext, spec);
     parser.setLanguage(language);
-    tree = parser.parse(file.content);
+    tree = parser.parse(file.content) ?? undefined;
+    if (tree == null) {
+      return [];
+    }
 
     const query = await compileQuery(ext, spec, querySpec.calls);
     const sites: CallSite[] = [];

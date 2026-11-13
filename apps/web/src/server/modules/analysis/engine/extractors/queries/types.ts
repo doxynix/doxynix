@@ -1,4 +1,4 @@
-import type Parser from "web-tree-sitter";
+import type { Node } from "web-tree-sitter";
 
 export type LanguageQuerySpec = {
   symbols: string;
@@ -12,5 +12,5 @@ export type LanguageQuerySpec = {
   nestingNodeTypes: string[];
   detectFramework?: (imports: Set<string>) => string | undefined;
   normalizeRouteMethod?: (raw: string) => string;
-  isExported?: (node: Parser.SyntaxNode, name: string) => boolean;
+  isExported?: (node: Node, name: string) => boolean;
 };

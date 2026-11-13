@@ -1,6 +1,22 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type * as WebTreeSitter from "web-tree-sitter";
 
-import { getSpecByExt, loadLanguage } from "./index";
+const queryConstruction = vi.hoisted(() => ({ count: 0 }));
+
+vi.mock("web-tree-sitter", async (importOriginal) => {
+  const actual = await importOriginal<typeof WebTreeSitter>();
+
+  class CountingQuery extends actual.Query {
+    constructor(language: InstanceType<typeof actual.Language>, source: string) {
+      queryConstruction.count += 1;
+      super(language, source);
+    }
+  }
+
+  return { ...actual, Query: CountingQuery };
+});
+
+import { getSpecByExt } from "./index";
 import { compileQuery, disposeQueries } from "./query-cache";
 
 const TS_QUERY = `
@@ -20,6 +36,7 @@ function tsSpec() {
 describe("compileQuery", () => {
   afterEach(() => {
     disposeQueries();
+    queryConstruction.count = 0;
     vi.restoreAllMocks();
   });
 
@@ -28,6 +45,7 @@ describe("compileQuery", () => {
     const second = await compileQuery(".ts", tsSpec(), TS_QUERY);
 
     expect(first).toBe(second);
+    expect(queryConstruction.count).toBe(1);
   });
 
   it("rejects an invalid query instead of caching it", async () => {
@@ -36,14 +54,10 @@ describe("compileQuery", () => {
   });
 
   it("evicts a rejected query so the next compile asks the grammar again", async () => {
-    const spec = tsSpec();
-    const language = await loadLanguage(".ts", spec);
-    const querySpy = vi.spyOn(language, "query");
+    await expect(compileQuery(".ts", tsSpec(), INVALID_QUERY)).rejects.toThrow(/not_a_real_node/);
+    await expect(compileQuery(".ts", tsSpec(), INVALID_QUERY)).rejects.toThrow(/not_a_real_node/);
 
-    await expect(compileQuery(".ts", spec, INVALID_QUERY)).rejects.toThrow(/not_a_real_node/);
-    await expect(compileQuery(".ts", spec, INVALID_QUERY)).rejects.toThrow(/not_a_real_node/);
-
-    expect(querySpy).toHaveBeenCalledTimes(2);
+    expect(queryConstruction.count).toBe(2);
   });
 
   it("handles out a fresh query after the cache is cleared", async () => {

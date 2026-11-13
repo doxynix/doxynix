@@ -1,7 +1,7 @@
-import type Parser from "web-tree-sitter";
+import type { Node, QueryCapture } from "web-tree-sitter";
 
-export function capturesByName(captures: Parser.QueryCapture[]): Map<string, Parser.SyntaxNode[]> {
-  const map = new Map<string, Parser.SyntaxNode[]>();
+export function capturesByName(captures: QueryCapture[]): Map<string, Node[]> {
+  const map = new Map<string, Node[]>();
 
   for (const capture of captures) {
     const nodes = map.get(capture.name);
@@ -15,9 +15,6 @@ export function capturesByName(captures: Parser.QueryCapture[]): Map<string, Par
   return map;
 }
 
-export function firstCapture(
-  map: Map<string, Parser.SyntaxNode[]>,
-  name: string,
-): Parser.SyntaxNode | undefined {
+export function firstCapture(map: Map<string, Node[]>, name: string): Node | undefined {
   return map.get(name)?.[0];
 }

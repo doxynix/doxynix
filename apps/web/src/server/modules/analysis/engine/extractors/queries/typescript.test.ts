@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { Query } from "web-tree-sitter";
 
 import { createParser, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
 
+import { parseFixture } from "./test-utils";
 import { typescriptQuerySpec } from "./typescript";
 
 const FIXTURE = [
@@ -30,8 +32,8 @@ describe("typescriptQuerySpec", () => {
     const parser = await createParser();
     const language = await loadLanguage(".ts", spec);
     parser.setLanguage(language);
-    const tree = parser.parse(FIXTURE);
-    const query = language.query(typescriptQuerySpec.symbols);
+    const tree = parseFixture(parser, FIXTURE);
+    const query = new Query(language, typescriptQuerySpec.symbols);
 
     const names = query
       .captures(tree.rootNode)

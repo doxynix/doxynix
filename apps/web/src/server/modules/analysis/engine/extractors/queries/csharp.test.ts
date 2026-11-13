@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { Query } from "web-tree-sitter";
 
 import { createParser, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
 
 import { csharpQuerySpec } from "./csharp";
+import { parseFixture } from "./test-utils";
 
 const FIXTURE = [
   "using System;",
@@ -50,9 +52,9 @@ describe("csharpQuerySpec", () => {
     try {
       const language = await loadLanguage(".cs", csharpSpec());
       parser.setLanguage(language);
-      const tree = parser.parse(FIXTURE);
+      const tree = parseFixture(parser, FIXTURE);
       try {
-        const symbolQuery = language.query(csharpQuerySpec.symbols);
+        const symbolQuery = new Query(language, csharpQuerySpec.symbols);
         try {
           const names = symbolQuery
             .captures(tree.rootNode)
@@ -64,7 +66,7 @@ describe("csharpQuerySpec", () => {
           symbolQuery.delete();
         }
 
-        const importQuery = language.query(csharpQuerySpec.imports);
+        const importQuery = new Query(language, csharpQuerySpec.imports);
         try {
           const sources = importQuery
             .captures(tree.rootNode)
@@ -88,9 +90,9 @@ describe("csharpQuerySpec", () => {
     try {
       const language = await loadLanguage(".cs", csharpSpec());
       parser.setLanguage(language);
-      const tree = parser.parse(ROUTE_FIXTURE);
+      const tree = parseFixture(parser, ROUTE_FIXTURE);
       try {
-        const routeQuery = language.query(csharpQuerySpec.routes);
+        const routeQuery = new Query(language, csharpQuerySpec.routes);
         try {
           const paths = routeQuery
             .captures(tree.rootNode)
@@ -117,7 +119,7 @@ describe("csharpQuerySpec", () => {
         const source = csharpQuerySpec[section] ?? "";
         expect(source.trim().length).toBeGreaterThan(0);
         try {
-          expect(() => language.query(source).delete()).not.toThrow();
+          expect(() => new Query(language, source).delete()).not.toThrow();
         } catch (error) {
           throw new Error(`query section "${section}" failed`, { cause: error });
         }

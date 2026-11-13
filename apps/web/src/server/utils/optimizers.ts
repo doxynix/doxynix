@@ -16,7 +16,7 @@ type AiTextLike = {
   text?: unknown;
 };
 
-// Must stay assignable from `web-tree-sitter`'s own declarations: SyntaxNode has no `delete`, and method syntax keeps params bivariant under `strictFunctionTypes`.
+// Must stay assignable from `web-tree-sitter`'s own declarations: `Node` has no `delete`, and method syntax keeps params bivariant under `strictFunctionTypes`.
 type TreeSitterNode = {
   child(index: number): null | TreeSitterNode;
   childCount: number;
@@ -32,7 +32,7 @@ type TreeSitterTree = {
 
 type TreeSitterParser = {
   delete(): void;
-  parse(code: string): TreeSitterTree;
+  parse(code: string): null | TreeSitterTree;
   setLanguage(language?: unknown): void;
 };
 
@@ -121,6 +121,9 @@ export const CodeOptimizer = {
       runtimeParser.setLanguage(lang);
 
       tree = runtimeParser.parse(code);
+      if (tree == null) {
+        throw new Error("[TreeSitter] Could not parse source for skeletonization");
+      }
       const root = tree.rootNode;
 
       const bodyNodeTypes = new Set([

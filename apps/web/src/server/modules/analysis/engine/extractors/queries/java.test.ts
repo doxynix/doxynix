@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { Query } from "web-tree-sitter";
 
 import { createParser, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
 
 import { javaQuerySpec } from "./java";
+import { parseFixture } from "./test-utils";
 
 const FIXTURE = [
   "import java.util.List;",
@@ -49,9 +51,9 @@ describe("javaQuerySpec", () => {
     try {
       const language = await loadLanguage(".java", javaSpec());
       parser.setLanguage(language);
-      const tree = parser.parse(FIXTURE);
+      const tree = parseFixture(parser, FIXTURE);
       try {
-        const symbolQuery = language.query(javaQuerySpec.symbols);
+        const symbolQuery = new Query(language, javaQuerySpec.symbols);
         try {
           const names = symbolQuery
             .captures(tree.rootNode)
@@ -63,7 +65,7 @@ describe("javaQuerySpec", () => {
           symbolQuery.delete();
         }
 
-        const importQuery = language.query(javaQuerySpec.imports);
+        const importQuery = new Query(language, javaQuerySpec.imports);
         try {
           const sources = importQuery
             .captures(tree.rootNode)
@@ -87,9 +89,9 @@ describe("javaQuerySpec", () => {
     try {
       const language = await loadLanguage(".java", javaSpec());
       parser.setLanguage(language);
-      const tree = parser.parse(ROUTE_FIXTURE);
+      const tree = parseFixture(parser, ROUTE_FIXTURE);
       try {
-        const routeQuery = language.query(javaQuerySpec.routes);
+        const routeQuery = new Query(language, javaQuerySpec.routes);
         try {
           const paths = routeQuery
             .captures(tree.rootNode)
@@ -116,7 +118,7 @@ describe("javaQuerySpec", () => {
         const source = javaQuerySpec[section] ?? "";
         expect(source.trim().length).toBeGreaterThan(0);
         try {
-          expect(() => language.query(source).delete()).not.toThrow();
+          expect(() => new Query(language, source).delete()).not.toThrow();
         } catch (error) {
           throw new Error(`query section "${section}" failed`, { cause: error });
         }

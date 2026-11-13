@@ -1,4 +1,4 @@
-import type Parser from "web-tree-sitter";
+import type { Tree } from "web-tree-sitter";
 
 import { getParserForExt, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
 import { compileQuery } from "@/server/core/tree-sitter/query-cache";
@@ -22,10 +22,13 @@ export async function collectAstSecurityFindings(
   const language = await loadLanguage(ext, spec);
   parser.setLanguage(language);
 
-  let tree: Parser.Tree | undefined;
+  let tree: Tree | undefined;
 
   try {
-    tree = parser.parse(file.content);
+    tree = parser.parse(file.content) ?? undefined;
+    if (tree == null) {
+      return [];
+    }
     const query = await compileQuery(ext, spec, querySource);
     const findings: SecurityFindingMetric[] = [];
     const seen = new Set<number>();

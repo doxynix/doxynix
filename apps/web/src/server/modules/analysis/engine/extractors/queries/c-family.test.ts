@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { Query } from "web-tree-sitter";
 
 import { createParser, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
 
 import { cQuerySpec } from "./c";
 import { cppQuerySpec } from "./cpp";
+import { parseFixture } from "./test-utils";
 
 const C_FIXTURE = [
   "#include <stdio.h>",
@@ -43,9 +45,9 @@ describe("c-family query specs", () => {
     try {
       const language = await loadLanguage(".c", cSpec());
       parser.setLanguage(language);
-      const tree = parser.parse(C_FIXTURE);
+      const tree = parseFixture(parser, C_FIXTURE);
       try {
-        const symbolQuery = language.query(cQuerySpec.symbols);
+        const symbolQuery = new Query(language, cQuerySpec.symbols);
         try {
           const names = symbolQuery
             .captures(tree.rootNode)
@@ -57,7 +59,7 @@ describe("c-family query specs", () => {
           symbolQuery.delete();
         }
 
-        const importQuery = language.query(cQuerySpec.imports);
+        const importQuery = new Query(language, cQuerySpec.imports);
         try {
           const sources = importQuery
             .captures(tree.rootNode)
@@ -81,9 +83,9 @@ describe("c-family query specs", () => {
     try {
       const language = await loadLanguage(".cpp", cppSpec());
       parser.setLanguage(language);
-      const tree = parser.parse(CPP_FIXTURE);
+      const tree = parseFixture(parser, CPP_FIXTURE);
       try {
-        const symbolQuery = language.query(cppQuerySpec.symbols);
+        const symbolQuery = new Query(language, cppQuerySpec.symbols);
         try {
           const names = symbolQuery
             .captures(tree.rootNode)
@@ -110,7 +112,7 @@ describe("c-family query specs", () => {
         const source = cQuerySpec[section] ?? "";
         expect(source.trim().length).toBeGreaterThan(0);
         try {
-          expect(() => language.query(source).delete()).not.toThrow();
+          expect(() => new Query(language, source).delete()).not.toThrow();
         } catch (error) {
           throw new Error(`query section "${section}" failed`, { cause: error });
         }
@@ -128,7 +130,7 @@ describe("c-family query specs", () => {
         const source = cppQuerySpec[section] ?? "";
         expect(source.trim().length).toBeGreaterThan(0);
         try {
-          expect(() => language.query(source).delete()).not.toThrow();
+          expect(() => new Query(language, source).delete()).not.toThrow();
         } catch (error) {
           throw new Error(`query section "${section}" failed`, { cause: error });
         }

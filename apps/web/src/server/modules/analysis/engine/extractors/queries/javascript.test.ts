@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { Query } from "web-tree-sitter";
 
 import { createParser, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
 
 import { javascriptQuerySpec } from "./javascript";
+import { parseFixture } from "./test-utils";
 
 const FIXTURE = [
   'import express from "express";',
@@ -28,9 +30,9 @@ describe("javascriptQuerySpec", () => {
     try {
       const language = await loadLanguage(".js", jsSpec());
       parser.setLanguage(language);
-      const tree = parser.parse(FIXTURE);
+      const tree = parseFixture(parser, FIXTURE);
       try {
-        const query = language.query(javascriptQuerySpec.symbols);
+        const query = new Query(language, javascriptQuerySpec.symbols);
         try {
           const names = query
             .captures(tree.rootNode)
