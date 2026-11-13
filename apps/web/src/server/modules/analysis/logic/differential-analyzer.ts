@@ -13,6 +13,7 @@ import { callWithFallback } from "@/server/utils/call";
 import { buildPrReviewSystemPrompt, buildPrReviewUserPrompt } from "../ai/prompts-refactored";
 import { PrAiReviewOutputSchema } from "../analysis.schemas";
 import { PROJECT_POLICY_RULES } from "../engine/core/project-policy-rules";
+import { collectAstSecurityFindings } from "../engine/extractors/security-signals";
 import { DECLARATION_TYPES, mapAddedLinesToNodes } from "./diff-node-mapper";
 import type { DifferentialAnalysisResult, PRAnalysisConfig, PRFinding } from "./pr.types";
 
@@ -357,9 +358,41 @@ export class DifferentialAnalyzer {
   private async runSentinelPhase(
     files: PRDiffInfo["changedFiles"],
     _prNumber: number,
-    _fileContents: Map<string, string>,
+    fileContents: Map<string, string>,
   ): Promise<PRFinding[]> {
     const findings: PRFinding[] = [];
+
+    try {
+      const astFindings = await Promise.all(
+        files.map(async (file) => {
+          const content = fileContents.get(file.filename);
+          if (content == null) {
+            return [];
+          }
+          return collectAstSecurityFindings({ content, path: file.filename });
+        }),
+      );
+
+      for (const finding of astFindings.flat()) {
+        findings.push(
+          this.createFinding(
+            finding.path,
+            finding.line ?? 1,
+            finding.message,
+            finding.message,
+            8,
+            "HIGH",
+            "Replace the unsafe sink with a safe API or validate the input.",
+          ),
+        );
+      }
+    } catch (error) {
+      appLogger.warn({
+        error: error instanceof Error ? error.message : String(error),
+        msg: "pr_ast_security_scan_failed",
+      });
+    }
+
     const { SECRETS, SQL_INJECTION, todoPatterns, VULNERABILITIES } = PROJECT_POLICY_RULES.security;
 
     for (const file of files) {
