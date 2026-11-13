@@ -216,6 +216,12 @@ describe("buildArchitectureWriterSystemPrompt", () => {
     expect(out).toContain("ADRs");
     expect(out.length).toBeGreaterThan(50);
   });
+
+  it("instructs the writer to prefer provided upstream callers", () => {
+    const out = buildArchitectureWriterSystemPrompt();
+    expect(out).toContain("**Upstream Callers**: Use the provided `upstreamCallers` list");
+    expect(out).toContain("If it is empty, infer callers from `module_dependency_context`");
+  });
 });
 
 describe("buildArchitectureWriterUserPrompt", () => {
