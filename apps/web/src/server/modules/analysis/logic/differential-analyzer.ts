@@ -361,23 +361,50 @@ export class DifferentialAnalyzer {
     fileContents: Map<string, string>,
   ): Promise<PRFinding[]> {
     const findings: PRFinding[] = [];
+    const astSinkLines = new Map<string, Set<number>>();
 
-    try {
-      const astFindings = await Promise.all(
-        files.map(async (file) => {
-          const content = fileContents.get(file.filename);
-          if (content == null) {
-            return [];
-          }
-          return collectAstSecurityFindings({ content, path: file.filename });
-        }),
-      );
+    const astScanResults = await Promise.allSettled(
+      files.map(async (file) => {
+        if (file.patch == null) {
+          return [];
+        }
 
-      for (const finding of astFindings.flat()) {
+        const content = fileContents.get(file.filename);
+        if (content == null) {
+          return [];
+        }
+
+        const addedLines = new Set(
+          extractAddedLinesFromPatch(file.patch).map((change) => change.lineAfter),
+        );
+        const astFindings = await collectAstSecurityFindings({
+          content,
+          path: file.filename,
+        });
+
+        return astFindings.filter((finding) => addedLines.has(finding.line ?? 1));
+      }),
+    );
+
+    for (const result of astScanResults) {
+      if (result.status === "rejected") {
+        appLogger.warn({
+          error: result.reason instanceof Error ? result.reason.message : String(result.reason),
+          msg: "pr_ast_security_scan_failed",
+        });
+        continue;
+      }
+
+      for (const finding of result.value) {
+        const line = finding.line ?? 1;
+        const claimed = astSinkLines.get(finding.path) ?? new Set<number>();
+        claimed.add(line);
+        astSinkLines.set(finding.path, claimed);
+
         findings.push(
           this.createFinding(
             finding.path,
-            finding.line ?? 1,
+            line,
             finding.message,
             finding.message,
             8,
@@ -386,11 +413,6 @@ export class DifferentialAnalyzer {
           ),
         );
       }
-    } catch (error) {
-      appLogger.warn({
-        error: error instanceof Error ? error.message : String(error),
-        msg: "pr_ast_security_scan_failed",
-      });
     }
 
     const { SECRETS, SQL_INJECTION, todoPatterns, VULNERABILITIES } = PROJECT_POLICY_RULES.security;
@@ -405,9 +427,10 @@ export class DifferentialAnalyzer {
       for (const change of addedLines) {
         const lineContent = change.content;
         const lineNum = change.lineAfter;
+        const claimedByAst = astSinkLines.get(file.filename)?.has(lineNum) ?? false;
 
         for (const { pattern, title } of SECRETS) {
-          if (pattern.test(lineContent)) {
+          if (!claimedByAst && pattern.test(lineContent)) {
             findings.push(
               this.createFinding(
                 file.filename,
@@ -423,7 +446,7 @@ export class DifferentialAnalyzer {
         }
 
         for (const { pattern, title } of VULNERABILITIES) {
-          if (pattern.test(lineContent)) {
+          if (!claimedByAst && pattern.test(lineContent)) {
             findings.push(
               this.createFinding(
                 file.filename,
@@ -439,7 +462,7 @@ export class DifferentialAnalyzer {
         }
 
         for (const { pattern, title } of SQL_INJECTION) {
-          if (pattern.test(lineContent)) {
+          if (!claimedByAst && pattern.test(lineContent)) {
             findings.push(
               this.createFinding(
                 file.filename,

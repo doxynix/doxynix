@@ -44,6 +44,21 @@ const RATIO_PATCH = `--- a/src/refactor.ts
 +third
 `;
 
+const AST_SINK_PATCH = `--- a/src/sink.ts
++++ b/src/sink.ts
+@@ -1,1 +1,2 @@
+ const a = 1;
++eval(userInput);
+`;
+
+const AST_PREEXISTING_PATCH = `--- a/src/sink.ts
++++ b/src/sink.ts
+@@ -1,2 +1,3 @@
+ eval(existing);
+ const a = 1;
++eval(added);
+`;
+
 const makeConfig = (overrides: Partial<PRAnalysisConfig> = {}): PRAnalysisConfig => ({
   ciSkip: false,
   commentStyle: "DETAILED",
@@ -474,6 +489,81 @@ ${"+a\n".repeat(301)}`;
       file: "src/a.ts",
       line: 2,
     });
+  });
+
+  it("adds an AST sink finding from fileContents", async () => {
+    const analyzer = new DifferentialAnalyzer(makeConfig());
+    const result = await analyzer.analyzePRDiff(
+      makeDiffInfo([
+        { additions: 1, deletions: 0, filename: "src/sink.ts", patch: AST_SINK_PATCH },
+      ]),
+      "{}",
+      PR_METADATA,
+      new Map([["src/sink.ts", "const a = 1;\neval(userInput);"]]),
+    );
+
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0]).toMatchObject({
+      file: "src/sink.ts",
+      line: 2,
+      score: 8,
+      severity: "HIGH",
+      type: "SECURITY",
+    });
+    expect(result.findings[0]?.message).toContain("AST sink detected");
+    expect(result.riskScore).toBe(8);
+  });
+
+  it("emits one finding for an added eval line instead of AST plus regex", async () => {
+    const analyzer = new DifferentialAnalyzer(makeConfig());
+    const result = await analyzer.analyzePRDiff(
+      makeDiffInfo([
+        { additions: 1, deletions: 0, filename: "src/sink.ts", patch: AST_SINK_PATCH },
+      ]),
+      "{}",
+      PR_METADATA,
+      new Map([["src/sink.ts", "const a = 1;\neval(userInput);"]]),
+    );
+
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0]?.title).toBe("AST sink detected: eval");
+    expect(result.findings.some((f) => f.title === "Dynamic Code Execution (eval)")).toBe(false);
+  });
+
+  it("ignores AST sinks outside the added lines", async () => {
+    const analyzer = new DifferentialAnalyzer(makeConfig());
+    const result = await analyzer.analyzePRDiff(
+      makeDiffInfo([
+        {
+          additions: 1,
+          deletions: 0,
+          filename: "src/sink.ts",
+          patch: AST_PREEXISTING_PATCH,
+        },
+      ]),
+      "{}",
+      PR_METADATA,
+      new Map([["src/sink.ts", "eval(existing);\nconst a = 1;\neval(added);"]]),
+    );
+
+    const astFindings = result.findings.filter((f) => f.title.startsWith("AST sink detected"));
+
+    expect(result.findings).toHaveLength(1);
+    expect(astFindings).toHaveLength(1);
+    expect(astFindings[0]).toMatchObject({ line: 3 });
+    expect(result.findings.some((f) => f.line === 1)).toBe(false);
+  });
+
+  it("ignores fileContents when the file has no patch", async () => {
+    const analyzer = new DifferentialAnalyzer(makeConfig());
+    const result = await analyzer.analyzePRDiff(
+      makeDiffInfo([{ additions: 1, deletions: 0, filename: "src/sink.ts" }]),
+      "{}",
+      PR_METADATA,
+      new Map([["src/sink.ts", "eval(userInput);"]]),
+    );
+
+    expect(result.findings).toEqual([]);
   });
 
   it("logs the start of analysis", async () => {
