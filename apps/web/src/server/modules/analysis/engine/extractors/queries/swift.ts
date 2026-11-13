@@ -10,6 +10,14 @@ export const swiftQuerySpec: LanguageQuerySpec = {
     (switch_statement) @complexity.branch
     (catch_block) @complexity.branch
   `,
+  complexityNodeTypes: [
+    "if_statement",
+    "for_statement",
+    "while_statement",
+    "repeat_while_statement",
+    "switch_statement",
+    "catch_block",
+  ],
   entrypoints: "",
   exports: "",
   imports: `(import_declaration (identifier) @import.source) @import.statement`,

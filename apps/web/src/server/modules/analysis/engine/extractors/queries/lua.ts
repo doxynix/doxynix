@@ -9,6 +9,13 @@ export const luaQuerySpec: LanguageQuerySpec = {
     (while_statement) @complexity.branch
     (repeat_statement) @complexity.branch
   `,
+  complexityNodeTypes: [
+    "if_statement",
+    "for_numeric_statement",
+    "for_generic_statement",
+    "while_statement",
+    "repeat_statement",
+  ],
   entrypoints: "",
   exports: "",
   imports: `

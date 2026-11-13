@@ -17,6 +17,17 @@ export const pythonQuerySpec: LanguageQuerySpec = {
     (boolean_operator operator: "and") @complexity.branch
     (boolean_operator operator: "or") @complexity.branch
   `,
+  complexityNodeTypes: [
+    "if_statement",
+    "elif_clause",
+    "for_statement",
+    "while_statement",
+    "try_statement",
+    "except_clause",
+    "with_statement",
+    "conditional_expression",
+    "boolean_operator",
+  ],
   detectFramework: (imports) => {
     if (imports.has("fastapi")) {
       return "FastAPI";

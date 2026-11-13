@@ -173,6 +173,37 @@ describe("collectQuerySignals", () => {
     expect(symbol?.returnType).toBe(": number");
   });
 
+  it("computes complexity per function", async () => {
+    const result = await collectQuerySignals(
+      {
+        content: [
+          "function simple() { return 1; }",
+          "function branchy(a: number) { if (a) { return 1; } return 0; }",
+        ].join("\n"),
+        path: "src/complexity.ts",
+      },
+      ".ts",
+      typescriptQuerySpec,
+    );
+
+    expect(result?.functionComplexities).toEqual([
+      expect.objectContaining({ complexity: 1, name: "simple" }),
+      expect.objectContaining({ complexity: 2, name: "branchy" }),
+    ]);
+  });
+
+  it("computes complexity for an arrow function declared as a const", async () => {
+    const result = await collectQuerySignals(
+      { content: "const pick = (a: number) => (a > 0 ? a : 0);", path: "src/arrow.ts" },
+      ".ts",
+      typescriptQuerySpec,
+    );
+
+    expect(result?.functionComplexities).toEqual([
+      expect.objectContaining({ complexity: 2, line: 1, maxNesting: 0, name: "pick" }),
+    ]);
+  });
+
   it("scopes method containers to the enclosing class only", async () => {
     const result = await collectQuerySignals(
       {

@@ -7,6 +7,7 @@ export type LanguageQuerySpec = {
   routes: string;
   entrypoints: string;
   complexity?: string;
+  complexityNodeTypes: string[];
   calls?: string;
   nestingNodeTypes: string[];
   detectFramework?: (imports: Set<string>) => string | undefined;

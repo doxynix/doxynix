@@ -59,6 +59,16 @@ export const javascriptQuerySpec: LanguageQuerySpec = {
     (binary_expression operator: "&&") @complexity.branch
     (binary_expression operator: "||") @complexity.branch
   `,
+  complexityNodeTypes: [
+    "if_statement",
+    "for_statement",
+    "for_in_statement",
+    "while_statement",
+    "do_statement",
+    "switch_statement",
+    "catch_clause",
+    "ternary_expression",
+  ],
   detectFramework: (imports) => {
     if (imports.has("express")) {
       return "Express";

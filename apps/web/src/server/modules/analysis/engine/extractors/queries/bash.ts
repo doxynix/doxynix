@@ -8,6 +8,7 @@ export const bashQuerySpec: LanguageQuerySpec = {
     (while_statement) @complexity.branch
     (case_statement) @complexity.branch
   `,
+  complexityNodeTypes: ["if_statement", "for_statement", "while_statement", "case_statement"],
   entrypoints: "",
   exports: "",
   imports: `

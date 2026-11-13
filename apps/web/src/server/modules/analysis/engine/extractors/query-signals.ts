@@ -190,6 +190,7 @@ export async function collectQuerySignals(
     const root = tree.rootNode;
 
     const symbols: SymbolRef[] = [];
+    const symbolDeclarations = new Map<string, Parser.SyntaxNode>();
     const imports = new Set<string>();
     const importDetails: ImportRef[] = [];
     const routes: RouteRef[] = [];
@@ -213,6 +214,7 @@ export async function collectQuerySignals(
 
           for (const nameNode of nameNodes) {
             const name = nameNode.text;
+            const line = (declaration ?? nameNode).startPosition.row + 1;
             const exported =
               exportedNames.has(name) ||
               querySpec.isExported?.(declaration ?? nameNode, name) === true ||
@@ -226,12 +228,14 @@ export async function collectQuerySignals(
             const returnType = signatureNode?.childForFieldName("return_type")?.text;
             const container = kind === "method" ? findClassContainer(declaration) : undefined;
 
+            symbolDeclarations.set(`${name}:${line}`, signatureNode ?? nameNode);
+
             symbols.push({
               confidence: CONFIDENCE_LEVELS.astSymbol,
               container,
               exported,
               kind,
-              line: (declaration ?? nameNode).startPosition.row + 1,
+              line,
               name,
               parameters,
               path: file.path,
@@ -242,6 +246,23 @@ export async function collectQuerySignals(
         }
       }
     }
+
+    const functionComplexities = symbols
+      .map((symbol) => {
+        const declaration = symbolDeclarations.get(`${symbol.name}:${symbol.line ?? 1}`);
+        const body = declaration?.childForFieldName("body");
+        if (body == null) {
+          return null;
+        }
+
+        return {
+          complexity: 1 + body.descendantsOfType(querySpec.complexityNodeTypes).length,
+          line: symbol.line ?? 1,
+          maxNesting: computeMaxNesting(body, querySpec.nestingNodeTypes),
+          name: symbol.name,
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => item != null);
 
     const importQuery = await compileOptionalQuery(ext, languageSpec, querySpec.imports);
     if (importQuery != null) {
@@ -373,6 +394,7 @@ export async function collectQuerySignals(
       exports: new Set(symbols.filter((symbol) => symbol.exported).map((symbol) => symbol.name))
         .size,
       frameworkHints,
+      functionComplexities,
       importDetails,
       imports: Array.from(imports),
       parseError: root.hasError(),

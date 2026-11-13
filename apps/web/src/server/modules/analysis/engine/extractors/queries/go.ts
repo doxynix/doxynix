@@ -14,6 +14,13 @@ export const goQuerySpec: LanguageQuerySpec = {
     (binary_expression operator: "&&") @complexity.branch
     (binary_expression operator: "||") @complexity.branch
   `,
+  complexityNodeTypes: [
+    "if_statement",
+    "for_statement",
+    "expression_case",
+    "type_case",
+    "communication_case",
+  ],
   detectFramework: (imports) => {
     if (imports.has("github.com/gin-gonic/gin")) {
       return "Gin";

@@ -73,6 +73,16 @@ const CALLS = `
 export const typescriptQuerySpec: LanguageQuerySpec = {
   calls: CALLS,
   complexity: COMPLEXITY,
+  complexityNodeTypes: [
+    "if_statement",
+    "for_statement",
+    "for_in_statement",
+    "while_statement",
+    "do_statement",
+    "switch_statement",
+    "catch_clause",
+    "ternary_expression",
+  ],
   detectFramework: (imports) => {
     if ([...imports].some((specifier) => specifier === "hono" || specifier.startsWith("hono/"))) {
       return "Hono";

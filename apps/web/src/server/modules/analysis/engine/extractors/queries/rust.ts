@@ -14,6 +14,13 @@ export const rustQuerySpec: LanguageQuerySpec = {
     (binary_expression operator: "&&") @complexity.branch
     (binary_expression operator: "||") @complexity.branch
   `,
+  complexityNodeTypes: [
+    "if_expression",
+    "for_expression",
+    "while_expression",
+    "loop_expression",
+    "match_arm",
+  ],
   entrypoints: `
     (function_item name: (identifier) @entrypoint.runtime (#eq? @entrypoint.runtime "main")) @entrypoint.call
   `,

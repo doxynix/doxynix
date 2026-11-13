@@ -23,6 +23,7 @@ describe("capturesByName", () => {
 describe("LanguageQuerySpec", () => {
   it("is satisfied by the required query sources alone", () => {
     const spec: LanguageQuerySpec = {
+      complexityNodeTypes: [],
       entrypoints: "(program) @entry",
       exports: "(export_statement) @export",
       imports: "(import_statement) @import",

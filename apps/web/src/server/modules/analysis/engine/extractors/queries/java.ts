@@ -18,6 +18,16 @@ export const javaQuerySpec: LanguageQuerySpec = {
     (binary_expression operator: "&&") @complexity.branch
     (binary_expression operator: "||") @complexity.branch
   `,
+  complexityNodeTypes: [
+    "if_statement",
+    "for_statement",
+    "enhanced_for_statement",
+    "while_statement",
+    "do_statement",
+    "switch_expression",
+    "catch_clause",
+    "ternary_expression",
+  ],
   entrypoints: `
     (method_declaration name: (identifier) @entrypoint.runtime (#eq? @entrypoint.runtime "main")) @entrypoint.call
   `,

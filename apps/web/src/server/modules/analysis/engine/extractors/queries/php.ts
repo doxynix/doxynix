@@ -18,6 +18,16 @@ export const phpQuerySpec: LanguageQuerySpec = {
     (binary_expression operator: "&&") @complexity.branch
     (binary_expression operator: "||") @complexity.branch
   `,
+  complexityNodeTypes: [
+    "if_statement",
+    "for_statement",
+    "foreach_statement",
+    "while_statement",
+    "do_statement",
+    "switch_statement",
+    "catch_clause",
+    "conditional_expression",
+  ],
   entrypoints: "",
   exports: "",
   imports: `

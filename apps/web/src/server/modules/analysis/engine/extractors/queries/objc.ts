@@ -9,6 +9,13 @@ export const objcQuerySpec: LanguageQuerySpec = {
     (do_statement) @complexity.branch
     (switch_statement) @complexity.branch
   `,
+  complexityNodeTypes: [
+    "if_statement",
+    "for_statement",
+    "while_statement",
+    "do_statement",
+    "switch_statement",
+  ],
   entrypoints: "",
   exports: "",
   imports: `

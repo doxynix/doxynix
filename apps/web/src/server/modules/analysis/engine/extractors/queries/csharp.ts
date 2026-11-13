@@ -18,6 +18,16 @@ export const csharpQuerySpec: LanguageQuerySpec = {
     (binary_expression operator: "&&") @complexity.branch
     (binary_expression operator: "||") @complexity.branch
   `,
+  complexityNodeTypes: [
+    "if_statement",
+    "for_statement",
+    "for_each_statement",
+    "while_statement",
+    "do_statement",
+    "switch_statement",
+    "catch_clause",
+    "conditional_expression",
+  ],
   entrypoints: `
     (method_declaration name: (identifier) @entrypoint.runtime (#eq? @entrypoint.runtime "Main")) @entrypoint.call
   `,
