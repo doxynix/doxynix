@@ -295,6 +295,7 @@ describe("buildArchitectDigest", () => {
                   exports: 3,
                   parseTier: "tree-sitter",
                   path: "src/b.ts",
+                  upstreamCallers: [],
                 },
               ],
             },
