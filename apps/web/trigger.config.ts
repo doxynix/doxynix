@@ -19,8 +19,9 @@ export default defineConfig({
     extensions: [
       additionalFiles({
         files: [
-          "node_modules/web-tree-sitter/tree-sitter.wasm",
-          "node_modules/tree-sitter-wasms/out/*.wasm",
+          "node_modules/web-tree-sitter/web-tree-sitter.wasm",
+          "node_modules/tree-sitter-wasm/out/*/tree-sitter-*.wasm",
+          "vendor/wasms/*.wasm",
         ],
       }),
       additionalPackages({

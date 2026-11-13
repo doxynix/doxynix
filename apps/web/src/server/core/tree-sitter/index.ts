@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 
 import { join, resolve } from "pathe";
-import type Parser from "web-tree-sitter";
+import { Language, Parser } from "web-tree-sitter";
 
 import { appLogger } from "@/server/core/app-logger";
 
@@ -12,10 +12,6 @@ import { appLogger } from "@/server/core/app-logger";
  * knowing anything about analysis; the analysis extractors build on top of it.
  */
 const nodeRequire = createRequire(import.meta.url);
-
-// `createRequire` is typed `any`; routing through `unknown` keeps the `any` at the CJS
-// boundary and forces the interop to be asserted deliberately at the call site.
-const requireModule = (id: string): unknown => nodeRequire(id);
 
 export type SymbolKind =
   | "class"
@@ -43,7 +39,7 @@ type LanguageSpecBody = {
     pattern: RegExp;
   }>;
   wasm: string;
-  wasmPackage?: string;
+  wasmDir: string;
 };
 
 const TS_DECLARATIONS = [
@@ -75,6 +71,7 @@ const SPECS: Record<string, LanguageSpec> = {
     entrypoints: [/\bint\s+main\s*\(/],
     imports: { patterns: [/^\s*#include\s+"([^"]+)"/m], types: ["preproc_include"] },
     wasm: "tree-sitter-c.wasm",
+    wasmDir: "c",
   },
   ".cjs": {
     declarations: [
@@ -84,6 +81,7 @@ const SPECS: Record<string, LanguageSpec> = {
     entrypoints: [/\bapp\.listen\(/],
     imports: { patterns: [/require\s*\(\s*["']([^"']+)["']\s*\)/], types: ["call_expression"] },
     wasm: "tree-sitter-javascript.wasm",
+    wasmDir: "javascript",
   },
   ".cpp": {
     declarations: [
@@ -93,6 +91,7 @@ const SPECS: Record<string, LanguageSpec> = {
     entrypoints: [/\bint\s+main\s*\(/],
     imports: { patterns: [/^\s*#include\s+"([^"]+)"/m], types: ["preproc_include"] },
     wasm: "tree-sitter-cpp.wasm",
+    wasmDir: "cpp",
   },
   ".cs": {
     declarations: [
@@ -105,12 +104,21 @@ const SPECS: Record<string, LanguageSpec> = {
     entrypoints: [/\bstatic\s+void\s+Main\b/, /\bWebApplication\.CreateBuilder\b/],
     imports: { patterns: [/^using\s+([\w.]+);/m], types: ["using_directive"] },
     wasm: "tree-sitter-c_sharp.wasm",
+    wasmDir: "c_sharp",
   },
   ".cts": {
     declarations: TS_DECLARATIONS,
     entrypoints: [/\bbootstrap\(\)/],
     imports: { patterns: [/from\s+["']([^"']+)["']/], types: ["import_statement"] },
     wasm: "tree-sitter-typescript.wasm",
+    wasmDir: "typescript",
+  },
+  ".erl": {
+    declarations: [{ kind: "function", types: ["function_clause"] }],
+    entrypoints: [/-export\s*\(\s*\[\s*main/],
+    imports: { patterns: [/-include\s*\(\s*["']([^"']+)["']\s*\)/], types: ["pp_directive"] },
+    wasm: "tree-sitter-erlang.wasm",
+    wasmDir: "erlang",
   },
   ".go": {
     declarations: [
@@ -144,7 +152,7 @@ const SPECS: Record<string, LanguageSpec> = {
       },
     ],
     wasm: "tree-sitter-go.wasm",
-    wasmPackage: "tree-sitter-go",
+    wasmDir: "go",
   },
   ".java": {
     declarations: [
@@ -162,6 +170,20 @@ const SPECS: Record<string, LanguageSpec> = {
       },
     ],
     wasm: "tree-sitter-java.wasm",
+    wasmDir: "java",
+  },
+  ".jl": {
+    declarations: [
+      { kind: "function", types: ["function_definition"] },
+      { kind: "struct", types: ["struct_definition"] },
+    ],
+    entrypoints: [/\bmain\s*\(|Base\.run/],
+    imports: {
+      patterns: [/using\s+([\w ,]+)/m, /import\s+([\w ,]+)/m],
+      types: ["using_statement", "import_statement"],
+    },
+    wasm: "tree-sitter-julia.wasm",
+    wasmDir: "julia",
   },
   ".js": {
     declarations: [
@@ -179,6 +201,7 @@ const SPECS: Record<string, LanguageSpec> = {
       },
     ],
     wasm: "tree-sitter-javascript.wasm",
+    wasmDir: "javascript",
   },
   ".jsx": {
     declarations: [
@@ -188,12 +211,27 @@ const SPECS: Record<string, LanguageSpec> = {
     entrypoints: [/\bcreateRoot\b/, /\bReactDOM\.render\b/],
     imports: { patterns: [/from\s+["']([^"']+)["']/], types: ["import_statement"] },
     wasm: "tree-sitter-javascript.wasm",
+    wasmDir: "javascript",
+  },
+  ".kt": {
+    declarations: [
+      {
+        kind: "class",
+        types: ["class_declaration", "object_declaration"],
+      },
+      { kind: "function", types: ["function_declaration"] },
+    ],
+    entrypoints: [/\bval\s+app\b/, /\bfun\s+main\b/],
+    imports: { patterns: [/^import\s+([\w.]+)/m], types: ["import_header"] },
+    wasm: "tree-sitter-kotlin.wasm",
+    wasmDir: "kotlin",
   },
   ".lua": {
-    declarations: [{ kind: "function", types: ["function_definition", "local_function"] }],
+    declarations: [{ kind: "function", types: ["function_declaration", "function_definition"] }],
     entrypoints: [/\bmain\s*\(/],
     imports: { patterns: [/\brequire\s*\(?\s*["']([^"']+)["']\s*\)?/], types: ["function_call"] },
     wasm: "tree-sitter-lua.wasm",
+    wasmDir: "lua",
   },
   ".m": {
     declarations: [
@@ -203,6 +241,7 @@ const SPECS: Record<string, LanguageSpec> = {
     entrypoints: [/main\s*\(|NSApplicationMain/],
     imports: { patterns: [/#import\s+["<]([^">]+)[">]/m], types: ["preproc_import"] },
     wasm: "tree-sitter-objc.wasm",
+    wasmDir: "objc",
   },
   ".mjs": {
     declarations: [
@@ -212,12 +251,14 @@ const SPECS: Record<string, LanguageSpec> = {
     entrypoints: [/\bapp\.listen\(/],
     imports: { patterns: [/from\s+["']([^"']+)["']/], types: ["import_statement"] },
     wasm: "tree-sitter-javascript.wasm",
+    wasmDir: "javascript",
   },
   ".mts": {
     declarations: TS_DECLARATIONS,
     entrypoints: [/\bbootstrap\(\)/],
     imports: { patterns: [/from\s+["']([^"']+)["']/], types: ["import_statement"] },
     wasm: "tree-sitter-typescript.wasm",
+    wasmDir: "typescript",
   },
   ".php": {
     declarations: [
@@ -235,6 +276,7 @@ const SPECS: Record<string, LanguageSpec> = {
       },
     ],
     wasm: "tree-sitter-php.wasm",
+    wasmDir: "php",
   },
   ".py": {
     declarations: [
@@ -261,7 +303,17 @@ const SPECS: Record<string, LanguageSpec> = {
       },
     ],
     wasm: "tree-sitter-python.wasm",
-    wasmPackage: "tree-sitter-python",
+    wasmDir: "python",
+  },
+  ".rb": {
+    declarations: [
+      { kind: "class", types: ["class", "module"] },
+      { kind: "function", types: ["method"] },
+    ],
+    entrypoints: [/config\.ru/, /bin\/rails/],
+    imports: { patterns: [/require\s+["']([^"']+)["']/m], types: ["require"] },
+    wasm: "tree-sitter-ruby.wasm",
+    wasmDir: "ruby",
   },
   ".rs": {
     declarations: [
@@ -281,21 +333,24 @@ const SPECS: Record<string, LanguageSpec> = {
       },
     ],
     wasm: "tree-sitter-rust.wasm",
+    wasmDir: "rust",
   },
   ".sh": {
     declarations: [{ kind: "function", types: ["function_definition"] }],
     entrypoints: [/^#!\//],
     imports: { patterns: [/\bsource\s+([\w./-]+)/m, /^\.\s+([\w./-]+)/m], types: ["command"] },
     wasm: "tree-sitter-bash.wasm",
+    wasmDir: "bash",
   },
   ".swift": {
     declarations: [
-      { kind: "class", types: ["class_declaration", "struct_declaration", "enum_declaration"] },
+      { kind: "class", types: ["class_declaration"] },
       { kind: "function", types: ["function_declaration"] },
     ],
     entrypoints: [/@main/],
     imports: { patterns: [/^import\s+(\w+)/m], types: ["import_declaration"] },
     wasm: "tree-sitter-swift.wasm",
+    wasmDir: "swift",
   },
   ".ts": {
     declarations: TS_DECLARATIONS,
@@ -303,6 +358,7 @@ const SPECS: Record<string, LanguageSpec> = {
     imports: { patterns: [/from\s+["']([^"']+)["']/], types: ["import_statement"] },
     routePatterns: TS_ROUTE_PATTERNS,
     wasm: "tree-sitter-typescript.wasm",
+    wasmDir: "typescript",
   },
   ".tsx": {
     declarations: TS_DECLARATIONS,
@@ -310,60 +366,25 @@ const SPECS: Record<string, LanguageSpec> = {
     imports: { patterns: [/from\s+["']([^"']+)["']/], types: ["import_statement"] },
     routePatterns: TS_ROUTE_PATTERNS,
     wasm: "tree-sitter-tsx.wasm",
+    wasmDir: "tsx",
   },
 };
 
 export const TREE_SITTER_SUPPORTED_EXTENSIONS = Object.keys(SPECS);
 
-// CJS `export = Parser`, so the module object can itself *be* the `Parser` class — the
-// intersection is what makes the `Parser = mod` fallback below legal. The `import type`
-// above is erased, so it adds no runtime edge and does not defeat the createRequire/Turbopack
-// avoidance.
-type WebTreeSitterModule = typeof Parser & {
-  default?: typeof Parser;
-  init?: (moduleOptions?: object) => Promise<void>;
-  Language?: typeof Parser.Language;
-  Parser?: typeof Parser;
-};
+let runtimeInitPromise: null | Promise<void> = null;
+let runtimeInitialized = false;
+const languageCache = new Map<string, Promise<Language>>();
 
-let runtimeInitPromise: null | Promise<{ mod: WebTreeSitterModule; Parser: typeof Parser }> = null;
-let initializedRuntime: null | { mod: WebTreeSitterModule; Parser: typeof Parser } = null;
-const languageCache = new Map<string, Promise<Parser.Language>>();
-
-async function initRuntime() {
-  // web-tree-sitter 0.20.8's CJS build cannot re-initialize, so the wasm runtime outlives
-  // `disposeTreeSitter`; only parsers, languages and the in-flight promise are dropped there.
-  if (initializedRuntime) {
-    return initializedRuntime;
+async function initRuntime(): Promise<void> {
+  // The wasm runtime outlives `disposeTreeSitter`; only parsers, languages and the
+  // in-flight promise are dropped there, so `Parser.init` runs at most once per process.
+  if (runtimeInitialized) {
+    return;
   }
 
-  if (runtimeInitPromise) {
-    return runtimeInitPromise;
-  }
-
-  runtimeInitPromise = (async () => {
-    const mod = requireModule("web-tree-sitter") as WebTreeSitterModule;
-
-    let Parser = mod.Parser;
-
-    if (!Parser || typeof Parser.init !== "function") {
-      Parser = mod.default;
-    }
-
-    if (!Parser || typeof Parser.init !== "function") {
-      Parser = mod;
-    }
-
-    // The declared shape is not proof the module resolves to CJS/ESM-default/the class,
-    // so these three fallbacks can genuinely be falsy at runtime.
-    /* oxlint-disable-next-line typescript/no-unnecessary-condition */
-    if (!Parser || typeof Parser.init !== "function") {
-      throw new Error(
-        `[TreeSitter] Could not find Parser.init. Module keys: ${Object.keys(mod).join(", ")}`,
-      );
-    }
-
-    const runtimeWasmName = "tree-sitter.wasm";
+  runtimeInitPromise ??= (async () => {
+    const runtimeWasmName = "web-tree-sitter.wasm";
     const pathsToTry = [
       resolve(process.cwd(), runtimeWasmName),
       resolve(process.cwd(), "node_modules/web-tree-sitter", runtimeWasmName),
@@ -378,7 +399,7 @@ async function initRuntime() {
 
     await Parser.init({
       locateFile: (name: string) => {
-        if (name === "tree-sitter.wasm") {
+        if (name === runtimeWasmName) {
           return finalWasmPath;
         }
         return name;
@@ -386,16 +407,14 @@ async function initRuntime() {
     });
 
     appLogger.info({ msg: "Tree-sitter runtime ready", wasm: finalWasmPath });
-
-    initializedRuntime = { mod, Parser };
-    return initializedRuntime;
+    runtimeInitialized = true;
   })();
 
   return runtimeInitPromise;
 }
 
 export async function loadLanguage(ext: string, spec: LanguageSpec) {
-  const { mod, Parser } = await initRuntime();
+  await initRuntime();
 
   const cached = languageCache.get(ext);
   if (cached != null) {
@@ -404,15 +423,6 @@ export async function loadLanguage(ext: string, spec: LanguageSpec) {
 
   const loading = (async () => {
     const wasmPath = resolveGrammarWasmPath(spec);
-
-    // Same runtime-vs-type mismatch as in `initRuntime`.
-    /* oxlint-disable-next-line typescript/no-unnecessary-condition */
-    const Language = Parser.Language || mod.Language || mod.default?.Language;
-
-    /* oxlint-disable-next-line typescript/no-unnecessary-condition */
-    if (!Language || typeof Language.load !== "function") {
-      throw new Error(`[TreeSitter] Language.load is missing!`);
-    }
 
     // turbopackIgnore stops NFT from tracing the whole project for this path
     const wasmBytes = fs.readFileSync(/* turbopackIgnore: true */ wasmPath);
@@ -429,11 +439,12 @@ export async function loadLanguage(ext: string, spec: LanguageSpec) {
 }
 
 function resolveGrammarWasmPath(spec: LanguageSpec): string {
+  const dirname = import.meta.dirname as string | undefined;
   const candidates = [
-    resolve(process.cwd(), spec.wasm),
-    resolve(process.cwd(), "node_modules/tree-sitter-wasms/out", spec.wasm),
-    resolve((import.meta.dirname as string | undefined) ?? "", "../../../vendor/wasms", spec.wasm),
-  ].filter(Boolean);
+    resolve(process.cwd(), "vendor/wasms", spec.wasm),
+    resolve(process.cwd(), "node_modules/tree-sitter-wasm/out", spec.wasmDir, spec.wasm),
+    ...(dirname == null ? [] : [resolve(dirname, "../../../../vendor/wasms", spec.wasm)]),
+  ];
 
   for (const path of candidates) {
     // turbopackIgnore stops NFT from walking node_modules recursively
@@ -459,7 +470,7 @@ function resolveGrammarWasmPath(spec: LanguageSpec): string {
 export type LanguageSpec = LanguageSpecBody;
 
 export async function getRuntime() {
-  const { Parser } = await initRuntime();
+  await initRuntime();
   return Parser;
 }
 
@@ -468,8 +479,8 @@ export function getSpecByExt(ext: string) {
 }
 
 export async function createParser(): Promise<Parser> {
-  const { Parser: ParserCtor } = await initRuntime();
-  return new ParserCtor();
+  await initRuntime();
+  return new Parser();
 }
 
 const parserCache = new Map<string, Promise<Parser>>();
@@ -480,10 +491,7 @@ export async function getParserForExt(ext: string): Promise<Parser> {
     return cached;
   }
 
-  const created = createParser().then((parser) => {
-    parser.setTimeoutMicros(1_000_000);
-    return parser;
-  });
+  const created = createParser();
 
   parserCache.set(ext, created);
   // Mirrors `loadLanguage`: a transient failure must not poison the cache for this extension.

@@ -216,12 +216,12 @@
         "svix": "2.10.0",
         "tailwind-merge": "catalog:",
         "temporal-polyfill": "catalog:",
-        "tree-sitter-wasms": "0.1.13",
+        "tree-sitter-wasm": "2.0.4",
         "ua-parser-js": "2.0.10",
         "undici": "8.12.4",
         "unified": "11.0.5",
         "unist-util-visit": "5.2.0",
-        "web-tree-sitter": "0.20.8",
+        "web-tree-sitter": "0.27.2",
         "yaml": "2.9.1",
         "zod": "catalog:",
         "zustand": "5.1.0",
@@ -4674,7 +4674,7 @@
 
     "tree-kill": ["tree-kill@1.2.2", "", { "bin": { "tree-kill": "cli.js" } }, "sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A=="],
 
-    "tree-sitter-wasms": ["tree-sitter-wasms@0.1.13", "", { "dependencies": { "tree-sitter-wasms": "^0.1.11" } }, "sha512-wT+cR6DwaIz80/vho3AvSF0N4txuNx/5bcRKoXouOfClpxh/qqrF4URNLQXbbt8MaAxeksZcZd1j8gcGjc+QxQ=="],
+    "tree-sitter-wasm": ["tree-sitter-wasm@2.0.4", "", {}, "sha512-U83TRmp3oC3DtFA7bMka+o9jtOjZDZpW5/Y5oLzVtSzkcBllQWaYwtQIeTh14aRzZ7feTweBMSFk8NAqwQWmkg=="],
 
     "trim-lines": ["trim-lines@3.0.1", "", {}, "sha512-kRj8B+YHZCc9kQYdWfJB2/oUl9rA99qbowYYBtr4ui4mZyAQ2JpvVBd/6U2YloATfqBhBTSMhTpgBHtU0Mf3Rg=="],
 
@@ -4866,7 +4866,7 @@
 
     "web-namespaces": ["web-namespaces@2.0.1", "", {}, "sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ=="],
 
-    "web-tree-sitter": ["web-tree-sitter@0.20.8", "", {}, "sha512-weOVgZ3aAARgdnb220GqYuh7+rZU0Ka9k9yfKtGAzEYMa6GgiCzW9JjQRJyCJakvibQW+dfjJdihjInKuuCAUQ=="],
+    "web-tree-sitter": ["web-tree-sitter@0.27.2", "", {}, "sha512-ZRo86GKI4aOSBAqOrPmCtriExI3xIzu1sNw/V6v3b4QGxrEmO19FGwbMNdyhw3MJLAZIw0xAV0oSpqX361eAyQ=="],
 
     "web-vitals": ["web-vitals@6.2.3", "", {}, "sha512-Dmy+vdO1UPMqXiAtZSNayhl4f794Bxfd94W4HIj2HlYtczEQfEOon969memlcpcHrTuOKLa5baFjX7WbgmOq+A=="],
 
