@@ -13,7 +13,7 @@ import { callWithFallback } from "@/server/utils/call";
 import { buildPrReviewSystemPrompt, buildPrReviewUserPrompt } from "../ai/prompts-refactored";
 import { PrAiReviewOutputSchema } from "../analysis.schemas";
 import { PROJECT_POLICY_RULES } from "../engine/core/project-policy-rules";
-import { mapAddedLinesToNodes } from "./diff-node-mapper";
+import { DECLARATION_TYPES, mapAddedLinesToNodes } from "./diff-node-mapper";
 import type { DifferentialAnalysisResult, PRAnalysisConfig, PRFinding } from "./pr.types";
 
 type PRDiffInfo = {
@@ -37,12 +37,6 @@ type PRAnalysisMetadata = {
   userId: string;
   workspaceId: string;
 };
-
-const TRACKED_DECLARATION_TYPES = new Set([
-  "class_declaration",
-  "function_declaration",
-  "method_definition",
-]);
 
 export class DifferentialAnalyzer {
   private config: PRAnalysisConfig;
@@ -314,13 +308,14 @@ export class DifferentialAnalyzer {
 
       // One finding per changed declaration, not one per added line inside it.
       const seenDeclarations = new Set<string>();
+      const sourceLines = content.split("\n");
 
       try {
         const addedLines = extractAddedLinesFromPatch(file.patch).map((change) => change.lineAfter);
         const nodes = await mapAddedLinesToNodes({ content, path: file.filename }, addedLines);
 
         for (const node of nodes) {
-          if (!TRACKED_DECLARATION_TYPES.has(node.nodeType)) {
+          if (!DECLARATION_TYPES.has(node.nodeType)) {
             continue;
           }
 
@@ -330,11 +325,15 @@ export class DifferentialAnalyzer {
           }
           seenDeclarations.add(declarationKey);
 
+          // A bare identifier as `codeSnippet` makes `healFindingLine` match the first line
+          // containing that name, moving the finding off its commentable line.
+          const sourceLine = sourceLines[node.line - 1]?.trim() ?? "";
+
           findings.push(
             this.createFinding(
               file.filename,
               node.line,
-              node.name ?? node.nodeType,
+              sourceLine.length > 0 ? sourceLine : (node.name ?? node.nodeType),
               `Changed ${node.nodeType.replaceAll("_", " ")}: ${node.name ?? "(anonymous)"}`,
               4,
               "LOW",

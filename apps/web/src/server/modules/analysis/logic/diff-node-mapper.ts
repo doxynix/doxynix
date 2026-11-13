@@ -12,16 +12,31 @@ export type ChangedNode = {
   path: string;
 };
 
-const DECLARATION_TYPES = new Set([
+export const DECLARATION_TYPES: ReadonlySet<string> = new Set([
   "arrow_function",
   "class_declaration",
+  "class_definition",
   "class_specifier",
   "function_declaration",
   "function_definition",
+  "function_expression",
   "function_item",
   "method_declaration",
   "method_definition",
 ]);
+
+function resolveNodeName(node: Parser.SyntaxNode): string | undefined {
+  const name = node.childForFieldName("name")?.text;
+  if (name != null) {
+    return name;
+  }
+
+  if (node.type === "arrow_function" || node.type === "function_expression") {
+    return node.parent?.childForFieldName("name")?.text;
+  }
+
+  return undefined;
+}
 
 export async function mapAddedLinesToNodes(
   file: RepositoryFile,
@@ -66,7 +81,7 @@ export async function mapAddedLinesToNodes(
 
       nodes.push({
         line,
-        name: node.childForFieldName("name")?.text,
+        name: resolveNodeName(node),
         nodeType: node.type,
         path: file.path,
       });

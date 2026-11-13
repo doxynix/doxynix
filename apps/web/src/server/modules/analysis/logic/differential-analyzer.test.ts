@@ -396,7 +396,50 @@ ${"+a\n".repeat(301)}`;
     );
 
     expect(result.findings).toEqual(
-      expect.arrayContaining([expect.objectContaining({ file: "src/a.ts", type: "ARCHITECTURE" })]),
+      expect.arrayContaining([
+        expect.objectContaining({
+          codeSnippet: "return 1;",
+          file: "src/a.ts",
+          line: 2,
+          type: "ARCHITECTURE",
+        }),
+      ]),
+    );
+  });
+
+  it("names an arrow-function change after its variable declarator", async () => {
+    const analyzer = new DifferentialAnalyzer(makeConfig());
+    const result = await analyzer.analyzePRDiff(
+      {
+        baseSha: "a",
+        changedFiles: [
+          {
+            additions: 1,
+            deletions: 0,
+            filename: "src/handler.ts",
+            patch: "@@ -1,2 +1,3 @@\n const handler = () => {\n+  return 1;\n };",
+          },
+        ],
+        headSha: "b",
+        owner: "o",
+        prNumber: 1,
+        repoName: "r",
+      },
+      "{}",
+      PR_METADATA,
+      new Map([["src/handler.ts", "const handler = () => {\n  return 1;\n};"]]),
+    );
+
+    expect(result.findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          codeSnippet: "return 1;",
+          file: "src/handler.ts",
+          line: 2,
+          message: "Changed arrow function: handler",
+          type: "ARCHITECTURE",
+        }),
+      ]),
     );
   });
 
@@ -423,7 +466,14 @@ ${"+a\n".repeat(301)}`;
       new Map([["src/a.ts", "function a() {\n  return 1;\n  return 2;\n}"]]),
     );
 
-    expect(result.findings.filter((f) => f.type === "ARCHITECTURE")).toHaveLength(1);
+    const architectureFindings = result.findings.filter((f) => f.type === "ARCHITECTURE");
+
+    expect(architectureFindings).toHaveLength(1);
+    expect(architectureFindings[0]).toMatchObject({
+      codeSnippet: "return 1;",
+      file: "src/a.ts",
+      line: 2,
+    });
   });
 
   it("logs the start of analysis", async () => {

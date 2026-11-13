@@ -19,4 +19,18 @@ describe("mapAddedLinesToNodes", () => {
       expect.objectContaining({ line: 5, name: "b", nodeType: "function_declaration" }),
     ]);
   });
+
+  it("names an arrow function after its variable declarator", async () => {
+    const nodes = await mapAddedLinesToNodes(
+      {
+        content: ["const handler = () => {", "  return 1;", "};"].join("\n"),
+        path: "src/handler.ts",
+      },
+      [2],
+    );
+
+    expect(nodes).toEqual([
+      expect.objectContaining({ line: 2, name: "handler", nodeType: "arrow_function" }),
+    ]);
+  });
 });
