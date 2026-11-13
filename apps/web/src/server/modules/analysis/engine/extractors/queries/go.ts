@@ -3,7 +3,7 @@ import type { LanguageQuerySpec } from "./types";
 export const goQuerySpec: LanguageQuerySpec = {
   calls: `
     (call_expression function: (identifier) @call.name) @call.expression
-    (call_expression function: (selector_expression field: (field_identifier) @call.method)) @call.expression
+    (call_expression function: (selector_expression operand: (identifier) @call.object field: (field_identifier) @call.method)) @call.expression
   `,
   complexity: `
     (if_statement) @complexity.branch

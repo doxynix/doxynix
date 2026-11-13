@@ -69,6 +69,14 @@ export type ImportRef = {
   source: string;
 };
 
+export type CallSite = {
+  calleeName: string;
+  callerName: string | null;
+  line: number;
+  path: string;
+  receiver?: string;
+};
+
 export type RouteRef = {
   confidence: number;
   framework?: string;
@@ -156,6 +164,7 @@ type BaseSignal = {
 export interface FileSignals extends BaseSignal {
   analysisMode: ParseTier;
   apiSurface: number;
+  calls?: CallSite[];
   categories?: FileCategory[];
   complexityMetrics: {
     complexity: number;

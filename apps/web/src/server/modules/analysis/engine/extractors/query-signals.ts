@@ -11,6 +11,7 @@ import {
 } from "@/server/core/tree-sitter";
 import { compileQuery } from "@/server/core/tree-sitter/query-cache";
 
+import { extractCallSites } from "../core/call-graph";
 import type {
   EntrypointRef,
   FileSignals,
@@ -350,6 +351,8 @@ export async function collectQuerySignals(
       complexityQuery?.captures(root).filter((capture) => capture.name === "complexity.branch")
         .length ?? 0;
 
+    const calls = await extractCallSites(file, ext, querySpec);
+
     const frameworkHints = collectFrameworkFactsFromTokens(
       [...imports, file.path, ...symbols.map((symbol) => symbol.name)],
       file.path,
@@ -359,6 +362,7 @@ export async function collectQuerySignals(
     return {
       analysisMode: "tree-sitter",
       apiSurface: routes.length,
+      calls,
       complexityMetrics: {
         complexity,
         maxNesting: computeMaxNesting(root, querySpec.nestingNodeTypes),

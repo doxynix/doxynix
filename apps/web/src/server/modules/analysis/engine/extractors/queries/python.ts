@@ -3,7 +3,7 @@ import type { LanguageQuerySpec } from "./types";
 export const pythonQuerySpec: LanguageQuerySpec = {
   calls: `
     (call function: (identifier) @call.name) @call.expression
-    (call function: (attribute attribute: (identifier) @call.method)) @call.expression
+    (call function: (attribute object: (identifier) @call.object attribute: (identifier) @call.method)) @call.expression
   `,
   complexity: `
     (if_statement) @complexity.branch

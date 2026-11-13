@@ -3,7 +3,7 @@ import type { LanguageQuerySpec } from "./types";
 export const phpQuerySpec: LanguageQuerySpec = {
   calls: `
     (function_call_expression function: (name) @call.name) @call.expression
-    (member_call_expression name: (name) @call.method) @call.expression
+    (member_call_expression object: (variable_name) @call.object name: (name) @call.method) @call.expression
     (object_creation_expression) @call.expression
   `,
   complexity: `

@@ -3,7 +3,7 @@ import type { LanguageQuerySpec } from "./types";
 export const javaQuerySpec: LanguageQuerySpec = {
   calls: `
     (method_invocation name: (identifier) @call.name) @call.expression
-    (method_invocation object: (identifier) name: (identifier) @call.method) @call.expression
+    (method_invocation object: (identifier) @call.object name: (identifier) @call.method) @call.expression
     (object_creation_expression type: (type_identifier) @call.constructor) @call.expression
   `,
   complexity: `

@@ -3,7 +3,7 @@ import type { LanguageQuerySpec } from "./types";
 export const rustQuerySpec: LanguageQuerySpec = {
   calls: `
     (call_expression function: (identifier) @call.name) @call.expression
-    (call_expression function: (field_expression field: (field_identifier) @call.method)) @call.expression
+    (call_expression function: (field_expression value: (identifier) @call.object field: (field_identifier) @call.method)) @call.expression
   `,
   complexity: `
     (if_expression) @complexity.branch
