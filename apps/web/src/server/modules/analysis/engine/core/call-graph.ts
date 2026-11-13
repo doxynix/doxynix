@@ -1,7 +1,12 @@
 import type { Node, Tree } from "web-tree-sitter";
 
 import { appLogger } from "@/server/core/app-logger";
-import { getParserForExt, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
+import {
+  getParserForExt,
+  getSpecByExt,
+  loadLanguage,
+  parseSource,
+} from "@/server/core/tree-sitter";
 import { compileQuery } from "@/server/core/tree-sitter/query-cache";
 
 import { capturesByName, firstCapture } from "../extractors/queries/captures";
@@ -74,7 +79,7 @@ export async function extractCallSites(
     const parser = await getParserForExt(ext);
     const language = await loadLanguage(ext, spec);
     parser.setLanguage(language);
-    tree = parser.parse(file.content) ?? undefined;
+    tree = parseSource(parser, file.content) ?? undefined;
     if (tree == null) {
       return [];
     }

@@ -7,6 +7,7 @@ import {
   getSpecByExt,
   type LanguageSpec,
   loadLanguage,
+  parseSource,
   type SymbolKind,
 } from "@/server/core/tree-sitter";
 import { compileQuery } from "@/server/core/tree-sitter/query-cache";
@@ -189,7 +190,7 @@ export async function collectQuerySignals(
     const parser = await getParserForExt(ext);
     const language = await loadLanguage(ext, languageSpec);
     parser.setLanguage(language);
-    tree = parser.parse(file.content) ?? undefined;
+    tree = parseSource(parser, file.content) ?? undefined;
     if (tree == null) {
       return null;
     }

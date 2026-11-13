@@ -1,3 +1,5 @@
+import fs from "node:fs";
+
 import { afterAll, describe, expect, it } from "vitest";
 
 import {
@@ -5,6 +7,8 @@ import {
   disposeTreeSitter,
   getSpecByExt,
   loadLanguage,
+  parseSource,
+  resolveGrammarWasmPath,
   TREE_SITTER_SUPPORTED_EXTENSIONS,
 } from "./index";
 
@@ -40,6 +44,18 @@ describe("grammar smoke matrix", () => {
     await disposeTreeSitter();
   });
 
+  it.each(TREE_SITTER_SUPPORTED_EXTENSIONS)("resolves %s from tree-sitter-wasm", (ext) => {
+    const spec = getSpecByExt(ext);
+    if (spec == null) {
+      throw new Error(`missing grammar spec for ${ext}`);
+    }
+
+    const wasmPath = resolveGrammarWasmPath(spec);
+
+    expect(wasmPath).toContain(`node_modules/tree-sitter-wasm/out/${spec.wasmDir}/${spec.wasm}`);
+    expect(fs.existsSync(wasmPath)).toBe(true);
+  });
+
   it.each(TREE_SITTER_SUPPORTED_EXTENSIONS)("loads and parses %s without errors", async (ext) => {
     const fixture = FIXTURES[ext];
     expect(fixture, `missing smoke fixture for ${ext}`).toBeDefined();
@@ -55,7 +71,7 @@ describe("grammar smoke matrix", () => {
     const parser = await createParser();
     try {
       parser.setLanguage(await loadLanguage(ext, spec));
-      const tree = parser.parse(fixture);
+      const tree = parseSource(parser, fixture);
       if (tree == null) {
         throw new Error(`parser returned no tree for ${ext}`);
       }

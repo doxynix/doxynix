@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 
 import { join, resolve } from "pathe";
-import { Language, Parser } from "web-tree-sitter";
+import { Language, Parser, type Tree } from "web-tree-sitter";
 
 import { appLogger } from "@/server/core/app-logger";
 
@@ -438,7 +438,7 @@ export async function loadLanguage(ext: string, spec: LanguageSpec) {
   return loading;
 }
 
-function resolveGrammarWasmPath(spec: LanguageSpec): string {
+export function resolveGrammarWasmPath(spec: LanguageSpec): string {
   const dirname = import.meta.dirname as string | undefined;
   const candidates = [
     resolve(process.cwd(), "vendor/wasms", spec.wasm),
@@ -481,6 +481,18 @@ export function getSpecByExt(ext: string) {
 export async function createParser(): Promise<Parser> {
   await initRuntime();
   return new Parser();
+}
+
+// Replaces the parse timeout 0.27 removed: a pathological file must not tie up the parser
+// indefinitely, so oversized sources are skipped instead of handed to the wasm parser.
+export const MAX_PARSE_BYTES = 5_000_000;
+
+export function parseSource(parser: Parser, source: string): null | Tree {
+  if (source.length > MAX_PARSE_BYTES) {
+    return null;
+  }
+
+  return parser.parse(source);
 }
 
 const parserCache = new Map<string, Promise<Parser>>();

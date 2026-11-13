@@ -1,9 +1,11 @@
 import { compact, isString } from "es-toolkit";
+import type { Node, Parser, Tree } from "web-tree-sitter";
 
 import {
   getRuntime,
   getSpecByExt,
   loadLanguage,
+  parseSource,
   TREE_SITTER_SUPPORTED_EXTENSIONS,
 } from "@/server/core/tree-sitter";
 
@@ -14,26 +16,6 @@ type AiTextLike = {
   content?: unknown;
   output?: unknown;
   text?: unknown;
-};
-
-// Must stay assignable from `web-tree-sitter`'s own declarations: `Node` has no `delete`, and method syntax keeps params bivariant under `strictFunctionTypes`.
-type TreeSitterNode = {
-  child(index: number): null | TreeSitterNode;
-  childCount: number;
-  endIndex: number;
-  startIndex: number;
-  type: string;
-};
-
-type TreeSitterTree = {
-  delete(): void;
-  rootNode: TreeSitterNode;
-};
-
-type TreeSitterParser = {
-  delete(): void;
-  parse(code: string): null | TreeSitterTree;
-  setLanguage(language?: unknown): void;
 };
 
 function isAiTextLike(v: unknown): v is AiTextLike {
@@ -109,18 +91,18 @@ export const CodeOptimizer = {
       return code.slice(0, 5000);
     }
 
-    let tree: null | TreeSitterTree = null;
-    let parser: null | TreeSitterParser = null;
+    let tree: null | Tree = null;
+    let parser: null | Parser = null;
 
     try {
-      const Parser = await getRuntime();
-      const runtimeParser: TreeSitterParser = new Parser();
+      const ParserCtor = await getRuntime();
+      const runtimeParser = new ParserCtor();
       parser = runtimeParser;
 
       const lang = await loadLanguage(ext, spec);
       runtimeParser.setLanguage(lang);
 
-      tree = runtimeParser.parse(code);
+      tree = parseSource(runtimeParser, code);
       if (tree == null) {
         throw new Error("[TreeSitter] Could not parse source for skeletonization");
       }
@@ -135,7 +117,7 @@ export const CodeOptimizer = {
       ]);
       const rangesToReplace: Array<{ end: number; start: number }> = [];
 
-      const findBodies = (node: TreeSitterNode) => {
+      const findBodies = (node: Node) => {
         if (bodyNodeTypes.has(node.type) && node.endIndex - node.startIndex > 60) {
           rangesToReplace.push({ end: node.endIndex, start: node.startIndex });
           return;
@@ -157,8 +139,6 @@ export const CodeOptimizer = {
         result = result.slice(0, range.start) + replacement + result.slice(range.end);
       }
 
-      tree.delete();
-      runtimeParser.delete();
       return result;
     } catch (error) {
       appLogger.error({ error, msg: "Polyglot skeletonizer error:" });

@@ -1,6 +1,11 @@
 import type { Tree } from "web-tree-sitter";
 
-import { getParserForExt, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
+import {
+  getParserForExt,
+  getSpecByExt,
+  loadLanguage,
+  parseSource,
+} from "@/server/core/tree-sitter";
 import { compileQuery } from "@/server/core/tree-sitter/query-cache";
 import { getFileExtension } from "@/server/utils/path-operations";
 
@@ -25,7 +30,7 @@ export async function collectAstSecurityFindings(
   let tree: Tree | undefined;
 
   try {
-    tree = parser.parse(file.content) ?? undefined;
+    tree = parseSource(parser, file.content) ?? undefined;
     if (tree == null) {
       return [];
     }

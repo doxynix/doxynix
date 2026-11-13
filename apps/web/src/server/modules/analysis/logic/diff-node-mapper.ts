@@ -1,6 +1,11 @@
 import type { Node, Tree } from "web-tree-sitter";
 
-import { getParserForExt, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
+import {
+  getParserForExt,
+  getSpecByExt,
+  loadLanguage,
+  parseSource,
+} from "@/server/core/tree-sitter";
 import { getFileExtension } from "@/server/utils/path-operations";
 
 import type { RepositoryFile } from "../engine/core/discovery.types";
@@ -55,7 +60,7 @@ export async function mapAddedLinesToNodes(
   let tree: Tree | undefined;
 
   try {
-    tree = parser.parse(file.content) ?? undefined;
+    tree = parseSource(parser, file.content) ?? undefined;
     if (tree == null) {
       return [];
     }
