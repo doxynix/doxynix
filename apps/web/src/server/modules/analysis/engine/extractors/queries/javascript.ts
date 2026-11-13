@@ -44,7 +44,7 @@ const ROUTES = `
 export const javascriptQuerySpec: LanguageQuerySpec = {
   calls: `
     (call_expression function: (identifier) @call.name) @call.expression
-    (call_expression function: (member_expression object: (identifier) @call.object property: (property_identifier) @call.method)) @call.expression
+    (call_expression function: (member_expression object: (_) @call.object property: (property_identifier) @call.method)) @call.expression
     (new_expression constructor: (identifier) @call.constructor) @call.expression
   `,
   complexity: `

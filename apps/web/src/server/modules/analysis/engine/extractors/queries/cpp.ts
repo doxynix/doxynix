@@ -3,7 +3,7 @@ import type { LanguageQuerySpec } from "./types";
 export const cppQuerySpec: LanguageQuerySpec = {
   calls: `
     (call_expression function: (identifier) @call.name) @call.expression
-    (call_expression function: (field_expression argument: (identifier) @call.object field: (field_identifier) @call.method)) @call.expression
+    (call_expression function: (field_expression argument: (_) @call.object field: (field_identifier) @call.method)) @call.expression
   `,
   complexity: `
     (if_statement) @complexity.branch

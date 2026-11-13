@@ -1,5 +1,6 @@
 import type Parser from "web-tree-sitter";
 
+import { appLogger } from "@/server/core/app-logger";
 import { getParserForExt, getSpecByExt, loadLanguage } from "@/server/core/tree-sitter";
 import { compileQuery } from "@/server/core/tree-sitter/query-cache";
 
@@ -15,18 +16,37 @@ const FUNCTION_NODE_TYPES = new Set([
   "function_declaration",
   "function_definition",
   "function_definition_statement",
+  "function_expression",
   "function_item",
   "local_function_definition_statement",
   "method_declaration",
   "method_definition",
 ]);
 
+// Stops at the next function boundary so an anonymous callback is never attributed outward.
+function findDeclaratorName(fn: Parser.SyntaxNode): string | null {
+  let current = fn.parent;
+
+  while (current != null && !FUNCTION_NODE_TYPES.has(current.type)) {
+    if (current.type === "variable_declarator") {
+      return current.childForFieldName("name")?.text ?? null;
+    }
+    current = current.parent;
+  }
+
+  return null;
+}
+
 function findEnclosingFunction(node: Parser.SyntaxNode): string | null {
   let current: Parser.SyntaxNode | null = node.parent;
 
   while (current != null) {
     if (FUNCTION_NODE_TYPES.has(current.type)) {
-      return current.childForFieldName("name")?.text ?? null;
+      const name = current.childForFieldName("name")?.text;
+      if (name != null) {
+        return name;
+      }
+      return findDeclaratorName(current);
     }
     current = current.parent;
   }
@@ -80,6 +100,14 @@ export async function extractCallSites(
     }
 
     return sites;
+  } catch (error) {
+    appLogger.debug({
+      error,
+      ext,
+      msg: "Tree-sitter call-site extraction failed",
+      path: file.path,
+    });
+    return [];
   } finally {
     tree?.delete();
   }
@@ -104,8 +132,7 @@ export function resolveCallSites(
       }
 
       const names = detail.names ?? [];
-      const matchesImport =
-        detail.kind === "default" || detail.kind === "namespace" || names.includes(site.calleeName);
+      const matchesImport = names.includes(site.calleeName);
 
       if (!matchesImport) {
         continue;

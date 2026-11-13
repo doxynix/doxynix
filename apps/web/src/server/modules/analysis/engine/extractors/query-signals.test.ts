@@ -122,6 +122,18 @@ describe("collectQuerySignals", () => {
     );
   });
 
+  it("keeps tree-sitter signals when the calls query fails to compile", async () => {
+    const result = await collectQuerySignals(
+      { content: "export function greet() {}", path: "src/calls-broken.ts" },
+      ".ts",
+      { ...typescriptQuerySpec, calls: "(not_a_node) @call.name" },
+    );
+
+    expect(result).not.toBeNull();
+    expect(result?.symbols?.map((symbol) => symbol.name)).toEqual(["greet"]);
+    expect(result?.calls).toEqual([]);
+  });
+
   it("returns null for an unsupported extension", async () => {
     const result = await collectQuerySignals(
       { content: "module x", path: "src/module.unknown" },

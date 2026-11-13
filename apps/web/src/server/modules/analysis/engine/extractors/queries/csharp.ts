@@ -3,7 +3,7 @@ import type { LanguageQuerySpec } from "./types";
 export const csharpQuerySpec: LanguageQuerySpec = {
   calls: `
     (invocation_expression function: (identifier) @call.name) @call.expression
-    (invocation_expression function: (member_access_expression expression: (identifier) @call.object name: (identifier) @call.method)) @call.expression
+    (invocation_expression function: (member_access_expression expression: (_) @call.object name: (identifier) @call.method)) @call.expression
     (object_creation_expression type: (identifier) @call.constructor) @call.expression
   `,
   complexity: `
