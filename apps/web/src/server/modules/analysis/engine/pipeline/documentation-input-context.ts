@@ -1,3 +1,5 @@
+import { uniq } from "es-toolkit";
+
 import type { RepositoryEvidence } from "../core/discovery.types";
 import type { ArchitectureSectionBody, DocumentationInputModel } from "../core/documentation.types";
 import { selectRepositoryFrameworkFacts } from "../core/framework-catalog";
@@ -106,12 +108,30 @@ function buildHotspots(evidence: RepositoryEvidence, metrics: RepoMetrics): Hots
 }
 
 function buildArchitectureModules(evidence: RepositoryEvidence): ArchitectureModuleInput[] {
+  const callersByTargetPath = new Map<string, string[]>();
+
+  for (const call of evidence.calls ?? []) {
+    if (
+      !call.resolved ||
+      call.targetPath == null ||
+      call.callerName == null ||
+      call.path === call.targetPath ||
+      !ProjectPolicy.isArchitectureRelevant(call.path)
+    ) {
+      continue;
+    }
+    const bucket = callersByTargetPath.get(call.targetPath) ?? [];
+    bucket.push(`${call.path}:${call.callerName}`);
+    callersByTargetPath.set(call.targetPath, bucket);
+  }
+
   return getPrimaryArchitectureModules(evidence.modules).map((module) => ({
     apiSurface: module.apiSurface,
     categories: module.categories,
     exports: module.exports,
     parseTier: module.parseTier,
     path: module.path,
+    upstreamCallers: uniq(callersByTargetPath.get(module.path) ?? []).slice(0, 12),
   }));
 }
 

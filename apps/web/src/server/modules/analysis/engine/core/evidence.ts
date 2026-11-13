@@ -1,3 +1,5 @@
+import { normalize } from "pathe";
+
 import { resolveCallSites } from "./call-graph";
 import type {
   FileComplexity,
@@ -61,7 +63,8 @@ export async function collectRepositoryEvidence(
   const importDetailsByPath = new Map(
     lookups.normalizedFiles.map((file) => [
       file.path,
-      fileSignalsByPath.get(file.path)?.importDetails ?? [],
+      (fileSignalsByPath.get(file.path) ?? fileSignalsByPath.get(normalize(file.path)))
+        ?.importDetails ?? [],
     ]),
   );
   const calls = resolveCallSites(

@@ -288,7 +288,7 @@ export function buildArchitectDigest(
             categories: module.categories,
             exports: module.exports,
             path: module.path,
-            upstreamCallers: uniq(callersByTargetPath.get(module.path) ?? []),
+            upstreamCallers: limit(uniq(callersByTargetPath.get(module.path) ?? []), 12),
           })),
           40,
         ),

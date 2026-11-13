@@ -51,7 +51,7 @@ export type ReportSectionInput<TBody> = {
 export type ModuleArchitectureSummary = Pick<
   ModuleRef,
   "apiSurface" | "categories" | "exports" | "parseTier" | "path"
->;
+> & { upstreamCallers: string[] };
 
 export type OverviewSectionBody = {
   configFiles: string[];
