@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.14.0](https://github.com/doxynix/doxynix/compare/web-v5.13.1...web-v5.14.0) (2026-11-14)
+
+
+### Features
+
+* **web:** stream routes with skeletons and unify shortcut hints ([#2401](https://github.com/doxynix/doxynix/issues/2401)) ([d6d110d](https://github.com/doxynix/doxynix/commit/d6d110d27e9f676a1e8f28b96bfa6d6dea1e2e08))
+
 ## [5.13.1](https://github.com/doxynix/doxynix/compare/web-v5.13.0...web-v5.13.1) (2026-11-14)
 
 

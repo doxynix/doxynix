@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.14.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.13.1...doxynix-v6.14.0) (2026-11-14)
+
+
+### Features
+
+* **web:** stream routes with skeletons and unify shortcut hints ([#2401](https://github.com/doxynix/doxynix/issues/2401)) ([d6d110d](https://github.com/doxynix/doxynix/commit/d6d110d27e9f676a1e8f28b96bfa6d6dea1e2e08))
+
 ## [6.13.1](https://github.com/doxynix/doxynix/compare/doxynix-v6.13.0...doxynix-v6.13.1) (2026-11-14)
 
 

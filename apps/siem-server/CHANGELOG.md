@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/doxynix/doxynix/compare/siem-server-v0.5.5...siem-server-v0.6.0) (2026-11-14)
+
+
+### Features
+
+* **web:** stream routes with skeletons and unify shortcut hints ([#2401](https://github.com/doxynix/doxynix/issues/2401)) ([d6d110d](https://github.com/doxynix/doxynix/commit/d6d110d27e9f676a1e8f28b96bfa6d6dea1e2e08))
+
 ## [0.5.5](https://github.com/doxynix/doxynix/compare/siem-server-v0.5.4...siem-server-v0.5.5) (2026-11-11)
 
 
