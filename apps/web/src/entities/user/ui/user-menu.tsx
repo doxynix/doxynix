@@ -118,9 +118,10 @@ export function UserMenu({ items }: Readonly<Props>) {
                   {item.icon != null && <item.icon />}
                   <span>{item.label}</span>
                   {item.shortcut != null && (
-                    <DropdownMenuShortcut className="opacity-0 transition-opacity group-hover:opacity-100">
-                      {item.shortcut}
-                    </DropdownMenuShortcut>
+                    <DropdownMenuShortcut
+                      className="max-sm:hidden opacity-0 transition-opacity group-hover:opacity-100"
+                      shortcut={item.shortcut}
+                    />
                   )}
                 </Link>
               </DropdownMenuItem>

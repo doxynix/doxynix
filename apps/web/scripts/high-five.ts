@@ -1,424 +1,300 @@
 import { execSync } from "node:child_process";
 import fs from "node:fs";
+import { fileURLToPath } from "node:url";
 
-import { dirname } from "pathe";
+import fg from "fast-glob";
+import { dirname, resolve } from "pathe";
 
-const capitalize = (str: string) => {
-  if (!str) {
-    return "Open Source Community";
-  }
-  return str.charAt(0).toUpperCase() + str.slice(1);
+type Manifest = {
+  author?: string | { name?: string; url?: string };
+  contributors?: Array<{ author?: boolean; name?: string; url?: string }>;
+  homepage?: string;
+  name?: string;
+  private?: boolean;
+  repository?: string | { directory?: string; type?: string; url?: string };
 };
 
-const MAPPINGS = [
-  // Vercel / Next.js ecosystem
-  { gh: "nextauthjs", name: "NextAuth.js", prefix: "next-auth" },
-  { gh: "nextauthjs", name: "NextAuth.js", prefix: "@next-auth/" },
-  { gh: "pacocoursey", name: "Paco", prefix: "next-themes" },
-  { gh: "amannn", name: "Jan Amann", prefix: "next-intl" },
-  { gh: "iamvishnusankar", name: "Vishnu Sankar", prefix: "next-sitemap" },
-  { gh: "TheSGJ", name: "Shri Ganesh Jha", prefix: "nextjs-toploader" },
-  { gh: "hashicorp", name: "Hashicorp", prefix: "nextjs-bundle-analysis" },
-  { gh: "axiomhq", name: "Axiom", prefix: "next-axiom" },
-  { gh: "vercel", name: "Vercel", prefix: "eslint-config-next" },
-  { gh: "vercel", name: "Vercel", prefix: "@next/" },
-  { gh: "vercel", name: "Vercel", prefix: "@vercel/" },
-  { gh: "vercel", name: "Vercel", prefix: "@ai-sdk/" },
-  { gh: "vercel", name: "Vercel", prefix: "next" },
-  { gh: "vercel", name: "Vercel", prefix: "ai" },
-
-  // Meta / React
-  { gh: "react-hook-form", name: "React Hook Form", prefix: "react-hook-form" },
-  {
-    gh: "brimdata",
-    name: "Brim Data",
-    prefix: "react-arborist",
-  },
-  { gh: "uiwjs", name: "UIW", prefix: "react-codemirror-merge" },
-  { gh: "JohannesKlauss", name: "Johannes Klauss", prefix: "react-hotkeys-hook" },
-  { gh: "bvaughn", name: "Brian Vaughn", prefix: "react-resizable-panels" },
-  { gh: "facebook", name: "Meta", prefix: "eslint-plugin-react-compiler" },
-  { gh: "facebook", name: "Meta", prefix: "babel-plugin-react-compiler" },
-  { gh: "facebook", name: "Meta", prefix: "eslint-plugin-react-hooks" },
-  { gh: "jsx-eslint", name: "JSX ESLint", prefix: "eslint-plugin-react" },
-  { gh: "facebook", name: "Meta", prefix: "server-only" },
-  { gh: "facebook", name: "Meta", prefix: "react-dom" },
-  { gh: "facebook", name: "Meta", prefix: "react" },
-
-  // UI, Tailwind, Radix
-  { gh: "radix-ui", name: "Radix UI", prefix: "@radix-ui/" },
-  { gh: "lucide-icons", name: "Lucide", prefix: "lucide-react" },
-  { gh: "tailwindlabs", name: "Tailwind Labs", prefix: "tailwindcss" },
-  { gh: "tailwindlabs", name: "Tailwind Labs", prefix: "@tailwindcss/" },
-  { gh: "tailwindlabs", name: "Tailwind Labs", prefix: "prettier-plugin-tailwindcss" },
-  { gh: "adoxography", name: "Adoxography", prefix: "tailwind-scrollbar" },
-  { gh: "dcastil", name: "Dany Castillo", prefix: "tailwind-merge" },
-  { gh: "Wombosvideo", name: "Luca", prefix: "tw-animate-css" },
-  { gh: "lukeed", name: "Luke Edwards", prefix: "clsx" },
-  { gh: "xyflow", name: "Xyflow", prefix: "@xyflow" },
-
-  // Prisma & Databases
-  { gh: "notiz-dev", name: "Notiz", prefix: "prisma-dbml-generator" },
-  { gh: "keonik", name: "John Fay", prefix: "prisma-erd-generator" },
-  { gh: "luisrudge", name: "Luís Rudge", prefix: "prisma-generator-fake-data" },
-  { gh: "47ng", name: "47ng", prefix: "prisma-field-encryption" },
-  { gh: "valentinpalkovic", name: "Valentin Palkovic", prefix: "prisma-json-schema-generator" },
-  { gh: "prisma", name: "Prisma", prefix: "@prisma/" },
-  { gh: "prisma", name: "Prisma", prefix: "prisma" },
-  { gh: "zenstackhq", name: "ZenStack", prefix: "@zenstackhq/" },
-  { gh: "zenstackhq", name: "ZenStack", prefix: "zenstack" },
-  { gh: "chrishoermann", name: "Chris Hoermann", prefix: "zod-prisma-types" },
-  { gh: "colinmcdonnell", name: "Colin McDonnell", prefix: "zod" },
-  { gh: "brianc", name: "Brian Carlson", prefix: "pg" },
-
-  // Unified, Remark, Rehype
-  { gh: "unifiedjs", name: "Unified.js", prefix: "remark-" },
-  { gh: "unifiedjs", name: "Unified.js", prefix: "rehype-" },
-  { gh: "unifiedjs", name: "Unified.js", prefix: "unified" },
-
-  // Shiki & Markdown
-  { gh: "shikijs", name: "Shiki", prefix: "@shikijs/" },
-  { gh: "shikijs", name: "Shiki", prefix: "shiki" },
-
-  // Linting, Types & Dev Tools
-  { gh: "typescript-eslint", name: "TypeScript ESLint", prefix: "@typescript-eslint/" },
-  { gh: "eslint", name: "ESLint", prefix: "@eslint/" },
-  { gh: "eslint", name: "ESLint", prefix: "eslint" },
-  { gh: "prettier", name: "Prettier", prefix: "prettier" },
-  { gh: "DefinitelyTyped", name: "DefinitelyTyped", prefix: "@types/" },
-  { gh: "microsoft", name: "Microsoft", prefix: "typescript" },
-  { gh: "microsoft", name: "Microsoft", prefix: "@playwright/" },
-  { gh: "vitest-dev", name: "Vitest", prefix: "@vitest/" },
-  { gh: "vitest-dev", name: "Vitest", prefix: "vitest" },
-  { gh: "stryker-mutator", name: "Stryker Mutator", prefix: "@stryker-mutator/" },
-  { gh: "conventional-changelog", name: "commitlint", prefix: "@commitlint/" },
-  { gh: "typicode", name: "Husky", prefix: "husky" },
-  { gh: "lint-staged", name: "lint-staged", prefix: "lint-staged" },
-  { gh: "streetsidesoftware", name: "Street Side Software", prefix: "cspell" },
-  { gh: "streetsidesoftware", name: "Street Side Software", prefix: "@cspell/" },
-  { gh: "faker-js", name: "Faker-js", prefix: "@faker-js/" },
-  { gh: "Webpro-nl", name: "Webpro", prefix: "knip" },
-  { gh: "FormidableLabs", name: "Nearform Commerce", prefix: "webpack-stats-plugin" },
-  { gh: "prettier", name: "Prettier", prefix: "eslint-config-prettier" },
-  { gh: "SonarSource", name: "Sonar", prefix: "eslint-plugin-sonarjs" },
-
-  // General ecosystem
-  { gh: "tanstack", name: "TanStack", prefix: "@tanstack/" },
-  { gh: "trpc", name: "tRPC", prefix: "@trpc/" },
-  { gh: "mcampa", name: "Mario Campa", prefix: "trpc-to-openapi" },
-  { gh: "octokit", name: "GitHub", prefix: "@octokit/" },
-  { gh: "codemirror", name: "CodeMirror", prefix: "@codemirror/" },
-  { gh: "codemirror", name: "CodeMirror", prefix: "@lezer/" },
-  { gh: "uiwjs", name: "UIW", prefix: "@uiw/" },
-  { gh: "scalar", name: "Scalar", prefix: "@scalar/" },
-  { gh: "triggerdotdev", name: "Trigger.dev", prefix: "@trigger.dev/" },
-  { gh: "upstash", name: "Upstash", prefix: "@upstash/" },
-  { gh: "pingdotgg", name: "Ping.gg", prefix: "@uploadthing/" },
-  { gh: "pingdotgg", name: "Ping.gg", prefix: "uploadthing" },
-  { gh: "resend", name: "Resend", prefix: "@react-email/" },
-  { gh: "resend", name: "Resend", prefix: "resend" },
-  { gh: "getsentry", name: "Sentry", prefix: "@sentry/" },
-  { gh: "mermaid-js", name: "Mermaid JS", prefix: "@mermaid-js/" },
-  { gh: "mermaid-js", name: "Mermaid JS", prefix: "mermaid" },
-
-  // Solo tools & libraries
-  { gh: "pmndrs", name: "Poimandres", prefix: "zustand" },
-  { gh: "motiondivision", name: "Matt Perry", prefix: "motion" },
-  { gh: "emilkowalski", name: "Emil Kowalski", prefix: "sonner" },
-  { gh: "47ng", name: "47ng", prefix: "nuqs" },
-  { gh: "pacocoursey", name: "Paco", prefix: "cmdk" },
-  { gh: "ably", name: "Ably", prefix: "ably" },
-  { gh: "auth0", name: "Auth0", prefix: "jsonwebtoken" },
-  { gh: "jshttp", name: "jshttp", prefix: "cookie" },
-  { gh: "motdotla", name: "Mot", prefix: "dotenv" },
-  { gh: "nodemailer", name: "Andris Reinman", prefix: "nodemailer" },
-  { gh: "pinojs", name: "Pino", prefix: "pino" },
-  { gh: "PostHog", name: "PostHog", prefix: "posthog-" },
-  { gh: "recharts", name: "Recharts", prefix: "recharts" },
-  { gh: "TypeStrong", name: "TypeStrong", prefix: "ts-node" },
-  { gh: "TypeStrong", name: "TypeStrong", prefix: "typedoc" },
-  { gh: "privatenumber", name: "Hiroki Osame", prefix: "tsx" },
-  { gh: "vitejs", name: "Vite", prefix: "@vitejs/" },
-  { gh: "blitz-js", name: "Blitz.js", prefix: "superjson" },
-  { gh: "react-hook-form", name: "React Hook Form", prefix: "@hookform/" },
-  { gh: "gjtorikian", name: "Garen Torikian", prefix: "isbinaryfile" },
-  { gh: "kucherenko", name: "Kucherenko", prefix: "jscpd" },
-  { gh: "steveukx", name: "Steve King", prefix: "simple-git" },
-  { gh: "MikeMcl", name: "Michael M", prefix: "decimal.js" },
-  {
-    gh: "davidmarkclements",
-    name: "David Mark Clements",
-    prefix: "fast-safe-stringify",
-  },
-  { gh: "dubzzz", name: "Nicolas DUBIEN", prefix: "fast-check" },
-  { gh: "aleclarson", name: "Alec Larson", prefix: "vite-tsconfig-paths" },
-  { gh: "ferdikoomen", name: "Ferdi Koomen", prefix: "openapi-typescript-codegen" },
-  { gh: "Ianvs", name: "Ian VanSchooten", prefix: "@ianvs/" },
-  {
-    gh: "Jonschlinkert",
-    name: "Jon Schlinkert",
-    prefix: "parse-github-url",
-  },
-  {
-    gh: "kentcdodds",
-    name: "Kent C. Dodds",
-    prefix: "cross-env",
-  },
-  {
-    gh: "marsidev",
-    name: "Luis Marsiglia",
-    prefix: "@marsidev/",
-  },
-  {
-    gh: "Xnimorz",
-    name: "Nik",
-    prefix: "use-debounce",
-  },
-  {
-    gh: "pirxpilot",
-    name: "Damian Krzeminski",
-    prefix: "detect-language",
-  },
-  {
-    gh: "eligrey",
-    name: "Eli Grey",
-    prefix: "file-saver",
-  },
-  {
-    gh: "Donaldcwl",
-    name: "Donald Chan",
-    prefix: "browser-image-compression",
-  },
-  {
-    gh: "flosse",
-    name: "Markus Kohlhase",
-    prefix: "sloc",
-  },
-  {
-    gh: "joe-bell",
-    name: "Joe-bell",
-    prefix: "class-variance-authority",
-  },
-  {
-    gh: "plantain",
-    name: "York Yao",
-    prefix: "type-coverage",
-  },
-].sort((a, b) => b.prefix.length - a.prefix.length);
-
-const stripParentheticalContent = (value: string) => {
-  let result = "";
-  let depth = 0;
-
-  for (const char of value) {
-    if (char === "(") {
-      depth += 1;
-      continue;
-    }
-
-    if (char === ")") {
-      if (depth > 0) {
-        depth -= 1;
-      }
-      continue;
-    }
-
-    if (depth === 0) {
-      result += char;
-    }
-  }
-
-  return result;
+type BunLicenseEntry = {
+  author?: string;
+  description?: string;
+  homepage?: string;
+  license?: string;
+  name: string;
+  paths?: string[];
+  versions?: string[];
 };
 
-const isEmailToken = (token: string) => {
-  const atIndex = token.indexOf("@");
+type RepoInfo = { host: string; owner: string; url: string };
 
-  if (atIndex <= 0 || atIndex >= token.length - 1) {
-    return false;
-  }
-
-  const domain = token.slice(atIndex + 1);
-  return domain.includes(".");
+type AuthorGroup = {
+  author: string;
+  authorLink: string;
+  avatar: null | string;
+  packages: Array<{ license: string; name: string }>;
 };
 
-const removeEmailTokens = (value: string) =>
+const DISPLAY_NAMES: Record<string, string> = {
+  axiomhq: "Axiom",
+  biomejs: "Biome",
+  codemirror: "CodeMirror",
+  definitelytyped: "DefinitelyTyped",
+  "drizzle-team": "Drizzle Team",
+  emilkowalski: "Emil Kowalski",
+  eslint: "ESLint",
+  evilmartians: "Evil Martians",
+  facebook: "Meta",
+  "faker-js": "Faker.js",
+  "feature-sliced": "Feature-Sliced",
+  "fuma-nama": "Fumadocs",
+  getsentry: "Sentry",
+  googlechrome: "Google Chrome",
+  honojs: "Hono",
+  jsdom: "jsdom",
+  "lucide-icons": "Lucide",
+  "mermaid-js": "Mermaid JS",
+  microsoft: "Microsoft",
+  motiondivision: "Motion",
+  nodejs: "Node.js",
+  octokit: "GitHub",
+  "oxc-project": "OXC",
+  pmndrs: "Poimandres",
+  posthog: "PostHog",
+  prettier: "Prettier",
+  prisma: "Prisma",
+  "radix-ui": "Radix UI",
+  "react-hook-form": "React Hook Form",
+  recharts: "Recharts",
+  rehypejs: "Rehype",
+  remarkjs: "Remark",
+  resend: "Resend",
+  secretlint: "Secretlint",
+  shikijs: "Shiki",
+  "stryker-mutator": "Stryker Mutator",
+  svix: "Svix",
+  "syntax-tree": "Syntax Tree",
+  "t3-oss": "T3 OSS",
+  tailwindlabs: "Tailwind Labs",
+  tanstack: "TanStack",
+  "testing-library": "Testing Library",
+  triggerdotdev: "Trigger.dev",
+  trpc: "tRPC",
+  "typescript-eslint": "TypeScript ESLint",
+  typestrong: "TypeStrong",
+  uiwjs: "UIW",
+  unifiedjs: "Unified.js",
+  unjs: "UnJS",
+  upstash: "Upstash",
+  vercel: "Vercel",
+  "vercel-labs": "Vercel Labs",
+  "vitest-dev": "Vitest",
+  xyflow: "Xyflow",
+  zenstackhq: "ZenStack",
+};
+
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const appDir = resolve(scriptDir, "..");
+const repoRoot = resolve(appDir, "../..");
+const outputPath = resolve(appDir, "src/features/high-five/model/licenses.json");
+
+const prettify = (value: string) =>
   value
-    .trim()
-    .split(/\s+/)
-    .filter((token) => !isEmailToken(token))
+    .replace(/^@/, "")
+    .split(/[-_.]/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
 
-const sanitizeAllowedCharacters = (value: string) => {
-  const result: string[] = [];
-
-  for (const char of value) {
-    const isAsciiLetterOrDigit =
-      (char >= "a" && char <= "z") || (char >= "A" && char <= "Z") || (char >= "0" && char <= "9");
-    const isWhitespace = char.trim() === "";
-    const isAllowedPunctuation = ".'\"-".includes(char);
-
-    if (isAsciiLetterOrDigit || isWhitespace || isAllowedPunctuation) {
-      result.push(char);
-    }
+const toPublicUrl = (value: string | undefined) => {
+  if (!value) {
+    return null;
   }
-
-  return result.join("");
-};
-
-const cleanUrl = (url) => {
-  if (!url) {
-    return "";
-  }
-
-  const rawUrl = typeof url === "string" ? url : url.url || String(url);
-
-  if (typeof rawUrl !== "string" || !rawUrl) {
-    return "";
-  }
-
-  return rawUrl
-    .replace(/^git\+/, "")
-    .replace(/\.git$/, "")
-    .replace(/\/$/, "");
-};
-
-const toPublicUrl = (url: string) => {
-  const cleaned = cleanUrl(url);
 
   try {
-    const parsed = new URL(cleaned);
-    return parsed.protocol === "https:" || parsed.protocol === "http:"
-      ? parsed.toString().replace(/\/$/, "")
-      : "";
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:"
+      ? url.toString().replace(/\/$/, "")
+      : null;
   } catch {
-    return "";
+    return null;
   }
 };
 
-const sanitizeAuthorName = (rawName: string) => {
-  if (!rawName) {
+const cleanAuthor = (value: string | undefined) => {
+  if (!value) {
     return "";
   }
 
-  let cleanedName = String(rawName);
-
-  cleanedName = stripParentheticalContent(cleanedName);
-  cleanedName = removeEmailTokens(cleanedName);
-  cleanedName = sanitizeAllowedCharacters(cleanedName).trim();
-
-  return cleanedName;
+  return (
+    value
+      .replaceAll(/<[^>]*>/g, "")
+      .replaceAll(/\([^)]*\)/g, "")
+      .split(/\s+/)
+      .filter((token) => !token.includes("@"))
+      .join(" ")
+      .trim() || ""
+  );
 };
 
-function enrichPackageData(pkg) {
-  let authorName = "";
-  let githubOwner = "";
-
-  for (const data of MAPPINGS) {
-    if (pkg.name === data.prefix || pkg.name.startsWith(data.prefix)) {
-      authorName = data.name;
-      githubOwner = data.gh;
-      break;
-    }
+const parseRepository = (value: string | undefined): RepoInfo | null => {
+  if (!value) {
+    return null;
   }
 
-  if (!authorName) {
-    const repoUrl = cleanUrl(pkg.repository?.url || pkg.repository || pkg.homepage || "");
-    const githubOwnerPattern = /(?:github\.com[/:]|github:)([^/.]+)/i;
-    const ghMatch = githubOwnerPattern.exec(repoUrl);
+  const raw = value.trim().replace(/^git\+/, "");
+  let host = "";
+  let rest = "";
 
-    if (ghMatch) {
-      const extracted = ghMatch[1];
+  const scp = /^git@([^:]+):(.+)$/.exec(raw);
+  const shortcut = /^(github|gitlab|bitbucket):(.+)$/.exec(raw);
+  const url = /^(?:https?|ssh|git):\/\/(?:[^@/]+@)?([^/]+)\/(.+)$/.exec(raw);
+  const bare = /^([\w.-]+)\/([\w.-]+)$/.exec(raw);
 
-      if (!["packages", "repos", "tree", "blob", "www"].includes(extracted.toLowerCase())) {
-        githubOwner = extracted;
-        authorName = capitalize(extracted);
-      }
-    }
+  if (scp) {
+    host = scp[1];
+    rest = scp[2];
+  } else if (shortcut) {
+    host = shortcut[1] === "bitbucket" ? "bitbucket.org" : `${shortcut[1]}.com`;
+    rest = shortcut[2];
+  } else if (url) {
+    host = url[1];
+    rest = url[2];
+  } else if (bare) {
+    host = "github.com";
+    rest = raw;
+  } else {
+    return null;
   }
 
-  if (!authorName && pkg.author) {
-    const rawName =
-      typeof pkg.author === "object" ? String(pkg.author?.name ?? "") : String(pkg.author ?? "");
+  const segments = rest
+    .replace(/\.git$/, "")
+    .replace(/[#?].*$/, "")
+    .split("/")
+    .filter(Boolean);
 
-    const cleanedName = sanitizeAuthorName(rawName);
-
-    if (cleanedName.length > 0) {
-      authorName = capitalize(cleanedName);
-    }
-  }
-
-  authorName = authorName || "Open Source Community";
-
-  if (authorName.toLowerCase() === "meta" || authorName.toLowerCase() === "facebook") {
-    authorName = "Meta";
-  }
-
-  if (authorName.toLowerCase() === "vercel") {
-    authorName = "Vercel";
+  if (segments.length < 2) {
+    return null;
   }
 
   return {
-    authorLink: githubOwner
-      ? `https://github.com/${githubOwner}`
-      : toPublicUrl(pkg.homepage) || toPublicUrl(pkg.repository?.url || pkg.repository),
-    authorName,
-    avatarUrl: githubOwner ? `https://github.com/${githubOwner}.png?size=96` : null,
-    description: pkg.description || "Essential dependency",
+    host: host.toLowerCase(),
+    owner: segments[0],
+    url: `https://${host.toLowerCase()}/${segments[0]}/${segments[1]}`,
   };
-}
+};
 
-try {
-  const pkgJson = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
+const resolveRepository = (manifest: Manifest): RepoInfo | null =>
+  parseRepository(
+    typeof manifest.repository === "string" ? manifest.repository : manifest.repository?.url,
+  ) ?? parseRepository(manifest.homepage);
 
-  const myDirectDeps = new Set([
-    ...Object.keys(pkgJson.dependencies || {}),
-    ...Object.keys(pkgJson.devDependencies || {}),
-  ]);
+const readManifest = (entry: BunLicenseEntry): Manifest | null => {
+  const path = entry.paths?.[0];
 
-  // The licenses subcommand lives under `bun pm` since Bun 1.1.
-  const output = execSync("bun pm licenses list --json", {
-    maxBuffer: 1024 * 1024 * 50,
-  }).toString();
+  if (!path) {
+    return null;
+  }
 
-  const rawData = JSON.parse(output);
+  try {
+    return JSON.parse(fs.readFileSync(resolve(path, "package.json"), "utf8")) as Manifest;
+  } catch {
+    return null;
+  }
+};
 
-  const grouped = Object.create(null);
-
-  Object.entries(rawData).forEach(([licenseType, packages]) => {
-    packages.forEach((pkg) => {
-      if (myDirectDeps.has(pkg.name)) {
-        const enriched = enrichPackageData(pkg);
-        const author = enriched.authorName;
-
-        if (!grouped[author]) {
-          grouped[author] = {
-            author: author,
-            authorLink: enriched.authorLink,
-            avatar: enriched.avatarUrl,
-            packages: [],
-          };
-        }
-
-        grouped[author].packages.push({
-          license: licenseType,
-          name: pkg.name,
-        });
-      }
-    });
+const directDependencies = () => {
+  const manifests = fg.sync(["package.json", "apps/*/package.json", "packages/*/package.json"], {
+    absolute: true,
+    cwd: repoRoot,
   });
 
-  const finalData = Object.values(grouped).sort(
-    (a, b) => b.packages.length - a.packages.length || a.author.localeCompare(b.author),
-  );
+  const names = new Set<string>();
 
-  const outputPath = "./src/features/high-five/model/licenses.json";
+  for (const path of manifests) {
+    const manifest = JSON.parse(fs.readFileSync(path, "utf8")) as {
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+    };
 
-  fs.mkdirSync(dirname(outputPath), { recursive: true });
-  fs.writeFileSync(outputPath, JSON.stringify(finalData, null, 2));
+    for (const name of [
+      ...Object.keys(manifest.dependencies ?? {}),
+      ...Object.keys(manifest.devDependencies ?? {}),
+    ]) {
+      names.add(name);
+    }
+  }
 
-  console.log(`Done! Processed ${finalData.length} unique authors.`);
-} catch (error) {
-  console.error("Error:", error.message);
-  process.exit(1);
+  return names;
+};
+
+const raw = JSON.parse(
+  execSync("bun pm licenses list --json", {
+    cwd: repoRoot,
+    maxBuffer: 1024 * 1024 * 100,
+  }).toString(),
+) as Record<string, BunLicenseEntry[]>;
+
+const direct = directDependencies();
+const groups = new Map<string, AuthorGroup>();
+
+for (const [license, entries] of Object.entries(raw)) {
+  for (const entry of entries) {
+    if (!direct.has(entry.name)) {
+      continue;
+    }
+
+    const manifest = readManifest(entry);
+
+    if (manifest?.private) {
+      continue;
+    }
+
+    const repo = resolveRepository(manifest ?? {});
+    const scope = entry.name.startsWith("@") ? entry.name.split("/")[0].slice(1) : "";
+    const authorName =
+      cleanAuthor(
+        typeof manifest?.author === "string" ? manifest.author : manifest?.author?.name,
+      ) || cleanAuthor(entry.author);
+
+    const rawOwner = repo?.owner ?? scope;
+    const owner = rawOwner.toLowerCase();
+    const key = owner ? `owner/${owner}` : `author/${authorName}`;
+    const name = owner
+      ? (DISPLAY_NAMES[owner] ?? (authorName || prettify(rawOwner)))
+      : authorName || "Open Source Community";
+    const isGitHub = repo?.host === "github.com" && owner !== "";
+
+    const group = groups.get(key) ?? {
+      author: name,
+      authorLink: isGitHub
+        ? `https://github.com/${rawOwner}`
+        : (repo?.url ??
+          toPublicUrl(manifest?.homepage) ??
+          `https://www.npmjs.com/package/${entry.name}`),
+      avatar: isGitHub ? `https://github.com/${owner}.png?size=96` : null,
+      packages: [],
+    };
+
+    if (isGitHub && !group.avatar) {
+      group.avatar = `https://github.com/${owner}.png?size=96`;
+      group.authorLink = `https://github.com/${rawOwner}`;
+    }
+
+    group.packages.push({ license, name: entry.name });
+    groups.set(key, group);
+  }
 }
+
+const finalData = [...groups.values()]
+  .map((group) => {
+    const packages = [...new Map(group.packages.map((pkg) => [pkg.name, pkg])).values()].sort(
+      (a, b) => a.name.localeCompare(b.name),
+    );
+
+    return { ...group, packages };
+  })
+  .sort((a, b) => b.packages.length - a.packages.length || a.author.localeCompare(b.author));
+
+fs.mkdirSync(dirname(outputPath), { recursive: true });
+fs.writeFileSync(outputPath, `${JSON.stringify(finalData, null, 2)}\n`);
+
+console.log(`Done! Processed ${finalData.length} unique authors.`);

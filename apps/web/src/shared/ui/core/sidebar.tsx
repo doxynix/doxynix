@@ -33,6 +33,8 @@ import {
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/core/tooltip";
 
+import { ShortcutHint } from "./shortcut-hint";
+
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 const SIDEBAR_WIDTH_MOBILE = "18rem";
@@ -812,15 +814,12 @@ function SidebarMenuSubButton({
   );
 }
 
-function SidebarMenuShortcut({ className, ...props }: ComponentProps<"kbd">) {
+function SidebarMenuShortcut({ className, shortcut }: { className?: string; shortcut: string }) {
   return (
-    <kbd
-      className={cn(
-        "ml-auto text-muted-foreground text-xs tracking-widest group-data-[collapsible=icon]:hidden",
-        className,
-      )}
+    <ShortcutHint
+      className={cn("max-sm:hidden group-data-[collapsible=icon]:hidden", className)}
       data-slot="sidebar-menu-shortcut"
-      {...props}
+      shortcut={shortcut}
     />
   );
 }

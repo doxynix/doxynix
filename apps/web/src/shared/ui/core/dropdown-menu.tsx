@@ -6,6 +6,8 @@ import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
 
+import { ShortcutHint } from "./shortcut-hint";
+
 function DropdownMenu({ ...props }: Readonly<ComponentProps<typeof DropdownMenuPrimitive.Root>>) {
   return (
     <DropdownMenuPrimitive.Root
@@ -178,12 +180,12 @@ function DropdownMenuSeparator({
   );
 }
 
-function DropdownMenuShortcut({ className, ...props }: ComponentProps<"kbd">) {
+function DropdownMenuShortcut({ className, shortcut }: { className?: string; shortcut: string }) {
   return (
-    <kbd
-      className={cn("ml-auto text-muted-foreground text-xs tracking-widest", className)}
+    <ShortcutHint
+      className={className}
       data-slot="dropdown-menu-shortcut"
-      {...props}
+      shortcut={shortcut}
     />
   );
 }

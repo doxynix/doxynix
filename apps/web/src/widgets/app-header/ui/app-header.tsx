@@ -9,8 +9,10 @@ import { userNavMenu } from "@/shared/config/navigation";
 import { useNavLabels } from "@/shared/config/navigation-labels";
 import { Link, usePathname } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
+import { useModifierKey } from "@/shared/lib/hooks/use-modifier-key";
 import { Logo } from "@/shared/ui/branding/doxynix-logo";
 import { AppButton } from "@/shared/ui/core/button";
+import { Kbd, KbdGroup } from "@/shared/ui/core/kbd";
 import { SidebarTrigger } from "@/shared/ui/core/sidebar";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
@@ -37,6 +39,7 @@ function stripLocalePrefix(pathname: string) {
 export function AppHeader() {
   const tCommon = useTranslations("Common");
   const navLabels = useNavLabels();
+  const modifierKey = useModifierKey();
   const { name, owner } = useRepoParams();
   const rawPathname = usePathname();
   const pathname = stripLocalePrefix(rawPathname);
@@ -71,7 +74,17 @@ export function AppHeader() {
     <header className="flex h-full flex-col justify-between bg-background px-4">
       <div className="flex w-full justify-between py-4">
         <div className="flex items-center gap-2.5">
-          <AppTooltip content={tCommon("toggle_sidebar_shortcut")}>
+          <AppTooltip
+            content={
+              <span className="flex items-center gap-1.5">
+                {tCommon("toggle_sidebar_shortcut")}
+                <KbdGroup>
+                  <Kbd>{modifierKey}</Kbd>
+                  <Kbd>B</Kbd>
+                </KbdGroup>
+              </span>
+            }
+          >
             <SidebarTrigger
               className="text-muted-foreground"
               variant="ghost"

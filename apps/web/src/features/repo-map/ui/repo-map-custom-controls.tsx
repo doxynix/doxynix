@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
+import { ShortcutHint } from "@/shared/ui/core/shortcut-hint";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { useMapCommands } from "../model/use-map-commands";
@@ -17,7 +18,16 @@ type ControlItem = {
   icon: ComponentType<{ className?: string }>;
   id: string;
   label: string;
+  shortcut: string;
 };
+
+const SHORTCUTS = {
+  fitView: "F then V",
+  focusSelected: "F then S",
+  toggleControls: "T then C",
+  zoomIn: "Z then I",
+  zoomOut: "Z then O",
+} as const;
 
 export function RepoMapCustomControls() {
   const t = useTranslations("Dashboard");
@@ -26,14 +36,33 @@ export function RepoMapCustomControls() {
   const map = useMapCommands();
 
   const CONTROLS_CONFIG: ControlItem[] = [
-    { action: map.zoomIn, icon: ZoomIn, id: "zoom-in", label: t("repo_map_zoom_in") },
-    { action: map.zoomOut, icon: ZoomOut, id: "zoom-out", label: t("repo_map_zoom_out") },
-    { action: map.fitView, icon: Maximize, id: "fit-view", label: t("repo_map_fit_view") },
+    {
+      action: map.zoomIn,
+      icon: ZoomIn,
+      id: "zoom-in",
+      label: t("repo_map_zoom_in"),
+      shortcut: SHORTCUTS.zoomIn,
+    },
+    {
+      action: map.zoomOut,
+      icon: ZoomOut,
+      id: "zoom-out",
+      label: t("repo_map_zoom_out"),
+      shortcut: SHORTCUTS.zoomOut,
+    },
+    {
+      action: map.fitView,
+      icon: Maximize,
+      id: "fit-view",
+      label: t("repo_map_fit_view"),
+      shortcut: SHORTCUTS.fitView,
+    },
     {
       action: map.focusSelected,
       icon: FocusIcon,
       id: "focus",
       label: t("repo_map_focus_selected"),
+      shortcut: SHORTCUTS.focusSelected,
     },
   ];
 
@@ -44,7 +73,15 @@ export function RepoMapCustomControls() {
     >
       {CONTROLS_CONFIG.map((item) => (
         <AppTooltip
-          content={item.label}
+          content={
+            <span className="flex items-center gap-1.5">
+              {item.label}
+              <ShortcutHint
+                className="ml-0"
+                shortcut={item.shortcut}
+              />
+            </span>
+          }
           key={item.id}
           side="left"
         >
@@ -66,7 +103,15 @@ export function RepoMapCustomControls() {
       ))}
 
       <AppTooltip
-        content={t("repo_map_toggle_controls")}
+        content={
+          <span className="flex items-center gap-1.5">
+            {t("repo_map_toggle_controls")}
+            <ShortcutHint
+              className="ml-0"
+              shortcut={SHORTCUTS.toggleControls}
+            />
+          </span>
+        }
         side="left"
       >
         <AppButton

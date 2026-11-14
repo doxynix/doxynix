@@ -1,15 +1,12 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignore": [".agents/**", ".opencode/**"],
-  "ignoreBinaries": ["dot", "doppler", "licenses", "podman", "semgrep"],
+  "ignoreBinaries": ["dot", "doppler", "podman", "semgrep", "with-doppler"],
   "ignoreDependencies": [
     "@secretlint/secretlint-rule-preset-recommend",
-    "hono",
+    "decimal.js",
     "k6",
-    "prisma-dbml-generator",
-    "prisma-erd-generator",
     "prisma-generator-fake-data",
-    "prisma-json-schema-generator",
     "tree-sitter-wasm"
   ],
   "ignoreExportsUsedInFile": true,

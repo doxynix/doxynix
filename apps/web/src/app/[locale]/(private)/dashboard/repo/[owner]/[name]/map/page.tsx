@@ -20,7 +20,7 @@ export default async function RepoMapPage({ params, searchParams }: Readonly<Rep
   const view = Array.isArray(rawView) ? rawView[0] : rawView;
 
   if (view == null) {
-    await prefetch(
+    void prefetch(
       trpcProxy.analysis.getStructureMap.queryOptions({ aid: aid ?? undefined, repoId: repo.id }),
     );
   }

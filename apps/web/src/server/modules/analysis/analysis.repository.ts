@@ -38,6 +38,16 @@ export type LatestCompletedAnalysis = Prisma.AnalysisGetPayload<{
   select: typeof latestCompletedAnalysisSelect;
 }>;
 
+export const analysisPayloadSelect = {
+  id: true,
+  metricsJson: true,
+  resultJson: true,
+} satisfies Prisma.AnalysisSelect;
+
+export type AnalysisPayloadRecord = Prisma.AnalysisGetPayload<{
+  select: typeof analysisPayloadSelect;
+}>;
+
 export const repoWithLatestAnalysisSelect = {
   analyses: {
     orderBy: { createdAt: "desc" },
@@ -170,6 +180,45 @@ export const analysisRepo = {
     });
   },
 
+  async getAnalysisPayloadForRepo(
+    db: DbClient,
+    repoId: string,
+    workspaceId: string,
+    aid?: string,
+  ): Promise<AnalysisPayloadRecord | null> {
+    if (aid != null) {
+      return this.resolveTargetAnalysis(db, aid, workspaceId);
+    }
+
+    const repo = await db.repo.findUnique({
+      select: {
+        analyses: {
+          orderBy: { createdAt: "desc" },
+          select: analysisPayloadSelect,
+          take: 1,
+          where: { status: "DONE" },
+        },
+      },
+      where: { id: repoId, workspaceId },
+    });
+
+    if (repo == null) {
+      return null;
+    }
+
+    const analysis = repo.analyses[0];
+
+    if (analysis == null) {
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.ANALYSIS_NOT_COMPLETED,
+        publicMessage: "No completed analysis found",
+      });
+    }
+
+    return analysis;
+  },
+
   async getById(db: DbClient, id: string, workspaceId: string) {
     return db.generatedFix.findFirst({
       where: { id, repo: { workspaceId } },
@@ -248,6 +297,44 @@ export const analysisRepo = {
       },
       where: { id: repoId, workspaceId },
     });
+  },
+
+  async getRepoDocsPayload(db: DbClient, repoId: string, workspaceId: string, aid?: string) {
+    const repo = await db.repo.findUnique({
+      select: {
+        analyses: {
+          orderBy: { createdAt: "desc" },
+          select: analysisPayloadSelect,
+          take: 1,
+          where: { status: "DONE" },
+        },
+        documents: {
+          orderBy: { updatedAt: "desc" },
+          select: repoDocumentsSelect,
+          ...(aid == null ? {} : { where: { analysisId: aid } }),
+        },
+      },
+      where: { id: repoId, workspaceId },
+    });
+
+    if (repo == null) {
+      return null;
+    }
+
+    const target = await this.resolveTargetAnalysis(db, aid, workspaceId);
+    if (target != null) {
+      return { ...repo, analyses: [target] };
+    }
+
+    if (repo.analyses.length === 0) {
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.ANALYSIS_NOT_COMPLETED,
+        publicMessage: "No completed analysis found",
+      });
+    }
+
+    return repo;
   },
 
   async getRepoSnapshot(db: DbClient, repoId: string, workspaceId: string, aid?: string) {

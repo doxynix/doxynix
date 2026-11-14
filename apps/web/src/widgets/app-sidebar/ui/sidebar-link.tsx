@@ -65,9 +65,10 @@ export function SidebarLink({
             </SidebarMenuBadge>
           )}
           {shortcut != null && (
-            <SidebarMenuShortcut className="opacity-0 transition-opacity group-hover/link:opacity-100">
-              {shortcut}
-            </SidebarMenuShortcut>
+            <SidebarMenuShortcut
+              className="opacity-0 transition-opacity group-hover/link:opacity-100"
+              shortcut={shortcut}
+            />
           )}
         </div>
         {blank && (

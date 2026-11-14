@@ -59,7 +59,9 @@ export function TwoFactorCard() {
           throw new Error(res.error.message);
         }
 
-        setBackupCodes(res.data.backupCodes);
+        if (res.data.method === "totp") {
+          setBackupCodes(res.data.backupCodes);
+        }
         return authClient.twoFactor.getTotpUri({});
       })
       .then((totpRes) => {

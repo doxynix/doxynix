@@ -8,6 +8,7 @@ import { getLanguageColor } from "@/server/utils/language-metadata";
 import { hasText } from "@/server/utils/string-utils";
 
 import type {
+  AnalysisPayloadRecord,
   ImpactAnalysis,
   LatestCompletedAnalysis,
   RepoWithLatestAnalysisAndDocs,
@@ -378,7 +379,11 @@ export const analysisMapper = {
     };
   },
 
-  toAvailableDocs(repo: Pick<RepoWithLatestAnalysisAndDocs, "analyses" | "documents">) {
+  toAvailableDocs(
+    repo: Pick<RepoWithLatestAnalysisAndDocs, "documents"> & {
+      analyses: AnalysisPayloadRecord[];
+    },
+  ) {
     const latestAnalysis = coerceAnalysisPayload(repo.analyses[0]);
     return dedupeLatestDocsByType(repo.documents).map((doc) =>
       toDocSummary(doc, latestAnalysis?.aiResult ?? null),
@@ -392,7 +397,7 @@ export const analysisMapper = {
     };
   },
 
-  toDetailedMetrics(analysis: LatestCompletedAnalysis | null) {
+  toDetailedMetrics(analysis: AnalysisPayloadRecord | null) {
     const payload = coerceAnalysisPayload(analysis);
     if (payload == null) {
       return null;

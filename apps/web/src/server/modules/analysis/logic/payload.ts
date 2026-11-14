@@ -4,7 +4,7 @@ import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 
-import type { LatestCompletedAnalysis } from "../analysis.repository";
+import type { AnalysisPayloadRecord, LatestCompletedAnalysis } from "../analysis.repository";
 import { type AIResult, aiSchema } from "../engine/core/analysis-result.schemas";
 import {
   EMPTY_REPO_METRICS,
@@ -13,15 +13,15 @@ import {
 } from "../engine/core/metrics.schemas";
 import type { StoredDocument, WriterStatus } from "./structure-shared";
 
-export type AnalysisPayload = {
+export type AnalysisPayload<T extends AnalysisPayloadRecord = LatestCompletedAnalysis> = {
   aiResult: AIResult;
-  analysis: LatestCompletedAnalysis;
+  analysis: T;
   metrics: ParsedRepoMetrics;
 };
 
-export function coerceAnalysisPayload(
-  analysis: LatestCompletedAnalysis | null | undefined,
-): AnalysisPayload | null {
+export function coerceAnalysisPayload<T extends AnalysisPayloadRecord>(
+  analysis: T | null | undefined,
+): AnalysisPayload<T> | null {
   if (analysis?.metricsJson == null || analysis.resultJson == null) {
     return null;
   }

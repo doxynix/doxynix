@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
 import { createRepoMetadata } from "@/shared/lib/metadata";
 
 import { RepoPullDetailContainer } from "@/features/repo-pulls/ui/repo-pull-details-container";
+import { RepoPullDetailsSkeleton } from "@/features/repo-pulls/ui/repo-pull-details-skeleton";
 
 import { HydrateClient, prefetch, trpcProxy } from "@/server/core/trpc/prefetch";
 import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
@@ -28,7 +30,30 @@ export default async function PullRequestDetailPage({ params }: Readonly<Props>)
 
   const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 
-  await prefetch(trpcProxy.analysis.getByPRNumber.queryOptions({ prNumber, repoId: repo.id }));
+  return (
+    <Suspense fallback={<RepoPullDetailsSkeleton />}>
+      <PullDetailSection
+        name={name}
+        owner={owner}
+        prNumber={prNumber}
+        repoId={repo.id}
+      />
+    </Suspense>
+  );
+}
+
+async function PullDetailSection({
+  name,
+  owner,
+  prNumber,
+  repoId,
+}: Readonly<{
+  name: string;
+  owner: string;
+  prNumber: number;
+  repoId: string;
+}>) {
+  await prefetch(trpcProxy.analysis.getByPRNumber.queryOptions({ prNumber, repoId }));
 
   return (
     <HydrateClient>
@@ -36,7 +61,7 @@ export default async function PullRequestDetailPage({ params }: Readonly<Props>)
         name={name}
         owner={owner}
         prNumber={prNumber}
-        repoId={repo.id}
+        repoId={repoId}
       />
     </HydrateClient>
   );

@@ -8,13 +8,12 @@ import { useTRPC } from "@/shared/api/trpc";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
-import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 
 import type { RepoStatus } from "@/entities/repo/model/repo.types";
 import { REPO_LIST_DEFAULT_LIMIT, repoParsers } from "@/entities/repo/model/repo-parsers";
-import { RepoCardSkeleton } from "@/entities/repo/ui/repo-card-skeleton";
 
 import { RepoList } from "./repo-list";
+import { RepoListSkeleton } from "./repo-list-skeleton";
 
 type Props = {
   config?: {
@@ -65,22 +64,10 @@ export function RepoListContainer({ config }: Readonly<Props>) {
 
   if (isLoading || data == null) {
     return (
-      <>
-        {config?.showTotalCount !== false && (
-          <div className="mb-4">
-            <SkeletonText
-              lines={1}
-              size="lg"
-              widths={["w-24"]}
-            />
-          </div>
-        )}
-        <SkeletonList
-          className="flex flex-col gap-3"
-          count={safeLimit}
-          renderItem={() => <RepoCardSkeleton />}
-        />
-      </>
+      <RepoListSkeleton
+        count={safeLimit}
+        showTotalCount={config?.showTotalCount !== false}
+      />
     );
   }
 

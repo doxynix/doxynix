@@ -1,10 +1,10 @@
 "use client";
 
 import {
+  type ComponentProps,
   type ComponentPropsWithoutRef,
   type ComponentRef,
   forwardRef,
-  type HTMLAttributes,
 } from "react";
 import type { DialogProps } from "@radix-ui/react-dialog";
 import { Command as CommandPrimitive } from "cmdk";
@@ -14,6 +14,8 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/shared/lib/cn";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/shared/ui/core/dialog";
 import { Spinner } from "@/shared/ui/core/spinner";
+
+import { ShortcutHint } from "./shortcut-hint";
 
 const Command = forwardRef<
   ComponentRef<typeof CommandPrimitive>,
@@ -152,23 +154,30 @@ const CommandItem = forwardRef<
 
 CommandItem.displayName = CommandPrimitive.Item.displayName;
 
-const CommandShortcut = ({ className, ...props }: HTMLAttributes<HTMLSpanElement>) => {
-  return (
-    <kbd
-      className={cn(
-        "ml-auto flex h-5 items-center rounded border border-border bg-surface-hover px-1.5 text-muted-foreground text-xs tracking-widest",
-        className,
-      )}
-      {...props}
-    />
-  );
-};
+const CommandShortcut = ({ className, shortcut }: { className?: string; shortcut: string }) => (
+  <ShortcutHint
+    className={className}
+    shortcut={shortcut}
+  />
+);
 CommandShortcut.displayName = "CommandShortcut";
+
+const CommandFooter = ({ className, ...props }: ComponentProps<"div">) => (
+  <div
+    className={cn(
+      "flex items-center gap-4 border-t px-3 py-2 text-muted-foreground text-xs",
+      className,
+    )}
+    data-slot="command-footer"
+    {...props}
+  />
+);
 
 export {
   Command,
   CommandDialog,
   CommandEmpty,
+  CommandFooter,
   CommandGroup,
   CommandInput,
   CommandItem,

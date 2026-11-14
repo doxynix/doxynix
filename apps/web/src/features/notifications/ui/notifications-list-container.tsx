@@ -7,17 +7,16 @@ import { useTRPC } from "@/shared/api/trpc";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
-import { SkeletonList } from "@/shared/ui/kit/app-skeleton";
 
 import {
   NOTIFICATIONS_DEFAULT_LIMIT,
   notificationsParsers,
 } from "@/entities/notification/model/notifications-parsers";
 import { useNotificationStats } from "@/entities/notification/model/use-notification-stats";
-import { NotificationCardSkeleton } from "@/entities/notification/ui/notification-card-skeleton";
 
 import { NotificationsHeader } from "./notifications-header";
 import { NotificationsList } from "./notifications-list";
+import { NotificationsListSkeleton } from "./notifications-list-skeleton";
 
 export function NotificationsListContainer() {
   const trpc = useTRPC();
@@ -58,11 +57,7 @@ export function NotificationsListContainer() {
       <NotificationsHeader stats={stats} />
 
       {isListLoading || data == null ? (
-        <SkeletonList
-          className="flex flex-col gap-3"
-          count={safeLimit}
-          renderItem={() => <NotificationCardSkeleton />}
-        />
+        <NotificationsListSkeleton count={safeLimit} />
       ) : (
         <>
           <div className="flex-1">

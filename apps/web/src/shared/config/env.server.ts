@@ -20,6 +20,8 @@ const envServer = createEnv({
     API_KEY_CHECKSUM_SECRET: process.env.API_KEY_CHECKSUM_SECRET,
     API_KEY_PEPPER: process.env.API_KEY_PEPPER,
     APP_VERSION: process.env.APP_VERSION,
+    AXIOM_DATASET: process.env.AXIOM_DATASET,
+    AXIOM_TOKEN: process.env.AXIOM_TOKEN,
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
     BETTERSTACK_API_TOKEN: process.env.BETTERSTACK_API_TOKEN,
@@ -66,6 +68,8 @@ const envServer = createEnv({
     API_KEY_CHECKSUM_SECRET: stringSchema,
     API_KEY_PEPPER: stringSchema,
     APP_VERSION: z._default(z.string(), "1.0.0"),
+    AXIOM_DATASET: z.optional(stringSchema),
+    AXIOM_TOKEN: z.optional(stringSchema),
     BETTER_AUTH_SECRET: stringSchema,
     BETTER_AUTH_URL: stringSchema,
     BETTERSTACK_API_TOKEN: stringSchema,
@@ -121,6 +125,8 @@ export const TOOL_APPROVAL_SECRET = envServer.TOOL_APPROVAL_SECRET;
 export const RESEND_API_KEY = envServer.RESEND_API_KEY;
 export const RESEND_WEBHOOK_SECRET = envServer.RESEND_WEBHOOK_SECRET;
 export const APP_VERSION = envServer.APP_VERSION;
+export const AXIOM_DATASET = envServer.AXIOM_DATASET;
+export const AXIOM_TOKEN = envServer.AXIOM_TOKEN;
 export const ABLY_API_KEY = envServer.ABLY_API_KEY;
 export const GROQ_API_KEY = envServer.GROQ_API_KEY;
 export const UPLOADTHING_TOKEN = envServer.UPLOADTHING_TOKEN;

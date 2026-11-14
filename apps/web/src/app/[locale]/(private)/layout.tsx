@@ -30,17 +30,16 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
     unauthorized();
   }
 
-  await Promise.all([
-    prefetch(trpcProxy.workspace.myWorkspaces.queryOptions()),
-    prefetch(trpcProxy.notification.getStats.queryOptions()),
-    prefetch(trpcProxy.user.getAppearance.queryOptions({})),
-    prefetch(
-      trpcProxy.repo.getSlim.infiniteQueryOptions(
-        { limit: REPO_LIST_PAGE_SIZE },
-        { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
-      ),
+  void prefetch(trpcProxy.notification.getStats.queryOptions());
+  void prefetch(trpcProxy.user.getAppearance.queryOptions({}));
+  void prefetch(
+    trpcProxy.repo.getSlim.infiniteQueryOptions(
+      { limit: REPO_LIST_PAGE_SIZE },
+      { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
     ),
-  ]);
+  );
+
+  await prefetch(trpcProxy.workspace.myWorkspaces.queryOptions());
 
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
