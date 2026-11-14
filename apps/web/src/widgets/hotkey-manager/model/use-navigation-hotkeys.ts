@@ -1,22 +1,40 @@
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
+import { commandMenuItems } from "@/shared/config/navigation";
 import { useRouter } from "@/shared/i18n/navigation";
 
-const SEQUENTIAL_ROUTES: Record<string, Record<string, string>> = {
-  g: {
-    c: "/dashboard/settings/connections",
-    d: "/dashboard/settings/danger-zone",
-    h: "/support",
-    k: "/dashboard/settings/api-keys",
-    l: "/dashboard/settings/audit-log",
-    n: "/dashboard/notifications",
-    o: "/dashboard",
-    p: "/dashboard/settings/profile",
-    r: "/dashboard/repos",
-    s: "/dashboard/settings/profile",
-  },
-};
+const SEQUENCE_PATTERN = /^\s*(\S+)\s+then\s+(\S+)\s*$/i;
+
+function buildSequentialRoutes(): Record<string, Record<string, string>> {
+  const routes: Record<string, Record<string, string>> = {};
+
+  for (const item of commandMenuItems) {
+    if (item.href == null || item.shortcut == null) {
+      continue;
+    }
+
+    const match = SEQUENCE_PATTERN.exec(item.shortcut);
+    if (match == null) {
+      continue;
+    }
+
+    const [, prefix, secondKey] = match;
+    if (prefix == null || secondKey == null) {
+      continue;
+    }
+
+    const prefixRoutes = (routes[prefix.toLowerCase()] ??= {});
+    prefixRoutes[secondKey.toLowerCase()] = item.href;
+  }
+
+  const gRoutes = (routes.g ??= {});
+  gRoutes.o ??= "/dashboard";
+
+  return routes;
+}
+
+const SEQUENTIAL_ROUTES = buildSequentialRoutes();
 
 const PREFIX_KEYS = Object.keys(SEQUENTIAL_ROUTES);
 

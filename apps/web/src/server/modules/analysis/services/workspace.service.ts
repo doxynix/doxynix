@@ -13,11 +13,11 @@ import { buildWorkspacePayload } from "../logic/workspace-payload";
 
 export const workspaceService = {
   async getDetailedMetrics(db: DbClient, repoId: string, workspaceId: string, aid?: string) {
-    const repo = await analysisRepo.getRepoSnapshot(db, repoId, workspaceId, aid);
-    if (repo == null) {
+    const analysis = await analysisRepo.getAnalysisPayloadForRepo(db, repoId, workspaceId, aid);
+    if (analysis == null) {
       return null;
     }
-    return analysisMapper.toDetailedMetrics(repo.analyses[0] ?? null);
+    return analysisMapper.toDetailedMetrics(analysis);
   },
 
   async getNodeContext(

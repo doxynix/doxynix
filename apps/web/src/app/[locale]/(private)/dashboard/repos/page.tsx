@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
@@ -14,6 +15,7 @@ import {
 import { CreateRepoButton } from "@/features/repo/ui/create-repo-button";
 import { RepoFilters } from "@/features/repo/ui/repo-filters";
 import { RepoListContainer } from "@/features/repo/ui/repo-list-container";
+import { RepoListSkeleton } from "@/features/repo/ui/repo-list-skeleton";
 
 import { HydrateClient, prefetch, trpcProxy } from "@/server/core/trpc/prefetch";
 
@@ -21,8 +23,31 @@ export const generateMetadata = createMetadata("repositories_title", "repositori
 
 export default async function ReposPage({ searchParams }: Readonly<PageProps>) {
   const t = await getTranslations("Dashboard");
+  const query = await searchParams;
+  const shouldPrefetch = !hasAnySearchParam(query, Object.keys(repoParsers));
 
-  if (!hasAnySearchParam(await searchParams, Object.keys(repoParsers))) {
+  return (
+    <div className="mx-auto flex h-full w-full flex-col">
+      <div className="mb-4 flex items-center not-sm:justify-center">
+        <h1 className="font-bold text-2xl">{t("repo_title")}</h1>
+      </div>
+      <div className="mb-4 flex w-full flex-wrap items-center justify-center gap-2 xl:justify-between">
+        <div className="flex flex-col items-center gap-4 xl:flex-row">
+          <AppSearch placeholder={t("repo_search_repository")} />
+          <RepoFilters />
+        </div>
+        <CreateRepoButton />
+      </div>
+
+      <Suspense fallback={<RepoListSkeleton count={REPO_LIST_DEFAULT_LIMIT} />}>
+        <RepoListSection prefetchList={shouldPrefetch} />
+      </Suspense>
+    </div>
+  );
+}
+
+async function RepoListSection({ prefetchList }: Readonly<{ prefetchList: boolean }>) {
+  if (prefetchList) {
     await prefetch(
       trpcProxy.repo.getAll.queryOptions({
         limit: REPO_LIST_DEFAULT_LIMIT,
@@ -34,20 +59,7 @@ export default async function ReposPage({ searchParams }: Readonly<PageProps>) {
 
   return (
     <HydrateClient>
-      <div className="mx-auto flex h-full w-full flex-col">
-        <div className="mb-4 flex items-center not-sm:justify-center">
-          <h1 className="font-bold text-2xl">{t("repo_title")}</h1>
-        </div>
-        <div className="mb-4 flex w-full flex-wrap items-center justify-center gap-2 xl:justify-between">
-          <div className="flex flex-col items-center gap-4 xl:flex-row">
-            <AppSearch placeholder={t("repo_search_repository")} />
-            <RepoFilters />
-          </div>
-          <CreateRepoButton />
-        </div>
-
-        <RepoListContainer />
-      </div>
+      <RepoListContainer />
     </HydrateClient>
   );
 }

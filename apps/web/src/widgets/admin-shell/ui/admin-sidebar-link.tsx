@@ -54,9 +54,10 @@ export function AdminSidebarLink({
             </SidebarMenuBadge>
           )}
           {shortcut != null && (
-            <SidebarMenuShortcut className="opacity-0 transition-opacity group-hover/link:opacity-100">
-              {shortcut}
-            </SidebarMenuShortcut>
+            <SidebarMenuShortcut
+              className="opacity-0 transition-opacity group-hover/link:opacity-100"
+              shortcut={shortcut}
+            />
           )}
         </div>
         {blank && <SquareArrowOutUpRight className="ml-auto size-3.5" />}

@@ -2,12 +2,11 @@
 
 import { useTranslations } from "next-intl";
 
-import { Skeleton } from "@/shared/ui/core/skeleton";
-
 import { useWorkspace } from "@/entities/workspace/model/workspace-context";
 
 import { useBillingState } from "../model/use-billing-state";
 import { AccessStateBanner } from "./access-state-banner";
+import { BillingSettingsSkeleton } from "./billing-settings-skeleton";
 import { PlanCard } from "./plan-card";
 import { SeatsCard } from "./seats-card";
 import { UsageCard } from "./usage-card";
@@ -18,12 +17,7 @@ export function BillingSettingsPage() {
   const { data, isError, isLoading } = useBillingState();
 
   if (isLoading) {
-    return (
-      <div className="flex w-full flex-col gap-6">
-        <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-40 w-full" />
-      </div>
-    );
+    return <BillingSettingsSkeleton />;
   }
 
   if (isError || data?.entitlement == null) {

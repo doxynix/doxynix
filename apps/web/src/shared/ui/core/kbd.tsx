@@ -8,7 +8,7 @@ function Kbd({ className, ...props }: ComponentProps<"kbd">) {
       className={cn(
         "pointer-events-none inline-flex h-5 w-fit min-w-5 select-none items-center justify-center gap-1 rounded-sm bg-muted px-1 font-medium font-sans text-muted-foreground text-xs",
         "[&_svg:not([class*='size-'])]:size-3",
-        "in-data-[slot=tooltip-content]:bg-background/20 in-data-[slot=tooltip-content]:text-background dark:in-data-[slot=tooltip-content]:bg-background/10",
+        "in-data-[slot=tooltip-content]:bg-popover-foreground/10 in-data-[slot=tooltip-content]:text-popover-foreground",
         className,
       )}
       data-slot="kbd"

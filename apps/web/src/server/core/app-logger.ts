@@ -1,8 +1,10 @@
-import { Logger } from "next-axiom";
+import { Axiom } from "@axiomhq/js";
+import { AxiomJSTransport, Logger } from "@axiomhq/logging";
 import pino from "pino";
 import pretty from "pino-pretty";
 
 import { IS_PROD } from "@/shared/config/env.flags";
+import { AXIOM_DATASET, AXIOM_TOKEN } from "@/shared/config/env.server";
 
 import { requestContext } from "../utils/request-context";
 import { sanitizePayload } from "../utils/sanitize-payload";
@@ -57,7 +59,18 @@ const createPinoLogger = () => {
 
 const pinoLogger = createPinoLogger();
 
-const axiomLogger = IS_PROD ? new Logger() : null;
+const axiomLogger = (() => {
+  if (!(IS_PROD && AXIOM_TOKEN && AXIOM_DATASET)) {
+    return null;
+  }
+
+  return new Logger({
+    logLevel: "debug",
+    transports: [
+      new AxiomJSTransport({ axiom: new Axiom({ token: AXIOM_TOKEN }), dataset: AXIOM_DATASET }),
+    ],
+  });
+})();
 
 const log = (level: "debug" | "error" | "info" | "warn", payload: LogPayload) => {
   const data = prepareData(payload);

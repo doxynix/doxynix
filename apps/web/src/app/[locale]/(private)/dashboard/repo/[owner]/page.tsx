@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { createRepoMetadata } from "@/shared/lib/metadata";
@@ -16,6 +17,7 @@ import { CreateRepoButton } from "@/features/repo/ui/create-repo-button";
 import { DeleteByOwnerDialog } from "@/features/repo/ui/delete-by-owner-dialog";
 import { RepoFilters } from "@/features/repo/ui/repo-filters";
 import { RepoListContainer } from "@/features/repo/ui/repo-list-container";
+import { RepoListSkeleton } from "@/features/repo/ui/repo-list-skeleton";
 
 import { HydrateClient, prefetch, trpcProxy } from "@/server/core/trpc/prefetch";
 import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
@@ -27,8 +29,47 @@ export default async function OwnerPage({ params, searchParams }: Readonly<RepoP
   const { owner } = await params;
 
   const data = await repoFetchers.getOwnerOrNotFound(owner);
+  const query = await searchParams;
+  const shouldPrefetch = !hasAnySearchParam(query, Object.keys(repoParsers));
 
-  if (!hasAnySearchParam(await searchParams, Object.keys(repoParsers))) {
+  const avatarUrl = data.ownerAvatarUrl;
+
+  return (
+    <div className="mx-auto flex h-full w-full flex-col">
+      <div className="mb-4 flex items-center not-xs:justify-center gap-4">
+        <AppAvatar
+          alt={owner}
+          fallbackText={owner}
+          sizeClassName="size-9"
+          src={avatarUrl}
+        />
+        <h1 className="font-bold text-2xl">{owner}</h1>
+      </div>
+
+      <div className="mb-4 flex w-full flex-wrap items-center justify-center gap-2 xl:justify-between">
+        <div className="flex flex-col items-center gap-4 xl:flex-row">
+          <AppSearch placeholder={t("repo_search_repository")} />
+          <RepoFilters />
+        </div>
+        <CreateRepoButton />
+        <DeleteByOwnerDialog owner={owner} />
+      </div>
+
+      <Suspense fallback={<RepoListSkeleton count={REPO_LIST_DEFAULT_LIMIT} />}>
+        <OwnerRepoListSection
+          owner={owner}
+          prefetchList={shouldPrefetch}
+        />
+      </Suspense>
+    </div>
+  );
+}
+
+async function OwnerRepoListSection({
+  owner,
+  prefetchList,
+}: Readonly<{ owner: string; prefetchList: boolean }>) {
+  if (prefetchList) {
     await prefetch(
       trpcProxy.repo.getAll.queryOptions({
         limit: REPO_LIST_DEFAULT_LIMIT,
@@ -39,32 +80,9 @@ export default async function OwnerPage({ params, searchParams }: Readonly<RepoP
     );
   }
 
-  const avatarUrl = data.ownerAvatarUrl;
-
   return (
     <HydrateClient>
-      <div className="mx-auto flex h-full w-full flex-col">
-        <div className="mb-4 flex items-center not-xs:justify-center gap-4">
-          <AppAvatar
-            alt={owner}
-            fallbackText={owner}
-            sizeClassName="size-9"
-            src={avatarUrl}
-          />
-          <h1 className="font-bold text-2xl">{owner}</h1>
-        </div>
-
-        <div className="mb-4 flex w-full flex-wrap items-center justify-center gap-2 xl:justify-between">
-          <div className="flex flex-col items-center gap-4 xl:flex-row">
-            <AppSearch placeholder={t("repo_search_repository")} />
-            <RepoFilters />
-          </div>
-          <CreateRepoButton />
-          <DeleteByOwnerDialog owner={owner} />
-        </div>
-
-        <RepoListContainer config={{ forcedFilters: { owner } }} />
-      </div>
+      <RepoListContainer config={{ forcedFilters: { owner } }} />
     </HydrateClient>
   );
 }

@@ -22,7 +22,8 @@ export const getRulesQuerySchema = paginationQuerySchema.extend({
 
 export const createRuleSchema = createInsertSchema(rules, {
   description: (schema) => schema.min(5).max(1000),
-  name: (schema) => schema.min(3).max(100),
+  // `name` is a citext column; drizzle-zod does not generate a string schema for it.
+  name: () => z.string().min(3).max(100),
   pattern: (schema) => schema.min(1).max(2000).refine(isValidRegex, "Invalid regex"),
 }).omit({ createdAt: true, id: true });
 

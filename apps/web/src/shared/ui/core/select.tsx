@@ -18,7 +18,7 @@ const SelectTrigger = forwardRef<
 >(({ children, className, ...props }, ref) => (
   <SelectPrimitive.Trigger
     className={cn(
-      "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-xl border border-input bg-background/80 px-3 py-2 text-sm ring-offset-background transition-standard focus-visible:border-border-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-placeholder:text-muted-foreground [&>span]:line-clamp-1",
+      "flex group/trigger h-9 w-full items-center justify-between whitespace-nowrap rounded-xl border border-input bg-background/80 px-3 py-2 text-sm ring-offset-background transition-standard focus-visible:border-border-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-50 data-placeholder:text-muted-foreground [&>span]:line-clamp-1",
       className,
     )}
     ref={ref}
@@ -26,7 +26,7 @@ const SelectTrigger = forwardRef<
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="opacity-50" />
+      <ChevronDown className="opacity-50 transition-standard group-hover/trigger:opacity-100" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));

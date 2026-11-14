@@ -4,7 +4,6 @@ import withBundleAnalyzer from "@next/bundle-analyzer";
 import { type SentryBuildOptions, withSentryConfig } from "@sentry/nextjs/config";
 import createWithVercelToolbar from "@vercel/toolbar/plugins/next";
 import { createMDX } from "fumadocs-mdx/next";
-import { withAxiom } from "next-axiom";
 import createNextIntlPlugin from "next-intl/plugin";
 import { join, relative } from "pathe";
 import { StatsWriterPlugin } from "webpack-stats-plugin";
@@ -296,8 +295,27 @@ const nextConfig: NextConfig = {
       { d: "/dashboard/notifications", s: "/inbox" },
       { d: "/dashboard/notifications", s: "/alerts" },
 
+      { d: "/dashboard/settings/members", s: "/mt" },
+      { d: "/dashboard/settings/members", s: "/members" },
+
+      { d: "/dashboard/settings/billing", s: "/b" },
+      { d: "/dashboard/settings/billing", s: "/billing" },
+
+      { d: "/dashboard/settings/appearance", s: "/a" },
+      { d: "/dashboard/settings/appearance", s: "/appearance" },
+
+      { d: "/dashboard/settings/connections", s: "/c" },
+      { d: "/dashboard/settings/connections", s: "/connections" },
+
+      { d: "/dashboard/settings/sessions", s: "/ms" },
+      { d: "/dashboard/settings/sessions", s: "/sessions" },
+
+      { d: "/dashboard/settings/audit-log", s: "/l" },
+      { d: "/dashboard/settings/audit-log", s: "/audit" },
+
       { d: "/admin/users", s: "/au" },
 
+      { d: "/dashboard/settings/danger-zone", s: "/z" },
       { d: "/dashboard/settings/danger-zone", s: "/dz" },
       { d: "/dashboard/settings/danger-zone", s: "/danger" },
       { d: "/dashboard/settings/danger-zone", s: "/rip" },
@@ -423,7 +441,7 @@ const sentryOptions: SentryBuildOptions = {
 const baseConfig =
   IS_DEV && !IS_ANALYZE
     ? withVercelToolbar(withNextIntl(nextConfig))
-    : withAxiom(bundleAnalyzer(withNextIntl(nextConfig)));
+    : bundleAnalyzer(withNextIntl(nextConfig));
 
 const IS_CI_OR_VERCEL = Boolean(process.env.VERCEL != null || process.env.CI != null);
 

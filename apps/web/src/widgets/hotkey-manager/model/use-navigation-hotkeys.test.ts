@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { commandMenuItems } from "@/shared/config/navigation";
+
 vi.mock("@/shared/i18n/navigation", () => ({
   useRouter: vi.fn(),
 }));
@@ -7,17 +9,22 @@ vi.mock("@/shared/i18n/navigation", () => ({
 import { processNavigationSequence, resolveNavigationRoute } from "./use-navigation-hotkeys";
 
 describe("resolveNavigationRoute", () => {
-  it("should map every valid g-prefix second key to its correct route string", () => {
-    expect(resolveNavigationRoute("g", "KeyC")).toBe("/dashboard/settings/connections");
-    expect(resolveNavigationRoute("g", "KeyD")).toBe("/dashboard/settings/danger-zone");
-    expect(resolveNavigationRoute("g", "KeyH")).toBe("/support");
-    expect(resolveNavigationRoute("g", "KeyK")).toBe("/dashboard/settings/api-keys");
-    expect(resolveNavigationRoute("g", "KeyL")).toBe("/dashboard/settings/audit-log");
-    expect(resolveNavigationRoute("g", "KeyN")).toBe("/dashboard/notifications");
+  it("should map every displayed g-sequence to its menu href", () => {
+    expect(commandMenuItems.length).toBeGreaterThan(0);
+
+    for (const item of commandMenuItems) {
+      if (item.href == null || item.shortcut == null) {
+        continue;
+      }
+      if (!item.shortcut.startsWith("G then ")) {
+        continue;
+      }
+
+      const key = item.shortcut.slice("G then ".length);
+      expect(resolveNavigationRoute("g", `Key${key}`)).toBe(item.href);
+    }
+
     expect(resolveNavigationRoute("g", "KeyO")).toBe("/dashboard");
-    expect(resolveNavigationRoute("g", "KeyP")).toBe("/dashboard/settings/profile");
-    expect(resolveNavigationRoute("g", "KeyR")).toBe("/dashboard/repos");
-    expect(resolveNavigationRoute("g", "KeyS")).toBe("/dashboard/settings/profile");
   });
 
   it("should return null for unknown keys or invalid prefix structures", () => {
@@ -41,9 +48,16 @@ describe("processNavigationSequence", () => {
   });
 
   it("should return reset action when second key is invalid or unrecognized", () => {
-    const result = processNavigationSequence("g", "KeyZ");
+    const result = processNavigationSequence("g", "KeyX");
 
     expect(result).toEqual({ action: "reset" });
+  });
+
+  it("should resolve the danger-zone sequence", () => {
+    expect(processNavigationSequence("g", "KeyZ")).toEqual({
+      action: "execute",
+      path: "/dashboard/settings/danger-zone",
+    });
   });
 
   it("should return reset action if second input is non-alphabetic", () => {

@@ -12,10 +12,12 @@ import { useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { useIntersectionObserver } from "@/shared/lib/hooks/use-intersection-observer";
+import { useModifierKey } from "@/shared/lib/hooks/use-modifier-key";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   CommandDialog,
   CommandEmpty,
+  CommandFooter,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -23,6 +25,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/shared/ui/core/command";
+import { Kbd, KbdGroup } from "@/shared/ui/core/kbd";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
@@ -34,11 +37,12 @@ import {
   useCommandMenuIsOpen,
 } from "@/features/command-menu/model/use-command-menu.store";
 
-const COMMAND_SHORTCUT = "Ctrl+K";
-
 export function AppCommandMenu() {
   const trpc = useTRPC();
+  const modifierKey = useModifierKey();
+  const commandShortcut = `${modifierKey}+K`;
   const t = useTranslations("Dashboard");
+  const tCommon = useTranslations("Common");
   const navLabels = useNavLabels();
   const open = useCommandMenuIsOpen();
   const { setOpen } = useCommandMenuActions();
@@ -164,7 +168,7 @@ export function AppCommandMenu() {
         content={t("command_search")}
       >
         <AppButton
-          aria-label={`${t("command_search")} ${COMMAND_SHORTCUT}`}
+          aria-label={`${t("command_search")} ${commandShortcut}`}
           className={cn(
             "relative size-9 justify-start rounded-xl not-lg:border-0 not-lg:p-0 font-normal text-muted-foreground text-sm lg:w-64 lg:border-border lg:bg-surface-hover lg:pr-12",
           )}
@@ -174,9 +178,10 @@ export function AppCommandMenu() {
           <Search className="absolute top-2.25 left-2.25" />
 
           <span className="hidden lg:inline-flex lg:pl-4">{t("command_search")}</span>
-          <CommandShortcut className="absolute top-1.5 right-3 hidden text-xs lg:flex">
-            {COMMAND_SHORTCUT}
-          </CommandShortcut>
+          <CommandShortcut
+            className="absolute top-1.5 right-3 hidden text-xs lg:flex"
+            shortcut={commandShortcut}
+          />
         </AppButton>
       </AppTooltip>
 
@@ -191,7 +196,7 @@ export function AppCommandMenu() {
           placeholder={t("command_placeholder")}
           value={search}
         />
-        <CommandList>
+        <CommandList label={tCommon("command_menu_title")}>
           {filteredCommands.length === 0 && (
             <CommandEmpty>{t("command_empty_results")}</CommandEmpty>
           )}
@@ -222,9 +227,10 @@ export function AppCommandMenu() {
                         </kbd>
                       )}
                       {item.shortcut != null && (
-                        <CommandShortcut className="hidden text-xs md:flex">
-                          {item.shortcut}
-                        </CommandShortcut>
+                        <CommandShortcut
+                          className="hidden text-xs md:flex"
+                          shortcut={item.shortcut}
+                        />
                       )}
                     </div>
                   </CommandItem>
@@ -300,6 +306,23 @@ export function AppCommandMenu() {
             </div>
           )}
         </CommandList>
+        <CommandFooter className="hidden justify-between sm:flex">
+          <span className="flex items-center gap-1.5">
+            <KbdGroup>
+              <Kbd>↑</Kbd>
+              <Kbd>↓</Kbd>
+            </KbdGroup>
+            {tCommon("command_footer_navigate")}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Kbd>↵</Kbd>
+            {tCommon("command_footer_select")}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Kbd>Esc</Kbd>
+            {tCommon("close")}
+          </span>
+        </CommandFooter>
       </CommandDialog>
     </>
   );
