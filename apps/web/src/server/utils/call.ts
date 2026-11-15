@@ -51,10 +51,19 @@ type UsageMeter = {
 };
 
 type MeterUsage = {
-  cachedInputTokens?: number;
+  cachedInputTokens?: number; // legacy fallback only
+  inputTokenDetails?: {
+    cacheReadTokens?: number;
+    cacheWriteTokens?: number;
+    noCacheTokens?: number;
+  };
   inputTokens?: number;
   outputTokens?: number;
 };
+
+// A reservation is a safety valve, not an invoice: capping the output side keeps a few concurrent
+// calls from inflating the quota, and settlement replaces the estimate with the actual usage.
+const MAX_RESERVED_OUTPUT_TOKENS = 8192;
 
 function readString(source: Record<string, unknown>, key: string): null | string {
   const value = source[key];
@@ -101,14 +110,27 @@ async function resolveUsageMeter(
   return repo == null ? null : { analysisId, workspaceId: repo.workspaceId };
 }
 
-function estimateTokens(system: string, prompt: string, maxOutputTokens: number): number {
-  return Math.ceil((system.length + prompt.length) / 4) + maxOutputTokens;
+export function estimateTokens(system: string, prompt: string, maxOutputTokens: number): number {
+  return (
+    Math.ceil((system.length + prompt.length) / 4) +
+    Math.min(maxOutputTokens, MAX_RESERVED_OUTPUT_TOKENS)
+  );
 }
 
-function toTokenUsage(usage: MeterUsage | null | undefined): TokenUsage {
+// The SDK reports cache hits inside `inputTokenDetails`; `cachedInputTokens` is the pre-v7 shape
+// and only survives as a fallback.
+export function mapUsageToTokenUsage(usage: MeterUsage | null | undefined): TokenUsage {
+  const cachedInputTokens =
+    usage?.inputTokenDetails?.cacheReadTokens ?? usage?.cachedInputTokens ?? 0;
+  const cacheWriteTokens = usage?.inputTokenDetails?.cacheWriteTokens ?? 0;
+  const noCacheTokens =
+    usage?.inputTokenDetails?.noCacheTokens ??
+    Math.max(0, (usage?.inputTokens ?? 0) - cachedInputTokens);
+
   return {
-    cachedInputTokens: usage?.cachedInputTokens ?? 0,
-    inputTokens: usage?.inputTokens ?? 0,
+    cachedInputTokens,
+    // Cache writes have no separate price class, so they are billed at the input rate.
+    inputTokens: noCacheTokens + cacheWriteTokens,
     outputTokens: usage?.outputTokens ?? 0,
   };
 }
@@ -176,7 +198,7 @@ async function settleAttempt(
       idempotencyKey,
       model,
       provider: "google",
-      usage: toTokenUsage(usage),
+      usage: mapUsageToTokenUsage(usage),
       workspaceId: meter.workspaceId,
     });
   } catch (error) {

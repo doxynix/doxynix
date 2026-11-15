@@ -30,14 +30,32 @@ describe("priceFor", () => {
 });
 
 describe("costCentsFor", () => {
-  it("prices each class and rounds up to whole cents", () => {
+  it("prices a call at the input rate and rounds to the nearest cent", () => {
     const cost = costCentsFor(
       MODEL,
       { cachedInputTokens: 0, inputTokens: 1_000_000, outputTokens: 0 },
       BEFORE_REPRICE,
     );
 
+    // 7.5 cents.
     expect(cost).toBe(BigInt(8));
+  });
+
+  it("prices cached input at the cached rate, not the input rate", () => {
+    const cached = costCentsFor(
+      MODEL,
+      { cachedInputTokens: 1_000_000, inputTokens: 0, outputTokens: 0 },
+      BEFORE_REPRICE,
+    );
+
+    expect(cached).toBe(BigInt(2));
+    expect(cached).toBeLessThan(
+      costCentsFor(
+        MODEL,
+        { cachedInputTokens: 0, inputTokens: 1_000_000, outputTokens: 0 },
+        BEFORE_REPRICE,
+      ),
+    );
   });
 
   it("adds input, cached input and output", () => {
@@ -47,8 +65,29 @@ describe("costCentsFor", () => {
       BEFORE_REPRICE,
     );
 
-    // 7.5 + 1.875 + 30 = 39.375 -> 40 cents.
-    expect(cost).toBe(BigInt(40));
+    // 7.5 + 1.875 + 30 = 39.375 -> 39 cents.
+    expect(cost).toBe(BigInt(39));
+  });
+
+  it("rounds a sub-cent call to zero instead of a whole cent", () => {
+    const cost = costCentsFor(
+      MODEL,
+      { cachedInputTokens: 0, inputTokens: 1000, outputTokens: 0 },
+      BEFORE_REPRICE,
+    );
+
+    expect(cost).toBe(BigInt(0));
+  });
+
+  it("rounds down a fractional cent instead of charging a whole one", () => {
+    const cost = costCentsFor(
+      MODEL,
+      { cachedInputTokens: 0, inputTokens: 60_000, outputTokens: 0 },
+      BEFORE_REPRICE,
+    );
+
+    // 0.45 cents: `Math.ceil` billed 1, the real sum is closer to 0.
+    expect(cost).toBe(BigInt(0));
   });
 
   it("is zero for an empty usage", () => {

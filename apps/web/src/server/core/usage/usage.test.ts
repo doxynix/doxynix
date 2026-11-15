@@ -171,7 +171,31 @@ describe("reserve and settle", () => {
     expect(settled.tokens).toBe(700);
     expect(settled.releasedTokens).toBe(500);
     expect(rollupFor(fake.rollups, JANUARY)?.aiTokensUsed).toBe(700);
-    expect(rollupFor(fake.rollups, JANUARY)?.costCents).toBeGreaterThan(BigInt(0));
+    // A 500-input-token call is worth a fraction of a cent, and rounding must not inflate it.
+    expect(rollupFor(fake.rollups, JANUARY)?.costCents).toBe(BigInt(0));
+  });
+
+  it("charges whole cents once a call costs more than one", async () => {
+    const fake = createFakeDb();
+
+    await reserveUsage(fake.db, {
+      estimatedTokens: 1200,
+      idempotencyKey: "call-1",
+      now: JANUARY,
+      workspaceId: WORKSPACE_ID,
+    });
+    const settled = await settleUsage(fake.db, {
+      idempotencyKey: "call-1",
+      model: MODEL,
+      now: JANUARY,
+      provider: "google",
+      usage: { cachedInputTokens: 0, inputTokens: 1_000_000, outputTokens: 0 },
+      workspaceId: WORKSPACE_ID,
+    });
+
+    // 7.5 cents at the input rate, rounded to the nearest cent instead of up.
+    expect(settled.costCents).toBe(BigInt(8));
+    expect(rollupFor(fake.rollups, JANUARY)?.costCents).toBe(BigInt(8));
   });
 
   it("does not double count a duplicate reservation", async () => {
