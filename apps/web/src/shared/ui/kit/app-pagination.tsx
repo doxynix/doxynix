@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { parseAsInteger, useQueryState } from "nuqs";
 
 import { cn } from "@/shared/lib/cn";
+import { clampPaginationMax, isBeyondMaxPage } from "@/shared/lib/pagination";
 import {
   Pagination,
   PaginationContent,
@@ -48,6 +49,9 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
     }
   }
 
+  const maxPage = clampPaginationMax(meta.totalPages);
+  const isCappedByCeiling = isBeyondMaxPage(meta.totalPages);
+
   const handlePageChange = (targetPage: number, btnType: "next" | "prev" | number) => {
     if (targetPage === page) {
       return;
@@ -64,7 +68,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
       e.preventDefault();
       const target = Number.parseInt(inputValue, 10);
 
-      if (!Number.isNaN(target) && target >= 1 && target <= meta.totalPages) {
+      if (!Number.isNaN(target) && target >= 1 && target <= maxPage) {
         if (target !== meta.currentPage) {
           handlePageChange(target, target);
         }
@@ -81,11 +85,11 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
   const handleBlur = () => {
     const target = Number.parseInt(inputValue, 10);
 
-    setInputValue(String(target));
+    setInputValue(String(Number.isNaN(target) ? meta.currentPage : Math.min(target, maxPage)));
   };
 
   const isPrevDisabled = isAnyLoading || meta.currentPage <= 1;
-  const isNextDisabled = isAnyLoading || meta.currentPage >= meta.totalPages;
+  const isNextDisabled = isAnyLoading || meta.currentPage >= maxPage;
 
   const isPrevLoading = isAnyLoading && clickedButton === "prev";
   const isNextLoading = isAnyLoading && clickedButton === "next";
@@ -117,7 +121,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
             className="size-8 px-1 text-center font-medium text-foreground"
             disabled={isAnyLoading}
             inputMode="numeric"
-            max={meta.totalPages}
+            max={maxPage}
             min={1}
             onBlur={handleBlur}
             onChange={(e) => {
@@ -130,7 +134,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
             value={inputValue}
           />
           <span>
-            {t("of")} {meta.totalPages}
+            {t("of")} {maxPage}
           </span>
         </PaginationItem>
 
@@ -147,6 +151,12 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
       {meta.capped && (
         <p className="mt-2 text-center text-muted-foreground text-xs">
           {t("capped_hint", { count: meta.filteredCount })}
+        </p>
+      )}
+
+      {isCappedByCeiling && (
+        <p className="mt-2 text-center text-muted-foreground text-xs">
+          {t("capped_hint", { count: maxPage })}
         </p>
       )}
     </Pagination>

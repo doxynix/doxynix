@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getPaginationItems } from "./pagination";
+import { clampPaginationMax, getPaginationItems, isBeyondMaxPage } from "./pagination";
 
 const pages = (totalPages: number, currentPage: number) =>
   getPaginationItems(totalPages, currentPage);
@@ -93,5 +93,24 @@ describe("getPaginationItems", () => {
 
   it("yields no items for an empty pagination", () => {
     expect(pages(0, 1)).toEqual([]);
+  });
+});
+
+describe("clampPaginationMax", () => {
+  it("keeps a reachable page count as it is", () => {
+    expect(clampPaginationMax(1)).toBe(1);
+    expect(clampPaginationMax(100)).toBe(100);
+  });
+
+  it("clamps a count past the offset ceiling the server enforces", () => {
+    expect(clampPaginationMax(101)).toBe(100);
+    expect(clampPaginationMax(6200)).toBe(100);
+  });
+});
+
+describe("isBeyondMaxPage", () => {
+  it("flags only the counts the server would clamp", () => {
+    expect(isBeyondMaxPage(100)).toBe(false);
+    expect(isBeyondMaxPage(101)).toBe(true);
   });
 });
