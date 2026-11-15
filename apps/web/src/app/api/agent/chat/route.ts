@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { ApiKeyScope, ChatRole, MessageCode } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
+import { acquireAdvisoryLock } from "@prisma/client/sql";
 import {
   convertToModelMessages,
   createUIMessageStreamResponse,
@@ -180,7 +181,7 @@ async function handler(req: Request) {
 - Only prompt for a repository ID if the user explicitly wants to target a completely different project.`;
 
   await prisma.$transaction(async (tx) => {
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`agent-quota:${workspace.id}`}))`;
+    await tx.$queryRawTyped(acquireAdvisoryLock(`agent-quota:${workspace.id}`));
 
     const fresh = await getWorkspaceEntitlement(tx, workspace.id, new Date(), { fresh: true });
 

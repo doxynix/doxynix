@@ -1,5 +1,6 @@
 import { DocType, MessageCode, Status } from "@doxynix/shared";
 import type { Prisma, Repo } from "@prisma/client";
+import { acquireAdvisoryLock } from "@prisma/client/sql";
 import { auth, runs, tasks } from "@trigger.dev/sdk";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
@@ -114,7 +115,7 @@ export const analysisLifecycleService = {
     try {
       if (cachedSha == null) {
         await prisma.$transaction(async (tx) => {
-          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`analysis-quota:${workspaceId}`}))`;
+          await tx.$queryRawTyped(acquireAdvisoryLock(`analysis-quota:${workspaceId}`));
           // `fresh` is mandatory here: the request memo already holds the pre-lock snapshot that
           // the router middleware read, so the quota check would pass on stale counters.
           assertAnalysisAllowed(

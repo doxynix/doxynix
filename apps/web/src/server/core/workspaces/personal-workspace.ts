@@ -1,4 +1,5 @@
 import { PlanCode } from "@doxynix/shared";
+import { acquireAdvisoryLock } from "@prisma/client/sql";
 
 import { prisma } from "../db";
 
@@ -26,7 +27,7 @@ export async function createPersonalWorkspace(
   name?: null | string,
 ): Promise<string> {
   return prisma.$transaction(async (tx) => {
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${userId}))`;
+    await tx.$queryRawTyped(acquireAdvisoryLock(userId));
 
     const existing = await tx.workspaceMember.findFirst({
       orderBy: { createdAt: "asc" },

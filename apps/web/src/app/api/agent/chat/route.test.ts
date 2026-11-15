@@ -24,7 +24,7 @@ vi.mock("next/headers", () => ({
 
 vi.mock("@/server/core/db", () => {
   const tx = {
-    $executeRaw: vi.fn(),
+    $queryRawTyped: vi.fn().mockResolvedValue([]),
     chatMessage: { create: mocks.chatMessageCreate },
     chatSession: { create: mocks.chatSessionCreate, findUnique: mocks.chatSessionFindUnique },
   };

@@ -1,4 +1,5 @@
 import { isRecord, MessageCode } from "@doxynix/shared";
+import { acquireAdvisoryLock } from "@prisma/client/sql";
 import type Stripe from "stripe";
 
 import { APP_URL } from "@/shared/config/env.client";
@@ -143,7 +144,7 @@ export async function createCheckoutSession(
       // Stripe call, otherwise two concurrent requests with different requestIds both pass.
       if ("$transaction" in input.db) {
         blocked = await input.db.$transaction(async (tx) => {
-          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`checkout:${input.workspaceId}`}))`;
+          await tx.$queryRawTyped(acquireAdvisoryLock(`checkout:${input.workspaceId}`));
 
           const recent = await tx.billingCheckoutSession.findFirst({
             orderBy: { createdAt: "desc" },

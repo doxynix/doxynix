@@ -2,6 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 
 import { MessageCode, PlanCode, PlanCodeSchema, type WorkspaceRole } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
+import { acquireAdvisoryLock, claimWorkspaceInvite } from "@prisma/client/sql";
 
 import { APP_URL } from "@/shared/config/env.client";
 
@@ -170,16 +171,12 @@ export const workspaceService = {
     await requirePaidWorkspace(prisma, invite.workspaceId);
 
     const memberId = await prisma.$transaction(async (tx) => {
-      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${invite.workspaceId}))`;
+      await tx.$queryRawTyped(acquireAdvisoryLock(invite.workspaceId));
 
       // Single-use: the first accept wins, and a concurrent second one rolls back.
-      const claimed = await tx.$executeRaw`
-        UPDATE "workspace_invites"
-        SET "accepted_at" = now()
-        WHERE "id" = ${invite.id}::uuid AND "accepted_at" IS NULL
-      `;
+      const claimed = await tx.$queryRawTyped(claimWorkspaceInvite(invite.id));
 
-      if (claimed === 0) {
+      if (claimed.length === 0) {
         throw invalidInvite();
       }
 
@@ -241,7 +238,7 @@ export const workspaceService = {
       const member = await db.$transaction(async (tx) => {
         // Serialises seat accounting per workspace; without it two concurrent adds both pass the
         // seatLimit check and create an unpaid seat.
-        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${workspaceId}))`;
+        await tx.$queryRawTyped(acquireAdvisoryLock(workspaceId));
 
         const existing = await tx.workspaceMember.findUnique({
           select: { id: true },

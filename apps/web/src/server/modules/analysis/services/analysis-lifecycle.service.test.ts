@@ -33,7 +33,7 @@ vi.mock("@/server/core/usage/usage", () => ({
 }));
 
 const prismaMock = vi.hoisted(() => ({
-  $executeRaw: vi.fn().mockResolvedValue(0),
+  $queryRawTyped: vi.fn().mockResolvedValue([]),
   $transaction: vi.fn(async (fn: (tx: unknown) => unknown) => fn(prismaMock)),
 }));
 
