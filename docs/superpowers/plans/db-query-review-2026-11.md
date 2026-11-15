@@ -6,10 +6,10 @@ Live checklist for the second static pass over `apps/web`. Companion to
 [`db-index-audit.md`](../../db/db-index-audit.md) (what the shapes cost) and
 [`db-ui-map.md`](../../db/db-ui-map.md) (where latency lands).
 
-**Closed: 15 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
-PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3, R6, R7, R9, R19, R21, R26, R29 and K2 closed
-2026-11-15, and R14 and R30 are **partially** done (see the item text and the progress note below the
-scoreboard).
+**Closed: 16 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
+PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3, R6, R7, R9, R18, R19, R21, R26, R29 and K2
+closed 2026-11-15, and R14 and R30 are **partially** done (see the item text and the progress note
+below the scoreboard).
 
 ## What this round covers that round 1 did not
 
@@ -74,16 +74,13 @@ reviewed and is correct.
 
 ### Progress since the last pass (2026-11-15)
 
-R14, R18 and R30 moved without closing: their verification lines still fail, so the checkboxes stay
+R14 and R30 moved without closing: their verification lines still fail, so the checkboxes stay
 unticked and the item text below says what is left. R3 (the third partial item from the last pass),
-R6, R7, R9, R19, R21, R26, R29 and K2 have since closed (see the closing log).
+R6, R7, R9, R18, R19, R21, R26, R29 and K2 have since closed (see the closing log).
 
 - **R14** — `getWorkspace` no longer reads every document when `aid` is set (fixed by R33, `311bd6a7`),
   and `getDocumentContent` now reads a narrow ref with a capped document read (2026-11-15). Still
   open: the per-keystroke structure rebuild in `searchWorkspace`.
-- **R18** — every list this item names is now bounded: `getByRepoId` and `getActiveSessions` gained
-  the `take` they were missing (2026-11-15). Still open: the verify line, which needs cursor
-  pagination plus a UI "load more" rather than a smaller cap.
 - **R30** — the PR and push webhook handlers now `select` narrow columns
   (`pr-webhook-handler.ts:167`, `push-webhook-handler.ts:28`). Still open:
   `issue-comment-webhook-handler.ts:17` and `review-comment-webhook-handler.ts:20` read full repo
@@ -455,7 +452,7 @@ R6, R7, R9, R19, R21, R26, R29 and K2 have since closed (see the closing log).
   - **Effort:** S · **Verify:** `pg_stat_activity` during 3 concurrent task runs shows a stable
     connection count; `pgPoolConnects` stops incrementing per run.
 
-- [ ] **R18 · Unbounded list payloads**
+- [x] **R18 · Unbounded list payloads**
   — `analysis/services/analysis-lifecycle.service.ts:21,271-301`,
     `analysis/services/pr-impact.service.ts:136-175`,
     `analysis/analysis.repository.ts:244-254`, `users/user.service.ts:177-187`
@@ -469,12 +466,6 @@ R6, R7, R9, R19, R21, R26, R29 and K2 have since closed (see the closing log).
     reduce the cap and add "load more".
   - **Effort:** S–M · **Verify:** response size for a repo with 600 analyses is comparable to one
     with 20.
-  > Progress 2026-11-15: `getByRepoId` now takes the newest 200 fixes and `getActiveSessions` the
-  > newest 50 sessions, so every list named above is bounded. Still open: "600 analyses behaves like
-  > 20" needs cursor pagination plus a UI "load more", which is not part of this batch.
-  > B5b 2026-11-15: `getActiveSessions`, `apikey.list` and `adminUser.listSessions` are cursor-based
-  > with scroll sentinels; `getHistory` and `listByRepository` are the two 500-row lists still needing
-  > cursor pagination + UI, and fixes' pagination is deferred until a client reads the list.
 
 - [x] **R19 · `getRepoSnapshot` issues a second query for the requested `aid`**
   — `src/server/modules/analysis/analysis.repository.ts:340-364`
@@ -690,6 +681,7 @@ These were checked and found correct. Listed so a third round does not repeat th
 | R7 | 2026-11-15 | `39d08034` | `getSessionHistory` takes the newest 200 rows (desc → reversed) with a four-field `select`; `listSessions` takes 100 with a `select` that keeps every output field. Follow-up: the ad-hoc `take` constants became cursor pagination through the shared `pagination.ts` primitives (`keysetArgs` / `splitKeysetPage` / `orderWithTiebreak`) — newest page plus `nextCursor`; the UI still renders the first page only. The array → `{ items, meta }` output is a breaking wire change for an older published `dxnx` (release-please ships CLI and server together). `listSessions` keysets on `updatedAt`, which moves on rename/append, so a multi-page walk can duplicate or skip before a "load older" UI ships. B2d flipped that last caveat: the web agent now pages history through `firstItemIndex`/`startReached` and the session list through an intersection sentinel, so a multi-page walk is live and the rename/append caveat now applies to it. |
 | R8 | 2026-11-01 | `311bd6a7` | `analysisRepo.getByRepoAndPRNumber` selects `id` instead of `include: { comments, generatedFixes }`; its only caller (the PR webhook) reads `id`. |
 | R9 | 2026-11-15 | `5420536e` | `bumpUsage` is one `INSERT … ON CONFLICT` statement per event; both paths clamp, and the conflict branch binds the raw delta (`+ $6::int`), so a negative release is not swallowed by `EXCLUDED`. `usage.test.ts` asserts the SQL text and params; `entitlements.test.ts` asserts the 900 → 0 clamp against a real database. |
+| R18 | 2026-11-15 | `a90fdb07` | `getHistory` and `listByRepository` return cursor pages (`{ items, meta, total }`, `take: limit + 1` + `splitKeysetPage` over `ORDER_CREATED_AT_DESC`, `limit` default 50) instead of 500-row reads, and the `capped` flag is gone: the version selector appends pages from a "More" item, the PR list from an intersection sentinel, and both keep the `count` as `total`. `getByRepoId` (fixes) keeps its 200-row cap and stays deferred until a client reads the list. |
 | R19 | 2026-11-15 | `c004fc44` | `getRepoSnapshot`, `getRepoSnapshotWithDocuments` and `getAnalysisPayloadForRepo` resolve the requested `aid` inside the single `repo.findUnique` (`analyses: { orderBy: createdAt desc, take: 1, where: { id, status: "DONE" } }`), so an `aid`-scoped read is one operation. A missing or foreign `aid` still throws `ANALYSIS_VERSION_NOT_FOUND`; an empty latest still throws `ANALYSIS_NOT_COMPLETED`. `getRepoDocsPayload` keeps its second lookup (out of this batch). |
 | R21 | 2026-11-15 | `39d08034` | `logic/project-result-overview.ts` replaces `JSON.stringify(resultJson)` in `analyze-pr.task.ts` with a bounded projection capped at 4096 chars. |
 | R26 | 2026-11-15 | `9192e12e` | `apiKeyService.list` takes the newest 100 keys of the workspace; the active/archived split, the column allowlist and the `ApiKeySchema` payload are unchanged. B5b (`bc449faf`) replaced the ceiling with cursor pagination (`{ items, meta }`) and the UI loads more on scroll; the split is a SQL predicate (`activeKeyWhere` for `list`, `archivedKeyWhere` for `listArchived`) that mirrors `isApiKeyDead`, which moved to `@doxynix/shared`. Archived keys are cursor-paginated as well (round 2), so the API-key surface has no capped list; an integration test walks both predicates against a real Postgres. |
@@ -698,7 +690,7 @@ These were checked and found correct. Listed so a third round does not repeat th
 | R33 | 2026-11-01 | `311bd6a7` | `documents` relation filtered by `analysisId` in SQL when `aid` is set; the JS `.filter()` in `getRepoSnapshotWithDocuments` is gone. |
 | K2 | 2026-11-15 | `84ad37d7` | `loadRelatedDocSections` takes the request's `aid` and forwards it to `loadLatestDocumentsWithContent`, so the related-docs panel lists only the pinned analysis's documents. |
 
-The first six shipped in PR #2356 and are on `main`; R3, R6, R7, R9, R19, R21, R26, R29 and K2
+The first six shipped in PR #2356 and are on `main`; R3, R6, R7, R9, R18, R19, R21, R26, R29 and K2
 landed on `perf/dxnx-310-db-query-review-round-2` and the "working tree" marker from the original log
 is now historical.
 
