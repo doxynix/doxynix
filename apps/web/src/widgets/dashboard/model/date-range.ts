@@ -12,10 +12,14 @@ export function resolveDateRange(
   period: string,
   periods: ReadonlyArray<DatePeriod>,
 ): DateRange | undefined {
-  if (from && to) {
-    return { from, to };
+  // The service ignores from/to unless the period is `custom`, so a preset must win over them.
+  if (period !== "custom") {
+    return periods.find((p) => p.key === period)?.getValue();
   }
-  return periods.find((p) => p.key === period)?.getValue();
+  if (from == null && to == null) {
+    return undefined;
+  }
+  return { from: from ?? undefined, to: to ?? undefined };
 }
 
 export function hasUrlStateChanged(prev: DateRangeState, next: DateRangeState): boolean {

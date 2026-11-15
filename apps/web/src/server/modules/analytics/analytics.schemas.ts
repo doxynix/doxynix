@@ -1,6 +1,14 @@
 import { StatusSchema } from "@doxynix/shared";
 import * as z from "zod";
 
+import {
+  ANALYTICS_PERIODS,
+  type AnalyticsPeriod,
+  MAX_CUSTOM_RANGE_DAYS,
+} from "@/shared/lib/analytics-periods";
+
+import { dateRangeMustBeOrdered } from "@/server/utils/pagination";
+
 export const DashboardStatsSchema = z.object({
   analysisStats: z.object({
     failed: z.number(),
@@ -80,12 +88,49 @@ export const TrendsSchema = z.array(
   }),
 );
 
-export const AnalyticsInputSchema = z.object({
-  from: z.date().optional(),
-  period: z.string().optional().default("30d"),
-  repoId: z.string().optional(),
-  to: z.date().optional(),
-});
+const MAX_CUSTOM_RANGE_MS = MAX_CUSTOM_RANGE_DAYS * 86_400_000;
+
+export const AnalyticsPeriodSchema = z.enum(ANALYTICS_PERIODS);
+
+// U6: `custom` is the only period that can reach `from=1970`, so it is the only one capped.
+function customRangeIssues(
+  data: { from?: Date; period: AnalyticsPeriod; to?: Date },
+  ctx: z.RefinementCtx,
+) {
+  if (data.period !== "custom") {
+    return;
+  }
+
+  if (data.from == null) {
+    ctx.addIssue({
+      code: "custom",
+      message: "A custom range needs a start date",
+      path: ["from"],
+    });
+    return;
+  }
+
+  // `to` is optional and the service falls back to now, so that is the span it would really query.
+  const spanMs = (data.to ?? new Date()).getTime() - data.from.getTime();
+
+  if (spanMs > MAX_CUSTOM_RANGE_MS) {
+    ctx.addIssue({
+      code: "custom",
+      message: `A custom range cannot span more than ${MAX_CUSTOM_RANGE_DAYS} days`,
+      path: ["to"],
+    });
+  }
+}
+
+export const AnalyticsInputSchema = z
+  .object({
+    from: z.date().optional(),
+    period: AnalyticsPeriodSchema.default("30d"),
+    repoId: z.string().optional(),
+    to: z.date().optional(),
+  })
+  .superRefine(dateRangeMustBeOrdered)
+  .superRefine(customRangeIssues);
 
 export type AnalyticsInput = z.infer<typeof AnalyticsInputSchema>;
 export type DashboardStats = z.infer<typeof DashboardStatsSchema>;

@@ -25,6 +25,23 @@ describe("resolveDateRange", () => {
     expect(resolveDateRange(from, to, "custom", PERIODS)).toEqual({ from, to });
   });
 
+  it("keeps a half-picked custom range without inventing an end", () => {
+    const from = new Date("2026-09-01T00:00:00Z");
+    expect(resolveDateRange(from, null, "custom", PERIODS)).toEqual({ from, to: undefined });
+  });
+
+  it("returns the preset window for a preset even when from/to are in the URL", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+    const from = new Date("2026-01-01T00:00:00Z");
+    const to = new Date("2026-01-10T00:00:00Z");
+
+    expect(resolveDateRange(from, to, "15m", PERIODS)).toEqual({
+      from: subMinutes(NOW, 15),
+      to: NOW,
+    });
+  });
+
   it("resolves a preset period when from/to are missing", () => {
     vi.useFakeTimers();
     vi.setSystemTime(NOW);

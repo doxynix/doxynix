@@ -1,16 +1,19 @@
-import { parseAsIsoDate, parseAsString } from "nuqs/server";
+import { parseAsIsoDate, parseAsStringLiteral } from "nuqs/server";
+
+import { ANALYTICS_PERIODS, type AnalyticsPeriod } from "@/shared/lib/analytics-periods";
 
 export const DASHBOARD_DEFAULT_PERIOD = "30d";
 
 export const dashboardParsers = {
   from: parseAsIsoDate,
-  period: parseAsString.withDefault(DASHBOARD_DEFAULT_PERIOD),
+  // An unknown `?period=` falls back to the default instead of reaching the analytics input.
+  period: parseAsStringLiteral(ANALYTICS_PERIODS).withDefault(DASHBOARD_DEFAULT_PERIOD),
   to: parseAsIsoDate,
 };
 
 type DashboardRangeUrlState = {
   from?: Date | null;
-  period?: string | null;
+  period?: AnalyticsPeriod | null;
   to?: Date | null;
 };
 

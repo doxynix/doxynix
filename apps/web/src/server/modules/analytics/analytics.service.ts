@@ -1,6 +1,8 @@
 import { getDashboardStats, getTrends } from "@prisma/client/sql";
 import { subDays, subHours, subMinutes } from "date-fns";
 
+import type { PresetPeriod } from "@/shared/lib/analytics-periods";
+
 import type { DbClient } from "@/server/core/db";
 
 import { analyticsMapper, type RecentActivityRecord } from "./analytics.mapper";
@@ -12,7 +14,7 @@ import {
 } from "./analytics.schemas";
 
 export const analyticsService = {
-  calculatePeriodStart(period: string, relativeTo: Date): Date {
+  calculatePeriodStart(period: PresetPeriod, relativeTo: Date): Date {
     switch (period) {
       case "15m": {
         return subMinutes(relativeTo, 15);
@@ -26,11 +28,11 @@ export const analyticsService = {
       case "7d": {
         return subDays(relativeTo, 7);
       }
+      case "30d": {
+        return subDays(relativeTo, 30);
+      }
       case "90d": {
         return subDays(relativeTo, 90);
-      }
-      default: {
-        return subDays(relativeTo, 30);
       }
     }
   },
@@ -52,7 +54,9 @@ export const analyticsService = {
       currentStart = input.from ?? subDays(currentEnd, 30);
     }
 
-    const durationMs = currentEnd.getTime() - currentStart.getTime();
+    // A reversed range cannot reach a schema-parsed caller, but a direct one would put the previous
+    // window after the current one and turn every delta into noise.
+    const durationMs = Math.max(currentEnd.getTime() - currentStart.getTime(), 0);
     const previousStart = new Date(currentStart.getTime() - durationMs);
 
     const [data] = await db.$queryRawTyped(

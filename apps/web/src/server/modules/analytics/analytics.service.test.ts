@@ -25,18 +25,13 @@ describe("analyticsService.calculatePeriodStart", () => {
     expect(result).toEqual(new Date("2026-02-22T12:00:00Z"));
   });
 
+  it("subtracts 30 days for '30d'", () => {
+    const result = analyticsService.calculatePeriodStart("30d", BASE);
+    expect(result).toEqual(new Date("2026-01-30T12:00:00Z"));
+  });
+
   it("subtracts 90 days for '90d'", () => {
     const result = analyticsService.calculatePeriodStart("90d", BASE);
     expect(result).toEqual(new Date("2025-12-01T12:00:00Z"));
-  });
-
-  it("defaults to 30 days for 'custom'", () => {
-    const result = analyticsService.calculatePeriodStart("custom", BASE);
-    expect(result).toEqual(new Date("2026-01-30T12:00:00Z"));
-  });
-
-  it("defaults to 30 days for an unknown period string", () => {
-    const result = analyticsService.calculatePeriodStart("unknown", BASE);
-    expect(result).toEqual(new Date("2026-01-30T12:00:00Z"));
   });
 });
