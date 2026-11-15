@@ -34,17 +34,23 @@ export function isBookkeepingWrite(model: string, operation: string, args: unkno
 }
 
 // One publish per request is enough: the client invalidates the same audit query either way.
+// The flag is spent before the publish resolves, so a failed publish stays quiet for the rest of
+// the request instead of retrying into a storm.
 export function shouldPublishAuditUpdated(
-  store: { auditUpdatedPublished?: boolean } | undefined,
+  store: { auditRealtime?: { published: boolean } } | null | undefined,
 ): boolean {
   if (store == null) {
     return true;
   }
 
-  if (store.auditUpdatedPublished === true) {
+  if (store.auditRealtime == null) {
+    return true;
+  }
+
+  if (store.auditRealtime.published) {
     return false;
   }
 
-  store.auditUpdatedPublished = true;
+  store.auditRealtime.published = true;
   return true;
 }

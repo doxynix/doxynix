@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { buildRequestStore, deriveProcedureStore } from "@/server/utils/request-context";
+
 import { isBookkeepingWrite, shouldPublishAuditUpdated } from "./audit-filters";
 
 describe("isBookkeepingWrite", () => {
@@ -59,26 +61,42 @@ describe("isBookkeepingWrite", () => {
 });
 
 describe("shouldPublishAuditUpdated", () => {
+  function makeStore() {
+    return buildRequestStore({
+      method: "query",
+      path: "/api/trpc",
+      req: { headers: new Headers() } as Request,
+    });
+  }
+
   it("should publish when there is no request store", () => {
     expect(shouldPublishAuditUpdated(undefined)).toBe(true);
+    expect(shouldPublishAuditUpdated(null)).toBe(true);
   });
 
-  it("should publish when the store has not published yet, then set the flag", () => {
-    const store: { auditUpdatedPublished?: boolean } = {};
+  it("should publish when the store has no realtime box", () => {
+    expect(shouldPublishAuditUpdated({})).toBe(true);
+  });
+
+  it("should publish once, then stay quiet for the rest of the store", () => {
+    const store = makeStore();
 
     expect(shouldPublishAuditUpdated(store)).toBe(true);
-    expect(store.auditUpdatedPublished).toBe(true);
-  });
-
-  it("should publish when the flag is explicitly false", () => {
-    expect(shouldPublishAuditUpdated({ auditUpdatedPublished: false })).toBe(true);
-  });
-
-  it("should skip every later write in the same request", () => {
-    const store: { auditUpdatedPublished?: boolean } = {};
-
-    shouldPublishAuditUpdated(store);
-
+    expect(store.auditRealtime?.published).toBe(true);
     expect(shouldPublishAuditUpdated(store)).toBe(false);
+  });
+
+  it("should coalesce across the procedures of one batched request", () => {
+    const parent = makeStore();
+    const first = deriveProcedureStore(parent, { method: "mutation", path: "repo.create" });
+    const second = deriveProcedureStore(parent, {
+      method: "mutation",
+      path: "notification.update",
+    });
+
+    expect([shouldPublishAuditUpdated(first), shouldPublishAuditUpdated(second)]).toEqual([
+      true,
+      false,
+    ]);
   });
 });

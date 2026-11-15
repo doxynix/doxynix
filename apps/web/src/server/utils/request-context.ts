@@ -12,7 +12,8 @@ type RequestStore = {
   // call shares it across procedures.
   entitlementMemo?: Map<string, Promise<unknown>>;
   appVersion?: string;
-  auditUpdatedPublished?: boolean;
+  // Shared by reference across derived stores, like the memo maps, so one request publishes once.
+  auditRealtime?: { published: boolean };
   country: string;
   ip: null | string;
   method: string;
@@ -167,7 +168,7 @@ export function buildRequestStore(input: RequestContextInput): RequestStore {
   return {
     apiKeyScopes: input.apiKeyScopes,
     appVersion: APP_VERSION,
-    auditUpdatedPublished: false,
+    auditRealtime: { published: false },
     country: getCountry(input.req),
     entitlementMemo: new Map(),
     ip: anonymizeIp(getIp(input.req)),

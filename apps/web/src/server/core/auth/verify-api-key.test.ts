@@ -62,7 +62,6 @@ describe("verifyAndUseApiKey", () => {
     };
 
     expect(call.where).toEqual({ hashedKey: HASHED_KEY });
-    expect(call.select).not.toHaveProperty("include");
     expect(Object.keys(call.select).toSorted()).toEqual([
       "expiresAt",
       "id",

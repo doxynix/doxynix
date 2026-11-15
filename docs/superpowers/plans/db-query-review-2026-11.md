@@ -71,13 +71,12 @@ reviewed and is correct.
 | correctness (adjacent) | 2 | K1–K2 |
 | verified clean (do not re-report) | 11 | FP1–FP11 |
 
-### Progress since the last pass (2026-11-14)
+### Progress since the last pass (2026-11-15)
 
-Two items moved without closing. Their verification lines still fail, so the checkboxes stay
-unticked; the item text below says what is left.
+R14 and R30 moved without closing: their verification lines still fail, so the checkboxes stay
+unticked and the item text below says what is left. R3, the third partial item from the last pass,
+has since closed (see the closing log).
 
-- **R3** — closed 2026-11-15: the lookup selects only the columns the gate reads, and a
-  `lastUsed`-only update is no longer audited (that half is R1).
 - **R14** — `getWorkspace` no longer reads every document when `aid` is set (fixed by R33, `311bd6a7`).
   Still open: the `getRepoSnapshot` + second-query shape for the docs viewer and the per-keystroke
   structure rebuild in `searchWorkspace`.
@@ -131,8 +130,9 @@ unticked; the item text below says what is left.
   - **Effort:** M · **Verify:** `audit_logs` rows per analysis completion == number of *semantic*
     events (not 8); no `poolWaiting > 0` in the `db.slow` payload during a 3-way parallel
     analysis; Ably publish count per analysis run drops accordingly.
-  > Progress 2026-11-15: bookkeeping-only writes (`lastUsed`, `progress`, `isRead`) are no longer
-  > audited and the Ably publish is coalesced to one per request; the "not 8 rows" target still
+  > Progress 2026-11-15: `ApiKey.lastUsed` and `Notification.isRead` writes are no longer audited,
+  > and the Ably publish is coalesced to one per request. `Analysis.progress` stays as a guard only —
+  > every write carrying it also carries `logs`/`message`/`status`. The "not 8 rows" target still
   > needs `audit-log-architecture.md` step 2.
 
 - [x] **R2 · `repo.getByName` / `getByOwner` read `resultJson`, `metricsJson` and `logs` to render a header**
@@ -169,6 +169,8 @@ unticked; the item text below says what is left.
   - **Effort:** S · **Verify:** a burst of 100 API requests against one key produces 0 `audit_logs`
     rows for `ApiKey.update*` and at most one `UPDATE api_keys` per refresh window; `lastUsed` still
     moves. The throttle half already holds — the missing half is the `select`.
+  > Done 2026-11-15 (`ad34335b`): the lookup selects only the columns the gate reads, and a
+  > `lastUsed`-only update is no longer audited (that half is R1). Burst verification not run.
 
 ---
 

@@ -28,7 +28,7 @@ let cachedAfterFn: null | typeof NextAfterFn = null;
 let isAfterChecked = false;
 
 // Dynamic on purpose: Trigger.dev runs on the node runtime, where `next/server` is not
-// always resolvable, and a failed import must degrade to a direct await, never crash db.ts.
+// always resolvable, and a failed import must degrade to execution, never crash db.ts.
 async function getNextAfterApi() {
   if (isAfterChecked) {
     return cachedAfterFn;
@@ -46,6 +46,9 @@ async function getNextAfterApi() {
 // Prefers Next.js `after()` and falls back to a direct await elsewhere; the import is dynamic so Trigger.dev tasks and builds, which have no Next.js request context, still work.
 export async function runAsBackgroundTask(task: () => Promise<void>): Promise<void> {
   const afterFn = await getNextAfterApi();
+  // A missing `after` or a rejected call is the only signal that separates a task/worker (and a bare
+  // route handler) from a Next request: both have no request store, so the store proves nothing.
+  let isTaskContext = afterFn == null;
 
   if (afterFn) {
     try {
@@ -58,7 +61,9 @@ export async function runAsBackgroundTask(task: () => Promise<void>): Promise<vo
           error.message.includes("request context") ||
           error.message.includes("lifecycle"));
 
-      if (!isContextError) {
+      if (isContextError) {
+        isTaskContext = true;
+      } else {
         appLogger.warn({ error, msg: "afterFn failed unexpectedly, falling back to execution" });
       }
     }
@@ -71,14 +76,11 @@ export async function runAsBackgroundTask(task: () => Promise<void>): Promise<vo
     return;
   }
 
-  // A Trigger.dev task has no request store, so awaiting here would put the audit write on the
-  // task's critical path; start it and let it settle on its own.
   const auditWrite = task().catch((error) => {
     appLogger.error({ error, msg: "Background task failed in production fallback mode" });
   });
 
-  if (requestContext.getStore() == null) {
-    void auditWrite;
+  if (isTaskContext) {
     return;
   }
 
