@@ -7,6 +7,7 @@ import {
   changedFileSnapshotSchema,
   DocumentFilePreviewSchema,
   FixApplicationPayloadSchema,
+  PRCommentsOutputSchema,
   PrAiReviewFindingSchema,
   PrAiReviewOutputSchema,
   PullListOutputSchema,
@@ -252,6 +253,26 @@ describe("PullListOutputSchema", () => {
 
     expect(parsed.items[0]).toEqual(item);
     expect(parsed.total).toBe(1);
+  });
+});
+
+describe("PRCommentsOutputSchema", () => {
+  it("accepts a stored risk level outside the 0-10 write range", () => {
+    const page = {
+      renderedComments: [
+        {
+          bodyHtml: "<p>x</p>",
+          filePath: "src/a.ts",
+          findingType: "BUG",
+          id: "018f0000-0000-7000-8000-000000000004",
+          line: 7,
+          riskLevel: 42,
+        },
+      ],
+      total: 620,
+    };
+
+    expect(PRCommentsOutputSchema.parse(page).renderedComments[0]?.riskLevel).toBe(42);
   });
 });
 

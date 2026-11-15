@@ -53,8 +53,9 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
   const topFindings = impact?.topFindings ?? [];
   const fixes = impact?.fixes ?? [];
   const commentsTotal = comments?.total ?? 0;
+  const renderedCommentsCount = comments?.renderedComments.length ?? 0;
   const linkedFixes = impact?.summary.linkedFixes ?? 0;
-  const isCommentsCapped = commentsTotal > (comments?.renderedComments.length ?? 0);
+  const isCommentsCapped = commentsTotal > renderedCommentsCount;
   const isFixesCapped = linkedFixes > fixes.length;
 
   const detailItems = buildPrDetailItems({
@@ -268,7 +269,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
               </CardTitle>
               {isCommentsCapped && (
                 <p className="text-muted-foreground text-xs">
-                  {tCommon("capped_hint", { count: commentsTotal })}
+                  {tCommon("capped_hint", { count: renderedCommentsCount })}
                 </p>
               )}
             </div>
@@ -483,7 +484,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                 </CardTitle>
                 {isFixesCapped && (
                   <p className="text-muted-foreground text-xs">
-                    {tCommon("capped_hint", { count: linkedFixes })}
+                    {tCommon("capped_hint", { count: fixes.length })}
                   </p>
                 )}
               </div>

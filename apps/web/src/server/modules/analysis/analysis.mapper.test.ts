@@ -393,6 +393,23 @@ describe("parseChangedFilesSnapshot", () => {
     ]);
   });
 
+  it("invalid snapshot and invalid findings → the explicit comments reach the findings", () => {
+    const analysis = makeImpactAnalysis({
+      changedFilesJson: [{ additions: -1, deletions: 0, filePath: "", status: "bogus" }],
+      findingsJson: [{ file: "", line: 0, message: "", title: "", type: "" }],
+    });
+
+    expect(analysisMapper.parseChangedFilesSnapshot(analysis, [LEGACY_COMMENT])).toEqual([
+      {
+        additions: 0,
+        deletions: 0,
+        filePath: "src/legacy.ts",
+        previousFilePath: null,
+        status: "modified",
+      },
+    ]);
+  });
+
   it("invalid snapshot without legacy comments → findings only", () => {
     const analysis = makeImpactAnalysis({
       changedFilesJson: [{ additions: -1, deletions: 0, filePath: "", status: "bogus" }],
