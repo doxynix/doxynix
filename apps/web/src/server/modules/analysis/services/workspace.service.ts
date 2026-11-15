@@ -5,10 +5,7 @@ import type { DbClient } from "@/server/core/db";
 
 import { analysisMapper } from "../analysis.mapper";
 import { analysisRepo, loadDocumentsPerType } from "../analysis.repository";
-import {
-  type AnalyzeContextBuilder,
-  getCachedAnalyzeContext,
-} from "../logic/analysis-context-cache";
+import { createAnalyzeContextBuilder } from "../logic/analyze-context-builder";
 import { buildInteractiveBriefNodePayload } from "../logic/brief";
 import { matchDocSections } from "../logic/doc-section-matcher";
 import type { RepoNodeContextPayload, RepoWorkspacePayload } from "../logic/workspace.types";
@@ -34,7 +31,7 @@ export const workspaceService = {
     if (repo == null) {
       return null;
     }
-    const analyzeContext = getCachedAnalyzeContext(repo);
+    const analyzeContext = createAnalyzeContextBuilder(repo);
     const structureNode = analyzeContext.getStructureNode(nodeId);
     const explain = analyzeContext.getNodeExplain(nodeId);
 
@@ -89,7 +86,7 @@ export const workspaceService = {
     if (repo == null) {
       return null;
     }
-    const analyzeContext = getCachedAnalyzeContext(repo);
+    const analyzeContext = createAnalyzeContextBuilder(repo);
     return analyzeContext.getStructureMap();
   },
 
@@ -104,7 +101,7 @@ export const workspaceService = {
     if (repo == null) {
       return null;
     }
-    const analyzeContext = getCachedAnalyzeContext(repo);
+    const analyzeContext = createAnalyzeContextBuilder(repo);
     return analyzeContext.getStructureNode(nodeId);
   },
 
@@ -119,7 +116,7 @@ export const workspaceService = {
       return null;
     }
     const documents = await loadDocumentsPerType(db, repoId, workspaceId, { aid, perType: 1 });
-    const analyzeContext = getCachedAnalyzeContext(repo);
+    const analyzeContext = createAnalyzeContextBuilder(repo);
     const overview = analysisMapper.toOverview({ ...repo, documents });
     const structure = analyzeContext.getStructureMap();
 
@@ -137,7 +134,7 @@ export const workspaceService = {
     nodeId: string,
     nodeLabel: string,
     relatedFiles: string[],
-    analyzeContext: AnalyzeContextBuilder,
+    analyzeContext: ReturnType<typeof createAnalyzeContextBuilder>,
     aid?: string,
   ) {
     const docs = await analysisRepo.loadLatestDocumentsWithContent(db, repoId, workspaceId, aid);

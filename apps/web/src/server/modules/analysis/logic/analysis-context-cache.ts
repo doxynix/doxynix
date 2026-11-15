@@ -11,7 +11,8 @@ function cacheKey(repo: RepoSnapshot | RepoWithLatestAnalysisAndDocs) {
   return `${repo.id}:${repo.analyses[0]?.id ?? "latest"}`;
 }
 
-// An analysis row is immutable once `DONE`, so a re-run lands under a new id and never reuses this.
+// Only the per-keystroke search path uses this: the builder caches each `nodeId` it explains, so a
+// node-context request would grow the map for the process lifetime.
 export function getCachedAnalyzeContext(repo: RepoSnapshot | RepoWithLatestAnalysisAndDocs) {
   const key = cacheKey(repo);
   const cached = contexts.get(key);
@@ -30,4 +31,13 @@ export function getCachedAnalyzeContext(repo: RepoSnapshot | RepoWithLatestAnaly
 
   contexts.set(key, builder);
   return builder;
+}
+
+// Test-only: the map is process-wide, so one test must not inherit another's entries.
+export function analyzeContextCacheSize() {
+  return contexts.size;
+}
+
+export function resetAnalyzeContextCache() {
+  contexts.clear();
 }

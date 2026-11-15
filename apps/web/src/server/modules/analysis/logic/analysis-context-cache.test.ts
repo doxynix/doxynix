@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { RepoSnapshot } from "../analysis.repository";
-import { getCachedAnalyzeContext } from "./analysis-context-cache";
+import {
+  analyzeContextCacheSize,
+  getCachedAnalyzeContext,
+  resetAnalyzeContextCache,
+} from "./analysis-context-cache";
 import { createAnalyzeContextBuilder } from "./analyze-context-builder";
 
 vi.mock("./analyze-context-builder", () => ({
@@ -17,6 +21,7 @@ function makeRepo(repoId: string, analysisId: string) {
 describe("getCachedAnalyzeContext", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAnalyzeContextCache();
   });
 
   it("returns the same builder for the same repo and analysis", () => {
@@ -36,7 +41,7 @@ describe("getCachedAnalyzeContext", () => {
     expect(build).toHaveBeenCalledTimes(2);
   });
 
-  it("evicts the oldest entry once 32 contexts are held", () => {
+  it("never holds more than 32 contexts", () => {
     const firstRepo = makeRepo("repo-cap-0", "analysis-cap-0");
     const firstBuilder = getCachedAnalyzeContext(firstRepo);
 
@@ -48,8 +53,10 @@ describe("getCachedAnalyzeContext", () => {
       lastBuilder = getCachedAnalyzeContext(lastRepo);
     }
 
-    expect(build).toHaveBeenCalledTimes(40);
+    expect(analyzeContextCacheSize()).toBe(32);
     expect(getCachedAnalyzeContext(lastRepo)).toBe(lastBuilder);
+    expect(analyzeContextCacheSize()).toBe(32);
     expect(getCachedAnalyzeContext(firstRepo)).not.toBe(firstBuilder);
+    expect(analyzeContextCacheSize()).toBe(32);
   });
 });

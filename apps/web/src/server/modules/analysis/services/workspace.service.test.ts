@@ -87,7 +87,7 @@ function makeDb() {
 describe("workspaceService.getNodeContext", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.getRepoSnapshot.mockResolvedValue({ analyses: [] });
+    mocks.getRepoSnapshot.mockResolvedValue({});
     mocks.getStructureMap.mockReturnValue(null);
     mocks.getStructureNode.mockReturnValue(STRUCTURE_NODE);
     mocks.getNodeExplain.mockReturnValue(EXPLAIN);
