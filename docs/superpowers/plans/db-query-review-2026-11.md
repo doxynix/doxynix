@@ -6,9 +6,9 @@ Live checklist for the second static pass over `apps/web`. Companion to
 [`db-index-audit.md`](../../db/db-index-audit.md) (what the shapes cost) and
 [`db-ui-map.md`](../../db/db-ui-map.md) (where latency lands).
 
-**Closed: 13 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
-PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3, R6, R7, R9, R19, R21 and K2 closed 2026-11-15,
-and R14 and R30 are **partially** done (see the item text and the progress note below the
+**Closed: 15 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
+PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3, R6, R7, R9, R19, R21, R26, R29 and K2 closed
+2026-11-15, and R14 and R30 are **partially** done (see the item text and the progress note below the
 scoreboard).
 
 ## What this round covers that round 1 did not
@@ -74,13 +74,16 @@ reviewed and is correct.
 
 ### Progress since the last pass (2026-11-15)
 
-R14 and R30 moved without closing: their verification lines still fail, so the checkboxes stay
+R14, R18 and R30 moved without closing: their verification lines still fail, so the checkboxes stay
 unticked and the item text below says what is left. R3 (the third partial item from the last pass),
-R6, R7, R9, R19, R21 and K2 have since closed (see the closing log).
+R6, R7, R9, R19, R21, R26, R29 and K2 have since closed (see the closing log).
 
 - **R14** — `getWorkspace` no longer reads every document when `aid` is set (fixed by R33, `311bd6a7`),
   and `getDocumentContent` now reads a narrow ref with a capped document read (2026-11-15). Still
   open: the per-keystroke structure rebuild in `searchWorkspace`.
+- **R18** — every list this item names is now bounded: `getByRepoId` and `getActiveSessions` gained
+  the `take` they were missing (2026-11-15). Still open: the verify line, which needs cursor
+  pagination plus a UI "load more" rather than a smaller cap.
 - **R30** — the PR and push webhook handlers now `select` narrow columns
   (`pr-webhook-handler.ts:167`, `push-webhook-handler.ts:28`). Still open:
   `issue-comment-webhook-handler.ts:17` and `review-comment-webhook-handler.ts:20` read full repo
@@ -466,6 +469,9 @@ R6, R7, R9, R19, R21 and K2 have since closed (see the closing log).
     reduce the cap and add "load more".
   - **Effort:** S–M · **Verify:** response size for a repo with 600 analyses is comparable to one
     with 20.
+  > Progress 2026-11-15: `getByRepoId` now takes the newest 200 fixes and `getActiveSessions` the
+  > newest 50 sessions, so every list named above is bounded. Still open: "600 analyses behaves like
+  > 20" needs cursor pagination plus a UI "load more", which is not part of this batch.
 
 - [x] **R19 · `getRepoSnapshot` issues a second query for the requested `aid`**
   — `src/server/modules/analysis/analysis.repository.ts:340-364`
@@ -563,7 +569,7 @@ R6, R7, R9, R19, R21 and K2 have since closed (see the closing log).
     round trips on the login path are avoidable. **Fix:** `select` narrow fields; merge the
     after-hook read into the before-hook result. **Effort:** XS.
 
-- [ ] **R26 · `apikey.list` returns every key of the workspace, unpaginated**
+- [x] **R26 · `apikey.list` returns every key of the workspace, unpaginated**
   — `src/server/modules/api-keys/api-key.service.ts:90-124` — `findMany` with no `take`; keys are
     few per workspace today but the endpoint has the same shape as R18 and is invalidated on every
     `apiKeyUpdated` event. **Fix:** `take`/cursor. **Effort:** XS.
@@ -579,7 +585,7 @@ R6, R7, R9, R19, R21 and K2 have since closed (see the closing log).
     title-generation LLM call and an update. The read exists only to detect `title === "New Chat"`.
     **Fix:** carry a flag from the session-creation branch in the same request. **Effort:** XS.
 
-- [ ] **R29 · Admin session list is unbounded**
+- [x] **R29 · Admin session list is unbounded**
   — `src/server/modules/users/admin-user.service.ts:265-289` — `session.findMany` for a user with
     no `take` (a narrow `select` landed in `f17088dd`, but there is no pagination). **Fix:** `take` +
     pagination. **Effort:** XS.
@@ -683,13 +689,15 @@ These were checked and found correct. Listed so a third round does not repeat th
 | R9 | 2026-11-15 | `5420536e` | `bumpUsage` is one `INSERT … ON CONFLICT` statement per event; both paths clamp, and the conflict branch binds the raw delta (`+ $6::int`), so a negative release is not swallowed by `EXCLUDED`. `usage.test.ts` asserts the SQL text and params; `entitlements.test.ts` asserts the 900 → 0 clamp against a real database. |
 | R19 | 2026-11-15 | `c004fc44` | `getRepoSnapshot`, `getRepoSnapshotWithDocuments` and `getAnalysisPayloadForRepo` resolve the requested `aid` inside the single `repo.findUnique` (`analyses: { orderBy: createdAt desc, take: 1, where: { id, status: "DONE" } }`), so an `aid`-scoped read is one operation. A missing or foreign `aid` still throws `ANALYSIS_VERSION_NOT_FOUND`; an empty latest still throws `ANALYSIS_NOT_COMPLETED`. `getRepoDocsPayload` keeps its second lookup (out of this batch). |
 | R21 | 2026-11-15 | `39d08034` | `logic/project-result-overview.ts` replaces `JSON.stringify(resultJson)` in `analyze-pr.task.ts` with a bounded projection capped at 4096 chars. |
+| R26 | 2026-11-15 | `9192e12e` | `apiKeyService.list` takes the newest 100 keys of the workspace; the active/archived split, the column allowlist and the `ApiKeySchema` payload are unchanged. No cursor in this batch, so a workspace past 100 keys stops seeing its oldest keys until pagination lands. |
 | R27 | 2026-11-01 | `311bd6a7` | `user.me` selects the eight `PublicUser` fields instead of the whole row. |
+| R29 | 2026-11-15 | `9192e12e` | `adminUserService.getSessions` takes the newest 100 sessions of the user, newest first. Pagination is deferred, so an account past 100 sessions shows the newest page only. |
 | R33 | 2026-11-01 | `311bd6a7` | `documents` relation filtered by `analysisId` in SQL when `aid` is set; the JS `.filter()` in `getRepoSnapshotWithDocuments` is gone. |
 | K2 | 2026-11-15 | `84ad37d7` | `loadRelatedDocSections` takes the request's `aid` and forwards it to `loadLatestDocumentsWithContent`, so the related-docs panel lists only the pinned analysis's documents. |
 
-The first six shipped in PR #2356 and are on `main`; R3, R6, R7, R9, R19, R21 and K2 landed on
-`perf/dxnx-310-db-query-review-round-2` and the "working tree" marker from the original log is
-now historical.
+The first six shipped in PR #2356 and are on `main`; R3, R6, R7, R9, R19, R21, R26, R29 and K2
+landed on `perf/dxnx-310-db-query-review-round-2` and the "working tree" marker from the original log
+is now historical.
 
 ## Verification recipes
 
