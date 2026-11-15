@@ -12,6 +12,7 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { useMapCommands } from "../model/use-map-commands";
 import { useMapControlsActions, useMapControlsHide } from "../model/use-repo-map.store";
+import { MAP_SHORTCUT_LABELS } from "../model/use-repo-map-hotkeys";
 
 type ControlItem = {
   action: () => void;
@@ -20,14 +21,6 @@ type ControlItem = {
   label: string;
   shortcut: string;
 };
-
-const SHORTCUTS = {
-  fitView: "F then V",
-  focusSelected: "F then S",
-  toggleControls: "T then C",
-  zoomIn: "Z then I",
-  zoomOut: "Z then O",
-} as const;
 
 export function RepoMapCustomControls() {
   const t = useTranslations("Dashboard");
@@ -41,28 +34,28 @@ export function RepoMapCustomControls() {
       icon: ZoomIn,
       id: "zoom-in",
       label: t("repo_map_zoom_in"),
-      shortcut: SHORTCUTS.zoomIn,
+      shortcut: MAP_SHORTCUT_LABELS.zoomIn,
     },
     {
       action: map.zoomOut,
       icon: ZoomOut,
       id: "zoom-out",
       label: t("repo_map_zoom_out"),
-      shortcut: SHORTCUTS.zoomOut,
+      shortcut: MAP_SHORTCUT_LABELS.zoomOut,
     },
     {
       action: map.fitView,
       icon: Maximize,
       id: "fit-view",
       label: t("repo_map_fit_view"),
-      shortcut: SHORTCUTS.fitView,
+      shortcut: MAP_SHORTCUT_LABELS.fitView,
     },
     {
       action: map.focusSelected,
       icon: FocusIcon,
       id: "focus",
       label: t("repo_map_focus_selected"),
-      shortcut: SHORTCUTS.focusSelected,
+      shortcut: MAP_SHORTCUT_LABELS.focusSelected,
     },
   ];
 
@@ -108,7 +101,7 @@ export function RepoMapCustomControls() {
             {t("repo_map_toggle_controls")}
             <ShortcutHint
               className="ml-0"
-              shortcut={SHORTCUTS.toggleControls}
+              shortcut={MAP_SHORTCUT_LABELS.toggleControls}
             />
           </span>
         }

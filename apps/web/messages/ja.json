@@ -292,6 +292,7 @@
     "you": "あなた"
   },
   "AuditLogs": {
+    "col_actions": "操作",
     "col_entity": "エンティティ",
     "col_event": "イベント",
     "col_source": "送信元",
@@ -491,6 +492,7 @@
     "nav_help": "ヘルプ",
     "nav_high_five": "ハイタッチ",
     "nav_home": "ホーム",
+    "nav_keyboard_shortcuts": "キーボードショートカット",
     "nav_map": "マップ",
     "nav_members": "メンバー",
     "nav_notifications": "通知",
@@ -500,6 +502,7 @@
     "nav_repositories": "リポジトリ",
     "nav_sessions": "セッション",
     "nav_settings": "設定",
+    "nav_short_links": "ショートリンク",
     "nav_support": "サポート",
     "navigated_to": "{title} に移動しました",
     "new": "新規",
@@ -1056,6 +1059,7 @@
     "settings_api_keys_history_revoked": "履歴（失効済み）",
     "settings_api_keys_label": "説明（任意）",
     "settings_api_keys_last_used": "最終使用",
+    "settings_api_keys_last_used_never": "未使用",
     "settings_api_keys_name": "キーに名前を付ける",
     "settings_api_keys_name_placeholder": "例：本番サーバー",
     "settings_api_keys_never_expires": "無期限",
@@ -1184,6 +1188,8 @@
     "settings_appearance_radius_title": "角丸半径",
     "settings_appearance_shape_desc": "角の丸みとインターフェイスのスケール。",
     "settings_appearance_shape_title": "形状とサイズ",
+    "settings_appearance_shortcuts_desc": "G then D のような 2 キーの組み合わせ。入力や支援デバイスと競合する場合はオフにしてください。",
+    "settings_appearance_shortcuts_title": "単キーショートカット",
     "settings_appearance_sidebar_collapse_desc": "サイドバーがどのように折りたたまれるか",
     "settings_appearance_sidebar_collapse_icon": "アイコン",
     "settings_appearance_sidebar_collapse_offcanvas": "オフキャンバス",
@@ -1906,6 +1912,22 @@
     "sign_out_all_devices": "他のすべてのデバイスからサインアウト",
     "this_device": "このデバイス",
     "unknown": "不明"
+  },
+  "Shortcuts": {
+    "description": "Doxynix でマウスを使わずにできるすべての操作。",
+    "group_actions": "アクション",
+    "group_interface": "インターフェース",
+    "group_navigation": "ナビゲーション",
+    "group_repo_map": "リポジトリマップ",
+    "group_repo_map_hint": "リポジトリマップを開いている間のみ有効です。",
+    "note": "2 キーの組み合わせは入力欄の外でのみ動作します。",
+    "sequences_disabled": "単キーの組み合わせは外観設定でオフになっています。",
+    "title": "キーボードショートカット"
+  },
+  "ShortLinks": {
+    "description": "ドメインの後にこれらのパスを入力するか、完全なリンクをコピーしてください。それぞれのページにリダイレクトされます。",
+    "hint": "アドレスバーから開くか、完全なリンクをコピーしてください。",
+    "title": "ショートリンク"
   },
   "Support": {
     "channel_discord_action": "サーバーに参加",

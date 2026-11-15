@@ -264,3 +264,19 @@ describe("appearance schemas", () => {
     expect(AppearancePatchSchema.parse({ radius: "soft" })).toEqual({ radius: "soft" });
   });
 });
+
+describe("single-key shortcuts preference", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it("is enabled by default", () => {
+    expect(readAppearancePreferences().singleKeyShortcuts).toBe(true);
+  });
+
+  it("round-trips a disabled value", () => {
+    writeAppearancePreferences({ ...DEFAULT_APPEARANCE, singleKeyShortcuts: false });
+
+    expect(readAppearancePreferences().singleKeyShortcuts).toBe(false);
+  });
+});

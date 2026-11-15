@@ -1,47 +1,37 @@
-import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import { commandMenuItems } from "@/shared/config/navigation";
+import { GLOBAL_HOTKEY_SCOPE, SHORTCUT_ENTRIES, toHotkeySequence } from "@/shared/config/shortcuts";
 import { useRouter } from "@/shared/i18n/navigation";
-
-const SEQUENCE_PATTERN = /^\s*(\S+)\s+then\s+(\S+)\s*$/i;
-
-function buildSequentialRoutes(): Record<string, Record<string, string>> {
-  const routes: Record<string, Record<string, string>> = {};
-
-  for (const item of commandMenuItems) {
-    if (item.href == null || item.shortcut == null) {
-      continue;
-    }
-
-    const match = SEQUENCE_PATTERN.exec(item.shortcut);
-    if (match == null) {
-      continue;
-    }
-
-    const [, prefix, secondKey] = match;
-    if (prefix == null || secondKey == null) {
-      continue;
-    }
-
-    const prefixRoutes = (routes[prefix.toLowerCase()] ??= {});
-    prefixRoutes[secondKey.toLowerCase()] = item.href;
-  }
-
-  const gRoutes = (routes.g ??= {});
-  gRoutes.o ??= "/dashboard";
-
-  return routes;
-}
-
-const SEQUENTIAL_ROUTES = buildSequentialRoutes();
-
-const PREFIX_KEYS = Object.keys(SEQUENTIAL_ROUTES);
+import { useSingleKeyShortcuts } from "@/shared/lib/hooks/use-single-key-shortcuts";
 
 export type SequenceResult =
   | { action: "execute"; path: string }
   | { action: "reset" }
   | { action: "ignore" };
+
+export function createNavigationRoutes(): Map<string, string> {
+  const routes = new Map<string, string>();
+
+  for (const entry of SHORTCUT_ENTRIES) {
+    if (entry.group !== "navigation" || entry.href == null) {
+      continue;
+    }
+
+    const sequence = toHotkeySequence(entry.keys);
+    if (sequence == null) {
+      continue;
+    }
+
+    routes.set(sequence, entry.href);
+  }
+
+  routes.set("g>o", "/dashboard");
+
+  return routes;
+}
+
+const NAVIGATION_ROUTES = createNavigationRoutes();
+const NAVIGATION_HOTKEYS = [...NAVIGATION_ROUTES.keys()].join(",");
 
 export function resolveNavigationRoute(prefix: string, code: string): string | null {
   const secondKey = code.startsWith("Key") ? code.slice(3).toLowerCase() : null;
@@ -50,7 +40,7 @@ export function resolveNavigationRoute(prefix: string, code: string): string | n
     return null;
   }
 
-  return SEQUENTIAL_ROUTES[prefix]?.[secondKey] ?? null;
+  return NAVIGATION_ROUTES.get(`${prefix}>${secondKey}`) ?? null;
 }
 
 export function processNavigationSequence(prefix: string | null, code: string): SequenceResult {
@@ -68,47 +58,25 @@ export function processNavigationSequence(prefix: string | null, code: string): 
 
 export function useNavigationHotkeys(onAction?: () => void) {
   const router = useRouter();
-  const [prefix, setPrefix] = useState<null | string>(null);
-
-  useEffect(() => {
-    if (prefix == null) {
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setPrefix(null);
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [prefix]);
+  const singleKeyShortcuts = useSingleKeyShortcuts();
 
   useHotkeys(
-    PREFIX_KEYS.join(","),
-    (_, handler) => {
-      const pressedKey = handler.hotkey;
-      setPrefix(pressedKey);
-    },
-    { enableOnFormTags: false, preventDefault: true },
-    [prefix],
-  );
-
-  useHotkeys(
-    "*",
-    (e) => {
-      const result = processNavigationSequence(prefix, e.code);
-
-      if (result.action === "reset") {
-        setPrefix(null);
+    NAVIGATION_HOTKEYS,
+    (_event, handler) => {
+      const path = NAVIGATION_ROUTES.get(handler.hotkey);
+      if (path == null) {
         return;
       }
 
-      if (result.action === "execute") {
-        onAction?.();
-        router.push(result.path);
-        setPrefix(null);
-      }
+      onAction?.();
+      router.push(path);
     },
-    { enabled: prefix != null, enableOnFormTags: false, preventDefault: true },
-    [prefix],
+    {
+      enabled: singleKeyShortcuts,
+      enableOnFormTags: false,
+      preventDefault: true,
+      scopes: GLOBAL_HOTKEY_SCOPE,
+      sequenceTimeoutMs: 1500,
+    },
   );
 }

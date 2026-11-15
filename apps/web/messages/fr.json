@@ -292,6 +292,7 @@
     "you": "Vous"
   },
   "AuditLogs": {
+    "col_actions": "Actions",
     "col_entity": "Entité",
     "col_event": "Événement",
     "col_source": "Source",
@@ -491,6 +492,7 @@
     "nav_help": "Aide",
     "nav_high_five": "Tope là",
     "nav_home": "Accueil",
+    "nav_keyboard_shortcuts": "Raccourcis clavier",
     "nav_map": "Carte",
     "nav_members": "Membres",
     "nav_notifications": "Notifications",
@@ -500,6 +502,7 @@
     "nav_repositories": "Dépôts",
     "nav_sessions": "Sessions",
     "nav_settings": "Paramètres",
+    "nav_short_links": "Liens courts",
     "nav_support": "Assistance",
     "navigated_to": "Navigation vers {title}",
     "new": "Nouveau",
@@ -1056,6 +1059,7 @@
     "settings_api_keys_history_revoked": "Historique (Révoqué)",
     "settings_api_keys_label": "Description (facultatif)",
     "settings_api_keys_last_used": "Dernière utilisation",
+    "settings_api_keys_last_used_never": "Jamais utilisé",
     "settings_api_keys_name": "Nom de la clé",
     "settings_api_keys_name_placeholder": "p. ex. Serveur Prod",
     "settings_api_keys_never_expires": "Jamais",
@@ -1184,6 +1188,8 @@
     "settings_appearance_radius_title": "Rayon des coins",
     "settings_appearance_shape_desc": "Arrondi des angles et échelle de l’interface.",
     "settings_appearance_shape_title": "Forme et taille",
+    "settings_appearance_shortcuts_desc": "Séquences à deux touches comme G then D. Désactivez-les si elles gênent la saisie ou les périphériques d'entrée.",
+    "settings_appearance_shortcuts_title": "Raccourcis à touche unique",
     "settings_appearance_sidebar_collapse_desc": "Comment la barre latérale se replie",
     "settings_appearance_sidebar_collapse_icon": "Icône",
     "settings_appearance_sidebar_collapse_offcanvas": "Coulissante",
@@ -1906,6 +1912,22 @@
     "sign_out_all_devices": "Se déconnecter de tous les autres appareils",
     "this_device": "Cet appareil",
     "unknown": "Inconnu"
+  },
+  "Shortcuts": {
+    "description": "Tout ce que vous pouvez faire dans Doxynix sans la souris.",
+    "group_actions": "Actions",
+    "group_interface": "Interface",
+    "group_navigation": "Navigation",
+    "group_repo_map": "Carte du dépôt",
+    "group_repo_map_hint": "Disponibles tant que la carte du dépôt est ouverte.",
+    "note": "Les séquences à deux touches fonctionnent hors des champs de saisie.",
+    "sequences_disabled": "Les séquences à touche unique sont désactivées dans Apparence.",
+    "title": "Raccourcis clavier"
+  },
+  "ShortLinks": {
+    "description": "Saisissez ces chemins après le domaine ou copiez le lien complet. Chacun redirige vers la page correspondante.",
+    "hint": "Ouvrez depuis la barre d'adresse ou copiez le lien complet.",
+    "title": "Liens courts"
   },
   "Support": {
     "channel_discord_action": "Rejoindre le serveur",

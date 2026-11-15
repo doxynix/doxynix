@@ -292,6 +292,7 @@
     "you": "Sie"
   },
   "AuditLogs": {
+    "col_actions": "Aktionen",
     "col_entity": "Entität",
     "col_event": "Ereignis",
     "col_source": "Quelle",
@@ -491,6 +492,7 @@
     "nav_help": "Hilfe",
     "nav_high_five": "High five",
     "nav_home": "Startseite",
+    "nav_keyboard_shortcuts": "Tastenkürzel",
     "nav_map": "Karte",
     "nav_members": "Mitglieder",
     "nav_notifications": "Benachrichtigungen",
@@ -500,6 +502,7 @@
     "nav_repositories": "Repositories",
     "nav_sessions": "Sitzungen",
     "nav_settings": "Einstellungen",
+    "nav_short_links": "Kurzlinks",
     "nav_support": "Support",
     "navigated_to": "Navigiert zu {title}",
     "new": "Neu",
@@ -1056,6 +1059,7 @@
     "settings_api_keys_history_revoked": "Verlauf (widerrufen)",
     "settings_api_keys_label": "Beschreibung (optional)",
     "settings_api_keys_last_used": "Zuletzt verwendet",
+    "settings_api_keys_last_used_never": "Nie verwendet",
     "settings_api_keys_name": "Benennen Sie Ihren Schlüssel",
     "settings_api_keys_name_placeholder": "z. B. Prod Server",
     "settings_api_keys_never_expires": "Nie",
@@ -1184,6 +1188,8 @@
     "settings_appearance_radius_title": "Eckenradius",
     "settings_appearance_shape_desc": "Eckenrundung und Skalierung der Oberfläche.",
     "settings_appearance_shape_title": "Form und Größe",
+    "settings_appearance_shortcuts_desc": "Zweistufige Folgen wie G then D. Deaktivieren, wenn sie beim Tippen oder bei Eingabehilfen stören.",
+    "settings_appearance_shortcuts_title": "Tastenkürzel mit einzelnen Tasten",
     "settings_appearance_sidebar_collapse_desc": "Wie die Seitenleiste eingeklappt wird",
     "settings_appearance_sidebar_collapse_icon": "Symbol",
     "settings_appearance_sidebar_collapse_offcanvas": "Offcanvas",
@@ -1906,6 +1912,22 @@
     "sign_out_all_devices": "Von allen anderen Geräten abmelden",
     "this_device": "Dieses Gerät",
     "unknown": "Unbekannt"
+  },
+  "Shortcuts": {
+    "description": "Alles, was du in Doxynix ohne Maus erledigen kannst.",
+    "group_actions": "Aktionen",
+    "group_interface": "Oberfläche",
+    "group_navigation": "Navigation",
+    "group_repo_map": "Repo-Karte",
+    "group_repo_map_hint": "Verfügbar, solange die Repository-Karte geöffnet ist.",
+    "note": "Zweistufige Tastenkürzel funktionieren nur außerhalb von Eingabefeldern.",
+    "sequences_disabled": "Einzeltasten-Folgen sind in den Darstellungseinstellungen deaktiviert.",
+    "title": "Tastenkürzel"
+  },
+  "ShortLinks": {
+    "description": "Gib diese Pfade nach der Domain ein oder kopiere den vollständigen Link. Jeder führt zur entsprechenden Seite.",
+    "hint": "Öffne den Pfad in der Adressleiste oder kopiere den vollständigen Link.",
+    "title": "Kurzlinks"
   },
   "Support": {
     "channel_discord_action": "Server beitreten",

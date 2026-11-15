@@ -292,6 +292,7 @@
     "you": "Sen"
   },
   "AuditLogs": {
+    "col_actions": "İşlemler",
     "col_entity": "Varlık",
     "col_event": "Olay",
     "col_source": "Kaynak",
@@ -491,6 +492,7 @@
     "nav_help": "Yardım",
     "nav_high_five": "Çak bir beşlik",
     "nav_home": "Ana sayfa",
+    "nav_keyboard_shortcuts": "Klavye kısayolları",
     "nav_map": "Harita",
     "nav_members": "Üyeler",
     "nav_notifications": "Bildirimler",
@@ -500,6 +502,7 @@
     "nav_repositories": "Depolar",
     "nav_sessions": "Oturumlar",
     "nav_settings": "Ayarlar",
+    "nav_short_links": "Kısa bağlantılar",
     "nav_support": "Destek",
     "navigated_to": "{title} sayfasına gidildi",
     "new": "Yeni",
@@ -1056,6 +1059,7 @@
     "settings_api_keys_history_revoked": "Geçmiş (İptal Edilenler)",
     "settings_api_keys_label": "Açıklama (isteğe bağlı)",
     "settings_api_keys_last_used": "Son kullanım",
+    "settings_api_keys_last_used_never": "Hiç kullanılmadı",
     "settings_api_keys_name": "Anahtarınızı adlandırın",
     "settings_api_keys_name_placeholder": "ör. Prod Sunucusu",
     "settings_api_keys_never_expires": "Süresiz",
@@ -1184,6 +1188,8 @@
     "settings_appearance_radius_title": "Köşe yarıçapı",
     "settings_appearance_shape_desc": "Köşe yuvarlatması ve arayüz ölçeği.",
     "settings_appearance_shape_title": "Şekil ve boyut",
+    "settings_appearance_shortcuts_desc": "G then D gibi iki tuşlu diziler. Yazmayı veya yardımcı girişi engelliyorsa kapatın.",
+    "settings_appearance_shortcuts_title": "Tek tuşlu kısayollar",
     "settings_appearance_sidebar_collapse_desc": "Kenar çubuğu nasıl daralır",
     "settings_appearance_sidebar_collapse_icon": "Simge",
     "settings_appearance_sidebar_collapse_offcanvas": "Offcanvas",
@@ -1906,6 +1912,22 @@
     "sign_out_all_devices": "Diğer tüm cihazlardan çıkış yap",
     "this_device": "Bu Cihaz",
     "unknown": "Bilinmiyor"
+  },
+  "Shortcuts": {
+    "description": "Doxynix'te fareye dokunmadan yapabileceğiniz her şey.",
+    "group_actions": "İşlemler",
+    "group_interface": "Arayüz",
+    "group_navigation": "Gezinme",
+    "group_repo_map": "Depo haritası",
+    "group_repo_map_hint": "Depo haritası açıkken kullanılabilir.",
+    "note": "İki tuşlu diziler metin alanları dışında çalışır.",
+    "sequences_disabled": "Tek tuşlu diziler Görünüm ayarlarında kapalı.",
+    "title": "Klavye kısayolları"
+  },
+  "ShortLinks": {
+    "description": "Bu yolları alan adından sonra yazın veya tam bağlantıyı kopyalayın. Her biri ilgili sayfaya yönlendirir.",
+    "hint": "Adres çubuğundan açın veya tam bağlantıyı kopyalayın.",
+    "title": "Kısa bağlantılar"
   },
   "Support": {
     "channel_discord_action": "Sunucuya Katıl",

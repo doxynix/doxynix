@@ -1,13 +1,14 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { ChevronDown, Search } from "lucide-react";
+import { ChevronDown, Keyboard, Link2, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useTRPC } from "@/shared/api/trpc";
 import { commandMenuItems } from "@/shared/config/navigation";
 import type { MenuItem } from "@/shared/config/navigation.types";
 import { useNavLabels } from "@/shared/config/navigation-labels";
+import { formatShortcut, SHORTCUTS } from "@/shared/config/shortcuts";
 import { useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
@@ -26,6 +27,7 @@ import {
   CommandShortcut,
 } from "@/shared/ui/core/command";
 import { Kbd, KbdGroup } from "@/shared/ui/core/kbd";
+import { ShortcutHint } from "@/shared/ui/core/shortcut-hint";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
@@ -36,6 +38,8 @@ import {
   useCommandMenuActions,
   useCommandMenuIsOpen,
 } from "@/features/command-menu/model/use-command-menu.store";
+import { useShortLinksDialogActions } from "@/features/short-links/model/use-short-links-dialog.store";
+import { useShortcutsDialogActions } from "@/features/shortcuts/model/use-shortcuts-dialog.store";
 
 export function AppCommandMenu() {
   const trpc = useTRPC();
@@ -43,13 +47,18 @@ export function AppCommandMenu() {
   const commandShortcut = `${modifierKey}+K`;
   const t = useTranslations("Dashboard");
   const tCommon = useTranslations("Common");
+  const tShortcuts = useTranslations("Shortcuts");
+  const tShortLinks = useTranslations("ShortLinks");
   const navLabels = useNavLabels();
+  const shortLinksShortcut = formatShortcut(SHORTCUTS.shortLinks.keys, modifierKey);
   const open = useCommandMenuIsOpen();
   const { setOpen } = useCommandMenuActions();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
   const [isReposExpanded, setIsReposExpanded] = useState(true);
   const { setOpen: setOpenCreateDialog } = useCreateRepoActions();
+  const { setOpen: setShortcutsOpen } = useShortcutsDialogActions();
+  const { setOpen: setShortLinksOpen } = useShortLinksDialogActions();
 
   const router = useRouter();
   const [prevOpen, setPrevOpen] = useState(open);
@@ -154,12 +163,7 @@ export function AppCommandMenu() {
 
   const filteredCommands = !s
     ? commandMenuItems
-    : commandMenuItems.filter(
-        (item) =>
-          (navLabels[item.labelKey].toLowerCase().includes(s) ||
-            item.url?.toLowerCase().includes(s)) ??
-          false,
-      );
+    : commandMenuItems.filter((item) => navLabels[item.labelKey].toLowerCase().includes(s));
 
   return (
     <>
@@ -168,7 +172,8 @@ export function AppCommandMenu() {
         content={t("command_search")}
       >
         <AppButton
-          aria-label={`${t("command_search")} ${commandShortcut}`}
+          aria-keyshortcuts="Meta+K Control+K"
+          aria-label={`${t("command_search")} ${modifierKey} K`}
           className={cn(
             "relative size-9 justify-start rounded-xl not-lg:border-0 not-lg:p-0 font-normal text-muted-foreground text-sm lg:w-64 lg:border-border lg:bg-surface-hover lg:pr-12",
           )}
@@ -220,19 +225,12 @@ export function AppCommandMenu() {
                       {item.icon != null && <item.icon />}
                       <span>{navLabels[item.labelKey]}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      {item.url != null && (
-                        <kbd className="px-1.5 py-0.5 text-muted-foreground text-xs">
-                          {item.url}
-                        </kbd>
-                      )}
-                      {item.shortcut != null && (
-                        <CommandShortcut
-                          className="hidden text-xs md:flex"
-                          shortcut={item.shortcut}
-                        />
-                      )}
-                    </div>
+                    {item.shortcut != null && (
+                      <CommandShortcut
+                        className="hidden text-xs md:flex"
+                        shortcut={item.shortcut}
+                      />
+                    )}
                   </CommandItem>
                 );
               })}
@@ -306,6 +304,43 @@ export function AppCommandMenu() {
             </div>
           )}
         </CommandList>
+        <div className="flex items-center justify-between gap-2 border-t px-3 py-2">
+          <span className="text-muted-foreground text-xs">{tCommon("nav_help")}</span>
+          <div className="flex items-center gap-1">
+            <AppButton
+              aria-label={tShortcuts("title")}
+              onClick={() => {
+                setOpen(false);
+                setTimeout(() => setShortcutsOpen(true), 10);
+              }}
+              size="sm"
+              variant="ghost"
+            >
+              <Keyboard />
+              <span className="hidden sm:inline">{tShortcuts("title")}</span>
+              <ShortcutHint
+                className="ml-0 hidden sm:inline-flex"
+                shortcut={SHORTCUTS.shortcutsHelp.display}
+              />
+            </AppButton>
+            <AppButton
+              aria-label={tShortLinks("title")}
+              onClick={() => {
+                setOpen(false);
+                setTimeout(() => setShortLinksOpen(true), 10);
+              }}
+              size="sm"
+              variant="ghost"
+            >
+              <Link2 />
+              <span className="hidden sm:inline">{tShortLinks("title")}</span>
+              <ShortcutHint
+                className="ml-0 hidden sm:inline-flex"
+                shortcut={shortLinksShortcut}
+              />
+            </AppButton>
+          </div>
+        </div>
         <CommandFooter className="hidden justify-between sm:flex">
           <span className="flex items-center gap-1.5">
             <KbdGroup>

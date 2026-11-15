@@ -292,6 +292,7 @@
     "you": "你"
   },
   "AuditLogs": {
+    "col_actions": "操作",
     "col_entity": "实体",
     "col_event": "事件",
     "col_source": "来源",
@@ -491,6 +492,7 @@
     "nav_help": "帮助",
     "nav_high_five": "击掌",
     "nav_home": "首页",
+    "nav_keyboard_shortcuts": "键盘快捷键",
     "nav_map": "地图",
     "nav_members": "成员",
     "nav_notifications": "通知",
@@ -500,6 +502,7 @@
     "nav_repositories": "仓库",
     "nav_sessions": "会话",
     "nav_settings": "设置",
+    "nav_short_links": "短链接",
     "nav_support": "支持",
     "navigated_to": "已导航至 {title}",
     "new": "新建",
@@ -1056,6 +1059,7 @@
     "settings_api_keys_history_revoked": "历史（已撤销）",
     "settings_api_keys_label": "说明（可选）",
     "settings_api_keys_last_used": "上次使用",
+    "settings_api_keys_last_used_never": "从未使用",
     "settings_api_keys_name": "为您的密钥命名",
     "settings_api_keys_name_placeholder": "例如：生产环境服务器",
     "settings_api_keys_never_expires": "永不过期",
@@ -1184,6 +1188,8 @@
     "settings_appearance_radius_title": "圆角半径",
     "settings_appearance_shape_desc": "角的圆滑程度和界面缩放。",
     "settings_appearance_shape_title": "形状和大小",
+    "settings_appearance_shortcuts_desc": "使用 G then D 这类两键组合。如果影响输入或辅助设备，请关闭。",
+    "settings_appearance_shortcuts_title": "单键快捷键",
     "settings_appearance_sidebar_collapse_desc": "侧边栏如何折叠",
     "settings_appearance_sidebar_collapse_icon": "图标",
     "settings_appearance_sidebar_collapse_offcanvas": "侧滑",
@@ -1906,6 +1912,22 @@
     "sign_out_all_devices": "退出其他所有设备",
     "this_device": "此设备",
     "unknown": "未知"
+  },
+  "Shortcuts": {
+    "description": "无需鼠标即可在 Doxynix 中完成的所有操作。",
+    "group_actions": "操作",
+    "group_interface": "界面",
+    "group_navigation": "导航",
+    "group_repo_map": "仓库地图",
+    "group_repo_map_hint": "仅在仓库地图打开时可用。",
+    "note": "两键组合仅在输入框外生效。",
+    "sequences_disabled": "单键组合已在“外观”设置中关闭。",
+    "title": "键盘快捷键"
+  },
+  "ShortLinks": {
+    "description": "在域名后输入这些路径，或复制完整链接。每个链接都会跳转到对应页面。",
+    "hint": "从地址栏打开，或复制完整链接。",
+    "title": "短链接"
   },
   "Support": {
     "channel_discord_action": "加入服务器",

@@ -1,20 +1,30 @@
-import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+
+import { GLOBAL_HOTKEY_SCOPE, SHORTCUTS, toHotkeySequence } from "@/shared/config/shortcuts";
+import { useSingleKeyShortcuts } from "@/shared/lib/hooks/use-single-key-shortcuts";
 
 import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dialog.store";
 
-const PREFIXES = ["c"];
-
 export type GlobalHotkeyCommand = "createRepo";
-
-const COMMAND_BY_SECOND_KEY: Record<string, Record<string, GlobalHotkeyCommand>> = {
-  c: { r: "createRepo" },
-};
 
 export type SequenceResult =
   | { action: "execute"; command: GlobalHotkeyCommand }
   | { action: "reset" }
   | { action: "ignore" };
+
+export function createActionCommands(): Map<string, GlobalHotkeyCommand> {
+  const commands = new Map<string, GlobalHotkeyCommand>();
+  const sequence = toHotkeySequence(SHORTCUTS.createRepo.keys);
+
+  if (sequence != null) {
+    commands.set(sequence, "createRepo");
+  }
+
+  return commands;
+}
+
+const ACTION_COMMANDS = createActionCommands();
+const ACTION_HOTKEYS = [...ACTION_COMMANDS.keys()].join(",");
 
 export function processGlobalHotkeySequence(prefix: string | null, code: string): SequenceResult {
   if (prefix == null) {
@@ -26,7 +36,7 @@ export function processGlobalHotkeySequence(prefix: string | null, code: string)
     return { action: "reset" };
   }
 
-  const command = COMMAND_BY_SECOND_KEY[prefix]?.[secondKey];
+  const command = ACTION_COMMANDS.get(`${prefix}>${secondKey}`);
   if (command == null) {
     return { action: "reset" };
   }
@@ -36,51 +46,25 @@ export function processGlobalHotkeySequence(prefix: string | null, code: string)
 
 export function useGlobalActionsHotkeys(onAction?: () => void) {
   const { setOpen } = useCreateRepoActions();
-  const [prefix, setPrefix] = useState<null | string>(null);
-
-  useEffect(() => {
-    if (prefix == null) {
-      return;
-    }
-    const timer = setTimeout(() => setPrefix(null), 1500);
-    return () => clearTimeout(timer);
-  }, [prefix]);
+  const singleKeyShortcuts = useSingleKeyShortcuts();
 
   useHotkeys(
-    PREFIXES.join(","),
-    (_, handler) => {
-      setPrefix(handler.hotkey);
-    },
-    {
-      enabled: prefix == null,
-      enableOnFormTags: false,
-      preventDefault: true,
-    },
-    [prefix],
-  );
-
-  useHotkeys(
-    "*",
-    (e) => {
-      const result = processGlobalHotkeySequence(prefix, e.code);
-
-      if (result.action === "reset") {
-        setPrefix(null);
+    ACTION_HOTKEYS,
+    (event, handler) => {
+      if (ACTION_COMMANDS.get(handler.hotkey) !== "createRepo") {
         return;
       }
 
-      if (result.action === "execute") {
-        e.stopPropagation();
-        onAction?.();
-        setTimeout(() => setOpen(true), 10);
-        setPrefix(null);
-      }
+      event.stopPropagation();
+      onAction?.();
+      setTimeout(() => setOpen(true), 10);
     },
     {
-      enabled: prefix != null,
+      enabled: singleKeyShortcuts,
       enableOnFormTags: false,
       preventDefault: true,
+      scopes: GLOBAL_HOTKEY_SCOPE,
+      sequenceTimeoutMs: 1500,
     },
-    [prefix],
   );
 }

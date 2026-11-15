@@ -11,6 +11,7 @@ import { StatsWriterPlugin } from "webpack-stats-plugin";
 import { API_PREFIX } from "@/shared/config/env.client";
 import { IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/config/env.flags";
 import { LOCALE_REGEX_STR } from "@/shared/config/locales";
+import { SHORT_LINKS } from "@/shared/config/short-links";
 
 import pkg from "./package.json" with { type: "json" };
 
@@ -267,74 +268,9 @@ const nextConfig: NextConfig = {
   // cacheComponents: true, // disable if bugs appear (// NOTE: bug #418 with hydration discovered — turns out everything must be wrapped in Suspense and the 'use cache' directive used everywhere, since caching is now manual; too much rewriting while PPR is deferred indefinitely)
   reactStrictMode: true,
   async redirects() {
-    const shortcuts = [
-      { d: "/dashboard", s: "/d" },
-      { d: "/dashboard", s: "/dash" },
-      { d: "/dashboard", s: "/home" },
-
-      { d: "/dashboard/settings/profile", s: "/dashboard/settings" },
-      { d: "/dashboard/repos", s: "/dashboard/repo" },
-      { d: "/dashboard/repo/:owner/:name/pulls", s: "/dashboard/repo/:owner/:name/pull" },
-
-      { d: "/dashboard/repos", s: "/r" },
-      { d: "/dashboard/repos", s: "/repos" },
-      { d: "/dashboard/repos", s: "/code" },
-
-      { d: "/dashboard/settings/profile", s: "/s" },
-      { d: "/dashboard/settings/profile", s: "/settings" },
-      { d: "/dashboard/settings/profile", s: "/me" },
-      { d: "/dashboard/settings/profile", s: "/profile" },
-
-      { d: "/dashboard/settings/api-keys", s: "/k" },
-      { d: "/dashboard/settings/api-keys", s: "/keys" },
-      { d: "/dashboard/settings/api-keys", s: "/token" },
-      { d: "/dashboard/settings/api-keys", s: "/api" },
-
-      { d: "/dashboard/notifications", s: "/n" },
-      { d: "/dashboard/notifications", s: "/notif" },
-      { d: "/dashboard/notifications", s: "/inbox" },
-      { d: "/dashboard/notifications", s: "/alerts" },
-
-      { d: "/dashboard/settings/members", s: "/mt" },
-      { d: "/dashboard/settings/members", s: "/members" },
-
-      { d: "/dashboard/settings/billing", s: "/b" },
-      { d: "/dashboard/settings/billing", s: "/billing" },
-
-      { d: "/dashboard/settings/appearance", s: "/a" },
-      { d: "/dashboard/settings/appearance", s: "/appearance" },
-
-      { d: "/dashboard/settings/connections", s: "/c" },
-      { d: "/dashboard/settings/connections", s: "/connections" },
-
-      { d: "/dashboard/settings/sessions", s: "/ms" },
-      { d: "/dashboard/settings/sessions", s: "/sessions" },
-
-      { d: "/dashboard/settings/audit-log", s: "/l" },
-      { d: "/dashboard/settings/audit-log", s: "/audit" },
-
-      { d: "/admin/users", s: "/au" },
-
-      { d: "/dashboard/settings/danger-zone", s: "/z" },
-      { d: "/dashboard/settings/danger-zone", s: "/dz" },
-      { d: "/dashboard/settings/danger-zone", s: "/danger" },
-      { d: "/dashboard/settings/danger-zone", s: "/rip" },
-
-      { d: "/auth", s: "/in" },
-      { d: "/auth", s: "/login" },
-      { d: "/auth", s: "/join" },
-
-      { d: "/support", s: "/h" },
-
-      { d: "/terms", s: "/tos" },
-      { d: "/privacy", s: "/pp" },
-
-      { d: "https://status.doxynix.space", s: "/status" },
-    ];
-
     const results: { destination: string; permanent: boolean; source: string }[] = [];
 
-    shortcuts.forEach(({ d, s }) => {
+    SHORT_LINKS.forEach(({ destination: d, source: s }) => {
       const isExternal = d.startsWith("http");
 
       results.push(

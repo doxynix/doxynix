@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { processGlobalHotkeySequence } from "./use-actions-hotkeys";
+import { createActionCommands, processGlobalHotkeySequence } from "./use-actions-hotkeys";
 
 describe("processGlobalHotkeySequence", () => {
   it("should return ignore action when prefix is missing", () => {
@@ -26,5 +26,15 @@ describe("processGlobalHotkeySequence", () => {
   it("should reset state when an unrecognized prefix is provided", () => {
     const result = processGlobalHotkeySequence("x", "KeyR");
     expect(result).toEqual({ action: "reset" });
+  });
+});
+
+describe("createActionCommands", () => {
+  it("should map the create-repository sequence", () => {
+    expect(createActionCommands().get("c>r")).toBe("createRepo");
+  });
+
+  it("should register every action exactly once", () => {
+    expect(createActionCommands().size).toBe(1);
   });
 });

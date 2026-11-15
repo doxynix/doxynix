@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveMapCommand } from "./use-repo-map-hotkeys";
+import { createMapCommands, resolveMapCommand } from "./use-repo-map-hotkeys";
 
 describe("resolveMapCommand", () => {
   it("resolves map commands accurately by prefix and key code", () => {
@@ -16,5 +16,21 @@ describe("resolveMapCommand", () => {
     expect(resolveMapCommand("unknown", "KeyS")).toBeNull();
     expect(resolveMapCommand("f", "Enter")).toBeNull();
     expect(resolveMapCommand("z", "Escape")).toBeNull();
+  });
+});
+
+describe("createMapCommands", () => {
+  it("maps every map sequence to its command", () => {
+    const commands = createMapCommands();
+
+    expect(commands.get("f>s")).toBe("focusSelected");
+    expect(commands.get("f>v")).toBe("fitView");
+    expect(commands.get("t>c")).toBe("toggleControls");
+    expect(commands.get("z>i")).toBe("zoomIn");
+    expect(commands.get("z>o")).toBe("zoomOut");
+  });
+
+  it("registers every map command exactly once", () => {
+    expect(createMapCommands().size).toBe(5);
   });
 });

@@ -1,5 +1,6 @@
 import { useHotkeys } from "react-hotkeys-hook";
 
+import { GLOBAL_HOTKEY_SCOPE, SHORTCUTS } from "@/shared/config/shortcuts";
 import { useSidebar } from "@/shared/ui/core/sidebar";
 
 import { useCommandMenuActions } from "@/features/command-menu/model/use-command-menu.store";
@@ -12,10 +13,11 @@ export function useLayoutHotkeys() {
     enableOnContentEditable: true,
     enableOnFormTags: true,
     preventDefault: true,
+    scopes: GLOBAL_HOTKEY_SCOPE,
   };
 
   useHotkeys(
-    "mod+b",
+    SHORTCUTS.toggleSidebar.keys,
     (e) => {
       if (e.repeat) {
         return;
@@ -26,7 +28,7 @@ export function useLayoutHotkeys() {
   );
 
   useHotkeys(
-    "mod+k",
+    SHORTCUTS.commandMenu.keys,
     (e) => {
       if (e.repeat) {
         return;

@@ -292,6 +292,7 @@
     "you": "Вы"
   },
   "AuditLogs": {
+    "col_actions": "Действия",
     "col_entity": "Сущность",
     "col_event": "Событие",
     "col_source": "Источник",
@@ -491,6 +492,7 @@
     "nav_help": "Помощь",
     "nav_high_five": "Дай пять",
     "nav_home": "Главная",
+    "nav_keyboard_shortcuts": "Горячие клавиши",
     "nav_map": "Карта",
     "nav_members": "Участники",
     "nav_notifications": "Уведомления",
@@ -500,6 +502,7 @@
     "nav_repositories": "Репозитории",
     "nav_sessions": "Сессии",
     "nav_settings": "Настройки",
+    "nav_short_links": "Короткие ссылки",
     "nav_support": "Поддержка",
     "navigated_to": "Переход к {title}",
     "new": "Новое",
@@ -1056,6 +1059,7 @@
     "settings_api_keys_history_revoked": "История (Отозванные)",
     "settings_api_keys_label": "Описание (необязательно)",
     "settings_api_keys_last_used": "Последнее использование",
+    "settings_api_keys_last_used_never": "Не использовался",
     "settings_api_keys_name": "Название ключа",
     "settings_api_keys_name_placeholder": "напр. Prod Server",
     "settings_api_keys_never_expires": "Без срока",
@@ -1184,6 +1188,8 @@
     "settings_appearance_radius_title": "Радиус скругления",
     "settings_appearance_shape_desc": "Скругление углов и масштаб интерфейса.",
     "settings_appearance_shape_title": "Форма и размер",
+    "settings_appearance_shortcuts_desc": "Двухклавишные последовательности вроде G then D. Отключите, если они мешают вводу или вспомогательным устройствам.",
+    "settings_appearance_shortcuts_title": "Односимвольные шорткаты",
     "settings_appearance_sidebar_collapse_desc": "Как сворачивается боковая панель",
     "settings_appearance_sidebar_collapse_icon": "Значок",
     "settings_appearance_sidebar_collapse_offcanvas": "Выезжающая",
@@ -1906,6 +1912,22 @@
     "sign_out_all_devices": "Выйти на всех остальных устройствах",
     "this_device": "Это устройство",
     "unknown": "Неизвестно"
+  },
+  "Shortcuts": {
+    "description": "Всё, что можно сделать в Doxynix, не отрывая рук от клавиатуры.",
+    "group_actions": "Действия",
+    "group_interface": "Интерфейс",
+    "group_navigation": "Навигация",
+    "group_repo_map": "Карта репозитория",
+    "group_repo_map_hint": "Работают, пока открыта карта репозитория.",
+    "note": "Двухклавишные комбинации работают, когда курсор не в поле ввода.",
+    "sequences_disabled": "Односимвольные последовательности отключены в настройках внешнего вида.",
+    "title": "Горячие клавиши"
+  },
+  "ShortLinks": {
+    "description": "Наберите эти пути после домена или скопируйте ссылку — каждая ведёт на нужную страницу.",
+    "hint": "Откройте из адресной строки или скопируйте полную ссылку.",
+    "title": "Короткие ссылки"
   },
   "Support": {
     "channel_discord_action": "Присоединиться к серверу",
