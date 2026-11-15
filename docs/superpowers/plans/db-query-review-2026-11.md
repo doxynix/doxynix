@@ -6,10 +6,10 @@ Live checklist for the second static pass over `apps/web`. Companion to
 [`db-index-audit.md`](../../db/db-index-audit.md) (what the shapes cost) and
 [`db-ui-map.md`](../../db/db-ui-map.md) (where latency lands).
 
-**Closed: 18 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
-PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3, R6, R7, R9, R18, R19, R21, R26, R29, R34, K1 and
-K2 closed 2026-11-15, and R14 and R30 are **partially** done (see the item text and the progress note
-below the scoreboard).
+**Closed: 19 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
+PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3, R6, R7, R9, R11, R18, R19, R21, R26, R29, R34,
+K1 and K2 closed 2026-11-15, and R14 and R30 are **partially** done (see the item text and the
+progress note below the scoreboard).
 
 ## What this round covers that round 1 did not
 
@@ -340,7 +340,7 @@ R6, R7, R9, R18, R19, R21, R26, R29, R34, K1 and K2 have since closed (see the c
 
 ## MEDIUM
 
-- [ ] **R11 · No index on `analyses.commit_sha`**
+- [x] **R11 · No index on `analyses.commit_sha`**
   — `prisma/models/review.zmodel:44-46`
   - **What:** indexes are `[repoId, status]`, `[repoId, createdAt desc]`, `[jobId]`. Two paths
     filter on the SHA: `findCachedSha`
@@ -682,6 +682,7 @@ These were checked and found correct. Listed so a third round does not repeat th
 | R7 | 2026-11-15 | `39d08034` | `getSessionHistory` takes the newest 200 rows (desc → reversed) with a four-field `select`; `listSessions` takes 100 with a `select` that keeps every output field. Follow-up: the ad-hoc `take` constants became cursor pagination through the shared `pagination.ts` primitives (`keysetArgs` / `splitKeysetPage` / `orderWithTiebreak`) — newest page plus `nextCursor`; the UI still renders the first page only. The array → `{ items, meta }` output is a breaking wire change for an older published `dxnx` (release-please ships CLI and server together). `listSessions` keysets on `updatedAt`, which moves on rename/append, so a multi-page walk can duplicate or skip before a "load older" UI ships. B2d flipped that last caveat: the web agent now pages history through `firstItemIndex`/`startReached` and the session list through an intersection sentinel, so a multi-page walk is live and the rename/append caveat now applies to it. |
 | R8 | 2026-11-01 | `311bd6a7` | `analysisRepo.getByRepoAndPRNumber` selects `id` instead of `include: { comments, generatedFixes }`; its only caller (the PR webhook) reads `id`. |
 | R9 | 2026-11-15 | `5420536e` | `bumpUsage` is one `INSERT … ON CONFLICT` statement per event; both paths clamp, and the conflict branch binds the raw delta (`+ $6::int`), so a negative release is not swallowed by `EXCLUDED`. `usage.test.ts` asserts the SQL text and params; `entitlements.test.ts` asserts the 900 → 0 clamp against a real database. |
+| R11 | 2026-11-15 | `4eaf34d2` | `@@index([repoId, commitSha])` on `analyses`, plus seven keyset indexes — `analyses` and `pull_request_analyses` `(repo_id, created_at DESC, id DESC)`, `chat_sessions` `(user_id, repo_id, updated_at DESC, id DESC)`, `chat_messages` `(session_id, created_at DESC, id DESC)`, `sessions` `(user_id, created_at DESC, id DESC)`, `api_keys` `(workspace_id, created_at DESC, id DESC)`, `workspace_members` `(workspace_id, created_at, id)` — in `20261115120000_keyset_indexes`. `EXPLAIN` was not run (the round's research covers it); `pg_indexes` on the local `dxnx_web` lists all eight and `migrate diff` from the schema is empty. |
 | R18 | 2026-11-15 | `a90fdb07` | `getHistory` and `listByRepository` return cursor pages (`{ items, meta, total }`, `take: limit + 1` + `splitKeysetPage` over `ORDER_CREATED_AT_DESC`, `limit` default 50) instead of 500-row reads, and the `capped` flag is gone: the version selector appends pages from a "More" item, the PR list from an intersection sentinel, and both keep the `count` as `total`. `getByRepoId` (fixes) keeps its 200-row cap and stays deferred until a client reads the list. |
 | R19 | 2026-11-15 | `c004fc44` | `getRepoSnapshot`, `getRepoSnapshotWithDocuments` and `getAnalysisPayloadForRepo` resolve the requested `aid` inside the single `repo.findUnique` (`analyses: { orderBy: createdAt desc, take: 1, where: { id, status: "DONE" } }`), so an `aid`-scoped read is one operation. A missing or foreign `aid` still throws `ANALYSIS_VERSION_NOT_FOUND`; an empty latest still throws `ANALYSIS_NOT_COMPLETED`. `getRepoDocsPayload` keeps its second lookup (out of this batch); B5e deleted `getRepoSnapshotWithDocuments` when the documents read left the repo select (`c0517117`). |
 | R21 | 2026-11-15 | `39d08034` | `logic/project-result-overview.ts` replaces `JSON.stringify(resultJson)` in `analyze-pr.task.ts` with a bounded projection capped at 4096 chars. |
@@ -693,7 +694,7 @@ These were checked and found correct. Listed so a third round does not repeat th
 | R34 | 2026-11-15 | `f232f133` | The `per_repo_top` lateral takes `LIMIT 1`, so no repo's history is sorted just to throw four rows away. `recentActivity` is therefore the newest analysis of each repo (one card per repo, five cards) and the outer `LIMIT 5` is its only cap; the comment says so instead of claiming a global top-5. |
 | K1 | 2026-11-15 | `5cb192d0` | Both SQL files filter `repos.workspace_id = $1::uuid` (the parameter and the `user_repos` CTE are renamed `workspace_id` / `workspace_repos`), `getDashboardStats`/`getTrends` take a `workspaceId`, and `analytics.*` moved from `protectedProcedure` to `workspaceProcedure`. The dashboard and the repository list now count the same set for an invited member; `dashboard-stats` and `analytics-trends` each seed a second member's repositories into one workspace. |
 
-The first six shipped in PR #2356 and are on `main`; R3, R6, R7, R9, R18, R19, R21, R26, R29, R34, K1
+The first six shipped in PR #2356 and are on `main`; R3, R6, R7, R9, R11, R18, R19, R21, R26, R29, R34, K1
 and K2 landed on `perf/dxnx-310-db-query-review-round-2` and the "working tree" marker from the
 original log is now historical.
 
@@ -776,4 +777,14 @@ they are one screen each and close in batches, so they stay out of the 36-item c
 - [x] **O4 · `adminUser.list` page ceiling** — same keyset contract; `page` is gone from
   `adminUserParsers` / `adminReviewParsers` / `adminAuditParsers`, so the URL carries only filters.
   `8dae57da`
+- [x] **B5i · keyset indexes** — `(repo_id, created_at DESC, id DESC)` on `analyses` and
+  `pull_request_analyses`, `(user_id, repo_id, updated_at DESC, id DESC)` on `chat_sessions`,
+  `(session_id, created_at DESC, id DESC)` on `chat_messages`, `(user_id, created_at DESC, id DESC)`
+  on `sessions`, `(workspace_id, created_at DESC, id DESC)` on `api_keys`, and
+  `(workspace_id, created_at, id)` on `workspace_members` — all in `20261115120000_keyset_indexes`.
+  `4eaf34d2`
+- [x] **B5i · first-page total** — `getHistory` and `listByRepository` count only when `cursor` is
+  null and answer `total: null` on later pages; the CLI folds the walk through
+  `summarizeCursorPages` (`@doxynix/shared`) and keeps the first non-null total, while the version
+  selector still reads page one. `2c39e6d3`
 
