@@ -41,6 +41,11 @@ Scope: everything left open after the round-2 branch
   longer re-exports siblings.
 - **Server mappers are `*.mapper.ts`** (`usage.mapper.ts`, `analysis.mapper.ts`); pure helpers are
   kebab-case without `-utils`.
+- **Transaction mechanics live in `core/db.ts`**: `withTransaction` (root client or an
+  already-open transaction) and `withAdvisoryLock` (transaction-scoped lock via typed SQL). The
+  serializable retry policy stays in `users/user.service.ts` because it carries `TRPCError`/retry
+  semantics, not database ones. Plain `prisma.$transaction([...])` array calls and the
+  `plan-changes` try-lock stay as they are.
 - **Legacy comments on old rows render empty** instead of being reconstructed from
   `pull_request_comments` — accepted owner trade-off.
 
