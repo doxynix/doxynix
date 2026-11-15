@@ -745,8 +745,9 @@ they are one screen each and close in batches, so they stay out of the 36-item c
 - [x] **U1 · `getRepoDocsPayload` reads every document version** — the nested `documents` relation is
   gone; `prisma/sql/getLatestDocumentsPerType.sql` windows rows per `(type, path)` and the service asks
   for one row per kind. `c0517117`
-- [ ] **U5 · `workspace.listMembers` reads every membership** — open; needs a cap-by-seat vs keyset
-  decision first.
+- [x] **U5 · `workspace.listMembers` reads every membership** — keyset on `(createdAt, id)` with
+  `cursorPageSchema(50)`; the service returns `{ items, meta, ownerCount, total }` from two counts in
+  the same `Promise.all` as the page, and the members page loads pages through a sentinel. `55695647`
 - [x] **U6 · `getTrends` has no range bound** — `period` is now a `z.enum` of the presets plus
   `custom` (`shared/lib/analytics-periods.ts`), and a `superRefine` requires `from` and caps the span
   at 366 days, measuring an open-ended range against now. The dashboard's own URL parser accepts only
