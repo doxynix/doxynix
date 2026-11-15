@@ -3,7 +3,7 @@ import { skipToken, useInfiniteQuery, useMutation } from "@tanstack/react-query"
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { useTRPC } from "@/shared/api/trpc";
+import { type RouterOutput, useTRPC } from "@/shared/api/trpc";
 import { PR_COMMENTS_PAGE_SIZE, PR_FIXES_PAGE_SIZE } from "@/shared/config/pagination";
 import { commentToFinding } from "@/shared/lib/comment-to-finding";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
@@ -18,14 +18,7 @@ type Options = {
   repoId: string;
 };
 
-type RenderedComment = {
-  bodyHtml: string;
-  filePath: string;
-  findingType: string;
-  id: string;
-  line: number;
-  riskLevel: number;
-};
+type RenderedComment = RouterOutput["analysis"]["getComments"]["renderedComments"][number];
 
 export function usePrDetails({ analysis, impact, repoId }: Options) {
   const trpc = useTRPC();
