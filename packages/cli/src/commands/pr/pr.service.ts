@@ -1,3 +1,5 @@
+import { collectCursorPages, MAX_PAGE_SIZE } from "@doxynix/shared";
+
 import { trpc } from "@/core/client";
 
 import type {
@@ -7,6 +9,7 @@ import type {
   GetByPRNumberInput,
   OpenPullRequestInput,
   PostCommentInput,
+  PRListPage,
 } from "./pr.types";
 
 export const prService = {
@@ -35,7 +38,27 @@ export const prService = {
   },
 
   async listByRepository(repoId: string) {
-    return trpc.analysis.listByRepository.query({ repoId });
+    const pages: PRListPage[] = [];
+
+    // Walks every page so `dxnx pr review <number>` resolves a PR older than the newest page;
+    // `hasNextPage` survives only when the shared page bound truncates the walk.
+    const items = await collectCursorPages(async (cursor) => {
+      const page = await trpc.analysis.listByRepository.query({
+        cursor,
+        limit: MAX_PAGE_SIZE,
+        repoId,
+      });
+      pages.push(page);
+      return page;
+    });
+
+    const last = pages.at(-1);
+
+    return {
+      items,
+      meta: { hasNextPage: last?.meta.hasNextPage ?? false, nextCursor: last?.meta.nextCursor },
+      total: pages[0]?.total ?? 0,
+    };
   },
 
   async openPullRequest(input: OpenPullRequestInput) {

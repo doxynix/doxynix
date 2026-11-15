@@ -4,6 +4,7 @@ export type RepoConfig = NonNullable<RouterOutput["analysis"]["getRepoConfig"]>;
 export type ConfigureRepositoryInput = RouterInput["analysis"]["configureRepository"];
 export type AnalysisItem = NonNullable<RouterOutput["analysis"]["getLatest"]>;
 export type AnalysisHistoryItem = RouterOutput["analysis"]["getHistory"]["items"][number];
+export type AnalysisHistoryPage = RouterOutput["analysis"]["getHistory"];
 export type DetailedMetrics = RouterOutput["analysis"]["getDetailedMetrics"];
 export type StructureMap = RouterOutput["analysis"]["getStructureMap"];
 export type WorkspaceSearchResult = RouterOutput["analysis"]["searchWorkspace"];
