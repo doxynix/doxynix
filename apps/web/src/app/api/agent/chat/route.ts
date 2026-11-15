@@ -38,6 +38,8 @@ export const maxDuration = 60;
 // Reservation for the whole streamed turn; `settleUsage` releases the difference on finish.
 const AGENT_TOKEN_ESTIMATE = 2000;
 
+const NEW_CHAT_TITLE = "New Chat";
+
 async function handler(req: Request) {
   const { currentRepo, currentRepoId, messages, sessionId } = await req.json();
 
@@ -85,6 +87,9 @@ async function handler(req: Request) {
 
   let resolvedRepoId: string | undefined;
   let internalRepoId: null | string = null;
+  // A title is still owed while the session carries the default one; the existence probe below
+  // reads it, so `onEnd` no longer has to.
+  let needsTitle = false;
 
   if (currentRepoId != null) {
     const dbRepo = await prisma.repo.findUnique({
@@ -119,9 +124,11 @@ async function handler(req: Request) {
 
       await prisma.$transaction(async (tx) => {
         const sessionExists = await tx.chatSession.findUnique({
-          select: { id: true },
+          select: { id: true, title: true },
           where: { id: sessionId, userId },
         });
+
+        needsTitle = sessionExists == null || sessionExists.title === NEW_CHAT_TITLE;
 
         if (sessionExists == null) {
           try {
@@ -129,7 +136,7 @@ async function handler(req: Request) {
               data: {
                 id: sessionId,
                 repoId: internalRepoId,
-                title: "New Chat",
+                title: NEW_CHAT_TITLE,
                 userId,
               },
             });
@@ -267,12 +274,7 @@ async function handler(req: Request) {
         });
 
         try {
-          const currentSession = await prisma.chatSession.findUnique({
-            select: { title: true },
-            where: { id: sessionId, userId },
-          });
-
-          if (currentSession?.title === "New Chat") {
+          if (needsTitle) {
             const firstUserMessage = callbackMessages.find((m) => m.role === "user");
 
             let rawUserText = "";
