@@ -81,8 +81,8 @@ score_stats AS (
         COUNT(*) FILTER (WHERE is_current AND COALESCE((metrics_json->>'busFactor')::int, 0) = 1)::int AS bus_factor_repos
     FROM latest_per_repo
 ),
--- Top-5 newest per repo via `analyses(repo_id, created_at DESC)`, so the outer LIMIT 5 never
--- sorts the whole history. Five rows of one repo can never crowd out the global top 5.
+-- One latest analysis per repo: `recentActivity` reports each repo's newest activity, not the five
+-- newest events globally, so `analyses(repo_id, created_at DESC)` answers it with a single row.
 per_repo_top AS (
     SELECT DISTINCT ON (l.repo_id) l.repo_id, l.id, l.progress, l.status, l.created_at
     FROM workspace_repos ur
@@ -92,7 +92,7 @@ per_repo_top AS (
         WHERE a.repo_id = ur.id
           AND a.created_at < (SELECT cur_end FROM periods)
         ORDER BY a.created_at DESC, a.id DESC
-        LIMIT 5
+        LIMIT 1
     ) l
     ORDER BY l.repo_id
 )
