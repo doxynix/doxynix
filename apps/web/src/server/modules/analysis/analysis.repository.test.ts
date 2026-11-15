@@ -35,7 +35,7 @@ type NestedArgs = {
   where?: Record<string, unknown>;
 };
 
-type Call = { select?: Record<string, NestedArgs>; where?: unknown };
+type Call = { orderBy?: unknown; select?: Record<string, NestedArgs>; where?: unknown };
 
 // Captures every call so a test can prove the method issued one query, not two.
 function makeDb(result: unknown) {
@@ -218,40 +218,95 @@ describe("analysisRepo.getRepoBySha", () => {
 });
 
 describe("analysisRepo.getRepoForImpact", () => {
-  it("reads the repo once and keeps the head-sha analysis even when it is not the newest", async () => {
-    const newer = { ...ANALYSIS, commitSha: "newer", id: "0195f000-0000-7000-8000-00000000000b" };
-    const pinned = {
-      ...ANALYSIS,
-      commitSha: "head-sha",
-      id: "0195f000-0000-7000-8000-00000000000c",
-    };
-    const { calls, db } = makeDb({ analyses: [newer, pinned], id: REPO_ID });
+  function makeImpactDb(repo: unknown, pinned: unknown = null) {
+    const analysisCalls: Call[] = [];
+    const repoCalls: Call[] = [];
+    const db = {
+      analysis: {
+        findFirst: async (args: Call) => {
+          analysisCalls.push(args);
+          return pinned;
+        },
+      },
+      repo: {
+        findUnique: async (args: Call) => {
+          repoCalls.push(args);
+          return repo;
+        },
+      },
+    } as unknown as DbClient;
+
+    return { analysisCalls, db, repoCalls };
+  }
+
+  const NEWEST = {
+    ...ANALYSIS,
+    commitSha: "newest",
+    id: "0195f000-0000-7000-8000-00000000000b",
+  };
+  const HISTORIC = {
+    ...ANALYSIS,
+    commitSha: "head-sha",
+    id: "0195f000-0000-7000-8000-00000000000c",
+  };
+
+  it("still finds a head sha that is older than the two newest completed analyses", async () => {
+    // A and B are the two newest DONE analyses; `take: 1` hides B from the heavy read and C is three
+    // analyses back, so only the narrow lookup can return it — a force-pushed PR must not lose it.
+    const { analysisCalls, db, repoCalls } = makeImpactDb(
+      { analyses: [NEWEST], id: REPO_ID },
+      HISTORIC,
+    );
 
     const repo = await analysisRepo.getRepoForImpact(db, REPO_ID, WORKSPACE_ID, "head-sha");
 
-    expect(calls).toHaveLength(1);
-    expect(nested(calls[0], "analyses").take).toBe(2);
-    expect(nested(calls[0], "analyses").where).toStrictEqual({ status: "DONE" });
-    expect(repo?.analyses.map((analysis) => analysis.id)).toStrictEqual([pinned.id]);
+    expect(repoCalls).toHaveLength(1);
+    expect(nested(repoCalls[0], "analyses").take).toBe(1);
+    expect(nested(repoCalls[0], "analyses").where).toStrictEqual({ status: "DONE" });
+    expect(analysisCalls).toHaveLength(1);
+    expect(analysisCalls[0]?.where).toStrictEqual({
+      commitSha: "head-sha",
+      repo: { id: REPO_ID, workspaceId: WORKSPACE_ID },
+      status: "DONE",
+    });
+    // Re-runs of one commit keep the newest row, like the old `getRepoBySha` did.
+    expect(analysisCalls[0]?.orderBy).toStrictEqual({ createdAt: "desc" });
+    // The same payload the page reads, so the pinned row is a drop-in for the latest one.
+    expect(Object.keys(analysisCalls[0]?.select ?? {})).toStrictEqual(
+      expect.arrayContaining(["commitSha", "metricsJson", "resultJson"]),
+    );
+    expect(repo?.analyses.map((analysis) => analysis.id)).toStrictEqual([HISTORIC.id]);
+  });
+
+  it("skips the narrow lookup when the newest analysis is already the head sha", async () => {
+    const { analysisCalls, db } = makeImpactDb({ analyses: [NEWEST], id: REPO_ID });
+
+    const repo = await analysisRepo.getRepoForImpact(db, REPO_ID, WORKSPACE_ID, "newest");
+
+    expect(analysisCalls).toHaveLength(0);
+    expect(repo?.analyses.map((analysis) => analysis.id)).toStrictEqual([NEWEST.id]);
   });
 
   it("falls back to the newest completed analysis when no analysis matches the head sha", async () => {
-    const newer = { ...ANALYSIS, commitSha: "newer", id: "0195f000-0000-7000-8000-00000000000b" };
-    const older = { ...ANALYSIS, commitSha: "older", id: "0195f000-0000-7000-8000-00000000000d" };
-    const { db } = makeDb({ analyses: [newer, older], id: REPO_ID });
+    const { db } = makeImpactDb({ analyses: [NEWEST], id: REPO_ID }, null);
 
     const repo = await analysisRepo.getRepoForImpact(db, REPO_ID, WORKSPACE_ID, "head-sha");
 
-    expect(repo?.analyses.map((analysis) => analysis.id)).toStrictEqual([newer.id]);
+    expect(repo?.analyses.map((analysis) => analysis.id)).toStrictEqual([NEWEST.id]);
   });
 
   it("returns null for a repo outside the workspace and throws when nothing has completed", async () => {
     await expect(
-      analysisRepo.getRepoForImpact(makeDb(null).db, REPO_ID, WORKSPACE_ID, "head-sha"),
+      analysisRepo.getRepoForImpact(makeImpactDb(null).db, REPO_ID, WORKSPACE_ID, "head-sha"),
     ).resolves.toBeNull();
 
     await expect(
-      analysisRepo.getRepoForImpact(makeDb({ analyses: [] }).db, REPO_ID, WORKSPACE_ID, "head-sha"),
+      analysisRepo.getRepoForImpact(
+        makeImpactDb({ analyses: [] }).db,
+        REPO_ID,
+        WORKSPACE_ID,
+        "head-sha",
+      ),
     ).rejects.toMatchObject({ messageCode: MessageCode.ANALYSIS_NOT_COMPLETED });
   });
 });

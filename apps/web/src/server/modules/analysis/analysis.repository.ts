@@ -402,7 +402,8 @@ export const analysisRepo = {
   },
 
   // The impact page needs the repo plus the analysis at the PR's head SHA, falling back to the
-  // newest completed one. One read: both candidates come back together and JS picks the winner.
+  // newest completed one. One heavy repo read; the head SHA costs one narrow analysis row, and only
+  // when it is not the latest — an old commit can be any distance back in the history.
   async getRepoForImpact(
     db: DbClient,
     repoId: string,
@@ -410,15 +411,7 @@ export const analysisRepo = {
     headSha: string,
   ): Promise<null | RepoSnapshot> {
     const repo = await db.repo.findUnique({
-      select: {
-        ...repoWithLatestAnalysisSelect,
-        analyses: {
-          orderBy: { createdAt: "desc" },
-          select: latestCompletedAnalysisSelect,
-          take: 2,
-          where: { status: "DONE" },
-        },
-      },
+      select: repoWithLatestAnalysisSelect,
       where: { id: repoId, workspaceId },
     });
 
@@ -426,14 +419,23 @@ export const analysisRepo = {
       return null;
     }
 
-    const pinned = repo.analyses.find((analysis) => analysis.commitSha === headSha);
-    const chosen = pinned ?? repo.analyses[0];
+    const latest = repo.analyses[0];
 
-    if (chosen == null) {
+    if (latest == null) {
       throw missingAnalysisError(undefined);
     }
 
-    return { ...repo, analyses: [chosen] };
+    if (latest.commitSha === headSha) {
+      return repo;
+    }
+
+    const pinned = await db.analysis.findFirst({
+      orderBy: { createdAt: "desc" },
+      select: latestCompletedAnalysisSelect,
+      where: { commitSha: headSha, repo: { id: repoId, workspaceId }, status: "DONE" },
+    });
+
+    return pinned == null ? repo : { ...repo, analyses: [pinned] };
   },
 
   async getRepoRef(db: DbClient, repoId: string, workspaceId: string, aid?: string) {
