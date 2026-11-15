@@ -29,6 +29,7 @@ const STALE_EVENT_MS = 15 * 60 * 1000;
 // PROCESSING one, but it must not sit forever.
 const STALE_ENQUEUED_MS = 30 * 60 * 1000;
 const SWEEP_BATCH_SIZE = 50;
+const SWEEP_CONCURRENCY = 10;
 
 export type StripeEventOutcome = { status: "processed" | "skipped" | "unowned" };
 
@@ -305,6 +306,24 @@ export async function markEventDeadLetter(billingEventId: string, error: unknown
   appLogger.error({ billingEventId, msg: "stripe_event_dead_letter" });
 }
 
+function triggerReplay(event: {
+  externalEventId: string;
+  id: string;
+  payload: unknown;
+  replayCount: number;
+}): Promise<string> {
+  return tasks
+    .trigger(
+      PROCESS_STRIPE_EVENT_TASK_ID,
+      { billingEventId: event.id },
+      {
+        concurrencyKey: ownershipKeyFromPayload(event.payload),
+        idempotencyKey: `${event.externalEventId}:replay:${event.replayCount + 1}`,
+      },
+    )
+    .then((run) => run.id);
+}
+
 // Sweeps events that no worker picked up or that died mid-run. A fresh replay key is required:
 // Trigger would otherwise return the old failed run for the same key.
 export async function sweepStaleStripeEvents(
@@ -315,7 +334,13 @@ export async function sweepStaleStripeEvents(
 
   const stale = await prisma.billingEvent.findMany({
     orderBy: { receivedAt: "asc" },
-    select: { externalEventId: true, id: true, payload: true, replayCount: true },
+    select: {
+      externalEventId: true,
+      id: true,
+      payload: true,
+      replayCount: true,
+      updatedAt: true,
+    },
     take: SWEEP_BATCH_SIZE,
     where: {
       OR: [
@@ -332,22 +357,16 @@ export async function sweepStaleStripeEvents(
     return { requeued: 0 };
   }
 
-  // One wave instead of one round trip per event. Run ids stay per-row because the batch handle
-  // `tasks.batchTrigger` returns has no per-run ids.
-  const runs = await Promise.allSettled(
-    stale.map((event) =>
-      tasks.trigger(
-        PROCESS_STRIPE_EVENT_TASK_ID,
-        { billingEventId: event.id },
-        {
-          concurrencyKey: ownershipKeyFromPayload(event.payload),
-          idempotencyKey: `${event.externalEventId}:replay:${event.replayCount + 1}`,
-        },
-      ),
-    ),
-  );
+  // Run ids stay per-row. Chunked so a full batch does not burst 50 trigger requests at once.
+  const runs: Array<PromiseSettledResult<string>> = [];
 
-  const queued: Array<{ id: string; runId: string }> = [];
+  for (let index = 0; index < stale.length; index += SWEEP_CONCURRENCY) {
+    const chunk = stale.slice(index, index + SWEEP_CONCURRENCY);
+
+    runs.push(...(await Promise.allSettled(chunk.map(triggerReplay))));
+  }
+
+  const queued: Array<{ expectedUpdatedAt: string; id: string; runId: string }> = [];
 
   for (const [index, event] of stale.entries()) {
     const run = runs[index];
@@ -366,7 +385,11 @@ export async function sweepStaleStripeEvents(
       continue;
     }
 
-    queued.push({ id: event.id, runId: run.value.id });
+    queued.push({
+      expectedUpdatedAt: event.updatedAt.toISOString(),
+      id: event.id,
+      runId: run.value,
+    });
   }
 
   if (queued.length === 0) {
@@ -374,8 +397,23 @@ export async function sweepStaleStripeEvents(
   }
 
   const updated = await prisma.$queryRawTyped(
-    markBillingEventsEnqueued({ items: queued.map(({ id, runId }) => ({ id, run_id: runId })) }),
+    markBillingEventsEnqueued({
+      items: queued.map(({ expectedUpdatedAt, id, runId }) => ({
+        expected_updated_at: expectedUpdatedAt,
+        id,
+        run_id: runId,
+      })),
+    }),
   );
+
+  if (updated.length < queued.length) {
+    // The status/freshness guard skipped a row: a worker picked it up between the select and here.
+    appLogger.warn({
+      msg: "stripe_event_sweep_skipped",
+      queued: queued.length,
+      updated: updated.length,
+    });
+  }
 
   return { requeued: updated.length };
 }
