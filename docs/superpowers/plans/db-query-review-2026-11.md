@@ -229,15 +229,17 @@ R6, R7 and R21 have since closed (see the closing log).
   - **Effort:** S · **Verify:** a PR with 200 comments issues 1 cache lookup; p95 of
     `analysis.getComments` in `bench:http` drops; cache tag cardinality stops growing per comment.
   > Done 2026-11-15 (`d73f3abc`, key corrected in the B2 fix round): one `unstable_cache` entry per
-  > page for both — `pr-comments-html-<workspaceId>-<analysisId>` with tags
-  > `["comments", analysisId, workspaceId]`, and `finding-html-<owner>-<name>-<analysisId>` with tags
-  > `["findings", owner, name, analysisId]` (analysis ids are globally unique and the caller already
-  > proves workspace access, so the findings key needs no workspace). An empty comment page skips the
-  > cache entirely, so an arbitrary `analysisId` cannot mint a permanent empty entry, and
-  > `postCommentToPR` calls `revalidateTag(analysisId)` so a posted comment is visible. Unit tests
-  > assert one lookup for a 3-comment page, one for a 3-finding page, distinct keys for two workspaces
-  > on the same analysis, no lookup for an empty page, and the tag revalidation. The `take` half was
-  > deliberately not done (it would truncate the payload); p95 not measured.
+  > page for both — `pr-comments-html-<workspaceId>-<analysisId>-<updatedAt>-<rows>` with tags
+  > `["comments", analysisId, workspaceId]`, and `finding-html-<owner>-<name>-<analysisId>:<updatedAt>`
+  > with tags `["findings", owner, name, analysisId:updatedAt]` (analysis ids are globally unique and
+  > the caller already proves workspace access, so the findings key needs no workspace). An empty
+  > comment page skips the cache entirely, so an arbitrary `analysisId` cannot mint a permanent empty
+  > entry, and `postCommentToPR` calls `revalidateTag(analysisId)` so a posted comment is visible.
+  > Unit tests assert one lookup for a 3-comment page, one for a 3-finding page, distinct keys for two
+  > workspaces on the same analysis, a miss when a row is appended or `updatedAt` moves, no lookup for
+  > an empty page, and the tag revalidation. The `take` half was deliberately not done (it would
+  > truncate the payload); p95 not measured.
+  > Cached per workspace+analysis version with a 1 h TTL; explicit writes revalidate immediately.
 
 - [x] **R7 · `agent.getSessionHistory` returns the entire chat with no limit and no `select`**
   — `src/server/modules/agent/agent.service.ts:75-82`

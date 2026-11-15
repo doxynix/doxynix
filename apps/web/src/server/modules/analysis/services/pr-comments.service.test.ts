@@ -29,9 +29,11 @@ import { prCommentsService } from "./pr-comments.service";
 const ANALYSIS_ID = "018f0000-0000-7000-8000-0000000000aa";
 const REPO_ID = "018f0000-0000-7000-8000-0000000000cc";
 
-function makeComment(index: number) {
+const ANALYSIS_VERSION = new Date("2026-03-01T12:00:00.000Z");
+
+function makeComment(index: number, updatedAt: Date = ANALYSIS_VERSION) {
   return {
-    analysis: { repo: { name: "doxynix", owner: "ivan" } },
+    analysis: { repo: { name: "doxynix", owner: "ivan" }, updatedAt },
     body: `comment ${index}`,
     filePath: `src/file-${index}.ts`,
     findingType: "BUG",
@@ -86,8 +88,8 @@ describe("prCommentsService.getComments", () => {
     expect(mocks.unstable_cache).toHaveBeenCalledTimes(1);
     expect(mocks.unstable_cache).toHaveBeenCalledWith(
       expect.any(Function),
-      [`pr-comments-html-ws-1-${ANALYSIS_ID}`],
-      { revalidate: false, tags: ["comments", ANALYSIS_ID, "ws-1"] },
+      [`pr-comments-html-ws-1-${ANALYSIS_ID}-${ANALYSIS_VERSION.getTime()}-3`],
+      { revalidate: 3600, tags: ["comments", ANALYSIS_ID, "ws-1"] },
     );
     expect(mocks.markdownToHtml).toHaveBeenCalledTimes(3);
     expect(result.renderedComments).toStrictEqual([
@@ -133,14 +135,44 @@ describe("prCommentsService.getComments", () => {
     );
 
     expect(mocks.unstable_cache.mock.calls[0]?.[1]).toStrictEqual([
-      `pr-comments-html-018f0000-0000-7000-8000-0000000000e1-${ANALYSIS_ID}`,
+      `pr-comments-html-018f0000-0000-7000-8000-0000000000e1-${ANALYSIS_ID}-${ANALYSIS_VERSION.getTime()}-1`,
     ]);
     expect(mocks.unstable_cache.mock.calls[1]?.[1]).toStrictEqual([
-      `pr-comments-html-018f0000-0000-7000-8000-0000000000e2-${ANALYSIS_ID}`,
+      `pr-comments-html-018f0000-0000-7000-8000-0000000000e2-${ANALYSIS_ID}-${ANALYSIS_VERSION.getTime()}-1`,
     ]);
     expect(mocks.unstable_cache.mock.calls[0]?.[1]).not.toStrictEqual(
       mocks.unstable_cache.mock.calls[1]?.[1],
     );
+  });
+
+  it("misses the cached page when a comment is appended", async () => {
+    await prCommentsService.getComments(stubDb([makeComment(1)]).db, ANALYSIS_ID, "ws-1");
+    await prCommentsService.getComments(
+      stubDb([makeComment(1), makeComment(2)]).db,
+      ANALYSIS_ID,
+      "ws-1",
+    );
+
+    expect(mocks.unstable_cache.mock.calls[0]?.[1]).toStrictEqual([
+      `pr-comments-html-ws-1-${ANALYSIS_ID}-${ANALYSIS_VERSION.getTime()}-1`,
+    ]);
+    expect(mocks.unstable_cache.mock.calls[1]?.[1]).toStrictEqual([
+      `pr-comments-html-ws-1-${ANALYSIS_ID}-${ANALYSIS_VERSION.getTime()}-2`,
+    ]);
+  });
+
+  it("misses the cached page when the analysis row is re-analysed in place", async () => {
+    const bumped = new Date("2026-03-01T13:00:00.000Z");
+
+    await prCommentsService.getComments(stubDb([makeComment(1)]).db, ANALYSIS_ID, "ws-1");
+    await prCommentsService.getComments(stubDb([makeComment(1, bumped)]).db, ANALYSIS_ID, "ws-1");
+
+    expect(mocks.unstable_cache.mock.calls[0]?.[1]).toStrictEqual([
+      `pr-comments-html-ws-1-${ANALYSIS_ID}-${ANALYSIS_VERSION.getTime()}-1`,
+    ]);
+    expect(mocks.unstable_cache.mock.calls[1]?.[1]).toStrictEqual([
+      `pr-comments-html-ws-1-${ANALYSIS_ID}-${bumped.getTime()}-1`,
+    ]);
   });
 
   it("does not cache an empty page", async () => {

@@ -21,6 +21,7 @@ export const prCommentsService = {
                 owner: true,
               },
             },
+            updatedAt: true,
           },
         },
         body: true,
@@ -36,11 +37,14 @@ export const prCommentsService = {
     });
 
     // An empty page must not create a permanent entry for an arbitrary analysis id
-    if (comments.length === 0) {
+    const firstComment = comments[0];
+    if (firstComment == null) {
       return { renderedComments: [] };
     }
 
-    // One cache entry per page: comment rows for a completed analysis never change
+    // Content-addressed by analysis version: a re-analysis bumps `updatedAt` and appends rows
+    const cacheVersion = `${firstComment.analysis.updatedAt.getTime()}-${comments.length}`;
+
     const renderedComments = await unstable_cache(
       async () =>
         Promise.all(
@@ -63,9 +67,9 @@ export const prCommentsService = {
             };
           }),
         ),
-      [`pr-comments-html-${workspaceId}-${analysisId}`],
+      [`pr-comments-html-${workspaceId}-${analysisId}-${cacheVersion}`],
       {
-        revalidate: false,
+        revalidate: 3600,
         tags: ["comments", analysisId, workspaceId],
       },
     )();

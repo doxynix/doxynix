@@ -213,7 +213,7 @@ export const analysisMapper = {
         ),
       [`finding-html-${owner ?? "unknown"}-${name ?? "unknown"}-${cacheScope}`],
       {
-        revalidate: false,
+        revalidate: 3600,
         tags: ["findings", owner ?? "unknown", name ?? "unknown", cacheScope],
       },
     )();

@@ -439,6 +439,7 @@ export const analysisRepo = {
         prNumber: true,
         riskScore: true,
         status: true,
+        updatedAt: true,
       },
       where: {
         prNumber,

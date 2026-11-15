@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   getLanguageColor: vi.fn(() => "#cccccc"),
   hasText: vi.fn((value: unknown) => typeof value === "string" && value.length > 0),
   markdownToHtml: vi.fn(async (input: { content: string }) => `<p>${input.content}</p>`),
-  unstable_cache: vi.fn((fn: () => unknown) => fn),
+  unstable_cache: vi.fn((fn: () => unknown, _key?: unknown[], _options?: unknown) => fn),
 }));
 
 vi.mock("next/cache", () => ({ unstable_cache: mocks.unstable_cache }));
@@ -659,7 +659,7 @@ describe("buildTopFindings", () => {
       zoneLabels,
       "ivan",
       "doxynix",
-      "pa-1",
+      "pa-1:1772366400000",
     );
 
     expect(result.map((item) => item.id)).toEqual([
@@ -686,10 +686,10 @@ describe("buildTopFindings", () => {
     expect(mocks.unstable_cache).toHaveBeenCalledTimes(1);
     expect(mocks.unstable_cache).toHaveBeenCalledWith(
       expect.any(Function),
-      ["finding-html-ivan-doxynix-pa-1"],
+      ["finding-html-ivan-doxynix-pa-1:1772366400000"],
       {
-        revalidate: false,
-        tags: ["findings", "ivan", "doxynix", "pa-1"],
+        revalidate: 3600,
+        tags: ["findings", "ivan", "doxynix", "pa-1:1772366400000"],
       },
     );
   });
@@ -713,6 +713,20 @@ describe("buildTopFindings", () => {
     expect(result).toHaveLength(3);
     expect(result.every((item) => item.messageHtml.startsWith("<p>"))).toBe(true);
     expect(mocks.unstable_cache).toHaveBeenCalledTimes(1);
+  });
+
+  it("keys the page on the analysis version, so a re-analysis misses the old entry", async () => {
+    const findings = [makeFinding()];
+
+    await analysisMapper.buildTopFindings(findings, [], new Map(), "ivan", "doxynix", "pa-1:1000");
+    await analysisMapper.buildTopFindings(findings, [], new Map(), "ivan", "doxynix", "pa-1:2000");
+
+    expect(mocks.unstable_cache.mock.calls[0]?.[1]).toStrictEqual([
+      "finding-html-ivan-doxynix-pa-1:1000",
+    ]);
+    expect(mocks.unstable_cache.mock.calls[1]?.[1]).toStrictEqual([
+      "finding-html-ivan-doxynix-pa-1:2000",
+    ]);
   });
 
   it("missing score → riskLevel 0; zoneLabel falls back to file.zoneLabel", async () => {
