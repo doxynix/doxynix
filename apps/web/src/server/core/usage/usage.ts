@@ -46,31 +46,27 @@ async function bumpUsage(
     workspaceId: string;
   },
 ): Promise<void> {
-  const periodStart = periodStartOf(input.now);
+  const periodStart = periodStartOf(input.now).toISOString().slice(0, 10);
 
-  await tx.workspaceUsage.upsert({
-    create: {
-      aiTokensUsed: Math.max(0, input.tokens),
-      analysesCount: input.analyses,
-      costCents: input.costCents,
-      periodStart,
-      workspaceId: input.workspaceId,
-    },
-    update: {
-      aiTokensUsed: { increment: input.tokens },
-      analysesCount: { increment: input.analyses },
-      costCents: { increment: input.costCents },
-    },
-    where: { workspaceId_periodStart: { periodStart, workspaceId: input.workspaceId } },
-  });
-
-  // A release can make a counter negative; the rollup is a quota read model, never a debt.
+  // One statement per event. The insert clamps a fresh row at zero; the conflict branch adds the
+  // raw delta, because a release is negative and would be lost if EXCLUDED were already clamped.
   await tx.$executeRaw`
-    UPDATE "workspace_usage"
-    SET "ai_tokens_used" = GREATEST(0, "ai_tokens_used"),
-        "cost_cents" = GREATEST(0, "cost_cents")
-    WHERE "workspace_id" = ${input.workspaceId}::uuid
-      AND "period_start" = ${periodStart.toISOString().slice(0, 10)}::date
+    INSERT INTO "workspace_usage" (
+      "workspace_id", "period_start", "ai_tokens_used", "analyses_count", "cost_cents", "updated_at"
+    )
+    VALUES (
+      ${input.workspaceId}::uuid,
+      ${periodStart}::date,
+      GREATEST(0, ${input.tokens}::int),
+      ${input.analyses}::int,
+      ${input.costCents}::bigint,
+      now()
+    )
+    ON CONFLICT ("workspace_id", "period_start") DO UPDATE SET
+      "ai_tokens_used" = GREATEST(0, "workspace_usage"."ai_tokens_used" + ${input.tokens}::int),
+      "analyses_count" = "workspace_usage"."analyses_count" + ${input.analyses}::int,
+      "cost_cents" = GREATEST(0, "workspace_usage"."cost_cents" + ${input.costCents}::bigint),
+      "updated_at" = now()
   `;
 }
 

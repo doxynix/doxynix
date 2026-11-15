@@ -44,8 +44,39 @@ function createFakeDb() {
   const rollups = new Map<string, RollupRow>();
   let eventCount = 0;
 
+  // Mirrors the single INSERT … ON CONFLICT statement in `bumpUsage`: insert clamps at zero, the
+  // conflict branch adds the raw delta and clamps the total.
+  const executeRaw = vi.fn(async (_strings: TemplateStringsArray, ...values: unknown[]) => {
+    const [workspaceId, periodStart, tokens, analyses, costCents] = values as [
+      string,
+      string,
+      number,
+      number,
+      bigint,
+    ];
+    const key = `${workspaceId}:${new Date(`${periodStart}T00:00:00.000Z`).toISOString()}`;
+    const existing = rollups.get(key);
+
+    if (existing == null) {
+      rollups.set(key, {
+        aiTokensUsed: Math.max(0, tokens),
+        analysesCount: analyses,
+        costCents: costCents > BigInt(0) ? costCents : BigInt(0),
+      });
+
+      return 1;
+    }
+
+    existing.aiTokensUsed = Math.max(0, existing.aiTokensUsed + tokens);
+    existing.analysesCount += analyses;
+    const total = existing.costCents + costCents;
+    existing.costCents = total > BigInt(0) ? total : BigInt(0);
+
+    return 1;
+  });
+
   const db = {
-    $executeRaw: vi.fn().mockResolvedValue(0),
+    $executeRaw: executeRaw,
     $transaction: vi.fn(async (fn: (tx: unknown) => unknown) => fn(db)),
     usageEvent: {
       create: vi.fn(async ({ data }: { data: Omit<EventRow, "id"> }) => {
@@ -64,46 +95,9 @@ function createFakeDb() {
           events.get(where.idempotencyKey) ?? null,
       ),
     },
-    workspaceUsage: {
-      upsert: vi.fn(
-        async ({
-          create,
-          update,
-          where,
-        }: {
-          create: RollupRow & { periodStart: Date; workspaceId: string };
-          update: {
-            aiTokensUsed: { increment: number };
-            analysesCount: { increment: number };
-            costCents: { increment: bigint };
-          };
-          where: { workspaceId_periodStart: { periodStart: Date; workspaceId: string } };
-        }) => {
-          const key = `${where.workspaceId_periodStart.workspaceId}:${where.workspaceId_periodStart.periodStart.toISOString()}`;
-          const existing = rollups.get(key);
-
-          if (existing == null) {
-            const row: RollupRow = {
-              aiTokensUsed: create.aiTokensUsed,
-              analysesCount: create.analysesCount,
-              costCents: create.costCents,
-            };
-            rollups.set(key, row);
-
-            return row;
-          }
-
-          existing.aiTokensUsed += update.aiTokensUsed.increment;
-          existing.analysesCount += update.analysesCount.increment;
-          existing.costCents += update.costCents.increment;
-
-          return existing;
-        },
-      ),
-    },
   };
 
-  return { db: db as unknown as DbClient, events, rollups };
+  return { db: db as unknown as DbClient, events, executeRaw, rollups };
 }
 
 function rollupFor(rollups: Map<string, RollupRow>, at: Date): RollupRow | undefined {
@@ -224,6 +218,34 @@ describe("reserve and settle", () => {
 
     expect(rollupFor(fake.rollups, JANUARY)?.aiTokensUsed).toBe(0);
     expect(fake.events.get("call-1:release")?.kind).toBe("SETTLE");
+  });
+
+  it("writes the rollup with one clamped statement per event", async () => {
+    const fake = createFakeDb();
+
+    await reserveUsage(fake.db, {
+      estimatedTokens: 900,
+      idempotencyKey: "call-1",
+      now: JANUARY,
+      workspaceId: WORKSPACE_ID,
+    });
+    await releaseUsage(fake.db, {
+      idempotencyKey: "call-1",
+      now: JANUARY,
+      workspaceId: WORKSPACE_ID,
+    });
+
+    // One statement per event, not an upsert followed by a clamp UPDATE.
+    expect(fake.executeRaw).toHaveBeenCalledTimes(2);
+    // The conflict branch re-binds the same deltas, so only the leading params are asserted.
+    const [reserveArgs, releaseArgs] = fake.executeRaw.mock.calls.map(([, ...values]) =>
+      values.slice(0, 5),
+    );
+
+    expect(reserveArgs).toEqual([WORKSPACE_ID, "2026-01-01", 900, 0, BigInt(0)]);
+    // The release keeps its negative delta, so the total lands on the clamp instead of above it.
+    expect(releaseArgs).toEqual([WORKSPACE_ID, "2026-01-01", -900, 0, BigInt(0)]);
+    expect(rollupFor(fake.rollups, JANUARY)?.aiTokensUsed).toBe(0);
   });
 
   it("keeps separate rollups per calendar month", async () => {
