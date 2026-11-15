@@ -6,10 +6,10 @@ Live checklist for the second static pass over `apps/web`. Companion to
 [`db-index-audit.md`](../../db/db-index-audit.md) (what the shapes cost) and
 [`db-ui-map.md`](../../db/db-ui-map.md) (where latency lands).
 
-**Closed: 30 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
+**Closed: 31 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
 PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3, R6, R7, R9, R11, R13, R15, R16, R17, R18,
 R19, R20, R21, R22, R26, R28, R29, R30, R31, R32, R34, K1 and K2 closed 2026-11-15 (R24 closed as
-dropped). Six items are partial: R1, R10, R12, R14, R23, R25 (see below).
+dropped). Five items are partial: R1, R10, R12, R23, R25 (see below).
 
 ## What this round covers that round 1 did not
 
@@ -74,7 +74,7 @@ reviewed and is correct.
 
 ### Partial items after the 2026-11-15 pass
 
-These six stay unticked because their verification lines still fail; each has a progress note in
+These five stay unticked because their verification lines still fail; each has a progress note in
 the closing log.
 
 - **R1** — bookkeeping writes are skipped and the audit Ably publish is coalesced per request, but
@@ -83,16 +83,11 @@ the closing log.
   a completion still triggers the four `analysisUpdated` invalidations (staging needs them).
 - **R12** — the sequential loop is gone (one trigger wave + one typed-SQL update), but the SDK's
   `batchTrigger` exposes no per-run ids, so the sweep still makes one HTTP call per event.
-- **R14** — `getWorkspace` reads one document per type and `getDocumentContent` uses a narrow ref;
-  the per-keystroke structure-map cache in `searchWorkspace` is not implemented.
 - **R23** — `assertRepoAccess` is narrowed; merging the cache probe and removing the trailing
   `jobId` update need an API change outside this plan.
 - **R25** — both before-hooks select narrow fields; the `session.create.after` read remains
   because Better Auth has no before→after channel.
 
-- **R14** — `getWorkspace` no longer reads every document when `aid` is set (fixed by R33, `311bd6a7`),
-  and `getDocumentContent` now reads a narrow ref with a capped document read (2026-11-15). Still
-  open: the per-keystroke structure rebuild in `searchWorkspace`.
 - **R30** — the PR and push webhook handlers now `select` narrow columns
   (`pr-webhook-handler.ts:167`, `push-webhook-handler.ts:28`). Still open:
   `issue-comment-webhook-handler.ts:17` and `review-comment-webhook-handler.ts:20` read full repo
@@ -394,11 +389,13 @@ the closing log.
   - **Effort:** M · **Verify:** query count per run scales as O(pages) for the reads instead of
     O(subscriptions); `billing.reconciliation.test.ts` still passes.
 
-- [ ] **R14 · Whole repository snapshot loaded where two fields are needed**
+- [x] **R14 · Whole repository snapshot loaded where two fields are needed**
   — `analysis/services/docs.service.ts:65-100`, `analysis/services/workspace.service.ts:107-137`,
     `analysis/services/workspace-search.service.ts:13-40`
   > Progress 2026-11-15: `getDocumentContent` uses a narrow repo ref and the no-aid documents read
-  > is capped; the per-keystroke structure-map cache is not implemented.
+  > is capped; the structure map is now cached per `(repoId, analysisId)` in
+  > `logic/analysis-context-cache.ts` and used by `searchWorkspace` only — 32 entries, FIFO, no TTL
+  > (an analysis row is immutable once `DONE`). `f8d802cf`/B11.
   - **What:** `getDocumentContent` calls `analysisRepo.getRepoSnapshot` (which selects
     `resultJson` + `metricsJson`, `analysis.repository.ts:51-70`) to obtain `repo.name`,
     `repo.owner` and `analysis.id`, then runs a second query for the document.
@@ -695,7 +692,7 @@ These were checked and found correct. Listed so a third round does not repeat th
 | R8 | 2026-11-01 | `311bd6a7` | `analysisRepo.getByRepoAndPRNumber` selects `id` instead of `include: { comments, generatedFixes }`; its only caller (the PR webhook) reads `id`. |
 | R9 | 2026-11-15 | `5420536e` | `bumpUsage` is one `INSERT … ON CONFLICT` statement per event; both paths clamp, and the conflict branch binds the raw delta (`+ $6::int`), so a negative release is not swallowed by `EXCLUDED`. `usage.test.ts` asserts the SQL text and params; `entitlements.test.ts` asserts the 900 → 0 clamp against a real database. |
 | R11 | 2026-11-15 | `4eaf34d2` | `@@index([repoId, commitSha])` on `analyses`, plus seven keyset indexes — `analyses` and `pull_request_analyses` `(repo_id, created_at DESC, id DESC)`, `chat_sessions` `(user_id, repo_id, updated_at DESC, id DESC)`, `chat_messages` `(session_id, created_at DESC, id DESC)`, `sessions` `(user_id, created_at DESC, id DESC)`, `api_keys` `(workspace_id, created_at DESC, id DESC)`, `workspace_members` `(workspace_id, created_at, id)` — in `20261115120000_keyset_indexes`. `EXPLAIN` was not run (the round's research covers it); `pg_indexes` on the local `dxnx_web` lists all eight and `migrate diff` from the schema is empty. |
-| R18 | 2026-11-15 | `a90fdb07` | `getHistory` and `listByRepository` return cursor pages (`{ items, meta, total }`, `take: limit + 1` + `splitKeysetPage` over `ORDER_CREATED_AT_DESC`, `limit` default 50) instead of 500-row reads, and the `capped` flag is gone: the version selector appends pages from a "More" item, the PR list from an intersection sentinel, and both keep the `count` as `total`. `getByRepoId` (fixes) keeps its 200-row cap and stays deferred until a client reads the list. |
+| R18 | 2026-11-15 | `a90fdb07` | `getHistory` and `listByRepository` return cursor pages (`{ items, meta, total }`, `take: limit + 1` + `splitKeysetPage` over `ORDER_CREATED_AT_DESC`, `limit` default 50) instead of 500-row reads, and the `capped` flag is gone: the version selector appends pages from a "More" item, the PR list from an intersection sentinel, and both keep the `count` as `total`. `getByRepoId` (fixes) is paginated too (`baaa229e`): the 200-row cap is gone, the CLI walks the pages, so no list read keeps a fixed ceiling. |
 | R19 | 2026-11-15 | `c004fc44` | `getRepoSnapshot`, `getRepoSnapshotWithDocuments` and `getAnalysisPayloadForRepo` resolve the requested `aid` inside the single `repo.findUnique` (`analyses: { orderBy: createdAt desc, take: 1, where: { id, status: "DONE" } }`), so an `aid`-scoped read is one operation. A missing or foreign `aid` still throws `ANALYSIS_VERSION_NOT_FOUND`; an empty latest still throws `ANALYSIS_NOT_COMPLETED`. `getRepoDocsPayload` keeps its second lookup (out of this batch); B5e deleted `getRepoSnapshotWithDocuments` when the documents read left the repo select (`c0517117`). |
 | R21 | 2026-11-15 | `39d08034` | `logic/project-result-overview.ts` replaces `JSON.stringify(resultJson)` in `analyze-pr.task.ts` with a bounded projection capped at 4096 chars. |
 | R26 | 2026-11-15 | `9192e12e` | `apiKeyService.list` takes the newest 100 keys of the workspace; the active/archived split, the column allowlist and the `ApiKeySchema` payload are unchanged. B5b (`bc449faf`) replaced the ceiling with cursor pagination (`{ items, meta }`) and the UI loads more on scroll; the split is a SQL predicate (`activeKeyWhere` for `list`, `archivedKeyWhere` for `listArchived`) that mirrors `isApiKeyDead`, which moved to `@doxynix/shared`. Archived keys are cursor-paginated as well (round 2), so the API-key surface has no capped list; an integration test walks both predicates against a real Postgres. |
@@ -705,6 +702,7 @@ These were checked and found correct. Listed so a third round does not repeat th
 | K2 | 2026-11-15 | `84ad37d7` | `loadRelatedDocSections` takes the request's `aid` and forwards it to `loadLatestDocumentsWithContent`, so the related-docs panel lists only the pinned analysis's documents. |
 | R34 | 2026-11-15 | `f232f133` | The `per_repo_top` lateral takes `LIMIT 1`, so no repo's history is sorted just to throw four rows away. `recentActivity` is therefore the newest analysis of each repo (one card per repo, five cards) and the outer `LIMIT 5` is its only cap; the comment says so instead of claiming a global top-5. |
 | R13 | 2026-11-15 | `35d3870e` | One `ReconcileContext` per Stripe page (customers, local subscriptions, entitlements, member counts), so the per-subscription `findFirst`/`findUnique` calls become map hits; missing keys fall back to a query and the repair path re-reads live rows. |
+| R14 | 2026-11-15 | `f8d802cf` | `logic/analysis-context-cache.ts` keeps the built `AnalyzeContextBuilder` per `(repoId, analysisId)` — 32 entries, FIFO eviction, no TTL, since an analysis row is immutable once `DONE`. Only `searchWorkspace` uses it: node context, `getWorkspace` and `getStructureMap` still build fresh, because the builder caches every `nodeId` it explains and would grow the map for the process lifetime. The narrow `getDocumentContent` ref and the capped no-`aid` documents read landed earlier. |
 | R15 | 2026-11-15 | `5379b00d` | `revokeOtherSessions` deletes the other sessions with one `deleteMany` and one Redis pipeline instead of one adapter call per token. |
 | R16 | 2026-11-15 | `ce69bd01` | `getValidToken` is memoised per request and the resolved token is passed into `syncInstallations`, so opening the add-repository dialog reads the token once. |
 | R17 | 2026-11-15 | `24c60499` | The run wrapper only sets `locals`; `$connect`/`$disconnect` are gone, and `onWait`/`onResume` remain the only release point. `pg_stat_activity` was not measured (no live worker). |
@@ -719,7 +717,7 @@ These were checked and found correct. Listed so a third round does not repeat th
 
 The first six shipped in PR #2356 and are on `main`; the rest landed on
 `perf/dxnx-310-db-query-review-round-2` (draft PR #2412) and the "working tree" marker from the
-original log is now historical. R1, R10, R12, R14, R23 and R25 remain partial, and the list-read /
+original log is now historical. R1, R10, R12, R23 and R25 remain partial, and the list-read /
 date-filter audits below stay outside the 36-item counter.
 
 ## Verification recipes
@@ -782,8 +780,7 @@ they are one screen each and close in batches, so they stay out of the 36-item c
   instead of a skeleton (`89c05f63`).
 - [x] **C1 · `getHistory`** — cursor pages, `{ items, meta, total }` (`a90fdb07`, B5c).
 - [x] **C2 · `listByRepository`** — cursor pages, `{ items, meta, total }` (`a90fdb07`, B5c).
-- [x] **C3 · `getByRepoId` (`take: 200`)** — deleted; no client consumer. The `getByRepository`
-  procedure, the service and repository reads, and the two client invalidations are gone.
+- [x] **C3 · `getByRepoId` (`take: 200`)** — live consumer: `packages/cli`; cursor-paginated, no cap.
 - [x] **C4 · `getRepoSnapshotWithDocuments` documents (`take: 500`)** — the method and
   `MAX_REPO_DOCUMENTS` are deleted; `getWorkspace` composes one row per kind onto `getRepoSnapshot`,
   and `getRepoBySha` no longer carries the unused documents relation. `c0517117`
