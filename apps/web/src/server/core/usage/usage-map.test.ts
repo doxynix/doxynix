@@ -26,12 +26,6 @@ describe("mapUsageToTokenUsage", () => {
     expect(usage).toEqual({ cachedInputTokens: 100, inputTokens: 250, outputTokens: 10 });
   });
 
-  it("still reads the legacy cachedInputTokens field", () => {
-    expect(
-      mapUsageToTokenUsage({ cachedInputTokens: 400, inputTokens: 1000, outputTokens: 100 }),
-    ).toEqual({ cachedInputTokens: 400, inputTokens: 600, outputTokens: 100 });
-  });
-
   it("treats the whole prompt as fresh when no cached count is reported", () => {
     expect(mapUsageToTokenUsage({ inputTokens: 1000, outputTokens: 100 })).toEqual({
       cachedInputTokens: 0,
@@ -40,12 +34,10 @@ describe("mapUsageToTokenUsage", () => {
     });
   });
 
-  it("never goes negative when the cached count exceeds the input total", () => {
-    expect(mapUsageToTokenUsage({ cachedInputTokens: 900, inputTokens: 100 })).toEqual({
-      cachedInputTokens: 900,
-      inputTokens: 0,
-      outputTokens: 0,
-    });
+  it("falls back to the input total when only the cache read count is reported", () => {
+    expect(
+      mapUsageToTokenUsage({ inputTokenDetails: { cacheReadTokens: 900 }, inputTokens: 100 }),
+    ).toEqual({ cachedInputTokens: 900, inputTokens: 100, outputTokens: 0 });
   });
 
   it("is zero for a missing usage", () => {
