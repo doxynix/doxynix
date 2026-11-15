@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { buildAnalyticsInput, buildTrendsInput } from "./analytics.input";
 
@@ -84,6 +84,46 @@ describe("date range flags reach the server", () => {
   });
 });
 
+describe("one-sided flags are completed before they reach the schema", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("fills --from from a lone --to, because a custom period needs both bounds", () => {
+    const result = buildAnalyticsInput({ to: "2026-10-02" });
+
+    expect(result).toHaveProperty("input.from", new Date("2026-09-02"));
+    expect(result).toHaveProperty("input.to", new Date("2026-10-02"));
+  });
+
+  it("fills --to from now when only --from is supplied", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(AT);
+    const result = buildAnalyticsInput({ from: "2026-01-01" });
+
+    expect(result).toHaveProperty("input.from", new Date("2026-01-01"));
+    expect(result).toHaveProperty("input.to", new Date(AT));
+  });
+
+  it("clamps a range longer than 366 days to the server cap", () => {
+    const to = new Date("2026-01-01");
+    const result = buildAnalyticsInput({ from: "2020-01-01", to: "2026-01-01" });
+
+    expect(result).toHaveProperty("input.to", to);
+    expect(result).toHaveProperty("input.from", new Date(to.getTime() - 365 * 86_400_000));
+  });
+
+  it("clamps a lone --from that is older than the cap", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(AT);
+    const result = buildAnalyticsInput({ from: "2020-01-01" });
+
+    expect(result).toHaveProperty("input.to", new Date(AT));
+    expect(result).toHaveProperty(
+      "input.from",
+      new Date(new Date(AT).getTime() - 365 * 86_400_000),
+    );
+  });
+});
+
 describe("buildTrendsInput", () => {
   it("returns an empty input when no filters are given", () => {
     expect(buildTrendsInput({})).toEqual({ input: {}, ok: true });
@@ -95,6 +135,17 @@ describe("buildTrendsInput", () => {
 
   it("parses a valid --to into a Date", () => {
     expect(buildTrendsInput({ to: AT })).toHaveProperty("input.to", new Date(AT));
+  });
+
+  it("fills --from when only --to is given, so the custom period is valid", () => {
+    expect(buildTrendsInput({ to: "2026-10-02" })).toEqual({
+      input: {
+        from: new Date("2026-09-02"),
+        period: "custom",
+        to: new Date("2026-10-02"),
+      },
+      ok: true,
+    });
   });
 
   it("rejects an unparseable date instead of silently dropping it", () => {
