@@ -38,9 +38,12 @@ export const fixesService = {
     });
 
     try {
-      const repo = await db.repo.findUnique({
-        where: { id: input.repoId, workspaceId },
-      });
+      const [repo, fix] = await Promise.all([
+        db.repo.findUnique({
+          where: { id: input.repoId, workspaceId },
+        }),
+        analysisRepo.getById(db, input.fixId, workspaceId),
+      ]);
 
       if (repo == null) {
         throw new AppError({
@@ -51,8 +54,6 @@ export const fixesService = {
       }
 
       const clientContext = await getClientContext(db, userId, repo.owner);
-
-      const fix = await analysisRepo.getById(db, input.fixId, workspaceId);
 
       if (fix == null) {
         throw new AppError({
@@ -240,9 +241,14 @@ export const fixesService = {
       userId,
     });
 
-    const repo = await db.repo.findUnique({
-      where: { id: input.repoId, workspaceId },
-    });
+    const cacheKey = REDIS_CONFIG.keys.prStaging(userId, input.repoId);
+    // The staged hash does not depend on the repo row, so the read rides along with it.
+    const [repo, staged] = await Promise.all([
+      db.repo.findUnique({
+        where: { id: input.repoId, workspaceId },
+      }),
+      redis.hgetall<Record<string, string>>(cacheKey),
+    ]);
 
     if (repo == null) {
       throw new AppError({
@@ -270,9 +276,6 @@ export const fixesService = {
     }
 
     const botOctokit = getInstallationClient(Number(installation.id));
-
-    const cacheKey = REDIS_CONFIG.keys.prStaging(userId, input.repoId);
-    const staged = await redis.hgetall<Record<string, string>>(cacheKey);
 
     if (staged == null || Object.keys(staged).length === 0) {
       throw new AppError({

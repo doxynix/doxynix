@@ -151,9 +151,18 @@ export const userService = {
 
   async disconnectAccount(db: DbClient, userId: string, provider: "github" | "google" | "yandex") {
     await runSerializableTransaction(asPolicyEnforcedDb(db), async (tx) => {
-      const accountToDelete = await tx.account.findUnique({
-        where: { userId_providerId: { providerId: provider, userId } },
-      });
+      // One await instead of three: the checks read different models, so they can share the
+      // serializable window without lengthening it.
+      const [accountToDelete, accountCount, user] = await Promise.all([
+        tx.account.findUnique({
+          where: { userId_providerId: { providerId: provider, userId } },
+        }),
+        tx.account.count({ where: { userId } }),
+        tx.user.findUnique({
+          select: { email: true, emailVerified: true },
+          where: { id: userId },
+        }),
+      ]);
 
       if (accountToDelete == null) {
         throw new AppError({
@@ -162,13 +171,6 @@ export const userService = {
           publicMessage: "Account not found or already disconnected.",
         });
       }
-
-      const accountCount = await tx.account.count({ where: { userId } });
-
-      const user = await tx.user.findUnique({
-        select: { email: true, emailVerified: true },
-        where: { id: userId },
-      });
 
       const hasEmailAuth = user?.email != null && user.emailVerified;
 

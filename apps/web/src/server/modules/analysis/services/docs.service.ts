@@ -210,19 +210,21 @@ export const docsService = {
 
     const { analysisId, commitSha } = cachedData;
 
-    let internalAnalysisId: string | undefined;
-    if (analysisId != null) {
-      const analysis = await db.analysis.findFirst({
+    // Two independent reads: the analysis that pins the document and the repo it belongs to.
+    const [analysis, repo] = await Promise.all([
+      analysisId == null
+        ? null
+        : db.analysis.findFirst({
+            select: { id: true },
+            where: { id: analysisId, repo: { workspaceId } },
+          }),
+      db.repo.findUnique({
         select: { id: true },
-        where: { id: analysisId, repo: { workspaceId } },
-      });
-      internalAnalysisId = analysis?.id;
-    }
+        where: { id: input.repoId, workspaceId },
+      }),
+    ]);
 
-    const repo = await db.repo.findUnique({
-      select: { id: true },
-      where: { id: input.repoId, workspaceId },
-    });
+    const internalAnalysisId = analysis?.id;
 
     if (repo == null) {
       throw new AppError({

@@ -216,6 +216,48 @@ describe("disconnectAccount: P2034 backoff", () => {
   });
 });
 
+describe("disconnectAccount: independent reads", () => {
+  it("issues the three validation reads concurrently and deletes last", async () => {
+    const order: string[] = [];
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    async function gated(name: string, value: unknown) {
+      order.push(name);
+      if (order.length === 3) {
+        release();
+      }
+      await gate;
+      return value;
+    }
+
+    const removeAccount = vi.fn().mockImplementation(() => order.push("delete"));
+    const tx = {
+      account: {
+        count: () => gated("count", 2),
+        delete: removeAccount,
+        findUnique: () => gated("findUnique", { id: "account-1" }),
+      },
+      user: {
+        findUnique: () => gated("user", { email: "ivan@doxynix.dev", emailVerified: true }),
+      },
+    };
+    const db = {
+      $transaction: (body: (client: typeof tx) => Promise<void>) => body(tx),
+    } as unknown as DbClient;
+
+    await expect(userService.disconnectAccount(db, USER_ID, "github")).resolves.toEqual({
+      success: true,
+    });
+
+    // The gate only opens once all three reads are in flight, so a sequential body would hang.
+    expect(order.slice(0, 3).sort()).toEqual(["count", "findUnique", "user"]);
+    expect(order.at(-1)).toBe("delete");
+  });
+});
+
 describe("deleteAccount", () => {
   const calls: string[] = [];
 

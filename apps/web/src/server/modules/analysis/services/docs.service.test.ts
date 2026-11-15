@@ -389,4 +389,37 @@ describe("docsService.pinAuditToDocs", () => {
     expect(captured.createData?.version).toBe("manual");
     expect(captured.createData?.analysis).toStrictEqual({ connect: { id: ANALYSIS_ID } });
   });
+
+  it("reads the analysis and the repo concurrently", async () => {
+    const order: string[] = [];
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    async function gated(name: string, value: unknown) {
+      order.push(name);
+      if (order.length === 2) {
+        release();
+      }
+      await gate;
+      return value;
+    }
+
+    const formatted = await docsService.pinAuditToDocs(
+      {
+        analysis: { findFirst: () => gated("analysis", { id: ANALYSIS_ID }) },
+        document: { create: async () => ({ id: "0195f000-0000-7000-8000-000000000004" }) },
+        repo: { findUnique: () => gated("repo", { id: REPO_ID }) },
+      } as unknown as DbClient,
+      makeRedis(),
+      "user-1",
+      { path: AUDIT_PATH, repoId: REPO_ID },
+      "workspace-1",
+    );
+
+    // The gate opens only once both reads are in flight, so a sequential body would hang.
+    expect(order.sort()).toEqual(["analysis", "repo"]);
+    expect(formatted.documentId).toBe("0195f000-0000-7000-8000-000000000004");
+  });
 });
