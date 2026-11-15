@@ -3,7 +3,7 @@
 import { subDays } from "date-fns";
 import { useLocale, useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
-import { parseAsInteger, type parseAsIsoDate } from "nuqs/server";
+import type { parseAsInteger, parseAsIsoDate } from "nuqs/server";
 import type { DateRange } from "react-day-picker";
 
 import { formatShortDate } from "@/shared/lib/date-utils";
@@ -28,12 +28,20 @@ export function AppListDateFilter({ parsers }: Readonly<Props>) {
   const t = useTranslations("DateRange");
   const locale = useLocale();
 
-  // Cursor-paged lists have no page to return to, so the reset key is allowed to be absent.
+  // A cursor list has no page key at all, so it must not gain one from this filter.
   const [urlState, setUrlState] = useQueryStates({
     from: parsers.from,
-    page: parsers.page ?? parseAsInteger,
+    ...(parsers.page != null ? { page: parsers.page } : {}),
     to: parsers.to,
   });
+
+  const updateRange = (from: Date | null, to: Date | null) => {
+    void setUrlState({
+      from,
+      ...(parsers.page != null ? { page: null } : {}),
+      to,
+    });
+  };
 
   const selected: DateRange | undefined =
     urlState.from != null && urlState.to != null
@@ -64,7 +72,7 @@ export function AppListDateFilter({ parsers }: Readonly<Props>) {
       emptyLabel={t("any_date")}
       onChange={(range) => {
         if (range?.from == null) {
-          void setUrlState({ from: null, page: null, to: null });
+          updateRange(null, null);
           return;
         }
 
@@ -72,7 +80,7 @@ export function AppListDateFilter({ parsers }: Readonly<Props>) {
           return;
         }
 
-        void setUrlState({ from: range.from, page: null, to: range.to });
+        updateRange(range.from, range.to);
       }}
       presets={PRESETS}
       selected={selected}

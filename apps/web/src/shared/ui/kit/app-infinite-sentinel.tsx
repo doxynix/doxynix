@@ -6,17 +6,21 @@ import { Spinner } from "@/shared/ui/core/spinner";
 
 type Props = {
   hasNextPage: boolean;
-  isFetching: boolean;
-  onLoadMore: () => void;
+  isFetchingNextPage: boolean;
+  onLoadMore: () => Promise<unknown> | void;
 };
 
-export function AppInfiniteSentinel({ hasNextPage, isFetching, onLoadMore }: Readonly<Props>) {
+export function AppInfiniteSentinel({
+  hasNextPage,
+  isFetchingNextPage,
+  onLoadMore,
+}: Readonly<Props>) {
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const { observe, unobserve } = useIntersectionObserver(
     (entries) => {
       if (entries[0]?.isIntersecting) {
-        onLoadMore();
+        void onLoadMore();
       }
     },
     { threshold: 0.1 },
@@ -24,7 +28,7 @@ export function AppInfiniteSentinel({ hasNextPage, isFetching, onLoadMore }: Rea
 
   useEffect(() => {
     const target = sentinelRef.current;
-    if (!hasNextPage || isFetching || target == null) {
+    if (!hasNextPage || isFetchingNextPage || target == null) {
       return;
     }
 
@@ -33,7 +37,7 @@ export function AppInfiniteSentinel({ hasNextPage, isFetching, onLoadMore }: Rea
     return () => {
       unobserve(target);
     };
-  }, [hasNextPage, isFetching, observe, onLoadMore, unobserve]);
+  }, [hasNextPage, isFetchingNextPage, observe, onLoadMore, unobserve]);
 
   if (!hasNextPage) {
     return null;
@@ -44,7 +48,7 @@ export function AppInfiniteSentinel({ hasNextPage, isFetching, onLoadMore }: Rea
       className="flex items-center justify-center py-2"
       ref={sentinelRef}
     >
-      {isFetching && <Spinner />}
+      {isFetchingNextPage && <Spinner />}
     </div>
   );
 }

@@ -60,6 +60,7 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
       owner: null,
       page: null,
       repo: null,
+      search: null,
       to: null,
       type: null,
     });

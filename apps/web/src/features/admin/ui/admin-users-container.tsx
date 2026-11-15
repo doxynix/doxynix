@@ -58,7 +58,7 @@ export function AdminUsersContainer() {
 
       <AppInfiniteSentinel
         hasNextPage={hasNextPage}
-        isFetching={isFetchingNextPage}
+        isFetchingNextPage={isFetchingNextPage}
         onLoadMore={fetchNextPage}
       />
     </div>

@@ -37,6 +37,7 @@ export function RepoFilters() {
     void setFilters({
       from: null,
       page: null,
+      search: null,
       sortBy: null,
       status: null,
       to: null,
