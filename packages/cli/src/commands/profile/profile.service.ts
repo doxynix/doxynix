@@ -1,3 +1,5 @@
+import { MAX_PAGE_SIZE } from "@doxynix/shared";
+
 import { trpc } from "@/core/client";
 
 import type { DisconnectAccountInput } from "./profile.types";
@@ -11,8 +13,10 @@ export const profileService = {
     return trpc.user.disconnectAccount.mutate(provider);
   },
 
-  async getActiveSessions() {
-    return trpc.user.getActiveSessions.query();
+  async getActiveSessions(limit = MAX_PAGE_SIZE) {
+    const { items } = await trpc.user.getActiveSessions.query({ limit });
+
+    return items;
   },
 
   async getLinkedAccounts() {

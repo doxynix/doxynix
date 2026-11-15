@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
 
+import { SESSIONS_PAGE_SIZE } from "@/features/settings/model/pagination";
 import { SessionsList } from "@/features/settings/ui/sessions/sessions-list";
 
 import { HydrateClient, prefetch, trpcProxy } from "@/server/core/trpc/prefetch";
@@ -11,7 +12,12 @@ export const generateMetadata = createMetadata("sessions_title", "sessions_desc"
 export default async function SessionsSettingsPage() {
   const t = await getTranslations("Sessions");
 
-  await prefetch(trpcProxy.user.getActiveSessions.queryOptions());
+  await prefetch(
+    trpcProxy.user.getActiveSessions.infiniteQueryOptions(
+      { limit: SESSIONS_PAGE_SIZE },
+      { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
+    ),
+  );
 
   return (
     <HydrateClient>

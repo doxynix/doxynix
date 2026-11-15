@@ -314,13 +314,61 @@ describe("getActiveSessions", () => {
     return { db: { session: { findMany } } as unknown as DbClient, findMany };
   }
 
-  it("reads the sessions of the user from the database", async () => {
-    const createdAt = new Date("2026-03-01T12:00:00Z");
+  function makeSession(id: string) {
+    return {
+      createdAt: new Date("2026-03-01T12:00:00Z"),
+      id,
+      ipAddress: "127.0.0.1",
+      userAgent: "internal",
+    };
+  }
+
+  it("reads one probe row past the page in the newest-first order", async () => {
     const { db, findMany } = mockDb([
-      { createdAt, id: "session-1", ipAddress: "127.0.0.1", userAgent: "internal" },
+      makeSession("session-1"),
+      makeSession("session-2"),
+      makeSession("probe"),
     ]);
 
-    await expect(userService.getActiveSessions(db, USER_ID, false)).resolves.toEqual([
+    const result = await userService.getActiveSessions(db, USER_ID, false, { limit: 2 });
+
+    expect(result.items.map((session) => session.id)).toStrictEqual(["session-1", "session-2"]);
+    expect(result.meta).toStrictEqual({ hasNextPage: true, nextCursor: "probe" });
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cursor: undefined,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 3,
+        where: { expiresAt: { gt: expect.any(Date) }, userId: USER_ID },
+      }),
+    );
+  });
+
+  it("keysets past the cursor id", async () => {
+    const { db, findMany } = mockDb([makeSession("session-3")]);
+
+    await userService.getActiveSessions(db, USER_ID, false, { cursor: "session-2", limit: 2 });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: { id: "session-2" }, take: 3 }),
+    );
+  });
+
+  it("reports the last page without a cursor when the probe row is missing", async () => {
+    const { db } = mockDb([makeSession("session-1")]);
+
+    const result = await userService.getActiveSessions(db, USER_ID, false, { limit: 2 });
+
+    expect(result.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
+  });
+
+  it("maps the user agent of every session", async () => {
+    const createdAt = new Date("2026-03-01T12:00:00Z");
+    const { db } = mockDb([makeSession("session-1")]);
+
+    const result = await userService.getActiveSessions(db, USER_ID, false, { limit: 2 });
+
+    expect(result.items).toStrictEqual([
       {
         createdAt,
         id: "session-1",
@@ -328,20 +376,12 @@ describe("getActiveSessions", () => {
         userAgent: "System",
       },
     ]);
-
-    expect(findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-        take: 50,
-        where: { expiresAt: { gt: expect.any(Date) }, userId: USER_ID },
-      }),
-    );
   });
 
   it("excludes expired sessions", async () => {
     const { db, findMany } = mockDb([]);
 
-    await userService.getActiveSessions(db, USER_ID, false);
+    await userService.getActiveSessions(db, USER_ID, false, { limit: 2 });
 
     const where = findMany.mock.calls[0]?.[0]?.where as { expiresAt: { gt: Date } };
     expect(where.expiresAt.gt).toBeInstanceOf(Date);
@@ -350,7 +390,10 @@ describe("getActiveSessions", () => {
   it("returns nothing for an API-key session, which has no session row", async () => {
     const { db, findMany } = mockDb([]);
 
-    await expect(userService.getActiveSessions(db, USER_ID, true)).resolves.toEqual([]);
+    await expect(userService.getActiveSessions(db, USER_ID, true, { limit: 2 })).resolves.toEqual({
+      items: [],
+      meta: { hasNextPage: false },
+    });
     expect(findMany).not.toHaveBeenCalled();
   });
 });

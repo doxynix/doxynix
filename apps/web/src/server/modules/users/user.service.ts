@@ -19,6 +19,7 @@ import {
 import { realtimeService } from "@/server/core/realtime";
 import { revokeUserSessions } from "@/server/utils/access-revocation";
 import { handlePrismaError } from "@/server/utils/handle-error";
+import { keysetArgs, orderWithTiebreak, splitKeysetPage } from "@/server/utils/pagination";
 
 import {
   assertNotSubscriptionOwner,
@@ -63,7 +64,10 @@ const SERIALIZABLE_MAX_ATTEMPTS = 3;
 const SERIALIZABLE_RETRY_BASE_MS = 20;
 const SERIALIZABLE_RETRY_JITTER_MS = 10;
 
-const ACTIVE_SESSIONS_LIMIT = 50;
+export type ActiveSessionsInput = {
+  cursor?: null | string;
+  limit: number;
+};
 
 function isWriteConflict(error: unknown): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034";
@@ -176,19 +180,31 @@ export const userService = {
 
     return { success: true };
   },
-  async getActiveSessions(db: DbClient, userId: string, isApiKeySession: boolean) {
+  async getActiveSessions(
+    db: DbClient,
+    userId: string,
+    isApiKeySession: boolean,
+    input: ActiveSessionsInput,
+  ) {
     if (isApiKeySession) {
-      return [];
+      return { items: [], meta: { hasNextPage: false } };
     }
 
-    const sessions = await db.session.findMany({
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    const { cursor, limit } = input;
+
+    const rows = await db.session.findMany({
+      ...keysetArgs(cursor, limit),
+      orderBy: orderWithTiebreak("createdAt", "desc"),
       select: { createdAt: true, id: true, ipAddress: true, userAgent: true },
-      take: ACTIVE_SESSIONS_LIMIT,
       where: { expiresAt: { gt: new Date() }, userId },
     });
 
-    return sessions.map((session) => userMapper.toSession(session));
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
+
+    return {
+      items: items.map((session) => userMapper.toSession(session)),
+      meta: { hasNextPage, nextCursor },
+    };
   },
 
   async getLinkedAccounts(db: DbClient, userId: string) {

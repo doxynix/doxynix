@@ -87,6 +87,10 @@ export const CursorSchema = z.object({
   search: z.string().trim().max(1000).optional(),
 });
 
+export const CursorPageSchema = CursorSchema.omit({ search: true }).extend({
+  limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(50),
+});
+
 export const ORDER_CREATED_AT_DESC = [{ createdAt: "desc" as const }, { id: "desc" as const }];
 
 export function keysetArgs(cursor: null | string | undefined, limit: number) {

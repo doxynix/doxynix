@@ -11,10 +11,12 @@ import {
 } from "@/shared/lib/appearance-preferences";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
+import { CursorPageSchema } from "@/server/utils/pagination";
 
 import { appearanceService } from "./appearance.service";
 import { OnboardingStateSchema } from "./onboarding.schemas";
 import { onboardingService } from "./onboarding.service";
+import { ActiveSessionsOutputSchema } from "./user.schemas";
 import { userService } from "./user.service";
 
 export const userRouter = createTRPCRouter({
@@ -41,13 +43,17 @@ export const userRouter = createTRPCRouter({
       return userService.disconnectAccount(ctx.db, ctx.session.user.id, input.provider);
     }),
 
-  getActiveSessions: protectedProcedure.query(async ({ ctx }) => {
-    return userService.getActiveSessions(
-      ctx.db,
-      ctx.session.user.id,
-      ctx.session.session.id === "api-key",
-    );
-  }),
+  getActiveSessions: protectedProcedure
+    .input(CursorPageSchema)
+    .output(ActiveSessionsOutputSchema)
+    .query(async ({ ctx, input }) => {
+      return userService.getActiveSessions(
+        ctx.db,
+        ctx.session.user.id,
+        ctx.session.session.id === "api-key",
+        input,
+      );
+    }),
 
   getAppearance: protectedProcedure
     .input(z.object({}).optional())
