@@ -6,9 +6,9 @@ Live checklist for the second static pass over `apps/web`. Companion to
 [`db-index-audit.md`](../../db/db-index-audit.md) (what the shapes cost) and
 [`db-ui-map.md`](../../db/db-ui-map.md) (where latency lands).
 
-**Closed: 16 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
-PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3, R6, R7, R9, R18, R19, R21, R26, R29 and K2
-closed 2026-11-15, and R14 and R30 are **partially** done (see the item text and the progress note
+**Closed: 18 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
+PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3, R6, R7, R9, R18, R19, R21, R26, R29, R34, K1 and
+K2 closed 2026-11-15, and R14 and R30 are **partially** done (see the item text and the progress note
 below the scoreboard).
 
 ## What this round covers that round 1 did not
@@ -76,7 +76,7 @@ reviewed and is correct.
 
 R14 and R30 moved without closing: their verification lines still fail, so the checkboxes stay
 unticked and the item text below says what is left. R3 (the third partial item from the last pass),
-R6, R7, R9, R18, R19, R21, R26, R29 and K2 have since closed (see the closing log).
+R6, R7, R9, R18, R19, R21, R26, R29, R34, K1 and K2 have since closed (see the closing log).
 
 - **R14** — `getWorkspace` no longer reads every document when `aid` is set (fixed by R33, `311bd6a7`),
   and `getDocumentContent` now reads a narrow ref with a capped document read (2026-11-15). Still
@@ -612,7 +612,7 @@ R6, R7, R9, R18, R19, R21, R26, R29 and K2 have since closed (see the closing lo
     **Fix:** `where: { analysisId: aid }` in the nested select. **Effort:** XS. The whole select was
     removed in B5e (`c0517117`) — documents now come from `prisma/sql/getLatestDocumentsPerType.sql`.
 
-- [ ] **R34 · `getDashboardStats.sql` builds a per-repo top-5 lateral it never uses**
+- [x] **R34 · `getDashboardStats.sql` builds a per-repo top-5 lateral it never uses**
   — `prisma/sql/getDashboardStats.sql` (`per_repo_top`) — `LIMIT 5` per repo followed by
     `DISTINCT ON (l.repo_id)`, i.e. one row is kept and four are discarded, for every repo of the
     user, on every dashboard load. **Fix:** `LIMIT 1`. **Effort:** XS. (Deliberately not merged
@@ -622,7 +622,7 @@ R6, R7, R9, R18, R19, R21, R26, R29 and K2 have since closed (see the closing lo
 
 ## Correctness found while reading (not performance)
 
-- [ ] **K1 · Dashboard cards and the repository list on the same screen count different sets**
+- [x] **K1 · Dashboard cards and the repository list on the same screen count different sets**
   — `prisma/sql/getDashboardStats.sql` (`user_repos … WHERE created_by_user_id = $1`),
     `prisma/sql/getTrends.sql` (`r.created_by_user_id = $1`), vs
     `repos/repo.service.ts:202-206` (`where: { workspaceId }`)
@@ -690,10 +690,12 @@ These were checked and found correct. Listed so a third round does not repeat th
 | R29 | 2026-11-15 | `9192e12e` | `adminUserService.getSessions` takes the newest 100 sessions of the user, newest first. B5b (`2669e145`) replaced the ceiling with cursor pagination (`{ items, meta }`), and the admin sheet loads more on scroll inside its new `ScrollArea`. |
 | R33 | 2026-11-01 | `311bd6a7` | `documents` relation filtered by `analysisId` in SQL when `aid` is set; the JS `.filter()` in `getRepoSnapshotWithDocuments` is gone. B5e removed that select entirely (`c0517117`). |
 | K2 | 2026-11-15 | `84ad37d7` | `loadRelatedDocSections` takes the request's `aid` and forwards it to `loadLatestDocumentsWithContent`, so the related-docs panel lists only the pinned analysis's documents. |
+| R34 | 2026-11-15 | `f232f133` | The `per_repo_top` lateral takes `LIMIT 1`, so no repo's history is sorted just to throw four rows away. `recentActivity` is therefore the newest analysis of each repo (one card per repo, five cards) and the outer `LIMIT 5` is its only cap; the comment says so instead of claiming a global top-5. |
+| K1 | 2026-11-15 | `5cb192d0` | Both SQL files filter `repos.workspace_id = $1::uuid` (the parameter and the `user_repos` CTE are renamed `workspace_id` / `workspace_repos`), `getDashboardStats`/`getTrends` take a `workspaceId`, and `analytics.*` moved from `protectedProcedure` to `workspaceProcedure`. The dashboard and the repository list now count the same set for an invited member; `dashboard-stats` and `analytics-trends` each seed a second member's repositories into one workspace. |
 
-The first six shipped in PR #2356 and are on `main`; R3, R6, R7, R9, R18, R19, R21, R26, R29 and K2
-landed on `perf/dxnx-310-db-query-review-round-2` and the "working tree" marker from the original log
-is now historical.
+The first six shipped in PR #2356 and are on `main`; R3, R6, R7, R9, R18, R19, R21, R26, R29, R34, K1
+and K2 landed on `perf/dxnx-310-db-query-review-round-2` and the "working tree" marker from the
+original log is now historical.
 
 ## Verification recipes
 
@@ -745,7 +747,11 @@ they are one screen each and close in batches, so they stay out of the 36-item c
   for one row per kind. `c0517117`
 - [ ] **U5 · `workspace.listMembers` reads every membership** — open; needs a cap-by-seat vs keyset
   decision first.
-- [ ] **U6 · `getTrends` has no range bound** — open; clamp the custom range or pre-bucket.
+- [x] **U6 · `getTrends` has no range bound** — `period` is now a `z.enum` of the presets plus
+  `custom` (`shared/lib/analytics-periods.ts`), and a `superRefine` requires `from` and caps the span
+  at 366 days, measuring an open-ended range against now. The dashboard's own URL parser accepts only
+  those literals, and `resolveDateRange` shows the preset window when the period is not `custom`.
+  `652f2316`
 - [x] **C1 · `getHistory`** — cursor pages, `{ items, meta, total }` (`a90fdb07`, B5c).
 - [x] **C2 · `listByRepository`** — cursor pages, `{ items, meta, total }` (`a90fdb07`, B5c).
 - [ ] **C3 · `getByRepoId` (`take: 200`)** — left at 200; no client reads the list.
@@ -756,6 +762,7 @@ they are one screen each and close in batches, so they stay out of the 36-item c
   versions per `(type, path)`, and `pickLatestDocsByType` is gone. `c0517117`
 - [ ] **C6 · `loadRelatedFixes` (`take: 8`)** — left; explicit "related" widget.
 - [ ] **C7 · `loadRelatedPrFindings` (`take: 12`)** — left; explicit "related" widget.
-- [ ] **C8 · `getDashboardStats` `per_repo_top` LATERAL** — open; depends on R34's `LIMIT 1` and on
-  the "recent activity" semantics.
+- [ ] **C8 · `getDashboardStats` `per_repo_top` LATERAL** — the `LIMIT 1` half landed in `f232f133`,
+  which fixes the semantics as "latest analysis per repo"; the remaining decision is whether the widget
+  wants five newest *events* instead, which would mean dropping the `DISTINCT ON`.
 
