@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { buildAnalyticsInput, buildTrendsInput } from "./analytics.input";
+import { buildAnalyticsInput } from "./analytics.input";
 
 const AT = "2026-01-01T00:00:00Z";
 
@@ -122,33 +122,19 @@ describe("one-sided flags are completed before they reach the schema", () => {
       new Date(new Date(AT).getTime() - 365 * 86_400_000),
     );
   });
-});
 
-describe("buildTrendsInput", () => {
-  it("returns an empty input when no filters are given", () => {
-    expect(buildTrendsInput({})).toEqual({ input: {}, ok: true });
-  });
+  it("runs a lone future --from backwards into the last 30 days", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(AT);
+    const result = buildAnalyticsInput({ from: "2027-01-01" });
 
-  it("carries repoId", () => {
-    expect(buildTrendsInput({}, "repo-9")).toEqual({ input: { repoId: "repo-9" }, ok: true });
-  });
+    expect(result.ok).toBe(true);
+    expect(result).toHaveProperty("input.period", "custom");
+    expect(result).toHaveProperty("input.to", new Date(AT));
+    expect(result).toHaveProperty("input.from", new Date(new Date(AT).getTime() - 30 * 86_400_000));
 
-  it("parses a valid --to into a Date", () => {
-    expect(buildTrendsInput({ to: AT })).toHaveProperty("input.to", new Date(AT));
-  });
-
-  it("fills --from when only --to is given, so the custom period is valid", () => {
-    expect(buildTrendsInput({ to: "2026-10-02" })).toEqual({
-      input: {
-        from: new Date("2026-09-02"),
-        period: "custom",
-        to: new Date("2026-10-02"),
-      },
-      ok: true,
-    });
-  });
-
-  it("rejects an unparseable date instead of silently dropping it", () => {
-    expect(buildTrendsInput({ to: "garbage" }).ok).toBe(false);
+    const input = (result as { input: { from: Date; to: Date } }).input;
+    expect(input.from.getTime()).toBeLessThanOrEqual(input.to.getTime());
+    expect(input.to.getTime() - input.from.getTime()).toBeLessThanOrEqual(366 * 86_400_000);
   });
 });

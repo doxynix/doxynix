@@ -11,6 +11,36 @@ import { withTaskSpinner } from "@/ui/spinner";
 import { renderDashboardStats, renderTrendsTable } from "./analytics.formatter";
 import { type AnalyticsCliOptions, buildAnalyticsInput } from "./analytics.input";
 import { analyticsService } from "./analytics.service";
+import type { DashboardStatsInput } from "./analytics.types";
+
+type PreparedAnalytics = { input: DashboardStatsInput; targetLabel: string };
+
+// Both commands resolve the optional repository and validate the range the same way; only the picker
+// prompt differs.
+async function prepareAnalyticsInput(
+  options: AnalyticsCliOptions,
+  prompt: string,
+): Promise<null | PreparedAnalytics> {
+  let repoId: string | undefined;
+  let targetLabel = "Global Platform";
+
+  if (options.repo) {
+    const repoContext = await resolveRepository(options.repo, prompt);
+    if (!repoContext) {
+      return null;
+    }
+    repoId = repoContext.repo.id;
+    targetLabel = repoContext.target;
+  }
+
+  const built = buildAnalyticsInput(options, repoId);
+  if (!built.ok) {
+    output.fail(built.message, { code: "BAD_REQUEST", json: options.json });
+    return null;
+  }
+
+  return { input: built.input, targetLabel };
+}
 
 export function registerAnalyticsCommand(program: Command) {
   const analytics = program
@@ -26,26 +56,14 @@ export function registerAnalyticsCommand(program: Command) {
     .option("--to <date>", "End date filter (YYYY-MM-DD)")
     .option("--json", "Output raw JSON payload")
     .action(async (options: AnalyticsCliOptions) => {
-      let repoId: string | undefined;
-      let targetLabel = "Global Platform";
-
-      if (options.repo) {
-        const repoContext = await resolveRepository(
-          options.repo,
-          "Select repository for analytics overview:",
-        );
-        if (!repoContext) {
-          return;
-        }
-        repoId = repoContext.repo.id;
-        targetLabel = repoContext.target;
-      }
-
-      const built = buildAnalyticsInput(options, repoId);
-      if (!built.ok) {
-        output.fail(built.message, { code: "BAD_REQUEST", json: options.json });
+      const prepared = await prepareAnalyticsInput(
+        options,
+        "Select repository for analytics overview:",
+      );
+      if (prepared == null) {
         return;
       }
+      const { input, targetLabel } = prepared;
 
       const stats = await withTaskSpinner(
         {
@@ -53,7 +71,7 @@ export function registerAnalyticsCommand(program: Command) {
           start: `Aggregating intelligence for ${pc.cyan(targetLabel)}...`,
           stop: "Metrics calculated",
         },
-        () => analyticsService.getDashboardStats(built.input),
+        () => analyticsService.getDashboardStats(input),
       );
 
       if (output.json(stats, options.json)) {
@@ -77,26 +95,11 @@ export function registerAnalyticsCommand(program: Command) {
     .option("--to <date>", "End date filter (YYYY-MM-DD)")
     .option("--json", "Output raw JSON payload")
     .action(async (options: AnalyticsCliOptions) => {
-      let repoId: string | undefined;
-      let targetLabel = "Global Platform";
-
-      if (options.repo) {
-        const repoContext = await resolveRepository(
-          options.repo,
-          "Select repository for metric trends:",
-        );
-        if (!repoContext) {
-          return;
-        }
-        repoId = repoContext.repo.id;
-        targetLabel = repoContext.target;
-      }
-
-      const built = buildAnalyticsInput(options, repoId);
-      if (!built.ok) {
-        output.fail(built.message, { code: "BAD_REQUEST", json: options.json });
+      const prepared = await prepareAnalyticsInput(options, "Select repository for metric trends:");
+      if (prepared == null) {
         return;
       }
+      const { input, targetLabel } = prepared;
 
       const trendsData = await withTaskSpinner(
         {
@@ -104,7 +107,7 @@ export function registerAnalyticsCommand(program: Command) {
           start: `Fetching metric trends for ${pc.cyan(targetLabel)}...`,
           stop: "Trends data loaded",
         },
-        () => analyticsService.getTrends(built.input),
+        () => analyticsService.getTrends(input),
       );
 
       if (output.json(trendsData, options.json)) {
