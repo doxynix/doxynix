@@ -39,14 +39,41 @@ function uniqueViolation() {
   });
 }
 
+type CapturedStatement = { sql: string; values: unknown[] };
+
+// Prisma invokes a tagged-template call as `(strings, ...values)`. Rebuilding the text with `$n`
+// placeholders keeps the test able to assert on the SQL itself, not only on the parameters.
+function captureStatement(strings: TemplateStringsArray, values: unknown[]): CapturedStatement {
+  const sql = strings.reduce(
+    (text, part, index) => `${text}${part}${index < values.length ? `$${index + 1}` : ""}`,
+    "",
+  );
+
+  return { sql, values };
+}
+
+function statementAt(statements: CapturedStatement[], index: number): CapturedStatement {
+  const statement = statements[index];
+
+  if (statement == null) {
+    throw new Error(`expected a captured statement at index ${index}`);
+  }
+
+  return statement;
+}
+
 function createFakeDb() {
   const events = new Map<string, EventRow>();
   const rollups = new Map<string, RollupRow>();
+  const statements: CapturedStatement[] = [];
   let eventCount = 0;
 
   // Mirrors the single INSERT … ON CONFLICT statement in `bumpUsage`: insert clamps at zero, the
-  // conflict branch adds the raw delta and clamps the total.
-  const executeRaw = vi.fn(async (_strings: TemplateStringsArray, ...values: unknown[]) => {
+  // conflict branch adds the raw delta and clamps the total. The real semantics are only asserted
+  // against a real database (integration suite); here the SQL text is asserted directly.
+  const executeRaw = vi.fn(async (strings: TemplateStringsArray, ...values: unknown[]) => {
+    statements.push(captureStatement(strings, values));
+
     const [workspaceId, periodStart, tokens, analyses, costCents] = values as [
       string,
       string,
@@ -97,7 +124,7 @@ function createFakeDb() {
     },
   };
 
-  return { db: db as unknown as DbClient, events, executeRaw, rollups };
+  return { db: db as unknown as DbClient, events, rollups, statements };
 }
 
 function rollupFor(rollups: Map<string, RollupRow>, at: Date): RollupRow | undefined {
@@ -236,15 +263,44 @@ describe("reserve and settle", () => {
     });
 
     // One statement per event, not an upsert followed by a clamp UPDATE.
-    expect(fake.executeRaw).toHaveBeenCalledTimes(2);
-    // The conflict branch re-binds the same deltas, so only the leading params are asserted.
-    const [reserveArgs, releaseArgs] = fake.executeRaw.mock.calls.map(([, ...values]) =>
-      values.slice(0, 5),
-    );
+    expect(fake.statements).toHaveLength(2);
+    const reserve = statementAt(fake.statements, 0);
+    const release = statementAt(fake.statements, 1);
 
-    expect(reserveArgs).toEqual([WORKSPACE_ID, "2026-01-01", 900, 0, BigInt(0)]);
-    // The release keeps its negative delta, so the total lands on the clamp instead of above it.
-    expect(releaseArgs).toEqual([WORKSPACE_ID, "2026-01-01", -900, 0, BigInt(0)]);
+    // Both paths clamp: the insert at zero, the conflict branch on the running total.
+    expect(reserve.sql).toContain("GREATEST(0, $3::int)");
+    expect(reserve.sql).toContain("GREATEST(0, $5::bigint)");
+    expect(reserve.sql).toContain(
+      '"ai_tokens_used" = GREATEST(0, "workspace_usage"."ai_tokens_used" + $6::int)',
+    );
+    expect(reserve.sql).toContain(
+      '"cost_cents" = GREATEST(0, "workspace_usage"."cost_cents" + $8::bigint)',
+    );
+    // The regression this guards: `EXCLUDED."ai_tokens_used"` is already GREATEST(0, …), so a
+    // negative release would be added as 0 and never come off the total.
+    expect(reserve.sql).not.toContain('EXCLUDED."ai_tokens_used"');
+    expect(release.sql).toBe(reserve.sql);
+
+    expect(reserve.values).toEqual([
+      WORKSPACE_ID,
+      "2026-01-01",
+      900,
+      0,
+      BigInt(0),
+      900,
+      0,
+      BigInt(0),
+    ]);
+    expect(release.values).toEqual([
+      WORKSPACE_ID,
+      "2026-01-01",
+      -900,
+      0,
+      BigInt(0),
+      -900,
+      0,
+      BigInt(0),
+    ]);
     expect(rollupFor(fake.rollups, JANUARY)?.aiTokensUsed).toBe(0);
   });
 

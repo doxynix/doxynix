@@ -58,7 +58,7 @@ const repoAccessSelect = {
   workspaceId: true,
 } satisfies Prisma.RepoSelect;
 
-export type RepoAccess = Prisma.RepoGetPayload<{ select: typeof repoAccessSelect }>;
+type RepoAccess = Prisma.RepoGetPayload<{ select: typeof repoAccessSelect }>;
 
 async function findCachedSha(
   repo: RepoAccess,

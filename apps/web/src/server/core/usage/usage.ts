@@ -59,7 +59,7 @@ async function bumpUsage(
       ${periodStart}::date,
       GREATEST(0, ${input.tokens}::int),
       ${input.analyses}::int,
-      ${input.costCents}::bigint,
+      GREATEST(0, ${input.costCents}::bigint),
       now()
     )
     ON CONFLICT ("workspace_id", "period_start") DO UPDATE SET
