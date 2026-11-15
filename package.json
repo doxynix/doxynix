@@ -31,6 +31,8 @@
     "dev": "turbo dev --filter=!@doxynix/cli",
     "dump:packages": "find . \\( -name \"node_modules\" -o -name \".next\" -o -name \".turbo\" \\) -prune -o -name \"package.json\" -print -exec bunx cli-highlight {} \\;",
     "dup": "jscpd . --skip-isolated \"apps/web|apps/siem-server|packages/cli|packages/config|packages/shared\"",
+    "dup:check": "jscpd . --skip-isolated \"apps/web|apps/siem-server|packages/cli|packages/config|packages/shared\" --baseline .jscpd-baseline.json --fail-on-new-clones",
+    "dup:update": "jscpd . --skip-isolated \"apps/web|apps/siem-server|packages/cli|packages/config|packages/shared\" --baseline .jscpd-baseline.json --update-baseline",
     "format": "turbo format",
     "format:check": "biome check .",
     "postinstall": "bun scripts/clean-symlinks.ts",
