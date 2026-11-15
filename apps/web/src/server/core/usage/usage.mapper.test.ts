@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { totalTokens } from "./price";
-import { mapUsageToTokenUsage } from "./usage-map";
+import { mapUsageToTokenUsage } from "./usage.mapper";
 
 describe("mapUsageToTokenUsage", () => {
   it("splits cached input out of the input total for the v7 usage shape", () => {

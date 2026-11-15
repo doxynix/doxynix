@@ -14,7 +14,7 @@ import { upsertBillingIssue } from "@/server/core/billing/issue";
 import { prisma } from "@/server/core/db";
 import { UnknownModelPriceError } from "@/server/core/usage/price";
 import { releaseUsage, reserveUsage, settleUsage } from "@/server/core/usage/usage";
-import { type MeterUsage, mapUsageToTokenUsage } from "@/server/core/usage/usage-map";
+import { type MeterUsage, mapUsageToTokenUsage } from "@/server/core/usage/usage.mapper";
 import { taskLogger } from "@/server/utils/task-logger";
 
 const tracedAi = wrapAISDK(ai);

@@ -24,7 +24,7 @@ import { prisma } from "@/server/core/db";
 import { getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { realtimeService } from "@/server/core/realtime";
 import { releaseUsage, reserveUsage, settleUsage } from "@/server/core/usage/usage";
-import { mapUsageToTokenUsage } from "@/server/core/usage/usage-map";
+import { mapUsageToTokenUsage } from "@/server/core/usage/usage.mapper";
 import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import {
   AGENT_SYSTEM_PROMPT,

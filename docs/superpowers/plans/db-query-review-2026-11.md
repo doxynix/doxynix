@@ -389,7 +389,7 @@ the closing log.
     `analysis/services/workspace-search.service.ts:13-40`
   > Progress 2026-11-15: `getDocumentContent` uses a narrow repo ref and the no-aid documents read
   > is capped; the structure map is now cached per `(repoId, analysisId)` in
-  > `logic/analysis-context-cache.ts` and used by `searchWorkspace` only — 32 entries, FIFO, no TTL
+  > `logic/analysis-context-memo.ts` and used by `searchWorkspace` only — 32 entries, FIFO, no TTL
   > (an analysis row is immutable once `DONE`). `f8d802cf`/B11.
   - **What:** `getDocumentContent` calls `analysisRepo.getRepoSnapshot` (which selects
     `resultJson` + `metricsJson`, `analysis.repository.ts:51-70`) to obtain `repo.name`,
@@ -697,7 +697,7 @@ These were checked and found correct. Listed so a third round does not repeat th
 | K2 | 2026-11-15 | `84ad37d7` | `loadRelatedDocSections` takes the request's `aid` and forwards it to `loadLatestDocumentsWithContent`, so the related-docs panel lists only the pinned analysis's documents. |
 | R34 | 2026-11-15 | `f232f133` | The `per_repo_top` lateral takes `LIMIT 1`, so no repo's history is sorted just to throw four rows away. `recentActivity` is therefore the newest analysis of each repo (one card per repo, five cards) and the outer `LIMIT 5` is its only cap; the comment says so instead of claiming a global top-5. |
 | R13 | 2026-11-15 | `35d3870e` | One `ReconcileContext` per Stripe page (customers, local subscriptions, entitlements, member counts), so the per-subscription `findFirst`/`findUnique` calls become map hits; missing keys fall back to a query and the repair path re-reads live rows. |
-| R14 | 2026-11-15 | `f8d802cf` | `logic/analysis-context-cache.ts` keeps the built `AnalyzeContextBuilder` per `(repoId, analysisId)` — 32 entries, FIFO eviction, no TTL, since an analysis row is immutable once `DONE`. Only `searchWorkspace` uses it: node context, `getWorkspace` and `getStructureMap` still build fresh, because the builder caches every `nodeId` it explains and would grow the map for the process lifetime. The narrow `getDocumentContent` ref and the capped no-`aid` documents read landed earlier. |
+| R14 | 2026-11-15 | `f8d802cf` | `logic/analysis-context-memo.ts` keeps the built `AnalyzeContextBuilder` per `(repoId, analysisId)` — 32 entries, FIFO eviction, no TTL, since an analysis row is immutable once `DONE`. Only `searchWorkspace` uses it: node context, `getWorkspace` and `getStructureMap` still build fresh, because the builder caches every `nodeId` it explains and would grow the map for the process lifetime. The narrow `getDocumentContent` ref and the capped no-`aid` documents read landed earlier. |
 | R15 | 2026-11-15 | `5379b00d` | `revokeOtherSessions` deletes the other sessions with one `deleteMany` and one Redis pipeline instead of one adapter call per token. |
 | R16 | 2026-11-15 | `ce69bd01` | `getValidToken` is memoised per request and the resolved token is passed into `syncInstallations`, so opening the add-repository dialog reads the token once. |
 | R17 | 2026-11-15 | `24c60499` | The run wrapper only sets `locals`; `$connect`/`$disconnect` are gone, and `onWait`/`onResume` remain the only release point. `pg_stat_activity` was not measured (no live worker). |
@@ -735,7 +735,7 @@ Closed after the 36-item counter above; these are follow-ups from the list-read 
 
 - `ai` v7 exposes `inputTokenDetails.{noCacheTokens,cacheReadTokens,cacheWriteTokens}` and no
   `cachedInputTokens`; the old reader always saw zero and billed cache hits at the full input rate.
-  `core/usage/usage-map.ts` now maps the v7 shape, and both `utils/call.ts` and the agent chat
+  `core/usage/usage.mapper.ts` now maps the v7 shape, and both `utils/call.ts` and the agent chat
   route use it, so cached tokens are billed once at the cached rate. (`7a131d76`, `6b7f3c5b`)
 - `costCentsFor` rounds to the nearest cent instead of up, so many small calls stop accumulating a
   one-cent overcharge per call.
