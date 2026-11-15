@@ -739,15 +739,20 @@ they are one screen each and close in batches, so they stay out of the 36-item c
   `dcfc6a65`
 - [x] **U7 · `adminReview.getDetail` loaded every fix** — `take: 100` (`MAX_DETAIL_FIXES`); the
   detail's `fixCount` is the `_count` the summary already selects. `dcfc6a65`
-- [ ] **U1 · `getRepoDocsPayload` reads every document version** — deferred to the documents pass.
+- [x] **U1 · `getRepoDocsPayload` reads every document version** — the nested `documents` relation is
+  gone; `prisma/sql/getLatestDocumentsPerType.sql` windows rows per `(type, path)` and the service asks
+  for one row per kind. `c0517117`
 - [ ] **U5 · `workspace.listMembers` reads every membership** — open; needs a cap-by-seat vs keyset
   decision first.
 - [ ] **U6 · `getTrends` has no range bound** — open; clamp the custom range or pre-bucket.
 - [x] **C1 · `getHistory`** — cursor pages, `{ items, meta, total }` (`a90fdb07`, B5c).
 - [x] **C2 · `listByRepository`** — cursor pages, `{ items, meta, total }` (`a90fdb07`, B5c).
 - [ ] **C3 · `getByRepoId` (`take: 200`)** — left at 200; no client reads the list.
-- [ ] **C4 · `getRepoSnapshotWithDocuments` documents (`take: 500`)** — closes with U1.
-- [ ] **C5 · `loadLatestDocumentsWithContent` (`take: 24`)** — closes with U1 (per-type fetch).
+- [x] **C4 · `getRepoSnapshotWithDocuments` documents (`take: 500`)** — the method and
+  `MAX_REPO_DOCUMENTS` are deleted; `getWorkspace` composes one row per kind onto `getRepoSnapshot`,
+  and `getRepoBySha` no longer carries the unused documents relation. `c0517117`
+- [x] **C5 · `loadLatestDocumentsWithContent` (`take: 24`)** — the global `take` is replaced by three
+  versions per `(type, path)`, and `pickLatestDocsByType` is gone. `c0517117`
 - [ ] **C6 · `loadRelatedFixes` (`take: 8`)** — left; explicit "related" widget.
 - [ ] **C7 · `loadRelatedPrFindings` (`take: 12`)** — left; explicit "related" widget.
 - [ ] **C8 · `getDashboardStats` `per_repo_top` LATERAL** — open; depends on R34's `LIMIT 1` and on
