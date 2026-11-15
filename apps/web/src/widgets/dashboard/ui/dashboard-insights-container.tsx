@@ -1,6 +1,6 @@
 "use client";
 
-import { QueryError } from "@/shared/ui/kit/query-error";
+import { ErrorState } from "@/shared/ui/kit/error-state";
 
 import { useDashboardStats } from "../model/use-dashboard-stats";
 import {
@@ -21,7 +21,7 @@ export function DashboardInsightsContainer() {
 
   if (isError || data == null) {
     return (
-      <QueryError
+      <ErrorState
         className="lg:col-span-4"
         error={error}
         onRetry={() => void refetch()}

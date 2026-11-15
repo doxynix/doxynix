@@ -1,6 +1,6 @@
 "use client";
 
-import { QueryError } from "@/shared/ui/kit/query-error";
+import { ErrorState } from "@/shared/ui/kit/error-state";
 
 import { useDashboardStats } from "../model/use-dashboard-stats";
 import { RefactoringTargetsWidget } from "./analytics-widgets";
@@ -15,7 +15,7 @@ export function DashboardActionContainer() {
 
   if (isError || data == null) {
     return (
-      <QueryError
+      <ErrorState
         error={error}
         onRetry={() => void refetch()}
       />

@@ -9,7 +9,7 @@ import { useTRPC } from "@/shared/api/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import type { ChartConfig } from "@/shared/ui/core/chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
-import { QueryError } from "@/shared/ui/kit/query-error";
+import { ErrorState } from "@/shared/ui/kit/error-state";
 
 import { dashboardParsers, dashboardRangeInput } from "../model/dashboard-parsers";
 import { TrendsWidgetsSkeleton } from "./repo-trends-widget-skeleton";
@@ -89,7 +89,7 @@ export function TrendsWidget({ className, repoId }: Readonly<Props>) {
 
       <CardContent className="pt-6">
         {isError || data == null ? (
-          <QueryError
+          <ErrorState
             error={error}
             onRetry={() => void refetch()}
           />

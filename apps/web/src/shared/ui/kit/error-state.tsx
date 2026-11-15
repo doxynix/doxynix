@@ -17,7 +17,7 @@ type Props = {
 
 // A failed read must never leave a skeleton on screen forever; the message comes from the server
 // payload when there is one, and the button re-runs the same query.
-export function QueryError({ className, error, onRetry }: Readonly<Props>) {
+export function ErrorState({ className, error, onRetry }: Readonly<Props>) {
   const t = useTranslations("Common");
   const errorMessage = useErrorMessage();
 

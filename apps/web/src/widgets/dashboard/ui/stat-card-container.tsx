@@ -1,7 +1,7 @@
 "use client";
 import { useLocale, useTranslations } from "next-intl";
 
-import { QueryError } from "@/shared/ui/kit/query-error";
+import { ErrorState } from "@/shared/ui/kit/error-state";
 
 import { StatCard } from "@/entities/repo/ui/stat-card";
 
@@ -21,7 +21,7 @@ export function StatCardContainer() {
 
   if (isError || data == null) {
     return (
-      <QueryError
+      <ErrorState
         error={error}
         onRetry={() => void refetch()}
       />
