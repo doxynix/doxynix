@@ -1,4 +1,4 @@
-import { ApiKeyScope, MessageCode } from "@doxynix/shared";
+import { ApiKeyScope, isApiKeyDead, MessageCode } from "@doxynix/shared";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
@@ -7,6 +7,7 @@ import type { DbClient } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
 import { handlePrismaError } from "@/server/utils/handle-error";
 import { extractPayloadFromKey, generateApiKey, getApiKeyHash } from "@/server/utils/hash";
+import { keysetArgs, orderWithTiebreak, splitKeysetPage } from "@/server/utils/pagination";
 
 type CreateKeyInput = {
   description?: string;
@@ -23,27 +24,12 @@ type UpdateKeyInput = {
   scopes?: ApiKeyScope[];
 };
 
+type ListKeysInput = {
+  cursor?: null | string;
+  limit: number;
+};
+
 const ROTATION_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
-const WORKSPACE_API_KEY_LIMIT = 100;
-
-export function isApiKeyDead(
-  key: {
-    expiresAt: Date | null;
-    revoked: boolean;
-    revokedAfter: Date | null;
-  },
-  now: number,
-): boolean {
-  if (key.revokedAfter != null) {
-    return key.revokedAfter.getTime() <= now;
-  }
-
-  if (key.revoked) {
-    return true;
-  }
-
-  return key.expiresAt != null && key.expiresAt.getTime() <= now;
-}
 
 export const apiKeyService = {
   async create(db: DbClient, userId: string, workspaceId: string, input: CreateKeyInput) {
@@ -88,9 +74,12 @@ export const apiKeyService = {
     return { key: fullKey };
   },
 
-  async list(db: DbClient, workspaceId: string) {
-    const allKeys = await db.apiKey.findMany({
-      orderBy: { createdAt: "desc" },
+  async list(db: DbClient, workspaceId: string, input: ListKeysInput) {
+    const { cursor, limit } = input;
+
+    const rows = await db.apiKey.findMany({
+      ...keysetArgs(cursor, limit),
+      orderBy: orderWithTiebreak("createdAt", "desc"),
       select: {
         createdAt: true,
         description: true,
@@ -104,25 +93,17 @@ export const apiKeyService = {
         scopes: true,
         updatedAt: true,
       },
-      take: WORKSPACE_API_KEY_LIMIT,
       where: { workspaceId },
     });
 
-    const now = Date.now();
-
-    const isRetired = (k: (typeof allKeys)[number]) =>
-      isApiKeyDead(
-        { expiresAt: k.expiresAt, revoked: k.revoked, revokedAfter: k.revokedAfter },
-        now,
-      );
-    const normalize = (k: (typeof allKeys)[number]) => ({
-      ...k,
-      scopes: k.scopes.length > 0 ? k.scopes : [ApiKeyScope.FULL],
-    });
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
 
     return {
-      active: allKeys.filter((k) => !isRetired(k)).map(normalize),
-      archived: allKeys.filter(isRetired).map(normalize),
+      items: items.map((key) => ({
+        ...key,
+        scopes: key.scopes.length > 0 ? key.scopes : [ApiKeyScope.FULL],
+      })),
+      meta: { hasNextPage, nextCursor },
     };
   },
 

@@ -1,7 +1,13 @@
-import { ApiKeySchema, CreateApiKeySchema, UpdateApiKeySchema } from "@doxynix/shared";
+import {
+  ApiKeySchema,
+  CreateApiKeySchema,
+  CursorMetaSchema,
+  UpdateApiKeySchema,
+} from "@doxynix/shared";
 import * as z from "zod/mini";
 
 import { createTRPCRouter, workspaceProcedure } from "@/server/core/trpc/init";
+import { CursorPageSchema } from "@/server/utils/pagination";
 
 import { apiKeyService } from "./api-key.service";
 
@@ -20,10 +26,10 @@ export const apiKeyRouter = createTRPCRouter({
     }),
 
   list: workspaceProcedure
-    .input(z.optional(z.object({})))
-    .output(z.object({ active: z.array(ApiKeySchema), archived: z.array(ApiKeySchema) }))
-    .query(async ({ ctx }) => {
-      return apiKeyService.list(ctx.db, ctx.workspace.id);
+    .input(CursorPageSchema)
+    .output(z.object({ items: z.array(ApiKeySchema), meta: CursorMetaSchema }))
+    .query(async ({ ctx, input }) => {
+      return apiKeyService.list(ctx.db, ctx.workspace.id, input);
     }),
 
   revoke: workspaceProcedure

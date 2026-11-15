@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
 
+import { API_KEYS_PAGE_SIZE } from "@/features/settings/model/pagination";
 import { ApiKeysListContainer } from "@/features/settings/ui/api-keys/api-keys-list-container";
 import { CreateApiKeyDialog } from "@/features/settings/ui/api-keys/create-api-key-dialog";
 
@@ -12,7 +13,12 @@ export const generateMetadata = createMetadata("api_keys_title", "api_keys_desc"
 export default async function ApiKeysPage() {
   const t = await getTranslations("Dashboard");
 
-  await prefetch(trpcProxy.apikey.list.queryOptions());
+  await prefetch(
+    trpcProxy.apikey.list.infiniteQueryOptions(
+      { limit: API_KEYS_PAGE_SIZE },
+      { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
+    ),
+  );
 
   return (
     <HydrateClient>

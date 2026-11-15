@@ -1,3 +1,3 @@
 import type { RouterOutput } from "@/shared/api/trpc";
 
-export type UiApiKey = RouterOutput["apikey"]["list"]["active"][number];
+export type UiApiKey = RouterOutput["apikey"]["list"]["items"][number];
