@@ -134,32 +134,66 @@ describe("adminReviewService.getDetail", () => {
     await expect(adminReviewService.getDetail(db, "missing")).rejects.toThrow(/not found/i);
   });
 
-  it("caps the fixes it loads but keeps the counted fixCount", async () => {
+  it("does not load the fixes into the detail, but keeps the counted fixCount", async () => {
     const { db, findUnique } = createDb({
       ...REVIEW,
       _count: { generatedFixes: 620 },
-      generatedFixes: [
-        {
-          branch: "doxynix/fix-1",
-          createdAt: new Date("2026-01-03"),
-          estimatedImpact: 40,
-          githubPrNumber: null,
-          githubPrUrl: null,
-          id: "0192f0c1-0000-7000-8000-0000000000bb",
-          status: "DRAFT",
-          title: "fix one",
-        },
-      ],
       repo: { id: "0192f0c1-0000-7000-8000-0000000000aa" },
     });
 
     const detail = await adminReviewService.getDetail(db, "0192f0c1-0000-7000-8000-000000000009");
 
-    expect(findUnique.mock.calls[0]?.[0]?.select?.generatedFixes).toMatchObject({
-      orderBy: { createdAt: "desc" },
-      take: 100,
-    });
+    expect(findUnique.mock.calls[0]?.[0]?.select).not.toHaveProperty("generatedFixes");
     expect(detail.fixCount).toBe(620);
-    expect(detail.fixes).toHaveLength(1);
+    expect(detail).not.toHaveProperty("fixes");
+    expect(AdminReviewDetailSchema.safeParse(detail).success).toBe(true);
+  });
+});
+
+describe("adminReviewService.listFixes", () => {
+  const FIX = {
+    branch: "doxynix/fix-1",
+    createdAt: new Date("2026-01-03"),
+    estimatedImpact: 40,
+    githubPrNumber: null,
+    githubPrUrl: null,
+    id: "0192f0c1-0000-7000-8000-0000000000bb",
+    status: "DRAFT",
+    title: "fix one",
+  } satisfies Row;
+
+  function createFixDb(rows: Row[] = []) {
+    const findMany = vi.fn().mockResolvedValue(rows);
+    return { db: { generatedFix: { findMany } } as never, findMany };
+  }
+
+  it("keysets the fixes of one review, newest first, with a probe row", async () => {
+    const { db, findMany } = createFixDb([
+      FIX,
+      { ...FIX, id: "0192f0c1-0000-7000-8000-0000000000bc" },
+    ]);
+
+    const result = await adminReviewService.listFixes(db, REVIEW_ID, { limit: 1 });
+
+    expect(findMany).toHaveBeenCalledWith({
+      cursor: undefined,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      select: expect.objectContaining({ id: true, title: true }),
+      take: 2,
+      where: { prAnalysisId: REVIEW_ID },
+    });
+    expect(result.items.map((fix) => fix.id)).toStrictEqual([FIX.id]);
+    expect(result.meta).toEqual({
+      hasNextPage: true,
+      nextCursor: "0192f0c1-0000-7000-8000-0000000000bc",
+    });
+  });
+
+  it("keysets past the cursor id", async () => {
+    const { db, findMany } = createFixDb();
+
+    await adminReviewService.listFixes(db, REVIEW_ID, { cursor: FIX.id, limit: 20 });
+
+    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ cursor: { id: FIX.id } }));
   });
 });

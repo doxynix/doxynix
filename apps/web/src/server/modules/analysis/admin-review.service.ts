@@ -39,8 +39,6 @@ const FIX_SELECT = {
   title: true,
 } satisfies Prisma.GeneratedFixSelect;
 
-const MAX_DETAIL_FIXES = 100;
-
 type ReviewRow = Prisma.PullRequestAnalysisGetPayload<{ select: typeof REVIEW_SELECT }>;
 
 function toSummary(row: ReviewRow) {
@@ -103,11 +101,6 @@ export const adminReviewService = {
     const review = await db.pullRequestAnalysis.findUnique({
       select: {
         ...REVIEW_SELECT,
-        generatedFixes: {
-          orderBy: { createdAt: "desc" },
-          select: FIX_SELECT,
-          take: MAX_DETAIL_FIXES,
-        },
         repo: { select: { id: true } },
       },
       where: { id },
@@ -121,15 +114,27 @@ export const adminReviewService = {
       });
     }
 
-    const { generatedFixes: fixes, repo, ...summary } = review;
+    const { repo, ...summary } = review;
 
     return {
       ...toSummary(summary),
       baseSha: review.baseSha,
       error: review.error,
-      fixes,
       headSha: review.headSha,
       repoId: repo.id,
     };
+  },
+
+  async listFixes(db: DbClient, id: string, input: { cursor?: null | string; limit: number }) {
+    const rows = await db.generatedFix.findMany({
+      ...keysetArgs(input.cursor, input.limit),
+      orderBy: ORDER_CREATED_AT_DESC,
+      select: FIX_SELECT,
+      where: { prAnalysisId: id },
+    });
+
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, input.limit);
+
+    return { items, meta: { hasNextPage, nextCursor } };
   },
 };

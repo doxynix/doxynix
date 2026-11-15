@@ -54,9 +54,19 @@ export const AdminReviewSummarySchema = z.object({
 export const AdminReviewDetailSchema = AdminReviewSummarySchema.extend({
   baseSha: z.string(),
   error: z.string().nullable(),
-  fixes: z.array(AdminReviewFixSchema),
   headSha: z.string(),
   repoId: z.uuid(),
+});
+
+export const AdminReviewFixListInputSchema = z
+  .object({ id: ID_SCHEMA })
+  .extend(cursorPageSchema(50).shape);
+
+export type AdminReviewFixListInput = z.infer<typeof AdminReviewFixListInputSchema>;
+
+export const AdminReviewFixListSchema = z.object({
+  items: z.array(AdminReviewFixSchema),
+  meta: CursorMetaSchema,
 });
 
 export const AdminReviewListSchema = z.object({

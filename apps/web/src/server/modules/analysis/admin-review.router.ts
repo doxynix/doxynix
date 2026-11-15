@@ -3,6 +3,8 @@ import { adminProcedure, createTRPCRouter } from "@/server/core/trpc/init";
 import {
   AdminReviewDetailSchema,
   AdminReviewFilterSchema,
+  AdminReviewFixListInputSchema,
+  AdminReviewFixListSchema,
   AdminReviewListSchema,
   AdminReviewRefSchema,
 } from "./admin-review.schemas";
@@ -21,5 +23,12 @@ export const adminReviewRouter = createTRPCRouter({
     .output(AdminReviewListSchema)
     .query(async ({ ctx, input }) => {
       return adminReviewService.getAll(ctx.db, input);
+    }),
+
+  listFixes: adminProcedure
+    .input(AdminReviewFixListInputSchema)
+    .output(AdminReviewFixListSchema)
+    .query(async ({ ctx, input }) => {
+      return adminReviewService.listFixes(ctx.db, input.id, input);
     }),
 });

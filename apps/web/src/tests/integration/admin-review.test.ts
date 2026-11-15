@@ -87,8 +87,12 @@ describe("adminReviewService against ZenStack policies", () => {
     expect(list.items[0]).toMatchObject({ fixCount: 2, id: review.id });
 
     const detail = await adminReviewService.getDetail(admin.db, review.id);
-    expect(detail.fixes).toHaveLength(2);
-    expect(detail.fixes.map((fix) => fix.title).sort()).toEqual(["One", "Two"]);
+    expect(detail.fixCount).toBe(2);
+    expect(detail).not.toHaveProperty("fixes");
+
+    const fixes = await adminReviewService.listFixes(admin.db, review.id, { limit: 50 });
+    expect(fixes.items).toHaveLength(2);
+    expect(fixes.items.map((fix) => fix.title).sort()).toEqual(["One", "Two"]);
   });
 
   it("filters by status, risk score and fix status", async () => {
