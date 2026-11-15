@@ -1,4 +1,5 @@
 import { cookies, headers } from "next/headers";
+import { clamp } from "es-toolkit";
 
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/shared/config/locales";
 import { LOCALE_COOKIE_NAME } from "@/shared/i18n/routing";
@@ -17,7 +18,7 @@ export function parseAcceptLanguage(
       const [tag = "", ...params] = part.trim().split(";");
       const qParam = params.find((param) => param.trim().startsWith("q="));
       const parsed = qParam == null ? 1 : Number.parseFloat(qParam.trim().slice(2));
-      const q = Number.isFinite(parsed) ? Math.min(Math.max(parsed, 0), 1) : 0;
+      const q = Number.isFinite(parsed) ? clamp(parsed, 0, 1) : 0;
 
       return { index, q, tag: tag.trim() };
     })

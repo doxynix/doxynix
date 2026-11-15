@@ -1,8 +1,9 @@
 import { MAX_PAGE, MAX_PAGE_SIZE } from "@doxynix/shared";
+import { clamp } from "es-toolkit";
 import * as z from "zod";
 
 export function clampPage(page: null | number | undefined): number {
-  return Math.min(Math.max(1, page ?? 1), MAX_PAGE);
+  return clamp(page ?? 1, 1, MAX_PAGE);
 }
 
 export function getPaginationMeta(params: {

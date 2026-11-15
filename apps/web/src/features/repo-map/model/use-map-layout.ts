@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { type Edge, type Node, useEdgesState, useNodesState } from "@xyflow/react";
 import type { ELK, ElkNode } from "elkjs";
+import { clamp } from "es-toolkit";
 
 import type { RepoMapDisplayData, RepoMapNodeData } from "./repo-map.types";
 import { extractParentGroups } from "./use-parent-groups";
@@ -46,7 +47,7 @@ export function createLayoutNodes<N extends RepoMapNodeData>(
 }
 
 export function computeStrokeWidth(weight?: number): number {
-  return weight ? Math.min(Math.max(weight / 2, 1.5), 5) : 2;
+  return weight ? clamp(weight / 2, 1.5, 5) : 2;
 }
 
 export function createLayoutEdges(sourceEdges: readonly RepoMapEdgeInput[]): Edge[] {

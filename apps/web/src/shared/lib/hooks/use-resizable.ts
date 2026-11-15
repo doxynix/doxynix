@@ -2,6 +2,7 @@
 
 import type { KeyboardEvent, PointerEvent } from "react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { clamp } from "es-toolkit";
 
 type UseResizableOptions = {
   // CSS custom property written on `panelRef` during a drag. Omit to write `width` instead.
@@ -24,10 +25,6 @@ const KEYBOARD_STEP = 16;
 const VIEWPORT_GUTTER = 32;
 
 const noopSubscribe = () => () => {};
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max);
-}
 
 function readWidth(storageKey: string | undefined, fallback: number, min: number, max: number) {
   const raw = storageKey === undefined ? null : localStorage.getItem(storageKey);
@@ -93,7 +90,7 @@ export function useResizable({
   );
   const minBound = Math.min(minWidth, maxBound);
 
-  const currentWidth = Math.min(Math.max(liveWidth ?? width, minBound), maxBound);
+  const currentWidth = clamp(liveWidth ?? width, minBound, maxBound);
 
   // Discrete changes (keyboard, double-click reset, reopen drag) still go through state.
   const applyWidth = (next: number) => {
