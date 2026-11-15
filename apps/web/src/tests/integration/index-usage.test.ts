@@ -61,7 +61,7 @@ describe("index usage", () => {
     const indexes = await prisma.$queryRaw<Array<{ indexname: string }>>`
       SELECT indexname::text FROM pg_indexes WHERE tablename = 'chat_messages';`;
     expect(indexes.map((row) => row.indexname)).toContain(
-      "chat_messages_session_id_created_at_idx",
+      "chat_messages_session_id_created_at_id_idx",
     );
 
     const alice = await createTestUser("Alice");
@@ -82,9 +82,13 @@ describe("index usage", () => {
       EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)
       SELECT id FROM chat_messages WHERE session_id = ${session.id}::uuid ORDER BY created_at ASC;`;
 
-    expect(collectIndexNames(plan[0]?.["QUERY PLAN"] ?? [])).toContain(
+    // Either index serves this scan: B5i's `(session_id, created_at DESC, id DESC)` reads backwards.
+    const sessionChatIndexes = new Set([
       "chat_messages_session_id_created_at_idx",
-    );
+      "chat_messages_session_id_created_at_id_idx",
+    ]);
+    const usedIndexes = collectIndexNames(plan[0]?.["QUERY PLAN"] ?? []);
+    expect(usedIndexes.some((name) => sessionChatIndexes.has(name))).toBe(true);
   });
 
   it("indexes sessions.expiresAt for the nightly cleanup", async () => {
