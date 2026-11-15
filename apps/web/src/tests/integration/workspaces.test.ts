@@ -10,6 +10,7 @@ import { redisClient } from "@/server/core/redis";
 import { createCallerFactory } from "@/server/core/trpc/init";
 import { createPersonalWorkspace } from "@/server/core/workspaces/personal-workspace";
 import { appRouter } from "@/server/modules";
+import { workspaceService } from "@/server/modules/workspaces/workspace.service";
 import { buildRequestStore } from "@/server/utils/request-context";
 
 import { cleanupDatabase, createAnon, createBareTestUser, createTestUser } from "../helpers";
@@ -318,5 +319,43 @@ describe("Workspace service and router", () => {
     await expect(anon.workspace.findMany()).resolves.toHaveLength(0);
     await expect(anon.workspaceMember.findMany()).resolves.toHaveLength(0);
     await expect(anon.workspaceEntitlement.findMany()).resolves.toHaveLength(0);
+  });
+
+  it("accepts an invite once and refuses the replay", async () => {
+    const alice = await createTestUser("Alice");
+    const bob = await createTestUser("Bob");
+    const workspaceId = await createPersonalWorkspace(alice.user.id, alice.user.name);
+
+    await prisma.workspaceEntitlement.update({
+      data: { planCode: "PRO", seatLimit: 3 },
+      where: { workspaceId },
+    });
+
+    const invite = await workspaceService.createInvite(workspaceId, alice.user.id);
+
+    await expect(workspaceService.acceptInvite(invite.token, bob.user.id)).resolves.toEqual({
+      workspaceId,
+    });
+
+    // The replay loses the `accepted_at IS NULL` claim, so the whole second transaction rolls back.
+    await expect(workspaceService.acceptInvite(invite.token, bob.user.id)).rejects.toMatchObject({
+      code: "NOT_FOUND",
+      message: "INVITE_INVALID",
+    });
+
+    const tokenHash = crypto.createHash("sha256").update(invite.token).digest("hex");
+    const stored = await prisma.workspaceInvite.findUniqueOrThrow({
+      select: { acceptedAt: true },
+      where: { tokenHash },
+    });
+    const members = await prisma.workspaceMember.findMany({
+      select: { userId: true },
+      where: { workspaceId },
+    });
+
+    expect(stored.acceptedAt).toBeInstanceOf(Date);
+    expect(members.map((member) => member.userId).sort()).toEqual(
+      [alice.user.id, bob.user.id].sort(),
+    );
   });
 });
