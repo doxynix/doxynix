@@ -7,7 +7,7 @@ import { EmptyState } from "@/shared/ui/kit/empty-state";
 import type { UiApiKey } from "@/entities/api-key/model/api-keys.types";
 import { ApiKeyCard } from "@/entities/api-key/ui/api-key-card";
 
-import { ApiKeyArchivedTable } from "./api-key-archived-table";
+import { ApiKeyArchivedTable, type ArchivedPagination } from "./api-key-archived-table";
 import { RevokeApiKeyDialog } from "./revoke-api-key-dialog";
 import { RotateApiKeyDialog } from "./rotate-api-key-dialog";
 import { UpdateApiKeyDialog } from "./update-api-key-dialog";
@@ -15,9 +15,10 @@ import { UpdateApiKeyDialog } from "./update-api-key-dialog";
 type Props = {
   active: UiApiKey[];
   archived: UiApiKey[];
+  archivedPagination: ArchivedPagination;
 };
 
-export function ApiKeysList({ active, archived }: Readonly<Props>) {
+export function ApiKeysList({ active, archived, archivedPagination }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
 
   return (
@@ -44,7 +45,12 @@ export function ApiKeysList({ active, archived }: Readonly<Props>) {
           ))}
         </div>
       )}
-      {archived.length > 0 && <ApiKeyArchivedTable archived={archived} />}
+      {archived.length > 0 && (
+        <ApiKeyArchivedTable
+          archived={archived}
+          pagination={archivedPagination}
+        />
+      )}
     </div>
   );
 }

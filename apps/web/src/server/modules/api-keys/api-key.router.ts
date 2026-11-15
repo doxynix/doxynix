@@ -33,9 +33,10 @@ export const apiKeyRouter = createTRPCRouter({
     }),
 
   listArchived: workspaceProcedure
-    .output(z.object({ items: z.array(ApiKeySchema) }))
-    .query(async ({ ctx }) => {
-      return apiKeyService.listArchived(ctx.db, ctx.workspace.id);
+    .input(ListApiKeysInputSchema)
+    .output(z.object({ items: z.array(ApiKeySchema), meta: CursorMetaSchema }))
+    .query(async ({ ctx, input }) => {
+      return apiKeyService.listArchived(ctx.db, ctx.workspace.id, input);
     }),
 
   revoke: workspaceProcedure

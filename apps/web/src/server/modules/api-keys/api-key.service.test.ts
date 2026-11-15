@@ -112,28 +112,42 @@ describe("apiKeyService.list", () => {
     expect(serialized).not.toContain("lte");
   });
 
-  it("reads archived keys without a cursor under a fixed cap", async () => {
-    const { db, findMany } = createApiKeyDbMock([makeApiKeyRow({ id: "dead", revoked: true })]);
+  it("pages archived keys with the same keyset as the live list", async () => {
+    const { db, findMany } = createApiKeyDbMock([
+      makeApiKeyRow({ id: "dead-1", revoked: true }),
+      makeApiKeyRow({ id: "probe", revoked: true }),
+    ]);
 
-    const result = await apiKeyService.listArchived(db, WORKSPACE_ID);
+    const result = await apiKeyService.listArchived(db, WORKSPACE_ID, { limit: 1 });
 
-    expect(result.items.map((key) => key.id)).toStrictEqual(["dead"]);
+    expect(result.items.map((key) => key.id)).toStrictEqual(["dead-1"]);
+    expect(result.meta).toStrictEqual({ hasNextPage: true, nextCursor: "probe" });
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
+        cursor: undefined,
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-        take: 100,
+        take: 2,
         where: expect.objectContaining({ workspaceId: WORKSPACE_ID }),
       }),
     );
     const args = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
-    expect(args).not.toHaveProperty("cursor");
     expect(JSON.stringify(args.where)).not.toContain("gt");
+  });
+
+  it("keysets the archived list past the cursor id too", async () => {
+    const { db, findMany } = createApiKeyDbMock();
+
+    await apiKeyService.listArchived(db, WORKSPACE_ID, { cursor: KEY_ID, limit: 2 });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: { id: KEY_ID }, take: 3 }),
+    );
   });
 
   it("normalises the scopes of an archived key the same way", async () => {
     const { db } = createApiKeyDbMock([makeApiKeyRow({ revoked: true, scopes: [] })]);
 
-    const result = await apiKeyService.listArchived(db, WORKSPACE_ID);
+    const result = await apiKeyService.listArchived(db, WORKSPACE_ID, { limit: 10 });
 
     expect(result.items[0]?.scopes).toStrictEqual(["FULL"]);
   });
@@ -244,7 +258,7 @@ describe("apiKeyService active/archived predicates", () => {
 
     await apiKeyService.list(db, WORKSPACE_ID, { limit: 1 });
     const activeWhere = wheres[0];
-    await apiKeyService.listArchived(db, WORKSPACE_ID);
+    await apiKeyService.listArchived(db, WORKSPACE_ID, { limit: 10 });
     const archivedWhere = wheres[1];
 
     if (activeWhere == null || archivedWhere == null) {
@@ -299,7 +313,7 @@ describe("apiKeyService active/archived predicates", () => {
     const db = { apiKey: { findMany } } as unknown as DbClient;
 
     const active = await apiKeyService.list(db, WORKSPACE_ID, { limit: 10 });
-    const archived = await apiKeyService.listArchived(db, WORKSPACE_ID);
+    const archived = await apiKeyService.listArchived(db, WORKSPACE_ID, { limit: 10 });
 
     expect(active.items.map((key) => key.id).sort()).toStrictEqual([
       "expiring-later",

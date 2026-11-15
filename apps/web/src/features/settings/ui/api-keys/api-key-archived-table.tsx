@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, HistoryIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
+import { useIntersectionObserver } from "@/shared/lib/hooks/use-intersection-observer";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/core/collapsible";
+import { Spinner } from "@/shared/ui/core/spinner";
 import {
   Table,
   TableBody,
@@ -20,15 +22,57 @@ import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
 import type { UiApiKey } from "@/entities/api-key/model/api-keys.types";
 
-type Props = {
-  archived: UiApiKey[];
+export type ArchivedPagination = {
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  onLoadMore: () => Promise<unknown>;
 };
 
-export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
+type Props = {
+  archived: UiApiKey[];
+  pagination: ArchivedPagination;
+};
+
+export function ApiKeyArchivedTable({ archived, pagination }: Readonly<Props>) {
   const locale = useLocale();
   const [isArchivedOpen, setIsArchivedOpen] = useState(false);
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const { observe, unobserve } = useIntersectionObserver(
+    (entries) => {
+      if (entries[0]?.isIntersecting) {
+        void pagination.onLoadMore();
+      }
+    },
+    { threshold: 0.1 },
+  );
+
+  useEffect(() => {
+    const target = sentinelRef.current;
+    if (!isArchivedOpen || !pagination.hasNextPage || pagination.isFetchingNextPage) {
+      return;
+    }
+
+    if (target == null) {
+      return;
+    }
+
+    observe(target);
+
+    return () => {
+      unobserve(target);
+    };
+  }, [
+    isArchivedOpen,
+    pagination.hasNextPage,
+    pagination.isFetchingNextPage,
+    pagination.onLoadMore,
+    observe,
+    unobserve,
+  ]);
 
   return (
     <Collapsible
@@ -40,7 +84,10 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
         <div className="flex items-center gap-2">
           <HistoryIcon className="text-muted-foreground" />
           <h3 className="font-medium text-sm">{t("settings_api_keys_history_revoked")}</h3>
-          <AppBadge className="ml-1 text-xs">{archived.length}</AppBadge>
+          <AppBadge className="ml-1 text-xs">
+            {archived.length}
+            {pagination.hasNextPage && "+"}
+          </AppBadge>
         </div>
 
         <CollapsibleTrigger asChild>
@@ -97,6 +144,15 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
             </TableBody>
           </Table>
         </div>
+
+        {pagination.hasNextPage && (
+          <div
+            className="flex items-center justify-center py-2"
+            ref={sentinelRef}
+          >
+            {pagination.isFetchingNextPage && <Spinner />}
+          </div>
+        )}
       </CollapsibleContent>
     </Collapsible>
   );

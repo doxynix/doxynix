@@ -1,4 +1,9 @@
-import { ApiKeyScopeSchema, DocTypeSchema, MAX_PAGE_SIZE } from "@doxynix/shared";
+import {
+  ApiKeyScopeSchema,
+  collectCursorPages,
+  DocTypeSchema,
+  MAX_PAGE_SIZE,
+} from "@doxynix/shared";
 import type { inferRouterInputs } from "@trpc/server";
 import { tool } from "ai";
 import * as z from "zod";
@@ -327,12 +332,12 @@ export const getAgentTools = (currentRepoId?: string) => ({
 
   listApiKeys: tool({
     description:
-      "List up to 100 active API keys and up to 100 archived keys, with their friendly names, prefixes, and UUIDs.",
+      "List the workspace API keys — active keys and archived keys — with their friendly names, prefixes, and UUIDs.",
     execute: async () => {
       const trpc = await api();
-      const [{ items: active }, { items: archived }] = await Promise.all([
-        trpc.apikey.list({ limit: MAX_PAGE_SIZE }),
-        trpc.apikey.listArchived(),
+      const [active, archived] = await Promise.all([
+        collectCursorPages((cursor) => trpc.apikey.list({ cursor, limit: MAX_PAGE_SIZE })),
+        collectCursorPages((cursor) => trpc.apikey.listArchived({ cursor, limit: MAX_PAGE_SIZE })),
       ]);
 
       return { active, archived };
@@ -510,8 +515,10 @@ export const getAgentTools = (currentRepoId?: string) => ({
         return trpc.apikey.revoke({ id: keyIdentifier });
       }
 
-      const activeKeys = await trpc.apikey.list({ limit: MAX_PAGE_SIZE });
-      const foundKey = activeKeys.items.find(
+      const activeKeys = await collectCursorPages((cursor) =>
+        trpc.apikey.list({ cursor, limit: MAX_PAGE_SIZE }),
+      );
+      const foundKey = activeKeys.find(
         (key) => key.name.toLowerCase() === keyIdentifier.toLowerCase(),
       );
 

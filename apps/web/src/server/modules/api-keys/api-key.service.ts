@@ -31,7 +31,6 @@ type ListKeysInput = {
 };
 
 const ROTATION_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
-const ARCHIVED_API_KEY_LIMIT = 100;
 
 const API_KEY_SELECT = {
   createdAt: true,
@@ -141,15 +140,22 @@ export const apiKeyService = {
     };
   },
 
-  async listArchived(db: DbClient, workspaceId: string) {
+  async listArchived(db: DbClient, workspaceId: string, input: ListKeysInput) {
+    const { cursor, limit } = input;
+
     const rows = await db.apiKey.findMany({
+      ...keysetArgs(cursor, limit),
       orderBy: orderWithTiebreak("createdAt", "desc"),
       select: API_KEY_SELECT,
-      take: ARCHIVED_API_KEY_LIMIT,
       where: { workspaceId, ...archivedKeyWhere(new Date()) },
     });
 
-    return { items: rows.map(normalizeKey) };
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
+
+    return {
+      items: items.map(normalizeKey),
+      meta: { hasNextPage, nextCursor },
+    };
   },
 
   async revoke(db: DbClient, id: string, userId: string, workspaceId: string) {

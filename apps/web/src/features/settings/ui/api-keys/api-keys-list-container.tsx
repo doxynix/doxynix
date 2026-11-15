@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { useTRPC } from "@/shared/api/trpc";
 import { useIntersectionObserver } from "@/shared/lib/hooks/use-intersection-observer";
@@ -24,7 +24,17 @@ export function ApiKeysListContainer() {
     ),
   );
 
-  const { data: archivedData } = useQuery(trpc.apikey.listArchived.queryOptions());
+  const {
+    data: archivedData,
+    fetchNextPage: fetchNextArchivedPage,
+    hasNextPage: hasNextArchivedPage,
+    isFetchingNextPage: isFetchingNextArchivedPage,
+  } = useInfiniteQuery(
+    trpc.apikey.listArchived.infiniteQueryOptions(
+      { limit: API_KEYS_PAGE_SIZE },
+      { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
+    ),
+  );
 
   const { observe, unobserve } = useIntersectionObserver(
     (entries) => {
@@ -62,7 +72,12 @@ export function ApiKeysListContainer() {
     <div className="flex w-full flex-col gap-6">
       <ApiKeysList
         active={data.pages.flatMap((page) => page.items)}
-        archived={archivedData?.items ?? []}
+        archived={archivedData?.pages.flatMap((page) => page.items) ?? []}
+        archivedPagination={{
+          hasNextPage: hasNextArchivedPage,
+          isFetchingNextPage: isFetchingNextArchivedPage,
+          onLoadMore: fetchNextArchivedPage,
+        }}
       />
 
       {hasNextPage && (

@@ -1,4 +1,4 @@
-import { MAX_PAGE_SIZE } from "@doxynix/shared";
+import { collectCursorPages, MAX_PAGE_SIZE } from "@doxynix/shared";
 
 import { trpc } from "@/core/client";
 
@@ -10,9 +10,11 @@ export const keysService = {
   },
 
   async list() {
-    const [{ items: active }, { items: archived }] = await Promise.all([
-      trpc.apikey.list.query({ limit: MAX_PAGE_SIZE }),
-      trpc.apikey.listArchived.query(),
+    const [active, archived] = await Promise.all([
+      collectCursorPages((cursor) => trpc.apikey.list.query({ cursor, limit: MAX_PAGE_SIZE })),
+      collectCursorPages((cursor) =>
+        trpc.apikey.listArchived.query({ cursor, limit: MAX_PAGE_SIZE }),
+      ),
     ]);
 
     return { active, archived };
