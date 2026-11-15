@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
     getStructureContext: () => null,
     getStructureNode: vi.fn(() => null),
   })),
+  getByPrAnalysisId: vi.fn(),
   getRepoForImpact: vi.fn(),
   loadImpactAnalysis: vi.fn(),
   loadLegacyComments: vi.fn(),
@@ -32,6 +33,7 @@ vi.mock("../analysis.mapper", () => ({
 }));
 vi.mock("../analysis.repository", () => ({
   analysisRepo: {
+    getByPrAnalysisId: mocks.getByPrAnalysisId,
     getRepoForImpact: mocks.getRepoForImpact,
     loadImpactAnalysis: mocks.loadImpactAnalysis,
     loadLegacyComments: mocks.loadLegacyComments,
@@ -60,7 +62,6 @@ function stubAnalysis() {
     changedFilesJson: [],
     createdAt: new Date("2026-03-01T11:00:00.000Z"),
     findingsJson: [],
-    generatedFixes: [],
     headSha: "head",
     id: ANALYSIS_ID,
     prNumber: 7,
@@ -95,27 +96,17 @@ describe("prImpactService.getByRepoAndPRNumber", () => {
     expect(payload?.analysis.id).toBe(ANALYSIS_ID);
   });
 
-  it("reports the counted fixes while building the capped page", async () => {
+  it("reports the counted fixes without shipping their rows", async () => {
     mocks.loadImpactAnalysis.mockResolvedValue({
       ...stubAnalysis(),
       _count: { generatedFixes: 137 },
-      generatedFixes: [
-        {
-          githubPrNumber: 12,
-          githubPrUrl: "https://pr/12",
-          id: "fix-1",
-          status: "DRAFT",
-          title: "a",
-        },
-        { githubPrNumber: null, githubPrUrl: null, id: "fix-2", status: "COMPLETED", title: "b" },
-      ],
     });
     mocks.getRepoForImpact.mockResolvedValue({ name: "doxynix", owner: "ivan" });
 
     const payload = await prImpactService.getByRepoAndPRNumber({} as DbClient, REPO_ID, 7, "ws-1");
 
     expect(payload?.summary.linkedFixes).toBe(137);
-    expect(payload?.fixes.map((fix) => fix.id)).toStrictEqual(["fix-1", "fix-2"]);
+    expect(payload).not.toHaveProperty("fixes");
   });
 
   it("skips the legacy comment query when both json snapshots are present", async () => {
@@ -163,6 +154,72 @@ describe("prImpactService.getByRepoAndPRNumber", () => {
       prImpactService.getByRepoAndPRNumber({} as DbClient, REPO_ID, 7, "ws-1"),
     ).resolves.toBeNull();
     expect(mocks.buildTopFindings).not.toHaveBeenCalled();
+  });
+});
+
+describe("prImpactService.listFixes", () => {
+  const WORKSPACE_ID = "ws-1";
+
+  function makeFixRow(overrides: Record<string, unknown> = {}) {
+    return {
+      githubPrNumber: 12,
+      githubPrUrl: "https://pr/12",
+      id: "018f0000-0000-7000-8000-0000000000f1",
+      status: "DRAFT",
+      title: "fix",
+      ...overrides,
+    };
+  }
+
+  it("keeps the probe row out of the page and hands it back as the cursor", async () => {
+    mocks.getByPrAnalysisId.mockResolvedValue([
+      makeFixRow({ id: "018f0000-0000-7000-8000-0000000000f1" }),
+      makeFixRow({ id: "018f0000-0000-7000-8000-0000000000f2" }),
+      makeFixRow({ id: "018f0000-0000-7000-8000-0000000000f3" }),
+    ]);
+
+    const result = await prImpactService.listFixes({} as DbClient, ANALYSIS_ID, WORKSPACE_ID, {
+      limit: 2,
+    });
+
+    expect(result.items.map((fix) => fix.id)).toStrictEqual([
+      "018f0000-0000-7000-8000-0000000000f1",
+      "018f0000-0000-7000-8000-0000000000f2",
+    ]);
+    expect(result.meta).toStrictEqual({
+      hasNextPage: true,
+      nextCursor: "018f0000-0000-7000-8000-0000000000f3",
+    });
+  });
+
+  it("maps the fix summary the linked-fixes card renders", async () => {
+    mocks.getByPrAnalysisId.mockResolvedValueOnce([makeFixRow()]);
+
+    const result = await prImpactService.listFixes({} as DbClient, ANALYSIS_ID, WORKSPACE_ID, {
+      limit: 20,
+    });
+
+    expect(result.items[0]).toStrictEqual({
+      githubPrNumber: 12,
+      githubPrUrl: "https://pr/12",
+      id: "018f0000-0000-7000-8000-0000000000f1",
+      status: "DRAFT",
+      title: "fix",
+    });
+  });
+
+  it("passes the cursor and the limit through to the workspace-scoped read", async () => {
+    mocks.getByPrAnalysisId.mockResolvedValue([]);
+
+    await prImpactService.listFixes({} as DbClient, ANALYSIS_ID, WORKSPACE_ID, {
+      cursor: "018f0000-0000-7000-8000-0000000000f2",
+      limit: 20,
+    });
+
+    expect(mocks.getByPrAnalysisId).toHaveBeenCalledWith(expect.anything(), ANALYSIS_ID, "ws-1", {
+      cursor: "018f0000-0000-7000-8000-0000000000f2",
+      limit: 20,
+    });
   });
 });
 

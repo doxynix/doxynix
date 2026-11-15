@@ -3,12 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { DbClient } from "@/server/core/db";
 
-import {
-  analysisRepo,
-  loadDocumentsPerType,
-  MAX_IMPACT_FIXES,
-  MAX_LEGACY_COMMENTS,
-} from "./analysis.repository";
+import { analysisRepo, loadDocumentsPerType, MAX_LEGACY_COMMENTS } from "./analysis.repository";
 
 const ANALYSIS_ID = "0195f000-0000-7000-8000-000000000001";
 const REPO_ID = "0195f000-0000-7000-8000-000000000002";
@@ -464,7 +459,6 @@ describe("analysisRepo.loadImpactAnalysis", () => {
       "changedFilesJson",
       "createdAt",
       "findingsJson",
-      "generatedFixes",
       "headSha",
       "id",
       "prNumber",
@@ -474,18 +468,39 @@ describe("analysisRepo.loadImpactAnalysis", () => {
     ]);
   });
 
-  it("caps the linked fixes and asks for their real count", async () => {
+  it("asks for the counted fixes without loading the rows", async () => {
     const { db, findFirst } = makePullDb();
 
     await analysisRepo.loadImpactAnalysis(db, REPO_ID, 7, WORKSPACE_ID);
 
     const select = selectOf(findFirst);
-    expect(MAX_IMPACT_FIXES).toBe(50);
-    expect(select.generatedFixes).toMatchObject({
-      orderBy: { createdAt: "desc" },
-      take: MAX_IMPACT_FIXES,
-    });
+    expect(select).not.toHaveProperty("generatedFixes");
     expect(select._count).toStrictEqual({ select: { generatedFixes: true } });
+  });
+});
+
+describe("analysisRepo.getByPrAnalysisId", () => {
+  function makeFixDb(rows: unknown[] = []) {
+    const findMany = vi.fn().mockResolvedValue(rows);
+    const db = { generatedFix: { findMany } } as unknown as DbClient;
+
+    return { db, findMany };
+  }
+
+  it("keysets the fixes of one analysis inside the workspace, newest first", async () => {
+    const { db, findMany } = makeFixDb();
+
+    await analysisRepo.getByPrAnalysisId(db, ANALYSIS_ID, WORKSPACE_ID, {
+      cursor: null,
+      limit: 20,
+    });
+
+    expect(findMany.mock.calls[0]?.[0]).toMatchObject({
+      cursor: undefined,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: 21,
+      where: { prAnalysisId: ANALYSIS_ID, repo: { workspaceId: WORKSPACE_ID } },
+    });
   });
 });
 

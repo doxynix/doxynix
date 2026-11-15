@@ -184,8 +184,6 @@ export type AnalysisRef = {
 export type ImpactAnalysisRecord = Awaited<ReturnType<typeof analysisRepo.loadImpactAnalysis>>;
 export type ImpactAnalysis = NonNullable<ImpactAnalysisRecord>;
 
-export const MAX_IMPACT_FIXES = 50;
-
 export const MAX_LEGACY_COMMENTS = 500;
 
 export const analysisRepo = {
@@ -286,6 +284,26 @@ export const analysisRepo = {
   async getById(db: DbClient, id: string, workspaceId: string) {
     return db.generatedFix.findFirst({
       where: { id, repo: { workspaceId } },
+    });
+  },
+
+  async getByPrAnalysisId(
+    db: DbClient,
+    prAnalysisId: string,
+    workspaceId: string,
+    input: { cursor?: null | string; limit: number },
+  ) {
+    return db.generatedFix.findMany({
+      ...keysetArgs(input.cursor, input.limit),
+      orderBy: ORDER_CREATED_AT_DESC,
+      select: {
+        githubPrNumber: true,
+        githubPrUrl: true,
+        id: true,
+        status: true,
+        title: true,
+      },
+      where: { prAnalysisId, repo: { workspaceId } },
     });
   },
 
@@ -490,17 +508,6 @@ export const analysisRepo = {
         changedFilesJson: true,
         createdAt: true,
         findingsJson: true,
-        generatedFixes: {
-          orderBy: { createdAt: "desc" },
-          select: {
-            githubPrNumber: true,
-            githubPrUrl: true,
-            id: true,
-            status: true,
-            title: true,
-          },
-          take: MAX_IMPACT_FIXES,
-        },
         headSha: true,
         id: true,
         prNumber: true,

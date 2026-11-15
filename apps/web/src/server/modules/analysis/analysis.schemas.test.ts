@@ -271,6 +271,7 @@ describe("PullListOutputSchema", () => {
 describe("PRCommentsOutputSchema", () => {
   it("accepts a stored risk level outside the 0-10 write range", () => {
     const page = {
+      meta: { hasNextPage: true, nextCursor: "018f0000-0000-7000-8000-000000000005" },
       renderedComments: [
         {
           bodyHtml: "<p>x</p>",
@@ -285,6 +286,16 @@ describe("PRCommentsOutputSchema", () => {
     };
 
     expect(PRCommentsOutputSchema.parse(page).renderedComments[0]?.riskLevel).toBe(42);
+  });
+
+  it("accepts a later page that carries no count", () => {
+    expect(
+      PRCommentsOutputSchema.parse({
+        meta: { hasNextPage: false },
+        renderedComments: [],
+        total: null,
+      }).total,
+    ).toBeNull();
   });
 });
 

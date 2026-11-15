@@ -253,8 +253,9 @@ export const PRCommentSchema = z.object({
 });
 
 export const PRCommentsOutputSchema = z.object({
+  meta: CursorMetaSchema,
   renderedComments: z.array(PRCommentSchema),
-  total: z.number().int(),
+  total: z.number().int().nullable(),
 });
 
 export const NodeContextInputSchema = z.object({
@@ -382,6 +383,13 @@ const RelatedFixSummarySchema = z.object({
   status: z.string(),
   title: z.string(),
 });
+
+export const PRFixesOutputSchema = z.object({
+  items: z.array(RelatedFixSummarySchema),
+  meta: CursorMetaSchema,
+});
+
+export type PRFixSummary = z.infer<typeof RelatedFixSummarySchema>;
 
 export const NodeContextOutputSchema = z
   .object({

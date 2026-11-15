@@ -37,10 +37,10 @@ export const analysisRepoRouter = {
       );
     }),
   getComments: workspaceProcedure
-    .input(z.object({ analysisId: z.string() }))
+    .input(z.object({ analysisId: z.string() }).extend(cursorPageSchema(100).shape))
     .output(PRCommentsOutputSchema)
     .query(async ({ ctx, input }) => {
-      return prCommentsService.getComments(ctx.db, input.analysisId, ctx.workspace.id);
+      return prCommentsService.getComments(ctx.db, input.analysisId, ctx.workspace.id, input);
     }),
   getNodeContext: workspaceProcedure
     .input(NodeContextInputSchema)

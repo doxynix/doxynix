@@ -198,7 +198,6 @@ const makeImpactAnalysis = (overrides: Record<string, unknown> = {}): ImpactAnal
     changedFilesJson: [],
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
     findingsJson: [],
-    generatedFixes: [],
     headSha: "head",
     id: "pa-1",
     prNumber: 1,

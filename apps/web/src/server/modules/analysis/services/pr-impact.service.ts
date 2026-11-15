@@ -6,6 +6,7 @@ import { keysetArgs, ORDER_CREATED_AT_DESC, splitKeysetPage } from "@/server/uti
 
 import { analysisMapper } from "../analysis.mapper";
 import { analysisRepo } from "../analysis.repository";
+import { fixesMapper } from "../fixes.mapper";
 import { createAnalyzeContextBuilder } from "../logic/analyze-context-builder";
 import { buildTopLevelNodes } from "../logic/graph-navigator";
 import { mapChangedFilesToImpactNodes } from "../logic/impact-file-mapper";
@@ -114,13 +115,6 @@ export const prImpactService = {
         status: analysis.status,
       },
       changedFiles: changedFileItems,
-      fixes: analysis.generatedFixes.map((fix) => ({
-        githubPrNumber: fix.githubPrNumber,
-        githubPrUrl: fix.githubPrUrl,
-        id: fix.id,
-        status: fix.status,
-        title: fix.title,
-      })),
       navigationHints: {
         primaryFilePath: primaryFile?.filePath ?? null,
         primaryNodeId,
@@ -185,6 +179,21 @@ export const prImpactService = {
       })),
       meta: { hasNextPage, nextCursor },
       total,
+    };
+  },
+
+  async listFixes(
+    db: DbClient,
+    prAnalysisId: string,
+    workspaceId: string,
+    input: { cursor?: null | string; limit: number },
+  ) {
+    const rows = await analysisRepo.getByPrAnalysisId(db, prAnalysisId, workspaceId, input);
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, input.limit);
+
+    return {
+      items: items.map((fix) => fixesMapper.toSummary(fix)),
+      meta: { hasNextPage, nextCursor },
     };
   },
 };

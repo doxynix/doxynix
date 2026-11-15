@@ -3,20 +3,86 @@ import { MessageCode } from "@doxynix/shared";
 import * as z from "zod";
 
 import { AppError } from "@/server/core/api-error";
+import { appLogger } from "@/server/core/app-logger";
 import type { DbClient } from "@/server/core/db";
 import { getInstallationClient } from "@/server/core/github/github-client";
+import { commentsToFindings } from "@/server/modules/analysis/logic/comment-to-finding";
+import { fixesService } from "@/server/modules/analysis/services/fixes.service";
 import { markdownToHtml } from "@/server/modules/analysis/services/markdown-to-html";
+import { keysetArgs, splitKeysetPage } from "@/server/utils/pagination";
 import { requestContext } from "@/server/utils/request-context";
 
-export const MAX_ANALYSIS_COMMENTS = 500;
+// A bulk fix reads the whole analysis, so the cap is a safety valve rather than a page: an
+// analysis near it is logged instead of silently truncated.
+export const MAX_FIXABLE_COMMENTS = 5000;
 
 export const prCommentsService = {
-  async getComments(db: DbClient, analysisId: string, workspaceId: string) {
+  // The verdict must cover the analysis, not the pages the caller happened to scroll through, so
+  // the fix is built from every stored comment in one server-side read.
+  async fixAllComments(db: DbClient, userId: string, prAnalysisId: string, workspaceId: string) {
+    const analysis = await db.pullRequestAnalysis.findFirst({
+      select: { repo: { select: { id: true } } },
+      where: { id: prAnalysisId, repo: { workspaceId } },
+    });
+
+    if (analysis == null) {
+      throw new AppError({
+        code: "NOT_FOUND",
+        messageCode: MessageCode.ANALYSIS_NOT_FOUND,
+        publicMessage: "Analysis not found",
+      });
+    }
+
+    const comments = await db.pullRequestComment.findMany({
+      orderBy: [{ filePath: "asc" }, { line: "asc" }, { id: "asc" }],
+      select: { body: true, filePath: true, findingType: true, line: true },
+      take: MAX_FIXABLE_COMMENTS,
+      where: { analysis: { id: prAnalysisId, repo: { workspaceId } } },
+    });
+
+    if (comments.length === MAX_FIXABLE_COMMENTS) {
+      appLogger.warn({
+        cap: MAX_FIXABLE_COMMENTS,
+        msg: "pr_comment_fix_cap_hit",
+        prAnalysisId,
+      });
+    }
+
+    if (comments.length === 0) {
+      return { error: "No comments to fix", success: false };
+    }
+
+    return fixesService.createFix(
+      db,
+      userId,
+      {
+        fileContents: {},
+        findings: commentsToFindings(
+          comments.map((comment) => ({
+            filePath: comment.filePath,
+            findingType: comment.findingType,
+            line: comment.line,
+            suggestion: comment.body,
+          })),
+        ),
+        prAnalysisId,
+        repoId: analysis.repo.id,
+      },
+      workspaceId,
+    );
+  },
+  async getComments(
+    db: DbClient,
+    analysisId: string,
+    workspaceId: string,
+    input: { cursor?: null | string; limit: number },
+  ) {
     const where = { analysis: { id: analysisId, repo: { workspaceId } } };
 
-    const [comments, total] = await Promise.all([
+    const [rows, total] = await Promise.all([
       db.pullRequestComment.findMany({
-        orderBy: [{ filePath: "asc" }, { line: "asc" }],
+        ...keysetArgs(input.cursor, input.limit),
+        orderBy: [{ filePath: "asc" }, { line: "asc" }, { id: "asc" }],
         select: {
           analysis: {
             select: {
@@ -36,21 +102,28 @@ export const prCommentsService = {
           line: true,
           riskLevel: true,
         },
-        take: MAX_ANALYSIS_COMMENTS,
         where,
       }),
-      db.pullRequestComment.count({ where }),
+      // Only the first page renders the total, so a later page must not pay for a COUNT(*).
+      input.cursor == null ? db.pullRequestComment.count({ where }) : null,
     ]);
+
+    const { hasNextPage, items: comments, nextCursor } = splitKeysetPage(rows, input.limit);
+    const meta = { hasNextPage, nextCursor };
 
     // An empty page must not create a cache entry for an arbitrary analysis id
     const firstComment = comments[0];
     if (firstComment == null) {
-      return { renderedComments: [], total };
+      return { meta, renderedComments: [], total };
     }
 
-    // Content-addressed by analysis version and comment count: a re-analysis bumps `updatedAt` and
-    // appends rows, and the total separates two pages that share the 500-row cap.
-    const cacheVersion = `${firstComment.analysis.updatedAt.getTime()}-${total}`;
+    // Content-addressed by analysis version and page position: a re-analysis bumps `updatedAt`,
+    // while the cursor and limit separate the pages of one version.
+    const cacheVersion = [
+      firstComment.analysis.updatedAt.getTime(),
+      input.cursor ?? "start",
+      input.limit,
+    ].join("-");
 
     const renderedComments = await unstable_cache(
       async () =>
@@ -82,6 +155,7 @@ export const prCommentsService = {
     )();
 
     return {
+      meta,
       renderedComments,
       total,
     };
