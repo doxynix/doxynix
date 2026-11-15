@@ -18,6 +18,12 @@ export async function handleIssueCommentEvent(
   }
 
   const repos = await prisma.repo.findMany({
+    select: {
+      createdByUserId: true,
+      defaultBranch: true,
+      id: true,
+      workspaceId: true,
+    },
     where: { githubId: payload.repository.id },
   });
 

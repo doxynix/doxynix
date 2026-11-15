@@ -71,6 +71,22 @@ beforeEach(() => {
 });
 
 describe("handleIssueCommentEvent", () => {
+  it("selects only the columns the mirror and the mention reply read", async () => {
+    stubDb([{ id: ANALYSIS_ID, repoId: REPO_ID }], [{ analysisId: ANALYSIS_ID, id: "c1" }]);
+
+    await handleIssueCommentEvent(makePayload());
+
+    expect(mocks.findManyRepos).toHaveBeenCalledWith({
+      select: {
+        createdByUserId: true,
+        defaultBranch: true,
+        id: true,
+        workspaceId: true,
+      },
+      where: { githubId: 4242 },
+    });
+  });
+
   it("revalidates the analysis tag of the page the comment was mirrored into", async () => {
     stubDb([{ id: ANALYSIS_ID, repoId: REPO_ID }], [{ analysisId: ANALYSIS_ID, id: "c1" }]);
 
