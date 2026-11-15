@@ -1,13 +1,15 @@
-import { UpdatePRConfigInput } from "@doxynix/shared";
+import { CursorMetaSchema, UpdatePRConfigInput } from "@doxynix/shared";
 import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 import { entitlementProcedure, workspaceProcedure } from "@/server/core/trpc/init";
+import { cursorPageSchema } from "@/server/utils/pagination";
 
 import {
   FindingForFixSchema,
   FixApplicationPayloadSchema,
   GeneratedFixDetailedDTO,
+  GeneratedFixDTO,
 } from "./analysis.schemas";
 import { PRConfigService } from "./logic/pr-config";
 import { fixesService } from "./services/fixes.service";
@@ -79,6 +81,12 @@ export const analysisPrFixesRouter = {
     .output(GeneratedFixDetailedDTO)
     .query(async ({ ctx, input }) => {
       return fixesService.getById(ctx.db, ctx.redis, input.fixId, ctx.workspace.id);
+    }),
+  getByRepository: workspaceProcedure
+    .input(z.object({ repoId: z.uuid() }).extend(cursorPageSchema(50).shape))
+    .output(z.object({ items: z.array(GeneratedFixDTO), meta: CursorMetaSchema }))
+    .query(async ({ ctx, input }) => {
+      return fixesService.getByRepository(ctx.db, input.repoId, ctx.workspace.id, input);
     }),
   getRepoConfig: workspaceProcedure
     .input(z.object({ repoId: z.uuid() }))

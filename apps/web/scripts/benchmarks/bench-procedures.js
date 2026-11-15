@@ -76,7 +76,7 @@ const PROCEDURES = [
   ["analysis.getAvailableDocs", { aid: AID, repoId: REPO }],
   ["analysis.getStructureMap", { repoId: REPO }],
   ["analysis.listByRepository", { repoId: REPO }],
-  ["analysis.getByRepository", { repoId: REPO }],
+  ["analysis.getByRepository", { limit: 20, repoId: REPO }],
   ["analysis.getRepoConfig", { repoId: REPO }],
   ["analysis.getStagedFiles", { repoId: REPO }],
   ["analysis.getWithGraphLinks", { repoId: REPO }],

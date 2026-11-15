@@ -15,6 +15,7 @@ const { invalidateMock, setQueriesDataMock } = vi.hoisted(() => ({
 
 const filters = {
   dashboardStats: ["analytics.getDashboardStats"],
+  getByRepository: ["analysis.getByRepository"],
   getHistory: ["analysis.getHistory"],
   getLatest: ["analysis.getLatest"],
   getOnboardingState: ["user.getOnboardingState"],
@@ -24,6 +25,7 @@ const filters = {
 
 const trpc = {
   analysis: {
+    getByRepository: { pathFilter: () => filters.getByRepository },
     getHistory: { pathFilter: () => filters.getHistory },
     getLatest: { pathFilter: () => filters.getLatest },
     getStagedFiles: { pathFilter: () => filters.getStagedFiles },
@@ -105,5 +107,6 @@ describe("analysis realtime handlers", () => {
       filters.getStagedFiles,
       filters.getOnboardingState,
     ]);
+    expect(invalidatedFilters()).not.toContain(filters.getByRepository);
   });
 });

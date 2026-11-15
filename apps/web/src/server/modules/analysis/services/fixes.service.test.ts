@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   createFix: vi.fn(),
+  getByRepoId: vi.fn(),
   publish: vi.fn(),
   trigger: vi.fn(),
 }));
@@ -14,7 +15,7 @@ vi.mock("@/server/core/realtime", () => ({
   realtimeService: { user: () => ({ publish: mocks.publish }) },
 }));
 vi.mock("../analysis.repository", () => ({
-  analysisRepo: { create: mocks.createFix },
+  analysisRepo: { create: mocks.createFix, getByRepoId: mocks.getByRepoId },
 }));
 vi.mock("../tasks/generate-fix.task", () => ({
   generateFixTask: { trigger: mocks.trigger },
@@ -117,5 +118,52 @@ describe("fixesService.createFix", () => {
     );
 
     expect(db.pullRequestAnalysis.findFirst).not.toHaveBeenCalled();
+  });
+});
+
+describe("fixesService.getByRepository", () => {
+  function fixRow(id: string) {
+    return {
+      branch: `fix/${id}`,
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      description: null,
+      estimatedImpact: null,
+      githubPrNumber: null,
+      githubPrUrl: null,
+      id,
+      status: "DRAFT",
+      title: id,
+    };
+  }
+
+  it("keeps the page and hands the probe row back as the next cursor", async () => {
+    mocks.getByRepoId.mockResolvedValue([fixRow("fix-1"), fixRow("fix-2"), fixRow("fix-3")]);
+
+    const page = await fixesService.getByRepository(
+      {} as unknown as DbClient,
+      REPO_ID,
+      "workspace-1",
+      { limit: 2 },
+    );
+
+    expect(page.items.map((fix) => fix.id)).toEqual(["fix-1", "fix-2"]);
+    expect(page.meta).toStrictEqual({ hasNextPage: true, nextCursor: "fix-3" });
+  });
+
+  it("reports the last page without a cursor", async () => {
+    mocks.getByRepoId.mockResolvedValue([fixRow("fix-1")]);
+
+    const page = await fixesService.getByRepository(
+      {} as unknown as DbClient,
+      REPO_ID,
+      "workspace-1",
+      { cursor: "fix-0", limit: 2 },
+    );
+
+    expect(page.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
+    expect(mocks.getByRepoId).toHaveBeenCalledWith(expect.anything(), REPO_ID, "workspace-1", {
+      cursor: "fix-0",
+      limit: 2,
+    });
   });
 });

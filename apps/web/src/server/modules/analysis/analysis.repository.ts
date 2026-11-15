@@ -6,6 +6,7 @@ import type { z } from "zod";
 
 import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
+import { keysetArgs, ORDER_CREATED_AT_DESC } from "@/server/utils/pagination";
 
 import type { persistedFindingSchema } from "./analysis.schemas";
 import { fixesMapper } from "./fixes.mapper";
@@ -301,6 +302,19 @@ export const analysisRepo = {
           workspaceId,
         },
       },
+    });
+  },
+
+  async getByRepoId(
+    db: DbClient,
+    repoId: string,
+    workspaceId: string,
+    input: { cursor?: null | string; limit: number },
+  ) {
+    return db.generatedFix.findMany({
+      ...keysetArgs(input.cursor, input.limit),
+      orderBy: ORDER_CREATED_AT_DESC,
+      where: { repo: { id: repoId, workspaceId } },
     });
   },
 

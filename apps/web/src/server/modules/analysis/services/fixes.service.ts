@@ -1,4 +1,4 @@
-import { generateBranchName, MessageCode } from "@doxynix/shared";
+import { type CursorMeta, generateBranchName, MessageCode } from "@doxynix/shared";
 import type { Redis } from "@upstash/redis";
 import type * as z from "zod";
 
@@ -9,6 +9,7 @@ import { appLogger } from "@/server/core/app-logger";
 import type { DbClient } from "@/server/core/db";
 import { getClientContext, getInstallationClient } from "@/server/core/github/github-client";
 import { realtimeService } from "@/server/core/realtime";
+import { splitKeysetPage } from "@/server/utils/pagination";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 
 import { analysisRepo } from "../analysis.repository";
@@ -17,6 +18,7 @@ import {
   type FixApplicationPayloadSchema,
   FixResultSchema,
   type GeneratedFixDetailedDTO,
+  type GeneratedFixDTO,
 } from "../analysis.schemas";
 import { fixesMapper } from "../fixes.mapper";
 import { FixService } from "../logic/fix-generator";
@@ -214,6 +216,21 @@ export const fixesService = {
     const parsedResult = FixResultSchema.safeParse(cachedResult);
 
     return fixesMapper.toDetailed(fix, parsedResult.success ? parsedResult.data : null);
+  },
+
+  async getByRepository(
+    db: DbClient,
+    repoId: string,
+    workspaceId: string,
+    input: { cursor?: null | string; limit: number },
+  ): Promise<{ items: Array<z.infer<typeof GeneratedFixDTO>>; meta: CursorMeta }> {
+    const rows = await analysisRepo.getByRepoId(db, repoId, workspaceId, input);
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, input.limit);
+
+    return {
+      items: items.map((fix) => fixesMapper.toPublic(fix)),
+      meta: { hasNextPage, nextCursor },
+    };
   },
 
   async openPullRequest(

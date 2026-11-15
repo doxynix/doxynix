@@ -411,6 +411,37 @@ describe("analysisRepo.getAnalysisPayloadForRepo", () => {
   });
 });
 
+describe("analysisRepo.getByRepoId", () => {
+  it("reads one keyset page newest-first with the id tiebreak", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const db = { generatedFix: { findMany } } as unknown as DbClient;
+
+    await analysisRepo.getByRepoId(db, REPO_ID, WORKSPACE_ID, { limit: 50 });
+
+    expect(findMany).toHaveBeenCalledWith({
+      cursor: undefined,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: 51,
+      where: { repo: { id: REPO_ID, workspaceId: WORKSPACE_ID } },
+    });
+  });
+
+  it("resumes after the cursor instead of re-reading the first page", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const db = { generatedFix: { findMany } } as unknown as DbClient;
+
+    await analysisRepo.getByRepoId(db, REPO_ID, WORKSPACE_ID, {
+      cursor: "0195f000-0000-7000-8000-000000000009",
+      limit: 20,
+    });
+
+    expect(findMany.mock.calls[0]?.[0]).toMatchObject({
+      cursor: { id: "0195f000-0000-7000-8000-000000000009" },
+      take: 21,
+    });
+  });
+});
+
 describe("analysisRepo.loadImpactAnalysis", () => {
   function makePullDb() {
     const findFirst = vi.fn().mockResolvedValue(null);

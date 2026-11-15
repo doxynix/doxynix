@@ -9,6 +9,7 @@ const EXPECTED = [
   "configureRepository",
   "createFix",
   "getById",
+  "getByRepository",
   "getRepoConfig",
   "getStagedFiles",
   "openPullRequest",
