@@ -5,10 +5,9 @@ import type { DbClient } from "@/server/core/db";
 
 import {
   analysisRepo,
+  loadDocumentsPerType,
   MAX_IMPACT_FIXES,
   MAX_LEGACY_COMMENTS,
-  MAX_REPO_DOCUMENTS,
-  repoWithLatestAnalysisAndDocsSelect,
 } from "./analysis.repository";
 
 const ANALYSIS_ID = "0195f000-0000-7000-8000-000000000001";
@@ -107,38 +106,162 @@ describe("analysisRepo.getRepoSnapshot", () => {
   });
 });
 
-describe("analysisRepo.getRepoSnapshotWithDocuments", () => {
-  it("caps the no-aid document read and keeps newest-first order", async () => {
-    const { calls, db } = makeDb({ analyses: [ANALYSIS], documents: [], id: REPO_ID });
+describe("loadDocumentsPerType", () => {
+  type Query = { sql: string; values: readonly unknown[] };
 
-    await analysisRepo.getRepoSnapshotWithDocuments(db, REPO_ID, WORKSPACE_ID);
+  function makeDocDb(rows: unknown[] = [], contents: unknown[] = []) {
+    const queries: Query[] = [];
+    const findMany = vi.fn(async () => contents);
+    const db = {
+      $queryRawTyped: async (query: Query) => {
+        queries.push(query);
+        return rows;
+      },
+      document: { findMany },
+    } as unknown as DbClient;
 
-    expect(calls).toHaveLength(1);
-    expect(nested(calls[0], "documents")).toMatchObject({
-      orderBy: { updatedAt: "desc" },
-      take: MAX_REPO_DOCUMENTS,
-    });
-    expect(repoWithLatestAnalysisAndDocsSelect.documents.take).toBe(MAX_REPO_DOCUMENTS);
+    return { db, findMany, queries };
+  }
+
+  const ROW = {
+    analysisId: ANALYSIS_ID,
+    createdAt: new Date("2026-01-01T00:00:00.000Z"),
+    id: "0195f000-0000-7000-8000-000000000009",
+    path: null,
+    type: "README" as const,
+    updatedAt: new Date("2026-01-02T00:00:00.000Z"),
+    version: "abc123",
+  };
+
+  const DOCUMENT = {
+    analysis: { id: ANALYSIS_ID },
+    createdAt: ROW.createdAt,
+    id: ROW.id,
+    path: ROW.path,
+    type: ROW.type,
+    updatedAt: ROW.updatedAt,
+    version: ROW.version,
+  };
+
+  it("windows the rows per document kind instead of capping the whole repo", async () => {
+    const { db, queries } = makeDocDb([ROW]);
+
+    await loadDocumentsPerType(db, REPO_ID, WORKSPACE_ID, { perType: 1 });
+
+    expect(queries).toHaveLength(1);
+    expect(queries[0]?.values).toStrictEqual([REPO_ID, WORKSPACE_ID, null, 1]);
+    expect(queries[0]?.sql).toContain("ROW_NUMBER() OVER");
   });
 
-  it("pins the documents and the analysis to the requested version", async () => {
-    const { calls, db } = makeDb({ analyses: [ANALYSIS], documents: [], id: REPO_ID });
+  it("scopes the window to the pinned analysis only when one is requested", async () => {
+    const { db, queries } = makeDocDb();
 
-    await analysisRepo.getRepoSnapshotWithDocuments(db, REPO_ID, WORKSPACE_ID, ANALYSIS_ID);
+    await loadDocumentsPerType(db, REPO_ID, WORKSPACE_ID, { aid: ANALYSIS_ID, perType: 3 });
 
-    expect(calls).toHaveLength(1);
-    expect(nested(calls[0], "documents").where).toStrictEqual({ analysisId: ANALYSIS_ID });
+    expect(queries[0]?.values).toStrictEqual([REPO_ID, WORKSPACE_ID, ANALYSIS_ID, 3]);
+  });
+
+  it("maps the SQL row onto the document shape the mappers read", async () => {
+    const { db } = makeDocDb([ROW]);
+
+    await expect(
+      loadDocumentsPerType(db, REPO_ID, WORKSPACE_ID, { perType: 1 }),
+    ).resolves.toStrictEqual([DOCUMENT]);
+  });
+
+  it("reads content through Prisma only when it is asked for", async () => {
+    const metadataOnly = makeDocDb([ROW]);
+
+    await loadDocumentsPerType(metadataOnly.db, REPO_ID, WORKSPACE_ID, { perType: 1 });
+
+    expect(metadataOnly.findMany).not.toHaveBeenCalled();
+
+    const withContent = makeDocDb([ROW], [{ content: "# readme", id: ROW.id }]);
+
+    await expect(
+      loadDocumentsPerType(withContent.db, REPO_ID, WORKSPACE_ID, {
+        perType: 1,
+        withContent: true,
+      }),
+    ).resolves.toStrictEqual([{ ...DOCUMENT, content: "# readme" }]);
+    expect(withContent.findMany).toHaveBeenCalledWith({
+      select: { content: true, id: true },
+      where: { id: { in: [ROW.id] } },
+    });
+  });
+
+  it("issues no content read for a repo without documents", async () => {
+    const { db, findMany } = makeDocDb();
+
+    await expect(
+      loadDocumentsPerType(db, REPO_ID, WORKSPACE_ID, { perType: 1, withContent: true }),
+    ).resolves.toStrictEqual([]);
+    expect(findMany).not.toHaveBeenCalled();
+  });
+});
+
+describe("analysisRepo.getRepoBySha", () => {
+  it("carries no documents, because no caller of the PR detail reads them", async () => {
+    const { calls, db } = makeDb({ analyses: [ANALYSIS], id: REPO_ID });
+
+    await analysisRepo.getRepoBySha(db, REPO_ID, "abc123", WORKSPACE_ID);
+
+    expect(Object.keys(calls[0]?.select ?? {})).not.toContain("documents");
     expect(nested(calls[0], "analyses").where).toStrictEqual({
-      id: ANALYSIS_ID,
+      commitSha: "abc123",
       status: "DONE",
     });
   });
+});
 
-  it("throws ANALYSIS_VERSION_NOT_FOUND when the requested analysis is gone", async () => {
-    const { db } = makeDb({ analyses: [], documents: [], id: REPO_ID });
+describe("analysisRepo.getRepoDocsPayload", () => {
+  type Query = { sql: string; values: readonly unknown[] };
+
+  function makeDocsDb(repo: unknown, target: unknown = null) {
+    const queries: Query[] = [];
+    const db = {
+      $queryRawTyped: async (query: Query) => {
+        queries.push(query);
+        return [];
+      },
+      analysis: { findFirst: async () => target },
+      repo: { findUnique: async () => repo },
+    } as unknown as DbClient;
+
+    return { db, queries };
+  }
+
+  it("reads one row per document kind instead of every version of the repo", async () => {
+    const { db, queries } = makeDocsDb({ analyses: [ANALYSIS] });
+
+    const payload = await analysisRepo.getRepoDocsPayload(db, REPO_ID, WORKSPACE_ID);
+
+    expect(payload?.documents).toStrictEqual([]);
+    expect(queries[0]?.values).toStrictEqual([REPO_ID, WORKSPACE_ID, null, 1]);
+  });
+
+  it("pins both the analysis and its documents to the requested version", async () => {
+    const { db, queries } = makeDocsDb({ analyses: [ANALYSIS] }, ANALYSIS);
+
+    const payload = await analysisRepo.getRepoDocsPayload(db, REPO_ID, WORKSPACE_ID, ANALYSIS_ID);
+
+    expect(payload?.analyses[0]?.id).toBe(ANALYSIS_ID);
+    expect(queries[0]?.values[2]).toBe(ANALYSIS_ID);
+  });
+
+  it("returns null when the repo is missing", async () => {
+    const { db } = makeDocsDb(null);
 
     await expect(
-      analysisRepo.getRepoSnapshotWithDocuments(db, REPO_ID, WORKSPACE_ID, ANALYSIS_ID),
+      analysisRepo.getRepoDocsPayload(db, REPO_ID, WORKSPACE_ID, ANALYSIS_ID),
+    ).resolves.toBeNull();
+  });
+
+  it("still throws ANALYSIS_VERSION_NOT_FOUND for an aid outside the workspace", async () => {
+    const { db } = makeDocsDb({ analyses: [ANALYSIS] }, null);
+
+    await expect(
+      analysisRepo.getRepoDocsPayload(db, REPO_ID, WORKSPACE_ID, ANALYSIS_ID),
     ).rejects.toMatchObject({ messageCode: MessageCode.ANALYSIS_VERSION_NOT_FOUND });
   });
 });

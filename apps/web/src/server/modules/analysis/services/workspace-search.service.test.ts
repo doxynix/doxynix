@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { DbClient } from "@/server/core/db";
 
 import { analysisRepo } from "../analysis.repository";
-import { MAX_SEARCHABLE_DOCUMENT_FETCH } from "../analysis.utils";
+import { MAX_SEARCHABLE_DOCUMENTS_PER_TYPE } from "../analysis.utils";
 import { analysisRepoRouter } from "../analysis-repo.router";
 import { workspaceSearchService } from "./workspace-search.service";
 
@@ -34,34 +34,71 @@ function makeCtx() {
 }
 
 describe("analysisRepo.loadLatestDocumentsWithContent", () => {
-  it("never requests more than the per-type document cap", async () => {
-    const findMany = vi.fn<(args: { take?: number }) => Promise<never[]>>(async () => []);
-    const db = { document: { findMany } } as unknown as DbClient;
+  type Query = { sql: string; values: readonly unknown[] };
+
+  const ROW = {
+    analysisId: null,
+    createdAt: new Date("2026-01-01T00:00:00.000Z"),
+    id: "0195f000-0000-7000-8000-000000000011",
+    path: null,
+    type: "README" as const,
+    updatedAt: new Date("2026-01-02T00:00:00.000Z"),
+    version: "abc123",
+  };
+
+  function makeDocsDb(rows: unknown[]) {
+    const findMany = vi.fn(async () =>
+      rows.map((row) => ({ content: "# doc", id: (row as { id: string }).id })),
+    );
+    const queries: Query[] = [];
+    const db = {
+      $queryRawTyped: async (query: Query) => {
+        queries.push(query);
+        return rows;
+      },
+      document: { findMany },
+    } as unknown as DbClient;
+
+    return { db, queries };
+  }
+
+  it("asks for a per-type window instead of one global row cap", async () => {
+    const { db, queries } = makeDocsDb([ROW]);
 
     await analysisRepo.loadLatestDocumentsWithContent(db, REPO_ID, "workspace-1");
 
-    expect(findMany.mock.calls[0]?.[0]?.take).toBe(MAX_SEARCHABLE_DOCUMENT_FETCH);
+    expect(queries).toHaveLength(1);
+    expect(queries[0]?.values).toStrictEqual([
+      REPO_ID,
+      "workspace-1",
+      null,
+      MAX_SEARCHABLE_DOCUMENTS_PER_TYPE,
+    ]);
+    expect(queries[0]?.sql).toContain("PARTITION BY d.type, d.path");
   });
 
-  it("orders the capped fetch by type first so every type survives the cap", async () => {
-    const findMany = vi.fn<(args: { orderBy?: unknown }) => Promise<never[]>>(async () => []);
-    const db = { document: { findMany } } as unknown as DbClient;
+  it("keeps every version the window returns, so one type cannot hide the others", async () => {
+    const { db } = makeDocsDb([
+      ...Array.from({ length: MAX_SEARCHABLE_DOCUMENTS_PER_TYPE }, (_, index) => ({
+        ...ROW,
+        id: `0195f000-0000-7000-8000-00000000002${index}`,
+        version: `readme-${index}`,
+      })),
+      { ...ROW, id: "0195f000-0000-7000-8000-000000000030", type: "API" as const },
+    ]);
 
-    await analysisRepo.loadLatestDocumentsWithContent(db, REPO_ID, "workspace-1");
+    const docs = await analysisRepo.loadLatestDocumentsWithContent(db, REPO_ID, "workspace-1");
 
-    // Documents are versioned, so a cap ordered by recency alone can be filled
-    // entirely by one type and starve the rest of the DocType enum.
-    const orderBy = findMany.mock.calls[0]?.[0]?.orderBy as
-      | Array<Record<string, string>>
-      | Record<string, string>
-      | undefined;
-    const keys = Array.isArray(orderBy)
-      ? orderBy.map((entry) => Object.keys(entry)[0])
-      : orderBy == null
-        ? []
-        : [Object.keys(orderBy)[0]];
+    expect(docs).toHaveLength(MAX_SEARCHABLE_DOCUMENTS_PER_TYPE + 1);
+    expect(new Set(docs.map((doc) => doc.type))).toStrictEqual(new Set(["README", "API"]));
+  });
 
-    expect(keys).toEqual(["type", "updatedAt"]);
+  it("scopes the window to the pinned analysis", async () => {
+    const { db, queries } = makeDocsDb([]);
+
+    await analysisRepo.loadLatestDocumentsWithContent(db, REPO_ID, "workspace-1", "analysis-1");
+
+    expect(queries[0]?.values[2]).toBe("analysis-1");
   });
 });
 

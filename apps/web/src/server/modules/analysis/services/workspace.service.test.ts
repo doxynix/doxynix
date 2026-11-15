@@ -3,13 +3,23 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { DbClient } from "@/server/core/db";
 
 const mocks = vi.hoisted(() => ({
+  buildWorkspacePayload: vi.fn(),
   getNodeExplain: vi.fn(),
   getRepoSnapshot: vi.fn(),
   getStructureMap: vi.fn(),
   getStructureNode: vi.fn(),
+  loadDocumentsPerType: vi.fn(),
   loadLatestDocumentsWithContent: vi.fn(),
   loadRelatedFixes: vi.fn(),
   loadRelatedPrFindings: vi.fn(),
+  toOverview: vi.fn(),
+}));
+
+vi.mock("../analysis.mapper", () => ({
+  analysisMapper: {
+    toInteractiveBriefNodePayloadInput: () => ({}),
+    toOverview: mocks.toOverview,
+  },
 }));
 
 vi.mock("../analysis.repository", () => ({
@@ -19,6 +29,11 @@ vi.mock("../analysis.repository", () => ({
     loadRelatedFixes: mocks.loadRelatedFixes,
     loadRelatedPrFindings: mocks.loadRelatedPrFindings,
   },
+  loadDocumentsPerType: mocks.loadDocumentsPerType,
+}));
+
+vi.mock("../logic/workspace-payload", () => ({
+  buildWorkspacePayload: mocks.buildWorkspacePayload,
 }));
 
 vi.mock("../logic/analyze-context-builder", () => ({
@@ -105,5 +120,58 @@ describe("workspaceService.getNodeContext", () => {
       WORKSPACE_ID,
       undefined,
     );
+  });
+});
+
+describe("workspaceService.getWorkspace", () => {
+  const STRUCTURE = { graph: { edges: [], nodes: [] } };
+  const DOCUMENTS = [{ id: "doc-1", type: "README" }];
+  const OVERVIEW = { docs: { items: [] } };
+  const PAYLOAD = { overview: OVERVIEW };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.getRepoSnapshot.mockResolvedValue({ analyses: [{ id: ANALYSIS_ID }], id: REPO_ID });
+    mocks.loadDocumentsPerType.mockResolvedValue(DOCUMENTS);
+    mocks.toOverview.mockReturnValue(OVERVIEW);
+    mocks.getStructureMap.mockReturnValue(STRUCTURE);
+    mocks.buildWorkspacePayload.mockReturnValue(PAYLOAD);
+  });
+
+  it("reads one row per document kind instead of every version", async () => {
+    const db = makeDb();
+
+    await workspaceService.getWorkspace(db, REPO_ID, WORKSPACE_ID);
+
+    expect(mocks.getRepoSnapshot).toHaveBeenCalledWith(db, REPO_ID, WORKSPACE_ID, undefined);
+    expect(mocks.loadDocumentsPerType).toHaveBeenCalledWith(db, REPO_ID, WORKSPACE_ID, {
+      aid: undefined,
+      perType: 1,
+    });
+    expect(mocks.toOverview).toHaveBeenCalledWith(
+      expect.objectContaining({ documents: DOCUMENTS }),
+    );
+  });
+
+  it("scopes the documents to the pinned analysis", async () => {
+    const db = makeDb();
+
+    await expect(
+      workspaceService.getWorkspace(db, REPO_ID, WORKSPACE_ID, ANALYSIS_ID),
+    ).resolves.toStrictEqual(PAYLOAD);
+
+    expect(mocks.loadDocumentsPerType).toHaveBeenCalledWith(db, REPO_ID, WORKSPACE_ID, {
+      aid: ANALYSIS_ID,
+      perType: 1,
+    });
+  });
+
+  it("returns null without reading documents when the repo is missing", async () => {
+    mocks.getRepoSnapshot.mockResolvedValue(null);
+
+    await expect(
+      workspaceService.getWorkspace(makeDb(), REPO_ID, WORKSPACE_ID),
+    ).resolves.toBeNull();
+    expect(mocks.loadDocumentsPerType).not.toHaveBeenCalled();
   });
 });

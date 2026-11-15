@@ -1,4 +1,4 @@
-import type { DocType, RepoSearchResult } from "@doxynix/shared";
+import type { RepoSearchResult } from "@doxynix/shared";
 import type { Repo } from "@prisma/client";
 import { orderBy, uniqBy } from "es-toolkit";
 import { normalize } from "pathe";
@@ -11,12 +11,7 @@ import type {
 } from "./analysis.schemas";
 import { ProjectPolicy } from "./engine/core/project-policy";
 
-const MAX_SEARCHABLE_DOCUMENTS_PER_TYPE = 3;
-
-// Upper bound on `DocType` members, so the bounded fetch stays bounded if the enum grows.
-const MAX_DOCUMENT_TYPES = 8;
-
-export const MAX_SEARCHABLE_DOCUMENT_FETCH = MAX_SEARCHABLE_DOCUMENTS_PER_TYPE * MAX_DOCUMENT_TYPES;
+export const MAX_SEARCHABLE_DOCUMENTS_PER_TYPE = 3;
 
 const MAX_SEARCH_RESULTS = 20;
 
@@ -337,11 +332,4 @@ export function dedupeSearchResults(results: RepoSearchResult[]) {
     0,
     MAX_SEARCH_RESULTS,
   );
-}
-
-export function pickLatestDocsByType<TDoc extends { type: DocType; updatedAt: Date }>(
-  docs: TDoc[],
-) {
-  const latest = uniqBy(orderBy(docs, [(d) => d.updatedAt], ["desc"]), (d) => d.type);
-  return orderBy(latest, [(d) => d.type], ["asc"]);
 }

@@ -166,6 +166,79 @@ describe("docsService.getWithGraphLinks", () => {
   });
 });
 
+describe("docsService.getAvailableDocs", () => {
+  type Query = { sql: string; values: readonly unknown[] };
+
+  const DOC_ROW = {
+    analysisId: null,
+    createdAt: new Date("2026-01-01T00:00:00.000Z"),
+    id: "0195f000-0000-7000-8000-000000000031",
+    path: null,
+    type: "README" as const,
+    updatedAt: new Date("2026-01-02T00:00:00.000Z"),
+    version: "abc123",
+  };
+
+  function makeDocsDb(rows: unknown[], target: unknown = null) {
+    const queries: Query[] = [];
+    const db = {
+      $queryRawTyped: async (query: Query) => {
+        queries.push(query);
+        return rows;
+      },
+      analysis: { findFirst: async () => target },
+      repo: {
+        findUnique: async () => ({
+          analyses: [{ id: ANALYSIS_ID, metricsJson: null, resultJson: null }],
+        }),
+      },
+    } as unknown as DbClient;
+
+    return { db, queries };
+  }
+
+  it("lists one row per document kind, capped per kind rather than per repo", async () => {
+    const { db, queries } = makeDocsDb([
+      DOC_ROW,
+      { ...DOC_ROW, id: "0195f000-0000-7000-8000-000000000032", type: "API" },
+      {
+        ...DOC_ROW,
+        id: "0195f000-0000-7000-8000-000000000033",
+        path: "src/a.ts",
+        type: "CODE_DOC",
+      },
+      {
+        ...DOC_ROW,
+        id: "0195f000-0000-7000-8000-000000000034",
+        path: "src/b.ts",
+        type: "CODE_DOC",
+      },
+    ]);
+
+    const docs = await docsService.getAvailableDocs(db, REPO_ID, "workspace-1");
+
+    expect(queries[0]?.values).toStrictEqual([REPO_ID, "workspace-1", null, 1]);
+    expect(docs.map((doc) => [doc.type, doc.path])).toStrictEqual([
+      ["README", null],
+      ["API", null],
+      ["CODE_DOC", "src/a.ts"],
+      ["CODE_DOC", "src/b.ts"],
+    ]);
+  });
+
+  it("keeps the payload scoped to the pinned analysis", async () => {
+    const { db, queries } = makeDocsDb([DOC_ROW], {
+      id: ANALYSIS_ID,
+      metricsJson: null,
+      resultJson: null,
+    });
+
+    await docsService.getAvailableDocs(db, REPO_ID, "workspace-1", ANALYSIS_ID);
+
+    expect(queries[0]?.values[2]).toBe(ANALYSIS_ID);
+  });
+});
+
 describe("docsService.getDocumentContent", () => {
   // `getDocumentContent` runs no `select` on the document, so the fake must return the whole row.
   const fullRow: RowBuilder = () => makeRow(EXPECTED_SELECT);

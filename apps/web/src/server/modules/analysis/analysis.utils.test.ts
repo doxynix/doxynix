@@ -1,4 +1,4 @@
-import type { DocType, RepoSearchResult } from "@doxynix/shared";
+import type { RepoSearchResult } from "@doxynix/shared";
 import type { Repo } from "@prisma/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -19,7 +19,6 @@ import {
   getNonActionableReason,
   isBinaryLikeContent,
   isProbablyMinifiedContent,
-  pickLatestDocsByType,
   scoreSearchMatch,
 } from "./analysis.utils";
 
@@ -166,26 +165,6 @@ describe("dedupeSearchResults", () => {
     const results = [searchResult("x", "zebra", 8), searchResult("y", "apple", 8)];
     expect(dedupeSearchResults(results).map((r) => r.label)).toEqual(["apple", "zebra"]);
     expect(dedupeSearchResults([])).toEqual([]);
-  });
-});
-
-describe("pickLatestDocsByType", () => {
-  const docs = (): Array<{ type: DocType; updatedAt: Date }> => [
-    { type: "API", updatedAt: new Date("2024-01-01") },
-    { type: "API", updatedAt: new Date("2025-06-01") },
-    { type: "README", updatedAt: new Date("2023-01-01") },
-    { type: "README", updatedAt: new Date("2022-01-01") },
-  ];
-
-  it("keeps the latest doc per type and orders types ascending", () => {
-    expect(pickLatestDocsByType(docs()).map((d) => [d.type, d.updatedAt.toISOString()])).toEqual([
-      ["API", "2025-06-01T00:00:00.000Z"],
-      ["README", "2023-01-01T00:00:00.000Z"],
-    ]);
-  });
-
-  it("returns [] for empty input", () => {
-    expect(pickLatestDocsByType([])).toEqual([]);
   });
 });
 
