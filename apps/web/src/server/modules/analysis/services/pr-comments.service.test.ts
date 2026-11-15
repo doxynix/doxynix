@@ -1,14 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
+  createComment: vi.fn().mockResolvedValue({}),
+  getStore: vi.fn((): unknown => ({})),
   markdownToHtml: vi.fn(async (input: { content: string }) => `<p>${input.content}</p>`),
-  unstable_cache: vi.fn((fn: () => unknown) => fn),
+  revalidateTag: vi.fn(),
+  unstable_cache: vi.fn((fn: () => unknown, _key?: unknown[], _options?: unknown) => fn),
 }));
 
-vi.mock("next/cache", () => ({ unstable_cache: mocks.unstable_cache }));
-vi.mock("@/server/core/github/github-client", () => ({ getInstallationClient: vi.fn() }));
+vi.mock("next/cache", () => ({
+  revalidateTag: mocks.revalidateTag,
+  unstable_cache: mocks.unstable_cache,
+}));
+vi.mock("@/server/core/github/github-client", () => ({
+  getInstallationClient: () => ({ rest: { issues: { createComment: mocks.createComment } } }),
+}));
 vi.mock("@/server/modules/analysis/services/markdown-to-html", () => ({
   markdownToHtml: mocks.markdownToHtml,
+}));
+vi.mock("@/server/utils/request-context", () => ({
+  requestContext: { getStore: mocks.getStore },
 }));
 
 import type { DbClient } from "@/server/core/db";
@@ -16,6 +27,7 @@ import type { DbClient } from "@/server/core/db";
 import { prCommentsService } from "./pr-comments.service";
 
 const ANALYSIS_ID = "018f0000-0000-7000-8000-0000000000aa";
+const REPO_ID = "018f0000-0000-7000-8000-0000000000cc";
 
 function makeComment(index: number) {
   return {
@@ -36,14 +48,29 @@ function stubDb(comments: unknown[]) {
   return { db, findMany };
 }
 
+function stubMutationDb() {
+  const create = vi.fn().mockResolvedValue({ id: "018f0000-0000-7000-8000-0000000000d1" });
+
+  const db = {
+    githubInstallation: { findFirst: vi.fn().mockResolvedValue({ id: "42" }) },
+    pullRequestAnalysis: { findFirst: vi.fn().mockResolvedValue({ id: ANALYSIS_ID }) },
+    pullRequestComment: { create },
+    repo: {
+      findUnique: vi.fn().mockResolvedValue({ id: REPO_ID, name: "doxynix", owner: "ivan" }),
+    },
+  } as unknown as DbClient;
+
+  return { create, db };
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.getStore.mockReturnValue({});
   mocks.unstable_cache.mockImplementation((fn: () => unknown) => fn);
   mocks.markdownToHtml.mockImplementation(
     async (input: { content: string }) => `<p>${input.content}</p>`,
   );
 });
-
 describe("prCommentsService.getComments", () => {
   it("renders a three-comment page through a single cache entry", async () => {
     const comments = [1, 2, 3].map((index) => makeComment(index));
@@ -59,8 +86,8 @@ describe("prCommentsService.getComments", () => {
     expect(mocks.unstable_cache).toHaveBeenCalledTimes(1);
     expect(mocks.unstable_cache).toHaveBeenCalledWith(
       expect.any(Function),
-      [`pr-comments-html-${ANALYSIS_ID}`],
-      { revalidate: false, tags: ["comments", ANALYSIS_ID] },
+      [`pr-comments-html-ws-1-${ANALYSIS_ID}`],
+      { revalidate: false, tags: ["comments", ANALYSIS_ID, "ws-1"] },
     );
     expect(mocks.markdownToHtml).toHaveBeenCalledTimes(3);
     expect(result.renderedComments).toStrictEqual([
@@ -91,13 +118,65 @@ describe("prCommentsService.getComments", () => {
     ]);
   });
 
-  it("still issues one cache lookup for an empty page", async () => {
+  it("keys the entry on the workspace, so the same analysis id cannot cross tenants", async () => {
+    const comments = [makeComment(1)];
+
+    await prCommentsService.getComments(
+      stubDb(comments).db,
+      ANALYSIS_ID,
+      "018f0000-0000-7000-8000-0000000000e1",
+    );
+    await prCommentsService.getComments(
+      stubDb(comments).db,
+      ANALYSIS_ID,
+      "018f0000-0000-7000-8000-0000000000e2",
+    );
+
+    expect(mocks.unstable_cache.mock.calls[0]?.[1]).toStrictEqual([
+      `pr-comments-html-018f0000-0000-7000-8000-0000000000e1-${ANALYSIS_ID}`,
+    ]);
+    expect(mocks.unstable_cache.mock.calls[1]?.[1]).toStrictEqual([
+      `pr-comments-html-018f0000-0000-7000-8000-0000000000e2-${ANALYSIS_ID}`,
+    ]);
+    expect(mocks.unstable_cache.mock.calls[0]?.[1]).not.toStrictEqual(
+      mocks.unstable_cache.mock.calls[1]?.[1],
+    );
+  });
+
+  it("does not cache an empty page", async () => {
     const { db } = stubDb([]);
 
     const result = await prCommentsService.getComments(db, ANALYSIS_ID, "ws-1");
 
-    expect(mocks.unstable_cache).toHaveBeenCalledTimes(1);
+    expect(mocks.unstable_cache).not.toHaveBeenCalled();
     expect(mocks.markdownToHtml).not.toHaveBeenCalled();
     expect(result.renderedComments).toStrictEqual([]);
+  });
+});
+
+describe("prCommentsService.postCommentToPR", () => {
+  const input = { body: "hello", prNumber: 7, repoId: REPO_ID };
+
+  it("revalidates the analysis tag after the comment is stored", async () => {
+    const { db, create } = stubMutationDb();
+
+    const result = await prCommentsService.postCommentToPR(db, input, "ws-1");
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(mocks.revalidateTag).toHaveBeenCalledTimes(1);
+    expect(mocks.revalidateTag).toHaveBeenCalledWith(ANALYSIS_ID, { expire: 0 });
+    expect(result).toStrictEqual({
+      commentId: "018f0000-0000-7000-8000-0000000000d1",
+      success: true,
+    });
+  });
+
+  it("skips revalidation when there is no request scope to revalidate from", async () => {
+    mocks.getStore.mockReturnValue(undefined);
+    const { db } = stubMutationDb();
+
+    await prCommentsService.postCommentToPR(db, input, "ws-1");
+
+    expect(mocks.revalidateTag).not.toHaveBeenCalled();
   });
 });

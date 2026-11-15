@@ -1,4 +1,4 @@
-import { unstable_cache } from "next/cache";
+import { revalidateTag, unstable_cache } from "next/cache";
 import { MessageCode } from "@doxynix/shared";
 import * as z from "zod";
 
@@ -6,6 +6,7 @@ import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
 import { getInstallationClient } from "@/server/core/github/github-client";
 import { markdownToHtml } from "@/server/modules/analysis/services/markdown-to-html";
+import { requestContext } from "@/server/utils/request-context";
 
 export const prCommentsService = {
   async getComments(db: DbClient, analysisId: string, workspaceId: string) {
@@ -34,6 +35,11 @@ export const prCommentsService = {
       },
     });
 
+    // An empty page must not create a permanent entry for an arbitrary analysis id
+    if (comments.length === 0) {
+      return { renderedComments: [] };
+    }
+
     // One cache entry per page: comment rows for a completed analysis never change
     const renderedComments = await unstable_cache(
       async () =>
@@ -57,10 +63,10 @@ export const prCommentsService = {
             };
           }),
         ),
-      [`pr-comments-html-${analysisId}`],
+      [`pr-comments-html-${workspaceId}-${analysisId}`],
       {
         revalidate: false,
-        tags: ["comments", analysisId],
+        tags: ["comments", analysisId, workspaceId],
       },
     )();
 
@@ -136,6 +142,11 @@ export const prCommentsService = {
         riskLevel: 0,
       },
     });
+
+    // Outside a request scope Next has no static generation store and throws
+    if (requestContext.getStore() != null) {
+      revalidateTag(prAnalysis.id, { expire: 0 });
+    }
 
     return { commentId: localComment.id, success: true };
   },
