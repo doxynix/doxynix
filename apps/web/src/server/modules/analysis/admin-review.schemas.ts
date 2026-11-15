@@ -1,22 +1,26 @@
-import { FixStatusSchema, PaginationMetaSchema, PRAnalysisStatusSchema } from "@doxynix/shared";
+import { CursorMetaSchema, FixStatusSchema, PRAnalysisStatusSchema } from "@doxynix/shared";
 import * as z from "zod";
 
 import {
+  CursorSchema,
+  cursorPageSchema,
   DateRangeSchema,
   dateRangeMustBeOrdered,
-  PaginationSchema,
 } from "@/server/utils/pagination";
 
 const ID_SCHEMA = z.uuid();
 const RISK_MIN = 0;
 const RISK_MAX = 10;
 
-export const AdminReviewFilterSchema = PaginationSchema.extend({
-  fixStatus: z.optional(FixStatusSchema),
-  minRiskScore: z.coerce.number().int().min(RISK_MIN).max(RISK_MAX).optional(),
-  status: z.optional(PRAnalysisStatusSchema),
-  ...DateRangeSchema.shape,
-}).superRefine(dateRangeMustBeOrdered);
+export const AdminReviewFilterSchema = cursorPageSchema(50)
+  .extend({
+    fixStatus: z.optional(FixStatusSchema),
+    minRiskScore: z.coerce.number().int().min(RISK_MIN).max(RISK_MAX).optional(),
+    search: CursorSchema.shape.search,
+    status: z.optional(PRAnalysisStatusSchema),
+  })
+  .extend(DateRangeSchema.shape)
+  .superRefine(dateRangeMustBeOrdered);
 
 export type AdminReviewFilterInput = z.infer<typeof AdminReviewFilterSchema>;
 
@@ -57,5 +61,5 @@ export const AdminReviewDetailSchema = AdminReviewSummarySchema.extend({
 
 export const AdminReviewListSchema = z.object({
   items: z.array(AdminReviewSummarySchema),
-  meta: PaginationMetaSchema,
+  meta: CursorMetaSchema,
 });

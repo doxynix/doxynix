@@ -25,6 +25,80 @@ function createDb(row: Row | null) {
   return { db: { pullRequestAnalysis: { findUnique } } as never, findUnique };
 }
 
+const REVIEW_ID = "0192f0c1-0000-7000-8000-000000000009";
+
+describe("adminReviewService.getAll", () => {
+  function createListDb(rows: Row[] = []) {
+    const findMany = vi.fn().mockResolvedValue(rows);
+    return { db: { pullRequestAnalysis: { findMany } } as never, findMany };
+  }
+
+  it("reads one probe row past the newest-first page, once", async () => {
+    const { db, findMany } = createListDb();
+
+    const result = await adminReviewService.getAll(db, { limit: 20 });
+
+    expect(findMany).toHaveBeenCalledTimes(1);
+    expect(findMany).toHaveBeenCalledWith({
+      cursor: undefined,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      select: expect.objectContaining({ id: true }),
+      take: 21,
+      where: {},
+    });
+    expect(result).toEqual({ items: [], meta: { hasNextPage: false, nextCursor: undefined } });
+  });
+
+  it("keysets past the cursor id", async () => {
+    const { db, findMany } = createListDb();
+
+    await adminReviewService.getAll(db, { cursor: REVIEW_ID, limit: 20 });
+
+    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ cursor: { id: REVIEW_ID } }));
+  });
+
+  it("turns the probe row into the next cursor and keeps the counted fix total", async () => {
+    const { db } = createListDb([
+      { ...REVIEW, _count: { generatedFixes: 7 } },
+      { ...REVIEW, id: "probe" },
+    ]);
+
+    const result = await adminReviewService.getAll(db, { limit: 1 });
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.fixCount).toBe(7);
+    expect(result.meta).toEqual({ hasNextPage: true, nextCursor: "probe" });
+  });
+
+  it("keeps the status, risk, search and date filters in the where clause", async () => {
+    const { db, findMany } = createListDb();
+
+    await adminReviewService.getAll(db, {
+      from: new Date("2026-01-01"),
+      limit: 20,
+      minRiskScore: 6,
+      search: "  acme ",
+      status: "COMPLETED",
+      to: new Date("2026-02-01"),
+    });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          createdAt: { gte: new Date("2026-01-01"), lt: new Date("2026-02-02") },
+          OR: [
+            { owner: { contains: "acme", mode: "insensitive" } },
+            { repoName: { contains: "acme", mode: "insensitive" } },
+            { prNumber: -1 },
+          ],
+          riskScore: { gte: 6 },
+          status: "COMPLETED",
+        },
+      }),
+    );
+  });
+});
+
 /**
  * `PullRequestAnalysis.repoId` is declared `@omit`, which makes ZenStack strip it from the result
  * however it is selected. The detail output schema requires a uuid there, so the procedure

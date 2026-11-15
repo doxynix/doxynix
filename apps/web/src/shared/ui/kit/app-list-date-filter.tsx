@@ -3,7 +3,7 @@
 import { subDays } from "date-fns";
 import { useLocale, useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
-import type { parseAsInteger, parseAsIsoDate } from "nuqs/server";
+import { parseAsInteger, type parseAsIsoDate } from "nuqs/server";
 import type { DateRange } from "react-day-picker";
 
 import { formatShortDate } from "@/shared/lib/date-utils";
@@ -19,7 +19,7 @@ const PRESETS = [
 type Props = {
   parsers: {
     from: typeof parseAsIsoDate;
-    page: typeof parseAsInteger;
+    page?: typeof parseAsInteger;
     to: typeof parseAsIsoDate;
   };
 };
@@ -28,9 +28,10 @@ export function AppListDateFilter({ parsers }: Readonly<Props>) {
   const t = useTranslations("DateRange");
   const locale = useLocale();
 
+  // Cursor-paged lists have no page to return to, so the reset key is allowed to be absent.
   const [urlState, setUrlState] = useQueryStates({
     from: parsers.from,
-    page: parsers.page,
+    page: parsers.page ?? parseAsInteger,
     to: parsers.to,
   });
 

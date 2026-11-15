@@ -1,20 +1,23 @@
-import { CursorMetaSchema, PaginationMetaSchema, UserRoleSchema } from "@doxynix/shared";
+import { CursorMetaSchema, UserRoleSchema } from "@doxynix/shared";
 import * as z from "zod";
 
 import {
+  CursorSchema,
   cursorPageSchema,
   DateRangeSchema,
   dateRangeMustBeOrdered,
-  PaginationSchema,
 } from "@/server/utils/pagination";
 
 const BAN_REASON_MAX = 500;
 
-export const AdminUsersFilterSchema = PaginationSchema.extend({
-  banned: z.boolean().optional(),
-  role: z.optional(UserRoleSchema),
-  ...DateRangeSchema.shape,
-}).superRefine(dateRangeMustBeOrdered);
+export const AdminUsersFilterSchema = cursorPageSchema(50)
+  .extend({
+    banned: z.boolean().optional(),
+    role: z.optional(UserRoleSchema),
+    search: CursorSchema.shape.search,
+  })
+  .extend(DateRangeSchema.shape)
+  .superRefine(dateRangeMustBeOrdered);
 
 export type AdminUsersFilterInput = z.infer<typeof AdminUsersFilterSchema>;
 
@@ -85,7 +88,7 @@ export type AdminUserDetail = z.infer<typeof AdminUserDetailSchema>;
 
 export const AdminUsersListSchema = z.object({
   items: z.array(AdminUserSummarySchema),
-  meta: PaginationMetaSchema,
+  meta: CursorMetaSchema,
 });
 
 export const AdminUserSessionSchema = z.object({

@@ -1,4 +1,3 @@
-import { MAX_PAGE } from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
@@ -7,9 +6,9 @@ import { highlightCode } from "@/shared/lib/shiki";
 import type { DbClient } from "@/server/core/db";
 import {
   buildDateRangeWhere,
-  cappedCount,
-  getPaginatedList,
+  keysetArgs,
   ORDER_CREATED_AT_DESC,
+  splitKeysetPage,
 } from "@/server/utils/pagination";
 import { sanitizeObject } from "@/server/utils/sanitize-payload";
 import { normalizeSearchInput } from "@/server/utils/search";
@@ -33,19 +32,8 @@ function normalizeFilters(input: AdminAuditFilterInput) {
 function buildWhereClause(input: AdminAuditFilterInput): Prisma.AuditLogWhereInput {
   const filters = normalizeFilters(input);
 
-  const range: Prisma.AuditLogWhereInput =
-    filters.from != null || filters.to != null
-      ? {
-          createdAt: {
-            ...(filters.from != null ? { gte: filters.from } : {}),
-            ...(filters.to != null ? { lte: filters.to } : {}),
-          },
-        }
-      : {};
-
   return {
     ...(filters.actorId != null ? { userId: filters.actorId } : {}),
-    ...range,
     ...buildDateRangeWhere(filters, "createdAt"),
     ...(filters.model != null ? { model: filters.model } : {}),
     ...(filters.operation != null ? { operation: filters.operation } : {}),
@@ -59,32 +47,20 @@ export const adminAuditService = {
   buildWhereClause,
 
   async getAll(db: DbClient, input: AdminAuditFilterInput) {
-    const { limit } = input;
-    const where = buildWhereClause(input);
-    const isUnfiltered = Object.keys(where).length === 0;
+    const { cursor, limit } = input;
 
-    const cap = MAX_PAGE * limit;
-    const countMatching = (filterWhere: Prisma.AuditLogWhereInput) =>
-      cappedCount(
-        (take) => db.auditLog.findMany({ select: { id: true }, take, where: filterWhere }),
-        cap,
-      );
-
-    const { items, meta } = await getPaginatedList({
-      countCap: cap,
-      countFiltered: () => countMatching(where),
-      countUnfiltered: isUnfiltered ? null : () => countMatching({}),
-      fetchItems: ({ skip, take }) =>
-        db.auditLog.findMany({
-          orderBy: ORDER_CREATED_AT_DESC,
-          skip,
-          take,
-          where,
-        }),
-      input: { ...input, limit },
+    const rows = await db.auditLog.findMany({
+      ...keysetArgs(cursor, limit),
+      orderBy: ORDER_CREATED_AT_DESC,
+      where: buildWhereClause(input),
     });
 
-    return { items: items.map((item) => auditMapper.toDto(item)), meta };
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
+
+    return {
+      items: items.map((item) => auditMapper.toDto(item)),
+      meta: { hasNextPage, nextCursor },
+    };
   },
 
   async getDetail(db: DbClient, id: string) {

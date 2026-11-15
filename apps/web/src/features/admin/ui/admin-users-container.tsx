@@ -1,13 +1,10 @@
 "use client";
-import { MAX_PAGE } from "@doxynix/shared";
-import { useQuery } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useQueryStates } from "nuqs";
 
 import { useTRPC } from "@/shared/api/trpc";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
-import { clampIntegerParam } from "@/shared/lib/number-utils";
-import { AppPagination } from "@/shared/ui/kit/app-pagination";
+import { AppInfiniteSentinel } from "@/shared/ui/kit/app-infinite-sentinel";
 
 import { adminUserParsers } from "@/entities/user/model/user-parsers";
 
@@ -20,28 +17,26 @@ const PAGE_SIZE = 20;
 
 export function AdminUsersContainer() {
   const trpc = useTRPC();
-  const t = useTranslations("AdminUsers");
   const actions = useAdminUserActions();
 
   const [filters] = useQueryStates(adminUserParsers);
   const debouncedSearch = useDebounce(filters.search, 500);
 
-  const safePage = clampIntegerParam(filters.page, { fallback: 1, max: MAX_PAGE, min: 1 });
-
-  const { data, isFetching, isLoading } = useQuery(
-    trpc.adminUser.list.queryOptions(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
+    trpc.adminUser.list.infiniteQueryOptions(
       {
         banned: filters.banned ?? undefined,
         from: filters.from ?? undefined,
         limit: PAGE_SIZE,
-        page: safePage,
         role: filters.role ?? undefined,
         search: debouncedSearch || undefined,
         to: filters.to ?? undefined,
       },
-      { placeholderData: (previousData) => previousData },
+      { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
     ),
   );
+
+  const users = data?.pages.flatMap((page) => page.items) ?? [];
 
   if (isLoading || data == null) {
     return (
@@ -54,21 +49,17 @@ export function AdminUsersContainer() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <AdminUsersToolbar />
-        <p className="text-muted-foreground text-sm">
-          {t("total_count", { filtered: data.meta.filteredCount, total: data.meta.totalCount })}
-        </p>
-      </div>
+      <AdminUsersToolbar />
 
       <AdminUsersTable
         actions={actions}
-        users={data.items}
+        users={users}
       />
 
-      <AppPagination
-        isLoading={isFetching}
-        meta={data.meta}
+      <AppInfiniteSentinel
+        hasNextPage={hasNextPage}
+        isFetching={isFetchingNextPage}
+        onLoadMore={fetchNextPage}
       />
     </div>
   );

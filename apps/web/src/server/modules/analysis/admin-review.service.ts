@@ -1,13 +1,13 @@
-import { MAX_PAGE, MessageCode } from "@doxynix/shared";
+import { MessageCode } from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
 
 import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
 import {
   buildDateRangeWhere,
-  cappedCount,
-  getPaginatedList,
+  keysetArgs,
   ORDER_CREATED_AT_DESC,
+  splitKeysetPage,
 } from "@/server/utils/pagination";
 import { normalizeSearchInput } from "@/server/utils/search";
 
@@ -85,34 +85,18 @@ export const adminReviewService = {
   buildWhereClause,
 
   async getAll(db: DbClient, input: AdminReviewFilterInput) {
-    const { limit } = input;
-    const where = buildWhereClause(input);
-    const isUnfiltered = Object.keys(where).length === 0;
+    const { cursor, limit } = input;
 
-    const cap = MAX_PAGE * limit;
-    const countMatching = (filterWhere: Prisma.PullRequestAnalysisWhereInput) =>
-      cappedCount(
-        (take) =>
-          db.pullRequestAnalysis.findMany({ select: { id: true }, take, where: filterWhere }),
-        cap,
-      );
-
-    const { items, meta } = await getPaginatedList({
-      countCap: cap,
-      countFiltered: () => countMatching(where),
-      countUnfiltered: isUnfiltered ? null : () => countMatching({}),
-      fetchItems: ({ skip, take }) =>
-        db.pullRequestAnalysis.findMany({
-          orderBy: ORDER_CREATED_AT_DESC,
-          select: REVIEW_SELECT,
-          skip,
-          take,
-          where,
-        }),
-      input: { ...input, limit },
+    const rows = await db.pullRequestAnalysis.findMany({
+      ...keysetArgs(cursor, limit),
+      orderBy: ORDER_CREATED_AT_DESC,
+      select: REVIEW_SELECT,
+      where: buildWhereClause(input),
     });
 
-    return { items: items.map(toSummary), meta };
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
+
+    return { items: items.map(toSummary), meta: { hasNextPage, nextCursor } };
   },
 
   async getDetail(db: DbClient, id: string) {

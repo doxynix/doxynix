@@ -1,4 +1,4 @@
-import { MAX_PAGE, MessageCode } from "@doxynix/shared";
+import { MessageCode } from "@doxynix/shared";
 import type { Prisma, UserRole } from "@prisma/client";
 import * as z from "zod";
 
@@ -12,8 +12,6 @@ import { normalizeEmail } from "@/server/utils/email-guard";
 import { handlePrismaError } from "@/server/utils/handle-error";
 import {
   buildDateRangeWhere,
-  cappedCount,
-  getPaginatedList,
   keysetArgs,
   ORDER_CREATED_AT_DESC,
   orderWithTiebreak,
@@ -224,34 +222,21 @@ export const adminUserService = {
   },
 
   async getAll(db: DbClient, input: AdminUsersFilterInput) {
-    const { limit, page } = input;
+    const { cursor, limit } = input;
 
-    const where = this.buildWhereClause(input);
-    const isUnfiltered = Object.keys(where).length === 0;
-
-    const cap = MAX_PAGE * limit;
-    const countMatching = (filterWhere: Prisma.UserWhereInput) =>
-      cappedCount(
-        (take) => db.user.findMany({ select: { id: true }, take, where: filterWhere }),
-        cap,
-      );
-
-    const { items, meta } = await getPaginatedList({
-      countCap: cap,
-      countFiltered: () => countMatching(where),
-      countUnfiltered: isUnfiltered ? null : () => countMatching({}),
-      fetchItems: ({ skip, take }) =>
-        db.user.findMany({
-          orderBy: ORDER_CREATED_AT_DESC,
-          select: ADMIN_USER_SELECT,
-          skip,
-          take,
-          where,
-        }),
-      input: { limit, page, ...(input.search != null ? { search: input.search } : {}) },
+    const rows = await db.user.findMany({
+      ...keysetArgs(cursor, limit),
+      orderBy: ORDER_CREATED_AT_DESC,
+      select: ADMIN_USER_SELECT,
+      where: this.buildWhereClause(input),
     });
 
-    return { items: items.map((item) => userMapper.toAdminSummary(item)), meta };
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
+
+    return {
+      items: items.map((item) => userMapper.toAdminSummary(item)),
+      meta: { hasNextPage, nextCursor },
+    };
   },
 
   async getDetail(db: DbClient, id: string) {

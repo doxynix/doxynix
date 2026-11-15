@@ -1,13 +1,10 @@
 "use client";
-import { MAX_PAGE } from "@doxynix/shared";
-import { useQuery } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useQueryStates } from "nuqs";
 
 import { useTRPC } from "@/shared/api/trpc";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
-import { clampIntegerParam } from "@/shared/lib/number-utils";
-import { AppPagination } from "@/shared/ui/kit/app-pagination";
+import { AppInfiniteSentinel } from "@/shared/ui/kit/app-infinite-sentinel";
 
 import { adminReviewParsers } from "../model/admin-review-parsers";
 import { AdminReviewSkeleton } from "./admin-review-skeleton";
@@ -18,29 +15,26 @@ const PAGE_SIZE = 20;
 
 export function AdminReviewContainer() {
   const trpc = useTRPC();
-  const t = useTranslations("AdminReview");
-
   const [filters] = useQueryStates(adminReviewParsers);
   const debouncedSearch = useDebounce(filters.search, 500);
 
-  const safePage = clampIntegerParam(filters.page, { fallback: 1, max: MAX_PAGE, min: 1 });
-
-  const { data, isFetching, isLoading } = useQuery(
-    trpc.adminReview.list.queryOptions(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
+    trpc.adminReview.list.infiniteQueryOptions(
       {
         fixStatus: filters.fixStatus ?? undefined,
         from: filters.from ?? undefined,
         limit: PAGE_SIZE,
         minRiskScore:
           filters.minRiskScore == null ? undefined : Number.parseInt(filters.minRiskScore, 10),
-        page: safePage,
         search: debouncedSearch || undefined,
         status: filters.status ?? undefined,
         to: filters.to ?? undefined,
       },
-      { placeholderData: (previousData) => previousData },
+      { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
     ),
   );
+
+  const reviews = data?.pages.flatMap((page) => page.items) ?? [];
 
   if (isLoading || data == null) {
     return (
@@ -53,18 +47,14 @@ export function AdminReviewContainer() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <AdminReviewToolbar />
-        <p className="text-muted-foreground text-sm">
-          {t("total_count", { filtered: data.meta.filteredCount, total: data.meta.totalCount })}
-        </p>
-      </div>
+      <AdminReviewToolbar />
 
-      <AdminReviewTable reviews={data.items} />
+      <AdminReviewTable reviews={reviews} />
 
-      <AppPagination
-        isLoading={isFetching}
-        meta={data.meta}
+      <AppInfiniteSentinel
+        hasNextPage={hasNextPage}
+        isFetching={isFetchingNextPage}
+        onLoadMore={fetchNextPage}
       />
     </div>
   );

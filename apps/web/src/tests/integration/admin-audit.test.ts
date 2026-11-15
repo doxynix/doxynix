@@ -1,4 +1,4 @@
-import { AuditModel, AuditOperation, MAX_PAGE } from "@doxynix/shared";
+import { AuditModel, AuditOperation } from "@doxynix/shared";
 import { describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/server/core/db";
@@ -151,32 +151,39 @@ describe("adminAuditService against ZenStack policies", () => {
     }
 
     const filter = { limit: 3, model: AuditModel.Repo, search: "req-" };
-    const first = await adminAuditService.getAll(admin.db, { ...filter, page: 1 });
-    const second = await adminAuditService.getAll(admin.db, { ...filter, page: 2 });
-    const third = await adminAuditService.getAll(admin.db, { ...filter, page: 3 });
+    const first = await adminAuditService.getAll(admin.db, filter);
+    const second = await adminAuditService.getAll(admin.db, {
+      ...filter,
+      cursor: first.meta.nextCursor,
+    });
+    const third = await adminAuditService.getAll(admin.db, {
+      ...filter,
+      cursor: second.meta.nextCursor,
+    });
 
     const ids = [...first.items, ...second.items, ...third.items].map((item) => item.requestId);
 
+    // The cursor is inclusive, so each page repeats the previous probe row once and the walk
+    // still yields every row exactly once.
     expect(new Set(ids).size).toBe(7);
-    expect(first.meta.totalPages).toBe(3);
+    expect(first.meta.hasNextPage).toBe(true);
     expect(third.meta.hasNextPage).toBe(false);
   });
 
-  it("clamps a page beyond the end instead of erroring", async () => {
+  it("ends the walk on the last row instead of erroring", async () => {
     await cleanupDatabase();
 
     const admin = await createTestUser("Admin", "ADMIN");
-    await seedLog({});
+    const only = await seedLog({ requestId: "req-only" });
 
     const result = await adminAuditService.getAll(admin.db, {
+      cursor: only.id,
       limit: 10,
-      model: "Repo",
-      page: 999,
+      model: AuditModel.Repo,
     });
 
-    expect(result.items).toHaveLength(0);
-    // Clamped to MAX_PAGE rather than rejected, and the empty page is reported as such.
-    expect(result.meta.currentPage).toBe(MAX_PAGE);
+    expect(result.items.map((item) => item.id)).toEqual([only.id]);
+    expect(result.meta).toEqual({ hasNextPage: false, nextCursor: undefined });
   });
 
   it("renders another actor's payload for an admin, which the self-service view cannot do", async () => {

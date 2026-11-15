@@ -50,7 +50,8 @@ describe("adminUserService against ZenStack policies", () => {
     const asAlice = await adminUserService.getAll(alice.db, { limit: 100 });
 
     expect(asAdmin.items.map((item) => item.email)).toContain(alice.email);
-    expect(asAdmin.meta.totalCount).toBe(await prisma.user.count());
+    expect(asAdmin.items).toHaveLength(await prisma.user.count());
+    expect(asAdmin.meta.hasNextPage).toBe(false);
     expect(asAlice.items).toHaveLength(1);
     expect(asAlice.items[0]?.id).toBe(alice.user.id);
   });

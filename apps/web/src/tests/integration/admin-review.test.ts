@@ -174,16 +174,21 @@ describe("adminReviewService against ZenStack policies", () => {
     }
 
     const filter = { limit: 3, search: "repo-ownerpage" };
-    const pages = await Promise.all([
-      adminReviewService.getAll(admin.db, { ...filter, page: 1 }),
-      adminReviewService.getAll(admin.db, { ...filter, page: 2 }),
-      adminReviewService.getAll(admin.db, { ...filter, page: 3 }),
-    ]);
+    const first = await adminReviewService.getAll(admin.db, filter);
+    const second = await adminReviewService.getAll(admin.db, {
+      ...filter,
+      cursor: first.meta.nextCursor,
+    });
+    const third = await adminReviewService.getAll(admin.db, {
+      ...filter,
+      cursor: second.meta.nextCursor,
+    });
 
-    const ids = pages.flatMap((page) => page.items.map((item) => item.id));
+    const ids = [...first.items, ...second.items, ...third.items].map((item) => item.id);
+
     expect(new Set(ids).size).toBe(7);
-    expect(pages[0].meta.totalPages).toBe(3);
-    expect(pages[2].meta.hasNextPage).toBe(false);
+    expect(first.meta.hasNextPage).toBe(true);
+    expect(third.meta.hasNextPage).toBe(false);
   });
 
   it("reports a missing review as NOT_FOUND", async () => {
