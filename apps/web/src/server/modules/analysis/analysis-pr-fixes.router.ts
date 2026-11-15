@@ -8,7 +8,6 @@ import {
   FindingForFixSchema,
   FixApplicationPayloadSchema,
   GeneratedFixDetailedDTO,
-  GeneratedFixDTO,
 } from "./analysis.schemas";
 import { PRConfigService } from "./logic/pr-config";
 import { fixesService } from "./services/fixes.service";
@@ -80,12 +79,6 @@ export const analysisPrFixesRouter = {
     .output(GeneratedFixDetailedDTO)
     .query(async ({ ctx, input }) => {
       return fixesService.getById(ctx.db, ctx.redis, input.fixId, ctx.workspace.id);
-    }),
-  getByRepository: workspaceProcedure
-    .input(z.object({ repoId: z.uuid() }))
-    .output(z.array(GeneratedFixDTO))
-    .query(async ({ ctx, input }) => {
-      return fixesService.getByRepository(ctx.db, input.repoId, ctx.workspace.id);
     }),
   getRepoConfig: workspaceProcedure
     .input(z.object({ repoId: z.uuid() }))

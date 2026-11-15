@@ -77,7 +77,6 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
           });
 
           void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
-          void queryClient.invalidateQueries(trpc.analysis.getByRepository.pathFilter());
           setOpen(false);
         }
       },

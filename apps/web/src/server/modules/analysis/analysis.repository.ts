@@ -183,8 +183,6 @@ export type AnalysisRef = {
 export type ImpactAnalysisRecord = Awaited<ReturnType<typeof analysisRepo.loadImpactAnalysis>>;
 export type ImpactAnalysis = NonNullable<ImpactAnalysisRecord>;
 
-const FIX_LIST_LIMIT = 200;
-
 export const MAX_IMPACT_FIXES = 50;
 
 export const MAX_LEGACY_COMMENTS = 500;
@@ -306,19 +304,6 @@ export const analysisRepo = {
     });
   },
 
-  async getByRepoId(db: DbClient, repoId: string, workspaceId: string, status?: FixStatus) {
-    return db.generatedFix.findMany({
-      orderBy: { createdAt: "desc" },
-      take: FIX_LIST_LIMIT,
-      where: {
-        repo: {
-          id: repoId,
-          workspaceId,
-        },
-        ...(status != null && { status }),
-      },
-    });
-  },
   async getLatestRef(
     db: DbClient,
     repoId: string,

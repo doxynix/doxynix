@@ -17,7 +17,6 @@ import {
   type FixApplicationPayloadSchema,
   FixResultSchema,
   type GeneratedFixDetailedDTO,
-  type GeneratedFixDTO,
 } from "../analysis.schemas";
 import { fixesMapper } from "../fixes.mapper";
 import { FixService } from "../logic/fix-generator";
@@ -215,15 +214,6 @@ export const fixesService = {
     const parsedResult = FixResultSchema.safeParse(cachedResult);
 
     return fixesMapper.toDetailed(fix, parsedResult.success ? parsedResult.data : null);
-  },
-
-  async getByRepository(
-    db: DbClient,
-    repoId: string,
-    workspaceId: string,
-  ): Promise<Array<z.infer<typeof GeneratedFixDTO>>> {
-    const fixes = await analysisRepo.getByRepoId(db, repoId, workspaceId);
-    return fixes.map((fix) => fixesMapper.toPublic(fix));
   },
 
   async openPullRequest(

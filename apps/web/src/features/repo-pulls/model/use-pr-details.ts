@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { skipToken, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { skipToken, useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -20,7 +20,6 @@ type Options = {
 export function usePrDetails({ analysis, impact, repoId }: Options) {
   const trpc = useTRPC();
   const t = useTranslations("Dashboard");
-  const queryClient = useQueryClient();
 
   const { data: comments, isLoading: isCommentsLoading } = useQuery(
     trpc.analysis.getComments.queryOptions(
@@ -65,7 +64,6 @@ export function usePrDetails({ analysis, impact, repoId }: Options) {
             fix_id: data.fixId,
             repo_id: repoId,
           });
-          void queryClient.invalidateQueries(trpc.analysis.getByRepository.queryFilter({ repoId }));
         }
       },
     }),

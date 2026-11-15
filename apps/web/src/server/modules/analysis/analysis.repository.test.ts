@@ -411,34 +411,6 @@ describe("analysisRepo.getAnalysisPayloadForRepo", () => {
   });
 });
 
-describe("analysisRepo.getByRepoId", () => {
-  it("caps the fix list and keeps newest-first order", async () => {
-    const findMany = vi.fn().mockResolvedValue([]);
-    const db = { generatedFix: { findMany } } as unknown as DbClient;
-
-    await analysisRepo.getByRepoId(db, REPO_ID, WORKSPACE_ID);
-
-    expect(findMany).toHaveBeenCalledWith({
-      orderBy: { createdAt: "desc" },
-      take: 200,
-      where: { repo: { id: REPO_ID, workspaceId: WORKSPACE_ID } },
-    });
-  });
-
-  it("keeps the cap when a status filter is applied", async () => {
-    const findMany = vi.fn().mockResolvedValue([]);
-    const db = { generatedFix: { findMany } } as unknown as DbClient;
-
-    await analysisRepo.getByRepoId(db, REPO_ID, WORKSPACE_ID, "DRAFT");
-
-    expect(findMany.mock.calls[0]?.[0]?.take).toBe(200);
-    expect(findMany.mock.calls[0]?.[0]?.where).toStrictEqual({
-      repo: { id: REPO_ID, workspaceId: WORKSPACE_ID },
-      status: "DRAFT",
-    });
-  });
-});
-
 describe("analysisRepo.loadImpactAnalysis", () => {
   function makePullDb() {
     const findFirst = vi.fn().mockResolvedValue(null);
