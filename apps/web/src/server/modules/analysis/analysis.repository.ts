@@ -48,6 +48,38 @@ export type AnalysisPayloadRecord = Prisma.AnalysisGetPayload<{
   select: typeof analysisPayloadSelect;
 }>;
 
+// Documents are versioned per analysis, so the no-`aid` read is capped instead of unbounded.
+export const MAX_REPO_DOCUMENTS = 500;
+
+// The requested analysis and the latest completed one are the same query, filtered by `aid`.
+function targetAnalysisArgs<const S extends Prisma.AnalysisSelect>(
+  aid: string | undefined,
+  select: S,
+) {
+  return {
+    orderBy: { createdAt: "desc" as const },
+    select,
+    take: 1,
+    where: aid == null ? { status: "DONE" as const } : { id: aid, status: "DONE" as const },
+  };
+}
+
+function missingAnalysisError(aid: string | undefined) {
+  return new AppError(
+    aid == null
+      ? {
+          code: "NOT_FOUND",
+          messageCode: MessageCode.ANALYSIS_NOT_COMPLETED,
+          publicMessage: "No completed analysis found",
+        }
+      : {
+          code: "NOT_FOUND",
+          messageCode: MessageCode.ANALYSIS_VERSION_NOT_FOUND,
+          publicMessage: "Analysis version not found",
+        },
+  );
+}
+
 export const repoWithLatestAnalysisSelect = {
   analyses: {
     orderBy: { createdAt: "desc" },
@@ -92,6 +124,7 @@ export const repoWithLatestAnalysisAndDocsSelect = {
   documents: {
     orderBy: { updatedAt: "desc" },
     select: repoDocumentsSelect,
+    take: MAX_REPO_DOCUMENTS,
   },
 } satisfies Prisma.RepoSelect;
 
@@ -102,6 +135,9 @@ export type RepoWithLatestAnalysisAndDocs = Prisma.RepoGetPayload<{
 export type RepoSnapshot = Prisma.RepoGetPayload<{
   select: typeof repoWithLatestAnalysisSelect;
 }>;
+
+export type RepoRefRecord = Awaited<ReturnType<typeof analysisRepo.getRepoRef>>;
+export type RepoRef = NonNullable<RepoRefRecord>;
 
 export type AnalysisRef = {
   analysisId: string;
@@ -187,18 +223,9 @@ export const analysisRepo = {
     workspaceId: string,
     aid?: string,
   ): Promise<AnalysisPayloadRecord | null> {
-    if (aid != null) {
-      return this.resolveTargetAnalysis(db, aid, workspaceId);
-    }
-
     const repo = await db.repo.findUnique({
       select: {
-        analyses: {
-          orderBy: { createdAt: "desc" },
-          select: analysisPayloadSelect,
-          take: 1,
-          where: { status: "DONE" },
-        },
+        analyses: targetAnalysisArgs(aid, analysisPayloadSelect),
       },
       where: { id: repoId, workspaceId },
     });
@@ -210,11 +237,7 @@ export const analysisRepo = {
     const analysis = repo.analyses[0];
 
     if (analysis == null) {
-      throw new AppError({
-        code: "NOT_FOUND",
-        messageCode: MessageCode.ANALYSIS_NOT_COMPLETED,
-        publicMessage: "No completed analysis found",
-      });
+      throw missingAnalysisError(aid);
     }
 
     return analysis;
@@ -338,9 +361,16 @@ export const analysisRepo = {
     return repo;
   },
 
-  async getRepoSnapshot(db: DbClient, repoId: string, workspaceId: string, aid?: string) {
+  async getRepoRef(db: DbClient, repoId: string, workspaceId: string, aid?: string) {
     const repo = await db.repo.findUnique({
-      select: repoWithLatestAnalysisSelect,
+      select: {
+        analyses: targetAnalysisArgs(aid, { id: true }),
+        defaultBranch: true,
+        id: true,
+        name: true,
+        owner: true,
+        url: true,
+      },
       where: { id: repoId, workspaceId },
     });
 
@@ -348,17 +378,28 @@ export const analysisRepo = {
       return null;
     }
 
-    const target = await this.resolveTargetAnalysis(db, aid, workspaceId);
-    if (target != null) {
-      return { ...repo, analyses: [target] };
+    if (repo.analyses.length === 0) {
+      throw missingAnalysisError(aid);
+    }
+
+    return repo;
+  },
+
+  async getRepoSnapshot(db: DbClient, repoId: string, workspaceId: string, aid?: string) {
+    const repo = await db.repo.findUnique({
+      select: {
+        ...repoWithLatestAnalysisSelect,
+        analyses: targetAnalysisArgs(aid, latestCompletedAnalysisSelect),
+      },
+      where: { id: repoId, workspaceId },
+    });
+
+    if (repo == null) {
+      return null;
     }
 
     if (repo.analyses.length === 0) {
-      throw new AppError({
-        code: "NOT_FOUND",
-        messageCode: MessageCode.ANALYSIS_NOT_COMPLETED,
-        publicMessage: "No completed analysis found",
-      });
+      throw missingAnalysisError(aid);
     }
 
     return repo;
@@ -373,6 +414,7 @@ export const analysisRepo = {
     const repo = await db.repo.findUnique({
       select: {
         ...repoWithLatestAnalysisAndDocsSelect,
+        analyses: targetAnalysisArgs(aid, latestCompletedAnalysisSelect),
         documents: {
           ...repoWithLatestAnalysisAndDocsSelect.documents,
           ...(aid == null ? {} : { where: { analysisId: aid } }),
@@ -385,20 +427,8 @@ export const analysisRepo = {
       return null;
     }
 
-    const target = await this.resolveTargetAnalysis(db, aid, workspaceId);
-    if (target != null) {
-      return {
-        ...repo,
-        analyses: [target],
-      };
-    }
-
     if (repo.analyses.length === 0) {
-      throw new AppError({
-        code: "NOT_FOUND",
-        messageCode: MessageCode.ANALYSIS_NOT_COMPLETED,
-        publicMessage: "No completed analysis found",
-      });
+      throw missingAnalysisError(aid);
     }
 
     return repo;

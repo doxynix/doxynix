@@ -1,11 +1,18 @@
+import { MessageCode } from "@doxynix/shared";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/cache", () => ({ unstable_cache: (fn: () => unknown) => fn }));
 vi.mock("@/shared/lib/shiki", () => ({ highlightCode: vi.fn(async () => ({ html: "" })) }));
+// The real pipeline loads every Shiki grammar, which costs seconds per call in a unit test.
+vi.mock("@/server/modules/analysis/services/markdown-to-html", () => ({
+  markdownToHtml: vi.fn(async () => "<p>rendered</p>"),
+}));
 
 import type { DbClient } from "@/server/core/db";
 
+import { analysisRepo } from "../analysis.repository";
 import { DocumentFormatter } from "../logic/section-graph-linker";
+import { markdownToHtml } from "../services/markdown-to-html";
 import { docsService } from "./docs.service";
 
 const ANALYSIS_ID = "0195f000-0000-7000-8000-000000000001";
@@ -23,8 +30,13 @@ const GRAPH = { nodes: [{ id: "file:src/app.ts", label: "app.ts" }] };
 type RowBuilder = (keys: string[]) => Record<string, unknown>;
 
 function makeDb(rowByKey: RowBuilder) {
-  const captured: { analysisQueried: boolean; analysisSelect?: unknown; documentSelect?: unknown } =
-    { analysisQueried: false };
+  const captured: {
+    analysisQueried: boolean;
+    analysisSelect?: unknown;
+    documentSelect?: unknown;
+    documentWhere?: Record<string, unknown>;
+    repoSelect?: unknown;
+  } = { analysisQueried: false };
 
   const db = {
     analysis: {
@@ -38,10 +50,24 @@ function makeDb(rowByKey: RowBuilder) {
       },
     },
     document: {
-      findFirst: (args: { select?: unknown }) => {
+      findFirst: (args: { select?: unknown; where?: Record<string, unknown> }) => {
         captured.documentSelect = args.select;
+        captured.documentWhere = args.where;
         const keys = Object.keys(args.select ?? {});
         return rowByKey(keys);
+      },
+    },
+    repo: {
+      findUnique: (args: { select?: unknown }) => {
+        captured.repoSelect = args.select;
+        return {
+          analyses: [{ id: ANALYSIS_ID }],
+          defaultBranch: "main",
+          id: REPO_ID,
+          name: "doxynix",
+          owner: "doxynix-org",
+          url: "https://github.com/doxynix-org/doxynix",
+        };
       },
     },
   } as unknown as DbClient;
@@ -137,6 +163,65 @@ describe("docsService.getWithGraphLinks", () => {
 
     expect(result.path).toBeNull();
     expect(Object.hasOwn(result, "path")).toBe(true);
+  });
+});
+
+describe("docsService.getDocumentContent", () => {
+  // `getDocumentContent` runs no `select` on the document, so the fake must return the whole row.
+  const fullRow: RowBuilder = () => makeRow(EXPECTED_SELECT);
+
+  it("reads a narrow repo ref instead of the whole snapshot", async () => {
+    const { captured, db } = makeDb(fullRow);
+    const snapshotSpy = vi.spyOn(analysisRepo, "getRepoSnapshot");
+
+    await docsService.getDocumentContent(db, REPO_ID, "README", "workspace-1", ANALYSIS_ID);
+
+    expect(snapshotSpy).not.toHaveBeenCalled();
+    snapshotSpy.mockRestore();
+
+    const select = captured.repoSelect as Record<string, unknown>;
+    expect(Object.keys(select).sort()).toStrictEqual([
+      "analyses",
+      "defaultBranch",
+      "id",
+      "name",
+      "owner",
+      "url",
+    ]);
+    expect(select).not.toHaveProperty("resultJson");
+    expect(select).not.toHaveProperty("metricsJson");
+    expect((select.analyses as { select?: unknown }).select).toStrictEqual({ id: true });
+    expect(vi.mocked(markdownToHtml)).toHaveBeenCalledWith({
+      content: CONTENT,
+      name: "doxynix",
+      owner: "doxynix-org",
+    });
+  });
+
+  it("still pins the document lookup to the selected analysis", async () => {
+    const { captured, db } = makeDb(fullRow);
+
+    const result = await docsService.getDocumentContent(
+      db,
+      REPO_ID,
+      "README",
+      "workspace-1",
+      ANALYSIS_ID,
+    );
+
+    expect(captured.documentWhere?.analysis).toStrictEqual({ id: ANALYSIS_ID });
+    expect(result.id).toBe("0195f000-0000-7000-8000-000000000003");
+  });
+
+  it("throws REPO_NOT_FOUND when the repo is missing", async () => {
+    const db = { repo: { findUnique: async () => null } } as unknown as DbClient;
+
+    await expect(
+      docsService.getDocumentContent(db, REPO_ID, "README", "workspace-1", ANALYSIS_ID),
+    ).rejects.toMatchObject({
+      messageCode: MessageCode.REPO_NOT_FOUND,
+      publicMessage: "Repository not found",
+    });
   });
 });
 

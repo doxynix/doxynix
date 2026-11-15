@@ -70,7 +70,7 @@ export const docsService = {
     aid?: string,
     path?: string,
   ) {
-    const repo = await analysisRepo.getRepoSnapshot(db, repoId, workspaceId, aid);
+    const repo = await analysisRepo.getRepoRef(db, repoId, workspaceId, aid);
     if (repo == null) {
       throw new AppError({
         code: "NOT_FOUND",
