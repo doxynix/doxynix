@@ -57,7 +57,7 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
   const { data: pinnedRef } = useQuery(
     trpc.analysis.getVersionRef.queryOptions(
       { analysisId: selectedAid, repoId },
-      { enabled: selectedAid !== "" && !pinnedInPage },
+      { enabled: selectedAid !== "" && history != null && !pinnedInPage },
     ),
   );
 

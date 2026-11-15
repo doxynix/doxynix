@@ -67,7 +67,7 @@ export const analysisCoreRouter = {
       return analysisLifecycleService.getLatest(ctx.db, input.repoId, ctx.workspace.id);
     }),
   getVersionRef: workspaceProcedure
-    .input(z.object({ analysisId: z.uuid(), repoId: z.uuid() }))
+    .input(z.object({ analysisId: z.string(), repoId: z.uuid() }))
     .output(AnalysisVersionRefSchema.nullable())
     .query(async ({ ctx, input }) => {
       return analysisLifecycleService.getVersionRef(

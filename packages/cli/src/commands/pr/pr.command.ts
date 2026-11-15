@@ -357,15 +357,25 @@ export function registerPrCommand(program: Command) {
           }
 
           const rawPrNumber = Number(identifier);
-          const { items: prList } = await withTaskSpinner(
-            `Locating analysis for PR #${rawPrNumber}...`,
-            () => prService.listByRepository(repoContext.repo.id),
+          const {
+            items: prList,
+            meta,
+            total,
+          } = await withTaskSpinner(`Locating analysis for PR #${rawPrNumber}...`, () =>
+            prService.listByRepository(repoContext.repo.id),
           );
 
           const foundPR = prList.find((item) => item.prNumber === rawPrNumber);
           if (!foundPR) {
+            // A miss past the page bound is not a "no such PR": say how much was searched.
+            const truncationHint = meta.hasNextPage
+              ? ` Showing ${prList.length} of ${total} analyzed pull requests.`
+              : "";
+
             p.outro(
-              brand.warning(`No analysis found for PR #${rawPrNumber} in ${repoContext.target}.`),
+              brand.warning(
+                `No analysis found for PR #${rawPrNumber} in ${repoContext.target}.${truncationHint}`,
+              ),
             );
             return;
           }
