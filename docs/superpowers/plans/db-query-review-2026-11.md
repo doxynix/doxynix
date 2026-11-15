@@ -274,9 +274,10 @@ R6, R7 and R21 have since closed (see the closing log).
   > uses the repo's `useIntersectionObserver` sentinel at the end of its `ScrollArea`
   > (`SESSION_PAGE_SIZE = 50`). No new user-facing copy: the prepend indicator is an `aria-hidden`
   > spinner in Virtuoso's `Header`. The prepend decision is the pure `history-window.ts` state machine
-  > (`resetHistoryWindow` / `seedHistoryWindow` / `decidePrepend`) and is unit-tested, as is the
-  > `flattenSessionPages` id-dedupe that guards the `updatedAt` keyset; the sentinel gating is not,
-  > because the client tests run in the `node` environment.
+  > (`resetHistoryWindow` / `seedHistoryWindow` / `decidePrepend`) and is unit-tested, as are the
+  > `filterNewMessages` and `flattenSessionPages` id-dedupes that keep a refetched page from
+  > repeating a row; the sentinel gating is not, because the client tests run in the `node`
+  > environment.
 
 - [x] **R8 · The PR-webhook existence check fetches every comment and every fix of the analysis**
   — `src/server/modules/analysis/analysis.repository.ts:179-196`, used at

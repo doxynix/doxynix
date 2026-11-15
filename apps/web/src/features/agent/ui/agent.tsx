@@ -27,7 +27,12 @@ import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { TOOL_INVALIDATIONS, toolLabelKeys } from "../model/agent-config";
 import type { AgentMessagePart, LocalFileAttachment } from "../model/agent-types";
-import { decidePrepend, type HistoryWindow, resetHistoryWindow } from "../model/history-window";
+import {
+  decidePrepend,
+  filterNewMessages,
+  type HistoryWindow,
+  resetHistoryWindow,
+} from "../model/history-window";
 import { flattenSessionPages } from "../model/session-pages";
 import { useAgentIsOpen } from "../model/use-agent.store";
 import { AgentForm } from "./agent-form";
@@ -209,6 +214,13 @@ export function Agent() {
     }),
   });
 
+  const messagesRef = useRef(messages);
+
+  // Declared before the prepend effect so the transcript ids it dedupes against are never stale.
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
   // Seeding the count is independent of the message reset: a chat created in this mount streams its
   // own messages and must still be able to prepend once it outgrows page 0.
   useEffect(() => {
@@ -231,13 +243,23 @@ export function Agent() {
       return;
     }
 
-    const { items } = decidePrepend(storedWindow, historyPages.pages);
+    const currentIds = new Set(messagesRef.current.map((message) => message.id));
+    const { items, window } = decidePrepend(storedWindow, historyPages.pages, currentIds);
+
+    if (window === storedWindow) {
+      return;
+    }
 
     if (items.length > 0) {
-      setMessages((previous) => [...toUIMessages(items), ...previous]);
-      // oxlint-disable-next-line react/set-state-in-effect -- the window mirrors useChat state.
-      setHistoryWindow((previous) => decidePrepend(previous, historyPages.pages).window);
+      // The inner filter only guards a race: a drop there would under-count the index shift by one.
+      setMessages((previous) => [
+        ...toUIMessages(filterNewMessages(items, new Set(previous.map((message) => message.id)))),
+        ...previous,
+      ]);
     }
+
+    // oxlint-disable-next-line react/set-state-in-effect -- the window mirrors useChat state.
+    setHistoryWindow((previous) => decidePrepend(previous, historyPages.pages, currentIds).window);
   }, [historyPages, setMessages, storedWindow]);
 
   useEffect(() => {

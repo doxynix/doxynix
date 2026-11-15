@@ -22,11 +22,19 @@ export function seedHistoryWindow(state: HistoryWindow, hasPageZero: boolean): H
   return { ...state, loadedPages: 1 };
 }
 
+export function filterNewMessages<TItem extends { id: string }>(
+  older: readonly TItem[],
+  currentIds: ReadonlySet<string>,
+): TItem[] {
+  return older.filter((item) => !currentIds.has(item.id));
+}
+
 // Pages arrive newest-first and are oldest-first inside, so reversing the page order yields the
 // items that belong above the ones already rendered.
-export function decidePrepend<TItem>(
+export function decidePrepend<TItem extends { id: string }>(
   state: HistoryWindow,
   pages: readonly Page<TItem>[],
+  currentIds: ReadonlySet<string>,
 ): { items: TItem[]; window: HistoryWindow } {
   const seeded = seedHistoryWindow(state, pages.length > 0);
 
@@ -34,10 +42,14 @@ export function decidePrepend<TItem>(
     return { items: [], window: seeded };
   }
 
-  const items = pages
-    .slice(seeded.loadedPages)
-    .toReversed()
-    .flatMap((page) => page.items);
+  // A refetch refills every page, so a row can slide into a page below the one it was read from.
+  const items = filterNewMessages(
+    pages
+      .slice(seeded.loadedPages)
+      .toReversed()
+      .flatMap((page) => page.items),
+    currentIds,
+  );
 
   return {
     items,
