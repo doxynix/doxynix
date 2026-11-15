@@ -118,12 +118,14 @@ type EntitlementRow = Prisma.WorkspaceEntitlementGetPayload<{ select: typeof ENT
 type LocalSubscription = Prisma.BillingSubscriptionGetPayload<Record<string, never>>;
 type CustomerRef = { id: string; workspaceId: string };
 
-// Built once per Stripe page (100 subscriptions), so the maps stay bounded. Missing keys fall back
-// to a query: a webhook can project a row while the loop is running.
+// Built once per Stripe page (100 subscriptions), so the maps stay bounded. A key that was not
+// prefetched still falls back to a query: a webhook can project a row while the loop is running.
+// `null` in `customers` is a negative cache entry — the page already knows that customer is unowned.
 type ReconcileContext = {
-  customers: Map<string, CustomerRef>;
+  customers: Map<string, CustomerRef | null>;
   entitlements: Map<string, EntitlementRow>;
   memberCounts: Map<string, number>;
+  subscriptionIdsByWorkspace: Map<string, Set<string>>;
   subscriptions: Map<string, LocalSubscription>;
 };
 
@@ -156,32 +158,63 @@ async function buildPageContext(page: Stripe.Subscription[]): Promise<ReconcileC
     }),
   ]);
 
+  const countByWorkspace = new Map(memberCounts.map((row) => [row.workspaceId, row._count._all]));
+  const customerByExternalId: Map<string, CustomerRef | null> = new Map(
+    externalCustomerIds.map((externalCustomerId) => [externalCustomerId, null]),
+  );
+  const subscriptionIdsByWorkspace = new Map<string, Set<string>>();
+
+  for (const customer of customers) {
+    customerByExternalId.set(customer.externalCustomerId, {
+      id: customer.id,
+      workspaceId: customer.workspaceId,
+    });
+  }
+
+  for (const local of subscriptions) {
+    const ids = subscriptionIdsByWorkspace.get(local.workspaceId) ?? new Set<string>();
+
+    ids.add(local.externalSubscriptionId);
+    subscriptionIdsByWorkspace.set(local.workspaceId, ids);
+  }
+
   return {
-    customers: new Map(
-      customers.map((customer) => [
-        customer.externalCustomerId,
-        { id: customer.id, workspaceId: customer.workspaceId },
-      ]),
-    ),
+    customers: customerByExternalId,
     entitlements: new Map(
       entitlements.map((entitlement) => [entitlement.workspaceId, entitlement]),
     ),
-    memberCounts: new Map(memberCounts.map((row) => [row.workspaceId, row._count._all])),
+    // `groupBy` omits workspaces without members; 0 is the truth for those, not a cache miss.
+    memberCounts: new Map(workspaceIds.map((id) => [id, countByWorkspace.get(id) ?? 0])),
+    subscriptionIdsByWorkspace,
     subscriptions: new Map(subscriptions.map((local) => [local.externalSubscriptionId, local])),
   };
+}
+
+// A repair rewrites the mirror, the entitlement and the previous holder's `isCurrent`, so later
+// subscriptions on the same page must re-read that workspace instead of trusting the prefetch.
+function forgetWorkspaceState(ctx: ReconcileContext, workspaceId: string): void {
+  ctx.entitlements.delete(workspaceId);
+
+  for (const externalSubscriptionId of ctx.subscriptionIdsByWorkspace.get(workspaceId) ?? []) {
+    ctx.subscriptions.delete(externalSubscriptionId);
+  }
 }
 
 async function customerFor(customerId: string, ctx: ReconcileContext): Promise<null | CustomerRef> {
   const known = ctx.customers.get(customerId);
 
-  if (known != null) {
+  if (known !== undefined) {
     return known;
   }
 
-  return prisma.billingCustomer.findFirst({
+  const found = await prisma.billingCustomer.findFirst({
     select: { id: true, workspaceId: true },
     where: { externalCustomerId: customerId, provider: STRIPE_PROVIDER },
   });
+
+  ctx.customers.set(customerId, found);
+
+  return found;
 }
 
 async function localFor(
@@ -337,6 +370,7 @@ async function reconcileSubscription(
       now,
       { allowTakeover: takeover },
     );
+    forgetWorkspaceState(ctx, mapping.workspaceId);
 
     return true;
   }
@@ -392,6 +426,7 @@ async function reconcileSubscription(
       now,
       { allowTakeover: takeover },
     );
+    forgetWorkspaceState(ctx, mapping.workspaceId);
     changed = true;
   }
 
@@ -410,6 +445,7 @@ async function reconcileSubscription(
       requestId: `reconcile:${subscription.id}:${now.getTime()}`,
       workspaceId: mapping.workspaceId,
     });
+    forgetWorkspaceState(ctx, mapping.workspaceId);
 
     changed = true;
   }

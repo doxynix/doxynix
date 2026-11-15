@@ -464,11 +464,6 @@ describe("runStripeReconciliation", () => {
       data: [subscription()],
       has_more: false,
     });
-    dbMock.billingCustomer.findMany.mockResolvedValue([]);
-    dbMock.billingCustomer.findFirst.mockResolvedValue({
-      id: "bc_1",
-      workspaceId: WORKSPACE_ID,
-    });
     dbMock.billingSubscription.findMany.mockResolvedValue([]);
     dbMock.billingSubscription.findUnique.mockResolvedValue(localSubscription());
 
@@ -477,34 +472,173 @@ describe("runStripeReconciliation", () => {
     expect(dbMock.billingSubscription.findUnique).toHaveBeenCalledWith({
       where: { externalSubscriptionId: "sub_1" },
     });
-    expect(dbMock.billingCustomer.findFirst).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { externalCustomerId: "cus_1", provider: "stripe" },
-      }),
-    );
     expect(summary.mismatchCount).toBe(0);
+  });
+
+  it("does not re-query a customer mapping the page already found missing", async () => {
+    stripeMock.subscriptions.list.mockResolvedValue({
+      data: [subscription(), subscription({ id: "sub_2" })],
+      has_more: false,
+    });
+    dbMock.billingCustomer.findMany.mockResolvedValue([]);
+
+    const summary = await runStripeReconciliation(NOW);
+
+    expect(dbMock.billingCustomer.findFirst).not.toHaveBeenCalled();
+    expect(issueKinds().filter((kind) => kind === "UNOWNED_STRIPE_OBJECT")).toHaveLength(2);
+    expect(summary.mismatchCount).toBe(2);
   });
 
   it("falls back to a query for an entitlement the page did not prefetch", async () => {
     stripeMock.subscriptions.list.mockResolvedValue({
-      data: [subscription()],
+      data: [
+        subscription({
+          items: {
+            data: [
+              {
+                current_period_end: 1_800_000_000,
+                current_period_start: 1_790_000_000,
+                id: "si_1",
+                price: {
+                  currency: "usd",
+                  id: proPlan().priceId,
+                  recurring: { interval: "month" },
+                },
+                quantity: 1,
+              },
+            ],
+          },
+        }),
+      ],
       has_more: false,
     });
-    dbMock.billingSubscription.findMany.mockResolvedValue([localSubscription()]);
+    dbMock.billingSubscription.findMany.mockResolvedValue([
+      localSubscription({ externalSubscriptionItemId: "si_1", quantity: 1 }),
+    ]);
     dbMock.workspaceEntitlement.findMany.mockResolvedValue([]);
     dbMock.workspaceMember.groupBy.mockResolvedValue([]);
     dbMock.workspaceEntitlement.findUnique.mockResolvedValue(entitlement());
-    dbMock.workspaceMember.count.mockResolvedValue(2);
 
     const summary = await runStripeReconciliation(NOW);
 
     expect(dbMock.workspaceEntitlement.findUnique).toHaveBeenCalledWith(
       expect.objectContaining({ where: { workspaceId: WORKSPACE_ID } }),
     );
-    expect(dbMock.workspaceMember.count).toHaveBeenCalledWith({
-      where: { workspaceId: WORKSPACE_ID },
-    });
+    // `groupBy` does not report workspaces without members, so 0 must be seeded, not queried.
+    expect(dbMock.workspaceMember.count).not.toHaveBeenCalled();
     expect(summary.mismatchCount).toBe(0);
+  });
+
+  it("prefetches once per Stripe page, not once per run", async () => {
+    stripeMock.subscriptions.list
+      .mockResolvedValueOnce({ data: [subscription()], has_more: true })
+      .mockResolvedValueOnce({
+        data: [subscription({ customer: "cus_2", id: "sub_2" })],
+        has_more: false,
+      });
+    dbMock.billingCustomer.findMany
+      .mockResolvedValueOnce([
+        { externalCustomerId: "cus_1", id: "bc_1", workspaceId: WORKSPACE_ID },
+      ])
+      .mockResolvedValueOnce([
+        { externalCustomerId: "cus_2", id: "bc_2", workspaceId: WORKSPACE_ID },
+      ]);
+    dbMock.billingSubscription.findMany
+      .mockResolvedValueOnce([localSubscription()])
+      .mockResolvedValueOnce([localSubscription({ externalSubscriptionId: "sub_2", id: "bs_2" })])
+      .mockResolvedValueOnce([]);
+
+    const summary = await runStripeReconciliation(NOW);
+
+    expect(dbMock.billingCustomer.findMany).toHaveBeenCalledTimes(2);
+    expect(dbMock.billingCustomer.findMany.mock.calls[0]?.[0]).toMatchObject({
+      where: { externalCustomerId: { in: ["cus_1"] }, provider: "stripe" },
+    });
+    expect(dbMock.billingCustomer.findMany.mock.calls[1]?.[0]).toMatchObject({
+      where: { externalCustomerId: { in: ["cus_2"] }, provider: "stripe" },
+    });
+    expect(dbMock.workspaceMember.groupBy).toHaveBeenCalledTimes(2);
+    expect(summary.checkedSubscriptions).toBe(2);
+    expect(summary.mismatchCount).toBe(0);
+  });
+
+  it("re-reads the workspace after a takeover instead of trusting the page prefetch", async () => {
+    const item = {
+      current_period_end: 1_800_000_000,
+      current_period_start: 1_790_000_000,
+      price: { currency: "usd", id: proPlan().priceId, recurring: { interval: "month" } },
+      quantity: 2,
+    };
+
+    stripeMock.subscriptions.list.mockResolvedValue({
+      data: [
+        subscription({ id: "sub_new", items: { data: [{ ...item, id: "si_new" }] } }),
+        subscription({
+          id: "sub_prev",
+          items: { data: [{ ...item, id: "si_prev" }] },
+          status: "canceled",
+        }),
+      ],
+      has_more: false,
+    });
+    // Before the run the previous subscription holds the slot, on HOBBY limits.
+    dbMock.billingSubscription.findMany.mockResolvedValue([
+      localSubscription({
+        externalSubscriptionId: "sub_new",
+        externalSubscriptionItemId: "si_new",
+        id: "bs_new",
+        isCurrent: null,
+      }),
+      localSubscription({
+        externalStatus: "canceled",
+        externalSubscriptionId: "sub_prev",
+        externalSubscriptionItemId: "si_prev",
+        id: "bs_prev",
+      }),
+    ]);
+    dbMock.workspaceEntitlement.findMany.mockResolvedValue([
+      entitlement({
+        aiTokensPerMonth: 1_000_000,
+        analysesPerMonth: 20,
+        autoResync: false,
+        historyDays: 7,
+        privateReposAllowed: false,
+        prReviews: false,
+        sourceSubscriptionId: "bs_prev",
+      }),
+    ]);
+    dbMock.billingSubscription.findFirst
+      .mockResolvedValueOnce({ externalStatus: "canceled", externalSubscriptionId: "sub_prev" })
+      .mockResolvedValueOnce(null);
+    stripeMock.subscriptions.retrieve.mockResolvedValue({ status: "canceled" });
+    // After the takeover: the new subscription owns the entitlement, the old one is history.
+    dbMock.billingSubscription.findUnique.mockResolvedValue(
+      localSubscription({
+        externalStatus: "canceled",
+        externalSubscriptionId: "sub_prev",
+        externalSubscriptionItemId: "si_prev",
+        id: "bs_prev",
+        isCurrent: null,
+      }),
+    );
+    dbMock.workspaceEntitlement.findUnique.mockResolvedValue(
+      entitlement({ sourceSubscriptionId: "bs_new" }),
+    );
+
+    const summary = await runStripeReconciliation(NOW);
+
+    expect(dbMock.workspaceEntitlement.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { workspaceId: WORKSPACE_ID } }),
+    );
+    expect(dbMock.billingSubscription.findUnique).toHaveBeenCalledWith({
+      where: { externalSubscriptionId: "sub_prev" },
+    });
+    expect(projectMock).toHaveBeenCalledTimes(1);
+    expect(projectMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ allowCurrentTakeover: true }),
+    );
+    expect(summary.mismatchCount).toBe(1);
   });
 
   it("fails closed when a local current subscription disappeared from Stripe", async () => {
