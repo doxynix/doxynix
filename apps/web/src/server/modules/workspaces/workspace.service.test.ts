@@ -339,6 +339,80 @@ describe("workspaceService.removeMember", () => {
   });
 });
 
+describe("workspaceService.listMembers", () => {
+  const PAGE = { limit: 2 };
+
+  function memberRow(overrides: Record<string, unknown> = {}) {
+    return {
+      id: MEMBER_ID,
+      role: "MEMBER",
+      user: { id: USER_ID, image: null, name: "Bob" },
+      userId: USER_ID,
+      ...overrides,
+    };
+  }
+
+  function membersDb(rows: unknown[], counts = { owners: 1, total: 1 }) {
+    const findMany = vi.fn().mockResolvedValue(rows);
+    const count = vi.fn(async (args: { where: { role?: string } }) =>
+      args.where.role === "OWNER" ? counts.owners : counts.total,
+    );
+
+    return { count, db: { workspaceMember: { count, findMany } } as never, findMany };
+  }
+
+  it("reads one probe row past the oldest-first page", async () => {
+    const { db, findMany } = membersDb([
+      memberRow({ id: "member-1" }),
+      memberRow({ id: "member-2" }),
+      memberRow({ id: "probe" }),
+    ]);
+
+    const result = await workspaceService.listMembers(db, WORKSPACE_ID, PAGE);
+
+    expect(result.items.map((member) => member.id)).toStrictEqual(["member-1", "member-2"]);
+    expect(result.meta).toStrictEqual({ hasNextPage: true, nextCursor: "probe" });
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cursor: undefined,
+        orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+        take: 3,
+        where: { workspaceId: WORKSPACE_ID },
+      }),
+    );
+  });
+
+  it("keysets past the cursor id", async () => {
+    const { db, findMany } = membersDb([memberRow({ id: "member-3" })]);
+
+    await workspaceService.listMembers(db, WORKSPACE_ID, { cursor: MEMBER_ID, limit: 2 });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: { id: MEMBER_ID }, take: 3 }),
+    );
+  });
+
+  it("counts owners and members in SQL so the counts survive paging", async () => {
+    const { count, db } = membersDb([memberRow()], { owners: 2, total: 7 });
+
+    const result = await workspaceService.listMembers(db, WORKSPACE_ID, PAGE);
+
+    expect(result.ownerCount).toBe(2);
+    expect(result.total).toBe(7);
+    expect(count).toHaveBeenCalledWith({ where: { role: "OWNER", workspaceId: WORKSPACE_ID } });
+    expect(count).toHaveBeenCalledWith({ where: { workspaceId: WORKSPACE_ID } });
+    expect(count).toHaveBeenCalledTimes(2);
+  });
+
+  it("reports the last page without a cursor when the probe row is missing", async () => {
+    const { db } = membersDb([memberRow()]);
+
+    const result = await workspaceService.listMembers(db, WORKSPACE_ID, PAGE);
+
+    expect(result.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
+  });
+});
+
 describe("workspaceService.switchWorkspace", () => {
   it("answers FORBIDDEN for a workspace the user does not belong to", async () => {
     const db = { workspaceMember: { findUnique: vi.fn().mockResolvedValue(null) } } as never;

@@ -24,6 +24,8 @@ import {
   WorkspaceInvitePreviewSchema,
   WorkspaceInviteTokenSchema,
   WorkspaceMemberSummarySchema,
+  WorkspaceMembersInputSchema,
+  WorkspaceMembersOutputSchema,
   WorkspaceSummarySchema,
 } from "./workspace.schemas";
 import { workspaceService } from "./workspace.service";
@@ -77,11 +79,10 @@ export const workspaceRouter = createTRPCRouter({
     }),
 
   members: workspaceProcedure
-    .output(z.object({ items: z.array(WorkspaceMemberSummarySchema) }))
-    .query(async ({ ctx }) => {
-      const items = await workspaceService.listMembers(ctx.db, ctx.workspace.id);
-
-      return { items };
+    .input(WorkspaceMembersInputSchema)
+    .output(WorkspaceMembersOutputSchema)
+    .query(async ({ ctx, input }) => {
+      return workspaceService.listMembers(ctx.db, ctx.workspace.id, input);
     }),
 
   myWorkspaces: protectedProcedure

@@ -14,6 +14,7 @@ import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import { sendWorkspaceInviteEmail } from "@/server/core/workspaces/send-workspace-invite";
 import { maskEmail, normalizeEmail } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
+import { keysetArgs, orderWithTiebreak, splitKeysetPage } from "@/server/utils/pagination";
 
 import type { WorkspaceSummary } from "./workspace.schemas";
 
@@ -374,17 +375,34 @@ export const workspaceService = {
     };
   },
 
-  async listMembers(db: DbClient, workspaceId: string) {
-    return db.workspaceMember.findMany({
-      orderBy: { createdAt: "asc" },
-      select: {
-        id: true,
-        role: true,
-        user: { select: { id: true, image: true, name: true } },
-        userId: true,
-      },
-      where: { workspaceId },
-    });
+  async listMembers(
+    db: DbClient,
+    workspaceId: string,
+    input: { cursor?: null | string; limit: number },
+  ) {
+    const { cursor, limit } = input;
+
+    const [rows, ownerCount, total] = await Promise.all([
+      db.workspaceMember.findMany({
+        ...keysetArgs(cursor, limit),
+        orderBy: orderWithTiebreak("createdAt", "asc"),
+        select: {
+          id: true,
+          role: true,
+          user: { select: { id: true, image: true, name: true } },
+          userId: true,
+        },
+        where: { workspaceId },
+      }),
+      // Counted in SQL: the page only holds one cursor window, so a client-side owner tally
+      // would shrink as members are paged in.
+      db.workspaceMember.count({ where: { role: "OWNER", workspaceId } }),
+      db.workspaceMember.count({ where: { workspaceId } }),
+    ]);
+
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
+
+    return { items, meta: { hasNextPage, nextCursor }, ownerCount, total };
   },
 
   async previewInvite(token: string) {

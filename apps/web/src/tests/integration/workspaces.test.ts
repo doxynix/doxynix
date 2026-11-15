@@ -146,7 +146,7 @@ describe("Workspace service and router", () => {
     expect(after.activeWorkspaceId).toBe(personalId);
     expect(after.reset).toBe(true);
 
-    await expect(caller.workspace.members()).rejects.toMatchObject({
+    await expect(caller.workspace.members({})).rejects.toMatchObject({
       code: "FORBIDDEN",
       message: "Workspace access denied",
     });
@@ -156,7 +156,7 @@ describe("Workspace service and router", () => {
     const alice = await createBareTestUser("Alice");
     const caller = callerFor(alice.user);
 
-    const members = await caller.workspace.members();
+    const members = await caller.workspace.members({});
 
     expect(members.items).toHaveLength(1);
     expect(members.items[0]?.role).toBe("OWNER");
@@ -187,11 +187,14 @@ describe("Workspace service and router", () => {
     const ownerCaller = callerFor(alice.user, workspaceId);
     const memberCaller = callerFor(carol.user, workspaceId);
 
-    const ownerView = await ownerCaller.workspace.members();
-    const memberView = await memberCaller.workspace.members();
+    const ownerView = await ownerCaller.workspace.members({});
+    const memberView = await memberCaller.workspace.members({});
 
     expect(ownerView.items).toHaveLength(2);
     expect(memberView.items).toHaveLength(2);
+    expect(ownerView.ownerCount).toBe(1);
+    expect(ownerView.total).toBe(2);
+    expect(ownerView.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
     expect(ownerView.items.map((member) => member.userId).sort()).toEqual(
       [alice.user.id, carol.user.id].sort(),
     );
@@ -225,7 +228,7 @@ describe("Workspace service and router", () => {
     const workspaceId = await createPersonalWorkspace(alice.user.id, alice.user.name);
     const caller = callerFor(bob.user, workspaceId);
 
-    await expect(caller.workspace.members()).rejects.toMatchObject({
+    await expect(caller.workspace.members({})).rejects.toMatchObject({
       code: "FORBIDDEN",
       message: "Workspace access denied",
     });
