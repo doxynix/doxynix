@@ -6,9 +6,9 @@ Live checklist for the second static pass over `apps/web`. Companion to
 [`db-index-audit.md`](../../db/db-index-audit.md) (what the shapes cost) and
 [`db-ui-map.md`](../../db/db-ui-map.md) (where latency lands).
 
-**Closed: 7 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
-PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3 closed 2026-11-15, and R14 and R30 are
-**partially** done (see the item text and the progress note below the scoreboard).
+**Closed: 10 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
+PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3, R6, R7 and R21 closed 2026-11-15, and R14 and
+R30 are **partially** done (see the item text and the progress note below the scoreboard).
 
 ## What this round covers that round 1 did not
 
@@ -74,8 +74,8 @@ reviewed and is correct.
 ### Progress since the last pass (2026-11-15)
 
 R14 and R30 moved without closing: their verification lines still fail, so the checkboxes stay
-unticked and the item text below says what is left. R3, the third partial item from the last pass,
-has since closed (see the closing log).
+unticked and the item text below says what is left. R3 (the third partial item from the last pass),
+R6, R7 and R21 have since closed (see the closing log).
 
 - **R14** — `getWorkspace` no longer reads every document when `aid` is set (fixed by R33, `311bd6a7`).
   Still open: the `getRepoSnapshot` + second-query shape for the docs viewer and the per-keystroke
@@ -212,7 +212,7 @@ has since closed (see the closing log).
     (count them with the `db.slow`/`db.write` telemetry or a temporary query counter); agent turn
     with N tool calls produces one.
 
-- [ ] **R6 · PR comments and PR findings render markdown with one cache lookup and one HTML build per row**
+- [x] **R6 · PR comments and PR findings render markdown with one cache lookup and one HTML build per row**
   — `src/server/modules/analysis/services/pr-comments.service.ts:11-62`,
   `src/server/modules/analysis/analysis.mapper.ts:166-227`
   - **What:** `pullRequestComment.findMany` has **no `take`**, then
@@ -228,8 +228,13 @@ has since closed (see the closing log).
     render on the client. Same for `buildTopFindings`.
   - **Effort:** S · **Verify:** a PR with 200 comments issues 1 cache lookup; p95 of
     `analysis.getComments` in `bench:http` drops; cache tag cardinality stops growing per comment.
+  > Done 2026-11-15 (`d73f3abc`): one `unstable_cache` entry per page for both — keyed on the
+  > analysis id (`pr-comments-html-<analysisId>` / `finding-html-<owner>-<name>-<id>`, tags
+  > `["comments", analysisId]` / `["findings", owner, name, analysisId]`). Unit tests assert one
+  > lookup for a 3-comment page and one for a 3-finding page. The `take` half was deliberately not
+  > done (it would truncate the payload); p95 not measured.
 
-- [ ] **R7 · `agent.getSessionHistory` returns the entire chat with no limit and no `select`**
+- [x] **R7 · `agent.getSessionHistory` returns the entire chat with no limit and no `select`**
   — `src/server/modules/agent/agent.service.ts:75-82`
   - **What:** `chatMessage.findMany({ orderBy: { createdAt: "asc" }, where: { sessionId, session: { userId } } })`
     — no `take`, no cursor, no `select`, so `parts` (JSON: text, tool calls, attachments) for every
@@ -243,6 +248,11 @@ has since closed (see the closing log).
     older pages.
   - **Effort:** S · **Verify:** a 5 000-message session returns a bounded page; response size
     stops scaling with history.
+  > Done 2026-11-15 (`39d08034`): `getSessionHistory` selects `id, role, parts, createdAt`, orders
+  > `createdAt: "desc"`, takes `SESSION_HISTORY_LIMIT = 200` and reverses before mapping;
+  > `listSessions` takes `SESSION_LIST_LIMIT = 100` with a `select` covering every field the
+  > `SessionListItemSchema` output reads plus `repoId`. The bounded horizon is silent — no "load
+  > older" endpoint was added, so history past 200 messages is not reachable from the UI.
 
 - [x] **R8 · The PR-webhook existence check fetches every comment and every fix of the analysis**
   — `src/server/modules/analysis/analysis.repository.ts:179-196`, used at
@@ -460,7 +470,7 @@ has since closed (see the closing log).
   - **Effort:** XS · **Verify:** request latency for disconnect/fix-apply drops by one round trip;
     tests for retries still pass.
 
-- [ ] **R21 · The PR task feeds the whole previous `resultJson` into the prompt**
+- [x] **R21 · The PR task feeds the whole previous `resultJson` into the prompt**
   — `src/server/modules/analysis/tasks/analyze-pr.task.ts:96-108, 222`
   - **What:** `findFirst({ select: { resultJson: true } })` → `JSON.stringify(...)` →
     `projectOverviewJson` in the model context.
@@ -471,6 +481,11 @@ has since closed (see the closing log).
     scores) instead of the raw blob, or reuse the already-computed `metricsJson`.
   - **Effort:** S · **Verify:** prompt token count for PR review drops and stays under the model
     budget; output quality spot-checked on 3 real PRs.
+  > Done 2026-11-15 (`39d08034`): `logic/project-result-overview.ts` projects
+  > architecture/purpose/stack, four scores, four counts, 5 findings, 3 vulnerabilities, 5 complex
+  > files and 5 bottlenecks, then shrinks (drop findings → purpose → string lists) until the
+  > serialized string is ≤ 4096 chars. Non-object input yields `{}`, which is also the null-row
+  > fallback in the task. Token count and quality spot-check not measured.
 
 - [ ] **R22 · PR-impact page can read the repository snapshot twice**
   — `src/server/modules/analysis/services/pr-impact.service.ts:43-56`
@@ -614,7 +629,7 @@ These were checked and found correct. Listed so a third round does not repeat th
 | FP4 | Redis usage | `core/redis.ts` pipelines every multi-step mutation (`increment`, `staging.addFiles`, `staging.removeFile`); no per-element `get`/`set` loops anywhere in `src/server`. |
 | FP5 | `comment-poster.ts` | Posts one `pulls.createReview` with all comments instead of one REST call per finding. |
 | FP6 | `analysisLatestSelect` | Narrow `select` — the polling endpoint does not touch the JSON columns. |
-| FP7 | `.map(async …)` over the database | Does not exist. The `map(async)` sites are R6 (markdown/cache, `pr-comments.service.ts:38`, `analysis.mapper.ts:198`), `webhooks/issue-comment-webhook-handler.ts:78` (markdown), `logic/repo-file-scanner.ts:40` and `logic/differential-analyzer.ts:367` (file reads / analysis), and `domain/ai/ai-tools.ts:198` (tool calls). None of them is a database read per element. |
+| FP7 | `.map(async …)` over the database | Does not exist. The `map(async)` sites are R6 (markdown/cache, `pr-comments.service.ts:38`, `analysis.mapper.ts:198` — both now run inside one page-level cache entry), `webhooks/issue-comment-webhook-handler.ts:78` (markdown), `logic/repo-file-scanner.ts:40` and `logic/differential-analyzer.ts:367` (file reads / analysis), and `domain/ai/ai-tools.ts:198` (tool calls). None of them is a database read per element. |
 | FP8 | Advisory locks | `pg_advisory_xact_lock(hashtext(…))` / `pg_try_advisory_xact_lock` are per-workspace or per-user, always inside a transaction, never held across an HTTP call. |
 | FP9 | `health.check` | `SELECT 1`. |
 | FP10 | Index hygiene | Round 1's `P3`/`P8`/`P17` cleaned up the duplicate and dead indexes; `check:index-parity` keeps app and clone in sync. `546a0750` (2026-11-03) did another pass: dropped `sessions_token_key`, `repos_workspace_id_owner_idx`, `repos_owner_name_workspace_id_key` and `workspace_usage_period_start_idx`, added `repos(workspace_id, owner, name)` unique, `billing_operations(actor_user_id)` and `audit_logs(user_id, created_at DESC, id DESC)`. Do not re-report those as missing. The only gap found in this round is R11. |
@@ -630,11 +645,14 @@ These were checked and found correct. Listed so a third round does not repeat th
 | R3 | 2026-11-15 | `ad34335b` | `select` added; `lastUsed`-only writes are no longer audited (see R1). |
 | R4 | 2026-11-01 | `311bd6a7` | Nested `analyses` narrowed to `select: { commitSha: true }`; the repo row itself is still full because `saveResults` needs it. |
 | R5 | 2026-11-01 | `311bd6a7` | `workspaceMemo` added to `RequestStore`; `resolveWorkspace` split into `loadWorkspace` + `memoizeOnce` keyed on user, header, `strict` and name. Both this and `entitlementMemo` now go through `src/server/utils/request-memo.ts`, so the key is typed and cannot drift from the inputs. |
+| R6 | 2026-11-15 | `d73f3abc` | One `unstable_cache` entry per page in `pr-comments.service.getComments` and `analysisMapper.buildTopFindings` (the latter gained a required `cacheScope`, the PR analysis id); no `take`, so row counts are still unbounded. |
+| R7 | 2026-11-15 | `39d08034` | `getSessionHistory` takes the newest 200 rows (desc → reversed) with a four-field `select`; `listSessions` takes 100 with a `select` that keeps every output field. |
 | R8 | 2026-11-01 | `311bd6a7` | `analysisRepo.getByRepoAndPRNumber` selects `id` instead of `include: { comments, generatedFixes }`; its only caller (the PR webhook) reads `id`. |
+| R21 | 2026-11-15 | `39d08034` | `logic/project-result-overview.ts` replaces `JSON.stringify(resultJson)` in `analyze-pr.task.ts` with a bounded projection capped at 4096 chars. |
 | R27 | 2026-11-01 | `311bd6a7` | `user.me` selects the eight `PublicUser` fields instead of the whole row. |
 | R33 | 2026-11-01 | `311bd6a7` | `documents` relation filtered by `analysisId` in SQL when `aid` is set; the JS `.filter()` in `getRepoSnapshotWithDocuments` is gone. |
 
-The first six shipped in PR #2356 and are on `main`; R3 landed on
+The first six shipped in PR #2356 and are on `main`; R3, R6, R7 and R21 landed on
 `perf/dxnx-310-db-query-review-round-2` and the "working tree" marker from the original log is
 now historical.
 
