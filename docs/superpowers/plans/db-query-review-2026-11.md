@@ -768,4 +768,12 @@ they are one screen each and close in batches, so they stay out of the 36-item c
 - [ ] **C8 · `getDashboardStats` `per_repo_top` LATERAL** — the `LIMIT 1` half landed in `f232f133`,
   which fixes the semantics as "latest analysis per repo"; the remaining decision is whether the widget
   wants five newest *events* instead, which would mean dropping the `DISTINCT ON`.
+- [x] **O2 · `adminAudit.list` page ceiling** — keyset on `(createdAt desc, id desc)` with
+  `cursorPageSchema(50)` and every existing filter; the three capped counts are gone and the table
+  walks pages through an intersection sentinel. `8dae57da`
+- [x] **O3 · `adminReview.list` page ceiling** — the same keyset contract as O2, so rows past the old
+  page 100 are reachable instead of repeating page 100. `8dae57da`
+- [x] **O4 · `adminUser.list` page ceiling** — same keyset contract; `page` is gone from
+  `adminUserParsers` / `adminReviewParsers` / `adminAuditParsers`, so the URL carries only filters.
+  `8dae57da`
 
