@@ -66,6 +66,40 @@ export type SystemEventPayloads = {
 
 export type AllEventPayloads = SystemEventPayloads & UserEventPayloads;
 
+export type UserBatchEvent = {
+  [K in keyof UserEventPayloads]: { data: UserEventPayloads[K]; name: K };
+}[keyof UserEventPayloads];
+
+// Ably's batch endpoint: one `POST /messages` for every event. The `2` is the REST API version
+// ably-js documents for `request()`, the same one its own `batchPublish` sends.
+async function safeBatchPublish(
+  channelName: string,
+  events: UserBatchEvent[],
+  meta: Record<string, unknown>,
+): Promise<boolean> {
+  try {
+    await realtimeServer.request(
+      "post",
+      "/messages",
+      2,
+      {},
+      {
+        channels: [channelName],
+        messages: events,
+      },
+    );
+    return true;
+  } catch (error) {
+    appLogger.error({
+      channel: channelName,
+      error: error instanceof Error ? error.message : String(error),
+      msg: "Failed to batch publish realtime events, falling back to sequential publish",
+      ...meta,
+    });
+    return false;
+  }
+}
+
 async function safePublish(
   channelName: string,
   event: string,
@@ -111,4 +145,28 @@ export const realtimeService = {
           })
         : Promise.resolve(false),
   }),
+
+  userBatch: async (userId: null | string | undefined, events: UserBatchEvent[]) => {
+    if (userId == null || events.length === 0) {
+      return false;
+    }
+
+    // Test credentials are placeholders, so the request always 401s after a ~1s round trip.
+    if (IS_TEST) {
+      return false;
+    }
+
+    const channelName = REALTIME_CONFIG.channels.user(String(userId));
+    const meta = { userId: String(userId) };
+
+    if (await safeBatchPublish(channelName, events, meta)) {
+      return true;
+    }
+
+    for (const { data, name } of events) {
+      await safePublish(channelName, name, data, meta);
+    }
+
+    return false;
+  },
 };

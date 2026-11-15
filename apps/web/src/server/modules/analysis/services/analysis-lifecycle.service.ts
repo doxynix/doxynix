@@ -10,7 +10,7 @@ import { type DbClient, prisma } from "@/server/core/db";
 import { assertAnalysisAllowed, getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { getBranchHeadSha } from "@/server/core/github/github-api";
 import { trackServerEvent } from "@/server/core/posthog-events";
-import { realtimeService } from "@/server/core/realtime";
+import { realtimeService, type UserBatchEvent } from "@/server/core/realtime";
 import {
   recordAnalysisUsage,
   recordCacheHitUsage,
@@ -518,7 +518,6 @@ export const analysisLifecycleService = {
     });
 
     if (activated) {
-      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.userUpdated, {});
       trackServerEvent(
         "onboarding_activated",
         { analysis_id: analysisId, repo_id: repo.id },
@@ -526,10 +525,21 @@ export const analysisLifecycleService = {
       );
     }
 
-    await realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.notification, {
-      id: notification.id,
-      title: notification.title,
-    });
+    // One batch request for the whole completion burst instead of three sequential publishes:
+    // `userUpdated` (first activation only), the notification, and the completion event.
+    const realtimeEvents: UserBatchEvent[] = [
+      {
+        data: { id: notification.id, title: notification.title },
+        name: REALTIME_CONFIG.events.user.notification,
+      },
+      { data: {}, name: REALTIME_CONFIG.events.user.analysisUpdated },
+    ];
+
+    if (activated) {
+      realtimeEvents.unshift({ data: {}, name: REALTIME_CONFIG.events.user.userUpdated });
+    }
+
+    await realtimeService.userBatch(userId, realtimeEvents);
 
     appLogger.info({ analysisId, commitSha: currentSha, msg: "Results saved", repoId: repo.id });
 
@@ -542,8 +552,6 @@ export const analysisLifecycleService = {
           repoId: repo.id,
         });
       });
-
-    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
 
     return finalHealthScore;
   },
