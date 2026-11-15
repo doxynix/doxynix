@@ -7,6 +7,7 @@ vi.mock("@/shared/config/env.server", () => ({ GITHUB_APP_ID: "12345" }));
 vi.mock("@/server/core/github/github-access-token", () => ({
   githubTokenService: { getValidToken },
 }));
+vi.mock("@/server/core/github/github-api", () => ({ getMyRepos: vi.fn().mockResolvedValue([]) }));
 vi.mock("@/server/core/github/github-client", () => ({
   getInstallationInfo: vi.fn(),
   getPublicClient: () => ({
@@ -107,5 +108,24 @@ describe("githubAppService.syncInstallations ownership", () => {
 
     expect(findMany).toHaveBeenCalledTimes(1);
     expect(findMany.mock.calls[0]?.[0]?.where?.id).toEqual({ in: [4242n, 5252n] });
+  });
+});
+
+describe("githubAppService.getMyRepos", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getValidToken.mockResolvedValue("tok");
+    paginate.mockResolvedValue([]);
+  });
+
+  it("resolves the GitHub token once and hands it to the installation sync", async () => {
+    const db = { githubInstallation: { findMany: vi.fn().mockResolvedValue([]) } };
+    const prisma = {
+      githubInstallation: { findMany: vi.fn().mockResolvedValue([]), updateMany: vi.fn() },
+    };
+
+    await githubAppService.getMyRepos(db as never, prisma as never, "user-b", "workspace-b");
+
+    expect(getValidToken).toHaveBeenCalledTimes(1);
   });
 });
