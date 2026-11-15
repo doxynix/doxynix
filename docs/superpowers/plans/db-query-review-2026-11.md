@@ -6,9 +6,9 @@ Live checklist for the second static pass over `apps/web`. Companion to
 [`db-index-audit.md`](../../db/db-index-audit.md) (what the shapes cost) and
 [`db-ui-map.md`](../../db/db-ui-map.md) (where latency lands).
 
-**Closed: 6 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
-PR #2356). Revalidated 2026-11-14 on `e48fcdec`: no item can be closed since then, but R3, R14 and
-R30 are now **partially** done (see the item text and the progress note below the scoreboard).
+**Closed: 7 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
+PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3 closed 2026-11-15, and R14 and R30 are
+**partially** done (see the item text and the progress note below the scoreboard).
 
 ## What this round covers that round 1 did not
 
@@ -73,12 +73,11 @@ reviewed and is correct.
 
 ### Progress since the last pass (2026-11-14)
 
-Three items moved without closing. Their verification lines still fail, so the checkboxes stay
+Two items moved without closing. Their verification lines still fail, so the checkboxes stay
 unticked; the item text below says what is left.
 
-- **R3** — the redundant write was throttled to once per hour and became an `updateMany`
-  (`546a0750`, 2026-11-03). Still open: `findUnique({ include: { user: true } })` reads both rows in
-  full, and each refresh still produces an audit INSERT because `updateMany` is audited.
+- **R3** — closed 2026-11-15: the lookup selects only the columns the gate reads, and a
+  `lastUsed`-only update is no longer audited (that half is R1).
 - **R14** — `getWorkspace` no longer reads every document when `aid` is set (fixed by R33, `311bd6a7`).
   Still open: the `getRepoSnapshot` + second-query shape for the docs viewer and the per-keystroke
   structure rebuild in `searchWorkspace`.
@@ -132,6 +131,9 @@ unticked; the item text below says what is left.
   - **Effort:** M · **Verify:** `audit_logs` rows per analysis completion == number of *semantic*
     events (not 8); no `poolWaiting > 0` in the `db.slow` payload during a 3-way parallel
     analysis; Ably publish count per analysis run drops accordingly.
+  > Progress 2026-11-15: bookkeeping-only writes (`lastUsed`, `progress`, `isRead`) are no longer
+  > audited and the Ably publish is coalesced to one per request; the "not 8 rows" target still
+  > needs `audit-log-architecture.md` step 2.
 
 - [x] **R2 · `repo.getByName` / `getByOwner` read `resultJson`, `metricsJson` and `logs` to render a header**
   — `src/server/modules/repos/repo.service.ts:248-276`
@@ -150,7 +152,7 @@ unticked; the item text below says what is left.
   - **Effort:** XS · **Verify:** `EXPLAIN (ANALYZE, BUFFERS)` on the repo-page query shows
     `rows`/`width` without the JSON columns; `repo.getByName` response unchanged in the UI.
 
-- [ ] **R3 · API-key gate does a full joined read, and its throttled write still audits**
+- [x] **R3 · API-key gate does a full joined read, and its throttled write still audits**
   — `src/server/core/auth/verify-api-key.ts:31-74`
   - **What:** `prisma.apiKey.findUnique({ include: { user: true } })` (`:36-39`) with no `select`
     (both rows in full). The per-request write was addressed in `546a0750` (2026-11-03):
@@ -623,13 +625,15 @@ These were checked and found correct. Listed so a third round does not repeat th
 | ID | closed | commit | note |
 | --- | --- | --- | --- |
 | R2 | 2026-11-01 | `311bd6a7` | `repoPublicSelect` / `repoPageSelect` in `repo.mapper.ts`; `getByName` uses the page projection, `getByOwner` the scalar one. `RepoRecord` dropped with the `include`. |
+| R3 | 2026-11-15 | `ad34335b` | `select` added; `lastUsed`-only writes are no longer audited (see R1). |
 | R4 | 2026-11-01 | `311bd6a7` | Nested `analyses` narrowed to `select: { commitSha: true }`; the repo row itself is still full because `saveResults` needs it. |
 | R5 | 2026-11-01 | `311bd6a7` | `workspaceMemo` added to `RequestStore`; `resolveWorkspace` split into `loadWorkspace` + `memoizeOnce` keyed on user, header, `strict` and name. Both this and `entitlementMemo` now go through `src/server/utils/request-memo.ts`, so the key is typed and cannot drift from the inputs. |
 | R8 | 2026-11-01 | `311bd6a7` | `analysisRepo.getByRepoAndPRNumber` selects `id` instead of `include: { comments, generatedFixes }`; its only caller (the PR webhook) reads `id`. |
 | R27 | 2026-11-01 | `311bd6a7` | `user.me` selects the eight `PublicUser` fields instead of the whole row. |
 | R33 | 2026-11-01 | `311bd6a7` | `documents` relation filtered by `analysisId` in SQL when `aid` is set; the JS `.filter()` in `getRepoSnapshotWithDocuments` is gone. |
 
-All six shipped in PR #2356 and are on `main`; the "working tree" marker from the original log is
+The first six shipped in PR #2356 and are on `main`; R3 landed on
+`perf/dxnx-310-db-query-review-round-2` and the "working tree" marker from the original log is
 now historical.
 
 ## Verification recipes

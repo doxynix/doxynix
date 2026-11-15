@@ -19,6 +19,7 @@ import { AUDIT_BUSINESS_MODELS } from "../utils/constants";
 import { requestContext } from "../utils/request-context";
 import { maskSensitiveFields, sanitizePayload } from "../utils/sanitize-payload";
 import { appLogger } from "./app-logger";
+import { isBookkeepingWrite, shouldPublishAuditUpdated } from "./audit-filters";
 import { AUDIT_OPERATION_BY_WIRE_NAME } from "./audit-operations";
 import { fieldEncryptionExtension } from "./field-encryption";
 import { realtimeService } from "./realtime";
@@ -70,9 +71,18 @@ export async function runAsBackgroundTask(task: () => Promise<void>): Promise<vo
     return;
   }
 
-  await task().catch((error) => {
+  // A Trigger.dev task has no request store, so awaiting here would put the audit write on the
+  // task's critical path; start it and let it settle on its own.
+  const auditWrite = task().catch((error) => {
     appLogger.error({ error, msg: "Background task failed in production fallback mode" });
   });
+
+  if (requestContext.getStore() == null) {
+    void auditWrite;
+    return;
+  }
+
+  await auditWrite;
 }
 
 // Held here so the slow-query log can read queue depth off the pool Prisma actually uses.
@@ -185,7 +195,12 @@ function createPrismaInstance() {
           const duration = performance.now() - start;
           const auditOperation = AUDIT_OPERATION_BY_WIRE_NAME[operation];
 
-          if (auditOperation != null && model !== "AuditLog" && isAuditedModel(model)) {
+          if (
+            auditOperation != null &&
+            model !== "AuditLog" &&
+            isAuditedModel(model) &&
+            !isBookkeepingWrite(model, operation, args)
+          ) {
             const auditModel = model;
             const ctxStore = requestContext.getStore();
             const userId = ctxStore?.userId ?? null;
@@ -211,7 +226,11 @@ function createPrismaInstance() {
                   },
                 });
 
-                if (userId != null && AUDIT_BUSINESS_MODELS.includes(auditModel)) {
+                if (
+                  userId != null &&
+                  AUDIT_BUSINESS_MODELS.includes(auditModel) &&
+                  shouldPublishAuditUpdated(ctxStore)
+                ) {
                   await realtimeService
                     .user(userId)
                     .publish(REALTIME_CONFIG.events.user.auditUpdated, {});
