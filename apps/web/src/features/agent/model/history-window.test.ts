@@ -31,12 +31,23 @@ describe("filterNewMessages", () => {
     expect(itemIds(filterNewMessages(olderPage.items, noIds))).toStrictEqual(["o1", "o2"]);
   });
 
+  it("returns nothing for an empty page", () => {
+    expect(filterNewMessages([], new Set(["o1"]))).toStrictEqual([]);
+  });
+
   it("drops every item when they are all already rendered", () => {
     expect(filterNewMessages(olderPage.items, new Set(["o1", "o2"]))).toStrictEqual([]);
   });
 
   it("keeps only the unseen rows, in their original order", () => {
     expect(itemIds(filterNewMessages(olderPage.items, new Set(["o1"])))).toStrictEqual(["o2"]);
+  });
+
+  it("drops a row repeated inside the older pages", () => {
+    expect(itemIds(filterNewMessages(page("o1", "o2", "o1").items, noIds))).toStrictEqual([
+      "o1",
+      "o2",
+    ]);
   });
 });
 

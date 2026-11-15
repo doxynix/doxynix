@@ -2,7 +2,7 @@ export const FIRST_ITEM_INDEX_START = 100_000;
 
 export type HistoryWindow = {
   firstItemIndex: number;
-  /** Pages of the current session already reflected in the transcript; `null` before page 0. */
+  // Pages of the current session already reflected in the transcript; `null` before page 0.
   loadedPages: null | number;
 };
 
@@ -22,11 +22,21 @@ export function seedHistoryWindow(state: HistoryWindow, hasPageZero: boolean): H
   return { ...state, loadedPages: 1 };
 }
 
+// A row can repeat inside `older` too: a refetch refills every page from a cursor that moved.
 export function filterNewMessages<TItem extends { id: string }>(
   older: readonly TItem[],
   currentIds: ReadonlySet<string>,
 ): TItem[] {
-  return older.filter((item) => !currentIds.has(item.id));
+  const seen = new Set(currentIds);
+
+  return older.filter((item) => {
+    if (seen.has(item.id)) {
+      return false;
+    }
+
+    seen.add(item.id);
+    return true;
+  });
 }
 
 // Pages arrive newest-first and are oldest-first inside, so reversing the page order yields the

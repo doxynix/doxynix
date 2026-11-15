@@ -27,12 +27,7 @@ import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { TOOL_INVALIDATIONS, toolLabelKeys } from "../model/agent-config";
 import type { AgentMessagePart, LocalFileAttachment } from "../model/agent-types";
-import {
-  decidePrepend,
-  filterNewMessages,
-  type HistoryWindow,
-  resetHistoryWindow,
-} from "../model/history-window";
+import { decidePrepend, type HistoryWindow, resetHistoryWindow } from "../model/history-window";
 import { flattenSessionPages } from "../model/session-pages";
 import { useAgentIsOpen } from "../model/use-agent.store";
 import { AgentForm } from "./agent-form";
@@ -230,7 +225,10 @@ export function Agent() {
       return;
     }
 
-    setMessages(toUIMessages(firstPage.items));
+    const seeded = toUIMessages(firstPage.items);
+
+    setMessages(seeded);
+    messagesRef.current = seeded;
     lastLoadedSessionIdRef.current = sessionId;
     setIsAtBottom(true);
     requestAnimationFrame(() => {
@@ -244,22 +242,18 @@ export function Agent() {
     }
 
     const currentIds = new Set(messagesRef.current.map((message) => message.id));
-    const { items, window } = decidePrepend(storedWindow, historyPages.pages, currentIds);
+    const nextWindow = decidePrepend(storedWindow, historyPages.pages, currentIds);
 
-    if (window === storedWindow) {
+    if (nextWindow.window === storedWindow) {
       return;
     }
 
-    if (items.length > 0) {
-      // The inner filter only guards a race: a drop there would under-count the index shift by one.
-      setMessages((previous) => [
-        ...toUIMessages(filterNewMessages(items, new Set(previous.map((message) => message.id)))),
-        ...previous,
-      ]);
+    if (nextWindow.items.length > 0) {
+      setMessages((previous) => [...toUIMessages(nextWindow.items), ...previous]);
     }
 
     // oxlint-disable-next-line react/set-state-in-effect -- the window mirrors useChat state.
-    setHistoryWindow((previous) => decidePrepend(previous, historyPages.pages, currentIds).window);
+    setHistoryWindow(nextWindow.window);
   }, [historyPages, setMessages, storedWindow]);
 
   useEffect(() => {
