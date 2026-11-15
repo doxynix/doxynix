@@ -7,7 +7,10 @@ const cipher = "aesgcm256";
 const key = randomBytes(32).toString("base64url");
 
 process.env.PRISMA_FIELD_ENCRYPTION_KEY = `${scheme}.${cipher}.${key}`;
-process.env.UPSTASH_REDIS_REST_URL ??= `http://127.0.0.1:${MEMORY_REDIS_PORT}`;
+// Same override as global-setup: a worker may start with the inherited URL rather than that one.
+if (process.env.TEST_REAL_REDIS !== "1") {
+  process.env.UPSTASH_REDIS_REST_URL = `http://127.0.0.1:${MEMORY_REDIS_PORT}`;
+}
 process.env.UPSTASH_REDIS_REST_TOKEN ??= "memory-redis-token";
 process.env.STRIPE_API_KEY ??= "sk_test_placeholder";
 process.env.STRIPE_WEBHOOK_SECRET ??= "whsec_placeholder";
