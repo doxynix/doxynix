@@ -34,33 +34,35 @@ export const prCommentsService = {
       },
     });
 
-    const renderedComments = await Promise.all(
-      comments.map(async (c) => {
-        const repoContext = c.analysis.repo;
+    // One cache entry per page: comment rows for a completed analysis never change
+    const renderedComments = await unstable_cache(
+      async () =>
+        Promise.all(
+          comments.map(async (c) => {
+            const repoContext = c.analysis.repo;
 
-        const html = await unstable_cache(
-          async () =>
-            markdownToHtml({
+            const html = await markdownToHtml({
               content: c.body,
               name: repoContext.name,
               owner: repoContext.owner,
-            }),
-          [`comment-html-${c.id}`],
-          {
-            revalidate: false,
-            tags: ["comments", c.id],
-          },
-        )();
-        return {
-          bodyHtml: html,
-          filePath: c.filePath,
-          findingType: c.findingType,
-          id: c.id,
-          line: c.line,
-          riskLevel: c.riskLevel,
-        };
-      }),
-    );
+            });
+
+            return {
+              bodyHtml: html,
+              filePath: c.filePath,
+              findingType: c.findingType,
+              id: c.id,
+              line: c.line,
+              riskLevel: c.riskLevel,
+            };
+          }),
+        ),
+      [`pr-comments-html-${analysisId}`],
+      {
+        revalidate: false,
+        tags: ["comments", analysisId],
+      },
+    )();
 
     return {
       renderedComments,

@@ -87,6 +87,7 @@ export const prImpactService = {
       nodeById,
       repoSnapshot.owner,
       repoSnapshot.name,
+      analysis.id,
     );
     const primaryFile = analysisMapper.selectPrimaryFile(changedFileItems);
     const primaryNodeId =

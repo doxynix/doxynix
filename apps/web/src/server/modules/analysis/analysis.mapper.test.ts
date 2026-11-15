@@ -659,6 +659,7 @@ describe("buildTopFindings", () => {
       zoneLabels,
       "ivan",
       "doxynix",
+      "pa-1",
     );
 
     expect(result.map((item) => item.id)).toEqual([
@@ -682,14 +683,36 @@ describe("buildTopFindings", () => {
       name: "doxynix",
       owner: "ivan",
     });
+    expect(mocks.unstable_cache).toHaveBeenCalledTimes(1);
     expect(mocks.unstable_cache).toHaveBeenCalledWith(
       expect.any(Function),
-      [expect.stringContaining("finding-html-ivan-doxynix-src/b.ts:2")],
-      expect.objectContaining({
+      ["finding-html-ivan-doxynix-pa-1"],
+      {
         revalidate: false,
-        tags: ["findings", "ivan", "doxynix", "src/b.ts:2:performance:1"],
-      }),
+        tags: ["findings", "ivan", "doxynix", "pa-1"],
+      },
     );
+  });
+
+  it("reads the page cache once for a three-finding page", async () => {
+    const findings = [
+      makeFinding({ file: "src/a.ts", line: 1, message: "a", score: 3 }),
+      makeFinding({ file: "src/b.ts", line: 2, message: "b", score: 5 }),
+      makeFinding({ file: "src/c.ts", line: 3, message: "c", score: 7 }),
+    ];
+
+    const result = await analysisMapper.buildTopFindings(
+      findings,
+      [],
+      new Map(),
+      "ivan",
+      "doxynix",
+      "pa-2",
+    );
+
+    expect(result).toHaveLength(3);
+    expect(result.every((item) => item.messageHtml.startsWith("<p>"))).toBe(true);
+    expect(mocks.unstable_cache).toHaveBeenCalledTimes(1);
   });
 
   it("missing score → riskLevel 0; zoneLabel falls back to file.zoneLabel", async () => {
@@ -698,7 +721,14 @@ describe("buildTopFindings", () => {
       makeChangedFile({ filePath: "src/a.ts", zoneId: "group:src", zoneLabel: "src" }),
     ];
 
-    const result = await analysisMapper.buildTopFindings(findings, files, new Map());
+    const result = await analysisMapper.buildTopFindings(
+      findings,
+      files,
+      new Map(),
+      undefined,
+      undefined,
+      "pa-3",
+    );
 
     expect(result[0]).toMatchObject({ riskLevel: 0, zoneLabel: "src" });
   });

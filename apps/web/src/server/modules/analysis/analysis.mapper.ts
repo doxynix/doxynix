@@ -167,8 +167,9 @@ export const analysisMapper = {
     findings: ParsedFinding[],
     changedFiles: Array<PRImpactPayload["changedFiles"][number]>,
     zoneNodeById: Map<string, Pick<TopLevelImpactNode, "label">>,
-    owner?: string,
-    name?: string,
+    owner: string | undefined,
+    name: string | undefined,
+    cacheScope: string,
   ) {
     const fileByPath = new Map(changedFiles.map((file) => [file.filePath, file] as const));
 
@@ -194,28 +195,28 @@ export const analysisMapper = {
           right.riskLevel - left.riskLevel || left.filePath.localeCompare(right.filePath),
       );
 
-    return Promise.all(
-      sortedFindings.map(async (finding) => {
-        const messageHtml = await unstable_cache(
-          async () =>
-            markdownToHtml({
+    return unstable_cache(
+      async () =>
+        Promise.all(
+          sortedFindings.map(async (finding) => {
+            const messageHtml = await markdownToHtml({
               content: finding.message,
               name,
               owner,
-            }),
-          [`finding-html-${owner ?? "unknown"}-${name ?? "unknown"}-${finding.id}`],
-          {
-            revalidate: false,
-            tags: ["findings", owner ?? "unknown", name ?? "unknown", finding.id],
-          },
-        )();
+            });
 
-        return {
-          ...finding,
-          messageHtml,
-        };
-      }),
-    );
+            return {
+              ...finding,
+              messageHtml,
+            };
+          }),
+        ),
+      [`finding-html-${owner ?? "unknown"}-${name ?? "unknown"}-${cacheScope}`],
+      {
+        revalidate: false,
+        tags: ["findings", owner ?? "unknown", name ?? "unknown", cacheScope],
+      },
+    )();
   },
 
   computeImpactScore(
