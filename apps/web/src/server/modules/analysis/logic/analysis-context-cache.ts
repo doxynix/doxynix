@@ -1,7 +1,7 @@
 import type { RepoSnapshot, RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
 import { createAnalyzeContextBuilder } from "./analyze-context-builder";
 
-export type AnalyzeContextBuilder = ReturnType<typeof createAnalyzeContextBuilder>;
+type AnalyzeContextBuilder = ReturnType<typeof createAnalyzeContextBuilder>;
 
 const MAX_CACHED_CONTEXTS = 32;
 

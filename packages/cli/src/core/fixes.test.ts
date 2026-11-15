@@ -1,5 +1,5 @@
 import { MAX_PAGE_SIZE } from "@doxynix/shared";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const query = vi.hoisted(() => vi.fn());
 
@@ -14,6 +14,10 @@ vi.mock("./client", () => ({
 import { fetchFixes } from "./fixes";
 
 describe("fetchFixes", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("queries the repository fix list using the repo id", async () => {
     query.mockResolvedValue({ items: [{ id: "fix-1" }], meta: { hasNextPage: false } });
 
