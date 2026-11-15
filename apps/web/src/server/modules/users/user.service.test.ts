@@ -332,6 +332,7 @@ describe("getActiveSessions", () => {
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 50,
         where: { expiresAt: { gt: expect.any(Date) }, userId: USER_ID },
       }),
     );

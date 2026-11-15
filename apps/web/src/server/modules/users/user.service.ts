@@ -63,6 +63,8 @@ const SERIALIZABLE_MAX_ATTEMPTS = 3;
 const SERIALIZABLE_RETRY_BASE_MS = 20;
 const SERIALIZABLE_RETRY_JITTER_MS = 10;
 
+const ACTIVE_SESSIONS_LIMIT = 50;
+
 function isWriteConflict(error: unknown): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034";
 }
@@ -182,6 +184,7 @@ export const userService = {
     const sessions = await db.session.findMany({
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       select: { createdAt: true, id: true, ipAddress: true, userAgent: true },
+      take: ACTIVE_SESSIONS_LIMIT,
       where: { expiresAt: { gt: new Date() }, userId },
     });
 

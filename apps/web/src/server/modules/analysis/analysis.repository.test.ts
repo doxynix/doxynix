@@ -1,5 +1,5 @@
 import { MessageCode } from "@doxynix/shared";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { DbClient } from "@/server/core/db";
 
@@ -176,6 +176,34 @@ describe("analysisRepo.getAnalysisPayloadForRepo", () => {
     ).rejects.toMatchObject({
       messageCode: MessageCode.ANALYSIS_VERSION_NOT_FOUND,
       publicMessage: "Analysis version not found",
+    });
+  });
+});
+
+describe("analysisRepo.getByRepoId", () => {
+  it("caps the fix list and keeps newest-first order", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const db = { generatedFix: { findMany } } as unknown as DbClient;
+
+    await analysisRepo.getByRepoId(db, REPO_ID, WORKSPACE_ID);
+
+    expect(findMany).toHaveBeenCalledWith({
+      orderBy: { createdAt: "desc" },
+      take: 200,
+      where: { repo: { id: REPO_ID, workspaceId: WORKSPACE_ID } },
+    });
+  });
+
+  it("keeps the cap when a status filter is applied", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const db = { generatedFix: { findMany } } as unknown as DbClient;
+
+    await analysisRepo.getByRepoId(db, REPO_ID, WORKSPACE_ID, "DRAFT");
+
+    expect(findMany.mock.calls[0]?.[0]?.take).toBe(200);
+    expect(findMany.mock.calls[0]?.[0]?.where).toStrictEqual({
+      repo: { id: REPO_ID, workspaceId: WORKSPACE_ID },
+      status: "DRAFT",
     });
   });
 });

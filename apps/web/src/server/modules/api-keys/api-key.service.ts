@@ -24,6 +24,7 @@ type UpdateKeyInput = {
 };
 
 const ROTATION_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
+const WORKSPACE_API_KEY_LIMIT = 100;
 
 export function isApiKeyDead(
   key: {
@@ -103,6 +104,7 @@ export const apiKeyService = {
         scopes: true,
         updatedAt: true,
       },
+      take: WORKSPACE_API_KEY_LIMIT,
       where: { workspaceId },
     });
 

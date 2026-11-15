@@ -81,6 +81,14 @@ describe("apiKeyService.list", () => {
     expect(JSON.stringify(args)).not.toContain("OR");
   });
 
+  it("should cap the workspace key list instead of reading every key", async () => {
+    const { db, findMany } = createApiKeyDbMock();
+
+    await apiKeyService.list(db, WORKSPACE_ID);
+
+    expect(findMany.mock.calls[0]?.[0]?.take).toBe(100);
+  });
+
   it("should never read the hashed key", async () => {
     const { db, findMany } = createApiKeyDbMock();
 

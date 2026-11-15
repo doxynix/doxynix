@@ -98,6 +98,22 @@ describe("adminUserService.buildWhereClause", () => {
   });
 });
 
+describe("adminUserService.getSessions", () => {
+  it("caps the session list and keeps newest-first order", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const db = { session: { findMany } };
+
+    await adminUserService.getSessions(db as never, USER_ID);
+
+    expect(findMany).toHaveBeenCalledWith({
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      select: { createdAt: true, expiresAt: true, id: true, ipAddress: true, userAgent: true },
+      take: 100,
+      where: { userId: USER_ID },
+    });
+  });
+});
+
 describe("adminUserService.setRole guards", () => {
   function makeDb(target: { role: string }, adminCount: number) {
     const update = vi.fn();

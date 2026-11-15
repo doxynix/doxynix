@@ -148,6 +148,8 @@ export type AnalysisRef = {
 export type ImpactAnalysisRecord = Awaited<ReturnType<typeof analysisRepo.loadImpactAnalysis>>;
 export type ImpactAnalysis = NonNullable<ImpactAnalysisRecord>;
 
+const FIX_LIST_LIMIT = 200;
+
 export const analysisRepo = {
   // No revalidateTag: a task has no Next store; readers miss the old page via the analysis version.
   async addComments(
@@ -268,6 +270,7 @@ export const analysisRepo = {
   async getByRepoId(db: DbClient, repoId: string, workspaceId: string, status?: FixStatus) {
     return db.generatedFix.findMany({
       orderBy: { createdAt: "desc" },
+      take: FIX_LIST_LIMIT,
       where: {
         repo: {
           id: repoId,

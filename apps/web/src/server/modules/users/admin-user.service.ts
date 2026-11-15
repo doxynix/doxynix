@@ -39,6 +39,8 @@ export type ReauthInput = {
 
 const ACTIVE_ADMIN_WHERE: Prisma.UserWhereInput = { banned: false, role: "ADMIN" };
 
+const ADMIN_SESSION_LIMIT = 100;
+
 const ADMIN_USER_SELECT = {
   banExpires: true,
   banned: true,
@@ -273,6 +275,7 @@ export const adminUserService = {
         ipAddress: true,
         userAgent: true,
       },
+      take: ADMIN_SESSION_LIMIT,
       where: { userId },
     });
 
