@@ -1,5 +1,3 @@
-import { MAX_PAGE } from "@doxynix/shared";
-
 export type PaginationItem =
   | {
       kind: "ellipsis";
@@ -27,9 +25,4 @@ export function getPaginationItems(totalPages: number, currentPage: number): Pag
   }
 
   return items;
-}
-
-// The server clamps `page` to MAX_PAGE, so a control that offers more would fetch page 100 again.
-export function clampPaginationMax(totalPages: number): number {
-  return Math.min(totalPages, MAX_PAGE);
 }

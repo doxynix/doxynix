@@ -1,12 +1,12 @@
 "use client";
 
 import { type KeyboardEvent, useState, useTransition } from "react";
-import type { PaginationMeta } from "@doxynix/shared";
+import { MAX_PAGE, type PaginationMeta } from "@doxynix/shared";
+import { clamp } from "es-toolkit";
 import { useTranslations } from "next-intl";
 import { parseAsInteger, useQueryState } from "nuqs";
 
 import { cn } from "@/shared/lib/cn";
-import { clampPaginationMax } from "@/shared/lib/pagination";
 import {
   Pagination,
   PaginationContent,
@@ -49,7 +49,8 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
     }
   }
 
-  const maxPage = clampPaginationMax(meta.totalPages);
+  // The server clamps `page` to MAX_PAGE, so a control that offers more would fetch page 100 again.
+  const maxPage = clamp(meta.totalPages, 1, MAX_PAGE);
   // Both caps mean the same thing to the reader: rows past `reachableRows` need a filter or a date.
   const showCapHint = meta.capped || maxPage < meta.totalPages;
   const reachableRows = maxPage * meta.pageSize;
