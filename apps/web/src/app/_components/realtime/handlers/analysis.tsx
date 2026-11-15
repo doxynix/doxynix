@@ -46,6 +46,8 @@ export function analysisHandlers({
       void queryClient.invalidateQueries(trpc.analysis.getLatest.pathFilter());
       void queryClient.invalidateQueries(trpc.analysis.getHistory.pathFilter());
       void queryClient.invalidateQueries(trpc.analysis.getVersionRef.pathFilter());
+      // Staging and fix services publish this event too, so other tabs still need the staged list.
+      void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
       void queryClient.invalidateQueries(trpc.user.getOnboardingState.pathFilter());
     },
     [REALTIME_CONFIG.events.user.fileActionCompleted]: (message) => {

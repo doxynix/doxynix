@@ -97,16 +97,16 @@ describe("analysis realtime handlers", () => {
     expect(invalidatedFilters()).not.toContain(filters.getOnboardingState);
   });
 
-  it("invalidates the analysis and onboarding queries on `analysisUpdated`", () => {
+  it("invalidates the analysis, staged-file and onboarding queries on `analysisUpdated`", () => {
     handler(REALTIME_CONFIG.events.user.analysisUpdated)(progressMessage("DONE"));
 
     expect(invalidatedFilters()).toStrictEqual([
       filters.getLatest,
       filters.getHistory,
       filters.getVersionRef,
+      filters.getStagedFiles,
       filters.getOnboardingState,
     ]);
-    expect(invalidatedFilters()).not.toContain(filters.getStagedFiles);
     expect(invalidatedFilters()).not.toContain(filters.getByRepository);
   });
 });
