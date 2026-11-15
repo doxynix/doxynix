@@ -12,12 +12,12 @@ export const SessionMessageSchema: z.ZodType<SessionMessage> = z.object({
   role: ChatRoleSchema,
 });
 
-export const SessionHistoryOutputSchema = z.object({
+export const GetSessionHistoryOutputSchema = z.object({
   items: z.array(SessionMessageSchema),
   meta: CursorMetaSchema,
 });
 
-export type SessionHistoryOutput = z.infer<typeof SessionHistoryOutputSchema>;
+export type GetSessionHistoryOutput = z.infer<typeof GetSessionHistoryOutputSchema>;
 
 export const SessionListItemSchema = z.object({
   createdAt: z.date(),
@@ -41,12 +41,12 @@ export const ListSessionsOutputSchema = z.object({
 
 export type ListSessionsOutput = z.infer<typeof ListSessionsOutputSchema>;
 
-export const SessionHistoryInputSchema = CursorSchema.omit({ search: true }).extend({
+export const GetSessionHistoryInputSchema = CursorSchema.omit({ search: true }).extend({
   limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(100),
   sessionId: z.uuid(),
 });
 
-export type SessionHistoryInput = z.infer<typeof SessionHistoryInputSchema>;
+export type GetSessionHistoryInput = z.infer<typeof GetSessionHistoryInputSchema>;
 
 export const ListSessionsInputSchema = CursorSchema.omit({ search: true }).extend({
   currentRepo: z

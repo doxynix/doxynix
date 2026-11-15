@@ -4,10 +4,10 @@ import {
   CreateSessionInputSchema,
   CreateSessionOutputSchema,
   DeleteSessionInputSchema,
+  GetSessionHistoryInputSchema,
+  GetSessionHistoryOutputSchema,
   ListSessionsInputSchema,
   ListSessionsOutputSchema,
-  SessionHistoryInputSchema,
-  SessionHistoryOutputSchema,
   UpdateSessionInputSchema,
   UpdateSessionOutputSchema,
 } from "./agent.schemas";
@@ -28,8 +28,8 @@ export const agentChatRouter = createTRPCRouter({
     }),
 
   getSessionHistory: protectedProcedure
-    .input(SessionHistoryInputSchema)
-    .output(SessionHistoryOutputSchema)
+    .input(GetSessionHistoryInputSchema)
+    .output(GetSessionHistoryOutputSchema)
     .query(async ({ ctx, input }) => {
       return agentService.getSessionHistory(ctx.db, ctx.session.user.id, input);
     }),

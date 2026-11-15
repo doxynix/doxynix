@@ -13,32 +13,13 @@ import {
 } from "@/server/utils/pagination";
 
 import { agentMapper } from "./agent.mapper";
-
-export type CreateSessionInput = {
-  repoId?: string;
-  title: string;
-};
-
-export type GetSessionHistoryInput = {
-  cursor?: null | string;
-  limit: number;
-  sessionId: string;
-};
-
-export type ListSessionsInput = {
-  cursor?: null | string;
-  currentRepo?: { name: string; owner: string };
-  limit: number;
-};
-
-export type UpdateSessionInput = {
-  sessionId: string;
-  title: string;
-};
-
-export type DeleteSessionInput = {
-  sessionId: string;
-};
+import type {
+  CreateSessionInput,
+  DeleteSessionInput,
+  GetSessionHistoryInput,
+  ListSessionsInput,
+  UpdateSessionInput,
+} from "./agent.schemas";
 
 export const agentService = {
   async createSession(
