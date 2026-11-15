@@ -7,7 +7,11 @@ import { entitlementProcedure, workspaceProcedure } from "@/server/core/trpc/ini
 import { cursorPageSchema } from "@/server/utils/pagination";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 
-import { AnalysisHistoryOutputSchema, AnalysisScopeInputSchema } from "./analysis.schemas";
+import {
+  AnalysisHistoryOutputSchema,
+  AnalysisScopeInputSchema,
+  AnalysisVersionRefSchema,
+} from "./analysis.schemas";
 import { AnalysisLatestOutputSchema } from "./analysis-latest.schemas";
 import { analysisLifecycleService } from "./services/analysis-lifecycle.service";
 import { workspaceService } from "./services/workspace.service";
@@ -61,6 +65,17 @@ export const analysisCoreRouter = {
     .output(AnalysisLatestOutputSchema)
     .query(async ({ ctx, input }) => {
       return analysisLifecycleService.getLatest(ctx.db, input.repoId, ctx.workspace.id);
+    }),
+  getVersionRef: workspaceProcedure
+    .input(z.object({ analysisId: z.uuid(), repoId: z.uuid() }))
+    .output(AnalysisVersionRefSchema.nullable())
+    .query(async ({ ctx, input }) => {
+      return analysisLifecycleService.getVersionRef(
+        ctx.db,
+        input.repoId,
+        ctx.workspace.id,
+        input.analysisId,
+      );
     }),
   getWorkspace: workspaceProcedure.input(AnalysisScopeInputSchema).query(async ({ ctx, input }) => {
     return workspaceService.getWorkspace(ctx.db, input.repoId, ctx.workspace.id, input.aid);

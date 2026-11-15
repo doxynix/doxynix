@@ -220,6 +220,13 @@ export const AnalysisHistoryOutputSchema = z.object({
   total: z.number().int(),
 });
 
+export const AnalysisVersionRefSchema = z.object({
+  commitSha: z.string().nullable(),
+  createdAt: z.date(),
+  id: z.uuid(),
+  status: StatusSchema,
+});
+
 export const PullListSummarySchema = z.object({
   createdAt: z.date(),
   findingCount: z.number().int(),

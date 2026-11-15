@@ -353,6 +353,13 @@ export const analysisLifecycleService = {
     };
   },
 
+  async getVersionRef(db: DbClient, repoId: string, workspaceId: string, analysisId: string) {
+    return db.analysis.findFirst({
+      select: { commitSha: true, createdAt: true, id: true, status: true },
+      where: { id: analysisId, repo: { id: repoId, workspaceId } },
+    });
+  },
+
   async saveResults(params: SaveResultsParams): Promise<number> {
     const {
       aiResult,

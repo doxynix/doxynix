@@ -4,6 +4,7 @@ import { GitPullRequest } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { REPO_ANALYSIS_PAGE_SIZE } from "@/shared/config/repos";
 import { Link } from "@/shared/i18n/navigation";
 import { AppButton } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
@@ -20,7 +21,7 @@ export function RepoPullsListContainer({ name, owner, repoId }: Readonly<Props>)
   const t = useTranslations("Dashboard");
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
     trpc.analysis.listByRepository.infiniteQueryOptions(
-      { limit: 50, repoId },
+      { limit: REPO_ANALYSIS_PAGE_SIZE, repoId },
       { getNextPageParam: (page) => page.meta.nextCursor },
     ),
   );

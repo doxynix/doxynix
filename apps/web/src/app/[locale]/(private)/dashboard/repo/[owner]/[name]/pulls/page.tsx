@@ -1,3 +1,4 @@
+import { REPO_ANALYSIS_PAGE_SIZE } from "@/shared/config/repos";
 import { createRepoMetadata } from "@/shared/lib/metadata";
 import type { RepoPageProps } from "@/shared/lib/next.types";
 
@@ -15,7 +16,7 @@ export default async function RepoPullsPage({ params }: Readonly<RepoPageProps>)
 
   await prefetch(
     trpcProxy.analysis.listByRepository.infiniteQueryOptions(
-      { limit: 50, repoId: repo.id },
+      { limit: REPO_ANALYSIS_PAGE_SIZE, repoId: repo.id },
       { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
     ),
   );

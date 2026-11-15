@@ -37,11 +37,13 @@ export function analysisHandlers({
 
         void queryClient.invalidateQueries(trpc.analysis.getLatest.pathFilter());
         void queryClient.invalidateQueries(trpc.analysis.getHistory.pathFilter());
+        void queryClient.invalidateQueries(trpc.analysis.getVersionRef.pathFilter());
       }
     },
     [REALTIME_CONFIG.events.user.analysisUpdated]: () => {
       void queryClient.invalidateQueries(trpc.analysis.getLatest.pathFilter());
       void queryClient.invalidateQueries(trpc.analysis.getHistory.pathFilter());
+      void queryClient.invalidateQueries(trpc.analysis.getVersionRef.pathFilter());
       void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
       void queryClient.invalidateQueries(trpc.analysis.getByRepository.pathFilter());
       void queryClient.invalidateQueries(trpc.user.getOnboardingState.pathFilter());

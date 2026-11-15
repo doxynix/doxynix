@@ -288,3 +288,43 @@ describe("analysisLifecycleService.getHistory", () => {
     });
   });
 });
+
+describe("analysisLifecycleService.getVersionRef", () => {
+  const WORKSPACE_ID = "workspace-1";
+  const REPO_ID = "018f0000-0000-7000-8000-0000000000cc";
+  const ANALYSIS_ID = "018f0000-0000-7000-8000-000000000001";
+
+  function buildRefDb(row: unknown) {
+    const findFirst = vi.fn().mockResolvedValue(row);
+    const db = { analysis: { findFirst } } as unknown as DbClient;
+
+    return { db, findFirst };
+  }
+
+  it("reads one row for a version the loaded page does not contain", async () => {
+    const ref = {
+      commitSha: "abc1234",
+      createdAt: new Date("2026-03-01T10:00:00.000Z"),
+      id: ANALYSIS_ID,
+      status: "DONE",
+    };
+    const { db, findFirst } = buildRefDb(ref);
+
+    await expect(
+      analysisLifecycleService.getVersionRef(db, REPO_ID, WORKSPACE_ID, ANALYSIS_ID),
+    ).resolves.toStrictEqual(ref);
+
+    expect(findFirst).toHaveBeenCalledWith({
+      select: { commitSha: true, createdAt: true, id: true, status: true },
+      where: { id: ANALYSIS_ID, repo: { id: REPO_ID, workspaceId: WORKSPACE_ID } },
+    });
+  });
+
+  it("returns null for a version outside the repository scope", async () => {
+    const { db } = buildRefDb(null);
+
+    await expect(
+      analysisLifecycleService.getVersionRef(db, REPO_ID, WORKSPACE_ID, ANALYSIS_ID),
+    ).resolves.toBeNull();
+  });
+});

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   AnalysisHistoryOutputSchema,
+  AnalysisVersionRefSchema,
   CodeDocEditSchema,
   changedFileSnapshotSchema,
   DocumentFilePreviewSchema,
@@ -251,5 +252,19 @@ describe("PullListOutputSchema", () => {
 
     expect(parsed.items[0]).toEqual(item);
     expect(parsed.total).toBe(1);
+  });
+});
+
+describe("AnalysisVersionRefSchema", () => {
+  it("parses a single version ref and a miss", () => {
+    const ref = {
+      commitSha: null,
+      createdAt: new Date("2026-03-01T10:00:00.000Z"),
+      id: "018f0000-0000-7000-8000-000000000003",
+      status: "FAILED" as const,
+    };
+
+    expect(AnalysisVersionRefSchema.parse(ref)).toEqual(ref);
+    expect(AnalysisVersionRefSchema.nullable().parse(null)).toBeNull();
   });
 });

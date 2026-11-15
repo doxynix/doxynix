@@ -1,10 +1,11 @@
 "use client";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { GitCommit } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { REPO_ANALYSIS_PAGE_SIZE } from "@/shared/config/repos";
 import { AppBadge } from "@/shared/ui/core/badge";
 import {
   Select,
@@ -18,6 +19,13 @@ import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
 const LOAD_MORE = "__load_more__";
+
+type VersionRef = {
+  commitSha: string | null;
+  createdAt: Date;
+  id: string;
+  status: string;
+};
 
 type Props = { repoId: string };
 
@@ -36,10 +44,49 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
     isLoading,
   } = useInfiniteQuery(
     trpc.analysis.getHistory.infiniteQueryOptions(
-      { limit: 50, repoId },
+      { limit: REPO_ANALYSIS_PAGE_SIZE, repoId },
       { getNextPageParam: (page) => page.meta.nextCursor },
     ),
   );
+
+  const items = history?.pages.flatMap((page) => page.items) ?? [];
+  const pinnedInPage = selectedAid !== "" && items.some((item) => item.id === selectedAid);
+
+  // A version pinned from an old link can sit past the first page, so its label has to come from
+  // a single-row read instead of the loaded pages.
+  const { data: pinnedRef } = useQuery(
+    trpc.analysis.getVersionRef.queryOptions(
+      { analysisId: selectedAid, repoId },
+      { enabled: selectedAid !== "" && !pinnedInPage },
+    ),
+  );
+
+  const pinnedVersion = pinnedInPage ? undefined : pinnedRef;
+
+  function renderVersion(item: VersionRef) {
+    return (
+      <div className="flex items-center justify-between gap-4 text-xs">
+        <div className="flex items-center gap-2 font-medium">
+          <span className="max-w-30 truncate">
+            {item.commitSha?.slice(0, 7) ?? t("repo_version_unknown")}
+          </span>
+        </div>
+        <TimeAgo
+          className="ml-auto text-xs"
+          date={item.createdAt}
+          locale={locale}
+        />
+        {item.status === "FAILED" && (
+          <AppBadge
+            className="text-destructive text-xs"
+            variant="outline"
+          >
+            {tCommon("failed")}
+          </AppBadge>
+        )}
+      </div>
+    );
+  }
 
   if (isLoading || history == null) {
     return (
@@ -57,10 +104,9 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
     );
   }
 
-  const items = history.pages.flatMap((page) => page.items);
   const total = history.pages[0]?.total ?? 0;
 
-  if (items.length === 0) {
+  if (items.length === 0 && pinnedVersion == null) {
     return null;
   }
 
@@ -88,32 +134,21 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
         )}
       </SelectTrigger>
       <SelectContent>
+        {pinnedVersion != null && (
+          <SelectItem
+            disabled={pinnedVersion.status === "FAILED"}
+            value={pinnedVersion.id}
+          >
+            {renderVersion(pinnedVersion)}
+          </SelectItem>
+        )}
         {items.map((item) => (
           <SelectItem
             disabled={item.status === "FAILED"}
             key={item.id}
             value={item.id}
           >
-            <div className="flex items-center justify-between gap-4 text-xs">
-              <div className="flex items-center gap-2 font-medium">
-                <span className="max-w-30 truncate">
-                  {item.commitSha?.slice(0, 7) ?? t("repo_version_unknown")}
-                </span>
-              </div>
-              <TimeAgo
-                className="ml-auto text-xs"
-                date={item.createdAt}
-                locale={locale}
-              />
-              {item.status === "FAILED" && (
-                <AppBadge
-                  className="text-destructive text-xs"
-                  variant="outline"
-                >
-                  {tCommon("failed")}
-                </AppBadge>
-              )}
-            </div>
+            {renderVersion(item)}
           </SelectItem>
         ))}
         {hasNextPage && (
