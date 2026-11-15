@@ -90,9 +90,9 @@ export const TrendsSchema = z.array(
 
 const MAX_CUSTOM_RANGE_MS = MAX_CUSTOM_RANGE_DAYS * 86_400_000;
 
-export const AnalyticsPeriodSchema = z.enum(ANALYTICS_PERIODS);
+const AnalyticsPeriodSchema = z.enum(ANALYTICS_PERIODS);
 
-// U6: `custom` is the only period that can reach `from=1970`, so it is the only one capped.
+// Presets ignore from/to in the service, so only a custom range can be unordered or unbounded.
 function customRangeIssues(
   data: { from?: Date; period: AnalyticsPeriod; to?: Date },
   ctx: z.RefinementCtx,
@@ -100,6 +100,8 @@ function customRangeIssues(
   if (data.period !== "custom") {
     return;
   }
+
+  dateRangeMustBeOrdered(data, ctx);
 
   if (data.from == null) {
     ctx.addIssue({
@@ -129,7 +131,6 @@ export const AnalyticsInputSchema = z
     repoId: z.string().optional(),
     to: z.date().optional(),
   })
-  .superRefine(dateRangeMustBeOrdered)
   .superRefine(customRangeIssues);
 
 export type AnalyticsInput = z.infer<typeof AnalyticsInputSchema>;

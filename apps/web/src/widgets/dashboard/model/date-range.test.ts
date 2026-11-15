@@ -1,7 +1,12 @@
 import { subDays, subMinutes } from "date-fns";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { hasUrlStateChanged, resolveDateRange } from "./date-range";
+import {
+  clampCustomRange,
+  hasUrlStateChanged,
+  normalizeCustomRange,
+  resolveDateRange,
+} from "./date-range";
 
 const NOW = new Date("2026-09-14T12:00:00Z");
 
@@ -53,6 +58,54 @@ describe("resolveDateRange", () => {
 
   it("returns undefined for an unknown period and no range", () => {
     expect(resolveDateRange(null, null, "nope", PERIODS)).toBeUndefined();
+  });
+});
+
+describe("clampCustomRange", () => {
+  const TO = new Date("2026-09-14T00:00:00Z");
+
+  it("leaves a range inside the cap untouched", () => {
+    const from = subDays(TO, 30);
+    expect(clampCustomRange(from, TO)).toEqual({ from, to: TO });
+  });
+
+  it("moves from to 365 days before to when the span is longer", () => {
+    const from = subDays(TO, 400);
+
+    expect(clampCustomRange(from, TO)).toEqual({
+      from: new Date(TO.getTime() - 365 * 86_400_000),
+      to: TO,
+    });
+  });
+});
+
+describe("normalizeCustomRange", () => {
+  afterEach(() => vi.useRealTimers());
+
+  const TO = new Date("2026-09-14T00:00:00Z");
+
+  it("returns null for a range the schema accepts", () => {
+    expect(normalizeCustomRange(subDays(TO, 7), TO)).toBeNull();
+  });
+
+  it("fills a missing from from the given to", () => {
+    expect(normalizeCustomRange(null, TO)).toEqual({ from: subDays(TO, 30), to: TO });
+  });
+
+  it("fills a missing from from now when to is missing too", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+
+    expect(normalizeCustomRange(null, null)).toEqual({ from: subDays(NOW, 30), to: NOW });
+  });
+
+  it("clamps an over-long range against the server cap", () => {
+    const from = subDays(TO, 400);
+
+    expect(normalizeCustomRange(from, TO)).toEqual({
+      from: new Date(TO.getTime() - 365 * 86_400_000),
+      to: TO,
+    });
   });
 });
 

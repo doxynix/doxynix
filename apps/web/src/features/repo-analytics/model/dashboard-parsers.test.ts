@@ -45,4 +45,14 @@ describe("dashboard prefetch input", () => {
     expect(hashKey([{ a: null }])).not.toBe(hashKey([{ a: undefined }]));
     expect(dashboardRangeInput({ from: null }).from).toBeUndefined();
   });
+
+  it("falls back to the default for a period the analytics schema would reject", () => {
+    // `?period=1y` must not become a `BAD_REQUEST`: nuqs yields null and the builder defaults it.
+    const unknown = urlStateFromSearchParams(dashboardParsers, { period: "1y" });
+    expect(unknown.period).toBeNull();
+    expect(dashboardRangeInput(unknown).period).toBe("30d");
+
+    const custom = urlStateFromSearchParams(dashboardParsers, { period: "custom" });
+    expect(dashboardRangeInput(custom).period).toBe("custom");
+  });
 });

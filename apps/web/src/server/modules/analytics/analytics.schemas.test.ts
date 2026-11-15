@@ -162,4 +162,14 @@ describe("AnalyticsInputSchema", () => {
     expect(result.period).toBe("7d");
     expect(result.from).toEqual(from);
   });
+
+  it("accepts a preset with reversed dates, because the service never reads them", () => {
+    const result = AnalyticsInputSchema.safeParse({
+      from: new Date("2026-03-01"),
+      period: "30d",
+      to: new Date("2026-01-01"),
+    });
+
+    expect(result.success).toBe(true);
+  });
 });
