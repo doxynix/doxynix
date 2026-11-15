@@ -11,8 +11,6 @@ import type {
 } from "./analysis.schemas";
 import { ProjectPolicy } from "./engine/core/project-policy";
 
-export const MAX_SEARCHABLE_DOCUMENTS_PER_TYPE = 3;
-
 const MAX_SEARCH_RESULTS = 20;
 
 // C0 controls except tab, LF and CR; built at runtime so the regex literal holds no raw control characters.

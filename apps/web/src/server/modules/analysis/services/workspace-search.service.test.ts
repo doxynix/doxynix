@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from "vitest";
 import type { DbClient } from "@/server/core/db";
 
 import { analysisRepo } from "../analysis.repository";
-import { MAX_SEARCHABLE_DOCUMENTS_PER_TYPE } from "../analysis.utils";
 import { analysisRepoRouter } from "../analysis-repo.router";
 import { workspaceSearchService } from "./workspace-search.service";
 
@@ -62,35 +61,29 @@ describe("analysisRepo.loadLatestDocumentsWithContent", () => {
     return { db, queries };
   }
 
-  it("asks for a per-type window instead of one global row cap", async () => {
+  it("asks for one row per document kind instead of a global row cap", async () => {
     const { db, queries } = makeDocsDb([ROW]);
 
     await analysisRepo.loadLatestDocumentsWithContent(db, REPO_ID, "workspace-1");
 
     expect(queries).toHaveLength(1);
-    expect(queries[0]?.values).toStrictEqual([
-      REPO_ID,
-      "workspace-1",
-      null,
-      MAX_SEARCHABLE_DOCUMENTS_PER_TYPE,
-    ]);
+    expect(queries[0]?.values).toStrictEqual([REPO_ID, "workspace-1", null, 1]);
     expect(queries[0]?.sql).toContain("PARTITION BY d.type, d.path");
   });
 
-  it("keeps every version the window returns, so one type cannot hide the others", async () => {
+  it("returns one document per type and path, so a search cannot repeat a label", async () => {
     const { db } = makeDocsDb([
-      ...Array.from({ length: MAX_SEARCHABLE_DOCUMENTS_PER_TYPE }, (_, index) => ({
-        ...ROW,
-        id: `0195f000-0000-7000-8000-00000000002${index}`,
-        version: `readme-${index}`,
-      })),
+      ROW,
       { ...ROW, id: "0195f000-0000-7000-8000-000000000030", type: "API" as const },
+      { ...ROW, id: "0195f000-0000-7000-8000-000000000031", path: "src/a.ts", type: "CODE_DOC" },
+      { ...ROW, id: "0195f000-0000-7000-8000-000000000032", path: "src/b.ts", type: "CODE_DOC" },
     ]);
 
     const docs = await analysisRepo.loadLatestDocumentsWithContent(db, REPO_ID, "workspace-1");
+    const groups = docs.map((doc) => `${doc.type}:${doc.path ?? ""}`);
 
-    expect(docs).toHaveLength(MAX_SEARCHABLE_DOCUMENTS_PER_TYPE + 1);
-    expect(new Set(docs.map((doc) => doc.type))).toStrictEqual(new Set(["README", "API"]));
+    expect(groups).toStrictEqual(["README:", "API:", "CODE_DOC:src/a.ts", "CODE_DOC:src/b.ts"]);
+    expect(new Set(groups).size).toBe(groups.length);
   });
 
   it("scopes the window to the pinned analysis", async () => {

@@ -8,7 +8,6 @@ import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
 
 import type { persistedFindingSchema } from "./analysis.schemas";
-import { MAX_SEARCHABLE_DOCUMENTS_PER_TYPE } from "./analysis.utils";
 import { fixesMapper } from "./fixes.mapper";
 import type { PRChangedFileSnapshot } from "./logic/pr.types";
 
@@ -157,7 +156,10 @@ export async function loadDocumentsPerType<W extends boolean = false>(
 
   const contents = await db.document.findMany({
     select: { content: true, id: true },
-    where: { id: { in: documents.map((document) => document.id) } },
+    where: {
+      id: { in: documents.map((document) => document.id) },
+      repo: { id: repoId, workspaceId },
+    },
   });
   const contentById = new Map(contents.map((row) => [row.id, row.content]));
 
@@ -381,18 +383,19 @@ export const analysisRepo = {
     }
 
     const target = await this.resolveTargetAnalysis(db, aid, workspaceId);
-    const documents = await loadDocumentsPerType(db, repoId, workspaceId, { aid, perType: 1 });
 
-    if (target != null) {
-      return { analyses: [target], documents };
-    }
-
-    if (repo.analyses.length === 0) {
+    if (target == null && repo.analyses.length === 0) {
       throw new AppError({
         code: "NOT_FOUND",
         messageCode: MessageCode.ANALYSIS_NOT_COMPLETED,
         publicMessage: "No completed analysis found",
       });
+    }
+
+    const documents = await loadDocumentsPerType(db, repoId, workspaceId, { aid, perType: 1 });
+
+    if (target != null) {
+      return { analyses: [target], documents };
     }
 
     return { ...repo, documents };
@@ -476,8 +479,8 @@ export const analysisRepo = {
     });
   },
 
-  // Three versions per kind: a type with a long history can no longer fill the window and starve
-  // the rest of the enum.
+  // One row per kind: search and the related-docs panel only ever showed the newest document of a
+  // type, and a per-kind window stops one type's history from starving the others.
   async loadLatestDocumentsWithContent(
     db: DbClient,
     repoId: string,
@@ -486,7 +489,7 @@ export const analysisRepo = {
   ) {
     return loadDocumentsPerType(db, repoId, workspaceId, {
       aid,
-      perType: MAX_SEARCHABLE_DOCUMENTS_PER_TYPE,
+      perType: 1,
       withContent: true,
     });
   },

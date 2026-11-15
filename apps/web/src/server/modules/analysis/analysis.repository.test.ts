@@ -48,7 +48,7 @@ function makeDb(result: unknown) {
   return { calls, db: { repo: { findUnique } } as unknown as DbClient };
 }
 
-function nested(call: Call | undefined, relation: "analyses" | "documents"): NestedArgs {
+function nested(call: Call | undefined, relation: "analyses"): NestedArgs {
   return call?.select?.[relation] ?? {};
 }
 
@@ -186,7 +186,10 @@ describe("loadDocumentsPerType", () => {
     ).resolves.toStrictEqual([{ ...DOCUMENT, content: "# readme" }]);
     expect(withContent.findMany).toHaveBeenCalledWith({
       select: { content: true, id: true },
-      where: { id: { in: [ROW.id] } },
+      where: {
+        id: { in: [ROW.id] },
+        repo: { id: REPO_ID, workspaceId: WORKSPACE_ID },
+      },
     });
   });
 
@@ -258,11 +261,21 @@ describe("analysisRepo.getRepoDocsPayload", () => {
   });
 
   it("still throws ANALYSIS_VERSION_NOT_FOUND for an aid outside the workspace", async () => {
-    const { db } = makeDocsDb({ analyses: [ANALYSIS] }, null);
+    const { db, queries } = makeDocsDb({ analyses: [ANALYSIS] }, null);
 
     await expect(
       analysisRepo.getRepoDocsPayload(db, REPO_ID, WORKSPACE_ID, ANALYSIS_ID),
     ).rejects.toMatchObject({ messageCode: MessageCode.ANALYSIS_VERSION_NOT_FOUND });
+    expect(queries).toHaveLength(0);
+  });
+
+  it("throws ANALYSIS_NOT_COMPLETED without reading documents", async () => {
+    const { db, queries } = makeDocsDb({ analyses: [] });
+
+    await expect(analysisRepo.getRepoDocsPayload(db, REPO_ID, WORKSPACE_ID)).rejects.toMatchObject({
+      messageCode: MessageCode.ANALYSIS_NOT_COMPLETED,
+    });
+    expect(queries).toHaveLength(0);
   });
 });
 

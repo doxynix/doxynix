@@ -3,10 +3,8 @@
 -- @param {String} $3:analysis_id?
 -- @param {Int} $4:per_type_limit
 
--- One version window per document kind instead of one global `take`, so a type with many
--- versions cannot evict the others. CODE_DOC rows are one-per-path, and NULL paths are peers
--- in a window partition, so (type, path) keeps every pinned code doc and still means "per type"
--- for the analysis-generated reports.
+-- One window per (type, path) instead of one global `take`, so a type with many versions cannot
+-- evict the others and pinned code docs stay one-per-path (NULL paths are peers in the partition).
 SELECT
     t.id,
     t.type,

@@ -339,12 +339,6 @@ const SHAPES: Shape[] = [
     label: "getLinkedAccounts: accounts per user",
     sql: `SELECT id FROM accounts WHERE user_id='@accountsUser' ORDER BY provider_id ASC`,
   },
-  {
-    group: "unbounded",
-    label: "loadLatestDocumentsWithContent: (type asc, updatedAt desc)",
-    sql: `SELECT id,type FROM documents WHERE repo_id='@documentsRepo' ORDER BY type ASC, updated_at DESC`,
-  },
-
   // ---- auth hot path: runs on sign-in, on session validation, on every API call ----
   {
     group: "auth",

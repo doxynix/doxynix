@@ -4,7 +4,7 @@ import type { DocType } from "@doxynix/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { prisma } from "@/server/core/db";
-import { loadDocumentsPerType } from "@/server/modules/analysis/analysis.repository";
+import { analysisRepo, loadDocumentsPerType } from "@/server/modules/analysis/analysis.repository";
 
 import { cleanupDatabase, createTestUser } from "../helpers";
 
@@ -80,11 +80,36 @@ describe("loadDocumentsPerType", () => {
       updatedAt: new Date("2025-01-01T00:00:00Z"),
     });
 
-    const docs = await loadDocumentsPerType(prisma, repoId, workspaceId, { perType: 3 });
+    const docs = await loadDocumentsPerType(prisma, repoId, workspaceId, { perType: 1 });
 
-    expect(docs.filter((doc) => doc.type === "README")).toHaveLength(3);
+    expect(docs.filter((doc) => doc.type === "README")).toHaveLength(1);
     expect(docs.filter((doc) => doc.type === "ARCHITECTURE")).toHaveLength(1);
     expect(new Set(docs.map((doc) => doc.type))).toStrictEqual(new Set(["README", "ARCHITECTURE"]));
+  });
+
+  it("returns one row per type when two analyses carry the same kind", async () => {
+    const { repoId, workspaceId } = await seedRepo("docs_per_type_two_analyses");
+    const older = await seedAnalysis(repoId, "sha-a", new Date("2026-01-01T00:00:00Z"));
+    const latest = await seedAnalysis(repoId, "sha-b", new Date("2026-02-01T00:00:00Z"));
+    await seedDocument({
+      analysisId: older.id,
+      path: "README.md",
+      repoId,
+      type: "README",
+      updatedAt: new Date("2026-03-01T00:00:00Z"),
+    });
+    await seedDocument({
+      analysisId: latest.id,
+      path: "README.md",
+      repoId,
+      type: "README",
+      updatedAt: new Date("2026-02-01T00:00:00Z"),
+    });
+
+    const docs = await analysisRepo.loadLatestDocumentsWithContent(prisma, repoId, workspaceId);
+
+    expect(docs).toHaveLength(1);
+    expect(docs[0]?.type).toBe("README");
   });
 
   it("returns the newest versions of a type first", async () => {

@@ -471,8 +471,9 @@ R6, R7, R9, R18, R19, R21, R26, R29 and K2 have since closed (see the closing lo
   — `src/server/modules/analysis/analysis.repository.ts:340-364`
   - **What:** `repo.findUnique(...)` (with the *latest* DONE analysis) and then, if `aid` is
     passed, `resolveTargetAnalysis` (`:546-565`) fetches *another* analysis. The latest analysis
-    fetched in the first query is discarded when `aid` is present. The same pattern is repeated in
-    `getRepoSnapshotWithDocuments` (`:366-402`).
+    fetched in the first query is discarded when `aid` is present. The same pattern was repeated in
+    `getRepoSnapshotWithDocuments`, deleted in B5e (`c0517117`) when the documents read moved out of
+    the repo select.
   - **Why it costs:** every `aid`-scoped call (`getWorkspace`, `getStructureMap`,
     `getStructureNode`, `getNodeContext`, `searchWorkspace`, `getDocumentContent`, `getByPRNumber`)
     pays a heavy read twice. `aid` is how the UI pins a historical analysis — the default view
@@ -605,11 +606,11 @@ R6, R7, R9, R18, R19, R21, R26, R29 and K2 have since closed (see the closing lo
     into one event the client already listens to. **Effort:** S.
 
 - [x] **R33 · `getRepoSnapshotWithDocuments` loads every document row of the repo and filters in JS**
-  — `analysis/analysis.repository.ts:366-402` — before `311bd6a7` the nested `documents` had no
-    `take`, and `repo.documents.filter(d => d.analysis?.id === aid)` ran in JS. Documents grow by
-    ~5 per analysis (`saveResults`), so a repo with 100 analyses read 500 metadata rows to serve one
-    version. **Fix:** `where: { analysisId: aid }` in the nested select — now at `:376-378`.
-    **Effort:** XS.
+  — `analysis/analysis.repository.ts` — before `311bd6a7` the nested `documents` had no `take`, and
+    `repo.documents.filter(d => d.analysis?.id === aid)` ran in JS. Documents grow by ~5 per analysis
+    (`saveResults`), so a repo with 100 analyses read 500 metadata rows to serve one version.
+    **Fix:** `where: { analysisId: aid }` in the nested select. **Effort:** XS. The whole select was
+    removed in B5e (`c0517117`) — documents now come from `prisma/sql/getLatestDocumentsPerType.sql`.
 
 - [ ] **R34 · `getDashboardStats.sql` builds a per-repo top-5 lateral it never uses**
   — `prisma/sql/getDashboardStats.sql` (`per_repo_top`) — `LIMIT 5` per repo followed by
@@ -682,12 +683,12 @@ These were checked and found correct. Listed so a third round does not repeat th
 | R8 | 2026-11-01 | `311bd6a7` | `analysisRepo.getByRepoAndPRNumber` selects `id` instead of `include: { comments, generatedFixes }`; its only caller (the PR webhook) reads `id`. |
 | R9 | 2026-11-15 | `5420536e` | `bumpUsage` is one `INSERT … ON CONFLICT` statement per event; both paths clamp, and the conflict branch binds the raw delta (`+ $6::int`), so a negative release is not swallowed by `EXCLUDED`. `usage.test.ts` asserts the SQL text and params; `entitlements.test.ts` asserts the 900 → 0 clamp against a real database. |
 | R18 | 2026-11-15 | `a90fdb07` | `getHistory` and `listByRepository` return cursor pages (`{ items, meta, total }`, `take: limit + 1` + `splitKeysetPage` over `ORDER_CREATED_AT_DESC`, `limit` default 50) instead of 500-row reads, and the `capped` flag is gone: the version selector appends pages from a "More" item, the PR list from an intersection sentinel, and both keep the `count` as `total`. `getByRepoId` (fixes) keeps its 200-row cap and stays deferred until a client reads the list. |
-| R19 | 2026-11-15 | `c004fc44` | `getRepoSnapshot`, `getRepoSnapshotWithDocuments` and `getAnalysisPayloadForRepo` resolve the requested `aid` inside the single `repo.findUnique` (`analyses: { orderBy: createdAt desc, take: 1, where: { id, status: "DONE" } }`), so an `aid`-scoped read is one operation. A missing or foreign `aid` still throws `ANALYSIS_VERSION_NOT_FOUND`; an empty latest still throws `ANALYSIS_NOT_COMPLETED`. `getRepoDocsPayload` keeps its second lookup (out of this batch). |
+| R19 | 2026-11-15 | `c004fc44` | `getRepoSnapshot`, `getRepoSnapshotWithDocuments` and `getAnalysisPayloadForRepo` resolve the requested `aid` inside the single `repo.findUnique` (`analyses: { orderBy: createdAt desc, take: 1, where: { id, status: "DONE" } }`), so an `aid`-scoped read is one operation. A missing or foreign `aid` still throws `ANALYSIS_VERSION_NOT_FOUND`; an empty latest still throws `ANALYSIS_NOT_COMPLETED`. `getRepoDocsPayload` keeps its second lookup (out of this batch); B5e deleted `getRepoSnapshotWithDocuments` when the documents read left the repo select (`c0517117`). |
 | R21 | 2026-11-15 | `39d08034` | `logic/project-result-overview.ts` replaces `JSON.stringify(resultJson)` in `analyze-pr.task.ts` with a bounded projection capped at 4096 chars. |
 | R26 | 2026-11-15 | `9192e12e` | `apiKeyService.list` takes the newest 100 keys of the workspace; the active/archived split, the column allowlist and the `ApiKeySchema` payload are unchanged. B5b (`bc449faf`) replaced the ceiling with cursor pagination (`{ items, meta }`) and the UI loads more on scroll; the split is a SQL predicate (`activeKeyWhere` for `list`, `archivedKeyWhere` for `listArchived`) that mirrors `isApiKeyDead`, which moved to `@doxynix/shared`. Archived keys are cursor-paginated as well (round 2), so the API-key surface has no capped list; an integration test walks both predicates against a real Postgres. |
 | R27 | 2026-11-01 | `311bd6a7` | `user.me` selects the eight `PublicUser` fields instead of the whole row. |
 | R29 | 2026-11-15 | `9192e12e` | `adminUserService.getSessions` takes the newest 100 sessions of the user, newest first. B5b (`2669e145`) replaced the ceiling with cursor pagination (`{ items, meta }`), and the admin sheet loads more on scroll inside its new `ScrollArea`. |
-| R33 | 2026-11-01 | `311bd6a7` | `documents` relation filtered by `analysisId` in SQL when `aid` is set; the JS `.filter()` in `getRepoSnapshotWithDocuments` is gone. |
+| R33 | 2026-11-01 | `311bd6a7` | `documents` relation filtered by `analysisId` in SQL when `aid` is set; the JS `.filter()` in `getRepoSnapshotWithDocuments` is gone. B5e removed that select entirely (`c0517117`). |
 | K2 | 2026-11-15 | `84ad37d7` | `loadRelatedDocSections` takes the request's `aid` and forwards it to `loadLatestDocumentsWithContent`, so the related-docs panel lists only the pinned analysis's documents. |
 
 The first six shipped in PR #2356 and are on `main`; R3, R6, R7, R9, R18, R19, R21, R26, R29 and K2
