@@ -1,18 +1,16 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { UserMinus } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useTRPC } from "@/shared/api/trpc";
 import { Link } from "@/shared/i18n/navigation";
-import { useIntersectionObserver } from "@/shared/lib/hooks/use-intersection-observer";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
-import { Spinner } from "@/shared/ui/core/spinner";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
+import { AppInfiniteSentinel } from "@/shared/ui/kit/app-infinite-sentinel";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { useWorkspace } from "@/entities/workspace/model/workspace-context";
@@ -26,7 +24,6 @@ export function WorkspaceMembersPage() {
   const trpc = useTRPC();
   const t = useTranslations("Dashboard");
   const { activeWorkspace, isOwner } = useWorkspace();
-  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
     trpc.workspace.members.infiniteQueryOptions(
@@ -40,28 +37,6 @@ export function WorkspaceMembersPage() {
 
   const planCode = activeWorkspace?.entitlement?.planCode ?? "HOBBY";
   const isHobby = planCode === "HOBBY";
-
-  const { observe, unobserve } = useIntersectionObserver(
-    (entries) => {
-      if (entries[0]?.isIntersecting) {
-        void fetchNextPage();
-      }
-    },
-    { threshold: 0.1 },
-  );
-
-  useEffect(() => {
-    const target = sentinelRef.current;
-    if (!hasNextPage || isFetchingNextPage || target == null) {
-      return;
-    }
-
-    observe(target);
-
-    return () => {
-      unobserve(target);
-    };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, observe, unobserve]);
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -146,14 +121,11 @@ export function WorkspaceMembersPage() {
         </div>
       )}
 
-      {hasNextPage && (
-        <div
-          className="flex items-center justify-center py-2"
-          ref={sentinelRef}
-        >
-          {isFetchingNextPage && <Spinner />}
-        </div>
-      )}
+      <AppInfiniteSentinel
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        onLoadMore={fetchNextPage}
+      />
     </div>
   );
 }

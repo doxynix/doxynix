@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -7,7 +7,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { useTRPC } from "@/shared/api/trpc";
 import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
-import { useIntersectionObserver } from "@/shared/lib/hooks/use-intersection-observer";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   DropdownMenu,
@@ -17,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/core/dropdown-menu";
 import { Skeleton } from "@/shared/ui/core/skeleton";
-import { Spinner } from "@/shared/ui/core/spinner";
+import { AppInfiniteSentinel } from "@/shared/ui/kit/app-infinite-sentinel";
 import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
@@ -38,7 +37,6 @@ export function NotificationsNav() {
   const { markAllAsRead, markAs } = useNotificationActions();
 
   const [open, setOpen] = useState(false);
-  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
     trpc.notification.getFeed.infiniteQueryOptions(
@@ -59,28 +57,6 @@ export function NotificationsNav() {
   function handleSelectRead(id: string) {
     markAs.mutate(id, true);
   }
-
-  const { observe, unobserve } = useIntersectionObserver(
-    (entries) => {
-      if (entries[0]?.isIntersecting) {
-        void fetchNextPage();
-      }
-    },
-    { threshold: 0.1 },
-  );
-
-  useEffect(() => {
-    const target = sentinelRef.current;
-    if (!hasNextPage || isFetchingNextPage || target == null) {
-      return;
-    }
-
-    observe(target);
-
-    return () => {
-      unobserve(target);
-    };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, observe, unobserve]);
 
   return (
     <DropdownMenu
@@ -207,14 +183,11 @@ export function NotificationsNav() {
               })
             )}
 
-            {hasNextPage && (
-              <div
-                className="flex items-center justify-center py-2"
-                ref={sentinelRef}
-              >
-                {isFetchingNextPage && <Spinner />}
-              </div>
-            )}
+            <AppInfiniteSentinel
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              onLoadMore={fetchNextPage}
+            />
           </div>
         )}
         <DropdownMenuSeparator />

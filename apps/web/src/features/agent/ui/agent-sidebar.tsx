@@ -1,16 +1,15 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { groupBy } from "es-toolkit";
 import { ChevronDown, Folder, MessageSquare, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
-import { useIntersectionObserver } from "@/shared/lib/hooks/use-intersection-observer";
 import { AppButton } from "@/shared/ui/core/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/core/collapsible";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { AppInfiniteSentinel } from "@/shared/ui/kit/app-infinite-sentinel";
 
 import type { AgentSession } from "../model/agent-types";
 import { DeleteChatDialog } from "./delete-chat-dialog";
@@ -93,29 +92,6 @@ export function AgentSidebar({
   setSessionId,
 }: Readonly<Props>) {
   const t = useTranslations("Agent");
-  const sentinelRef = useRef<HTMLDivElement>(null);
-
-  const { observe, unobserve } = useIntersectionObserver(
-    (entries) => {
-      if (entries[0]?.isIntersecting) {
-        void fetchNextPage();
-      }
-    },
-    { threshold: 0.1 },
-  );
-
-  useEffect(() => {
-    const target = sentinelRef.current;
-    if (target == null || !hasNextPage || isFetchingNextPage) {
-      return;
-    }
-
-    observe(target);
-
-    return () => {
-      unobserve(target);
-    };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, observe, unobserve]);
 
   const globalSessions = sessions?.filter((session) => session.repo == null) ?? [];
   const repos = groupBy(
@@ -201,12 +177,11 @@ export function AgentSidebar({
               <p className="mt-8 text-center text-muted-foreground text-xs">{t("no_past_chats")}</p>
             )}
 
-            {hasNextPage && (
-              <div
-                className="h-px"
-                ref={sentinelRef}
-              />
-            )}
+            <AppInfiniteSentinel
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              onLoadMore={fetchNextPage}
+            />
           </div>
         </ScrollArea>
       )}

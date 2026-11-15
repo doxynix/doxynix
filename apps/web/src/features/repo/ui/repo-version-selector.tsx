@@ -15,10 +15,9 @@ import {
   SelectValue,
 } from "@/shared/ui/core/select";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { AppInfiniteSentinel } from "@/shared/ui/kit/app-infinite-sentinel";
 import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
-
-const LOAD_MORE = "__load_more__";
 
 type VersionRef = {
   commitSha: string | null;
@@ -112,13 +111,7 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
 
   return (
     <Select
-      onValueChange={(value) => {
-        if (value === LOAD_MORE) {
-          void fetchNextPage();
-          return;
-        }
-        void setAid(value);
-      }}
+      onValueChange={(value) => void setAid(value)}
       value={selectedAid || items[0]?.id}
     >
       <SelectTrigger
@@ -151,16 +144,11 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
             {renderVersion(item)}
           </SelectItem>
         ))}
-        {hasNextPage && (
-          <SelectItem
-            disabled={isFetchingNextPage}
-            value={LOAD_MORE}
-          >
-            <span className="text-muted-foreground text-xs">
-              {isFetchingNextPage ? tCommon("loading") : tCommon("more")}
-            </span>
-          </SelectItem>
-        )}
+        <AppInfiniteSentinel
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          onLoadMore={fetchNextPage}
+        />
       </SelectContent>
     </Select>
   );
