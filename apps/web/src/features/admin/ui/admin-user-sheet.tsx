@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useTRPC } from "@/shared/api/trpc";
 import { formatFullDate } from "@/shared/lib/date-utils";
 import { AppBadge } from "@/shared/ui/core/badge";
+import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -63,79 +64,85 @@ export function AdminUserSheet({ actions, onOpenChange, open, userId }: Readonly
         </SheetHeader>
 
         {isLoading || data == null ? (
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-wrap items-center gap-2">
-              <Skeleton className="h-5 w-20 rounded-xl" />
-              <Skeleton className="h-5 w-24 rounded-xl" />
-            </div>
+          <ScrollArea className="flex-1">
+            <div className="flex flex-col gap-6 pr-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <Skeleton className="h-5 w-20 rounded-xl" />
+                <Skeleton className="h-5 w-24 rounded-xl" />
+              </div>
 
-            <dl className="grid grid-cols-2 gap-4 text-sm">
-              {Array.from({ length: 4 }, (_, index) => (
-                <div
-                  className="flex flex-col gap-1"
-                  key={index}
-                >
-                  <dt className="text-muted-foreground text-xs">
+              <dl className="grid grid-cols-2 gap-4 text-sm">
+                {Array.from({ length: 4 }, (_, index) => (
+                  <div
+                    className="flex flex-col gap-1"
+                    key={index}
+                  >
+                    <dt className="text-muted-foreground text-xs">
+                      <SkeletonText
+                        lines={1}
+                        widths={["w-28"]}
+                      />
+                    </dt>
+                    <dd className="truncate">
+                      <SkeletonText
+                        lines={1}
+                        widths={["w-36"]}
+                      />
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+
+              <SkeletonList
+                className="grid grid-cols-2 gap-4 sm:grid-cols-3"
+                count={5}
+                itemClassName="flex flex-col gap-1 rounded-xl border border-border p-4"
+                renderItem={() => (
+                  <>
+                    <Skeleton className="h-8 w-12 rounded-md" />
                     <SkeletonText
                       lines={1}
-                      widths={["w-28"]}
+                      widths={["w-24"]}
                     />
-                  </dt>
-                  <dd className="truncate">
-                    <SkeletonText
-                      lines={1}
-                      widths={["w-36"]}
-                    />
-                  </dd>
-                </div>
-              ))}
-            </dl>
-
-            <SkeletonList
-              className="grid grid-cols-2 gap-4 sm:grid-cols-3"
-              count={5}
-              itemClassName="flex flex-col gap-1 rounded-xl border border-border p-4"
-              renderItem={() => (
-                <>
-                  <Skeleton className="h-8 w-12 rounded-md" />
-                  <SkeletonText
-                    lines={1}
-                    widths={["w-24"]}
-                  />
-                </>
-              )}
-            />
-
-            <div className="flex flex-col gap-2">
-              <SkeletonText
-                lines={1}
-                widths={["w-32"]}
+                  </>
+                )}
               />
-              <ul className="flex flex-col gap-2">
-                <li className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border p-3 text-sm">
-                  <div className="flex flex-col">
-                    <SkeletonText
-                      lines={2}
-                      widths={["w-48", "w-64"]}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <SkeletonText
-                      lines={1}
-                      widths={["w-20"]}
-                    />
-                    <Skeleton className="rounded-xl size-9" />
-                  </div>
-                </li>
-              </ul>
+
+              <div className="flex flex-col gap-2">
+                <SkeletonText
+                  lines={1}
+                  widths={["w-32"]}
+                />
+                <ul className="flex flex-col gap-2">
+                  <li className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border p-3 text-sm">
+                    <div className="flex flex-col">
+                      <SkeletonText
+                        lines={2}
+                        widths={["w-48", "w-64"]}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <SkeletonText
+                        lines={1}
+                        widths={["w-20"]}
+                      />
+                      <Skeleton className="rounded-xl size-9" />
+                    </div>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
+          </ScrollArea>
         ) : (
-          <AdminUserDetailBody
-            actions={actions}
-            data={data}
-            locale={locale}
-          />
+          <ScrollArea className="flex-1">
+            <div className="pr-4">
+              <AdminUserDetailBody
+                actions={actions}
+                data={data}
+                locale={locale}
+              />
+            </div>
+          </ScrollArea>
         )}
       </SheetContent>
     </Sheet>
