@@ -719,3 +719,37 @@ bun --filter @doxynix/web test src/server/modules/analysis
 bun --filter @doxynix/web test src/server/modules/billing
 bun --filter @doxynix/web test src/server/core
 ```
+
+## List-read audit follow-ups (2026-11-15)
+
+[`list-read-audit.md`](../../../.superpowers/sdd/db-query-review-2026-11/list-read-audit.md) re-read
+the ten unbounded reads (`U*`) and the eight capped ones (`C*`) this scoreboard does not carry: they
+are one screen each and close in batches, so they stay out of the 36-item counter above.
+
+- [x] **U2 · `loadImpactAnalysis` loaded every comment of the PR analysis** —
+  `analysis.repository.ts` dropped the `comments` relation; findings come from `findingsJson`.
+  `dcfc6a65`
+- [x] **U3 · `loadImpactAnalysis` loaded every linked fix** — `generatedFixes` takes 50
+  (`MAX_IMPACT_FIXES`) and the select carries `_count.generatedFixes`; `summary.linkedFixes` is that
+  count, `fixes` is the page. `dcfc6a65`
+- [x] **U4 · `getComments` rendered every comment of one analysis** — `take: 500`
+  (`MAX_ANALYSIS_COMMENTS`) with a matching `count` in the same `Promise.all`, output
+  `{ renderedComments, total }`, cache key still `workspace + analysis version + total`, and the PR
+  card renders `Common.capped_hint` when the page is short. `fixAll` still maps the loaded page.
+  `dcfc6a65`
+- [x] **U7 · `adminReview.getDetail` loaded every fix** — `take: 100` (`MAX_DETAIL_FIXES`); the
+  detail's `fixCount` is the `_count` the summary already selects. `dcfc6a65`
+- [ ] **U1 · `getRepoDocsPayload` reads every document version** — deferred to the documents pass.
+- [ ] **U5 · `workspace.listMembers` reads every membership** — open; needs a cap-by-seat vs keyset
+  decision first.
+- [ ] **U6 · `getTrends` has no range bound** — open; clamp the custom range or pre-bucket.
+- [x] **C1 · `getHistory`** — cursor pages, `{ items, meta, total }` (`a90fdb07`, B5c).
+- [x] **C2 · `listByRepository`** — cursor pages, `{ items, meta, total }` (`a90fdb07`, B5c).
+- [ ] **C3 · `getByRepoId` (`take: 200`)** — left at 200; no client reads the list.
+- [ ] **C4 · `getRepoSnapshotWithDocuments` documents (`take: 500`)** — closes with U1.
+- [ ] **C5 · `loadLatestDocumentsWithContent` (`take: 24`)** — closes with U1 (per-type fetch).
+- [ ] **C6 · `loadRelatedFixes` (`take: 8`)** — left; explicit "related" widget.
+- [ ] **C7 · `loadRelatedPrFindings` (`take: 12`)** — left; explicit "related" widget.
+- [ ] **C8 · `getDashboardStats` `per_repo_top` LATERAL** — open; depends on R34's `LIMIT 1` and on
+  the "recent activity" semantics.
+
