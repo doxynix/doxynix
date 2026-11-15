@@ -4,6 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import type { ChatStatus, UIMessage } from "ai";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
+import { uniqBy } from "es-toolkit";
 import { ArrowDown, LoaderCircle } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
@@ -28,7 +29,6 @@ import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 import { TOOL_INVALIDATIONS, toolLabelKeys } from "../model/agent-config";
 import type { AgentMessagePart, LocalFileAttachment } from "../model/agent-types";
 import { decidePrepend, type HistoryWindow, resetHistoryWindow } from "../model/history-window";
-import { flattenSessionPages } from "../model/session-pages";
 import { useAgentIsOpen } from "../model/use-agent.store";
 import { AgentForm } from "./agent-form";
 import { AgentHeader } from "./agent-header";
@@ -161,7 +161,14 @@ export function Agent() {
     ),
   );
 
-  const sessions = sessionPages == null ? undefined : flattenSessionPages(sessionPages.pages);
+  // `listSessions` keysets on `updatedAt`, which a rename moves, so a row can repeat across pages.
+  const sessions =
+    sessionPages == null
+      ? undefined
+      : uniqBy(
+          sessionPages.pages.flatMap((page) => page.items),
+          (session) => session.id,
+        );
 
   const {
     data: historyPages,
