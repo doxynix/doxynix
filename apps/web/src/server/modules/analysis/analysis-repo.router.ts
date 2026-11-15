@@ -7,6 +7,7 @@ import {
   AnalysisScopeInputSchema,
   NodeContextInputSchema,
   NodeContextOutputSchema,
+  PRCommentsOutputSchema,
   PullListOutputSchema,
 } from "./analysis.schemas";
 import { PostCommentToPROutput, prCommentsService } from "./services/pr-comments.service";
@@ -37,6 +38,7 @@ export const analysisRepoRouter = {
     }),
   getComments: workspaceProcedure
     .input(z.object({ analysisId: z.string() }))
+    .output(PRCommentsOutputSchema)
     .query(async ({ ctx, input }) => {
       return prCommentsService.getComments(ctx.db, input.analysisId, ctx.workspace.id);
     }),

@@ -5,6 +5,7 @@ import type { DbClient } from "@/server/core/db";
 
 import {
   analysisRepo,
+  MAX_IMPACT_FIXES,
   MAX_REPO_DOCUMENTS,
   repoWithLatestAnalysisAndDocsSelect,
 } from "./analysis.repository";
@@ -205,6 +206,53 @@ describe("analysisRepo.getByRepoId", () => {
       repo: { id: REPO_ID, workspaceId: WORKSPACE_ID },
       status: "DRAFT",
     });
+  });
+});
+
+describe("analysisRepo.loadImpactAnalysis", () => {
+  function makePullDb() {
+    const findFirst = vi.fn().mockResolvedValue(null);
+
+    return { db: { pullRequestAnalysis: { findFirst } } as unknown as DbClient, findFirst };
+  }
+
+  function selectOf(findFirst: ReturnType<typeof vi.fn>) {
+    return findFirst.mock.calls[0]?.[0]?.select as Record<string, unknown>;
+  }
+
+  it("drops the unused comments relation and keeps every other column", async () => {
+    const { db, findFirst } = makePullDb();
+
+    await analysisRepo.loadImpactAnalysis(db, REPO_ID, 7, WORKSPACE_ID);
+
+    expect(Object.keys(selectOf(findFirst)).sort()).toStrictEqual([
+      "_count",
+      "baseSha",
+      "changedFilesJson",
+      "createdAt",
+      "findingsJson",
+      "generatedFixes",
+      "headSha",
+      "id",
+      "prNumber",
+      "riskScore",
+      "status",
+      "updatedAt",
+    ]);
+  });
+
+  it("caps the linked fixes and asks for their real count", async () => {
+    const { db, findFirst } = makePullDb();
+
+    await analysisRepo.loadImpactAnalysis(db, REPO_ID, 7, WORKSPACE_ID);
+
+    const select = selectOf(findFirst);
+    expect(MAX_IMPACT_FIXES).toBe(50);
+    expect(select.generatedFixes).toMatchObject({
+      orderBy: { createdAt: "desc" },
+      take: MAX_IMPACT_FIXES,
+    });
+    expect(select._count).toStrictEqual({ select: { generatedFixes: true } });
   });
 });
 

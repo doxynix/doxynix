@@ -150,6 +150,8 @@ export type ImpactAnalysis = NonNullable<ImpactAnalysisRecord>;
 
 const FIX_LIST_LIMIT = 200;
 
+export const MAX_IMPACT_FIXES = 50;
+
 export const analysisRepo = {
   // No revalidateTag: a task has no Next store; readers miss the old page via the analysis version.
   async addComments(
@@ -441,19 +443,9 @@ export const analysisRepo = {
     return db.pullRequestAnalysis.findFirst({
       orderBy: { createdAt: "desc" },
       select: {
+        _count: { select: { generatedFixes: true } },
         baseSha: true,
         changedFilesJson: true,
-        comments: {
-          orderBy: [{ riskLevel: "desc" }, { filePath: "asc" }, { line: "asc" }],
-          select: {
-            body: true,
-            filePath: true,
-            findingType: true,
-            id: true,
-            line: true,
-            riskLevel: true,
-          },
-        },
         createdAt: true,
         findingsJson: true,
         generatedFixes: {
@@ -465,6 +457,7 @@ export const analysisRepo = {
             status: true,
             title: true,
           },
+          take: MAX_IMPACT_FIXES,
         },
         headSha: true,
         id: true,

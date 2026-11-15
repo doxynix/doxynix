@@ -59,4 +59,33 @@ describe("adminReviewService.getDetail", () => {
 
     await expect(adminReviewService.getDetail(db, "missing")).rejects.toThrow(/not found/i);
   });
+
+  it("caps the fixes it loads but keeps the counted fixCount", async () => {
+    const { db, findUnique } = createDb({
+      ...REVIEW,
+      _count: { generatedFixes: 620 },
+      generatedFixes: [
+        {
+          branch: "doxynix/fix-1",
+          createdAt: new Date("2026-01-03"),
+          estimatedImpact: 40,
+          githubPrNumber: null,
+          githubPrUrl: null,
+          id: "0192f0c1-0000-7000-8000-0000000000bb",
+          status: "DRAFT",
+          title: "fix one",
+        },
+      ],
+      repo: { id: "0192f0c1-0000-7000-8000-0000000000aa" },
+    });
+
+    const detail = await adminReviewService.getDetail(db, "0192f0c1-0000-7000-8000-000000000009");
+
+    expect(findUnique.mock.calls[0]?.[0]?.select?.generatedFixes).toMatchObject({
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    });
+    expect(detail.fixCount).toBe(620);
+    expect(detail.fixes).toHaveLength(1);
+  });
 });

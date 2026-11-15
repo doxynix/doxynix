@@ -243,6 +243,20 @@ export const PullListOutputSchema = z.object({
   total: z.number().int(),
 });
 
+export const PRCommentSchema = z.object({
+  bodyHtml: z.string(),
+  filePath: z.string(),
+  findingType: z.string(),
+  id: z.uuid(),
+  line: z.number().int(),
+  riskLevel: z.number().int().min(0).max(10),
+});
+
+export const PRCommentsOutputSchema = z.object({
+  renderedComments: z.array(PRCommentSchema),
+  total: z.number().int(),
+});
+
 export const NodeContextInputSchema = z.object({
   aid: z.string().optional(),
   nodeId: z.string(),

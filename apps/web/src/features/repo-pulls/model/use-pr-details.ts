@@ -84,6 +84,7 @@ export function usePrDetails({ analysis, impact, repoId }: Options) {
       return;
     }
 
+    // Findings are capped server-side, so a bulk fix covers the loaded page only.
     createFixMutation.mutate({
       findings: comments.renderedComments.map((comment) => toFixFinding(comment)),
       prAnalysisId: analysis?.analysis.id,

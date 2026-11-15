@@ -55,9 +55,9 @@ const REPO_ID = "018f0000-0000-7000-8000-0000000000cc";
 
 function stubAnalysis() {
   return {
+    _count: { generatedFixes: 0 },
     baseSha: "base",
     changedFilesJson: [],
-    comments: [],
     createdAt: new Date("2026-03-01T11:00:00.000Z"),
     findingsJson: [],
     generatedFixes: [],
@@ -92,6 +92,29 @@ describe("prImpactService.getByRepoAndPRNumber", () => {
     );
     expect(payload).not.toBeNull();
     expect(payload?.analysis.id).toBe(ANALYSIS_ID);
+  });
+
+  it("reports the counted fixes while building the capped page", async () => {
+    mocks.loadImpactAnalysis.mockResolvedValue({
+      ...stubAnalysis(),
+      _count: { generatedFixes: 137 },
+      generatedFixes: [
+        {
+          githubPrNumber: 12,
+          githubPrUrl: "https://pr/12",
+          id: "fix-1",
+          status: "DRAFT",
+          title: "a",
+        },
+        { githubPrNumber: null, githubPrUrl: null, id: "fix-2", status: "COMPLETED", title: "b" },
+      ],
+    });
+    mocks.getRepoBySha.mockResolvedValue({ name: "doxynix", owner: "ivan" });
+
+    const payload = await prImpactService.getByRepoAndPRNumber({} as DbClient, REPO_ID, 7, "ws-1");
+
+    expect(payload?.summary.linkedFixes).toBe(137);
+    expect(payload?.fixes.map((fix) => fix.id)).toStrictEqual(["fix-1", "fix-2"]);
   });
 
   it("returns null when the analysis or the repo snapshot is missing", async () => {

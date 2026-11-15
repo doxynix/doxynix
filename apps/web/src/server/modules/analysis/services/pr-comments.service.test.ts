@@ -24,7 +24,7 @@ vi.mock("@/server/utils/request-context", () => ({
 
 import type { DbClient } from "@/server/core/db";
 
-import { prCommentsService } from "./pr-comments.service";
+import { MAX_ANALYSIS_COMMENTS, prCommentsService } from "./pr-comments.service";
 
 const ANALYSIS_ID = "018f0000-0000-7000-8000-0000000000aa";
 const REPO_ID = "018f0000-0000-7000-8000-0000000000cc";
@@ -43,11 +43,12 @@ function makeComment(index: number, updatedAt: Date = ANALYSIS_VERSION) {
   };
 }
 
-function stubDb(comments: unknown[]) {
+function stubDb(comments: unknown[], total = comments.length) {
   const findMany = vi.fn().mockResolvedValue(comments);
-  const db = { pullRequestComment: { findMany } } as unknown as DbClient;
+  const count = vi.fn().mockResolvedValue(total);
+  const db = { pullRequestComment: { count, findMany } } as unknown as DbClient;
 
-  return { db, findMany };
+  return { count, db, findMany };
 }
 
 function stubMutationDb() {
@@ -182,7 +183,40 @@ describe("prCommentsService.getComments", () => {
 
     expect(mocks.unstable_cache).not.toHaveBeenCalled();
     expect(mocks.markdownToHtml).not.toHaveBeenCalled();
-    expect(result.renderedComments).toStrictEqual([]);
+    expect(result).toStrictEqual({ renderedComments: [], total: 0 });
+  });
+
+  it("caps the page and reports the total from the count query", async () => {
+    const comments = Array.from({ length: MAX_ANALYSIS_COMMENTS }, (_, index) =>
+      makeComment(index),
+    );
+    const { count, db, findMany } = stubDb(comments, 620);
+
+    const result = await prCommentsService.getComments(db, ANALYSIS_ID, "ws-1");
+
+    expect(findMany.mock.calls[0]?.[0]?.take).toBe(MAX_ANALYSIS_COMMENTS);
+    expect(MAX_ANALYSIS_COMMENTS).toBe(500);
+    expect(count).toHaveBeenCalledWith({
+      where: { analysis: { id: ANALYSIS_ID, repo: { workspaceId: "ws-1" } } },
+    });
+    expect(result.total).toBe(620);
+    expect(result.renderedComments).toHaveLength(MAX_ANALYSIS_COMMENTS);
+  });
+
+  it("keys the entry on the total, so two capped pages cannot share one entry", async () => {
+    const fullPage = Array.from({ length: MAX_ANALYSIS_COMMENTS }, (_, index) =>
+      makeComment(index),
+    );
+
+    await prCommentsService.getComments(stubDb(fullPage, 500).db, ANALYSIS_ID, "ws-1");
+    await prCommentsService.getComments(stubDb(fullPage, 620).db, ANALYSIS_ID, "ws-1");
+
+    expect(mocks.unstable_cache.mock.calls[0]?.[1]).toStrictEqual([
+      `pr-comments-html-ws-1-${ANALYSIS_ID}-${ANALYSIS_VERSION.getTime()}-500`,
+    ]);
+    expect(mocks.unstable_cache.mock.calls[1]?.[1]).toStrictEqual([
+      `pr-comments-html-ws-1-${ANALYSIS_ID}-${ANALYSIS_VERSION.getTime()}-620`,
+    ]);
   });
 });
 

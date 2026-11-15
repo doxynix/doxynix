@@ -127,7 +127,7 @@ export const prImpactService = {
         affectedNodes: affectedNodes.length,
         affectedZones: affectedZones.length,
         findings: findings.length,
-        linkedFixes: analysis.generatedFixes.length,
+        linkedFixes: analysis._count.generatedFixes,
       },
       topFindings,
     } satisfies PRImpactPayload;

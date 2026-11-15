@@ -39,6 +39,8 @@ const FIX_SELECT = {
   title: true,
 } satisfies Prisma.GeneratedFixSelect;
 
+const MAX_DETAIL_FIXES = 100;
+
 type ReviewRow = Prisma.PullRequestAnalysisGetPayload<{ select: typeof REVIEW_SELECT }>;
 
 function toSummary(row: ReviewRow) {
@@ -117,7 +119,11 @@ export const adminReviewService = {
     const review = await db.pullRequestAnalysis.findUnique({
       select: {
         ...REVIEW_SELECT,
-        generatedFixes: { orderBy: { createdAt: "desc" }, select: FIX_SELECT },
+        generatedFixes: {
+          orderBy: { createdAt: "desc" },
+          select: FIX_SELECT,
+          take: MAX_DETAIL_FIXES,
+        },
         repo: { select: { id: true } },
       },
       where: { id },
@@ -134,7 +140,7 @@ export const adminReviewService = {
     const { generatedFixes: fixes, repo, ...summary } = review;
 
     return {
-      ...toSummary({ ...summary, _count: { generatedFixes: fixes.length } }),
+      ...toSummary(summary),
       baseSha: review.baseSha,
       error: review.error,
       fixes,

@@ -8,42 +8,49 @@ import { getInstallationClient } from "@/server/core/github/github-client";
 import { markdownToHtml } from "@/server/modules/analysis/services/markdown-to-html";
 import { requestContext } from "@/server/utils/request-context";
 
+export const MAX_ANALYSIS_COMMENTS = 500;
+
 export const prCommentsService = {
   async getComments(db: DbClient, analysisId: string, workspaceId: string) {
-    const comments = await db.pullRequestComment.findMany({
-      orderBy: [{ filePath: "asc" }, { line: "asc" }],
-      select: {
-        analysis: {
-          select: {
-            repo: {
-              select: {
-                name: true,
-                owner: true,
+    const where = { analysis: { id: analysisId, repo: { workspaceId } } };
+
+    const [comments, total] = await Promise.all([
+      db.pullRequestComment.findMany({
+        orderBy: [{ filePath: "asc" }, { line: "asc" }],
+        select: {
+          analysis: {
+            select: {
+              repo: {
+                select: {
+                  name: true,
+                  owner: true,
+                },
               },
+              updatedAt: true,
             },
-            updatedAt: true,
           },
+          body: true,
+          filePath: true,
+          findingType: true,
+          id: true,
+          line: true,
+          riskLevel: true,
         },
-        body: true,
-        filePath: true,
-        findingType: true,
-        id: true,
-        line: true,
-        riskLevel: true,
-      },
-      where: {
-        analysis: { id: analysisId, repo: { workspaceId } },
-      },
-    });
+        take: MAX_ANALYSIS_COMMENTS,
+        where,
+      }),
+      db.pullRequestComment.count({ where }),
+    ]);
 
     // An empty page must not create a cache entry for an arbitrary analysis id
     const firstComment = comments[0];
     if (firstComment == null) {
-      return { renderedComments: [] };
+      return { renderedComments: [], total };
     }
 
-    // Content-addressed by analysis version: a re-analysis bumps `updatedAt` and appends rows
-    const cacheVersion = `${firstComment.analysis.updatedAt.getTime()}-${comments.length}`;
+    // Content-addressed by analysis version and comment count: a re-analysis bumps `updatedAt` and
+    // appends rows, and the total separates two pages that share the 500-row cap.
+    const cacheVersion = `${firstComment.analysis.updatedAt.getTime()}-${total}`;
 
     const renderedComments = await unstable_cache(
       async () =>
@@ -76,6 +83,7 @@ export const prCommentsService = {
 
     return {
       renderedComments,
+      total,
     };
   },
 

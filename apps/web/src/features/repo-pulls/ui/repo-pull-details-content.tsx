@@ -52,6 +52,8 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
   const affectedNodes = impact?.affectedNodes ?? [];
   const topFindings = impact?.topFindings ?? [];
   const fixes = impact?.fixes ?? [];
+  const commentsTotal = comments?.total ?? 0;
+  const isCommentsCapped = commentsTotal > (comments?.renderedComments.length ?? 0);
 
   const detailItems = buildPrDetailItems({
     analysis,
@@ -257,10 +259,17 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <ShieldCheck />
-              {t("repo_pull_detected_issues")} ({comments?.renderedComments.length ?? 0})
-            </CardTitle>
+            <div className="flex flex-col gap-1">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ShieldCheck />
+                {t("repo_pull_detected_issues")} ({comments?.renderedComments.length ?? 0})
+              </CardTitle>
+              {isCommentsCapped && (
+                <p className="text-muted-foreground text-xs">
+                  {tCommon("capped_hint", { count: commentsTotal })}
+                </p>
+              )}
+            </div>
             {comments != null && comments.renderedComments.length > 0 && (
               <LoadingButton
                 aria-label={t("repo_pull_autofix_all")}

@@ -38,6 +38,19 @@ type AnalysisRef = {
   createdAt: Date;
 };
 
+// The impact select stopped loading `comments`; these fallbacks only serve pre-`findingsJson` rows.
+type LegacyImpactComment = {
+  body: string;
+  filePath: string;
+  findingType: string;
+  line: number;
+  riskLevel: number;
+};
+
+function legacyComments(analysis: ImpactAnalysis): LegacyImpactComment[] {
+  return (analysis as ImpactAnalysis & { comments?: LegacyImpactComment[] }).comments ?? [];
+}
+
 type ExplainPayload = NodeExplainPayload;
 
 type StructureNodePayload = LeafStructureNodePayload;
@@ -281,7 +294,7 @@ export const analysisMapper = {
     }
 
     const legacyPaths = new Set<string>();
-    for (const comment of analysis.comments) {
+    for (const comment of legacyComments(analysis)) {
       legacyPaths.add(normalize(comment.filePath));
     }
 
@@ -308,7 +321,7 @@ export const analysisMapper = {
       }));
     }
 
-    return analysis.comments.map((comment) => ({
+    return legacyComments(analysis).map((comment) => ({
       file: normalize(comment.filePath),
       line: comment.line,
       message: comment.body,
