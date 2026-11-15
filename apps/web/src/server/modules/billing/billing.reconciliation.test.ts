@@ -10,7 +10,7 @@ const NOW = new Date("2026-10-30T04:17:00.000Z");
 
 const dbMock = vi.hoisted(() => ({
   $transaction: vi.fn(),
-  billingCustomer: { findFirst: vi.fn() },
+  billingCustomer: { findFirst: vi.fn(), findMany: vi.fn() },
   billingEvent: { findFirst: vi.fn() },
   billingIssue: { createMany: vi.fn(), updateMany: vi.fn() },
   billingLedgerEntry: { createMany: vi.fn(), findMany: vi.fn() },
@@ -22,8 +22,13 @@ const dbMock = vi.hoisted(() => ({
     updateMany: vi.fn(),
     upsert: vi.fn(),
   },
-  workspaceEntitlement: { findUnique: vi.fn(), updateMany: vi.fn(), upsert: vi.fn() },
-  workspaceMember: { count: vi.fn() },
+  workspaceEntitlement: {
+    findMany: vi.fn(),
+    findUnique: vi.fn(),
+    updateMany: vi.fn(),
+    upsert: vi.fn(),
+  },
+  workspaceMember: { count: vi.fn(), groupBy: vi.fn() },
 }));
 
 const projectMock = vi.hoisted(() => vi.fn());
@@ -91,6 +96,22 @@ function localSubscription(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function entitlement(overrides: Record<string, unknown> = {}) {
+  return {
+    aiTokensPerMonth: 20_000_000,
+    analysesPerMonth: 500,
+    autoResync: true,
+    historyDays: 90,
+    planCode: "PRO",
+    privateReposAllowed: true,
+    prReviews: true,
+    reposLimit: null,
+    sourceSubscriptionId: "bs_1",
+    workspaceId: WORKSPACE_ID,
+    ...overrides,
+  };
+}
+
 function issueKinds(): Array<string> {
   return dbMock.billingIssue.createMany.mock.calls.flatMap((call) => {
     const data = (call[0] as { data?: Array<{ kind: string }> }).data ?? [];
@@ -104,6 +125,9 @@ describe("runStripeReconciliation", () => {
     vi.clearAllMocks();
     dbMock.$transaction.mockImplementation(async (fn: (tx: unknown) => unknown) => fn(dbMock));
     dbMock.billingCustomer.findFirst.mockResolvedValue({ id: "bc_1", workspaceId: WORKSPACE_ID });
+    dbMock.billingCustomer.findMany.mockResolvedValue([
+      { externalCustomerId: "cus_1", id: "bc_1", workspaceId: WORKSPACE_ID },
+    ]);
     dbMock.billingEvent.findFirst.mockResolvedValue(null);
     dbMock.billingIssue.createMany.mockResolvedValue({ count: 1 });
     dbMock.billingIssue.updateMany.mockResolvedValue({ count: 1 });
@@ -118,18 +142,13 @@ describe("runStripeReconciliation", () => {
     dbMock.billingSubscription.updateMany.mockResolvedValue({ count: 1 });
     dbMock.billingSubscription.upsert.mockResolvedValue({ id: "bs_1" });
     dbMock.workspaceEntitlement.updateMany.mockResolvedValue({ count: 1 });
-    dbMock.workspaceEntitlement.findUnique.mockResolvedValue({
-      aiTokensPerMonth: 20_000_000,
-      analysesPerMonth: 500,
-      autoResync: true,
-      historyDays: 90,
-      planCode: "PRO",
-      privateReposAllowed: true,
-      prReviews: true,
-      reposLimit: null,
-    });
+    dbMock.workspaceEntitlement.findMany.mockResolvedValue([entitlement()]);
+    dbMock.workspaceEntitlement.findUnique.mockResolvedValue(entitlement());
     dbMock.workspaceEntitlement.upsert.mockResolvedValue({});
     dbMock.workspaceMember.count.mockResolvedValue(2);
+    dbMock.workspaceMember.groupBy.mockResolvedValue([
+      { _count: { _all: 2 }, workspaceId: WORKSPACE_ID },
+    ]);
     projectMock.mockReset().mockResolvedValue({
       accessState: "ACTIVE",
       mirrorId: "bs_1",
@@ -163,6 +182,7 @@ describe("runStripeReconciliation", () => {
   });
 
   it("does not guess a tenant for a subscription without a customer mapping", async () => {
+    dbMock.billingCustomer.findMany.mockResolvedValue([]);
     dbMock.billingCustomer.findFirst.mockResolvedValue(null);
     stripeMock.subscriptions.list.mockResolvedValue({
       data: [subscription()],
@@ -177,9 +197,9 @@ describe("runStripeReconciliation", () => {
   });
 
   it("repairs a mirror that drifted from Stripe", async () => {
-    dbMock.billingSubscription.findUnique.mockResolvedValue(
+    dbMock.billingSubscription.findMany.mockResolvedValue([
       localSubscription({ externalStatus: "past_due" }),
-    );
+    ]);
     stripeMock.subscriptions.list.mockResolvedValue({
       data: [subscription({ status: "active" })],
       has_more: false,
@@ -192,8 +212,10 @@ describe("runStripeReconciliation", () => {
   });
 
   it("repairs seats that drifted from the membership count", async () => {
-    dbMock.billingSubscription.findUnique.mockResolvedValue(localSubscription());
-    dbMock.workspaceMember.count.mockResolvedValue(3);
+    dbMock.billingSubscription.findMany.mockResolvedValue([localSubscription()]);
+    dbMock.workspaceMember.groupBy.mockResolvedValue([
+      { _count: { _all: 3 }, workspaceId: WORKSPACE_ID },
+    ]);
     stripeMock.subscriptions.list.mockResolvedValue({
       data: [subscription()],
       has_more: false,
@@ -209,10 +231,12 @@ describe("runStripeReconciliation", () => {
   });
 
   it("repairs a stale mirror and the seat quantity in one run", async () => {
-    dbMock.billingSubscription.findUnique.mockResolvedValue(
+    dbMock.billingSubscription.findMany.mockResolvedValue([
       localSubscription({ externalStatus: "past_due" }),
-    );
-    dbMock.workspaceMember.count.mockResolvedValue(3);
+    ]);
+    dbMock.workspaceMember.groupBy.mockResolvedValue([
+      { _count: { _all: 3 }, workspaceId: WORKSPACE_ID },
+    ]);
     stripeMock.subscriptions.list.mockResolvedValue({
       data: [subscription({ status: "active" })],
       has_more: false,
@@ -226,9 +250,9 @@ describe("runStripeReconciliation", () => {
   });
 
   it("recomputes a workspace stuck in review even when the mirror matches", async () => {
-    dbMock.billingSubscription.findUnique.mockResolvedValue(
+    dbMock.billingSubscription.findMany.mockResolvedValue([
       localSubscription({ needsReview: true }),
-    );
+    ]);
     stripeMock.subscriptions.list.mockResolvedValue({
       data: [subscription()],
       has_more: false,
@@ -241,17 +265,17 @@ describe("runStripeReconciliation", () => {
   });
 
   it("repairs stale plan limits even when the mirror matches", async () => {
-    dbMock.billingSubscription.findUnique.mockResolvedValue(localSubscription());
-    dbMock.workspaceEntitlement.findUnique.mockResolvedValue({
-      aiTokensPerMonth: 1_000_000,
-      analysesPerMonth: 20,
-      autoResync: false,
-      historyDays: 7,
-      planCode: "PRO",
-      privateReposAllowed: false,
-      prReviews: false,
-      reposLimit: null,
-    });
+    dbMock.billingSubscription.findMany.mockResolvedValue([localSubscription()]);
+    dbMock.workspaceEntitlement.findMany.mockResolvedValue([
+      entitlement({
+        aiTokensPerMonth: 1_000_000,
+        analysesPerMonth: 20,
+        autoResync: false,
+        historyDays: 7,
+        privateReposAllowed: false,
+        prReviews: false,
+      }),
+    ]);
     stripeMock.subscriptions.list.mockResolvedValue({
       data: [subscription()],
       has_more: false,
@@ -264,12 +288,12 @@ describe("runStripeReconciliation", () => {
   });
 
   it("refreshes a historical mirror and keeps the live entitlement untouched", async () => {
-    dbMock.billingSubscription.findUnique.mockResolvedValue(
+    dbMock.billingSubscription.findMany.mockResolvedValue([
       localSubscription({ externalStatus: "active", isCurrent: null }),
-    );
-    dbMock.workspaceEntitlement.findUnique.mockResolvedValue({
-      sourceSubscriptionId: "bs_current_other",
-    });
+    ]);
+    dbMock.workspaceEntitlement.findMany.mockResolvedValue([
+      entitlement({ sourceSubscriptionId: "bs_current_other" }),
+    ]);
     projectMock.mockResolvedValue({
       accessState: "ACTIVE",
       mirrorId: "bs_historical",
@@ -315,12 +339,12 @@ describe("runStripeReconciliation", () => {
   });
 
   it("does not evict a current subscription whose mirror lies about cancellation", async () => {
-    dbMock.billingSubscription.findUnique.mockResolvedValue(
+    dbMock.billingSubscription.findMany.mockResolvedValue([
       localSubscription({ externalSubscriptionId: "sub_duplicate", isCurrent: null }),
-    );
-    dbMock.workspaceEntitlement.findUnique.mockResolvedValue({
-      sourceSubscriptionId: "bs_current",
-    });
+    ]);
+    dbMock.workspaceEntitlement.findMany.mockResolvedValue([
+      entitlement({ sourceSubscriptionId: "bs_current" }),
+    ]);
     dbMock.billingSubscription.findFirst.mockResolvedValue({
       externalStatus: "canceled",
       externalSubscriptionId: "sub_current",
@@ -339,12 +363,12 @@ describe("runStripeReconciliation", () => {
   });
 
   it("lets a live subscription take the slot once Stripe confirms the current is terminal", async () => {
-    dbMock.billingSubscription.findUnique.mockResolvedValue(
+    dbMock.billingSubscription.findMany.mockResolvedValue([
       localSubscription({ externalSubscriptionId: "sub_new", isCurrent: null, quantity: 2 }),
-    );
-    dbMock.workspaceEntitlement.findUnique.mockResolvedValue({
-      sourceSubscriptionId: "bs_canceled",
-    });
+    ]);
+    dbMock.workspaceEntitlement.findMany.mockResolvedValue([
+      entitlement({ sourceSubscriptionId: "bs_canceled" }),
+    ]);
     dbMock.billingSubscription.findFirst.mockResolvedValue({
       externalStatus: "canceled",
       externalSubscriptionId: "sub_canceled",
@@ -366,12 +390,12 @@ describe("runStripeReconciliation", () => {
   });
 
   it("gives a live subscription the slot once the previous holder is gone", async () => {
-    dbMock.billingSubscription.findUnique.mockResolvedValue(
+    dbMock.billingSubscription.findMany.mockResolvedValue([
       localSubscription({ externalSubscriptionId: "sub_new", isCurrent: null, quantity: 2 }),
-    );
-    dbMock.workspaceEntitlement.findUnique.mockResolvedValue({
-      sourceSubscriptionId: "bs_canceled",
-    });
+    ]);
+    dbMock.workspaceEntitlement.findMany.mockResolvedValue([
+      entitlement({ sourceSubscriptionId: "bs_canceled" }),
+    ]);
     stripeMock.subscriptions.list.mockResolvedValue({
       data: [subscription({ id: "sub_new" })],
       has_more: false,
@@ -387,7 +411,7 @@ describe("runStripeReconciliation", () => {
   });
 
   it("does not count a matching mirror as a mismatch", async () => {
-    dbMock.billingSubscription.findUnique.mockResolvedValue(localSubscription());
+    dbMock.billingSubscription.findMany.mockResolvedValue([localSubscription()]);
     stripeMock.subscriptions.list.mockResolvedValue({
       data: [subscription()],
       has_more: false,
@@ -397,6 +421,90 @@ describe("runStripeReconciliation", () => {
 
     expect(summary.mismatchCount).toBe(0);
     expect(projectMock).not.toHaveBeenCalled();
+  });
+
+  it("prefetches the page lookups once instead of per subscription", async () => {
+    stripeMock.subscriptions.list.mockResolvedValue({
+      data: [subscription(), subscription({ customer: "cus_2", id: "sub_2" })],
+      has_more: false,
+    });
+    dbMock.billingCustomer.findMany.mockResolvedValue([
+      { externalCustomerId: "cus_1", id: "bc_1", workspaceId: WORKSPACE_ID },
+      { externalCustomerId: "cus_2", id: "bc_2", workspaceId: WORKSPACE_ID },
+    ]);
+    dbMock.billingSubscription.findMany.mockResolvedValue([
+      localSubscription(),
+      localSubscription({ externalSubscriptionId: "sub_2", id: "bs_2" }),
+    ]);
+
+    const summary = await runStripeReconciliation(NOW);
+
+    expect(dbMock.billingCustomer.findMany).toHaveBeenCalledTimes(1);
+    expect(dbMock.billingCustomer.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { externalCustomerId: { in: ["cus_1", "cus_2"] }, provider: "stripe" },
+      }),
+    );
+    expect(dbMock.billingSubscription.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { externalSubscriptionId: { in: ["sub_1", "sub_2"] } },
+      }),
+    );
+    expect(dbMock.workspaceEntitlement.findMany).toHaveBeenCalledTimes(1);
+    expect(dbMock.workspaceMember.groupBy).toHaveBeenCalledTimes(1);
+    expect(dbMock.billingCustomer.findFirst).not.toHaveBeenCalled();
+    expect(dbMock.billingSubscription.findUnique).not.toHaveBeenCalled();
+    expect(dbMock.workspaceEntitlement.findUnique).not.toHaveBeenCalled();
+    expect(dbMock.workspaceMember.count).not.toHaveBeenCalled();
+    expect(summary.mismatchCount).toBe(0);
+  });
+
+  it("falls back to a query for rows that appeared after the prefetch", async () => {
+    stripeMock.subscriptions.list.mockResolvedValue({
+      data: [subscription()],
+      has_more: false,
+    });
+    dbMock.billingCustomer.findMany.mockResolvedValue([]);
+    dbMock.billingCustomer.findFirst.mockResolvedValue({
+      id: "bc_1",
+      workspaceId: WORKSPACE_ID,
+    });
+    dbMock.billingSubscription.findMany.mockResolvedValue([]);
+    dbMock.billingSubscription.findUnique.mockResolvedValue(localSubscription());
+
+    const summary = await runStripeReconciliation(NOW);
+
+    expect(dbMock.billingSubscription.findUnique).toHaveBeenCalledWith({
+      where: { externalSubscriptionId: "sub_1" },
+    });
+    expect(dbMock.billingCustomer.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { externalCustomerId: "cus_1", provider: "stripe" },
+      }),
+    );
+    expect(summary.mismatchCount).toBe(0);
+  });
+
+  it("falls back to a query for an entitlement the page did not prefetch", async () => {
+    stripeMock.subscriptions.list.mockResolvedValue({
+      data: [subscription()],
+      has_more: false,
+    });
+    dbMock.billingSubscription.findMany.mockResolvedValue([localSubscription()]);
+    dbMock.workspaceEntitlement.findMany.mockResolvedValue([]);
+    dbMock.workspaceMember.groupBy.mockResolvedValue([]);
+    dbMock.workspaceEntitlement.findUnique.mockResolvedValue(entitlement());
+    dbMock.workspaceMember.count.mockResolvedValue(2);
+
+    const summary = await runStripeReconciliation(NOW);
+
+    expect(dbMock.workspaceEntitlement.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { workspaceId: WORKSPACE_ID } }),
+    );
+    expect(dbMock.workspaceMember.count).toHaveBeenCalledWith({
+      where: { workspaceId: WORKSPACE_ID },
+    });
+    expect(summary.mismatchCount).toBe(0);
   });
 
   it("fails closed when a local current subscription disappeared from Stripe", async () => {
