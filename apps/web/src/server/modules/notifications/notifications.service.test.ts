@@ -250,6 +250,57 @@ describe("notificationsService.getAll counts", () => {
   });
 });
 
+describe("notificationsService.getAll date range", () => {
+  const from = new Date("2026-01-01T00:00:00.000Z");
+  const to = new Date("2026-01-31T00:00:00.000Z");
+  // The helper's end bound is inclusive today; B5h-2 flips a date-only `to` to `lt + 1d`.
+  const rangeWhere = { createdAt: { gte: from, lte: to }, userId: "user-1" };
+
+  it("should apply the range to the list and to the filtered count", async () => {
+    const { db, findMany } = createNotificationDbMock();
+
+    await notificationsService.getAll(db, { from, limit: 10, to }, "user-1");
+
+    expect(findMany).toHaveBeenNthCalledWith(1, expect.objectContaining({ where: rangeWhere }));
+    expect(findMany).toHaveBeenNthCalledWith(2, expect.objectContaining({ where: rangeWhere }));
+  });
+
+  it("should not treat a date-only filter as unfiltered", async () => {
+    const { db, findMany } = createNotificationDbMock();
+    findMany
+      .mockResolvedValueOnce([]) // page
+      .mockResolvedValueOnce([{ id: "f1" }, { id: "f2" }]) // filtered count
+      .mockResolvedValueOnce(Array.from({ length: 7 }, (_, i) => ({ id: `u${i}` }))); // global count
+
+    const result = await notificationsService.getAll(db, { from, limit: 10 }, "user-1");
+
+    expect(findMany).toHaveBeenCalledTimes(3);
+    expect(findMany).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ where: { createdAt: { gte: from }, userId: "user-1" } }),
+    );
+    // The global pass is unscoped on purpose: it is the denominator for the filtered count.
+    expect(findMany).toHaveBeenNthCalledWith(3, expect.objectContaining({ where: {} }));
+    expect(result.meta.filteredCount).toBe(2);
+    expect(result.meta.totalCount).toBe(7);
+  });
+
+  it("should keep the unfiltered count path when no filter is set", async () => {
+    const { db, findMany } = createNotificationDbMock();
+    findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([{ id: "a" }]);
+
+    const result = await notificationsService.getAll(db, { limit: 10 }, "user-1");
+
+    expect(findMany).toHaveBeenCalledTimes(2);
+    expect(findMany).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ where: { userId: "user-1" } }),
+    );
+    expect(result.meta.filteredCount).toBe(1);
+    expect(result.meta.totalCount).toBe(1);
+  });
+});
+
 describe("notificationsService.getStats", () => {
   it("should count both groups when both are present", async () => {
     const { db, groupBy } = createNotificationDbMock();
@@ -324,6 +375,18 @@ describe("notificationsService.deleteRead", () => {
       where: { isRead: true, type: NotifyType.WARNING, userId: "user-1" },
     });
   });
+
+  it("should scope the delete to the date range", async () => {
+    const { db, deleteMany } = createNotificationDbMock();
+    const from = new Date("2026-01-01T00:00:00.000Z");
+    const to = new Date("2026-01-31T00:00:00.000Z");
+
+    await notificationsService.deleteRead(db, { from, to }, "user-1");
+
+    expect(deleteMany).toHaveBeenCalledWith({
+      where: { createdAt: { gte: from, lte: to }, isRead: true, userId: "user-1" },
+    });
+  });
 });
 
 describe("notificationsService.markAllAsRead", () => {
@@ -348,6 +411,19 @@ describe("notificationsService.markAllAsRead", () => {
     expect(updateMany).toHaveBeenCalledWith({
       data: { isRead: true },
       where: { isRead: false, type: NotifyType.ERROR, userId: "user-1" },
+    });
+  });
+
+  it("should scope the update to the date range", async () => {
+    const { db, updateMany } = createNotificationDbMock();
+    const from = new Date("2026-01-01T00:00:00.000Z");
+    const to = new Date("2026-01-31T00:00:00.000Z");
+
+    await notificationsService.markAllAsRead(db, { from, to }, "user-1");
+
+    expect(updateMany).toHaveBeenCalledWith({
+      data: { isRead: true },
+      where: { createdAt: { gte: from, lte: to }, isRead: false, userId: "user-1" },
     });
   });
 });

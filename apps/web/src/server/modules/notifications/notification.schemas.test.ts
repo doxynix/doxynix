@@ -23,4 +23,19 @@ describe("notification.schemas", () => {
       }).success,
     ).toBe(true);
   });
+
+  it("rejects an inverted date range on both schemas", () => {
+    const from = new Date("2026-02-01T00:00:00.000Z");
+    const to = new Date("2026-01-01T00:00:00.000Z");
+
+    expect(NotificationsFilterSchema.safeParse({ from, to }).success).toBe(false);
+    expect(NotificationsBulkFilterSchema.safeParse({ from, to }).success).toBe(false);
+  });
+
+  it("keeps from/to in the bulk filter so bulk actions match the list window", () => {
+    const from = new Date("2026-01-01T00:00:00.000Z");
+    const to = new Date("2026-01-31T00:00:00.000Z");
+
+    expect(NotificationsBulkFilterSchema.parse({ from, to })).toStrictEqual({ from, to });
+  });
 });

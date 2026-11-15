@@ -123,9 +123,9 @@ export const notificationsService = {
   },
 
   async getAll(db: DbClient, input: NotificationsFilterInput, userId: string) {
-    const { isRead, limit, page, repoName, repoOwner, search, type } = input;
+    const { limit, page, search } = input;
 
-    const where = this.buildWhereClause({ isRead, repoName, repoOwner, search, type }, userId);
+    const where = this.buildWhereClause(input, userId);
     const isUnfiltered = Object.keys(where).every((key) => key === "userId");
 
     const cap = MAX_PAGE * limit;
