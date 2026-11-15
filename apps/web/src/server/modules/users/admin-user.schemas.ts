@@ -1,7 +1,8 @@
-import { PaginationMetaSchema, UserRoleSchema } from "@doxynix/shared";
+import { CursorMetaSchema, PaginationMetaSchema, UserRoleSchema } from "@doxynix/shared";
 import * as z from "zod";
 
 import {
+  CursorPageSchema,
   DateRangeSchema,
   dateRangeMustBeOrdered,
   PaginationSchema,
@@ -98,6 +99,9 @@ export const AdminUserSessionSchema = z.object({
 
 export const AdminUserSessionsListSchema = z.object({
   items: z.array(AdminUserSessionSchema),
+  meta: CursorMetaSchema,
 });
+
+export const AdminUserSessionsInputSchema = AdminUserRefSchema.extend(CursorPageSchema.shape);
 
 export const AdminUserSessionRefSchema = z.object({ sessionId: z.uuid() });

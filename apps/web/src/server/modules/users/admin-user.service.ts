@@ -14,7 +14,10 @@ import {
   buildDateRangeWhere,
   cappedCount,
   getPaginatedList,
+  keysetArgs,
   ORDER_CREATED_AT_DESC,
+  orderWithTiebreak,
+  splitKeysetPage,
 } from "@/server/utils/pagination";
 import { normalizeSearchInput } from "@/server/utils/search";
 
@@ -39,7 +42,11 @@ export type ReauthInput = {
 
 const ACTIVE_ADMIN_WHERE: Prisma.UserWhereInput = { banned: false, role: "ADMIN" };
 
-const ADMIN_SESSION_LIMIT = 100;
+type AdminSessionsInput = {
+  cursor?: null | string;
+  limit: number;
+  userId: string;
+};
 
 const ADMIN_USER_SELECT = {
   banExpires: true,
@@ -264,10 +271,13 @@ export const adminUserService = {
     return userMapper.toAdminDetail(user);
   },
 
-  async getSessions(db: DbClient, userId: string) {
+  async getSessions(db: DbClient, input: AdminSessionsInput) {
+    const { cursor, limit, userId } = input;
     const now = Date.now();
-    const sessions = await db.session.findMany({
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+
+    const rows = await db.session.findMany({
+      ...keysetArgs(cursor, limit),
+      orderBy: orderWithTiebreak("createdAt", "desc"),
       select: {
         createdAt: true,
         expiresAt: true,
@@ -275,12 +285,13 @@ export const adminUserService = {
         ipAddress: true,
         userAgent: true,
       },
-      take: ADMIN_SESSION_LIMIT,
       where: { userId },
     });
 
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
+
     return {
-      items: sessions.map((session) => ({
+      items: items.map((session) => ({
         createdAt: session.createdAt,
         expired: session.expiresAt.getTime() <= now,
         expiresAt: session.expiresAt,
@@ -288,6 +299,7 @@ export const adminUserService = {
         ipAddress: session.ipAddress,
         userAgent: session.userAgent,
       })),
+      meta: { hasNextPage, nextCursor },
     };
   },
 

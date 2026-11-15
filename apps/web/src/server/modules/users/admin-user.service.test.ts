@@ -99,18 +99,61 @@ describe("adminUserService.buildWhereClause", () => {
 });
 
 describe("adminUserService.getSessions", () => {
-  it("caps the session list and keeps newest-first order", async () => {
-    const findMany = vi.fn().mockResolvedValue([]);
+  function makeSession(id: string) {
+    return {
+      createdAt: new Date("2026-03-01T12:00:00Z"),
+      expiresAt: new Date("2026-03-08T12:00:00Z"),
+      id,
+      ipAddress: null,
+      userAgent: "internal",
+    };
+  }
+
+  it("reads one probe row past the page in the newest-first order", async () => {
+    const findMany = vi.fn().mockResolvedValue([makeSession("session-1"), makeSession("probe")]);
     const db = { session: { findMany } };
 
-    await adminUserService.getSessions(db as never, USER_ID);
+    const result = await adminUserService.getSessions(db as never, {
+      limit: 1,
+      userId: USER_ID,
+    });
 
+    expect(result.items.map((session) => session.id)).toStrictEqual(["session-1"]);
+    expect(result.meta).toStrictEqual({ hasNextPage: true, nextCursor: "probe" });
     expect(findMany).toHaveBeenCalledWith({
+      cursor: undefined,
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       select: { createdAt: true, expiresAt: true, id: true, ipAddress: true, userAgent: true },
-      take: 100,
+      take: 2,
       where: { userId: USER_ID },
     });
+  });
+
+  it("keysets past the cursor id and stops on the last page", async () => {
+    const findMany = vi.fn().mockResolvedValue([makeSession("session-9")]);
+    const db = { session: { findMany } };
+
+    const result = await adminUserService.getSessions(db as never, {
+      cursor: "session-8",
+      limit: 2,
+      userId: USER_ID,
+    });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: { id: "session-8" }, take: 3 }),
+    );
+    expect(result.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
+  });
+
+  it("marks a session expired from its expiry date", async () => {
+    const findMany = vi
+      .fn()
+      .mockResolvedValue([{ ...makeSession("session-1"), expiresAt: new Date(0) }]);
+    const db = { session: { findMany } };
+
+    const result = await adminUserService.getSessions(db as never, { limit: 2, userId: USER_ID });
+
+    expect(result.items[0]?.expired).toBe(true);
   });
 });
 
