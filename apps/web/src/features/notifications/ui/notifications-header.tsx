@@ -54,10 +54,12 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
 
   const handleReset = () => {
     void setFilters({
+      from: null,
       isRead: null,
       owner: null,
       page: null,
       repo: null,
+      to: null,
       type: null,
     });
   };
@@ -66,7 +68,9 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
     filters.isRead !== null ||
     filters.owner !== null ||
     filters.repo !== null ||
-    filters.type !== null;
+    filters.type !== null ||
+    filters.from !== null ||
+    filters.to !== null;
 
   return (
     <div className="flex flex-col gap-4">

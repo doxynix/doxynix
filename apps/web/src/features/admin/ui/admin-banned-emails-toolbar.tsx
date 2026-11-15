@@ -24,14 +24,18 @@ export function AdminBannedEmailsToolbar() {
 
   const [filters, setFilters] = useQueryStates(bannedEmailParsers);
 
-  const hasFilters = filters.reason !== null || filters.search !== "";
+  const hasFilters =
+    filters.reason !== null ||
+    filters.search !== "" ||
+    filters.from !== null ||
+    filters.to !== null;
 
   const update = (value: keyof typeof BannedEmailReason | null) => {
     void setFilters({ page: null, reason: value });
   };
 
   const reset = () => {
-    void setFilters({ page: null, reason: null, search: null });
+    void setFilters({ from: null, page: null, reason: null, search: null, to: null });
   };
 
   return (

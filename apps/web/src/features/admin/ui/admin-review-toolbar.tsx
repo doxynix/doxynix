@@ -28,7 +28,9 @@ export function AdminReviewToolbar() {
     filters.status !== null ||
     filters.fixStatus !== null ||
     filters.minRiskScore !== null ||
-    filters.search !== "";
+    filters.search !== "" ||
+    filters.from !== null ||
+    filters.to !== null;
 
   const update = (key: "fixStatus" | "minRiskScore" | "status", value: null | string) => {
     void setFilters({ [key]: value, page: null });
@@ -37,10 +39,12 @@ export function AdminReviewToolbar() {
   const reset = () => {
     void setFilters({
       fixStatus: null,
+      from: null,
       minRiskScore: null,
       page: null,
       search: null,
       status: null,
+      to: null,
     });
   };
 

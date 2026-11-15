@@ -24,14 +24,26 @@ export function AdminAuditToolbar() {
 
   const [filters, setFilters] = useQueryStates(adminAuditParsers);
 
-  const hasFilters = filters.model !== null || filters.operation !== null || filters.search !== "";
+  const hasFilters =
+    filters.model !== null ||
+    filters.operation !== null ||
+    filters.search !== "" ||
+    filters.from !== null ||
+    filters.to !== null;
 
   const update = (key: "model" | "operation", value: null | string) => {
     void setFilters({ [key]: value, page: null });
   };
 
   const reset = () => {
-    void setFilters({ model: null, operation: null, page: null, search: null });
+    void setFilters({
+      from: null,
+      model: null,
+      operation: null,
+      page: null,
+      search: null,
+      to: null,
+    });
   };
 
   return (

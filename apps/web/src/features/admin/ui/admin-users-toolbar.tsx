@@ -24,14 +24,19 @@ export function AdminUsersToolbar() {
 
   const [filters, setFilters] = useQueryStates(adminUserParsers);
 
-  const hasFilters = filters.banned !== null || filters.role !== null || filters.search !== "";
+  const hasFilters =
+    filters.banned !== null ||
+    filters.role !== null ||
+    filters.search !== "" ||
+    filters.from !== null ||
+    filters.to !== null;
 
   const update = (key: "banned" | "role", value: null | string) => {
     void setFilters({ [key]: value, page: null });
   };
 
   const reset = () => {
-    void setFilters({ banned: null, page: null, role: null, search: null });
+    void setFilters({ banned: null, from: null, page: null, role: null, search: null, to: null });
   };
 
   return (
