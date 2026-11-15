@@ -27,7 +27,8 @@ import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { TOOL_INVALIDATIONS, toolLabelKeys } from "../model/agent-config";
 import type { AgentMessagePart, LocalFileAttachment } from "../model/agent-types";
-import { mergeOlderHistory } from "../model/merge-history-pages";
+import { decidePrepend, type HistoryWindow, resetHistoryWindow } from "../model/history-window";
+import { flattenSessionPages } from "../model/session-pages";
 import { useAgentIsOpen } from "../model/use-agent.store";
 import { AgentForm } from "./agent-form";
 import { AgentHeader } from "./agent-header";
@@ -37,8 +38,6 @@ import { AgentSuggestions } from "./agent-suggestions";
 
 const HISTORY_PAGE_SIZE = 100;
 const SESSION_PAGE_SIZE = 50;
-// Virtuoso shifts every item by `firstItemIndex`; a high start leaves room to prepend older pages.
-const FIRST_ITEM_INDEX_START = 100_000;
 
 type HistoryItem = RouterOutput["agent"]["getSessionHistory"]["items"][number];
 
@@ -143,9 +142,8 @@ export function Agent() {
   const [sessionId, setSessionId] = useState<null | string>(() => crypto.randomUUID());
 
   const lastLoadedSessionIdRef = useRef<null | string>(sessionId);
-  const loadedPagesRef = useRef(0);
 
-  const [firstItemIndex, setFirstItemIndex] = useState(FIRST_ITEM_INDEX_START);
+  const [storedWindow, setHistoryWindow] = useState<HistoryWindow>(resetHistoryWindow);
 
   const queryClient = useQueryClient();
   // Guards against two submits in the same tick, where `status` from the last render is stale.
@@ -163,9 +161,7 @@ export function Agent() {
     ),
   );
 
-  const sessions = sessionPages?.pages.flatMap((page) => page.items);
-
-  const isSessionSaved = sessions?.some((session) => session.id === sessionId);
+  const sessions = sessionPages == null ? undefined : flattenSessionPages(sessionPages.pages);
 
   const {
     data: historyPages,
@@ -213,46 +209,36 @@ export function Agent() {
     }),
   });
 
-  // Clearing the page count pins the window to the new session: an older session's stale pages
-  // cannot prepend, and the transcript is reseeded from page 0 in the effect below.
-  const resetHistoryWindow = () => {
-    loadedPagesRef.current = 0;
-    setFirstItemIndex(FIRST_ITEM_INDEX_START);
-  };
-
+  // Seeding the count is independent of the message reset: a chat created in this mount streams its
+  // own messages and must still be able to prepend once it outgrows page 0.
   useEffect(() => {
-    if (
-      sessionId != null &&
-      isSessionSaved === true &&
-      historyPages != null &&
-      lastLoadedSessionIdRef.current !== sessionId
-    ) {
-      setMessages(toUIMessages(historyPages.pages[0]?.items ?? []));
-      loadedPagesRef.current = 1;
-      lastLoadedSessionIdRef.current = sessionId;
-      setIsAtBottom(true);
-      requestAnimationFrame(() => {
-        virtuosoRef.current?.scrollToIndex({ align: "end", behavior: "auto", index: "LAST" });
-      });
-    }
-  }, [historyPages, sessionId, isSessionSaved, setMessages]);
+    const firstPage = historyPages?.pages[0];
 
-  useEffect(() => {
-    const pages = historyPages?.pages;
-    if (pages == null || loadedPagesRef.current === 0 || pages.length <= loadedPagesRef.current) {
+    if (firstPage == null || lastLoadedSessionIdRef.current === sessionId) {
       return;
     }
 
-    const { addedCount, items: older } = mergeOlderHistory(pages, loadedPagesRef.current);
-    loadedPagesRef.current = pages.length;
+    setMessages(toUIMessages(firstPage.items));
+    lastLoadedSessionIdRef.current = sessionId;
+    setIsAtBottom(true);
+    requestAnimationFrame(() => {
+      virtuosoRef.current?.scrollToIndex({ align: "end", behavior: "auto", index: "LAST" });
+    });
+  }, [historyPages, sessionId, setMessages]);
 
-    if (addedCount === 0) {
+  useEffect(() => {
+    if (historyPages == null) {
       return;
     }
 
-    setMessages((previous) => [...toUIMessages(older), ...previous]);
-    setFirstItemIndex((previous) => previous - addedCount);
-  }, [historyPages, setMessages]);
+    const { items } = decidePrepend(storedWindow, historyPages.pages);
+
+    if (items.length > 0) {
+      setMessages((previous) => [...toUIMessages(items), ...previous]);
+      // oxlint-disable-next-line react/set-state-in-effect -- the window mirrors useChat state.
+      setHistoryWindow((previous) => decidePrepend(previous, historyPages.pages).window);
+    }
+  }, [historyPages, setMessages, storedWindow]);
 
   useEffect(() => {
     const lastMessage = messages.at(-1);
@@ -357,14 +343,19 @@ export function Agent() {
     setMessages([]);
     setIsAtBottom(true);
     lastLoadedSessionIdRef.current = newId;
-    resetHistoryWindow();
+    setHistoryWindow(resetHistoryWindow());
   };
 
   const handleSessionChange = (id: null | string) => {
+    // Re-clicking the open chat is not a session change; resetting here would strand the window.
+    if (id === sessionId) {
+      return;
+    }
+
     void stop();
     setSessionId(id);
     setIsAtBottom(true);
-    resetHistoryWindow();
+    setHistoryWindow(resetHistoryWindow());
   };
 
   const handleSessionDeleted = (deletedSessionId: string) => {
@@ -512,7 +503,7 @@ export function Agent() {
                         computeItemKey={computeMessageKey}
                         context={listContext}
                         data={messages}
-                        firstItemIndex={firstItemIndex}
+                        firstItemIndex={storedWindow.firstItemIndex}
                         followOutput="auto"
                         increaseViewportBy={INCREASE_VIEWPORT_BY}
                         initialTopMostItemIndex={INITIAL_TOP_MOST_ITEM_INDEX}
