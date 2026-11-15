@@ -90,7 +90,10 @@ export const TOOL_INVALIDATIONS: Record<string, (context: InvalidationContext) =
   clearStaging: ({ queryClient, trpc }) =>
     queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter()),
   createApiKey: ({ queryClient, trpc }) =>
-    queryClient.invalidateQueries(trpc.apikey.list.pathFilter()),
+    Promise.all([
+      queryClient.invalidateQueries(trpc.apikey.list.pathFilter()),
+      queryClient.invalidateQueries(trpc.apikey.listArchived.pathFilter()),
+    ]).then(() => undefined),
   deleteRepository: ({ queryClient, trpc }) =>
     Promise.all([
       queryClient.invalidateQueries(trpc.repo.getAll.pathFilter()),
@@ -115,7 +118,10 @@ export const TOOL_INVALIDATIONS: Record<string, (context: InvalidationContext) =
       queryClient.invalidateQueries(trpc.repo.getSlim.pathFilter()),
     ]).then(() => undefined),
   revokeApiKey: ({ queryClient, trpc }) =>
-    queryClient.invalidateQueries(trpc.apikey.list.pathFilter()),
+    Promise.all([
+      queryClient.invalidateQueries(trpc.apikey.list.pathFilter()),
+      queryClient.invalidateQueries(trpc.apikey.listArchived.pathFilter()),
+    ]).then(() => undefined),
   stageFile: ({ queryClient, trpc }) =>
     queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter()),
   stageGeneratedFix: ({ queryClient, trpc }) =>
@@ -125,7 +131,10 @@ export const TOOL_INVALIDATIONS: Record<string, (context: InvalidationContext) =
   unstageFile: ({ queryClient, trpc }) =>
     queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter()),
   updateApiKey: ({ queryClient, trpc }) =>
-    queryClient.invalidateQueries(trpc.apikey.list.pathFilter()),
+    Promise.all([
+      queryClient.invalidateQueries(trpc.apikey.list.pathFilter()),
+      queryClient.invalidateQueries(trpc.apikey.listArchived.pathFilter()),
+    ]).then(() => undefined),
 
   updateUserProfile: async ({ queryClient, trpc }) => {
     await queryClient.invalidateQueries(trpc.user.me.pathFilter());

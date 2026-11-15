@@ -1,4 +1,4 @@
-import { isApiKeyDead, MAX_PAGE_SIZE } from "@doxynix/shared";
+import { MAX_PAGE_SIZE } from "@doxynix/shared";
 
 import { trpc } from "@/core/client";
 
@@ -10,13 +10,12 @@ export const keysService = {
   },
 
   async list() {
-    const { items } = await trpc.apikey.list.query({ limit: MAX_PAGE_SIZE });
-    const now = Date.now();
+    const [{ items: active }, { items: archived }] = await Promise.all([
+      trpc.apikey.list.query({ limit: MAX_PAGE_SIZE }),
+      trpc.apikey.listArchived.query(),
+    ]);
 
-    return {
-      active: items.filter((key) => !isApiKeyDead(key, now)),
-      archived: items.filter((key) => isApiKeyDead(key, now)),
-    };
+    return { active, archived };
   },
 
   async revoke(id: string) {

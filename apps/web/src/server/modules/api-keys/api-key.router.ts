@@ -32,6 +32,12 @@ export const apiKeyRouter = createTRPCRouter({
       return apiKeyService.list(ctx.db, ctx.workspace.id, input);
     }),
 
+  listArchived: workspaceProcedure
+    .output(z.object({ items: z.array(ApiKeySchema) }))
+    .query(async ({ ctx }) => {
+      return apiKeyService.listArchived(ctx.db, ctx.workspace.id);
+    }),
+
   revoke: workspaceProcedure
     .input(z.object({ id: z.uuid() }))
     .output(z.object({ success: z.boolean() }))

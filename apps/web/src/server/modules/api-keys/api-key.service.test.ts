@@ -1,4 +1,5 @@
-import { ApiKeySchema } from "@doxynix/shared";
+import { ApiKeySchema, isApiKeyDead } from "@doxynix/shared";
+import type { Prisma } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 
 import type { DbClient } from "@/server/core/db";
@@ -72,7 +73,7 @@ describe("apiKeyService.list", () => {
         cursor: undefined,
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         take: 3,
-        where: { workspaceId: WORKSPACE_ID },
+        where: expect.objectContaining({ workspaceId: WORKSPACE_ID }),
       }),
     );
   });
@@ -95,17 +96,46 @@ describe("apiKeyService.list", () => {
     expect(result.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
   });
 
-  it("should not apply the redundant revoked OR clause", async () => {
+  it("scopes the page to the workspace and to live keys only", async () => {
     const { db, findMany } = createApiKeyDbMock();
 
     await apiKeyService.list(db, WORKSPACE_ID, PAGE);
 
     expect(findMany).toHaveBeenCalledTimes(1);
+    const args = findMany.mock.calls[0]?.[0] as { where?: Record<string, unknown> };
+    const serialized = JSON.stringify(args.where);
+
+    // The tenant is the outer filter; the dead rows are excluded in SQL rather than by a
+    // client-side partition of the first page.
+    expect(args.where).toHaveProperty("workspaceId", WORKSPACE_ID);
+    expect(args.where).toHaveProperty("OR");
+    expect(serialized).not.toContain("lte");
+  });
+
+  it("reads archived keys without a cursor under a fixed cap", async () => {
+    const { db, findMany } = createApiKeyDbMock([makeApiKeyRow({ id: "dead", revoked: true })]);
+
+    const result = await apiKeyService.listArchived(db, WORKSPACE_ID);
+
+    expect(result.items.map((key) => key.id)).toStrictEqual(["dead"]);
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 100,
+        where: expect.objectContaining({ workspaceId: WORKSPACE_ID }),
+      }),
+    );
     const args = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
-    // The owner and nothing else — the redundant `revoked` OR clause must not come back, and
-    // `where` must be exactly the tenant rather than a filter that could later be widened.
-    expect(args.where).toStrictEqual({ workspaceId: WORKSPACE_ID });
-    expect(JSON.stringify(args)).not.toContain("OR");
+    expect(args).not.toHaveProperty("cursor");
+    expect(JSON.stringify(args.where)).not.toContain("gt");
+  });
+
+  it("normalises the scopes of an archived key the same way", async () => {
+    const { db } = createApiKeyDbMock([makeApiKeyRow({ revoked: true, scopes: [] })]);
+
+    const result = await apiKeyService.listArchived(db, WORKSPACE_ID);
+
+    expect(result.items[0]?.scopes).toStrictEqual(["FULL"]);
   });
 
   it("should never read the hashed key", async () => {
@@ -157,6 +187,130 @@ describe("apiKeyService.list", () => {
     expect(Object.keys(parsed).sort()).toStrictEqual(Object.keys(ApiKeySchema.shape).sort());
     expect(JSON.stringify(parsed)).not.toContain("leaked-hash");
     expect(JSON.stringify(parsed)).not.toContain("dxnx_plaintext_key");
+  });
+});
+
+describe("apiKeyService active/archived predicates", () => {
+  type LifecycleRow = { expiresAt: Date | null; revoked: boolean; revokedAfter: Date | null };
+
+  // Evaluates the narrow subset of Prisma filters these predicates emit, so the test compares
+  // them with `isApiKeyDead` instead of re-implementing the same branch order twice.
+  function matchesWhere(where: Prisma.ApiKeyWhereInput, row: LifecycleRow): boolean {
+    return Object.entries(where).every(([field, condition]) => {
+      if (field === "workspaceId") {
+        return true;
+      }
+
+      if (field === "OR") {
+        return (condition as Prisma.ApiKeyWhereInput[]).some((branch) => matchesWhere(branch, row));
+      }
+
+      const value = row[field as keyof LifecycleRow];
+
+      if (condition === null) {
+        return value == null;
+      }
+
+      if (typeof condition === "boolean") {
+        return value === condition;
+      }
+
+      const range = condition as { gt?: Date; lte?: Date };
+
+      if (!(value instanceof Date)) {
+        return false;
+      }
+
+      if (range.gt !== undefined) {
+        return value > range.gt;
+      }
+
+      if (range.lte !== undefined) {
+        return value <= range.lte;
+      }
+
+      throw new Error(`Unsupported predicate on ${field}`);
+    });
+  }
+
+  it("splits the truth table exactly where isApiKeyDead does", async () => {
+    const wheres: Prisma.ApiKeyWhereInput[] = [];
+    const findMany = vi.fn((args: { where: Prisma.ApiKeyWhereInput }) => {
+      wheres.push(args.where);
+
+      return Promise.resolve([]);
+    });
+    const db = { apiKey: { findMany } } as unknown as DbClient;
+
+    await apiKeyService.list(db, WORKSPACE_ID, { limit: 1 });
+    const activeWhere = wheres[0];
+    await apiKeyService.listArchived(db, WORKSPACE_ID);
+    const archivedWhere = wheres[1];
+
+    if (activeWhere == null || archivedWhere == null) {
+      throw new Error("both list and listArchived must query the database");
+    }
+
+    const now = Date.now();
+    const past = new Date(now - 60_000);
+    const future = new Date(now + 60_000);
+
+    for (const revokedAfter of [null, past, future]) {
+      for (const revoked of [false, true]) {
+        for (const expiresAt of [null, past, future]) {
+          const row = { expiresAt, revoked, revokedAfter };
+          const dead = isApiKeyDead(row, now);
+          const label = {
+            expiresAt: expiresAt?.toISOString() ?? "null",
+            revoked,
+            revokedAfter: revokedAfter?.toISOString() ?? "null",
+          };
+
+          expect({ ...label, active: matchesWhere(activeWhere, row) }).toStrictEqual({
+            ...label,
+            active: !dead,
+          });
+          expect({ ...label, archived: matchesWhere(archivedWhere, row) }).toStrictEqual({
+            ...label,
+            archived: dead,
+          });
+        }
+      }
+    }
+  });
+
+  it("puts a mixed fixture on the right side of the split", async () => {
+    const now = Date.now();
+    const past = new Date(now - 60_000);
+    const future = new Date(now + 60_000);
+
+    const rows = [
+      makeApiKeyRow({ id: "live" }),
+      makeApiKeyRow({ expiresAt: future, id: "expiring-later" }),
+      makeApiKeyRow({ expiresAt: past, id: "expired" }),
+      makeApiKeyRow({ id: "revoked", revoked: true }),
+      makeApiKeyRow({ id: "grace-open", revoked: true, revokedAfter: future }),
+      makeApiKeyRow({ id: "grace-closed", revoked: true, revokedAfter: past }),
+    ];
+
+    const findMany = vi.fn((args: { where: Prisma.ApiKeyWhereInput }) =>
+      Promise.resolve(rows.filter((row) => matchesWhere(args.where, row))),
+    );
+    const db = { apiKey: { findMany } } as unknown as DbClient;
+
+    const active = await apiKeyService.list(db, WORKSPACE_ID, { limit: 10 });
+    const archived = await apiKeyService.listArchived(db, WORKSPACE_ID);
+
+    expect(active.items.map((key) => key.id).sort()).toStrictEqual([
+      "expiring-later",
+      "grace-open",
+      "live",
+    ]);
+    expect(archived.items.map((key) => key.id).sort()).toStrictEqual([
+      "expired",
+      "grace-closed",
+      "revoked",
+    ]);
   });
 });
 

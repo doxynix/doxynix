@@ -1,4 +1,5 @@
 import { ApiKeyScope, isApiKeyDead, MessageCode } from "@doxynix/shared";
+import type { Prisma } from "@prisma/client";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
@@ -30,6 +31,53 @@ type ListKeysInput = {
 };
 
 const ROTATION_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
+const ARCHIVED_API_KEY_LIMIT = 100;
+
+const API_KEY_SELECT = {
+  createdAt: true,
+  description: true,
+  expiresAt: true,
+  id: true,
+  lastUsed: true,
+  name: true,
+  prefix: true,
+  revoked: true,
+  revokedAfter: true,
+  scopes: true,
+  updatedAt: true,
+} satisfies Prisma.ApiKeySelect;
+
+// Mirrors `isApiKeyDead` in SQL: a key with an open grace window is live, otherwise revoked or
+// expired means dead. Keep the two predicates in step — the unit test walks their truth table.
+function activeKeyWhere(now: Date): Prisma.ApiKeyWhereInput {
+  return {
+    OR: [
+      { revokedAfter: { gt: now } },
+      {
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+        revoked: false,
+        revokedAfter: null,
+      },
+    ],
+  };
+}
+
+function archivedKeyWhere(now: Date): Prisma.ApiKeyWhereInput {
+  return {
+    OR: [
+      { revokedAfter: { lte: now } },
+      { revoked: true, revokedAfter: null },
+      { expiresAt: { lte: now }, revoked: false, revokedAfter: null },
+    ],
+  };
+}
+
+function normalizeKey(key: Prisma.ApiKeyGetPayload<{ select: typeof API_KEY_SELECT }>) {
+  return {
+    ...key,
+    scopes: key.scopes.length > 0 ? key.scopes : [ApiKeyScope.FULL],
+  };
+}
 
 export const apiKeyService = {
   async create(db: DbClient, userId: string, workspaceId: string, input: CreateKeyInput) {
@@ -76,35 +124,32 @@ export const apiKeyService = {
 
   async list(db: DbClient, workspaceId: string, input: ListKeysInput) {
     const { cursor, limit } = input;
+    const now = new Date();
 
     const rows = await db.apiKey.findMany({
       ...keysetArgs(cursor, limit),
       orderBy: orderWithTiebreak("createdAt", "desc"),
-      select: {
-        createdAt: true,
-        description: true,
-        expiresAt: true,
-        id: true,
-        lastUsed: true,
-        name: true,
-        prefix: true,
-        revoked: true,
-        revokedAfter: true,
-        scopes: true,
-        updatedAt: true,
-      },
-      where: { workspaceId },
+      select: API_KEY_SELECT,
+      where: { workspaceId, ...activeKeyWhere(now) },
     });
 
     const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
 
     return {
-      items: items.map((key) => ({
-        ...key,
-        scopes: key.scopes.length > 0 ? key.scopes : [ApiKeyScope.FULL],
-      })),
+      items: items.map(normalizeKey),
       meta: { hasNextPage, nextCursor },
     };
+  },
+
+  async listArchived(db: DbClient, workspaceId: string) {
+    const rows = await db.apiKey.findMany({
+      orderBy: orderWithTiebreak("createdAt", "desc"),
+      select: API_KEY_SELECT,
+      take: ARCHIVED_API_KEY_LIMIT,
+      where: { workspaceId, ...archivedKeyWhere(new Date()) },
+    });
+
+    return { items: rows.map(normalizeKey) };
   },
 
   async revoke(db: DbClient, id: string, userId: string, workspaceId: string) {

@@ -11,7 +11,10 @@ export function useApiKeyActions() {
   const queryClient = useQueryClient();
   const t = useTranslations("Dashboard");
   const errorMessage = useErrorMessage();
-  const invalidate = () => void queryClient.invalidateQueries(trpc.apikey.list.pathFilter());
+  const invalidate = () => {
+    void queryClient.invalidateQueries(trpc.apikey.list.pathFilter());
+    void queryClient.invalidateQueries(trpc.apikey.listArchived.pathFilter());
+  };
 
   const create = useMutation(
     trpc.apikey.create.mutationOptions({

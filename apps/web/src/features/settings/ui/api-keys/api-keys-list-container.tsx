@@ -1,27 +1,16 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { isApiKeyDead } from "@doxynix/shared";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 import { useTRPC } from "@/shared/api/trpc";
 import { useIntersectionObserver } from "@/shared/lib/hooks/use-intersection-observer";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { SkeletonList } from "@/shared/ui/kit/app-skeleton";
 
-import type { UiApiKey } from "@/entities/api-key/model/api-keys.types";
 import { ApiKeyCardSkeleton } from "@/entities/api-key/ui/api-key-card-skeleton";
 
 import { API_KEYS_PAGE_SIZE } from "../../model/pagination";
 import { ApiKeysList } from "./api-keys-list";
-
-function partitionKeys(keys: UiApiKey[]) {
-  const now = Date.now();
-
-  return {
-    active: keys.filter((key) => !isApiKeyDead(key, now)),
-    archived: keys.filter((key) => isApiKeyDead(key, now)),
-  };
-}
 
 export function ApiKeysListContainer() {
   const trpc = useTRPC();
@@ -34,6 +23,8 @@ export function ApiKeysListContainer() {
       { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
     ),
   );
+
+  const { data: archivedData } = useQuery(trpc.apikey.listArchived.queryOptions());
 
   const { observe, unobserve } = useIntersectionObserver(
     (entries) => {
@@ -67,13 +58,11 @@ export function ApiKeysListContainer() {
     );
   }
 
-  const { active, archived } = partitionKeys(data.pages.flatMap((page) => page.items));
-
   return (
     <div className="flex w-full flex-col gap-6">
       <ApiKeysList
-        active={active}
-        archived={archived}
+        active={data.pages.flatMap((page) => page.items)}
+        archived={archivedData?.items ?? []}
       />
 
       {hasNextPage && (
