@@ -5,11 +5,10 @@ import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
 import { PR_COMMENTS_PAGE_SIZE, PR_FIXES_PAGE_SIZE } from "@/shared/config/repos";
+import { commentToFinding } from "@/shared/lib/comment-to-finding";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
 
 import type { PRNumber } from "@/entities/pr/model/pr.types";
-
-import { commentToFinding } from "@/server/modules/analysis/logic/comment-to-finding";
 
 import { usePrStage } from "./use-pr-stage";
 

@@ -2,11 +2,12 @@ import { revalidateTag, unstable_cache } from "next/cache";
 import { MessageCode } from "@doxynix/shared";
 import * as z from "zod";
 
+import { commentsToFindings } from "@/shared/lib/comment-to-finding";
+
 import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import type { DbClient } from "@/server/core/db";
 import { getInstallationClient } from "@/server/core/github/github-client";
-import { commentsToFindings } from "@/server/modules/analysis/logic/comment-to-finding";
 import { fixesService } from "@/server/modules/analysis/services/fixes.service";
 import { markdownToHtml } from "@/server/modules/analysis/services/markdown-to-html";
 import { keysetArgs, splitKeysetPage } from "@/server/utils/pagination";
