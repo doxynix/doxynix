@@ -1,5 +1,6 @@
-import { desc, eq } from "drizzle-orm";
-import postgres from "postgres";
+import { SQL } from "bun";
+
+import { DrizzleQueryError, desc, eq } from "drizzle-orm";
 
 import { db } from "@/core/db/db";
 import { executePaginatedQuery, type PaginatedResponse } from "@/core/db/pagination";
@@ -48,7 +49,11 @@ export async function updateRule(id: string, data: UpdateRuleInput): Promise<Upd
 
     return { data: updated, success: true };
   } catch (error) {
-    if (error instanceof postgres.PostgresError && error.code === "23505") {
+    if (
+      error instanceof DrizzleQueryError &&
+      error.cause instanceof SQL.PostgresError &&
+      error.cause.errno === "23505"
+    ) {
       return { reason: "conflict", success: false };
     }
     throw error;
