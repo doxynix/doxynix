@@ -472,9 +472,9 @@ R6, R7, R9, R19, R21, R26, R29 and K2 have since closed (see the closing log).
   > Progress 2026-11-15: `getByRepoId` now takes the newest 200 fixes and `getActiveSessions` the
   > newest 50 sessions, so every list named above is bounded. Still open: "600 analyses behaves like
   > 20" needs cursor pagination plus a UI "load more", which is not part of this batch.
-  > B5b 2026-11-15: `getActiveSessions` is cursor-paged with a scroll sentinel; `getHistory` and
-  > `listByRepository` are the two 500-row lists still needing cursor pagination + UI, and fixes'
-  > pagination is deferred until a client actually reads the list.
+  > B5b 2026-11-15: `getActiveSessions`, `apikey.list` and `adminUser.listSessions` are cursor-based
+  > with scroll sentinels; `getHistory` and `listByRepository` are the two 500-row lists still needing
+  > cursor pagination + UI, and fixes' pagination is deferred until a client reads the list.
 
 - [x] **R19 · `getRepoSnapshot` issues a second query for the requested `aid`**
   — `src/server/modules/analysis/analysis.repository.ts:340-364`
@@ -692,9 +692,9 @@ These were checked and found correct. Listed so a third round does not repeat th
 | R9 | 2026-11-15 | `5420536e` | `bumpUsage` is one `INSERT … ON CONFLICT` statement per event; both paths clamp, and the conflict branch binds the raw delta (`+ $6::int`), so a negative release is not swallowed by `EXCLUDED`. `usage.test.ts` asserts the SQL text and params; `entitlements.test.ts` asserts the 900 → 0 clamp against a real database. |
 | R19 | 2026-11-15 | `c004fc44` | `getRepoSnapshot`, `getRepoSnapshotWithDocuments` and `getAnalysisPayloadForRepo` resolve the requested `aid` inside the single `repo.findUnique` (`analyses: { orderBy: createdAt desc, take: 1, where: { id, status: "DONE" } }`), so an `aid`-scoped read is one operation. A missing or foreign `aid` still throws `ANALYSIS_VERSION_NOT_FOUND`; an empty latest still throws `ANALYSIS_NOT_COMPLETED`. `getRepoDocsPayload` keeps its second lookup (out of this batch). |
 | R21 | 2026-11-15 | `39d08034` | `logic/project-result-overview.ts` replaces `JSON.stringify(resultJson)` in `analyze-pr.task.ts` with a bounded projection capped at 4096 chars. |
-| R26 | 2026-11-15 | `9192e12e` | `apiKeyService.list` takes the newest 100 keys of the workspace; the active/archived split, the column allowlist and the `ApiKeySchema` payload are unchanged. B5b replaced the ceiling with cursor pagination (`{ items, meta }`), and the UI loads more on scroll; the split moved to `isApiKeyDead` in `@doxynix/shared`, which the container and the CLI both use. |
+| R26 | 2026-11-15 | `9192e12e` | `apiKeyService.list` takes the newest 100 keys of the workspace; the active/archived split, the column allowlist and the `ApiKeySchema` payload are unchanged. B5b (`bc449faf`) replaced the ceiling with cursor pagination (`{ items, meta }`) and the UI loads more on scroll; the split is now a SQL predicate (`activeKeyWhere` for `list`, `archivedKeyWhere` for the fixed 100-row `listArchived`) that mirrors `isApiKeyDead`, which moved to `@doxynix/shared`. |
 | R27 | 2026-11-01 | `311bd6a7` | `user.me` selects the eight `PublicUser` fields instead of the whole row. |
-| R29 | 2026-11-15 | `9192e12e` | `adminUserService.getSessions` takes the newest 100 sessions of the user, newest first. B5b replaced the ceiling with cursor pagination (`{ items, meta }`), and the admin sheet loads more on scroll. |
+| R29 | 2026-11-15 | `9192e12e` | `adminUserService.getSessions` takes the newest 100 sessions of the user, newest first. B5b (`2669e145`) replaced the ceiling with cursor pagination (`{ items, meta }`), and the admin sheet loads more on scroll inside its new `ScrollArea`. |
 | R33 | 2026-11-01 | `311bd6a7` | `documents` relation filtered by `analysisId` in SQL when `aid` is set; the JS `.filter()` in `getRepoSnapshotWithDocuments` is gone. |
 | K2 | 2026-11-15 | `84ad37d7` | `loadRelatedDocSections` takes the request's `aid` and forwards it to `loadLatestDocumentsWithContent`, so the related-docs panel lists only the pinned analysis's documents. |
 
