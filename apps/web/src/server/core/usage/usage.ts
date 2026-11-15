@@ -1,5 +1,6 @@
 import { UsageEventKind as USAGE_EVENT_KIND } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
+import { upsertWorkspaceUsage } from "@prisma/client/sql";
 
 import type { DbClient } from "@/server/core/db";
 
@@ -48,26 +49,15 @@ async function bumpUsage(
 ): Promise<void> {
   const periodStart = periodStartOf(input.now).toISOString().slice(0, 10);
 
-  // One statement per event. The insert clamps a fresh row at zero; the conflict branch adds the
-  // raw delta, because a release is negative and would be lost if EXCLUDED were already clamped.
-  await tx.$executeRaw`
-    INSERT INTO "workspace_usage" (
-      "workspace_id", "period_start", "ai_tokens_used", "analyses_count", "cost_cents", "updated_at"
-    )
-    VALUES (
-      ${input.workspaceId}::uuid,
-      ${periodStart}::date,
-      GREATEST(0, ${input.tokens}::int),
-      ${input.analyses}::int,
-      GREATEST(0, ${input.costCents}::bigint),
-      now()
-    )
-    ON CONFLICT ("workspace_id", "period_start") DO UPDATE SET
-      "ai_tokens_used" = GREATEST(0, "workspace_usage"."ai_tokens_used" + ${input.tokens}::int),
-      "analyses_count" = "workspace_usage"."analyses_count" + ${input.analyses}::int,
-      "cost_cents" = GREATEST(0, "workspace_usage"."cost_cents" + ${input.costCents}::bigint),
-      "updated_at" = now()
-  `;
+  await tx.$queryRawTyped(
+    upsertWorkspaceUsage(
+      input.workspaceId,
+      periodStart,
+      input.tokens,
+      input.analyses,
+      input.costCents,
+    ),
+  );
 }
 
 async function reservedTokensOf(db: DbClient, idempotencyKey: string): Promise<number> {

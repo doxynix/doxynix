@@ -41,15 +41,10 @@ function uniqueViolation() {
 
 type CapturedStatement = { sql: string; values: unknown[] };
 
-// Prisma invokes a tagged-template call as `(strings, ...values)`. Rebuilding the text with `$n`
-// placeholders keeps the test able to assert on the SQL itself, not only on the parameters.
-function captureStatement(strings: TemplateStringsArray, values: unknown[]): CapturedStatement {
-  const sql = strings.reduce(
-    (text, part, index) => `${text}${part}${index < values.length ? `$${index + 1}` : ""}`,
-    "",
-  );
-
-  return { sql, values };
+// The generated typed query carries the statement text and its positional values, so the fake keeps
+// both and the assertions below still cover the SQL, not only the parameters.
+function captureStatement(query: { sql: string; values: readonly unknown[] }): CapturedStatement {
+  return { sql: query.sql, values: [...query.values] };
 }
 
 function statementAt(statements: CapturedStatement[], index: number): CapturedStatement {
@@ -68,42 +63,45 @@ function createFakeDb() {
   const statements: CapturedStatement[] = [];
   let eventCount = 0;
 
-  // Mirrors the single INSERT … ON CONFLICT statement in `bumpUsage`: insert clamps at zero, the
-  // conflict branch adds the raw delta and clamps the total. The real semantics are only asserted
-  // against a real database (integration suite); here the SQL text is asserted directly.
-  const executeRaw = vi.fn(async (strings: TemplateStringsArray, ...values: unknown[]) => {
-    statements.push(captureStatement(strings, values));
+  // Mirrors the single INSERT … ON CONFLICT statement in `prisma/sql/upsertWorkspaceUsage.sql`:
+  // insert clamps at zero, the conflict branch adds the raw delta and clamps the total. The real
+  // semantics are only asserted against a real database (integration suite); here the SQL text is
+  // asserted directly.
+  const queryRawTyped = vi.fn(
+    async (query: { sql: string; values: readonly unknown[] }): Promise<unknown[]> => {
+      statements.push(captureStatement(query));
 
-    const [workspaceId, periodStart, tokens, analyses, costCents] = values as [
-      string,
-      string,
-      number,
-      number,
-      bigint,
-    ];
-    const key = `${workspaceId}:${new Date(`${periodStart}T00:00:00.000Z`).toISOString()}`;
-    const existing = rollups.get(key);
+      const [workspaceId, periodStart, tokens, analyses, costCents] = query.values as [
+        string,
+        string,
+        number,
+        number,
+        bigint,
+      ];
+      const key = `${workspaceId}:${new Date(`${periodStart}T00:00:00.000Z`).toISOString()}`;
+      const existing = rollups.get(key);
 
-    if (existing == null) {
-      rollups.set(key, {
-        aiTokensUsed: Math.max(0, tokens),
-        analysesCount: analyses,
-        costCents: costCents > BigInt(0) ? costCents : BigInt(0),
-      });
+      if (existing == null) {
+        rollups.set(key, {
+          aiTokensUsed: Math.max(0, tokens),
+          analysesCount: analyses,
+          costCents: costCents > BigInt(0) ? costCents : BigInt(0),
+        });
 
-      return 1;
-    }
+        return [];
+      }
 
-    existing.aiTokensUsed = Math.max(0, existing.aiTokensUsed + tokens);
-    existing.analysesCount += analyses;
-    const total = existing.costCents + costCents;
-    existing.costCents = total > BigInt(0) ? total : BigInt(0);
+      existing.aiTokensUsed = Math.max(0, existing.aiTokensUsed + tokens);
+      existing.analysesCount += analyses;
+      const total = existing.costCents + costCents;
+      existing.costCents = total > BigInt(0) ? total : BigInt(0);
 
-    return 1;
-  });
+      return [];
+    },
+  );
 
   const db = {
-    $executeRaw: executeRaw,
+    $queryRawTyped: queryRawTyped,
     $transaction: vi.fn(async (fn: (tx: unknown) => unknown) => fn(db)),
     usageEvent: {
       create: vi.fn(async ({ data }: { data: Omit<EventRow, "id"> }) => {
@@ -271,36 +269,18 @@ describe("reserve and settle", () => {
     expect(reserve.sql).toContain("GREATEST(0, $3::int)");
     expect(reserve.sql).toContain("GREATEST(0, $5::bigint)");
     expect(reserve.sql).toContain(
-      '"ai_tokens_used" = GREATEST(0, "workspace_usage"."ai_tokens_used" + $6::int)',
+      '"ai_tokens_used" = GREATEST(0, "workspace_usage"."ai_tokens_used" + $3::int)',
     );
     expect(reserve.sql).toContain(
-      '"cost_cents" = GREATEST(0, "workspace_usage"."cost_cents" + $8::bigint)',
+      '"cost_cents" = GREATEST(0, "workspace_usage"."cost_cents" + $5::bigint)',
     );
     // The regression this guards: `EXCLUDED."ai_tokens_used"` is already GREATEST(0, …), so a
     // negative release would be added as 0 and never come off the total.
     expect(reserve.sql).not.toContain('EXCLUDED."ai_tokens_used"');
     expect(release.sql).toBe(reserve.sql);
 
-    expect(reserve.values).toEqual([
-      WORKSPACE_ID,
-      "2026-01-01",
-      900,
-      0,
-      BigInt(0),
-      900,
-      0,
-      BigInt(0),
-    ]);
-    expect(release.values).toEqual([
-      WORKSPACE_ID,
-      "2026-01-01",
-      -900,
-      0,
-      BigInt(0),
-      -900,
-      0,
-      BigInt(0),
-    ]);
+    expect(reserve.values).toEqual([WORKSPACE_ID, "2026-01-01", 900, 0, BigInt(0)]);
+    expect(release.values).toEqual([WORKSPACE_ID, "2026-01-01", -900, 0, BigInt(0)]);
     expect(rollupFor(fake.rollups, JANUARY)?.aiTokensUsed).toBe(0);
   });
 
