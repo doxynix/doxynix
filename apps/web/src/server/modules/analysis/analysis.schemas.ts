@@ -249,7 +249,7 @@ export const PRCommentSchema = z.object({
   findingType: z.string(),
   id: z.uuid(),
   line: z.number().int(),
-  riskLevel: z.number().int().min(0).max(10),
+  riskLevel: z.number().int(),
 });
 
 export const PRCommentsOutputSchema = z.object({
