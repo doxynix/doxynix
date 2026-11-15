@@ -260,6 +260,10 @@ R6, R7 and R21 have since closed (see the closing log).
   > `listSessions` takes `SESSION_LIST_LIMIT = 100` with a `select` covering every field the
   > `SessionListItemSchema` output reads plus `repoId`. The bounded horizon is silent — no "load
   > older" endpoint was added, so history past 200 messages is not reachable from the UI.
+  > Follow-up 2026-11-15 (B2b): both procedures now return `{ items, meta }` pages built from the
+  > shared `pagination.ts` keyset primitives (`getSessionHistory` on `(createdAt, id)`,
+  > `listSessions` on `(updatedAt, id)`), so `nextCursor` reaches older rows; the UI still renders
+  > the first page.
 
 - [x] **R8 · The PR-webhook existence check fetches every comment and every fix of the analysis**
   — `src/server/modules/analysis/analysis.repository.ts:179-196`, used at
@@ -655,7 +659,7 @@ These were checked and found correct. Listed so a third round does not repeat th
 | R4 | 2026-11-01 | `311bd6a7` | Nested `analyses` narrowed to `select: { commitSha: true }`; the repo row itself is still full because `saveResults` needs it. |
 | R5 | 2026-11-01 | `311bd6a7` | `workspaceMemo` added to `RequestStore`; `resolveWorkspace` split into `loadWorkspace` + `memoizeOnce` keyed on user, header, `strict` and name. Both this and `entitlementMemo` now go through `src/server/utils/request-memo.ts`, so the key is typed and cannot drift from the inputs. |
 | R6 | 2026-11-15 | `d73f3abc` | One `unstable_cache` entry per page in `pr-comments.service.getComments` and `analysisMapper.buildTopFindings` (the latter gained a required `cacheScope`, the PR analysis id); the comments key and tag are workspace-scoped, empty pages are not cached, `postCommentToPR` revalidates the analysis tag. No `take`, so row counts are still unbounded. |
-| R7 | 2026-11-15 | `39d08034` | `getSessionHistory` takes the newest 200 rows (desc → reversed) with a four-field `select`; `listSessions` takes 100 with a `select` that keeps every output field. |
+| R7 | 2026-11-15 | `39d08034` | `getSessionHistory` takes the newest 200 rows (desc → reversed) with a four-field `select`; `listSessions` takes 100 with a `select` that keeps every output field. Follow-up: the ad-hoc `take` constants became cursor pagination through the shared `pagination.ts` primitives (`keysetArgs` / `splitKeysetPage` / `orderWithTiebreak`) — newest page plus `nextCursor`; the UI still renders the first page only. |
 | R8 | 2026-11-01 | `311bd6a7` | `analysisRepo.getByRepoAndPRNumber` selects `id` instead of `include: { comments, generatedFixes }`; its only caller (the PR webhook) reads `id`. |
 | R21 | 2026-11-15 | `39d08034` | `logic/project-result-overview.ts` replaces `JSON.stringify(resultJson)` in `analyze-pr.task.ts` with a bounded projection capped at 4096 chars. |
 | R27 | 2026-11-01 | `311bd6a7` | `user.me` selects the eight `PublicUser` fields instead of the whole row. |
