@@ -659,7 +659,7 @@ describe("buildTopFindings", () => {
       zoneLabels,
       "ivan",
       "doxynix",
-      "pa-1:1772366400000",
+      { analysisId: "pa-1", version: "1772366400000" },
     );
 
     expect(result.map((item) => item.id)).toEqual([
@@ -686,10 +686,10 @@ describe("buildTopFindings", () => {
     expect(mocks.unstable_cache).toHaveBeenCalledTimes(1);
     expect(mocks.unstable_cache).toHaveBeenCalledWith(
       expect.any(Function),
-      ["finding-html-ivan-doxynix-pa-1:1772366400000"],
+      ["finding-html-ivan-doxynix-pa-1-1772366400000"],
       {
         revalidate: 3600,
-        tags: ["findings", "ivan", "doxynix", "pa-1:1772366400000"],
+        tags: ["findings", "ivan", "doxynix", "pa-1"],
       },
     );
   });
@@ -707,7 +707,7 @@ describe("buildTopFindings", () => {
       new Map(),
       "ivan",
       "doxynix",
-      "pa-2",
+      { analysisId: "pa-2", version: "1" },
     );
 
     expect(result).toHaveLength(3);
@@ -718,14 +718,20 @@ describe("buildTopFindings", () => {
   it("keys the page on the analysis version, so a re-analysis misses the old entry", async () => {
     const findings = [makeFinding()];
 
-    await analysisMapper.buildTopFindings(findings, [], new Map(), "ivan", "doxynix", "pa-1:1000");
-    await analysisMapper.buildTopFindings(findings, [], new Map(), "ivan", "doxynix", "pa-1:2000");
+    await analysisMapper.buildTopFindings(findings, [], new Map(), "ivan", "doxynix", {
+      analysisId: "pa-1",
+      version: "1000",
+    });
+    await analysisMapper.buildTopFindings(findings, [], new Map(), "ivan", "doxynix", {
+      analysisId: "pa-1",
+      version: "2000",
+    });
 
     expect(mocks.unstable_cache.mock.calls[0]?.[1]).toStrictEqual([
-      "finding-html-ivan-doxynix-pa-1:1000",
+      "finding-html-ivan-doxynix-pa-1-1000",
     ]);
     expect(mocks.unstable_cache.mock.calls[1]?.[1]).toStrictEqual([
-      "finding-html-ivan-doxynix-pa-1:2000",
+      "finding-html-ivan-doxynix-pa-1-2000",
     ]);
   });
 
@@ -741,7 +747,7 @@ describe("buildTopFindings", () => {
       new Map(),
       undefined,
       undefined,
-      "pa-3",
+      { analysisId: "pa-3", version: "1" },
     );
 
     expect(result[0]).toMatchObject({ riskLevel: 0, zoneLabel: "src" });

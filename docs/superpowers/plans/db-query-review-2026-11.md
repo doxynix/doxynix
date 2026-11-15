@@ -230,11 +230,11 @@ R6, R7 and R21 have since closed (see the closing log).
     `analysis.getComments` in `bench:http` drops; cache tag cardinality stops growing per comment.
   > Done 2026-11-15 (`d73f3abc`, key corrected in the B2 fix round): one `unstable_cache` entry per
   > page for both — `pr-comments-html-<workspaceId>-<analysisId>-<updatedAt>-<rows>` with tags
-  > `["comments", analysisId, workspaceId]`, and `finding-html-<owner>-<name>-<analysisId>:<updatedAt>`
-  > with tags `["findings", owner, name, analysisId:updatedAt]` (analysis ids are globally unique and
-  > the caller already proves workspace access, so the findings key needs no workspace). An empty
-  > comment page skips the cache entirely, so an arbitrary `analysisId` cannot mint a permanent empty
-  > entry, and `postCommentToPR` calls `revalidateTag(analysisId)` so a posted comment is visible.
+  > `["comments", analysisId, workspaceId]`, and `finding-html-<owner>-<name>-<analysisId>-<updatedAt>`
+  > with tags `["findings", owner, name, analysisId]` (analysis ids are globally unique and the
+  > caller already proves workspace access, so the findings key needs no workspace). An empty
+  > comment page skips the cache entirely, so an arbitrary `analysisId` cannot mint an empty entry,
+  > and `postCommentToPR` calls `revalidateTag(analysisId)` so a posted comment is visible.
   > Unit tests assert one lookup for a 3-comment page, one for a 3-finding page, distinct keys for two
   > workspaces on the same analysis, a miss when a row is appended or `updatedAt` moves, no lookup for
   > an empty page, and the tag revalidation. The `take` half was deliberately not done (it would

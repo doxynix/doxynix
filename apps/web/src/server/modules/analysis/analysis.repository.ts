@@ -113,8 +113,7 @@ export type ImpactAnalysisRecord = Awaited<ReturnType<typeof analysisRepo.loadIm
 export type ImpactAnalysis = NonNullable<ImpactAnalysisRecord>;
 
 export const analysisRepo = {
-  // Trigger.dev has no Next work store, so this writer cannot revalidate the comment page cache:
-  // a re-analysed PR row relies on the new analysis id, and keeps its old page until eviction.
+  // No revalidateTag: a task has no Next store; readers miss the old page via the analysis version.
   async addComments(
     db: DbClient,
     analysisId: string,

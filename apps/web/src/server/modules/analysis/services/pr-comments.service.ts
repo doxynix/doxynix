@@ -36,7 +36,7 @@ export const prCommentsService = {
       },
     });
 
-    // An empty page must not create a permanent entry for an arbitrary analysis id
+    // An empty page must not create a cache entry for an arbitrary analysis id
     const firstComment = comments[0];
     if (firstComment == null) {
       return { renderedComments: [] };

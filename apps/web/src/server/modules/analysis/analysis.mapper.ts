@@ -169,7 +169,7 @@ export const analysisMapper = {
     zoneNodeById: Map<string, Pick<TopLevelImpactNode, "label">>,
     owner: string | undefined,
     name: string | undefined,
-    cacheScope: string,
+    cacheScope: { analysisId: string; version: string },
   ) {
     const fileByPath = new Map(changedFiles.map((file) => [file.filePath, file] as const));
 
@@ -211,10 +211,12 @@ export const analysisMapper = {
             };
           }),
         ),
-      [`finding-html-${owner ?? "unknown"}-${name ?? "unknown"}-${cacheScope}`],
+      [
+        `finding-html-${owner ?? "unknown"}-${name ?? "unknown"}-${cacheScope.analysisId}-${cacheScope.version}`,
+      ],
       {
         revalidate: 3600,
-        tags: ["findings", owner ?? "unknown", name ?? "unknown", cacheScope],
+        tags: ["findings", owner ?? "unknown", name ?? "unknown", cacheScope.analysisId],
       },
     )();
   },
