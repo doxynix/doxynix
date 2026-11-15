@@ -1,4 +1,4 @@
--- @param {String} $1:user_id
+-- @param {String} $1:workspace_id
 -- @param {DateTime} $2:current_period_start
 -- @param {DateTime} $3:previous_period_start
 -- @param {DateTime} $4:period_end
@@ -12,10 +12,10 @@ WITH periods AS (
         (($3::timestamp) AT TIME ZONE 'UTC') AS prev_start,
         (($2::timestamp) AT TIME ZONE 'UTC') AS prev_end
 ),
-user_repos AS (
+workspace_repos AS (
     SELECT id, name, owner, created_at
     FROM repos
-    WHERE created_by_user_id = $1::uuid
+    WHERE workspace_id = $1::uuid
 ),
 base_data AS (
     SELECT
@@ -25,7 +25,7 @@ base_data AS (
         ur.name as repo_name,
         (a.created_at >= p.cur_start AND a.created_at < p.cur_end) as is_current
     FROM analyses a
-    JOIN user_repos ur ON a.repo_id = ur.id
+    JOIN workspace_repos ur ON a.repo_id = ur.id
     CROSS JOIN periods p
     WHERE a.status = 'DONE'
       AND a.created_at >= p.prev_start
@@ -50,7 +50,7 @@ status_agg AS (
         COUNT(*) FILTER (WHERE a.status = 'NEW')::int AS "newCount",
         COUNT(*)::int AS "totalCount"
     FROM analyses a
-    JOIN user_repos ur ON a.repo_id = ur.id
+    JOIN workspace_repos ur ON a.repo_id = ur.id
     CROSS JOIN periods p
     WHERE a.created_at >= p.cur_start
       AND a.created_at < p.cur_end
@@ -58,7 +58,7 @@ status_agg AS (
 doc_agg AS (
     SELECT COUNT(*)::int AS "docCount"
     FROM documents d
-    JOIN user_repos ur ON d.repo_id = ur.id
+    JOIN workspace_repos ur ON d.repo_id = ur.id
     CROSS JOIN periods p
     WHERE d.created_at < p.cur_end
 ),
@@ -85,7 +85,7 @@ score_stats AS (
 -- sorts the whole history. Five rows of one repo can never crowd out the global top 5.
 per_repo_top AS (
     SELECT DISTINCT ON (l.repo_id) l.repo_id, l.id, l.progress, l.status, l.created_at
-    FROM user_repos ur
+    FROM workspace_repos ur
     CROSS JOIN LATERAL (
         SELECT a.id, a.repo_id, a.progress, a.status, a.created_at
         FROM analyses a
@@ -98,10 +98,10 @@ per_repo_top AS (
 )
 SELECT
     -- Counters
-    (SELECT COUNT(*)::int FROM user_repos ur CROSS JOIN periods p WHERE ur.created_at < p.cur_end) AS "repoCount",
+    (SELECT COUNT(*)::int FROM workspace_repos ur CROSS JOIN periods p WHERE ur.created_at < p.cur_end) AS "repoCount",
     (SELECT "docCount" FROM doc_agg) AS "docCount",
 
-    -- Statuses (one pass over user_repos x analyses instead of five identical scans)
+    -- Statuses (one pass over workspace_repos x analyses instead of five identical scans)
     (SELECT "failedCount" FROM status_agg) AS "failedCount",
     (SELECT "pendingCount" FROM status_agg) AS "pendingCount",
     (SELECT "successCount" FROM status_agg) AS "successCount",
@@ -128,7 +128,7 @@ SELECT
                TO_CHAR(prt.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS "createdAt",
                ur.name AS "repoName", ur.owner AS "repoOwner"
         FROM per_repo_top prt
-        JOIN user_repos ur ON ur.id = prt.repo_id
+        JOIN workspace_repos ur ON ur.id = prt.repo_id
         ORDER BY prt.created_at DESC, prt.id DESC
         LIMIT 5
     ) ra) AS "recentActivity",

@@ -40,7 +40,7 @@ export const analyticsService = {
   async getDashboardStats(
     db: DbClient,
     input: AnalyticsInput,
-    userId: string,
+    workspaceId: string,
   ): Promise<DashboardStats> {
     const now = new Date();
 
@@ -60,7 +60,7 @@ export const analyticsService = {
     const previousStart = new Date(currentStart.getTime() - durationMs);
 
     const [data] = await db.$queryRawTyped(
-      getDashboardStats(userId, currentStart, previousStart, currentEnd),
+      getDashboardStats(workspaceId, currentStart, previousStart, currentEnd),
     );
 
     if (data == null) {
@@ -137,7 +137,7 @@ export const analyticsService = {
     };
   },
 
-  async getTrends(db: DbClient, input: AnalyticsInput, userId: string): Promise<Trends> {
+  async getTrends(db: DbClient, input: AnalyticsInput, workspaceId: string): Promise<Trends> {
     let startDate: Date;
     let endDate = input.to ?? new Date();
 
@@ -149,7 +149,7 @@ export const analyticsService = {
     }
 
     const trends = await db.$queryRawTyped(
-      getTrends(userId, startDate, endDate, input.repoId ?? null),
+      getTrends(workspaceId, startDate, endDate, input.repoId ?? null),
     );
 
     return trends.map((trend) => analyticsMapper.toTrend(trend));

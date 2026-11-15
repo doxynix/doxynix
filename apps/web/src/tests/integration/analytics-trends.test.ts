@@ -3,12 +3,12 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { prisma } from "@/server/core/db";
 
-import { cleanupDatabase, createTestUser } from "../helpers";
+import { cleanupDatabase, createBareTestUser, createTestUser } from "../helpers";
 
 const DAY = 86_400_000;
 
 async function runTrendsUnderTimeZone(
-  userId: string,
+  workspaceId: string,
   startDate: Date,
   endDate: Date,
   repoId: string | null,
@@ -16,7 +16,7 @@ async function runTrendsUnderTimeZone(
 ) {
   return prisma.$transaction(async (tx) => {
     await tx.$executeRawUnsafe(`SET LOCAL TimeZone = '${timeZone}'`);
-    return tx.$queryRawTyped(getTrends(userId, startDate, endDate, repoId));
+    return tx.$queryRawTyped(getTrends(workspaceId, startDate, endDate, repoId));
   });
 }
 
@@ -83,10 +83,16 @@ describe("getTrends", () => {
     const startDate = new Date(endDate.getTime() - 7 * DAY);
     await seedPastPeriodEnd(repo.id, endDate);
 
-    const utc = await runTrendsUnderTimeZone(user.id, startDate, endDate, null, "UTC");
-    const tokyo = await runTrendsUnderTimeZone(user.id, startDate, endDate, null, "Asia/Tokyo");
+    const utc = await runTrendsUnderTimeZone(workspace.id, startDate, endDate, null, "UTC");
+    const tokyo = await runTrendsUnderTimeZone(
+      workspace.id,
+      startDate,
+      endDate,
+      null,
+      "Asia/Tokyo",
+    );
     const losAngeles = await runTrendsUnderTimeZone(
-      user.id,
+      workspace.id,
       startDate,
       endDate,
       null,
@@ -115,7 +121,7 @@ describe("getTrends", () => {
     });
 
     const rows = await runTrendsUnderTimeZone(
-      user.id,
+      workspace.id,
       new Date(Date.UTC(2026, 9, 1)),
       new Date(Date.UTC(2026, 9, 14, 22, 0, 0)),
       null,
@@ -129,14 +135,14 @@ describe("getTrends", () => {
     expect(onTheDay[0]?.health).toBe(70);
   });
 
-  it("scopes to the calling user and ignores another user's rows", async () => {
+  it("scopes to the workspace and ignores another workspace's rows", async () => {
     const alice = await createTestUser("TrendsAlice");
     const bob = await createTestUser("TrendsBob");
     await seedRepoWithAnalyses(alice.user.id, alice.workspace.id, "alice_repo", [90, 80, 70]);
     await seedRepoWithAnalyses(bob.user.id, bob.workspace.id, "bob_repo", [10, 20, 30]);
 
     const rows = await runTrendsUnderTimeZone(
-      alice.user.id,
+      alice.workspace.id,
       new Date(Date.UTC(2026, 9, 1)),
       new Date(Date.UTC(2026, 9, 14, 22, 0, 0)),
       null,
@@ -147,5 +153,30 @@ describe("getTrends", () => {
     for (const row of rows) {
       expect(Number(row.health)).toBeGreaterThanOrEqual(70);
     }
+  });
+
+  // K1: a member's repositories belong to the workspace, so they must show up in the owner's trend.
+  it("includes repositories another member created in the same workspace", async () => {
+    const owner = await createTestUser("TrendsOwner");
+    const member = await createBareTestUser("TrendsMember");
+
+    await prisma.workspaceMember.create({
+      data: { role: "MEMBER", userId: member.user.id, workspaceId: owner.workspace.id },
+    });
+
+    await seedRepoWithAnalyses(owner.user.id, owner.workspace.id, "owner_repo", [90]);
+    await seedRepoWithAnalyses(member.user.id, owner.workspace.id, "member_repo", [10]);
+
+    const rows = await runTrendsUnderTimeZone(
+      owner.workspace.id,
+      new Date(Date.UTC(2026, 9, 1)),
+      new Date(Date.UTC(2026, 9, 14, 22, 0, 0)),
+      null,
+      "UTC",
+    );
+
+    expect(rows).toHaveLength(1);
+    // AVG(90, 10): the owner's own repo alone would have produced 90.
+    expect(rows[0]?.health).toBe(50);
   });
 });

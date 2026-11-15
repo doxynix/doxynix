@@ -3,12 +3,12 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { prisma } from "@/server/core/db";
 
-import { cleanupDatabase, createTestUser } from "../helpers";
+import { cleanupDatabase, createBareTestUser, createTestUser } from "../helpers";
 
 /**
  * The pre-optimisation formulation, kept as a reference oracle. `getDashboardStats.sql` used to
  * run five independent `COUNT(CASE WHEN a.status = ...)` subqueries, each re-scanning
- * `analyses JOIN user_repos`; it now aggregates once in a `status_agg` CTE. The counters are
+ * `analyses JOIN workspace_repos`; it now aggregates once in a `status_agg` CTE. The counters are
  * period-scoped by design and the oracle encodes that rule on purpose — both bound the same
  * window, so any drift between them means the shipped query stopped honouring the period.
  */
@@ -17,12 +17,12 @@ WITH periods AS (
     SELECT $2::timestamp AS cur_start, ($4::date + interval '1 day')::timestamp AS cur_end,
            $3::timestamp AS prev_start, $2::timestamp AS prev_end
 ),
-user_repos AS (SELECT id, name, owner, created_at FROM repos WHERE created_by_user_id = $1::uuid),
+workspace_repos AS (SELECT id, name, owner, created_at FROM repos WHERE workspace_id = $1::uuid),
 base_data AS (
     SELECT a.*, ur.name as repo_name,
         (a.created_at >= p.cur_start AND a.created_at < p.cur_end) as is_current,
         (a.created_at >= p.prev_start AND a.created_at < p.prev_end) as is_previous
-    FROM analyses a JOIN user_repos ur ON a.repo_id = ur.id CROSS JOIN periods p
+    FROM analyses a JOIN workspace_repos ur ON a.repo_id = ur.id CROSS JOIN periods p
     WHERE a.status = 'DONE' AND a.created_at >= p.prev_start AND a.created_at < p.cur_end
 ),
 latest_per_repo AS (
@@ -32,13 +32,13 @@ latest_per_repo AS (
     ORDER BY repo_id, period_group, created_at DESC
 )
 SELECT
-    (SELECT COUNT(*)::int FROM user_repos ur CROSS JOIN periods p WHERE ur.created_at < p.cur_end) AS "repoCount",
-    (SELECT COUNT(*)::int FROM documents d JOIN user_repos ur ON d.repo_id = ur.id CROSS JOIN periods p WHERE d.created_at < p.cur_end) AS "docCount",
-    (SELECT COUNT(CASE WHEN a.status = 'FAILED' THEN 1 END)::int FROM analyses a JOIN user_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at >= p.cur_start AND a.created_at < p.cur_end) AS "failedCount",
-    (SELECT COUNT(CASE WHEN a.status = 'PENDING' THEN 1 END)::int FROM analyses a JOIN user_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at >= p.cur_start AND a.created_at < p.cur_end) AS "pendingCount",
-    (SELECT COUNT(CASE WHEN a.status = 'DONE' THEN 1 END)::int FROM analyses a JOIN user_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at >= p.cur_start AND a.created_at < p.cur_end) AS "successCount",
-    (SELECT COUNT(CASE WHEN a.status = 'NEW' THEN 1 END)::int FROM analyses a JOIN user_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at >= p.cur_start AND a.created_at < p.cur_end) AS "newCount",
-    (SELECT COUNT(*)::int FROM analyses a JOIN user_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at >= p.cur_start AND a.created_at < p.cur_end) AS "totalCount",
+    (SELECT COUNT(*)::int FROM workspace_repos ur CROSS JOIN periods p WHERE ur.created_at < p.cur_end) AS "repoCount",
+    (SELECT COUNT(*)::int FROM documents d JOIN workspace_repos ur ON d.repo_id = ur.id CROSS JOIN periods p WHERE d.created_at < p.cur_end) AS "docCount",
+    (SELECT COUNT(CASE WHEN a.status = 'FAILED' THEN 1 END)::int FROM analyses a JOIN workspace_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at >= p.cur_start AND a.created_at < p.cur_end) AS "failedCount",
+    (SELECT COUNT(CASE WHEN a.status = 'PENDING' THEN 1 END)::int FROM analyses a JOIN workspace_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at >= p.cur_start AND a.created_at < p.cur_end) AS "pendingCount",
+    (SELECT COUNT(CASE WHEN a.status = 'DONE' THEN 1 END)::int FROM analyses a JOIN workspace_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at >= p.cur_start AND a.created_at < p.cur_end) AS "successCount",
+    (SELECT COUNT(CASE WHEN a.status = 'NEW' THEN 1 END)::int FROM analyses a JOIN workspace_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at >= p.cur_start AND a.created_at < p.cur_end) AS "newCount",
+    (SELECT COUNT(*)::int FROM analyses a JOIN workspace_repos ur ON a.repo_id = ur.id CROSS JOIN periods p WHERE a.created_at >= p.cur_start AND a.created_at < p.cur_end) AS "totalCount",
     COALESCE((SELECT AVG(score) FROM latest_per_repo WHERE is_current), 0)::float AS "avgHealth",
     COALESCE((SELECT AVG(security_score) FROM latest_per_repo WHERE is_current), 0)::float AS "avgSecurity",
     COALESCE((SELECT AVG(complexity_score) FROM latest_per_repo WHERE is_current), 0)::float AS "avgComplexity",
@@ -88,14 +88,14 @@ function project(row: Statuses): Record<string, unknown> {
 const DAY = 86_400_000;
 
 async function reference(
-  userId: string,
+  workspaceId: string,
   currentStart: Date,
   previousStart: Date,
   currentEnd: Date,
 ) {
   const [row] = await prisma.$queryRawUnsafe<Statuses[]>(
     REFERENCE_SQL,
-    userId,
+    workspaceId,
     currentStart,
     previousStart,
     currentEnd,
@@ -103,16 +103,21 @@ async function reference(
   return row;
 }
 
-async function shipped(userId: string, currentStart: Date, previousStart: Date, currentEnd: Date) {
+async function shipped(
+  workspaceId: string,
+  currentStart: Date,
+  previousStart: Date,
+  currentEnd: Date,
+) {
   const [row] = await prisma.$queryRawTyped(
-    getDashboardStats(userId, currentStart, previousStart, currentEnd),
+    getDashboardStats(workspaceId, currentStart, previousStart, currentEnd),
   );
   return row as unknown as Statuses;
 }
 
 /** Runs the shipped query with `TimeZone` pinned, so a boundary bug cannot hide behind UTC. */
 async function runDashboardStatsUnderTimeZone(
-  userId: string,
+  workspaceId: string,
   currentStart: Date,
   previousStart: Date,
   currentEnd: Date,
@@ -121,23 +126,30 @@ async function runDashboardStatsUnderTimeZone(
   return prisma.$transaction(async (tx) => {
     await tx.$executeRawUnsafe(`SET LOCAL TimeZone = '${timeZone}'`);
     const [row] = await tx.$queryRawTyped(
-      getDashboardStats(userId, currentStart, previousStart, currentEnd),
+      getDashboardStats(workspaceId, currentStart, previousStart, currentEnd),
     );
     return row as unknown as Statuses;
   });
 }
 
-async function seed(userId: string, workspaceId: string, repoCount: number, analysisCount: number) {
+async function seed(
+  userId: string,
+  workspaceId: string,
+  repoCount: number,
+  analysisCount: number,
+  prefix = "",
+) {
   const now = Date.now();
   for (let r = 0; r < repoCount; r++) {
+    const label = `${prefix}${r}`;
     const repo = await prisma.repo.create({
       data: {
         createdAt: new Date(now - (30 + r) * DAY),
         createdByUserId: userId,
-        githubId: 900_000_000 + r,
-        name: `repo_${r}`,
-        owner: `org_${r}`,
-        url: `https://github.com/org_${r}/repo_${r}`,
+        githubId: 900_000_000 + Math.floor(Math.random() * 100_000_000),
+        name: `repo_${label}`,
+        owner: `org_${label}`,
+        url: `https://github.com/org_${label}/repo_${label}`,
         workspaceId,
       },
     });
@@ -146,7 +158,7 @@ async function seed(userId: string, workspaceId: string, repoCount: number, anal
       const status = (["DONE", "FAILED", "PENDING", "NEW"] as const)[a % 4];
       await prisma.analysis.create({
         data: {
-          commitSha: `sha_${r}_${a}`,
+          commitSha: `sha_${label}_${a}`,
           createdAt: new Date(now - (a + 1) * 3_600_000),
           repoId: repo.id,
           score: (r * 7 + a * 3) % 101,
@@ -168,12 +180,12 @@ async function seed(userId: string, workspaceId: string, repoCount: number, anal
 
     await prisma.document.create({
       data: {
-        content: `# repo_${r}`,
+        content: `# repo_${label}`,
         createdAt: new Date(now - 2 * DAY),
         repoId: repo.id,
         type: "README",
         updatedAt: new Date(now - DAY),
-        version: `v_${r}`,
+        version: `v_${label}`,
       },
     });
   }
@@ -265,8 +277,8 @@ describe("getDashboardStats", () => {
       const previousStart = new Date(now - w.previous);
       const currentEnd = new Date(now);
 
-      const actual = await shipped(user.id, currentStart, previousStart, currentEnd);
-      const expected = await reference(user.id, currentStart, previousStart, currentEnd);
+      const actual = await shipped(workspace.id, currentStart, previousStart, currentEnd);
+      const expected = await reference(workspace.id, currentStart, previousStart, currentEnd);
 
       expect(actual, `window ${w.label} — reference returned no row`).toBeDefined();
       expect(expected, `window ${w.label} — reference returned no row`).toBeDefined();
@@ -280,7 +292,7 @@ describe("getDashboardStats", () => {
 
     const now = Date.now();
     const row = await shipped(
-      user.id,
+      workspace.id,
       new Date(now - 30 * DAY),
       new Date(now - 60 * DAY),
       new Date(now),
@@ -296,11 +308,16 @@ describe("getDashboardStats", () => {
     expect(Number(row.totalCount)).toBe(32);
   });
 
-  it("returns zeroes rather than nulls for a user with no repositories", async () => {
-    const { user } = await createTestUser("Empty");
+  it("returns zeroes rather than nulls for a workspace with no repositories", async () => {
+    const { workspace } = await createTestUser("Empty");
     const now = Date.now();
 
-    const row = await shipped(user.id, new Date(now - DAY), new Date(now - 2 * DAY), new Date(now));
+    const row = await shipped(
+      workspace.id,
+      new Date(now - DAY),
+      new Date(now - 2 * DAY),
+      new Date(now),
+    );
 
     expect(row.repoCount).toBe(0);
     expect(row.docCount).toBe(0);
@@ -315,7 +332,7 @@ describe("getDashboardStats", () => {
     const day = 86_400_000;
 
     const row = await shipped(
-      user.id,
+      workspace.id,
       new Date(Date.now() - 400 * day),
       new Date(Date.now() - 420 * day),
       new Date(Date.now() - 390 * day),
@@ -326,7 +343,7 @@ describe("getDashboardStats", () => {
     expect(row.totalCount).toBe(0);
   });
 
-  it("scopes to the calling user and ignores another user's rows", async () => {
+  it("scopes to the workspace and ignores another workspace's rows", async () => {
     const alice = await createTestUser("Alice");
     const bob = await createTestUser("Bob");
     await seed(alice.user.id, alice.workspace.id, 2, 4);
@@ -334,7 +351,7 @@ describe("getDashboardStats", () => {
 
     const now = Date.now();
     const row = await shipped(
-      alice.user.id,
+      alice.workspace.id,
       new Date(now - 30 * DAY),
       new Date(now - 60 * DAY),
       new Date(now),
@@ -342,6 +359,31 @@ describe("getDashboardStats", () => {
 
     expect(Number(row.repoCount)).toBe(2);
     expect(Number(row.totalCount)).toBe(8);
+  });
+
+  // K1: the stat cards must agree with the repository list on the same screen, which already reads
+  // by `workspaceId`, so a member's repositories count for every member of the workspace.
+  it("counts every repository of the workspace, whichever member created it", async () => {
+    const owner = await createTestUser("WorkspaceOwner");
+    const member = await createBareTestUser("WorkspaceMember");
+
+    await prisma.workspaceMember.create({
+      data: { role: "MEMBER", userId: member.user.id, workspaceId: owner.workspace.id },
+    });
+
+    await seed(owner.user.id, owner.workspace.id, 2, 4);
+    await seed(member.user.id, owner.workspace.id, 3, 4, "member_");
+
+    const now = Date.now();
+    const row = await shipped(
+      owner.workspace.id,
+      new Date(now - 30 * DAY),
+      new Date(now - 60 * DAY),
+      new Date(now),
+    );
+
+    expect(Number(row.repoCount)).toBe(5);
+    expect(Number(row.totalCount)).toBe(20);
   });
 
   it("returns identical rows under every session TimeZone", async () => {
@@ -374,21 +416,21 @@ describe("getDashboardStats", () => {
     }
 
     const utc = await runDashboardStatsUnderTimeZone(
-      user.id,
+      workspace.id,
       currentStart,
       previousStart,
       currentEnd,
       "UTC",
     );
     const tokyo = await runDashboardStatsUnderTimeZone(
-      user.id,
+      workspace.id,
       currentStart,
       previousStart,
       currentEnd,
       "Asia/Tokyo",
     );
     const losAngeles = await runDashboardStatsUnderTimeZone(
-      user.id,
+      workspace.id,
       currentStart,
       previousStart,
       currentEnd,
@@ -405,7 +447,7 @@ describe("getDashboardStats", () => {
 
     const now = Date.now();
     const row = await shipped(
-      user.id,
+      workspace.id,
       new Date(now - 30 * DAY),
       new Date(now - 60 * DAY),
       new Date(now),
@@ -425,7 +467,7 @@ describe("getDashboardStats", () => {
 
     const now = Date.now();
     const args = [
-      user.id,
+      workspace.id,
       new Date(now - 30 * DAY),
       new Date(now - 60 * DAY),
       new Date(now),
