@@ -54,6 +54,7 @@ model WorkspaceMember {
   @@unique([workspaceId, userId])
   @@index([userId, workspaceId])
   @@index([workspaceId, role])
+  @@index([workspaceId, createdAt, id])
   @@map("workspace_members")
 }
 
@@ -174,6 +175,7 @@ model ApiKey {
   // Names are deliberately not unique per workspace: rotation creates the replacement under the
   // same name while the old key is still inside its grace window.
   @@index([workspaceId])
+  @@index([workspaceId, createdAt(sort: Desc), id(sort: Desc)])
   @@index([userId])
   @@index([expiresAt])
   @@index([revokedAfter])

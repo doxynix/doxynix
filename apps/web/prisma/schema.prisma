@@ -377,6 +377,7 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([userId, createdAt(sort: Desc), id(sort: Desc)])
   @@index([expiresAt])
   @@map("sessions")
 }
@@ -536,6 +537,7 @@ model WorkspaceMember {
   @@unique([workspaceId, userId])
   @@index([userId, workspaceId])
   @@index([workspaceId, role])
+  @@index([workspaceId, createdAt, id])
   @@map("workspace_members")
 }
 
@@ -612,6 +614,7 @@ model ApiKey {
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId])
+  @@index([workspaceId, createdAt(sort: Desc), id(sort: Desc)])
   @@index([userId])
   @@index([expiresAt])
   @@index([revokedAfter])
@@ -896,6 +899,8 @@ model Analysis {
 
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
+  @@index([repoId, createdAt(sort: Desc), id(sort: Desc)])
+  @@index([repoId, commitSha])
   @@index([jobId])
   @@map("analyses")
 }
@@ -950,6 +955,7 @@ model PullRequestAnalysis {
   @@index([jobId])
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
+  @@index([repoId, createdAt(sort: Desc), id(sort: Desc)])
   @@index([status])
   @@index([createdAt(sort: Desc), id(sort: Desc)], map: "pull_request_analyses_created_at_id_idx")
   @@map("pull_request_analyses")
@@ -1112,6 +1118,7 @@ model ChatSession {
 
   @@index([repoId])
   @@index([userId, updatedAt(sort: Desc)])
+  @@index([userId, repoId, updatedAt(sort: Desc), id(sort: Desc)])
   @@map("chat_sessions")
 }
 
@@ -1125,5 +1132,6 @@ model ChatMessage {
   createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
 
   @@index([sessionId, createdAt(sort: Asc)])
+  @@index([sessionId, createdAt(sort: Desc), id(sort: Desc)])
   @@map("chat_messages")
 }
