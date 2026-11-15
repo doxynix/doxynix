@@ -723,8 +723,8 @@ bun --filter @doxynix/web test src/server/core
 ## List-read audit follow-ups (2026-11-15)
 
 [`list-read-audit.md`](../../../.superpowers/sdd/db-query-review-2026-11/list-read-audit.md) re-read
-the ten unbounded reads (`U*`) and the eight capped ones (`C*`) this scoreboard does not carry: they
-are one screen each and close in batches, so they stay out of the 36-item counter above.
+the seven unbounded reads (`U*`) and the eight capped ones (`C*`) this scoreboard does not carry:
+they are one screen each and close in batches, so they stay out of the 36-item counter above.
 
 - [x] **U2 · `loadImpactAnalysis` loaded every comment of the PR analysis** —
   `analysis.repository.ts` dropped the `comments` relation; findings come from `findingsJson`.
