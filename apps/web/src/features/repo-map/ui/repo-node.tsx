@@ -165,7 +165,7 @@ export const RepoNode = ({ data }: Props) => {
                 <span>{data.score}</span>
               </div>
               <Progress
-                indicatorClassName={data.score > 200 ? "bg-destructive" : "bg-foreground"}
+                indicatorClassName={data.score > 200 ? "bg-destructive-fill" : "bg-foreground"}
                 value={data.score / 5}
               />
             </div>

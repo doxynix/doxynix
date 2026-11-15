@@ -381,14 +381,14 @@ function SidebarTrigger({ className, onClick, ...props }: ComponentProps<typeof 
 
   return (
     <AppButton
-      className={cn("size-7", className)}
+      className={className}
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
       onClick={(event) => {
         onClick?.(event);
         toggleSidebar();
       }}
-      size="icon"
+      size="icon-sm"
       variant="ghost"
       {...props}
     >

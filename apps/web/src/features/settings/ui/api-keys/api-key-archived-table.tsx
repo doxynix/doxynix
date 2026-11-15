@@ -45,6 +45,7 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
 
         <CollapsibleTrigger asChild>
           <AppButton
+            aria-label={isArchivedOpen ? t("command_collapse") : t("command_expand")}
             className="size-8 p-0"
             size="sm"
             variant="ghost"
@@ -82,10 +83,14 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
                     />
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
-                    <TimeAgo
-                      date={key.lastUsed ?? ""}
-                      locale={locale}
-                    />
+                    {key.lastUsed != null ? (
+                      <TimeAgo
+                        date={key.lastUsed}
+                        locale={locale}
+                      />
+                    ) : (
+                      t("settings_api_keys_last_used_never")
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

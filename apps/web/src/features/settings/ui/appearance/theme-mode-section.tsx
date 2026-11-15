@@ -107,9 +107,9 @@ function ThemeOption({
     <Label
       className={cn(
         "relative flex flex-1 cursor-pointer flex-col gap-2 rounded-xl border p-2 font-normal transition-standard",
-        "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring/50",
+        "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring/80",
         disabled && "cursor-not-allowed opacity-50",
-        checked ? "border-primary bg-accent" : "border-input hover:bg-accent/50",
+        checked ? "border-primary-accent bg-accent" : "border-input hover:bg-accent/50",
       )}
       htmlFor={id}
     >

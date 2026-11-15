@@ -117,7 +117,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
                 "h-6 w-6 rounded-xl p-0 transition-standard",
                 options.caseSensitive
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "text-muted-foreground hover:bg-primary/90",
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
               )}
               onClick={() => toggleOption("caseSensitive")}
               tooltipText={t("repo_code_match_case")}
@@ -129,7 +129,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
                 "h-6 w-6 rounded-xl p-0 transition-standard",
                 options.wholeWord
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "text-muted-foreground hover:bg-primary/90",
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
               )}
               onClick={() => toggleOption("wholeWord")}
               tooltipText={t("repo_code_whole_word")}
@@ -142,7 +142,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
                 "h-6 w-6 rounded-xl p-0 transition-standard",
                 options.regexp
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "text-muted-foreground hover:bg-primary/90",
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
               )}
               onClick={() => toggleOption("regexp")}
               tooltipText={t("repo_code_regexp")}

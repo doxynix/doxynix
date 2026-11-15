@@ -64,7 +64,7 @@ const BreadcrumbLink = forwardRef<
     <Comp
       className={cn(
         "transition-colors hover:text-foreground",
-        "-mx-1 rounded-md px-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50",
+        "-mx-1 rounded-md px-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/80",
         className,
       )}
       ref={ref}

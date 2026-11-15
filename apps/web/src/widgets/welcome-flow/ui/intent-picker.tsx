@@ -59,7 +59,7 @@ export function IntentPicker({ disabled = false, onChange, value }: Readonly<Pro
             <label
               className={cn(
                 "flex min-w-0 cursor-pointer flex-col gap-2 rounded-xl border p-3 transition-standard",
-                "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring/50",
+                "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring/80",
                 checked
                   ? "border-border-strong bg-surface-selected"
                   : "border-border bg-card hover:bg-accent/50",

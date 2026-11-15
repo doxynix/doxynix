@@ -38,7 +38,7 @@ export function AgentHeader({ expanded, setExpanded }: Readonly<Props>) {
         <AppButton
           aria-label={expanded ? t("collapse_agent") : t("expand_agent")}
           onClick={() => setExpanded(!expanded)}
-          size="icon"
+          size="icon-sm"
           variant="ghost"
         >
           {expanded ? <Minimize2 /> : <Maximize2 />}
@@ -47,7 +47,7 @@ export function AgentHeader({ expanded, setExpanded }: Readonly<Props>) {
         <AppButton
           aria-label={tCommon("close")}
           onClick={closeAgent}
-          size="icon"
+          size="icon-sm"
           variant="ghost"
         >
           <X />

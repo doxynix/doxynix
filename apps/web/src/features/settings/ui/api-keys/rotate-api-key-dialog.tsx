@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from "@/shared/ui/core/dialog";
 import { Input } from "@/shared/ui/core/input";
+import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
@@ -58,20 +59,22 @@ export function RotateApiKeyDialog({ apiKey }: Readonly<Props>) {
       onOpenChange={handleOpenChange}
       open={open}
     >
-      <DialogTrigger asChild>
-        <AppButton
-          aria-label={t("settings_api_keys_rotate_aria")}
-          className="text-muted-foreground not-md:opacity-100 opacity-0 transition-opacity group-hover:opacity-100"
-          onClick={(e) => {
-            e.preventDefault();
-            setOpen(true);
-          }}
-          size="icon"
-          variant="ghost"
-        >
-          <RefreshCw />
-        </AppButton>
-      </DialogTrigger>
+      <AppTooltip content={t("settings_api_keys_rotate_key")}>
+        <DialogTrigger asChild>
+          <AppButton
+            aria-label={t("settings_api_keys_rotate_aria")}
+            className="text-muted-foreground not-md:opacity-100 opacity-0 transition-opacity group-hover:opacity-100"
+            onClick={(e) => {
+              e.preventDefault();
+              setOpen(true);
+            }}
+            size="icon"
+            variant="ghost"
+          >
+            <RefreshCw />
+          </AppButton>
+        </DialogTrigger>
+      </AppTooltip>
 
       <DialogContent
         onEscapeKeyDown={(e) => issuedKey != null && e.preventDefault()}

@@ -41,7 +41,7 @@ function UsageRow({
         : "text-muted-foreground";
   const indicatorClass =
     forecast.severity === "critical"
-      ? "bg-destructive"
+      ? "bg-destructive-fill"
       : forecast.severity === "warning"
         ? "bg-warning"
         : undefined;
@@ -61,6 +61,7 @@ function UsageRow({
       </div>
       {limit != null && (
         <Progress
+          aria-label={label}
           indicatorClassName={indicatorClass}
           value={forecast.percent}
         />
