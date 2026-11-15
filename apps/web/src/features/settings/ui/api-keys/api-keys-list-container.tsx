@@ -2,12 +2,12 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { API_KEYS_PAGE_SIZE } from "@/shared/config/pagination";
 import { AppInfiniteSentinel } from "@/shared/ui/kit/app-infinite-sentinel";
 import { SkeletonList } from "@/shared/ui/kit/app-skeleton";
 
 import { ApiKeyCardSkeleton } from "@/entities/api-key/ui/api-key-card-skeleton";
 
-import { API_KEYS_PAGE_SIZE } from "../../model/pagination";
 import { ApiKeysList } from "./api-keys-list";
 
 export function ApiKeysListContainer() {

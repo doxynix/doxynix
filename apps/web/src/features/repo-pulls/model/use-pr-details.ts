@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
-import { PR_COMMENTS_PAGE_SIZE, PR_FIXES_PAGE_SIZE } from "@/shared/config/repos";
+import { PR_COMMENTS_PAGE_SIZE, PR_FIXES_PAGE_SIZE } from "@/shared/config/pagination";
 import { commentToFinding } from "@/shared/lib/comment-to-finding";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
 

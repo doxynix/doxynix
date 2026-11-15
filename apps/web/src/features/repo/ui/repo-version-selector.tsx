@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 
 import { useTRPC } from "@/shared/api/trpc";
-import { REPO_ANALYSIS_PAGE_SIZE } from "@/shared/config/repos";
+import { REPO_ANALYSIS_PAGE_SIZE } from "@/shared/config/pagination";
 import { AppBadge } from "@/shared/ui/core/badge";
 import {
   Select,

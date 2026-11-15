@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { parseAsInteger, useQueryState } from "nuqs";
 
 import { cn } from "@/shared/lib/cn";
-import { clampPaginationMax, isBeyondMaxPage } from "@/shared/lib/pagination";
+import { clampPaginationMax } from "@/shared/lib/pagination";
 import {
   Pagination,
   PaginationContent,
@@ -51,7 +51,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
 
   const maxPage = clampPaginationMax(meta.totalPages);
   // Both caps mean the same thing to the reader: rows past `reachableRows` need a filter or a date.
-  const showCapHint = meta.capped || isBeyondMaxPage(meta.totalPages);
+  const showCapHint = meta.capped || maxPage < meta.totalPages;
   const reachableRows = maxPage * meta.pageSize;
 
   const handlePageChange = (targetPage: number, btnType: "next" | "prev" | number) => {

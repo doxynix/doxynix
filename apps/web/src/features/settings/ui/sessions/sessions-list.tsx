@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { SESSIONS_PAGE_SIZE } from "@/shared/config/pagination";
 import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { authClient } from "@/shared/lib/auth-client";
 import { formatFullDate } from "@/shared/lib/date-utils";
@@ -18,8 +19,6 @@ import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { ConnectionCard } from "@/entities/connection/ui/connection-card";
-
-import { SESSIONS_PAGE_SIZE } from "../../model/pagination";
 
 function SessionCardSkeleton() {
   return (

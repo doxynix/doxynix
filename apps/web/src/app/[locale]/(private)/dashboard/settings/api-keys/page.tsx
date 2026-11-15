@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
+import { API_KEYS_PAGE_SIZE } from "@/shared/config/pagination";
 import { createMetadata } from "@/shared/lib/metadata";
 
-import { API_KEYS_PAGE_SIZE } from "@/features/settings/model/pagination";
 import { ApiKeysListContainer } from "@/features/settings/ui/api-keys/api-keys-list-container";
 import { CreateApiKeyDialog } from "@/features/settings/ui/api-keys/create-api-key-dialog";
 

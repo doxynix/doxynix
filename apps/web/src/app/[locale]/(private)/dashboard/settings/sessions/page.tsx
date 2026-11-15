@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
+import { SESSIONS_PAGE_SIZE } from "@/shared/config/pagination";
 import { createMetadata } from "@/shared/lib/metadata";
 
-import { SESSIONS_PAGE_SIZE } from "@/features/settings/model/pagination";
 import { SessionsList } from "@/features/settings/ui/sessions/sessions-list";
 
 import { HydrateClient, prefetch, trpcProxy } from "@/server/core/trpc/prefetch";

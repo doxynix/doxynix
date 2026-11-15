@@ -4,7 +4,7 @@ import { GitPullRequest } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useTRPC } from "@/shared/api/trpc";
-import { REPO_ANALYSIS_PAGE_SIZE } from "@/shared/config/repos";
+import { REPO_ANALYSIS_PAGE_SIZE } from "@/shared/config/pagination";
 import { Link } from "@/shared/i18n/navigation";
 import { AppButton } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";

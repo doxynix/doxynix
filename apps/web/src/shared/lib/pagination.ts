@@ -33,7 +33,3 @@ export function getPaginationItems(totalPages: number, currentPage: number): Pag
 export function clampPaginationMax(totalPages: number): number {
   return Math.min(totalPages, MAX_PAGE);
 }
-
-export function isBeyondMaxPage(totalPages: number): boolean {
-  return totalPages > MAX_PAGE;
-}

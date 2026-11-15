@@ -1,4 +1,4 @@
-import { REPO_ANALYSIS_PAGE_SIZE } from "@/shared/config/repos";
+import { REPO_ANALYSIS_PAGE_SIZE } from "@/shared/config/pagination";
 import { createRepoMetadata } from "@/shared/lib/metadata";
 import type { RepoPageProps } from "@/shared/lib/next.types";
 
