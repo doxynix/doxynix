@@ -10,7 +10,7 @@ import { analyzeService } from "./analyze.service";
 
 type Run = { id: string; status: string };
 
-function page(items: Run[], nextCursor?: string, total = items.length) {
+function page(items: Run[], nextCursor?: string, total: null | number = items.length) {
   return {
     items,
     meta: { hasNextPage: nextCursor != null, nextCursor },
@@ -33,7 +33,7 @@ describe("analyze service", () => {
   it("walks every page so an in-flight run older than the first page stays reachable", async () => {
     historyQuery
       .mockResolvedValueOnce(page(runs(100, 100, "DONE"), "cursor-2", 120))
-      .mockResolvedValueOnce(page(runs(200, 20, "PENDING"), undefined, 120));
+      .mockResolvedValueOnce(page(runs(200, 20, "PENDING"), undefined, null));
 
     const history = await analyzeService.getHistory("repo-1");
 

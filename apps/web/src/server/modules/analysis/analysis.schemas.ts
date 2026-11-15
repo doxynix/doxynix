@@ -217,7 +217,7 @@ export const AnalysisHistoryItemSchema = z.object({
 export const AnalysisHistoryOutputSchema = z.object({
   items: z.array(AnalysisHistoryItemSchema),
   meta: CursorMetaSchema,
-  total: z.number().int(),
+  total: z.number().int().nullable(),
 });
 
 export const AnalysisVersionRefSchema = z.object({
@@ -240,7 +240,7 @@ export const PullListSummarySchema = z.object({
 export const PullListOutputSchema = z.object({
   items: z.array(PullListSummarySchema),
   meta: CursorMetaSchema,
-  total: z.number().int(),
+  total: z.number().int().nullable(),
 });
 
 export const PRCommentSchema = z.object({

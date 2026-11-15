@@ -159,14 +159,12 @@ export const prImpactService = {
           riskScore: true,
           status: true,
         },
-        where: {
-          repo: {
-            id: repoId,
-            workspaceId,
-          },
-        },
+        where: { repo: { id: repoId, workspaceId } },
       }),
-      db.pullRequestAnalysis.count({ where: { repo: { id: repoId, workspaceId } } }),
+      // Only the first page renders the total, so a later page must not pay for a COUNT(*).
+      input.cursor == null
+        ? db.pullRequestAnalysis.count({ where: { repo: { id: repoId, workspaceId } } })
+        : null,
     ]);
 
     const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, input.limit);

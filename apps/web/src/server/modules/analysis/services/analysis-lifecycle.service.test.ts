@@ -275,7 +275,7 @@ describe("analysisLifecycleService.getHistory", () => {
     expect(result.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
   });
 
-  it("keeps the total from the count query independent of the page", async () => {
+  it("counts the whole history on the first page", async () => {
     const { count, db } = buildHistoryDb([makeHistoryRow()], 620);
 
     const result = await analysisLifecycleService.getHistory(db, REPO_ID, WORKSPACE_ID, {
@@ -286,6 +286,18 @@ describe("analysisLifecycleService.getHistory", () => {
     expect(count).toHaveBeenCalledWith({
       where: { repo: { id: REPO_ID, workspaceId: WORKSPACE_ID } },
     });
+  });
+
+  it("skips the count once a cursor is given", async () => {
+    const { count, db } = buildHistoryDb([makeHistoryRow()], 620);
+
+    const result = await analysisLifecycleService.getHistory(db, REPO_ID, WORKSPACE_ID, {
+      cursor: "018f0000-0000-7000-8000-00000000000b",
+      limit: 2,
+    });
+
+    expect(result.total).toBeNull();
+    expect(count).not.toHaveBeenCalled();
   });
 });
 

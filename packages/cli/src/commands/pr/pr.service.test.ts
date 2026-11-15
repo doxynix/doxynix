@@ -10,7 +10,7 @@ import { prService } from "./pr.service";
 
 type Pull = { id: string; prNumber: number };
 
-function page(items: Pull[], nextCursor?: string, total = items.length) {
+function page(items: Pull[], nextCursor?: string, total: null | number = items.length) {
   return {
     items,
     meta: { hasNextPage: nextCursor != null, nextCursor },
@@ -33,7 +33,7 @@ describe("pr service", () => {
   it("resolves a PR that only exists past the first page", async () => {
     listQuery
       .mockResolvedValueOnce(page(pulls(100, 100), "cursor-2", 120))
-      .mockResolvedValueOnce(page(pulls(200, 20), undefined, 120));
+      .mockResolvedValueOnce(page(pulls(200, 20), undefined, null));
 
     const result = await prService.listByRepository("repo-1");
 

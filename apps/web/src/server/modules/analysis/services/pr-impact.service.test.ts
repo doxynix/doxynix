@@ -239,12 +239,24 @@ describe("prImpactService.listByRepository", () => {
     expect(result.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
   });
 
-  it("keeps the comment count mapping and the total from the count query", async () => {
+  it("keeps the comment count mapping and counts the first page", async () => {
     const { db } = buildPullDb([makePullRow({ _count: { comments: 7 } })], 620);
 
     const result = await prImpactService.listByRepository(db, REPO_ID, WORKSPACE_ID, { limit: 50 });
 
     expect(result.items[0]?.findingCount).toBe(7);
     expect(result.total).toBe(620);
+  });
+
+  it("skips the count once a cursor is given", async () => {
+    const { count, db } = buildPullDb([makePullRow()], 620);
+
+    const result = await prImpactService.listByRepository(db, REPO_ID, WORKSPACE_ID, {
+      cursor: "018f0000-0000-7000-8000-00000000000b",
+      limit: 2,
+    });
+
+    expect(result.total).toBeNull();
+    expect(count).not.toHaveBeenCalled();
   });
 });

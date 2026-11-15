@@ -231,6 +231,12 @@ describe("AnalysisHistoryOutputSchema", () => {
       AnalysisHistoryOutputSchema.parse({ items: [], meta: { hasNextPage: false }, total: 0 }),
     ).toEqual({ items: [], meta: { hasNextPage: false }, total: 0 });
   });
+
+  it("accepts a later page that carries no count", () => {
+    expect(
+      AnalysisHistoryOutputSchema.parse({ items: [], meta: { hasNextPage: true }, total: null }),
+    ).toEqual({ items: [], meta: { hasNextPage: true }, total: null });
+  });
 });
 
 describe("PullListOutputSchema", () => {
@@ -253,6 +259,12 @@ describe("PullListOutputSchema", () => {
 
     expect(parsed.items[0]).toEqual(item);
     expect(parsed.total).toBe(1);
+  });
+
+  it("accepts a later page that carries no count", () => {
+    expect(
+      PullListOutputSchema.parse({ items: [], meta: { hasNextPage: true }, total: null }).total,
+    ).toBeNull();
   });
 });
 

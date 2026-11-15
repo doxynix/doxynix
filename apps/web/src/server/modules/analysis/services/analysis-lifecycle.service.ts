@@ -298,7 +298,10 @@ export const analysisLifecycleService = {
         },
         where: { repo: { id: repoId, workspaceId } },
       }),
-      db.analysis.count({ where: { repo: { id: repoId, workspaceId } } }),
+      // Only the first page renders the total, so a later page must not pay for a COUNT(*).
+      input.cursor == null
+        ? db.analysis.count({ where: { repo: { id: repoId, workspaceId } } })
+        : null,
     ]);
 
     const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, input.limit);
