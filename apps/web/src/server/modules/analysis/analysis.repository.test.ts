@@ -6,6 +6,7 @@ import type { DbClient } from "@/server/core/db";
 import {
   analysisRepo,
   MAX_IMPACT_FIXES,
+  MAX_LEGACY_COMMENTS,
   MAX_REPO_DOCUMENTS,
   repoWithLatestAnalysisAndDocsSelect,
 } from "./analysis.repository";
@@ -253,6 +254,27 @@ describe("analysisRepo.loadImpactAnalysis", () => {
       take: MAX_IMPACT_FIXES,
     });
     expect(select._count).toStrictEqual({ select: { generatedFixes: true } });
+  });
+});
+
+describe("analysisRepo.loadLegacyComments", () => {
+  it("caps the legacy comment read and keeps it inside the workspace", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const db = { pullRequestComment: { findMany } } as unknown as DbClient;
+
+    await analysisRepo.loadLegacyComments(db, ANALYSIS_ID, WORKSPACE_ID);
+
+    const args = findMany.mock.calls[0]?.[0];
+    expect(MAX_LEGACY_COMMENTS).toBe(500);
+    expect(args?.take).toBe(MAX_LEGACY_COMMENTS);
+    expect(args?.where).toStrictEqual({
+      analysis: { id: ANALYSIS_ID, repo: { workspaceId: WORKSPACE_ID } },
+    });
+    expect(args?.orderBy).toStrictEqual([
+      { riskLevel: "desc" },
+      { filePath: "asc" },
+      { line: "asc" },
+    ]);
   });
 });
 

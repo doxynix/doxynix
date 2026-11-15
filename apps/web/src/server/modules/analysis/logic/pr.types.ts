@@ -53,6 +53,15 @@ export type PRChangedFileSnapshot = {
   status: "added" | "modified" | "removed" | "renamed";
 };
 
+// Only read for rows written before `findingsJson` / `changedFilesJson` existed.
+export type LegacyImpactComment = {
+  body: string;
+  filePath: string;
+  findingType: string;
+  line: number;
+  riskLevel: number;
+};
+
 export type PRImpactPayload = {
   affectedNodes: Array<{
     fileCount: number;

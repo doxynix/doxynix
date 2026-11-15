@@ -152,6 +152,8 @@ const FIX_LIST_LIMIT = 200;
 
 export const MAX_IMPACT_FIXES = 50;
 
+export const MAX_LEGACY_COMMENTS = 500;
+
 export const analysisRepo = {
   // No revalidateTag: a task has no Next store; readers miss the old page via the analysis version.
   async addComments(
@@ -497,6 +499,27 @@ export const analysisRepo = {
     });
 
     return pickLatestDocsByType(docs);
+  },
+
+  async loadLegacyComments(
+    db: DbClient,
+    analysisId: string,
+    workspaceId: string,
+    take = MAX_LEGACY_COMMENTS,
+  ) {
+    return db.pullRequestComment.findMany({
+      orderBy: [{ riskLevel: "desc" }, { filePath: "asc" }, { line: "asc" }],
+      select: {
+        body: true,
+        filePath: true,
+        findingType: true,
+        id: true,
+        line: true,
+        riskLevel: true,
+      },
+      take,
+      where: { analysis: { id: analysisId, repo: { workspaceId } } },
+    });
   },
 
   async loadRelatedFixes(db: DbClient, analysisIds: string[], workspaceId: string) {

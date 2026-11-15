@@ -25,7 +25,7 @@ import {
   normalizeWriterStatuses,
   toDocSummary,
 } from "./logic/payload";
-import type { PRChangedFileSnapshot, PRImpactPayload } from "./logic/pr.types";
+import type { LegacyImpactComment, PRChangedFileSnapshot, PRImpactPayload } from "./logic/pr.types";
 import {
   isPathInsideScope,
   type StructureNodePayload as LeafStructureNodePayload,
@@ -37,19 +37,6 @@ type AnalysisRef = {
   commitSha: null | string;
   createdAt: Date;
 };
-
-// The impact select stopped loading `comments`; these fallbacks only serve pre-`findingsJson` rows.
-type LegacyImpactComment = {
-  body: string;
-  filePath: string;
-  findingType: string;
-  line: number;
-  riskLevel: number;
-};
-
-function legacyComments(analysis: ImpactAnalysis): LegacyImpactComment[] {
-  return (analysis as ImpactAnalysis & { comments?: LegacyImpactComment[] }).comments ?? [];
-}
 
 type ExplainPayload = NodeExplainPayload;
 
@@ -281,7 +268,10 @@ export const analysisMapper = {
     return matchPath(filePath) ?? (previousFilePath == null ? null : matchPath(previousFilePath));
   },
 
-  parseChangedFilesSnapshot(analysis: ImpactAnalysis): PRChangedFileSnapshot[] {
+  parseChangedFilesSnapshot(
+    analysis: ImpactAnalysis,
+    legacyComments?: LegacyImpactComment[],
+  ): PRChangedFileSnapshot[] {
     const parsed = z.array(changedFileSnapshotSchema).safeParse(analysis.changedFilesJson);
     if (parsed.success) {
       return parsed.data.map((file) => ({
@@ -294,11 +284,11 @@ export const analysisMapper = {
     }
 
     const legacyPaths = new Set<string>();
-    for (const comment of legacyComments(analysis)) {
+    for (const comment of legacyComments ?? []) {
       legacyPaths.add(normalize(comment.filePath));
     }
 
-    const findings = this.parsePersistedFindings(analysis);
+    const findings = this.parsePersistedFindings(analysis, legacyComments);
     for (const finding of findings) {
       legacyPaths.add(normalize(finding.file));
     }
@@ -312,7 +302,10 @@ export const analysisMapper = {
     }));
   },
 
-  parsePersistedFindings(analysis: ImpactAnalysis): ParsedFinding[] {
+  parsePersistedFindings(
+    analysis: ImpactAnalysis,
+    legacyComments?: LegacyImpactComment[],
+  ): ParsedFinding[] {
     const parsed = z.array(persistedFindingSchema).safeParse(analysis.findingsJson);
     if (parsed.success) {
       return parsed.data.map((finding) => ({
@@ -321,7 +314,7 @@ export const analysisMapper = {
       }));
     }
 
-    return legacyComments(analysis).map((comment) => ({
+    return (legacyComments ?? []).map((comment) => ({
       file: normalize(comment.filePath),
       line: comment.line,
       message: comment.body,

@@ -34,7 +34,7 @@ import type { RepoMetrics } from "./engine/core/metrics.types";
 import defaultAiResult from "./fixtures/default-ai-result.json";
 import defaultMetrics from "./fixtures/default-metrics.json";
 import { coerceAnalysisPayload } from "./logic/payload";
-import type { PRImpactPayload } from "./logic/pr.types";
+import type { LegacyImpactComment, PRImpactPayload } from "./logic/pr.types";
 import type {
   NodeExplainPayload,
   StoredDocument,
@@ -196,7 +196,6 @@ const makeImpactAnalysis = (overrides: Record<string, unknown> = {}): ImpactAnal
   ({
     baseSha: "base",
     changedFilesJson: [],
-    comments: [],
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
     findingsJson: [],
     generatedFixes: [],
@@ -207,6 +206,14 @@ const makeImpactAnalysis = (overrides: Record<string, unknown> = {}): ImpactAnal
     status: "DONE",
     ...overrides,
   }) as unknown as ImpactAnalysis;
+
+const LEGACY_COMMENT: LegacyImpactComment = {
+  body: "b",
+  filePath: "src/legacy.ts",
+  findingType: "BUG",
+  line: 1,
+  riskLevel: 7,
+};
 
 const topLevelNode = (overrides: Partial<TopLevelNode> = {}): TopLevelNode => ({
   id: "group:src",
@@ -360,25 +367,15 @@ describe("parseChangedFilesSnapshot", () => {
     ]);
   });
 
-  it("invalid snapshot → legacy paths from comments and findings (modified, zeros)", () => {
+  it("invalid snapshot → legacy paths from the explicit comments and findings (modified, zeros)", () => {
     const analysis = makeImpactAnalysis({
       changedFilesJson: [{ additions: -1, deletions: 0, filePath: "", status: "bogus" }],
-      comments: [
-        {
-          body: "b",
-          filePath: "src/legacy.ts",
-          findingType: "BUG",
-          id: "c1",
-          line: 1,
-          riskLevel: 7,
-        },
-      ],
       findingsJson: [
         { file: "src/./other.ts", line: 2, message: "m", title: "t", type: "security" },
       ],
     });
 
-    expect(analysisMapper.parseChangedFilesSnapshot(analysis)).toEqual([
+    expect(analysisMapper.parseChangedFilesSnapshot(analysis, [LEGACY_COMMENT])).toEqual([
       {
         additions: 0,
         deletions: 0,
@@ -386,6 +383,25 @@ describe("parseChangedFilesSnapshot", () => {
         previousFilePath: null,
         status: "modified",
       },
+      {
+        additions: 0,
+        deletions: 0,
+        filePath: "src/other.ts",
+        previousFilePath: null,
+        status: "modified",
+      },
+    ]);
+  });
+
+  it("invalid snapshot without legacy comments → findings only", () => {
+    const analysis = makeImpactAnalysis({
+      changedFilesJson: [{ additions: -1, deletions: 0, filePath: "", status: "bogus" }],
+      findingsJson: [
+        { file: "src/./other.ts", line: 2, message: "m", title: "t", type: "security" },
+      ],
+    });
+
+    expect(analysisMapper.parseChangedFilesSnapshot(analysis)).toEqual([
       {
         additions: 0,
         deletions: 0,
@@ -408,24 +424,22 @@ describe("parsePersistedFindings", () => {
     ]);
   });
 
-  it("invalid findingsJson → falls back to comments", () => {
+  it("invalid findingsJson → falls back to the explicit legacy comments", () => {
     const analysis = makeImpactAnalysis({
-      comments: [
-        {
-          body: "b",
-          filePath: "src/c.ts",
-          findingType: "BUG",
-          id: "c1",
-          line: 1,
-          riskLevel: 7,
-        },
-      ],
       findingsJson: [{ file: "", line: 0, message: "", title: "", type: "" }],
     });
 
-    expect(analysisMapper.parsePersistedFindings(analysis)).toEqual([
-      { file: "src/c.ts", line: 1, message: "b", score: 7, title: "BUG", type: "BUG" },
+    expect(analysisMapper.parsePersistedFindings(analysis, [LEGACY_COMMENT])).toEqual([
+      { file: "src/legacy.ts", line: 1, message: "b", score: 7, title: "BUG", type: "BUG" },
     ]);
+  });
+
+  it("invalid findingsJson without legacy comments → no findings", () => {
+    const analysis = makeImpactAnalysis({
+      findingsJson: [{ file: "", line: 0, message: "", title: "", type: "" }],
+    });
+
+    expect(analysisMapper.parsePersistedFindings(analysis)).toEqual([]);
   });
 });
 
