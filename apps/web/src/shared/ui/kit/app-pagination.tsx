@@ -50,7 +50,9 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
   }
 
   const maxPage = clampPaginationMax(meta.totalPages);
-  const isCappedByCeiling = isBeyondMaxPage(meta.totalPages);
+  // Both caps mean the same thing to the reader: rows past `reachableRows` need a filter or a date.
+  const showCapHint = meta.capped || isBeyondMaxPage(meta.totalPages);
+  const reachableRows = maxPage * meta.pageSize;
 
   const handlePageChange = (targetPage: number, btnType: "next" | "prev" | number) => {
     if (targetPage === page) {
@@ -148,15 +150,9 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
         </PaginationItem>
       </PaginationContent>
 
-      {meta.capped && (
+      {showCapHint && (
         <p className="mt-2 text-center text-muted-foreground text-xs">
-          {t("capped_hint", { count: meta.filteredCount })}
-        </p>
-      )}
-
-      {isCappedByCeiling && (
-        <p className="mt-2 text-center text-muted-foreground text-xs">
-          {t("capped_hint", { count: maxPage })}
+          {t("capped_hint", { count: reachableRows })}
         </p>
       )}
     </Pagination>
