@@ -61,15 +61,17 @@ describe("agent service", () => {
   });
 
   it("creates and listings sessions through the agent router", async () => {
-    agentQuery.mockResolvedValue([{ id: "session-1" }]);
+    agentQuery.mockResolvedValue({ items: [{ id: "session-1" }], meta: { hasNextPage: false } });
 
     await agentService.createSession({ repoId: "repo-1" });
-    await agentService.getSessionHistory("session-1");
-    await agentService.listSessions({ repoId: "repo-1" } as any);
+    const history = await agentService.getSessionHistory("session-1");
+    const sessions = await agentService.listSessions({ repoId: "repo-1" } as any);
 
     expect(agentMutate).toHaveBeenCalledWith({ repoId: "repo-1" });
-    expect(agentQuery).toHaveBeenNthCalledWith(1, { sessionId: "session-1" });
-    expect(agentQuery).toHaveBeenNthCalledWith(2, { repoId: "repo-1" });
+    expect(agentQuery).toHaveBeenNthCalledWith(1, { limit: 100, sessionId: "session-1" });
+    expect(agentQuery).toHaveBeenNthCalledWith(2, { limit: 100, repoId: "repo-1" });
+    expect(history).toEqual([{ id: "session-1" }]);
+    expect(sessions).toEqual([{ id: "session-1" }]);
   });
 
   it("parses SSE stream events and returns pending approvals", async () => {

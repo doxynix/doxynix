@@ -19,7 +19,11 @@ vi.mock("@/server/core/realtime", () => ({
   },
 }));
 
-function stubDb(messages: ChatMessage[] = [], sessions: unknown[] = []) {
+function stubDb(
+  messages: ChatMessage[] = [],
+  sessions: unknown[] = [],
+  repo: unknown = { id: REPO_ID },
+) {
   const calls: unknown[] = [];
   const sessionListCalls: unknown[] = [];
 
@@ -46,7 +50,7 @@ function stubDb(messages: ChatMessage[] = [], sessions: unknown[] = []) {
     },
     repo: {
       findFirst() {
-        return Promise.resolve({ id: REPO_ID });
+        return Promise.resolve(repo);
       },
     },
   } as unknown as DbClient;
@@ -69,22 +73,26 @@ describe("agentService.getSessionHistory", () => {
   it("scopes the query to the calling user as well as the session", async () => {
     const { calls, db } = stubDb([makeMessage()]);
 
-    const history = await agentService.getSessionHistory(db, USER_ID, SESSION_ID);
+    const history = await agentService.getSessionHistory(db, USER_ID, {
+      limit: 100,
+      sessionId: SESSION_ID,
+    });
 
     expect(calls).toHaveLength(1);
     expect(calls[0]).toStrictEqual({
-      orderBy: { createdAt: "desc" },
+      cursor: undefined,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       select: { createdAt: true, id: true, parts: true, role: true },
-      take: 200,
+      take: 101,
       where: { session: { userId: USER_ID }, sessionId: SESSION_ID },
     });
-    expect(history).toHaveLength(1);
+    expect(history.items).toHaveLength(1);
   });
 
   it("never issues an unscoped sessionId-only lookup", async () => {
     const { calls, db } = stubDb();
 
-    await agentService.getSessionHistory(db, USER_ID, SESSION_ID);
+    await agentService.getSessionHistory(db, USER_ID, { limit: 100, sessionId: SESSION_ID });
 
     const where = (calls[0] as { where: Record<string, unknown> }).where;
     expect(where).toHaveProperty("session");
@@ -102,21 +110,60 @@ describe("agentService.getSessionHistory", () => {
     });
     const { db } = stubDb([newer, older]);
 
-    const history = await agentService.getSessionHistory(db, USER_ID, SESSION_ID);
+    const history = await agentService.getSessionHistory(db, USER_ID, {
+      limit: 100,
+      sessionId: SESSION_ID,
+    });
 
-    expect(history.map((message) => message.id)).toStrictEqual([older.id, newer.id]);
+    expect(history.items.map((message) => message.id)).toStrictEqual([older.id, newer.id]);
+    expect(history.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
+  });
+
+  it("passes an older-page cursor through as a row id", async () => {
+    const cursor = "018f0000-0000-7000-8000-0000000000a1";
+    const { calls, db } = stubDb();
+
+    await agentService.getSessionHistory(db, USER_ID, { cursor, limit: 2, sessionId: SESSION_ID });
+
+    expect(calls[0]).toMatchObject({ cursor: { id: cursor }, take: 3 });
+  });
+
+  it("turns the extra probe row into the next cursor", async () => {
+    const newest = makeMessage({
+      createdAt: new Date("2026-03-01T12:03:00Z"),
+      id: "018f0000-0000-7000-8000-0000000000b0",
+    });
+    const older = makeMessage({
+      createdAt: new Date("2026-03-01T12:02:00Z"),
+      id: "018f0000-0000-7000-8000-0000000000b1",
+    });
+    const probe = makeMessage({
+      createdAt: new Date("2026-03-01T12:01:00Z"),
+      id: "018f0000-0000-7000-8000-0000000000b2",
+    });
+    const { db } = stubDb([newest, older, probe]);
+
+    const history = await agentService.getSessionHistory(db, USER_ID, {
+      limit: 2,
+      sessionId: SESSION_ID,
+    });
+
+    expect(history.items).toHaveLength(2);
+    expect(history.items.map((message) => message.id)).toStrictEqual([older.id, newest.id]);
+    expect(history.meta).toStrictEqual({ hasNextPage: true, nextCursor: probe.id });
   });
 });
 
 describe("agentService.listSessions", () => {
-  it("bounds the list and selects only the fields the router returns", async () => {
+  it("keysets on updatedAt and selects only the fields the router returns", async () => {
     const { db, sessionListCalls } = stubDb();
 
-    await agentService.listSessions(db, USER_ID, "ws-1", undefined);
+    await agentService.listSessions(db, USER_ID, "ws-1", { limit: 50 });
 
     expect(sessionListCalls).toHaveLength(1);
     expect(sessionListCalls[0]).toStrictEqual({
-      orderBy: { updatedAt: "desc" },
+      cursor: undefined,
+      orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
       select: {
         createdAt: true,
         id: true,
@@ -125,9 +172,45 @@ describe("agentService.listSessions", () => {
         title: true,
         updatedAt: true,
       },
-      take: 100,
+      take: 51,
       where: { repoId: null, userId: USER_ID },
     });
+  });
+
+  it("keeps the currentRepo filter and pages older sessions by cursor", async () => {
+    const cursor = "018f0000-0000-7000-8000-0000000000c1";
+    const { db, sessionListCalls } = stubDb([], [], { id: REPO_ID });
+
+    const page = await agentService.listSessions(db, USER_ID, "ws-1", {
+      currentRepo: { name: "repo", owner: "owner" },
+      cursor,
+      limit: 50,
+    });
+
+    expect(sessionListCalls[0]).toMatchObject({
+      cursor: { id: cursor },
+      take: 51,
+      where: { repoId: REPO_ID, userId: USER_ID },
+    });
+    expect(page.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
+  });
+
+  it("flips hasNextPage when the probe row comes back", async () => {
+    const newest = {
+      createdAt: new Date("2026-03-01T12:00:00Z"),
+      id: "018f0000-0000-7000-8000-0000000000e0",
+      repo: null,
+      repoId: null,
+      title: "Chat 0",
+      updatedAt: new Date("2026-03-01T12:02:00Z"),
+    };
+    const older = { ...newest, id: "018f0000-0000-7000-8000-0000000000e1", title: "Chat 1" };
+    const { db } = stubDb([], [newest, older]);
+
+    const page = await agentService.listSessions(db, USER_ID, "ws-1", { limit: 1 });
+
+    expect(page.items.map((session) => session.id)).toStrictEqual([newest.id]);
+    expect(page.meta).toStrictEqual({ hasNextPage: true, nextCursor: older.id });
   });
 });
 

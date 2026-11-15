@@ -1,4 +1,4 @@
-import { isRecord } from "@doxynix/shared";
+import { isRecord, MAX_PAGE_SIZE } from "@doxynix/shared";
 
 import { trpc } from "@/core/client";
 import { getApiUrl, getToken } from "@/core/config";
@@ -23,11 +23,15 @@ export const agentService = {
   },
 
   async getSessionHistory(sessionId: string) {
-    return trpc.agent.getSessionHistory.query({ sessionId });
+    const { items } = await trpc.agent.getSessionHistory.query({ limit: MAX_PAGE_SIZE, sessionId });
+
+    return items;
   },
 
   async listSessions(input?: ListSessionsInput) {
-    return trpc.agent.listSessions.query(input ?? {});
+    const { items } = await trpc.agent.listSessions.query({ limit: MAX_PAGE_SIZE, ...input });
+
+    return items;
   },
 
   async stream(

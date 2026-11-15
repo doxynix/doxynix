@@ -1,8 +1,23 @@
+import { ChatRoleSchema, CursorMetaSchema, MAX_PAGE_SIZE } from "@doxynix/shared";
 import * as z from "zod";
 
 import { createTRPCRouter, protectedProcedure, workspaceProcedure } from "@/server/core/trpc/init";
+import { CursorSchema } from "@/server/utils/pagination";
 
+import type { SessionMessagePart } from "./agent.mapper";
 import { agentService } from "./agent.service";
+
+const SessionMessageSchema = z.object({
+  createdAt: z.date(),
+  id: z.uuid(),
+  parts: z.array(z.custom<SessionMessagePart>()),
+  role: ChatRoleSchema,
+});
+
+const SessionHistoryOutput = z.object({
+  items: z.array(SessionMessageSchema),
+  meta: CursorMetaSchema,
+});
 
 const SessionListItemSchema = z.object({
   createdAt: z.date(),
@@ -17,7 +32,25 @@ const SessionListItemSchema = z.object({
   updatedAt: z.date(),
 });
 
-const ListSessionsOutput = z.array(SessionListItemSchema);
+const ListSessionsOutput = z.object({
+  items: z.array(SessionListItemSchema),
+  meta: CursorMetaSchema,
+});
+
+const SessionHistoryInput = CursorSchema.omit({ search: true }).extend({
+  limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(100),
+  sessionId: z.uuid(),
+});
+
+const ListSessionsInput = CursorSchema.omit({ search: true }).extend({
+  currentRepo: z
+    .object({
+      name: z.string(),
+      owner: z.string(),
+    })
+    .optional(),
+  limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(50),
+});
 
 const CreateSessionOutput = z.object({
   createdAt: z.date(),
@@ -51,24 +84,14 @@ export const agentChatRouter = createTRPCRouter({
     }),
 
   getSessionHistory: protectedProcedure
-    .input(z.object({ sessionId: z.uuid() }))
+    .input(SessionHistoryInput)
+    .output(SessionHistoryOutput)
     .query(async ({ ctx, input }) => {
-      return agentService.getSessionHistory(ctx.db, ctx.session.user.id, input.sessionId);
+      return agentService.getSessionHistory(ctx.db, ctx.session.user.id, input);
     }),
 
   listSessions: workspaceProcedure
-    .input(
-      z
-        .object({
-          currentRepo: z
-            .object({
-              name: z.string(),
-              owner: z.string(),
-            })
-            .optional(),
-        })
-        .optional(),
-    )
+    .input(ListSessionsInput)
     .output(ListSessionsOutput)
     .query(async ({ ctx, input }) => {
       return agentService.listSessions(ctx.db, ctx.session.user.id, ctx.workspace.id, input);

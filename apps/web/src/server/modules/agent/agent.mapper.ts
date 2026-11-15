@@ -3,7 +3,7 @@ import type { UIDataTypes, UIMessagePart, UITools } from "ai";
 
 import { appLogger } from "@/server/core/app-logger";
 
-type SessionMessagePart = UIMessagePart<UIDataTypes, UITools>;
+export type SessionMessagePart = UIMessagePart<UIDataTypes, UITools>;
 
 export type SessionMessage = {
   createdAt: Date;

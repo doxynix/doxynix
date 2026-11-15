@@ -1,7 +1,7 @@
 import type { RouterInput, RouterOutput } from "@/core/client";
 
-export type ChatSessionItem = RouterOutput["agent"]["listSessions"][number];
-export type ChatMessageHistoryItem = RouterOutput["agent"]["getSessionHistory"][number];
+export type ChatSessionItem = RouterOutput["agent"]["listSessions"]["items"][number];
+export type ChatMessageHistoryItem = RouterOutput["agent"]["getSessionHistory"]["items"][number];
 export type CreateSessionInput = RouterInput["agent"]["createSession"];
 export type ListSessionsInput = RouterInput["agent"]["listSessions"];
 export type GetSessionHistoryInput = RouterInput["agent"]["getSessionHistory"];

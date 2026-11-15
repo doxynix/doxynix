@@ -111,7 +111,7 @@ export function Agent() {
     trpc.agent.listSessions.queryOptions({ currentRepo }, { enabled: isOpen }),
   );
 
-  const isSessionSaved = sessions?.some((s) => s.id === sessionId);
+  const isSessionSaved = sessions?.items.some((s) => s.id === sessionId);
 
   const { data: history, isLoading: isHistoryLoading } = useQuery(
     trpc.agent.getSessionHistory.queryOptions(
@@ -133,7 +133,7 @@ export function Agent() {
   } = useChat({
     id: sessionId ?? undefined,
     messages:
-      history?.map((msg) => ({
+      history?.items.map((msg) => ({
         createdAt: msg.createdAt,
         id: msg.id,
         parts: msg.parts,
@@ -164,7 +164,7 @@ export function Agent() {
       lastLoadedSessionIdRef.current !== sessionId
     ) {
       setMessages(
-        history.map((msg) => ({
+        history.items.map((msg) => ({
           createdAt: msg.createdAt,
           id: msg.id,
           parts: msg.parts,
@@ -385,7 +385,7 @@ export function Agent() {
                         onNewChat={handleNewChat}
                         onSessionDeleted={handleSessionDeleted}
                         sessionId={sessionId}
-                        sessions={sessions}
+                        sessions={sessions?.items}
                         setSessionId={handleSessionChange}
                       />
                     </ResizablePanel>
