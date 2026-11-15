@@ -217,9 +217,47 @@ describe("analysisRepo.getRepoBySha", () => {
   });
 });
 
+describe("analysisRepo.getRepoForImpact", () => {
+  it("reads the repo once and keeps the head-sha analysis even when it is not the newest", async () => {
+    const newer = { ...ANALYSIS, commitSha: "newer", id: "0195f000-0000-7000-8000-00000000000b" };
+    const pinned = {
+      ...ANALYSIS,
+      commitSha: "head-sha",
+      id: "0195f000-0000-7000-8000-00000000000c",
+    };
+    const { calls, db } = makeDb({ analyses: [newer, pinned], id: REPO_ID });
+
+    const repo = await analysisRepo.getRepoForImpact(db, REPO_ID, WORKSPACE_ID, "head-sha");
+
+    expect(calls).toHaveLength(1);
+    expect(nested(calls[0], "analyses").take).toBe(2);
+    expect(nested(calls[0], "analyses").where).toStrictEqual({ status: "DONE" });
+    expect(repo?.analyses.map((analysis) => analysis.id)).toStrictEqual([pinned.id]);
+  });
+
+  it("falls back to the newest completed analysis when no analysis matches the head sha", async () => {
+    const newer = { ...ANALYSIS, commitSha: "newer", id: "0195f000-0000-7000-8000-00000000000b" };
+    const older = { ...ANALYSIS, commitSha: "older", id: "0195f000-0000-7000-8000-00000000000d" };
+    const { db } = makeDb({ analyses: [newer, older], id: REPO_ID });
+
+    const repo = await analysisRepo.getRepoForImpact(db, REPO_ID, WORKSPACE_ID, "head-sha");
+
+    expect(repo?.analyses.map((analysis) => analysis.id)).toStrictEqual([newer.id]);
+  });
+
+  it("returns null for a repo outside the workspace and throws when nothing has completed", async () => {
+    await expect(
+      analysisRepo.getRepoForImpact(makeDb(null).db, REPO_ID, WORKSPACE_ID, "head-sha"),
+    ).resolves.toBeNull();
+
+    await expect(
+      analysisRepo.getRepoForImpact(makeDb({ analyses: [] }).db, REPO_ID, WORKSPACE_ID, "head-sha"),
+    ).rejects.toMatchObject({ messageCode: MessageCode.ANALYSIS_NOT_COMPLETED });
+  });
+});
+
 describe("analysisRepo.getRepoDocsPayload", () => {
   type Query = { sql: string; values: readonly unknown[] };
-
   function makeDocsDb(repo: unknown, target: unknown = null) {
     const queries: Query[] = [];
     const db = {

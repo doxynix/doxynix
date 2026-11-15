@@ -53,8 +53,12 @@ export const prImpactService = {
     const changedFiles = analysisMapper.parseChangedFilesSnapshot(analysis, legacyComments);
     const findings = analysisMapper.parsePersistedFindings(analysis, legacyComments);
 
-    const repo = await analysisRepo.getRepoBySha(db, repoId, analysis.headSha, workspaceId);
-    const repoSnapshot = repo ?? (await analysisRepo.getRepoSnapshot(db, repoId, workspaceId));
+    const repoSnapshot = await analysisRepo.getRepoForImpact(
+      db,
+      repoId,
+      workspaceId,
+      analysis.headSha,
+    );
 
     if (repoSnapshot == null) {
       return null;

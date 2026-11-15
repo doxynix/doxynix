@@ -401,6 +401,41 @@ export const analysisRepo = {
     return { ...repo, documents };
   },
 
+  // The impact page needs the repo plus the analysis at the PR's head SHA, falling back to the
+  // newest completed one. One read: both candidates come back together and JS picks the winner.
+  async getRepoForImpact(
+    db: DbClient,
+    repoId: string,
+    workspaceId: string,
+    headSha: string,
+  ): Promise<null | RepoSnapshot> {
+    const repo = await db.repo.findUnique({
+      select: {
+        ...repoWithLatestAnalysisSelect,
+        analyses: {
+          orderBy: { createdAt: "desc" },
+          select: latestCompletedAnalysisSelect,
+          take: 2,
+          where: { status: "DONE" },
+        },
+      },
+      where: { id: repoId, workspaceId },
+    });
+
+    if (repo == null) {
+      return null;
+    }
+
+    const pinned = repo.analyses.find((analysis) => analysis.commitSha === headSha);
+    const chosen = pinned ?? repo.analyses[0];
+
+    if (chosen == null) {
+      throw missingAnalysisError(undefined);
+    }
+
+    return { ...repo, analyses: [chosen] };
+  },
+
   async getRepoRef(db: DbClient, repoId: string, workspaceId: string, aid?: string) {
     const repo = await db.repo.findUnique({
       select: {

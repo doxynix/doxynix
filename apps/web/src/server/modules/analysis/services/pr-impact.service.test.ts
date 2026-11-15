@@ -10,8 +10,7 @@ const mocks = vi.hoisted(() => ({
     getStructureContext: () => null,
     getStructureNode: vi.fn(() => null),
   })),
-  getRepoBySha: vi.fn(),
-  getRepoSnapshot: vi.fn(),
+  getRepoForImpact: vi.fn(),
   loadImpactAnalysis: vi.fn(),
   loadLegacyComments: vi.fn(),
   mapChangedFilesToImpactNodes: vi.fn(() => []),
@@ -33,8 +32,7 @@ vi.mock("../analysis.mapper", () => ({
 }));
 vi.mock("../analysis.repository", () => ({
   analysisRepo: {
-    getRepoBySha: mocks.getRepoBySha,
-    getRepoSnapshot: mocks.getRepoSnapshot,
+    getRepoForImpact: mocks.getRepoForImpact,
     loadImpactAnalysis: mocks.loadImpactAnalysis,
     loadLegacyComments: mocks.loadLegacyComments,
   },
@@ -80,7 +78,7 @@ beforeEach(() => {
 describe("prImpactService.getByRepoAndPRNumber", () => {
   it("hands the findings cache the analysis id and its version separately", async () => {
     mocks.loadImpactAnalysis.mockResolvedValue(stubAnalysis());
-    mocks.getRepoBySha.mockResolvedValue({ name: "doxynix", owner: "ivan" });
+    mocks.getRepoForImpact.mockResolvedValue({ name: "doxynix", owner: "ivan" });
 
     const payload = await prImpactService.getByRepoAndPRNumber({} as DbClient, REPO_ID, 7, "ws-1");
 
@@ -112,7 +110,7 @@ describe("prImpactService.getByRepoAndPRNumber", () => {
         { githubPrNumber: null, githubPrUrl: null, id: "fix-2", status: "COMPLETED", title: "b" },
       ],
     });
-    mocks.getRepoBySha.mockResolvedValue({ name: "doxynix", owner: "ivan" });
+    mocks.getRepoForImpact.mockResolvedValue({ name: "doxynix", owner: "ivan" });
 
     const payload = await prImpactService.getByRepoAndPRNumber({} as DbClient, REPO_ID, 7, "ws-1");
 
@@ -122,7 +120,7 @@ describe("prImpactService.getByRepoAndPRNumber", () => {
 
   it("skips the legacy comment query when both json snapshots are present", async () => {
     mocks.loadImpactAnalysis.mockResolvedValue(stubAnalysis());
-    mocks.getRepoBySha.mockResolvedValue({ name: "doxynix", owner: "ivan" });
+    mocks.getRepoForImpact.mockResolvedValue({ name: "doxynix", owner: "ivan" });
 
     await prImpactService.getByRepoAndPRNumber({} as DbClient, REPO_ID, 7, "ws-1");
 
@@ -141,7 +139,7 @@ describe("prImpactService.getByRepoAndPRNumber", () => {
       findingsJson: null,
     });
     mocks.loadLegacyComments.mockResolvedValue(legacy);
-    mocks.getRepoBySha.mockResolvedValue({ name: "doxynix", owner: "ivan" });
+    mocks.getRepoForImpact.mockResolvedValue({ name: "doxynix", owner: "ivan" });
 
     await prImpactService.getByRepoAndPRNumber({} as DbClient, REPO_ID, 7, "ws-1");
 
@@ -159,8 +157,7 @@ describe("prImpactService.getByRepoAndPRNumber", () => {
     ).resolves.toBeNull();
 
     mocks.loadImpactAnalysis.mockResolvedValue(stubAnalysis());
-    mocks.getRepoBySha.mockResolvedValue(null);
-    mocks.getRepoSnapshot.mockResolvedValue(null);
+    mocks.getRepoForImpact.mockResolvedValue(null);
 
     await expect(
       prImpactService.getByRepoAndPRNumber({} as DbClient, REPO_ID, 7, "ws-1"),
