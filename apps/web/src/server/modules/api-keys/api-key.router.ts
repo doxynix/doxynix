@@ -7,8 +7,8 @@ import {
 import * as z from "zod/mini";
 
 import { createTRPCRouter, workspaceProcedure } from "@/server/core/trpc/init";
-import { CursorPageSchema } from "@/server/utils/pagination";
 
+import { ListApiKeysInputSchema } from "./api-key.schemas";
 import { apiKeyService } from "./api-key.service";
 
 export const apiKeyRouter = createTRPCRouter({
@@ -26,7 +26,7 @@ export const apiKeyRouter = createTRPCRouter({
     }),
 
   list: workspaceProcedure
-    .input(CursorPageSchema)
+    .input(ListApiKeysInputSchema)
     .output(z.object({ items: z.array(ApiKeySchema), meta: CursorMetaSchema }))
     .query(async ({ ctx, input }) => {
       return apiKeyService.list(ctx.db, ctx.workspace.id, input);

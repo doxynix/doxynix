@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   AdminDeleteUserSchema,
   AdminSetBannedSchema,
+  AdminUserSessionsInputSchema,
   AdminUsersFilterSchema,
 } from "./admin-user.schemas";
 
@@ -80,6 +81,15 @@ describe("AdminDeleteUserSchema", () => {
     expect(AdminDeleteUserSchema.safeParse({ id: USER_ID }).success).toBe(true);
     expect(AdminDeleteUserSchema.safeParse({ code: CODE, id: USER_ID }).success).toBe(true);
     expect(AdminDeleteUserSchema.safeParse({ code: CODE, id: "nope" }).success).toBe(false);
+  });
+});
+
+describe("AdminUserSessionsInputSchema", () => {
+  it("defaults the page size for the sessions block of the user sheet", () => {
+    expect(AdminUserSessionsInputSchema.parse({ id: USER_ID })).toStrictEqual({
+      id: USER_ID,
+      limit: 50,
+    });
   });
 });
 

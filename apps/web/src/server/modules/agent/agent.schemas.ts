@@ -1,7 +1,7 @@
-import { ChatRoleSchema, CursorMetaSchema, MAX_PAGE_SIZE } from "@doxynix/shared";
+import { ChatRoleSchema, CursorMetaSchema } from "@doxynix/shared";
 import * as z from "zod";
 
-import { CursorSchema } from "@/server/utils/pagination";
+import { cursorPageSchema } from "@/server/utils/pagination";
 
 import type { SessionMessage, SessionMessagePart } from "./agent.mapper";
 
@@ -41,21 +41,19 @@ export const ListSessionsOutputSchema = z.object({
 
 export type ListSessionsOutput = z.infer<typeof ListSessionsOutputSchema>;
 
-export const GetSessionHistoryInputSchema = CursorSchema.omit({ search: true }).extend({
-  limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(100),
+export const GetSessionHistoryInputSchema = cursorPageSchema(100).extend({
   sessionId: z.uuid(),
 });
 
 export type GetSessionHistoryInput = z.infer<typeof GetSessionHistoryInputSchema>;
 
-export const ListSessionsInputSchema = CursorSchema.omit({ search: true }).extend({
+export const ListSessionsInputSchema = cursorPageSchema(50).extend({
   currentRepo: z
     .object({
       name: z.string(),
       owner: z.string(),
     })
     .optional(),
-  limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(50),
 });
 
 export type ListSessionsInput = z.infer<typeof ListSessionsInputSchema>;
