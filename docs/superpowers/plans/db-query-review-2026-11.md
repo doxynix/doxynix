@@ -782,17 +782,18 @@ they are one screen each and close in batches, so they stay out of the 36-item c
   instead of a skeleton (`89c05f63`).
 - [x] **C1 · `getHistory`** — cursor pages, `{ items, meta, total }` (`a90fdb07`, B5c).
 - [x] **C2 · `listByRepository`** — cursor pages, `{ items, meta, total }` (`a90fdb07`, B5c).
-- [ ] **C3 · `getByRepoId` (`take: 200`)** — left at 200; no client reads the list.
+- [x] **C3 · `getByRepoId` (`take: 200`)** — deleted; no client consumer. The `getByRepository`
+  procedure, the service and repository reads, and the two client invalidations are gone.
 - [x] **C4 · `getRepoSnapshotWithDocuments` documents (`take: 500`)** — the method and
   `MAX_REPO_DOCUMENTS` are deleted; `getWorkspace` composes one row per kind onto `getRepoSnapshot`,
   and `getRepoBySha` no longer carries the unused documents relation. `c0517117`
 - [x] **C5 · `loadLatestDocumentsWithContent` (`take: 24`)** — the global `take` is replaced by three
   versions per `(type, path)`, and `pickLatestDocsByType` is gone. `c0517117`
-- [ ] **C6 · `loadRelatedFixes` (`take: 8`)** — left; explicit "related" widget.
-- [ ] **C7 · `loadRelatedPrFindings` (`take: 12`)** — left; explicit "related" widget.
-- [ ] **C8 · `getDashboardStats` `per_repo_top` LATERAL** — the `LIMIT 1` half landed in `f232f133`,
-  which fixes the semantics as "latest analysis per repo"; the remaining decision is whether the widget
-  wants five newest *events* instead, which would mean dropping the `DISTINCT ON`.
+- [x] **C6 · `loadRelatedFixes` (`take: 8`)** — dropped; explicit top-N widget (`related` panel).
+- [x] **C7 · `loadRelatedPrFindings` (`take: 12`)** — dropped; explicit top-N widget (`related`
+  panel).
+- [x] **C8 · `getDashboardStats` `per_repo_top` LATERAL** — the `LIMIT 1` half landed in
+  `f232f133`; `recentActivity` is defined as the latest analysis per repo (product decision).
 - [x] **O2 · `adminAudit.list` page ceiling** — keyset on `(createdAt desc, id desc)` with
   `cursorPageSchema(50)` and every existing filter; the three capped counts are gone and the table
   walks pages through an intersection sentinel. `8dae57da`
