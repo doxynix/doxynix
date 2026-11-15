@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/doxynix/doxynix/compare/siem-server-v0.6.0...siem-server-v0.7.0) (2026-11-15)
+
+
+### Features
+
+* **web:** centralize keyboard shortcuts and add help dialogs ([#2408](https://github.com/doxynix/doxynix/issues/2408)) ([b4edbea](https://github.com/doxynix/doxynix/commit/b4edbea8be496516bd3f9444e423d800489d5fb2))
+
 ## [0.6.0](https://github.com/doxynix/doxynix/compare/siem-server-v0.5.5...siem-server-v0.6.0) (2026-11-14)
 
 

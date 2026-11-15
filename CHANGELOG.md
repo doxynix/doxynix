@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.15.0](https://github.com/doxynix/doxynix/compare/doxynix-v6.14.2...doxynix-v6.15.0) (2026-11-15)
+
+
+### Features
+
+* **web:** centralize keyboard shortcuts and add help dialogs ([#2408](https://github.com/doxynix/doxynix/issues/2408)) ([b4edbea](https://github.com/doxynix/doxynix/commit/b4edbea8be496516bd3f9444e423d800489d5fb2))
+
 ## [6.14.2](https://github.com/doxynix/doxynix/compare/doxynix-v6.14.1...doxynix-v6.14.2) (2026-11-15)
 
 

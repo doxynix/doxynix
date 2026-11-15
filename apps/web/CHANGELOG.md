@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.15.0](https://github.com/doxynix/doxynix/compare/web-v5.14.2...web-v5.15.0) (2026-11-15)
+
+
+### Features
+
+* **web:** centralize keyboard shortcuts and add help dialogs ([#2408](https://github.com/doxynix/doxynix/issues/2408)) ([b4edbea](https://github.com/doxynix/doxynix/commit/b4edbea8be496516bd3f9444e423d800489d5fb2))
+
 ## [5.14.2](https://github.com/doxynix/doxynix/compare/web-v5.14.1...web-v5.14.2) (2026-11-15)
 
 
