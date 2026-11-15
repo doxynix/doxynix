@@ -57,6 +57,7 @@ export const workspaceService = {
         structureNode.node.label,
         relatedFiles,
         analyzeContext,
+        aid,
       ),
       analysisRepo.loadRelatedPrFindings(db, repoId, workspaceId, relatedFiles),
     ]);
@@ -133,8 +134,9 @@ export const workspaceService = {
     nodeLabel: string,
     relatedFiles: string[],
     analyzeContext: ReturnType<typeof createAnalyzeContextBuilder>,
+    aid?: string,
   ) {
-    const docs = await analysisRepo.loadLatestDocumentsWithContent(db, repoId, workspaceId);
+    const docs = await analysisRepo.loadLatestDocumentsWithContent(db, repoId, workspaceId, aid);
 
     return matchDocSections({
       docs,
