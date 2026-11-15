@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { DbClient } from "@/server/core/db";
 
-import { analysisRepo, loadDocumentsPerType, MAX_LEGACY_COMMENTS } from "./analysis.repository";
+import { analysisRepo, loadDocumentsPerType } from "./analysis.repository";
 
 const ANALYSIS_ID = "0195f000-0000-7000-8000-000000000001";
 const REPO_ID = "0195f000-0000-7000-8000-000000000002";
@@ -501,27 +501,6 @@ describe("analysisRepo.getByPrAnalysisId", () => {
       take: 21,
       where: { prAnalysisId: ANALYSIS_ID, repo: { workspaceId: WORKSPACE_ID } },
     });
-  });
-});
-
-describe("analysisRepo.loadLegacyComments", () => {
-  it("caps the legacy comment read and keeps it inside the workspace", async () => {
-    const findMany = vi.fn().mockResolvedValue([]);
-    const db = { pullRequestComment: { findMany } } as unknown as DbClient;
-
-    await analysisRepo.loadLegacyComments(db, ANALYSIS_ID, WORKSPACE_ID);
-
-    const args = findMany.mock.calls[0]?.[0];
-    expect(MAX_LEGACY_COMMENTS).toBe(500);
-    expect(args?.take).toBe(MAX_LEGACY_COMMENTS);
-    expect(args?.where).toStrictEqual({
-      analysis: { id: ANALYSIS_ID, repo: { workspaceId: WORKSPACE_ID } },
-    });
-    expect(args?.orderBy).toStrictEqual([
-      { riskLevel: "desc" },
-      { filePath: "asc" },
-      { line: "asc" },
-    ]);
   });
 });
 

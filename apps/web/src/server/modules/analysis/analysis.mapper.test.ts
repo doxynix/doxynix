@@ -34,7 +34,7 @@ import type { RepoMetrics } from "./engine/core/metrics.types";
 import defaultAiResult from "./fixtures/default-ai-result.json";
 import defaultMetrics from "./fixtures/default-metrics.json";
 import { coerceAnalysisPayload } from "./logic/payload";
-import type { LegacyImpactComment, PRImpactPayload } from "./logic/pr.types";
+import type { PRImpactPayload } from "./logic/pr.types";
 import type {
   NodeExplainPayload,
   StoredDocument,
@@ -206,14 +206,6 @@ const makeImpactAnalysis = (overrides: Record<string, unknown> = {}): ImpactAnal
     ...overrides,
   }) as unknown as ImpactAnalysis;
 
-const LEGACY_COMMENT: LegacyImpactComment = {
-  body: "b",
-  filePath: "src/legacy.ts",
-  findingType: "BUG",
-  line: 1,
-  riskLevel: 7,
-};
-
 const topLevelNode = (overrides: Partial<TopLevelNode> = {}): TopLevelNode => ({
   id: "group:src",
   kind: "group",
@@ -366,7 +358,7 @@ describe("parseChangedFilesSnapshot", () => {
     ]);
   });
 
-  it("invalid snapshot → legacy paths from the explicit comments and findings (modified, zeros)", () => {
+  it("invalid snapshot → empty list", () => {
     const analysis = makeImpactAnalysis({
       changedFilesJson: [{ additions: -1, deletions: 0, filePath: "", status: "bogus" }],
       findingsJson: [
@@ -374,58 +366,7 @@ describe("parseChangedFilesSnapshot", () => {
       ],
     });
 
-    expect(analysisMapper.parseChangedFilesSnapshot(analysis, [LEGACY_COMMENT])).toEqual([
-      {
-        additions: 0,
-        deletions: 0,
-        filePath: "src/legacy.ts",
-        previousFilePath: null,
-        status: "modified",
-      },
-      {
-        additions: 0,
-        deletions: 0,
-        filePath: "src/other.ts",
-        previousFilePath: null,
-        status: "modified",
-      },
-    ]);
-  });
-
-  it("invalid snapshot and invalid findings → the explicit comments reach the findings", () => {
-    const analysis = makeImpactAnalysis({
-      changedFilesJson: [{ additions: -1, deletions: 0, filePath: "", status: "bogus" }],
-      findingsJson: [{ file: "", line: 0, message: "", title: "", type: "" }],
-    });
-
-    expect(analysisMapper.parseChangedFilesSnapshot(analysis, [LEGACY_COMMENT])).toEqual([
-      {
-        additions: 0,
-        deletions: 0,
-        filePath: "src/legacy.ts",
-        previousFilePath: null,
-        status: "modified",
-      },
-    ]);
-  });
-
-  it("invalid snapshot without legacy comments → findings only", () => {
-    const analysis = makeImpactAnalysis({
-      changedFilesJson: [{ additions: -1, deletions: 0, filePath: "", status: "bogus" }],
-      findingsJson: [
-        { file: "src/./other.ts", line: 2, message: "m", title: "t", type: "security" },
-      ],
-    });
-
-    expect(analysisMapper.parseChangedFilesSnapshot(analysis)).toEqual([
-      {
-        additions: 0,
-        deletions: 0,
-        filePath: "src/other.ts",
-        previousFilePath: null,
-        status: "modified",
-      },
-    ]);
+    expect(analysisMapper.parseChangedFilesSnapshot(analysis)).toEqual([]);
   });
 });
 
@@ -440,17 +381,7 @@ describe("parsePersistedFindings", () => {
     ]);
   });
 
-  it("invalid findingsJson → falls back to the explicit legacy comments", () => {
-    const analysis = makeImpactAnalysis({
-      findingsJson: [{ file: "", line: 0, message: "", title: "", type: "" }],
-    });
-
-    expect(analysisMapper.parsePersistedFindings(analysis, [LEGACY_COMMENT])).toEqual([
-      { file: "src/legacy.ts", line: 1, message: "b", score: 7, title: "BUG", type: "BUG" },
-    ]);
-  });
-
-  it("invalid findingsJson without legacy comments → no findings", () => {
+  it("invalid findingsJson → no findings", () => {
     const analysis = makeImpactAnalysis({
       findingsJson: [{ file: "", line: 0, message: "", title: "", type: "" }],
     });

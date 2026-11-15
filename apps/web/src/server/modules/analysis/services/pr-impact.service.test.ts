@@ -13,10 +13,9 @@ const mocks = vi.hoisted(() => ({
   getByPrAnalysisId: vi.fn(),
   getRepoForImpact: vi.fn(),
   loadImpactAnalysis: vi.fn(),
-  loadLegacyComments: vi.fn(),
   mapChangedFilesToImpactNodes: vi.fn(() => []),
-  parseChangedFilesSnapshot: vi.fn((_analysis: unknown, _legacyComments?: unknown) => []),
-  parsePersistedFindings: vi.fn((_analysis: unknown, _legacyComments?: unknown) => []),
+  parseChangedFilesSnapshot: vi.fn((_analysis: unknown) => []),
+  parsePersistedFindings: vi.fn((_analysis: unknown) => []),
   selectPrimaryFile: vi.fn(() => null),
 }));
 
@@ -36,7 +35,6 @@ vi.mock("../analysis.repository", () => ({
     getByPrAnalysisId: mocks.getByPrAnalysisId,
     getRepoForImpact: mocks.getRepoForImpact,
     loadImpactAnalysis: mocks.loadImpactAnalysis,
-    loadLegacyComments: mocks.loadLegacyComments,
   },
 }));
 vi.mock("../logic/analyze-context-builder", () => ({
@@ -73,7 +71,6 @@ function stubAnalysis() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.loadLegacyComments.mockResolvedValue([]);
 });
 
 describe("prImpactService.getByRepoAndPRNumber", () => {
@@ -109,35 +106,15 @@ describe("prImpactService.getByRepoAndPRNumber", () => {
     expect(payload).not.toHaveProperty("fixes");
   });
 
-  it("skips the legacy comment query when both json snapshots are present", async () => {
-    mocks.loadImpactAnalysis.mockResolvedValue(stubAnalysis());
+  it("parses both persisted snapshots from the analysis row alone", async () => {
+    const analysis = stubAnalysis();
+    mocks.loadImpactAnalysis.mockResolvedValue(analysis);
     mocks.getRepoForImpact.mockResolvedValue({ name: "doxynix", owner: "ivan" });
 
     await prImpactService.getByRepoAndPRNumber({} as DbClient, REPO_ID, 7, "ws-1");
 
-    expect(mocks.loadLegacyComments).not.toHaveBeenCalled();
-    expect(mocks.parseChangedFilesSnapshot.mock.calls[0]?.[1]).toBeUndefined();
-    expect(mocks.parsePersistedFindings.mock.calls[0]?.[1]).toBeUndefined();
-  });
-
-  it("loads the legacy comments once for a row with a missing json snapshot", async () => {
-    const legacy = [
-      { body: "b", filePath: "src/a.ts", findingType: "BUG", id: "c1", line: 1, riskLevel: 7 },
-    ];
-    mocks.loadImpactAnalysis.mockResolvedValue({
-      ...stubAnalysis(),
-      changedFilesJson: null,
-      findingsJson: null,
-    });
-    mocks.loadLegacyComments.mockResolvedValue(legacy);
-    mocks.getRepoForImpact.mockResolvedValue({ name: "doxynix", owner: "ivan" });
-
-    await prImpactService.getByRepoAndPRNumber({} as DbClient, REPO_ID, 7, "ws-1");
-
-    expect(mocks.loadLegacyComments).toHaveBeenCalledTimes(1);
-    expect(mocks.loadLegacyComments).toHaveBeenCalledWith(expect.anything(), ANALYSIS_ID, "ws-1");
-    expect(mocks.parseChangedFilesSnapshot.mock.calls[0]?.[1]).toStrictEqual(legacy);
-    expect(mocks.parsePersistedFindings.mock.calls[0]?.[1]).toStrictEqual(legacy);
+    expect(mocks.parseChangedFilesSnapshot).toHaveBeenCalledWith(analysis);
+    expect(mocks.parsePersistedFindings).toHaveBeenCalledWith(analysis);
   });
 
   it("returns null when the analysis or the repo snapshot is missing", async () => {

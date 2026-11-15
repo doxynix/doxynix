@@ -184,8 +184,6 @@ export type AnalysisRef = {
 export type ImpactAnalysisRecord = Awaited<ReturnType<typeof analysisRepo.loadImpactAnalysis>>;
 export type ImpactAnalysis = NonNullable<ImpactAnalysisRecord>;
 
-export const MAX_LEGACY_COMMENTS = 500;
-
 export const analysisRepo = {
   // No revalidateTag: a task has no Next store; readers miss the old page via the analysis version.
   async addComments(
@@ -534,27 +532,6 @@ export const analysisRepo = {
       aid,
       perType: 1,
       withContent: true,
-    });
-  },
-
-  async loadLegacyComments(
-    db: DbClient,
-    analysisId: string,
-    workspaceId: string,
-    take = MAX_LEGACY_COMMENTS,
-  ) {
-    return db.pullRequestComment.findMany({
-      orderBy: [{ riskLevel: "desc" }, { filePath: "asc" }, { line: "asc" }],
-      select: {
-        body: true,
-        filePath: true,
-        findingType: true,
-        id: true,
-        line: true,
-        riskLevel: true,
-      },
-      take,
-      where: { analysis: { id: analysisId, repo: { workspaceId } } },
     });
   },
 

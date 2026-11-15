@@ -46,13 +46,8 @@ export const prImpactService = {
       return null;
     }
 
-    const isLegacySnapshot = analysis.findingsJson == null || analysis.changedFilesJson == null;
-    const legacyComments = isLegacySnapshot
-      ? await analysisRepo.loadLegacyComments(db, analysis.id, workspaceId)
-      : undefined;
-
-    const changedFiles = analysisMapper.parseChangedFilesSnapshot(analysis, legacyComments);
-    const findings = analysisMapper.parsePersistedFindings(analysis, legacyComments);
+    const changedFiles = analysisMapper.parseChangedFilesSnapshot(analysis);
+    const findings = analysisMapper.parsePersistedFindings(analysis);
 
     const repoSnapshot = await analysisRepo.getRepoForImpact(
       db,

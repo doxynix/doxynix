@@ -25,7 +25,7 @@ import {
   normalizeWriterStatuses,
   toDocSummary,
 } from "./logic/payload";
-import type { LegacyImpactComment, PRChangedFileSnapshot, PRImpactPayload } from "./logic/pr.types";
+import type { PRChangedFileSnapshot, PRImpactPayload } from "./logic/pr.types";
 import {
   isPathInsideScope,
   type StructureNodePayload as LeafStructureNodePayload,
@@ -268,10 +268,7 @@ export const analysisMapper = {
     return matchPath(filePath) ?? (previousFilePath == null ? null : matchPath(previousFilePath));
   },
 
-  parseChangedFilesSnapshot(
-    analysis: ImpactAnalysis,
-    legacyComments?: LegacyImpactComment[],
-  ): PRChangedFileSnapshot[] {
+  parseChangedFilesSnapshot(analysis: ImpactAnalysis): PRChangedFileSnapshot[] {
     const parsed = z.array(changedFileSnapshotSchema).safeParse(analysis.changedFilesJson);
     if (parsed.success) {
       return parsed.data.map((file) => ({
@@ -283,29 +280,10 @@ export const analysisMapper = {
       }));
     }
 
-    const legacyPaths = new Set<string>();
-    for (const comment of legacyComments ?? []) {
-      legacyPaths.add(normalize(comment.filePath));
-    }
-
-    const findings = this.parsePersistedFindings(analysis, legacyComments);
-    for (const finding of findings) {
-      legacyPaths.add(normalize(finding.file));
-    }
-
-    return [...legacyPaths].map((filePath) => ({
-      additions: 0,
-      deletions: 0,
-      filePath,
-      previousFilePath: null,
-      status: "modified" as const,
-    }));
+    return [];
   },
 
-  parsePersistedFindings(
-    analysis: ImpactAnalysis,
-    legacyComments?: LegacyImpactComment[],
-  ): ParsedFinding[] {
+  parsePersistedFindings(analysis: ImpactAnalysis): ParsedFinding[] {
     const parsed = z.array(persistedFindingSchema).safeParse(analysis.findingsJson);
     if (parsed.success) {
       return parsed.data.map((finding) => ({
@@ -314,14 +292,7 @@ export const analysisMapper = {
       }));
     }
 
-    return (legacyComments ?? []).map((comment) => ({
-      file: normalize(comment.filePath),
-      line: comment.line,
-      message: comment.body,
-      score: comment.riskLevel,
-      title: comment.findingType,
-      type: comment.findingType,
-    }));
+    return [];
   },
 
   resolveMatchedNode(
