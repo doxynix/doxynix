@@ -208,6 +208,7 @@ model GeneratedFix {
 
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
+  @@index([repoId, createdAt(sort: Desc), id(sort: Desc)])
   @@index([prAnalysisId])
   @@map("generated_fixes")
 }
