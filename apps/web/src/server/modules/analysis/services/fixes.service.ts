@@ -125,22 +125,21 @@ export const fixesService = {
     });
 
     try {
-      let validPrAnalysisId: string | undefined;
+      // Both reads only need the request input, so the PR-analysis check no longer sits in front of
+      // the repo read. An unusable PR analysis still just clears the FK.
+      const [prAnalysisRecord, repo] = await Promise.all([
+        input.prAnalysisId == null
+          ? null
+          : db.pullRequestAnalysis.findFirst({
+              select: { id: true },
+              where: { id: input.prAnalysisId, repo: { workspaceId } },
+            }),
+        db.repo.findUnique({
+          where: { id: input.repoId, workspaceId },
+        }),
+      ]);
 
-      if (input.prAnalysisId != null) {
-        const prAnalysisRecord = await db.pullRequestAnalysis.findFirst({
-          select: { id: true },
-          where: { id: input.prAnalysisId, repo: { workspaceId } },
-        });
-
-        if (prAnalysisRecord != null) {
-          validPrAnalysisId = prAnalysisRecord.id;
-        }
-      }
-
-      const repo = await db.repo.findUnique({
-        where: { id: input.repoId, workspaceId },
-      });
+      const validPrAnalysisId = prAnalysisRecord?.id;
 
       if (repo == null) {
         throw new AppError({
