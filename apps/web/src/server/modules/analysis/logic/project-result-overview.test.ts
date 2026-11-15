@@ -41,6 +41,7 @@ describe("projectResultOverview", () => {
       "not json",
       [1, 2, 3],
       {},
+      { foo: 1, nested: { bar: [1, 2] } },
       () => undefined,
     ];
 
@@ -144,5 +145,55 @@ describe("projectResultOverview", () => {
 
     expect(overview.length).toBeLessThanOrEqual(4096);
     expect(() => JSON.parse(overview)).not.toThrow();
+  });
+
+  it("stays under the cap and parses when every string field is escape-heavy", () => {
+    const control = "\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\b\t\n\u000b\f\r\u000e\u000f";
+    const noise = control.repeat(400);
+
+    const escapeHeavy = {
+      complexityScore: 12,
+      executive_summary: {
+        architecture_style: noise,
+        purpose: noise,
+        stack_details: Array.from({ length: 40 }, () => noise),
+      },
+      findings: Array.from({ length: 40 }, () => ({
+        evidence: [{ path: noise }],
+        severity: noise,
+        summary: noise,
+        title: noise,
+      })),
+      mainBottlenecks: Array.from({ length: 40 }, () => noise),
+      mostComplexFiles: Array.from({ length: 40 }, () => noise),
+      vulnerabilities: Array.from({ length: 40 }, () => ({ file: noise, risk: noise })),
+    };
+
+    const overview = projectResultOverview(escapeHeavy);
+
+    expect(overview.length).toBeLessThanOrEqual(4096);
+    expect(JSON.parse(overview)).toStrictEqual(expect.any(Object));
+  });
+
+  it("falls back to the nested scores when a top-level score is not a number", () => {
+    const parsed = JSON.parse(
+      projectResultOverview({
+        complexityScore: "61",
+        findings: [],
+        scores: { complexityScore: 55 },
+      }),
+    ) as { scores: { complexityScore: null | number } };
+
+    expect(parsed.scores.complexityScore).toBe(55);
+  });
+
+  it("caps the source array before mapping, so junk entries consume a slot", () => {
+    const stackDetails = [{}, ...Array.from({ length: 12 }, (_, index) => `stack-${index}`)];
+    const parsed = JSON.parse(
+      projectResultOverview({ executive_summary: { stack_details: stackDetails } }),
+    ) as { stack: string[] };
+
+    expect(parsed.stack).toHaveLength(11);
+    expect(parsed.stack.at(-1)).toBe("stack-10");
   });
 });

@@ -8,6 +8,20 @@ const MAX_VULNERABILITY_ITEMS = 3;
 const MAX_FILE_ITEMS = 5;
 const MAX_BOTTLENECK_ITEMS = 5;
 
+const OVERVIEW_KEYS = [
+  "complexityScore",
+  "executive_summary",
+  "findings",
+  "mainBottlenecks",
+  "mostComplexFiles",
+  "onboardingScore",
+  "repository_facts",
+  "scores",
+  "securityScore",
+  "techDebtScore",
+  "vulnerabilities",
+];
+
 type JsonRecord = Record<string, unknown>;
 
 type ResultOverview = {
@@ -48,7 +62,7 @@ function asRecord(value: unknown): JsonRecord {
 }
 
 function readScore(root: JsonRecord, key: string): null | number {
-  const value = root[key] ?? asRecord(root["scores"])[key];
+  const value = typeof root[key] === "number" ? root[key] : asRecord(root["scores"])[key];
 
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
@@ -66,9 +80,9 @@ function readText(value: unknown, maxChars = MAX_TEXT_CHARS): null | string {
 
 function readTextList(value: unknown, maxItems: number, maxChars = MAX_TEXT_CHARS): string[] {
   return asArray(value)
+    .slice(0, maxItems)
     .map((item) => readText(item, maxChars))
-    .filter((item): item is string => item != null)
-    .slice(0, maxItems);
+    .filter((item): item is string => item != null);
 }
 
 function readTopFindings(root: JsonRecord) {
@@ -131,11 +145,8 @@ function buildOverview(root: JsonRecord): ResultOverview {
 }
 
 // Deterministic shrink order: drop findings from the end, then purpose, then the string lists.
-function shrinkToLimit(overview: ResultOverview): string {
+function shrinkToLimit(overview: ResultOverview) {
   let json = JSON.stringify(overview);
-  if (json.length <= MAX_OVERVIEW_CHARS) {
-    return json;
-  }
 
   while (overview.topFindings.length > 0 && json.length > MAX_OVERVIEW_CHARS) {
     overview.topFindings.pop();
@@ -153,15 +164,77 @@ function shrinkToLimit(overview: ResultOverview): string {
       json = JSON.stringify(overview);
     }
   }
+}
 
-  return json;
+// Escape-heavy values can defeat the shrink above, so the bound is re-checked on the serialized form.
+function enforceAbsoluteLimit(overview: ResultOverview): string {
+  let json = JSON.stringify(overview);
+  const architectureStyle = overview.architecture_style ?? "";
+
+  if (json.length > MAX_OVERVIEW_CHARS) {
+    const overflow = json.length - MAX_OVERVIEW_CHARS;
+    overview.purpose = overview.purpose.slice(0, Math.max(0, overview.purpose.length - overflow));
+    json = JSON.stringify(overview);
+  }
+
+  while (overview.topVulnerabilities.length > 0 && json.length > MAX_OVERVIEW_CHARS) {
+    overview.topVulnerabilities.pop();
+    json = JSON.stringify(overview);
+  }
+
+  if (json.length > MAX_OVERVIEW_CHARS) {
+    overview.architecture_style = null;
+    json = JSON.stringify(overview);
+  }
+
+  if (json.length <= MAX_OVERVIEW_CHARS) {
+    return json;
+  }
+
+  const clipped = json.slice(0, MAX_OVERVIEW_CHARS);
+  if (isJson(clipped)) {
+    return clipped;
+  }
+
+  return minimalJson(architectureStyle);
+}
+
+function isJson(value: string): boolean {
+  try {
+    JSON.parse(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function minimalJson(architectureStyle: string): string {
+  const budget = MAX_OVERVIEW_CHARS - '{"architecture_style":""}'.length;
+  let escaped = "";
+
+  for (const char of architectureStyle) {
+    const encoded = JSON.stringify(char).slice(1, -1);
+    if (escaped.length + encoded.length > budget) {
+      break;
+    }
+    escaped += encoded;
+  }
+
+  return `{"architecture_style":"${escaped}"}`;
+}
+
+function isRecognizedBlob(root: JsonRecord): boolean {
+  return OVERVIEW_KEYS.some((key) => Object.hasOwn(root, key));
 }
 
 export function projectResultOverview(resultJson: unknown): string {
   const root = asRecord(resultJson);
-  if (Object.keys(root).length === 0) {
+  if (!isRecognizedBlob(root)) {
     return "{}";
   }
 
-  return shrinkToLimit(buildOverview(root));
+  const overview = buildOverview(root);
+  shrinkToLimit(overview);
+
+  return enforceAbsoluteLimit(overview);
 }
