@@ -6,7 +6,7 @@ import { normalizeSearchInput, tokenizeSearchInput } from "@/server/utils/search
 
 import { analysisRepo } from "../analysis.repository";
 import { dedupeSearchResults, scoreSearchMatch } from "../analysis.utils";
-import { createAnalyzeContextBuilder } from "../logic/analyze-context-builder";
+import { getCachedAnalyzeContext } from "../logic/analysis-context-cache";
 import { coerceAnalysisPayload } from "../logic/payload";
 import { DocumentFormatter } from "../logic/section-graph-linker";
 
@@ -28,7 +28,7 @@ export const workspaceSearchService = {
     if (repo == null) {
       return [];
     }
-    const analyzeContext = createAnalyzeContextBuilder(repo);
+    const analyzeContext = getCachedAnalyzeContext(repo);
     const structure = analyzeContext.getStructureMap();
     const structureContext = analyzeContext.getEntityContext().structureContext;
     const payload = coerceAnalysisPayload(repo.analyses[0]);
