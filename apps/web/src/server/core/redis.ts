@@ -45,6 +45,27 @@ export const redisService = {
         },
       ),
 
+    // One pipeline for a token batch: the better-auth adapter deletes secondary-storage keys one
+    // call at a time, which turns "sign out everywhere" into N round trips.
+    deleteMany: (keys: string[]): Promise<void> =>
+      safeRedis(
+        async () => {
+          if (keys.length === 0) {
+            return;
+          }
+          const pipeline = redisClient.pipeline();
+          for (const key of keys) {
+            pipeline.del(key);
+          }
+          await pipeline.exec();
+        },
+        {
+          meta: { count: keys.length },
+          msg: "Redis secondaryStorage deleteMany error",
+          rethrow: true,
+        },
+      ),
+
     get: (key: string): Promise<null | string> =>
       safeRedis(
         async () => {

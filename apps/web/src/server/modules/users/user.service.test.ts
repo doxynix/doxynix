@@ -17,7 +17,7 @@ const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 
 const { sleepCalls } = vi.hoisted(() => ({ sleepCalls: [] as number[] }));
 
-const { authMock, prismaMock, revokeUserSessionsMock } = vi.hoisted(() => ({
+const { authMock, prismaMock, revokeUserSessionsMock, redisMock } = vi.hoisted(() => ({
   authMock: {
     deleteSession: vi.fn(),
     listSessions: vi.fn(),
@@ -25,6 +25,7 @@ const { authMock, prismaMock, revokeUserSessionsMock } = vi.hoisted(() => ({
   },
   prismaMock: {
     session: {
+      deleteMany: vi.fn(),
       findFirst: vi.fn(),
       findMany: vi.fn(),
     },
@@ -32,6 +33,7 @@ const { authMock, prismaMock, revokeUserSessionsMock } = vi.hoisted(() => ({
       findUnique: vi.fn(),
     },
   },
+  redisMock: { deleteMany: vi.fn() },
   revokeUserSessionsMock: vi.fn(),
 }));
 
@@ -60,6 +62,10 @@ vi.mock("@/server/core/auth", () => ({
     $context: Promise.resolve({ internalAdapter: { deleteSession: authMock.deleteSession } }),
     api: authMock,
   },
+}));
+
+vi.mock("@/server/core/redis", () => ({
+  redisService: { authStorage: { deleteMany: redisMock.deleteMany } },
 }));
 
 vi.mock("@/server/core/db", async (importOriginal) => {
@@ -288,9 +294,19 @@ describe("revokeOtherSessions", () => {
   const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
   const CURRENT_SESSION_ID = "018f0000-0000-7000-8000-0000000000a1";
 
-  it("deletes every session except the current one", async () => {
-    const other = { id: "018f0000-0000-7000-8000-0000000000a2", token: "other-token" };
-    prismaMock.session.findMany.mockResolvedValue([other]);
+  beforeEach(() => {
+    authMock.deleteSession.mockReset();
+    prismaMock.session.deleteMany.mockReset();
+    prismaMock.session.findMany.mockReset();
+    redisMock.deleteMany.mockReset();
+  });
+
+  it("deletes every other session with one statement and one redis pipeline", async () => {
+    const others = [
+      { id: "018f0000-0000-7000-8000-0000000000a2", token: "other-token" },
+      { id: "018f0000-0000-7000-8000-0000000000a3", token: "third-token" },
+    ];
+    prismaMock.session.findMany.mockResolvedValue(others);
 
     await expect(userService.revokeOtherSessions(USER_ID, CURRENT_SESSION_ID)).resolves.toEqual({
       success: true,
@@ -301,7 +317,26 @@ describe("revokeOtherSessions", () => {
         where: { id: { not: CURRENT_SESSION_ID }, userId: USER_ID },
       }),
     );
-    expect(authMock.deleteSession).toHaveBeenCalledWith(other.token);
+    expect(redisMock.deleteMany).toHaveBeenCalledTimes(1);
+    expect(redisMock.deleteMany).toHaveBeenCalledWith(["other-token", "third-token"]);
+    expect(prismaMock.session.deleteMany).toHaveBeenCalledTimes(1);
+    expect(prismaMock.session.deleteMany).toHaveBeenCalledWith({
+      where: { token: { in: ["other-token", "third-token"] } },
+    });
+    // The secondary storage record is gone, so a session restored from the cookie cache has
+    // nothing to resolve against once the cache expires.
+    expect(authMock.deleteSession).not.toHaveBeenCalled();
+  });
+
+  it("does not touch the database when the current session is the only one", async () => {
+    prismaMock.session.findMany.mockResolvedValue([]);
+
+    await expect(userService.revokeOtherSessions(USER_ID, CURRENT_SESSION_ID)).resolves.toEqual({
+      success: true,
+    });
+
+    expect(redisMock.deleteMany).not.toHaveBeenCalled();
+    expect(prismaMock.session.deleteMany).not.toHaveBeenCalled();
   });
 });
 

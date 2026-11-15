@@ -17,6 +17,7 @@ import {
   type TransactionClient,
 } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
+import { redisService } from "@/server/core/redis";
 import { revokeUserSessions } from "@/server/utils/access-revocation";
 import { handlePrismaError } from "@/server/utils/handle-error";
 import { keysetArgs, orderWithTiebreak, splitKeysetPage } from "@/server/utils/pagination";
@@ -290,11 +291,14 @@ export const userService = {
       where: { id: { not: currentSessionId }, userId },
     });
 
-    const authContext = await auth.$context;
+    // `internalAdapter.deleteSessions` is one SQL delete plus one Redis delete per token; this is the
+    // same pair with a single pipeline, and there are no session-delete hooks to fire.
+    const tokens = others.map((session) => session.token);
 
-    await Promise.all(
-      others.map((session) => authContext.internalAdapter.deleteSession(session.token)),
-    );
+    if (tokens.length > 0) {
+      await redisService.authStorage.deleteMany(tokens);
+      await prisma.session.deleteMany({ where: { token: { in: tokens } } });
+    }
 
     void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.userUpdated, {});
 
