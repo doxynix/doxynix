@@ -26,6 +26,7 @@ const stripeMock = vi.hoisted(() => ({
 }));
 
 const dbMock = vi.hoisted(() => ({
+  $queryRawTyped: vi.fn(),
   $transaction: vi.fn(),
   billingCheckoutSession: { findFirst: vi.fn(), upsert: vi.fn() },
   billingCustomer: { findFirst: vi.fn() },
@@ -45,8 +46,10 @@ const dbMock = vi.hoisted(() => ({
 }));
 
 const triggerMock = vi.hoisted(() => vi.fn());
+const logMock = vi.hoisted(() => ({ error: vi.fn(), info: vi.fn(), warn: vi.fn() }));
 
 vi.mock("@/server/core/db", () => ({ prisma: dbMock }));
+vi.mock("@/server/core/app-logger", () => ({ appLogger: logMock }));
 vi.mock("@trigger.dev/sdk", () => ({ tasks: { trigger: triggerMock } }));
 vi.mock("@/server/core/billing/stripe-client", () => ({ getStripeClient: () => stripeMock }));
 
@@ -101,6 +104,7 @@ function callArg(mock: ReturnType<typeof vi.fn>, index = 0): Record<string, unkn
 
 describe("stripe event worker", () => {
   beforeEach(() => {
+    dbMock.$queryRawTyped.mockReset().mockResolvedValue([]);
     dbMock.$transaction
       .mockReset()
       .mockImplementation(async (fn: (tx: unknown) => unknown) => fn(dbMock));
@@ -299,6 +303,7 @@ describe("stripe event worker", () => {
         replayCount: 2,
       },
     ]);
+    dbMock.$queryRawTyped.mockResolvedValue([{ id: "be_1" }]);
 
     const result = await sweepStaleStripeEvents(new Date("2026-10-30T12:00:00.000Z"));
 
@@ -321,9 +326,87 @@ describe("stripe event worker", () => {
       { billingEventId: "be_1" },
       { concurrencyKey: "customer:cus_1", idempotencyKey: "evt_1:replay:3" },
     );
-    expect(callArg(dbMock.billingEvent.update)).toMatchObject({
-      data: { replayCount: { increment: 1 }, status: "ENQUEUED" },
+    expect(dbMock.$queryRawTyped).toHaveBeenCalledTimes(1);
+    expect(dbMock.$queryRawTyped.mock.calls[0]?.[0]).toMatchObject({
+      values: [{ items: [{ id: "be_1", run_id: "run_1" }] }],
     });
+  });
+
+  it("sweeps a whole batch in one trigger wave and one statement", async () => {
+    dbMock.billingEvent.findMany.mockResolvedValue([
+      {
+        externalEventId: "evt_1",
+        id: "be_1",
+        payload: { data: { object: { customer: "cus_1" } } },
+        replayCount: 0,
+      },
+      { externalEventId: "evt_2", id: "be_2", payload: null, replayCount: 4 },
+      { externalEventId: "evt_3", id: "be_3", payload: null, replayCount: 1 },
+    ]);
+    triggerMock
+      .mockResolvedValueOnce({ id: "run_1" })
+      .mockResolvedValueOnce({ id: "run_2" })
+      .mockResolvedValueOnce({ id: "run_3" });
+    dbMock.$queryRawTyped.mockResolvedValue([{ id: "be_1" }, { id: "be_2" }, { id: "be_3" }]);
+
+    const result = await sweepStaleStripeEvents(new Date("2026-10-30T12:00:00.000Z"));
+
+    expect(triggerMock).toHaveBeenCalledTimes(3);
+    expect(triggerMock).toHaveBeenCalledWith(
+      "billing-process-stripe-event",
+      { billingEventId: "be_2" },
+      { concurrencyKey: "owner:unknown", idempotencyKey: "evt_2:replay:5" },
+    );
+    expect(dbMock.$queryRawTyped).toHaveBeenCalledTimes(1);
+    expect(dbMock.$queryRawTyped.mock.calls[0]?.[0]).toMatchObject({
+      values: [
+        {
+          items: [
+            { id: "be_1", run_id: "run_1" },
+            { id: "be_2", run_id: "run_2" },
+            { id: "be_3", run_id: "run_3" },
+          ],
+        },
+      ],
+    });
+    expect(result).toEqual({ requeued: 3 });
+  });
+
+  it("keeps a row enqueued when only part of the batch fails", async () => {
+    dbMock.billingEvent.findMany.mockResolvedValue([
+      { externalEventId: "evt_1", id: "be_1", payload: null, replayCount: 0 },
+      { externalEventId: "evt_2", id: "be_2", payload: null, replayCount: 0 },
+    ]);
+    triggerMock
+      .mockRejectedValueOnce(new Error("trigger down"))
+      .mockResolvedValueOnce({ id: "run_2" });
+    dbMock.$queryRawTyped.mockResolvedValue([{ id: "be_2" }]);
+
+    const result = await sweepStaleStripeEvents();
+
+    expect(result).toEqual({ requeued: 1 });
+    expect(dbMock.$queryRawTyped.mock.calls[0]?.[0]).toMatchObject({
+      values: [{ items: [{ id: "be_2", run_id: "run_2" }] }],
+    });
+    expect(logMock.error).toHaveBeenCalledWith(
+      expect.objectContaining({ externalEventId: "evt_1", msg: "stripe_event_sweep_failed" }),
+    );
+  });
+
+  it("writes nothing when every trigger fails and logs one error per event", async () => {
+    dbMock.billingEvent.findMany.mockResolvedValue([
+      { externalEventId: "evt_1", id: "be_1", payload: null, replayCount: 0 },
+    ]);
+    triggerMock.mockRejectedValue(new Error("trigger down"));
+
+    const result = await sweepStaleStripeEvents();
+
+    expect(result).toEqual({ requeued: 0 });
+    expect(dbMock.$queryRawTyped).not.toHaveBeenCalled();
+    expect(logMock.error).toHaveBeenCalledTimes(1);
+    expect(logMock.error).toHaveBeenCalledWith(
+      expect.objectContaining({ externalEventId: "evt_1", msg: "stripe_event_sweep_failed" }),
+    );
   });
 
   it("never sweeps processed events", async () => {
@@ -337,6 +420,7 @@ describe("stripe event worker", () => {
       }),
     );
     expect(triggerMock).not.toHaveBeenCalled();
+    expect(dbMock.$queryRawTyped).not.toHaveBeenCalled();
   });
 
   it("purges an old payload without deleting the event id", async () => {
@@ -372,6 +456,7 @@ describe("stripe event worker", () => {
     dbMock.billingEvent.findMany.mockResolvedValue([
       { externalEventId: "evt_lost", id: "be_lost", replayCount: 0 },
     ]);
+    dbMock.$queryRawTyped.mockResolvedValue([{ id: "be_lost" }]);
 
     const result = await sweepStaleStripeEvents(new Date("2026-10-30T12:00:00.000Z"));
 

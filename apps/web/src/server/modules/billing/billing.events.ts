@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { markBillingEventsEnqueued } from "@prisma/client/sql";
 import { tasks } from "@trigger.dev/sdk";
 import type Stripe from "stripe";
 
@@ -327,42 +328,54 @@ export async function sweepStaleStripeEvents(
     },
   });
 
-  let requeued = 0;
+  if (stale.length === 0) {
+    return { requeued: 0 };
+  }
 
-  for (const event of stale) {
-    try {
-      const runId = await tasks.trigger(
+  // One wave instead of one round trip per event. Run ids stay per-row because the batch handle
+  // `tasks.batchTrigger` returns has no per-run ids.
+  const runs = await Promise.allSettled(
+    stale.map((event) =>
+      tasks.trigger(
         PROCESS_STRIPE_EVENT_TASK_ID,
         { billingEventId: event.id },
         {
           concurrencyKey: ownershipKeyFromPayload(event.payload),
           idempotencyKey: `${event.externalEventId}:replay:${event.replayCount + 1}`,
         },
-      );
+      ),
+    ),
+  );
 
-      await prisma.billingEvent.update({
-        data: {
-          replayCount: { increment: 1 },
-          status: "ENQUEUED",
-          triggerRunId: runId.id,
-        },
-        where: {
-          id: event.id,
-          status: {
-            in: ["RECEIVED", "PROCESSING", "ENQUEUED"],
-          },
-        },
-      });
+  const queued: Array<{ id: string; runId: string }> = [];
 
-      requeued += 1;
-    } catch (error) {
+  for (const [index, event] of stale.entries()) {
+    const run = runs[index];
+
+    if (run == null) {
+      continue;
+    }
+
+    if (run.status === "rejected") {
       appLogger.error({
-        error,
+        error: run.reason,
         externalEventId: event.externalEventId,
         msg: "stripe_event_sweep_failed",
       });
+
+      continue;
     }
+
+    queued.push({ id: event.id, runId: run.value.id });
   }
 
-  return { requeued };
+  if (queued.length === 0) {
+    return { requeued: 0 };
+  }
+
+  const updated = await prisma.$queryRawTyped(
+    markBillingEventsEnqueued({ items: queued.map(({ id, runId }) => ({ id, run_id: runId })) }),
+  );
+
+  return { requeued: updated.length };
 }
