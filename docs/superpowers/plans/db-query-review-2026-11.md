@@ -228,11 +228,16 @@ R6, R7 and R21 have since closed (see the closing log).
     render on the client. Same for `buildTopFindings`.
   - **Effort:** S · **Verify:** a PR with 200 comments issues 1 cache lookup; p95 of
     `analysis.getComments` in `bench:http` drops; cache tag cardinality stops growing per comment.
-  > Done 2026-11-15 (`d73f3abc`): one `unstable_cache` entry per page for both — keyed on the
-  > analysis id (`pr-comments-html-<analysisId>` / `finding-html-<owner>-<name>-<id>`, tags
-  > `["comments", analysisId]` / `["findings", owner, name, analysisId]`). Unit tests assert one
-  > lookup for a 3-comment page and one for a 3-finding page. The `take` half was deliberately not
-  > done (it would truncate the payload); p95 not measured.
+  > Done 2026-11-15 (`d73f3abc`, key corrected in the B2 fix round): one `unstable_cache` entry per
+  > page for both — `pr-comments-html-<workspaceId>-<analysisId>` with tags
+  > `["comments", analysisId, workspaceId]`, and `finding-html-<owner>-<name>-<analysisId>` with tags
+  > `["findings", owner, name, analysisId]` (analysis ids are globally unique and the caller already
+  > proves workspace access, so the findings key needs no workspace). An empty comment page skips the
+  > cache entirely, so an arbitrary `analysisId` cannot mint a permanent empty entry, and
+  > `postCommentToPR` calls `revalidateTag(analysisId)` so a posted comment is visible. Unit tests
+  > assert one lookup for a 3-comment page, one for a 3-finding page, distinct keys for two workspaces
+  > on the same analysis, no lookup for an empty page, and the tag revalidation. The `take` half was
+  > deliberately not done (it would truncate the payload); p95 not measured.
 
 - [x] **R7 · `agent.getSessionHistory` returns the entire chat with no limit and no `select`**
   — `src/server/modules/agent/agent.service.ts:75-82`
@@ -483,8 +488,10 @@ R6, R7 and R21 have since closed (see the closing log).
     budget; output quality spot-checked on 3 real PRs.
   > Done 2026-11-15 (`39d08034`): `logic/project-result-overview.ts` projects
   > architecture/purpose/stack, four scores, four counts, 5 findings, 3 vulnerabilities, 5 complex
-  > files and 5 bottlenecks, then shrinks (drop findings → purpose → string lists) until the
-  > serialized string is ≤ 4096 chars. Non-object input yields `{}`, which is also the null-row
+  > files and 5 bottlenecks, then shrinks (drop findings → purpose → string lists) and finally
+  > re-checks the serialized form, dropping purpose remainder → vulnerabilities → architecture style
+  > before falling back to a minimal object, so the output is always ≤ 4096 chars and always valid
+  > JSON. A blob with none of the recognised top-level keys yields `{}`, which is also the null-row
   > fallback in the task. Token count and quality spot-check not measured.
 
 - [ ] **R22 · PR-impact page can read the repository snapshot twice**
@@ -645,7 +652,7 @@ These were checked and found correct. Listed so a third round does not repeat th
 | R3 | 2026-11-15 | `ad34335b` | `select` added; `lastUsed`-only writes are no longer audited (see R1). |
 | R4 | 2026-11-01 | `311bd6a7` | Nested `analyses` narrowed to `select: { commitSha: true }`; the repo row itself is still full because `saveResults` needs it. |
 | R5 | 2026-11-01 | `311bd6a7` | `workspaceMemo` added to `RequestStore`; `resolveWorkspace` split into `loadWorkspace` + `memoizeOnce` keyed on user, header, `strict` and name. Both this and `entitlementMemo` now go through `src/server/utils/request-memo.ts`, so the key is typed and cannot drift from the inputs. |
-| R6 | 2026-11-15 | `d73f3abc` | One `unstable_cache` entry per page in `pr-comments.service.getComments` and `analysisMapper.buildTopFindings` (the latter gained a required `cacheScope`, the PR analysis id); no `take`, so row counts are still unbounded. |
+| R6 | 2026-11-15 | `d73f3abc` | One `unstable_cache` entry per page in `pr-comments.service.getComments` and `analysisMapper.buildTopFindings` (the latter gained a required `cacheScope`, the PR analysis id); the comments key and tag are workspace-scoped, empty pages are not cached, `postCommentToPR` revalidates the analysis tag. No `take`, so row counts are still unbounded. |
 | R7 | 2026-11-15 | `39d08034` | `getSessionHistory` takes the newest 200 rows (desc → reversed) with a four-field `select`; `listSessions` takes 100 with a `select` that keeps every output field. |
 | R8 | 2026-11-01 | `311bd6a7` | `analysisRepo.getByRepoAndPRNumber` selects `id` instead of `include: { comments, generatedFixes }`; its only caller (the PR webhook) reads `id`. |
 | R21 | 2026-11-15 | `39d08034` | `logic/project-result-overview.ts` replaces `JSON.stringify(resultJson)` in `analyze-pr.task.ts` with a bounded projection capped at 4096 chars. |
