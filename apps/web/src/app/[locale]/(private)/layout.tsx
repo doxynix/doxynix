@@ -17,6 +17,7 @@ import { AppHeader } from "@/widgets/app-header/ui/app-header";
 import { AppSidebar } from "@/widgets/app-sidebar/ui/app-sidebar";
 import { GithubConnectionFeedback } from "@/widgets/dashboard/ui/github-connection-feedback";
 import { HotkeyListeners } from "@/widgets/hotkey-manager/ui/hotkey-listeners";
+import { HotkeyProvider } from "@/widgets/hotkey-manager/ui/hotkey-provider";
 
 import { auth } from "@/server/core/auth";
 import { HydrateClient, prefetch, trpcProxy } from "@/server/core/trpc/prefetch";
@@ -30,16 +31,21 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
     unauthorized();
   }
 
-  void prefetch(trpcProxy.notification.getStats.queryOptions());
   void prefetch(trpcProxy.user.getAppearance.queryOptions({}));
-  void prefetch(
-    trpcProxy.repo.getSlim.infiniteQueryOptions(
-      { limit: REPO_LIST_PAGE_SIZE },
-      { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
-    ),
-  );
 
-  await prefetch(trpcProxy.workspace.myWorkspaces.queryOptions());
+  await Promise.all([
+    prefetch(trpcProxy.notification.getStats.queryOptions()),
+    prefetch(
+      trpcProxy.repo.getSlim.infiniteQueryOptions(
+        { limit: REPO_LIST_PAGE_SIZE },
+        {
+          getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
+          initialCursor: undefined,
+        },
+      ),
+    ),
+    prefetch(trpcProxy.workspace.myWorkspaces.queryOptions()),
+  ]);
 
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
@@ -51,35 +57,37 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
       <HydrateClient>
         <WorkspaceProvider>
           <AppearanceSync />
-          <SidebarProvider
-            className="flex h-dvh w-full flex-col overflow-hidden"
-            defaultOpen={defaultOpen}
-            defaultWidth={sidebarWidth > 0 ? sidebarWidth : undefined}
-          >
-            <div className="z-50 w-full shrink-0 border-b">
-              <AppHeader />
-            </div>
+          <HotkeyProvider>
+            <SidebarProvider
+              className="flex h-dvh w-full flex-col overflow-hidden"
+              defaultOpen={defaultOpen}
+              defaultWidth={sidebarWidth > 0 ? sidebarWidth : undefined}
+            >
+              <div className="z-50 w-full shrink-0 border-b">
+                <AppHeader />
+              </div>
 
-            <div className="flex flex-1 overflow-hidden">
-              <AppSidebar />
-              <div className="relative flex flex-1 flex-col overflow-y-auto [scrollbar-gutter:stable]">
-                {/* <ScrollArea className="flex-1"> */}
-                <SidebarInset
-                  className="mx-auto max-w-400 p-4"
-                  id="main-content"
-                  tabIndex={-1}
-                >
-                  {children}
-                </SidebarInset>
-                {/* </ScrollArea> */}
-                <div className="z-50 w-full shrink-0 border-t">
-                  <AppFooter />
+              <div className="flex flex-1 overflow-hidden">
+                <AppSidebar />
+                <div className="relative flex flex-1 flex-col overflow-y-auto [scrollbar-gutter:stable]">
+                  {/* <ScrollArea className="flex-1"> */}
+                  <SidebarInset
+                    className="mx-auto max-w-400 p-4"
+                    id="main-content"
+                    tabIndex={-1}
+                  >
+                    {children}
+                  </SidebarInset>
+                  {/* </ScrollArea> */}
+                  <div className="z-50 w-full shrink-0 border-t">
+                    <AppFooter />
+                  </div>
                 </div>
               </div>
-            </div>
-            <HotkeyListeners />
-            <Agent />
-          </SidebarProvider>
+              <HotkeyListeners />
+              <Agent />
+            </SidebarProvider>
+          </HotkeyProvider>
         </WorkspaceProvider>
       </HydrateClient>
       <GithubConnectionFeedback />

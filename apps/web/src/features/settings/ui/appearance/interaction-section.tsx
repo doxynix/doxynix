@@ -10,6 +10,7 @@ import type { AppearanceSectionProps } from "../../model/appearance/appearance.t
 
 const POINTER_CURSOR_ID = "appearance-pointer-cursor";
 const REDUCE_MOTION_ID = "appearance-reduce-motion";
+const SINGLE_KEY_SHORTCUTS_ID = "appearance-single-key-shortcuts";
 const UNDERLINE_LINKS_ID = "appearance-underline-links";
 
 export function InteractionSection({ preferences, update }: Readonly<AppearanceSectionProps>) {
@@ -75,6 +76,26 @@ export function InteractionSection({ preferences, update }: Readonly<AppearanceS
             id={REDUCE_MOTION_ID}
             onCheckedChange={(reduceMotion) => {
               update({ reduceMotion });
+            }}
+          />
+        </div>
+        <div className="flex items-center justify-between gap-6">
+          <div>
+            <Label
+              className="text-sm"
+              htmlFor={SINGLE_KEY_SHORTCUTS_ID}
+            >
+              {t("settings_appearance_shortcuts_title")}
+            </Label>
+            <p className="text-muted-foreground text-xs">
+              {t("settings_appearance_shortcuts_desc")}
+            </p>
+          </div>
+          <Switch
+            checked={preferences.singleKeyShortcuts}
+            id={SINGLE_KEY_SHORTCUTS_ID}
+            onCheckedChange={(singleKeyShortcuts) => {
+              update({ singleKeyShortcuts });
             }}
           />
         </div>

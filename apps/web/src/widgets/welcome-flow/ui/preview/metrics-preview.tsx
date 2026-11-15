@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 const BARS = [
   { labelKey: "preview_complexity", tone: "bg-warning", value: 62 },
-  { labelKey: "preview_tech_debt", tone: "bg-destructive", value: 38 },
+  { labelKey: "preview_tech_debt", tone: "bg-destructive-fill", value: 38 },
   { labelKey: "preview_docs_coverage", tone: "bg-success", value: 84 },
 ] as const;
 

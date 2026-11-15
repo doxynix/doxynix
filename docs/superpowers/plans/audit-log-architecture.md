@@ -1,9 +1,9 @@
-# Audit trail architecture — review, options and migration plan (2026-11-01)
+# Audit trail architecture — review, options and migration plan (2026-11-01, revalidated 2026-11-14)
 
 Everything `apps/web` does with audit data, what the industry does, and one recommended path.
 Companion to [`db-query-review-2026-11.md`](./db-query-review-2026-11.md) (R1 measures what the
-current interceptor costs per write), [`db-query-inventory.md`](./db-query-inventory.md) (call
-sites) and [`db-optimization-progress.md`](./db-optimization-progress.md) (round 1).
+current interceptor costs per write), [`db-query-inventory.md`](../../db/db-query-inventory.md)
+(call sites) and [`db-optimization-progress.md`](../../db/db-optimization-progress.md) (round 1).
 
 **Scope: `apps/web` only.** `apps/siem-server` is explicitly out of scope for this design
 (decision 2026-11-01); nothing here assumes a second database, a second service, or a new HTTP
@@ -13,15 +13,19 @@ Written because the current design mixes three different jobs into one mechanism
 question "should this be in Redis / should it be a global middleware at all" has a technical
 answer, not a taste answer.
 
-**Status: proposal. Nothing here is implemented.** The migration steps at the end are checkboxes
-so they can be tracked like the round-2 list.
+**Status: proposal. Nothing here is implemented** (re-confirmed 2026-11-14 on `e48fcdec`: no
+`audit_events` table, no `recordAudit`, no `stream`/`workspace_id`/`delivered_at` column). The
+migration steps at the end are checkboxes so they can be tracked like the round-2 list.
 
 ## Method and honesty section
 
 - Read: `core/db.ts`, `prisma/models/core.zmodel`, `modules/audit-logs/*`,
-  `entities/audit-log/*`, `modules/system/tasks/cleanup-db.task.ts`, both READMEs.
+  `entities/audit-log/*`, `modules/system/tasks/cleanup-db.task.ts`,
+  `modules/system/tasks/history-retention.task.ts`, both READMEs.
 - Researched with Tavily and Context7; sources at the bottom. Nothing was benchmarked for this
   document — the per-write cost figures are *counts* of operations from R1, not timings.
+- Revalidated against the tree on 2026-11-14; the line numbers below are from that pass. Prefer
+  following a symbol name rather than a line range — the code moves, this document does not.
 - Two claims are explicitly **unverified** and marked as such below (whether `after()` is
   reachable in a Trigger.dev worker, and the real size of `resultJson`).
 
@@ -31,25 +35,32 @@ so they can be tracked like the round-2 list.
 
 | Piece | Where | State |
 | --- | --- | --- |
-| Writer | `src/server/core/db.ts:185-262` | Prisma `$allOperations` on every model. After each audited operation it calls `baseClient.auditLog.create` (`:200`) with `sanitizePayload(args)` (`:203`), and for 13 models in `AUDIT_BUSINESS_MODELS` also publishes an Ably event (`:212-218`). |
-| Connection | `core/db.ts:82-90, 150-158` | `baseClient` is the **unextended** client over a `pg.Pool` (default max 10). Any open interactive transaction holds a different connection. |
-| Table | `prisma/models/core.zmodel:78-98` | `model`, `operation`, `payload Json`, `requestId`, `userId`, `ip`, `userAgent`, `createdAt`. **No `workspaceId`.** Append-only (`@@allow('update,delete', false)`), but `@@allow('create', true)`. |
-| Indexes | same | `requestId`; `(createdAt desc, id desc)`; `(userId, operation)`; `(operation, createdAt desc)`. |
-| Reader (user) | `modules/audit-logs/audit.router.ts`, `audit.service.ts` | `getActivityLogs` — cursor feed of the caller's own rows; `getLogPayloadHtml` renders the raw `payload` JSON as highlighted HTML. |
+| Writer | `src/server/core/db.ts:167-262` | Prisma `$allOperations` on every audited model. After each operation whose wire name is in `AUDIT_OPERATION_BY_WIRE_NAME` (`core/audit-operations.ts`) it calls `baseClient.auditLog.create` (`:202`) with `sanitizePayload(args)` (`:194`) and `maskSensitiveFields` (`:195-198`), and for the 13 models in `AUDIT_BUSINESS_MODELS` also publishes an Ably event (`:214-218`). Bookkeeping writes are still not excluded. |
+| Connection | `core/db.ts:83-100, 147` | `baseClient` is the **unextended** client over a `pg.Pool` created with defaults (`new Pool({ connectionString })`, max 10). Any open interactive transaction holds a different connection. |
+| Table | `prisma/models/core.zmodel:78-101` | `model`, `operation`, `payload Json`, `requestId`, `userId`, `ip`, `userAgent`, `createdAt`. **No `workspaceId`.** Append-only (`@@allow('update,delete', false)`), but `@@allow('create', true)`. |
+| Indexes | same | `requestId`; `(createdAt desc, id desc)`; `(userId, operation)`; `(userId, createdAt desc, id desc)`; `(operation, createdAt desc)`. |
+| Reader (user) | `modules/audit-logs/audit.router.ts`, `audit.service.ts` | `getActivityLogs` — keyset feed of the caller's own rows, already filtered to `AUDIT_BUSINESS_MODELS` (`audit.service.ts:18-39`); `getLogPayloadHtml` renders the raw `payload` JSON as highlighted HTML (`:41-56`). |
 | Reader (admin) | `modules/audit-logs/admin-audit.*` | `cappedCount` + `getPaginatedList`, filters by model/operation/date/search; detail returns the whole row. |
 | Projection | `audit.mapper.ts` | Derives `targetName` by switching on `log.model` and reading `payload.data.*`; maps device from UA. |
-| Cleanup | `modules/system/tasks/cleanup-db.task.ts` | Deletes `verification`, `sessions`, `webhook_deliveries`, and billing payloads. **`audit_logs` is never pruned.** |
+| Cleanup | `modules/system/tasks/cleanup-db.task.ts`, `modules/system/tasks/history-retention.task.ts` | `daily-database-maintenance` deletes expired `verification`, `sessions`, `webhook_deliveries` and billing payloads. `history-retention` (added 2026-11-03) prunes `analyses`/`pull_request_analyses` by the plan's `historyDays`. **`audit_logs` is outside both.** |
 
 Observations that follow directly:
 
 1. The table is **user-scoped, not workspace-scoped**. A team member cannot see a colleague's
    actions; a workspace owner cannot audit their own workspace. For a product sold per workspace
-   that is a product gap, not a preference.
+   that is a product gap, not a preference. Workspace tenancy landed in `e431f761` (2026-11-01) for
+   the rest of the schema and did **not** touch `AuditLog`.
 2. `@@allow('create', true)` means any code path that writes through the *enhanced* client
    (`ctx.db`) may insert an audit row. The current writer bypasses policies (it uses `baseClient`),
    so the policy can be tightened to `false` with no behavioral change.
-3. Retention does not exist. In the round-1 stress fixture `audit_logs` had the two largest
-   indexes in the database (`created_at_id_idx` 171 MB, `request_id_idx` 204 MB) at ~3.4M rows.
+3. Retention does not exist **for audit**. The scheduled-task plumbing does exist now
+   (`history-retention.task.ts`, `daily-database-maintenance`), which removes the "new
+   infrastructure" objection from §4 — but both tasks ignore this table. In the round-1 stress
+   fixture `audit_logs` had the two largest indexes in the database (`created_at_id_idx` 171 MB,
+   `request_id_idx` 204 MB) at ~3.4M rows, and nothing has pruned it since.
+4. The user-facing feed already filters by `model: { in: AUDIT_BUSINESS_MODELS }`
+   (`audit.service.ts:22-27`), so demoting the interceptor to `FORENSIC` does not change what the
+   feed shows — only which rows exist.
 
 ---
 
@@ -94,25 +105,26 @@ different pooled connection. If the caller is inside `$transaction`, that connec
 
 This repository has that exact structure (`baseClient.auditLog.create` while `tx` is open) and
 compensates with generous limits — `transactionOptions: { maxWait: 20_000, timeout: 30_000 }`
-(`core/db.ts:134-137`). Two things keep it from biting today:
+(`core/db.ts:128-131`). Two things keep it from biting today:
 
 - in HTTP requests `runAsBackgroundTask` defers the audit write into `after()`, i.e. after the
   response and after commit;
 - most single-row mutations never open a transaction at all.
 
-**Unverified:** the exact behaviour inside a Trigger.dev worker. `core/db.ts:24-40` documents that
+**Unverified:** the exact behaviour inside a Trigger.dev worker. `core/db.ts:33-49` documents that
 `next/server` is "not always resolvable" there, and even when it resolves, `after()` outside a
-request scope throws and is caught (`:57-70`). Either path lands on `await task()` in production
-(`:73-80`) — synchronous audit inside the run. `saveResults`
-(`analysis/services/analysis-lifecycle.service.ts:409-482`) performs **8** audited writes inside
-one transaction, 7 of which also publish to Ably. With 10 pool connections and a few concurrent
-analyses this is a queue on the pool, and the 30 s limit is the blast radius.
+request scope throws and is caught (`:51-63`). Either path lands on `await task()` in production
+(`:71-76`) — synchronous audit inside the run. `saveResults`
+(`analysis/services/analysis-lifecycle.service.ts:339-522`, transaction at `:418-491`) performs
+**8** audited writes inside one transaction (analysis update, user updateMany, 5 document upserts,
+notification create), 7 of which also publish to Ably. With 10 pool connections and a few
+concurrent analyses this is a queue on the pool, and the 30 s limit is the blast radius.
 
 ### 3.2 It is blind to batch operations
 
 `createMany`, `updateMany`, `deleteMany` return a count. There is no row list, so there is nothing
 to record beyond "something changed". This codebase uses `updateMany` for exactly the operations
-one would want to audit (`access-revocation.ts:28`, billing projections, notification
+one would want to audit (`utils/access-revocation.ts:28`, billing projections, notification
 `markAllAsRead`, admin bulk paths).
 
 ### 3.3 It has no domain meaning
@@ -161,7 +173,8 @@ else.
   durable thing available.
 - `delivered_at` makes the audit table *also* the outbox — no second table, no dual-write problem.
 - A Trigger.dev `schedules.task({ cron: "* * * * *" })` drains it. The repo already runs scheduled
-  tasks (`daily-database-maintenance`), so this is not new infrastructure.
+  tasks (`daily-database-maintenance`, `history-retention`), so this is not new infrastructure —
+  only a faster cron.
 - The drainer is the right place for everything currently done in the hot path: Ably publish and
   the optional Axiom forward.
 
@@ -325,8 +338,10 @@ Two surfaces, one table, one endpoint family:
 
 ## 7. Retention, partitioning, indexes
 
-Nothing prunes `audit_logs` today. At the round-1 fixture size the two biggest indexes in the
-database belong to this table.
+Nothing prunes `audit_logs` today — the two scheduled tasks that exist
+(`daily-database-maintenance`, `history-retention`) cover sessions, webhooks, billing payloads and
+analysis history, not this table. At the round-1 fixture size the two biggest indexes in the
+database belong to it.
 
 Recommendation, following the standard advice for event tables
 ([AppMaster](https://appmaster.io/blog/postgresql-partitioning-event-audit-tables),
@@ -369,8 +384,10 @@ Each step ships on its own; step 1 stops the bleeding and changes no behaviour.
 - [ ] **Step 3 — outbox drain (S–M, 1–2 days).**
   A `schedules.task` every minute: select `delivered_at IS NULL` in batches, publish to Ably (and
   optionally to Axiom), mark delivered. Remove the `auditUpdated` per-write invalidation from the
-  client provider (`app/_components/realtime-provider.tsx:237-239`) and publish once per drained
-  batch instead.
+  client handler (`src/app/_components/realtime/handlers/account.ts:10-12`; the provider itself was
+  split into `app/_components/realtime/` in `#2386`) and publish once per drained batch instead.
+  The scheduled-task plumbing already exists in `modules/system/tasks/` — this is a new task next
+  to `history-retention`, not a new scheduler.
   *Effect:* the audit insert joins the caller's transaction (same connection), no second pool
   connection, no Ably in the request path, replay possible.
 
@@ -396,11 +413,11 @@ Repeated from R1 so this document stands alone. Counts are operations, not milli
 
 | Cost | Where |
 | --- | --- |
-| One INSERT per audited write (8 per `saveResults`) | `core/db.ts:200` |
-| A second pooled connection while a transaction is open → `waitingCount`, 30 s timeout risk | `core/db.ts:200` + `:134-137` |
-| Full `JSON.stringify` of `args` before 1 KB truncation | `core/db.ts:203`, `utils/sanitize-payload.ts:79-100` |
-| One Ably REST call per business-model write (7 per `saveResults`) | `core/db.ts:212-218` |
-| Client-side invalidation of the audit feed on every such write | `app/_components/realtime-provider.tsx:237-239` |
+| One INSERT per audited write (8 per `saveResults`) | `core/db.ts:202` |
+| A second pooled connection while a transaction is open → `waitingCount`, 30 s timeout risk | `core/db.ts:202` + `:128-131` |
+| Full `JSON.stringify` of `args` before 1 KB truncation | `core/db.ts:194`, `utils/sanitize-payload.ts:78-100` |
+| One Ably REST call per business-model write (7 per `saveResults`) | `core/db.ts:214-218` |
+| Client-side invalidation of the audit feed on every such write | `app/_components/realtime/handlers/account.ts:10-12` |
 
 So: the audit layer is not slow because it is asynchronous. It is slow because it adds a second
 INSERT on another connection, serializes the entire payload, and makes a network call — on every

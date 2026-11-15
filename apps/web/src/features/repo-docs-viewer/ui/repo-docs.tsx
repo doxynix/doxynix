@@ -265,7 +265,7 @@ export function RepoDocs({
 
           return (
             <TabsContent
-              className="mt-0 flex min-h-0 flex-1 flex-col outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50 data-[state=inactive]:hidden"
+              className="mt-0 flex min-h-0 flex-1 flex-col outline-hidden focus-visible:ring-2 focus-visible:ring-ring/80 data-[state=inactive]:hidden"
               key={doc.type}
               value={doc.type}
             >

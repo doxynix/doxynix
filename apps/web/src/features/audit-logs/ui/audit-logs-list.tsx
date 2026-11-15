@@ -21,7 +21,9 @@ export function AuditLogList({ logs }: Readonly<Props>) {
           <TableHead>{t("col_target")}</TableHead>
           <TableHead>{t("col_source")}</TableHead>
           <TableHead className="text-right">{t("col_time")}</TableHead>
-          <TableHead />
+          <TableHead>
+            <span className="sr-only">{t("col_actions")}</span>
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

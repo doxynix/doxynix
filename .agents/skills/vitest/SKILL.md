@@ -47,9 +47,11 @@ tests across 9 files because module-level mocks and `process.env` leak between f
 parallelism is the only safe lever.
 
 Both configs run `src/tests/global-setup.ts`, which stands up an in-memory Upstash-compatible
-Redis (`src/tests/memory-redis.ts`) on `127.0.0.1:18777`. Without it every Redis command fails
-after five retries (~4.2 s), which used to dominate the integration suite. If a real
-`UPSTASH_REDIS_REST_URL` is present (e.g. from Doppler), the stub is skipped.
+Redis (`src/tests/memory-redis.ts`) on `127.0.0.1:18777` and rewrites `UPSTASH_REDIS_REST_URL` to
+point at it. It overwrites whatever the environment inherited rather than deferring to it: CI
+exports a dummy host (`https://dummy-redis.upstash.io`), which made every command burn five retries
+(~4.2 s) and left two files owning 84% of the integration run; Doppler can export a live one, which
+would let tests write real keys. `TEST_REAL_REDIS=1` keeps the inherited URL instead.
 
 ### Unit vs integration
 

@@ -156,7 +156,7 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
                 key={item.title}
               >
                 <div className="flex items-center gap-3">
-                  <span className="flex size-9 items-center justify-center rounded-full border border-border bg-primary/10">
+                  <span className="flex size-9 items-center justify-center rounded-full border border-border bg-primary-accent/10">
                     <item.icon className="text-foreground" />
                   </span>
                   <p className="font-medium text-foreground text-sm">{item.title}</p>
@@ -325,7 +325,7 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
           >
             <div className="flex w-full items-center justify-between border-b pb-4">
               <div className="flex items-center gap-2">
-                <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-muted-foreground">
+                <div className="flex size-10 items-center justify-center rounded-full bg-primary-accent/10 text-muted-foreground">
                   {isBackupMode ? <KeyRound size={20} /> : <ShieldCheck size={20} />}
                 </div>
                 <div className="text-left">

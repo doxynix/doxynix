@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import Image from "next/image";
 
 import { getSizesFromClassName, isUnoptimizedHost } from "@/shared/lib/avatar-utils";
@@ -8,6 +8,55 @@ import { cn } from "@/shared/lib/cn";
 import { getInitials } from "@/shared/lib/get-initials";
 import { Avatar, AvatarFallback } from "@/shared/ui/core/avatar";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+
+type AvatarStatus = "error" | "loading" | "success";
+
+const loadedAvatars = new Set<string>();
+const erroredAvatars = new Set<string>();
+const avatarListeners = new Set<() => void>();
+
+function emitAvatarChange() {
+  for (const listener of avatarListeners) {
+    listener();
+  }
+}
+
+function subscribeAvatars(listener: () => void) {
+  avatarListeners.add(listener);
+
+  return () => {
+    avatarListeners.delete(listener);
+  };
+}
+
+function avatarStatus(src: null | string | undefined): AvatarStatus {
+  if (typeof src !== "string" || src === "") {
+    return "error";
+  }
+  if (erroredAvatars.has(src)) {
+    return "error";
+  }
+  if (loadedAvatars.has(src)) {
+    return "success";
+  }
+  return "loading";
+}
+
+function serverAvatarStatus(src: null | string | undefined): AvatarStatus {
+  return typeof src === "string" && src !== "" ? "loading" : "error";
+}
+
+function markAvatarLoaded(src: string) {
+  erroredAvatars.delete(src);
+  loadedAvatars.add(src);
+  emitAvatarChange();
+}
+
+function markAvatarErrored(src: string) {
+  loadedAvatars.delete(src);
+  erroredAvatars.add(src);
+  emitAvatarChange();
+}
 
 type Props = {
   alt: string;
@@ -19,8 +68,6 @@ type Props = {
   src?: null | string;
 };
 
-const loadedAvatars = new Map<string, boolean>();
-
 export function AppAvatar({
   alt,
   className,
@@ -31,40 +78,20 @@ export function AppAvatar({
   src,
 }: Readonly<Props>) {
   const hasSrc = typeof src === "string" && src !== "";
-
-  const [status, setStatus] = useState<"error" | "loading" | "success">(() => {
-    if (!hasSrc) {
-      return "error";
-    }
-    if (loadedAvatars.get(src) === true) {
-      return "success";
-    }
-    return "loading";
-  });
-
-  const [prevSrc, setPrevSrc] = useState(src);
-
+  const status = useSyncExternalStore(
+    subscribeAvatars,
+    () => avatarStatus(src),
+    () => serverAvatarStatus(src),
+  );
   const imageRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    if (imageRef.current?.complete && imageRef.current.naturalWidth > 0) {
-      if (src) {
-        loadedAvatars.set(src, true);
-      }
-      setStatus("success");
+    if (!src || !imageRef.current?.complete || imageRef.current.naturalWidth === 0) {
+      return;
     }
-  }, [src]);
 
-  if (src !== prevSrc) {
-    setPrevSrc(src);
-    if (!hasSrc) {
-      setStatus("error");
-    } else if (loadedAvatars.get(src) === true) {
-      setStatus("success");
-    } else {
-      setStatus("loading");
-    }
-  }
+    markAvatarLoaded(src);
+  }, [src]);
 
   const isError = status === "error";
   const isEmpty = typeof src !== "string" || src === "";
@@ -87,13 +114,14 @@ export function AppAvatar({
           loading={priority ? undefined : "lazy"}
           onError={() => {
             console.error("Image load error:", src);
-            setStatus("error");
+            if (src) {
+              markAvatarErrored(src);
+            }
           }}
           onLoad={() => {
             if (src) {
-              loadedAvatars.set(src, true);
+              markAvatarLoaded(src);
             }
-            setStatus("success");
           }}
           priority={priority}
           ref={imageRef}

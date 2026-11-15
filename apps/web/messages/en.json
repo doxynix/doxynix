@@ -292,6 +292,7 @@
     "you": "You"
   },
   "AuditLogs": {
+    "col_actions": "Actions",
     "col_entity": "Entity",
     "col_event": "Event",
     "col_source": "Source",
@@ -491,6 +492,7 @@
     "nav_help": "Help",
     "nav_high_five": "High five",
     "nav_home": "Home",
+    "nav_keyboard_shortcuts": "Keyboard shortcuts",
     "nav_map": "Map",
     "nav_members": "Members",
     "nav_notifications": "Notifications",
@@ -500,6 +502,7 @@
     "nav_repositories": "Repositories",
     "nav_sessions": "Sessions",
     "nav_settings": "Settings",
+    "nav_short_links": "Short links",
     "nav_support": "Support",
     "navigated_to": "Navigated to {title}",
     "new": "New",
@@ -1056,6 +1059,7 @@
     "settings_api_keys_history_revoked": "History (Revoked)",
     "settings_api_keys_label": "Description (optional)",
     "settings_api_keys_last_used": "Last used",
+    "settings_api_keys_last_used_never": "Never used",
     "settings_api_keys_name": "Name your key",
     "settings_api_keys_name_placeholder": "e.g., Prod Server",
     "settings_api_keys_never_expires": "Never expires",
@@ -1184,6 +1188,8 @@
     "settings_appearance_radius_title": "Corner radius",
     "settings_appearance_shape_desc": "Corner rounding and interface scale.",
     "settings_appearance_shape_title": "Shape and size",
+    "settings_appearance_shortcuts_desc": "Use two-key sequences like G then D. Turn off if they interfere with typing or assistive input.",
+    "settings_appearance_shortcuts_title": "Single-key shortcuts",
     "settings_appearance_sidebar_collapse_desc": "How the sidebar collapses",
     "settings_appearance_sidebar_collapse_icon": "Icon",
     "settings_appearance_sidebar_collapse_offcanvas": "Offcanvas",
@@ -1906,6 +1912,22 @@
     "sign_out_all_devices": "Sign out of all other devices",
     "this_device": "This Device",
     "unknown": "Unknown"
+  },
+  "Shortcuts": {
+    "description": "Everything you can do in Doxynix without reaching for the mouse.",
+    "group_actions": "Actions",
+    "group_interface": "Interface",
+    "group_navigation": "Navigation",
+    "group_repo_map": "Repo map",
+    "group_repo_map_hint": "Available while the repository map is open.",
+    "note": "Two-key sequences work when you are not typing in a field.",
+    "sequences_disabled": "Single-key sequences are turned off in Appearance settings.",
+    "title": "Keyboard shortcuts"
+  },
+  "ShortLinks": {
+    "description": "Type these paths after the domain or copy the full link. Each one redirects to the full page.",
+    "hint": "Open from the address bar or copy the full link.",
+    "title": "Short links"
   },
   "Support": {
     "channel_discord_action": "Join Server",

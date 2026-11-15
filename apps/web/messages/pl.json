@@ -292,6 +292,7 @@
     "you": "Ty"
   },
   "AuditLogs": {
+    "col_actions": "Akcje",
     "col_entity": "Encja",
     "col_event": "Zdarzenie",
     "col_source": "Źródło",
@@ -491,6 +492,7 @@
     "nav_help": "Pomoc",
     "nav_high_five": "Piątka",
     "nav_home": "Strona główna",
+    "nav_keyboard_shortcuts": "Skróty klawiszowe",
     "nav_map": "Mapa",
     "nav_members": "Członkowie",
     "nav_notifications": "Powiadomienia",
@@ -500,6 +502,7 @@
     "nav_repositories": "Repozytoria",
     "nav_sessions": "Sesje",
     "nav_settings": "Ustawienia",
+    "nav_short_links": "Krótkie linki",
     "nav_support": "Wsparcie",
     "navigated_to": "Przejście do {title}",
     "new": "Nowy",
@@ -1056,6 +1059,7 @@
     "settings_api_keys_history_revoked": "Historia (unieważnione)",
     "settings_api_keys_label": "Opis (opcjonalnie)",
     "settings_api_keys_last_used": "Ostatnio użyto",
+    "settings_api_keys_last_used_never": "Nigdy nie użyto",
     "settings_api_keys_name": "Nazwij swój klucz",
     "settings_api_keys_name_placeholder": "np. serwer produkcyjny",
     "settings_api_keys_never_expires": "Bezterminowo",
@@ -1184,6 +1188,8 @@
     "settings_appearance_radius_title": "Promień narożników",
     "settings_appearance_shape_desc": "Zaokrąglenie rogów i skala interfejsu.",
     "settings_appearance_shape_title": "Kształt i rozmiar",
+    "settings_appearance_shortcuts_desc": "Dwuklawiszowe sekwencje, takie jak G then D. Wyłącz, jeśli przeszkadzają w pisaniu lub pracy urządzeń wspomagających.",
+    "settings_appearance_shortcuts_title": "Skróty jednoklawiszowe",
     "settings_appearance_sidebar_collapse_desc": "Jak zwija się pasek boczny",
     "settings_appearance_sidebar_collapse_icon": "Ikona",
     "settings_appearance_sidebar_collapse_offcanvas": "Offcanvas",
@@ -1906,6 +1912,22 @@
     "sign_out_all_devices": "Wyloguj ze wszystkich pozostałych urządzeń",
     "this_device": "To urządzenie",
     "unknown": "Nieznane"
+  },
+  "Shortcuts": {
+    "description": "Wszystko, co możesz zrobić w Doxynix bez myszy.",
+    "group_actions": "Akcje",
+    "group_interface": "Interfejs",
+    "group_navigation": "Nawigacja",
+    "group_repo_map": "Mapa repozytorium",
+    "group_repo_map_hint": "Dostępne, gdy mapa repozytorium jest otwarta.",
+    "note": "Kombinacje dwuklawiszowe działają poza polami tekstowymi.",
+    "sequences_disabled": "Sekwencje jednoklawiszowe są wyłączone w Ustawieniach wyglądu.",
+    "title": "Skróty klawiszowe"
+  },
+  "ShortLinks": {
+    "description": "Wpisz te ścieżki po domenie lub skopiuj pełny link. Każdy prowadzi do odpowiedniej strony.",
+    "hint": "Otwórz z paska adresu lub skopiuj pełny link.",
+    "title": "Krótkie linki"
   },
   "Support": {
     "channel_discord_action": "Dołącz do serwera",

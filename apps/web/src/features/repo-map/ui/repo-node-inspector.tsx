@@ -172,7 +172,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           {explain.whyImportant && (
             <section className="flex flex-col gap-2">
               <div className="text-xs">{t("business_impact")}</div>
-              <p className="italic border border-primary pl-3 text-xs">
+              <p className="italic border border-primary-accent pl-3 text-xs">
                 {`"${explain.whyImportant}"`}
               </p>
             </section>

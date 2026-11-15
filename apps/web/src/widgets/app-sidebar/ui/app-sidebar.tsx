@@ -41,7 +41,7 @@ export function AppSidebar() {
   const navLabels = useNavLabels();
   const { preferences } = useAppearancePreferences();
   const { state } = useSidebar();
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery(
     trpc.repo.getSlim.infiniteQueryOptions(
       {
         limit: REPO_LIST_PAGE_SIZE,
@@ -52,6 +52,9 @@ export function AppSidebar() {
       },
     ),
   );
+
+  const repos = data?.pages.flatMap((page) => page.items) ?? [];
+  const isInitialLoading = data == null;
 
   const { data: stats } = useNotificationStats();
 
@@ -115,28 +118,26 @@ export function AppSidebar() {
                 <CollapsibleContent>
                   <SidebarGroupContent>
                     <SidebarMenu>
-                      {isLoading &&
+                      {isInitialLoading &&
                         Array.from({ length: REPO_LIST_PAGE_SIZE }).map((_, i) => (
                           <SidebarMenuItem key={i}>
                             <SidebarMenuSkeleton showIcon />
                           </SidebarMenuItem>
                         ))}
 
-                      {data?.pages.map((page) =>
-                        page.items.map((repo) => (
-                          <SidebarMenuItem
-                            className="min-w-0 max-w-[calc(var(--sidebar-width)-1.0625rem)]"
-                            key={repo.id}
-                          >
-                            <SidebarLink
-                              avatar={repo.avatar ?? ""}
-                              href={`/dashboard/repo/${repo.owner}/${repo.name}`}
-                              label={`${repo.owner}/${repo.name}`}
-                            />
-                          </SidebarMenuItem>
-                        )),
-                      )}
-                      {!isLoading && data?.pages[0]?.items.length === 0 && state === "expanded" && (
+                      {repos.map((repo) => (
+                        <SidebarMenuItem
+                          className="min-w-0 max-w-[calc(var(--sidebar-width)-1.0625rem)]"
+                          key={repo.id}
+                        >
+                          <SidebarLink
+                            avatar={repo.avatar ?? ""}
+                            href={`/dashboard/repo/${repo.owner}/${repo.name}`}
+                            label={`${repo.owner}/${repo.name}`}
+                          />
+                        </SidebarMenuItem>
+                      ))}
+                      {!isInitialLoading && repos.length === 0 && state === "expanded" && (
                         <SidebarMenuItem>
                           <div className="truncate px-4 py-2 text-muted-foreground text-xs">
                             {t("repo_empty_title")}

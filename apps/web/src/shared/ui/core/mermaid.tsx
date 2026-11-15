@@ -189,7 +189,7 @@ export function AppMermaid({
       {status === "loading" && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-[1px]">
           <div className="flex flex-col items-center gap-3">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-accent border-t-transparent" />
             <span className="font-medium text-muted-foreground text-xs">
               {tCommon("rendering")}
             </span>

@@ -79,8 +79,8 @@ function ThemeSwatch({
     <Label
       className={cn(
         "flex flex-1 cursor-pointer flex-col gap-2 rounded-xl border p-2 font-normal transition-standard",
-        "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring/50",
-        selected ? "border-primary bg-accent" : "border-input hover:bg-accent/50",
+        "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring/80",
+        selected ? "border-primary-accent bg-accent" : "border-input hover:bg-accent/50",
       )}
       htmlFor={id}
     >

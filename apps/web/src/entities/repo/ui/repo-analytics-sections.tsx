@@ -108,7 +108,7 @@ export function SnapshotsSection({
                   className="flex items-start gap-2"
                   key={step}
                 >
-                  <div className="mt-1 size-1.5 shrink-0 rounded-full bg-primary" />
+                  <div className="mt-1 size-1.5 shrink-0 rounded-full bg-primary-accent" />
                   <span>{step}</span>
                 </li>
               ))}

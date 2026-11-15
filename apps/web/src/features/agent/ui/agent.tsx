@@ -17,7 +17,7 @@ import { usePanelLayout } from "@/shared/lib/hooks/use-panel-layout";
 import { DxnxLogo } from "@/shared/ui/branding/dxnx-logo";
 import { AppButton } from "@/shared/ui/core/button";
 import { Card } from "@/shared/ui/core/card";
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/shared/ui/core/empty";
+import { Empty, EmptyDescription, EmptyHeader } from "@/shared/ui/core/empty";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ui/core/resizable";
 import { useSidebar } from "@/shared/ui/core/sidebar";
 import { ActionErrorAlert } from "@/shared/ui/kit/action-error-alert";
@@ -408,7 +408,6 @@ export function Agent() {
                       <Empty className="fade-in h-full animate-in border-0 pt-16">
                         <EmptyHeader>
                           <DxnxLogo className="size-40" />
-                          <EmptyTitle>{t("assistant_name")}</EmptyTitle>
                           <EmptyDescription>{t("assistant_description")}</EmptyDescription>
                         </EmptyHeader>
                         <AgentSuggestions
@@ -451,7 +450,7 @@ export function Agent() {
 
                   {error != null && (
                     <ActionErrorAlert
-                      className="mx-4 mb-2"
+                      className="mx-4 mb-2 w-auto"
                       error={error}
                       onDismiss={clearError}
                     />

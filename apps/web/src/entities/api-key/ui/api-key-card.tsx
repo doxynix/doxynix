@@ -35,10 +35,14 @@ export function ApiKeyCard({
             </p>
             <p>
               {t("settings_api_keys_last_used")}:{" "}
-              <TimeAgo
-                date={active.lastUsed ?? ""}
-                locale={locale}
-              />
+              {active.lastUsed != null ? (
+                <TimeAgo
+                  date={active.lastUsed}
+                  locale={locale}
+                />
+              ) : (
+                t("settings_api_keys_last_used_never")
+              )}
             </p>
             <p>
               {t("settings_api_keys_expires")}:{" "}

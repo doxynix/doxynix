@@ -292,6 +292,7 @@
     "you": "Tu"
   },
   "AuditLogs": {
+    "col_actions": "Azioni",
     "col_entity": "Entità",
     "col_event": "Evento",
     "col_source": "Origine",
@@ -491,6 +492,7 @@
     "nav_help": "Aiuto",
     "nav_high_five": "Batti cinque",
     "nav_home": "Home",
+    "nav_keyboard_shortcuts": "Scorciatoie da tastiera",
     "nav_map": "Mappa",
     "nav_members": "Membri",
     "nav_notifications": "Notifiche",
@@ -500,6 +502,7 @@
     "nav_repositories": "Repository",
     "nav_sessions": "Sessioni",
     "nav_settings": "Impostazioni",
+    "nav_short_links": "Link brevi",
     "nav_support": "Supporto",
     "navigated_to": "Navigato a {title}",
     "new": "Nuovo",
@@ -1056,6 +1059,7 @@
     "settings_api_keys_history_revoked": "Cronologia (revocate)",
     "settings_api_keys_label": "Descrizione (facoltativa)",
     "settings_api_keys_last_used": "Ultimo utilizzo",
+    "settings_api_keys_last_used_never": "Mai usato",
     "settings_api_keys_name": "Dai un nome alla tua chiave",
     "settings_api_keys_name_placeholder": "es. Server di produzione",
     "settings_api_keys_never_expires": "Mai",
@@ -1184,6 +1188,8 @@
     "settings_appearance_radius_title": "Raggio degli angoli",
     "settings_appearance_shape_desc": "Arrotondamento degli angoli e scala dell’interfaccia.",
     "settings_appearance_shape_title": "Forma e dimensione",
+    "settings_appearance_shortcuts_desc": "Sequenze a due tasti come G then D. Disattivale se interferiscono con la digitazione o con input assistiti.",
+    "settings_appearance_shortcuts_title": "Scorciatoie a tasto singolo",
     "settings_appearance_sidebar_collapse_desc": "Come si richiude la barra laterale",
     "settings_appearance_sidebar_collapse_icon": "Icona",
     "settings_appearance_sidebar_collapse_offcanvas": "Offcanvas",
@@ -1906,6 +1912,22 @@
     "sign_out_all_devices": "Esci da tutti gli altri dispositivi",
     "this_device": "Questo dispositivo",
     "unknown": "Sconosciuto"
+  },
+  "Shortcuts": {
+    "description": "Tutto ciò che puoi fare in Doxynix senza usare il mouse.",
+    "group_actions": "Azioni",
+    "group_interface": "Interfaccia",
+    "group_navigation": "Navigazione",
+    "group_repo_map": "Mappa del repository",
+    "group_repo_map_hint": "Disponibili mentre la mappa del repository è aperta.",
+    "note": "Le sequenze a due tasti funzionano fuori dai campi di testo.",
+    "sequences_disabled": "Le sequenze a tasto singolo sono disattivate in Aspetto.",
+    "title": "Scorciatoie da tastiera"
+  },
+  "ShortLinks": {
+    "description": "Digita questi percorsi dopo il dominio o copia il link completo. Ognuno reindirizza alla pagina corrispondente.",
+    "hint": "Apri dalla barra degli indirizzi o copia il link completo.",
+    "title": "Link brevi"
   },
   "Support": {
     "channel_discord_action": "Unisciti al server",

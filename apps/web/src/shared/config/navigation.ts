@@ -27,127 +27,122 @@ import {
 } from "lucide-react";
 
 import type { MenuItem, MenuItems, PublicMenuItem } from "./navigation.types";
+import { formatSequence, SHORTCUTS, type ShortcutId } from "./shortcuts";
+
+type SequentialShortcutId = {
+  [Id in ShortcutId]: (typeof SHORTCUTS)[Id]["keys"] extends `${string} then ${string}`
+    ? Id
+    : never;
+}[ShortcutId];
+
+const sequenceShortcut = (id: SequentialShortcutId) => formatSequence(SHORTCUTS[id].keys);
 
 const DASHBOARD_BASE: MenuItems = [
   {
     exact: true,
-    href: "/dashboard",
+    href: SHORTCUTS.dashboard.href,
     icon: LayoutGrid,
     id: "dashboard",
     labelKey: "dashboard",
-    shortcut: "G then D",
-    url: "/d",
+    shortcut: sequenceShortcut("dashboard"),
   },
   {
-    href: "/dashboard/repos",
+    href: SHORTCUTS.repositories.href,
     icon: Book,
     id: "repositories",
     labelKey: "repositories",
-    shortcut: "G then R",
-    url: "/r",
+    shortcut: sequenceShortcut("repositories"),
   },
   {
-    href: "/dashboard/settings",
+    href: SHORTCUTS.settings.href,
     icon: Settings,
     id: "settings",
     labelKey: "settings",
-    shortcut: "G then S",
-    url: "/s",
+    shortcut: sequenceShortcut("settings"),
   },
   {
-    href: "/dashboard/notifications",
+    href: SHORTCUTS.notifications.href,
     icon: Bell,
     id: "notifications",
     labelKey: "notifications",
-    shortcut: "G then N",
-    url: "/n",
+    shortcut: sequenceShortcut("notifications"),
   },
 ];
 
 const SETTINGS_PAGES: MenuItems = [
   {
-    href: "/dashboard/settings/profile",
+    href: SHORTCUTS.profile.href,
     icon: User,
     id: "profile",
     labelKey: "profile",
-    shortcut: "G then P",
-    url: "/me",
+    shortcut: sequenceShortcut("profile"),
   },
   {
-    href: "/dashboard/settings/members",
+    href: SHORTCUTS.members.href,
     icon: Users2,
     id: "members",
     labelKey: "members",
-    shortcut: "G then T",
-    url: "/mt",
+    shortcut: sequenceShortcut("members"),
   },
   {
-    href: "/dashboard/settings/billing",
+    href: SHORTCUTS.billing.href,
     icon: CreditCard,
     id: "billing",
     labelKey: "billing",
-    shortcut: "G then B",
-    url: "/b",
+    shortcut: sequenceShortcut("billing"),
   },
   {
-    href: "/dashboard/settings/appearance",
+    href: SHORTCUTS.appearance.href,
     icon: Palette,
     id: "appearance",
     labelKey: "appearance",
-    shortcut: "G then A",
-    url: "/a",
+    shortcut: sequenceShortcut("appearance"),
   },
   {
-    href: "/dashboard/settings/connections",
+    href: SHORTCUTS.connections.href,
     icon: Link,
     id: "connections",
     labelKey: "connections",
-    shortcut: "G then C",
-    url: "/c",
+    shortcut: sequenceShortcut("connections"),
   },
   {
-    href: "/dashboard/settings/sessions",
+    href: SHORTCUTS.sessions.href,
     icon: TabletSmartphone,
     id: "sessions",
     labelKey: "sessions",
-    shortcut: "G then M",
-    url: "/ms",
+    shortcut: sequenceShortcut("sessions"),
   },
   {
-    href: "/dashboard/settings/api-keys",
+    href: SHORTCUTS.apiKeys.href,
     icon: KeyRound,
     id: "api keys",
     labelKey: "api_keys",
-    shortcut: "G then K",
-    url: "/k",
+    shortcut: sequenceShortcut("apiKeys"),
   },
   {
-    href: "/dashboard/settings/audit-log",
+    href: SHORTCUTS.auditLog.href,
     icon: Logs,
     id: "audit log",
     labelKey: "audit_log",
-    shortcut: "G then L",
-    url: "/l",
+    shortcut: sequenceShortcut("auditLog"),
   },
   {
-    href: "/dashboard/settings/danger-zone",
+    href: SHORTCUTS.dangerZone.href,
     icon: AlertTriangle,
     id: "danger zone",
     labelKey: "danger_zone",
-    shortcut: "G then Z",
-    url: "/z",
+    shortcut: sequenceShortcut("dangerZone"),
     variant: "destructive",
   },
 ];
 
 const GLOBAL_FEATURES: MenuItems = [
   {
-    href: "/support",
+    href: SHORTCUTS.support.href,
     icon: Headset,
     id: "support",
     labelKey: "support",
-    shortcut: "G then H",
-    url: "/h",
+    shortcut: sequenceShortcut("support"),
   },
 ];
 
@@ -193,7 +188,7 @@ const actionsMenu: MenuItems = [
     icon: SquareTerminal,
     id: "createRepo",
     labelKey: "create_repository",
-    shortcut: "C then R",
+    shortcut: sequenceShortcut("createRepo"),
   },
 ];
 

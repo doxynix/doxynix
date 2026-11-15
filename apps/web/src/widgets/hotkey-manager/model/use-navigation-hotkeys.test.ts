@@ -6,7 +6,11 @@ vi.mock("@/shared/i18n/navigation", () => ({
   useRouter: vi.fn(),
 }));
 
-import { processNavigationSequence, resolveNavigationRoute } from "./use-navigation-hotkeys";
+import {
+  createNavigationRoutes,
+  processNavigationSequence,
+  resolveNavigationRoute,
+} from "./use-navigation-hotkeys";
 
 describe("resolveNavigationRoute", () => {
   it("should map every displayed g-sequence to its menu href", () => {
@@ -64,5 +68,34 @@ describe("processNavigationSequence", () => {
     const result = processNavigationSequence("g", "Digit2");
 
     expect(result).toEqual({ action: "reset" });
+  });
+});
+
+describe("createNavigationRoutes", () => {
+  it("should map every displayed g-sequence to its menu href", () => {
+    const routes = createNavigationRoutes();
+
+    expect(routes.size).toBeGreaterThan(0);
+
+    for (const item of commandMenuItems) {
+      if (item.href == null || item.shortcut == null) {
+        continue;
+      }
+      if (!item.shortcut.startsWith("G then ")) {
+        continue;
+      }
+
+      const key = item.shortcut.slice("G then ".length).toLowerCase();
+      expect(routes.get(`g>${key}`)).toBe(item.href);
+    }
+
+    expect(routes.get("g>o")).toBe("/dashboard");
+  });
+
+  it("should not register sequences from other groups", () => {
+    const routes = createNavigationRoutes();
+
+    expect(routes.has("c>r")).toBe(false);
+    expect(routes.has("f>v")).toBe(false);
   });
 });

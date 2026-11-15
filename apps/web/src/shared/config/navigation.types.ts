@@ -49,7 +49,6 @@ export type MenuItem = {
   labelKey: NavLabelKey;
   notificationsCount?: number;
   shortcut?: string;
-  url?: string;
   variant?: "default" | "destructive";
 };
 

@@ -39,7 +39,7 @@ export function ConfirmationField({ onValueChange, phrase, value }: Readonly<Pro
         </code>
         <CopyButton
           alwaysVisible={true}
-          className="-my-1 size-5"
+          className="-my-1"
           tooltipText={t("copy")}
           value={phrase}
         />
