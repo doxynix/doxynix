@@ -68,10 +68,48 @@ describe("agent service", () => {
     const sessions = await agentService.listSessions({ repoId: "repo-1" } as any);
 
     expect(agentMutate).toHaveBeenCalledWith({ repoId: "repo-1" });
-    expect(agentQuery).toHaveBeenNthCalledWith(1, { limit: 100, sessionId: "session-1" });
+    expect(agentQuery).toHaveBeenNthCalledWith(1, {
+      cursor: null,
+      limit: 100,
+      sessionId: "session-1",
+    });
     expect(agentQuery).toHaveBeenNthCalledWith(2, { limit: 100, repoId: "repo-1" });
     expect(history).toEqual([{ id: "session-1" }]);
     expect(sessions).toEqual([{ id: "session-1" }]);
+  });
+
+  it("pages back through the history up to the 200-message horizon", async () => {
+    agentQuery.mockReset();
+
+    const newestPage = Array.from({ length: 100 }, (_, index) => ({ id: `new-${index}` }));
+    const olderPage = Array.from({ length: 100 }, (_, index) => ({ id: `old-${index}` }));
+
+    agentQuery
+      .mockResolvedValueOnce({
+        items: newestPage,
+        meta: { hasNextPage: true, nextCursor: "cursor-2" },
+      })
+      .mockResolvedValueOnce({
+        items: olderPage,
+        meta: { hasNextPage: true, nextCursor: "cursor-3" },
+      });
+
+    const history = await agentService.getSessionHistory("session-1");
+
+    expect(agentQuery).toHaveBeenCalledTimes(2);
+    expect(agentQuery).toHaveBeenNthCalledWith(1, {
+      cursor: null,
+      limit: 100,
+      sessionId: "session-1",
+    });
+    expect(agentQuery).toHaveBeenNthCalledWith(2, {
+      cursor: "cursor-2",
+      limit: 100,
+      sessionId: "session-1",
+    });
+    expect(history).toHaveLength(200);
+    expect(history.at(0)).toEqual({ id: "old-0" });
+    expect(history.at(-1)).toEqual({ id: "new-99" });
   });
 
   it("parses SSE stream events and returns pending approvals", async () => {

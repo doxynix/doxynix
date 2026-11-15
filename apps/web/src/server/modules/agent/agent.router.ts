@@ -4,10 +4,10 @@ import * as z from "zod";
 import { createTRPCRouter, protectedProcedure, workspaceProcedure } from "@/server/core/trpc/init";
 import { CursorSchema } from "@/server/utils/pagination";
 
-import type { SessionMessagePart } from "./agent.mapper";
+import type { SessionMessage, SessionMessagePart } from "./agent.mapper";
 import { agentService } from "./agent.service";
 
-const SessionMessageSchema = z.object({
+const SessionMessageSchema: z.ZodType<SessionMessage> = z.object({
   createdAt: z.date(),
   id: z.uuid(),
   parts: z.array(z.custom<SessionMessagePart>()),

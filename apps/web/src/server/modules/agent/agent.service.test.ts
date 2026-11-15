@@ -125,7 +125,13 @@ describe("agentService.getSessionHistory", () => {
 
     await agentService.getSessionHistory(db, USER_ID, { cursor, limit: 2, sessionId: SESSION_ID });
 
-    expect(calls[0]).toMatchObject({ cursor: { id: cursor }, take: 3 });
+    expect(calls[0]).toStrictEqual({
+      cursor: { id: cursor },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      select: { createdAt: true, id: true, parts: true, role: true },
+      take: 3,
+      where: { session: { userId: USER_ID }, sessionId: SESSION_ID },
+    });
   });
 
   it("turns the extra probe row into the next cursor", async () => {

@@ -9,6 +9,7 @@ import { renderMarkdownLine, resetMarkdownState } from "@/ui/markdown";
 import { createSpinner } from "@/ui/spinner";
 
 import type {
+  ChatMessageHistoryItem,
   CreateSessionInput,
   ListSessionsInput,
   PendingApproval,
@@ -17,15 +18,35 @@ import type {
   UIMessageToolPart,
 } from "./agent.types";
 
+const HISTORY_FETCH_LIMIT = 200;
+
 export const agentService = {
   async createSession(input: CreateSessionInput) {
     return trpc.agent.createSession.mutate(input);
   },
 
   async getSessionHistory(sessionId: string) {
-    const { items } = await trpc.agent.getSessionHistory.query({ limit: MAX_PAGE_SIZE, sessionId });
+    const messages: ChatMessageHistoryItem[] = [];
+    let cursor: null | string = null;
 
-    return items;
+    while (messages.length < HISTORY_FETCH_LIMIT) {
+      const page = await trpc.agent.getSessionHistory.query({
+        cursor,
+        limit: MAX_PAGE_SIZE,
+        sessionId,
+      });
+
+      // Newest page first, so every older page is prepended.
+      messages.unshift(...page.items);
+
+      if (!page.meta.hasNextPage || page.meta.nextCursor == null) {
+        break;
+      }
+
+      cursor = page.meta.nextCursor;
+    }
+
+    return messages;
   },
 
   async listSessions(input?: ListSessionsInput) {
