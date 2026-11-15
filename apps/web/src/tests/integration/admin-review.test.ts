@@ -186,6 +186,7 @@ describe("adminReviewService against ZenStack policies", () => {
 
     const ids = [...first.items, ...second.items, ...third.items].map((item) => item.id);
 
+    expect(ids).toHaveLength(7);
     expect(new Set(ids).size).toBe(7);
     expect(first.meta.hasNextPage).toBe(true);
     expect(third.meta.hasNextPage).toBe(false);

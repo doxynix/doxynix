@@ -163,8 +163,9 @@ describe("adminAuditService against ZenStack policies", () => {
 
     const ids = [...first.items, ...second.items, ...third.items].map((item) => item.requestId);
 
-    // The cursor is inclusive, so each page repeats the previous probe row once and the walk
-    // still yields every row exactly once.
+    // Each page withholds its probe row; the inclusive cursor then returns that row as the next
+    // page's first item, so the walk holds seven distinct rows with no duplicate and no gap.
+    expect(ids).toHaveLength(7);
     expect(new Set(ids).size).toBe(7);
     expect(first.meta.hasNextPage).toBe(true);
     expect(third.meta.hasNextPage).toBe(false);
