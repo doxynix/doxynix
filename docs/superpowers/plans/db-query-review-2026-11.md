@@ -715,6 +715,34 @@ The first six shipped in PR #2356 and are on `main`; the rest landed on
 original log is now historical. R1, R10, R12, R23 and R25 remain partial, and the list-read /
 date-filter audits below stay outside the 36-item counter.
 
+## Pagination completeness (2026-11-15)
+
+Closed after the 36-item counter above; these are follow-ups from the list-read audit.
+
+- PR comments are cursor-paginated (`{ renderedComments, meta, total }`), and `fixAll` moved to a
+  server mutation (`analysis.fixAllComments`) that reads every comment of the analysis, so it no
+  longer depends on the loaded page. (`8b425664`)
+- PR fixes have their own cursor procedure (`analysis.listFixes`); the card loads pages and the
+  stat keeps the `_count` total. (`8b425664`)
+- Admin review fixes have `adminReview.listFixes`; `getDetail` returns only `fixCount`. (`59025a76`)
+- The offset tables that remain (repo list, banned emails, notifications page) never offer a page
+  past `MAX_PAGE`; a single hint states the reachable row count and points at the date/search
+  filters, which is how the older rows stay reachable. (`c65b533b`)
+- Keyset lists have supporting composite indexes (B5i) plus the fixes-list index; `COUNT(*)` runs
+  only on the first page of history and the PR list.
+
+## Usage metering accuracy (2026-11-15)
+
+- `ai` v7 exposes `inputTokenDetails.{noCacheTokens,cacheReadTokens,cacheWriteTokens}` and no
+  `cachedInputTokens`; the old reader always saw zero and billed cache hits at the full input rate.
+  `core/usage/usage-map.ts` now maps the v7 shape, and both `utils/call.ts` and the agent chat
+  route use it, so cached tokens are billed once at the cached rate. (`7a131d76`, `6b7f3c5b`)
+- `costCentsFor` rounds to the nearest cent instead of up, so many small calls stop accumulating a
+  one-cent overcharge per call.
+- The per-call reservation caps its output estimate at 8 192 tokens instead of the full
+  `maxOutputTokens` (65 536), so parallel calls no longer inflate `workspace_usage` enough to trip
+  `aiTokensPerMonth` before settling.
+
 ## Verification recipes
 
 Run from the repo root. The bench and parity scripts live in `apps/web/package.json`, so they need
