@@ -50,8 +50,18 @@ export type SaveResultsParams = {
   workspaceId: string;
 };
 
+const repoAccessSelect = {
+  defaultBranch: true,
+  id: true,
+  name: true,
+  owner: true,
+  workspaceId: true,
+} satisfies Prisma.RepoSelect;
+
+export type RepoAccess = Prisma.RepoGetPayload<{ select: typeof repoAccessSelect }>;
+
 async function findCachedSha(
-  repo: Repo,
+  repo: RepoAccess,
   userId: string,
   branch: string | undefined,
 ): Promise<null | string> {
@@ -201,8 +211,9 @@ export const analysisLifecycleService = {
     return { jobId: handle.id, publicAccessToken: handle.publicAccessToken, status: "QUEUED" };
   },
 
-  async assertRepoAccess(db: DbClient, workspaceId: string, repoId: string) {
+  async assertRepoAccess(db: DbClient, workspaceId: string, repoId: string): Promise<RepoAccess> {
     const repo = await db.repo.findFirst({
+      select: repoAccessSelect,
       where: { id: repoId, workspaceId },
     });
 

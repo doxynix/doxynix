@@ -6,9 +6,9 @@ Live checklist for the second static pass over `apps/web`. Companion to
 [`db-index-audit.md`](../../db/db-index-audit.md) (what the shapes cost) and
 [`db-ui-map.md`](../../db/db-ui-map.md) (where latency lands).
 
-**Closed: 10 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
-PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3, R6, R7 and R21 closed 2026-11-15, and R14 and
-R30 are **partially** done (see the item text and the progress note below the scoreboard).
+**Closed: 11 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
+PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3, R6, R7, R9 and R21 closed 2026-11-15, and R14
+and R30 are **partially** done (see the item text and the progress note below the scoreboard).
 
 ## What this round covers that round 1 did not
 
@@ -75,7 +75,7 @@ reviewed and is correct.
 
 R14 and R30 moved without closing: their verification lines still fail, so the checkboxes stay
 unticked and the item text below says what is left. R3 (the third partial item from the last pass),
-R6, R7 and R21 have since closed (see the closing log).
+R6, R7, R9 and R21 have since closed (see the closing log).
 
 - **R14** — `getWorkspace` no longer reads every document when `aid` is set (fixed by R33, `311bd6a7`).
   Still open: the `getRepoSnapshot` + second-query shape for the docs viewer and the per-keystroke
@@ -293,7 +293,7 @@ R6, R7 and R21 have since closed (see the closing log).
   - **Effort:** XS · **Verify:** webhook path logs one narrow query; duplicate-PR check still
     returns early (`analyze-pr.task.test.ts` / webhook tests).
 
-- [ ] **R9 · Usage metering writes the same `workspace_usage` row twice per event**
+- [x] **R9 · Usage metering writes the same `workspace_usage` row twice per event**
   — `src/server/core/usage/usage.ts:39-75`
   - **What:** `bumpUsage` = `workspaceUsage.upsert({ update: { increment } })` **plus** a second
     raw `UPDATE … GREATEST(0, …)` (`:62-75`) in the same transaction. Each LLM call performs
@@ -528,6 +528,8 @@ R6, R7 and R21 have since closed (see the closing log).
 
 - [ ] **R23 · `analysis.analyze` performs 9–10 operations before the client gets an answer**
   — `src/server/modules/analysis/services/analysis-lifecycle.service.ts:92-201`
+  > Progress 2026-11-15: `assertRepoAccess` narrowed; the cache-probe merge and the trailing
+  > `jobId` update are not implemented (see report).
   - **What:** `assertRepoAccess` (full repo row) → GitHub branch-head call → `analysis.findFirst`
     (cache probe) → transaction (advisory lock, entitlement read (2 queries), usage event,
     upsert + clamp UPDATE) → `analysis.create` → `tasks.trigger` → `analysis.update(jobId)`.
@@ -675,6 +677,7 @@ These were checked and found correct. Listed so a third round does not repeat th
 | R6 | 2026-11-15 | `d73f3abc` | One `unstable_cache` entry per page in `pr-comments.service.getComments` and `analysisMapper.buildTopFindings` (the latter gained a required `cacheScope`, the PR analysis id); the comments key and tag are workspace-scoped, empty pages are not cached, `postCommentToPR` revalidates the analysis tag. No `take`, so row counts are still unbounded. |
 | R7 | 2026-11-15 | `39d08034` | `getSessionHistory` takes the newest 200 rows (desc → reversed) with a four-field `select`; `listSessions` takes 100 with a `select` that keeps every output field. Follow-up: the ad-hoc `take` constants became cursor pagination through the shared `pagination.ts` primitives (`keysetArgs` / `splitKeysetPage` / `orderWithTiebreak`) — newest page plus `nextCursor`; the UI still renders the first page only. The array → `{ items, meta }` output is a breaking wire change for an older published `dxnx` (release-please ships CLI and server together). `listSessions` keysets on `updatedAt`, which moves on rename/append, so a multi-page walk can duplicate or skip before a "load older" UI ships. B2d flipped that last caveat: the web agent now pages history through `firstItemIndex`/`startReached` and the session list through an intersection sentinel, so a multi-page walk is live and the rename/append caveat now applies to it. |
 | R8 | 2026-11-01 | `311bd6a7` | `analysisRepo.getByRepoAndPRNumber` selects `id` instead of `include: { comments, generatedFixes }`; its only caller (the PR webhook) reads `id`. |
+| R9 | 2026-11-15 | `5420536e` | `bumpUsage` is one `INSERT … ON CONFLICT` statement per event; the clamp stays, and the conflict branch adds the raw delta so a negative release is not swallowed by `EXCLUDED`. `usage.test.ts` asserts one statement and its params. |
 | R21 | 2026-11-15 | `39d08034` | `logic/project-result-overview.ts` replaces `JSON.stringify(resultJson)` in `analyze-pr.task.ts` with a bounded projection capped at 4096 chars. |
 | R27 | 2026-11-01 | `311bd6a7` | `user.me` selects the eight `PublicUser` fields instead of the whole row. |
 | R33 | 2026-11-01 | `311bd6a7` | `documents` relation filtered by `analysisId` in SQL when `aid` is set; the JS `.filter()` in `getRepoSnapshotWithDocuments` is gone. |

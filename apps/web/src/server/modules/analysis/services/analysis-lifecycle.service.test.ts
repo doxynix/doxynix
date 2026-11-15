@@ -56,7 +56,13 @@ function buildDb(): DbClient {
       update: vi.fn().mockResolvedValue({ id: "analysis-1" }),
     },
     repo: {
-      findFirst: vi.fn().mockResolvedValue({ id: "repo-1", name: "demo", owner: "acme" }),
+      findFirst: vi.fn().mockResolvedValue({
+        defaultBranch: "main",
+        id: "repo-1",
+        name: "demo",
+        owner: "acme",
+        workspaceId: "workspace-1",
+      }),
     },
   } as unknown as DbClient;
 }
@@ -162,6 +168,17 @@ describe("analysisLifecycleService.analyze analytics", () => {
     ).rejects.toThrow("Repository not found or access denied");
 
     expect(trackMock).not.toHaveBeenCalled();
+  });
+
+  it("reads only the repo columns the access check needs", async () => {
+    const db = buildDb();
+
+    await analysisLifecycleService.assertRepoAccess(db, "workspace-1", "repo-1");
+
+    expect(db.repo.findFirst).toHaveBeenCalledWith({
+      select: { defaultBranch: true, id: true, name: true, owner: true, workspaceId: true },
+      where: { id: "repo-1", workspaceId: "workspace-1" },
+    });
   });
 
   it("does not track when the task could not be triggered", async () => {
