@@ -12,8 +12,9 @@ import { isSchemaMismatchError } from "@/server/core/ai/schema-mismatch";
 import { appLogger } from "@/server/core/app-logger";
 import { upsertBillingIssue } from "@/server/core/billing/issue";
 import { prisma } from "@/server/core/db";
-import { type TokenUsage, UnknownModelPriceError } from "@/server/core/usage/price";
+import { UnknownModelPriceError } from "@/server/core/usage/price";
 import { releaseUsage, reserveUsage, settleUsage } from "@/server/core/usage/usage";
+import { type MeterUsage, mapUsageToTokenUsage } from "@/server/core/usage/usage-map";
 import { taskLogger } from "@/server/utils/task-logger";
 
 const tracedAi = wrapAISDK(ai);
@@ -48,17 +49,6 @@ const LLM_API_TIMEOUT_MS = 300_000; // TIME: 5 minutes
 type UsageMeter = {
   analysisId: null | string;
   workspaceId: string;
-};
-
-type MeterUsage = {
-  cachedInputTokens?: number; // legacy fallback only
-  inputTokenDetails?: {
-    cacheReadTokens?: number;
-    cacheWriteTokens?: number;
-    noCacheTokens?: number;
-  };
-  inputTokens?: number;
-  outputTokens?: number;
 };
 
 // A reservation is a safety valve, not an invoice: capping the output side keeps a few concurrent
@@ -115,24 +105,6 @@ export function estimateTokens(system: string, prompt: string, maxOutputTokens: 
     Math.ceil((system.length + prompt.length) / 4) +
     Math.min(maxOutputTokens, MAX_RESERVED_OUTPUT_TOKENS)
   );
-}
-
-// The SDK reports cache hits inside `inputTokenDetails`; `cachedInputTokens` is the pre-v7 shape
-// and only survives as a fallback.
-export function mapUsageToTokenUsage(usage: MeterUsage | null | undefined): TokenUsage {
-  const cachedInputTokens =
-    usage?.inputTokenDetails?.cacheReadTokens ?? usage?.cachedInputTokens ?? 0;
-  const cacheWriteTokens = usage?.inputTokenDetails?.cacheWriteTokens ?? 0;
-  const noCacheTokens =
-    usage?.inputTokenDetails?.noCacheTokens ??
-    Math.max(0, (usage?.inputTokens ?? 0) - cachedInputTokens);
-
-  return {
-    cachedInputTokens,
-    // Cache writes have no separate price class, so they are billed at the input rate.
-    inputTokens: noCacheTokens + cacheWriteTokens,
-    outputTokens: usage?.outputTokens ?? 0,
-  };
 }
 
 async function reserveAttempt(

@@ -24,6 +24,7 @@ import { prisma } from "@/server/core/db";
 import { getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { realtimeService } from "@/server/core/realtime";
 import { releaseUsage, reserveUsage, settleUsage } from "@/server/core/usage/usage";
+import { mapUsageToTokenUsage } from "@/server/core/usage/usage-map";
 import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import {
   AGENT_SYSTEM_PROMPT,
@@ -228,11 +229,7 @@ async function handler(req: Request) {
           idempotencyKey: usageKey,
           model: agentModelId,
           provider: "google",
-          usage: {
-            cachedInputTokens: usage.inputTokenDetails.cacheReadTokens ?? 0,
-            inputTokens: usage.inputTokens ?? 0,
-            outputTokens: usage.outputTokens ?? 0,
-          },
+          usage: mapUsageToTokenUsage(usage),
           workspaceId: workspace.id,
         });
       } catch (error) {

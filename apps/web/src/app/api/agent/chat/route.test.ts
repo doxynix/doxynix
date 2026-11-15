@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+type StreamTextOptions = {
+  onEnd: (event: { usage: unknown }) => Promise<void>;
+};
+
 const mocks = vi.hoisted(() => ({
   chatMessageCreate: vi.fn(),
   chatSessionCreate: vi.fn(),
@@ -15,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   resolveRequestUserId: vi.fn(),
   resolveWorkspace: vi.fn(),
   settleUsage: vi.fn(),
+  streamText: vi.fn((_options: StreamTextOptions) => ({ stream: {} })),
   toUIMessageStream: vi.fn(),
 }));
 
@@ -44,7 +49,7 @@ vi.mock("ai", () => ({
   createUIMessageStreamResponse: () => new Response("stream"),
   generateText: mocks.generateText,
   isStepCount: () => false,
-  streamText: () => ({ stream: {} }),
+  streamText: mocks.streamText,
   toUIMessageStream: mocks.toUIMessageStream,
 }));
 
@@ -103,6 +108,16 @@ async function runChat() {
   await POST(request);
 }
 
+function streamOptions() {
+  const options = mocks.streamText.mock.calls.at(-1)?.[0];
+
+  if (options == null) {
+    throw new Error("streamText was not called");
+  }
+
+  return options;
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   onEnd = undefined;
@@ -154,6 +169,28 @@ describe("POST /api/agent/chat", () => {
     expect(mocks.chatSessionCreate).not.toHaveBeenCalled();
     expect(mocks.generateText).not.toHaveBeenCalled();
     expect(mocks.chatSessionUpdate).not.toHaveBeenCalled();
+  });
+
+  it("settles cached input once and at the cached rate", async () => {
+    mocks.chatSessionFindUnique.mockResolvedValue({ id: SESSION_ID, title: "Existing" });
+
+    await runChat();
+    await streamOptions().onEnd({
+      usage: {
+        inputTokenDetails: { cacheReadTokens: 400, cacheWriteTokens: 0, noCacheTokens: 600 },
+        inputTokens: 1000,
+        outputTokens: 100,
+      },
+    });
+
+    expect(mocks.settleUsage).toHaveBeenCalledTimes(1);
+    expect(mocks.settleUsage).toHaveBeenCalledWith(expect.anything(), {
+      idempotencyKey: expect.stringContaining(`agent:${SESSION_ID}:`),
+      model: "gemini-3-pro",
+      provider: "google",
+      usage: { cachedInputTokens: 400, inputTokens: 600, outputTokens: 100 },
+      workspaceId: "ws-1",
+    });
   });
 
   it("skips the session probe and the title when the request carries no session", async () => {
