@@ -53,7 +53,9 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
   const topFindings = impact?.topFindings ?? [];
   const fixes = impact?.fixes ?? [];
   const commentsTotal = comments?.total ?? 0;
+  const linkedFixes = impact?.summary.linkedFixes ?? 0;
   const isCommentsCapped = commentsTotal > (comments?.renderedComments.length ?? 0);
+  const isFixesCapped = linkedFixes > fixes.length;
 
   const detailItems = buildPrDetailItems({
     analysis,
@@ -68,8 +70,8 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
   });
 
   const impactStats = buildImpactStats({
-    commentsCount: comments?.renderedComments.length ?? 0,
-    fixesCount: fixes.length,
+    commentsCount: commentsTotal,
+    fixesCount: linkedFixes,
     impact,
     labels: {
       findings: t("repo_pull_stat_findings"),
@@ -262,7 +264,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
             <div className="flex flex-col gap-1">
               <CardTitle className="flex items-center gap-2 text-base">
                 <ShieldCheck />
-                {t("repo_pull_detected_issues")} ({comments?.renderedComments.length ?? 0})
+                {t("repo_pull_detected_issues")} ({commentsTotal})
               </CardTitle>
               {isCommentsCapped && (
                 <p className="text-muted-foreground text-xs">
@@ -475,7 +477,16 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
         {fixes.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">{t("repo_pull_linked_fixes")}</CardTitle>
+              <div className="flex flex-col gap-1">
+                <CardTitle className="text-base">
+                  {t("repo_pull_linked_fixes")} ({linkedFixes})
+                </CardTitle>
+                {isFixesCapped && (
+                  <p className="text-muted-foreground text-xs">
+                    {tCommon("capped_hint", { count: linkedFixes })}
+                  </p>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               {fixes.map((fix) => (
