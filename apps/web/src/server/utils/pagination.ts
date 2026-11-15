@@ -59,10 +59,25 @@ export const dateRangeMustBeOrdered = (
 
 export type DateRangeInput = z.infer<typeof DateRangeSchema>;
 
+const DAY_MS = 86_400_000;
+
+// A date-only `to` arrives at UTC midnight, so `lte` would drop that whole day. `lt` of the next
+// day is the bound getTrends/getDashboardStats use; a real timestamp keeps `lte`.
+function endBound(to: Date | null | undefined): Record<string, Date> {
+  if (to == null) {
+    return {};
+  }
+
+  const isUtcMidnight =
+    to.getTime() === Date.UTC(to.getUTCFullYear(), to.getUTCMonth(), to.getUTCDate());
+
+  return isUtcMidnight ? { lt: new Date(to.getTime() + DAY_MS) } : { lte: to };
+}
+
 export function buildDateRangeWhere(
   range: { from?: Date | null; to?: Date | null },
   column: "createdAt" | "updatedAt",
-): Record<string, { gte?: Date; lte?: Date }> {
+): Record<string, { gte?: Date; lt?: Date; lte?: Date }> {
   if (range.from == null && range.to == null) {
     return {};
   }
@@ -70,7 +85,7 @@ export function buildDateRangeWhere(
   return {
     [column]: {
       ...(range.from != null ? { gte: range.from } : {}),
-      ...(range.to != null ? { lte: range.to } : {}),
+      ...endBound(range.to),
     },
   };
 }

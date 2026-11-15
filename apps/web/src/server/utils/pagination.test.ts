@@ -6,7 +6,9 @@ import { MAX_PAGE, MAX_PAGE_SIZE } from "@doxynix/shared";
 import { describe, expect, it } from "vitest";
 
 import {
+  buildDateRangeWhere,
   clampPage,
+  DateRangeSchema,
   getPaginationMeta,
   keysetArgs,
   ORDER_CREATED_AT_DESC,
@@ -133,6 +135,50 @@ describe("pagination", () => {
     // Absent, not false, when the count was exact — keeps the common payload unchanged.
     const exact = getPaginationMeta({ filteredCount: 35, limit: 10, page: 1, totalCount: 35 });
     expect(exact.capped).toBeUndefined();
+  });
+});
+
+/**
+ * The toolbar sends `to` as the URL's ISO date, which the schema coerces to UTC midnight of the
+ * selected day — so an `lte` bound dropped that entire day from every list. `getTrends.sql` and
+ * `getDashboardStats.sql` already end at `< to + 1 day`; the list helper matches them now.
+ */
+describe("buildDateRangeWhere", () => {
+  const from = new Date("2026-01-01T00:00:00.000Z");
+  const to = new Date("2026-01-31T00:00:00.000Z");
+  const afterEndDay = new Date("2026-02-01T00:00:00.000Z");
+
+  it("includes the selected end day when `to` is date-only", () => {
+    expect(buildDateRangeWhere({ from, to }, "createdAt")).toEqual({
+      createdAt: { gte: from, lt: afterEndDay },
+    });
+  });
+
+  it("keeps `lte` when `to` carries a time", () => {
+    const timestamp = new Date("2026-01-31T14:30:00.000Z");
+
+    expect(buildDateRangeWhere({ to: timestamp }, "createdAt")).toEqual({
+      createdAt: { lte: timestamp },
+    });
+  });
+
+  it("emits only the start bound when `to` is absent", () => {
+    expect(buildDateRangeWhere({ from }, "updatedAt")).toEqual({ updatedAt: { gte: from } });
+  });
+
+  it("emits only the end bound when `from` is absent", () => {
+    expect(buildDateRangeWhere({ to }, "updatedAt")).toEqual({
+      updatedAt: { lt: afterEndDay },
+    });
+  });
+
+  it("emits nothing when both ends are open", () => {
+    expect(buildDateRangeWhere({}, "createdAt")).toEqual({});
+  });
+
+  it("still rejects a reversed range in the schema", () => {
+    expect(DateRangeSchema.safeParse({ from, to }).success).toBe(true);
+    expect(DateRangeSchema.safeParse({ from: to, to: from }).success).toBe(false);
   });
 });
 

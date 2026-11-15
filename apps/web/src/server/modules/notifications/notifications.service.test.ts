@@ -253,8 +253,11 @@ describe("notificationsService.getAll counts", () => {
 describe("notificationsService.getAll date range", () => {
   const from = new Date("2026-01-01T00:00:00.000Z");
   const to = new Date("2026-01-31T00:00:00.000Z");
-  // The helper's end bound is inclusive today; B5h-2 flips a date-only `to` to `lt + 1d`.
-  const rangeWhere = { createdAt: { gte: from, lte: to }, userId: "user-1" };
+  // `to` is date-only, so the helper ends at the day after it — 31 January stays in the range.
+  const rangeWhere = {
+    createdAt: { gte: from, lt: new Date("2026-02-01T00:00:00.000Z") },
+    userId: "user-1",
+  };
 
   it("should apply the range to the list and to the filtered count", async () => {
     const { db, findMany } = createNotificationDbMock();
@@ -384,7 +387,11 @@ describe("notificationsService.deleteRead", () => {
     await notificationsService.deleteRead(db, { from, to }, "user-1");
 
     expect(deleteMany).toHaveBeenCalledWith({
-      where: { createdAt: { gte: from, lte: to }, isRead: true, userId: "user-1" },
+      where: {
+        createdAt: { gte: from, lt: new Date("2026-02-01T00:00:00.000Z") },
+        isRead: true,
+        userId: "user-1",
+      },
     });
   });
 });
@@ -423,7 +430,11 @@ describe("notificationsService.markAllAsRead", () => {
 
     expect(updateMany).toHaveBeenCalledWith({
       data: { isRead: true },
-      where: { createdAt: { gte: from, lte: to }, isRead: false, userId: "user-1" },
+      where: {
+        createdAt: { gte: from, lt: new Date("2026-02-01T00:00:00.000Z") },
+        isRead: false,
+        userId: "user-1",
+      },
     });
   });
 });
