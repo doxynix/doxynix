@@ -752,7 +752,9 @@ they are one screen each and close in batches, so they stay out of the 36-item c
   `custom` (`shared/lib/analytics-periods.ts`), and a `superRefine` requires `from` and caps the span
   at 366 days, measuring an open-ended range against now. The dashboard's own URL parser accepts only
   those literals, and `resolveDateRange` shows the preset window when the period is not `custom`.
-  `652f2316`
+  `652f2316` — the calendar stops one day short of the cap, a bare `?period=custom` is repaired to a
+  30-day window before it fetches, and a query that still fails renders `QueryError` with a retry
+  instead of a skeleton (`89c05f63`).
 - [x] **C1 · `getHistory`** — cursor pages, `{ items, meta, total }` (`a90fdb07`, B5c).
 - [x] **C2 · `listByRepository`** — cursor pages, `{ items, meta, total }` (`a90fdb07`, B5c).
 - [ ] **C3 · `getByRepoId` (`take: 200`)** — left at 200; no client reads the list.
