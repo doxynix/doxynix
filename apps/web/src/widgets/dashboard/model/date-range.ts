@@ -1,7 +1,7 @@
+import { ANALYTICS_MAX_RANGE_DAYS } from "@doxynix/shared";
 import { subDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
 
-import { MAX_CUSTOM_RANGE_DAYS } from "@/shared/lib/analytics-periods";
 import type { DateRangePreset } from "@/shared/ui/kit/app-date-range";
 
 export type DateRangeState = { from: Date | null; period: string; to: Date | null };
@@ -11,7 +11,7 @@ export type DatePeriod = DateRangePreset;
 const DAY_MS = 86_400_000;
 const DEFAULT_CUSTOM_RANGE_DAYS = 30;
 // One day short of the server cap, so a DST-shifted local-midnight span cannot hit the boundary.
-const MAX_WRITABLE_SPAN_MS = (MAX_CUSTOM_RANGE_DAYS - 1) * DAY_MS;
+const MAX_WRITABLE_SPAN_MS = (ANALYTICS_MAX_RANGE_DAYS - 1) * DAY_MS;
 
 export function resolveDateRange(
   from: Date | null,
@@ -30,10 +30,14 @@ export function resolveDateRange(
 }
 
 export function clampCustomRange(from: Date, to: Date): { from: Date; to: Date } {
-  if (to.getTime() - from.getTime() <= MAX_WRITABLE_SPAN_MS) {
-    return { from, to };
+  // A URL can carry `from` after `to`; swapping keeps both endpoints instead of discarding them.
+  const start = from.getTime() <= to.getTime() ? from : to;
+  const end = from.getTime() <= to.getTime() ? to : from;
+
+  if (end.getTime() - start.getTime() <= MAX_WRITABLE_SPAN_MS) {
+    return { from: start, to: end };
   }
-  return { from: new Date(to.getTime() - MAX_WRITABLE_SPAN_MS), to };
+  return { from: new Date(end.getTime() - MAX_WRITABLE_SPAN_MS), to: end };
 }
 
 // The params to write when a `custom` URL cannot pass `AnalyticsInputSchema`, or null when it can.
@@ -47,9 +51,10 @@ export function normalizeCustomRange(
     return { from: subDays(end, DEFAULT_CUSTOM_RANGE_DAYS), to: end };
   }
 
-  const clamped = clampCustomRange(from, end).from;
+  const { from: start, to: finish } = clampCustomRange(from, end);
+  const unchanged = start.getTime() === from.getTime() && finish.getTime() === end.getTime();
 
-  return clamped.getTime() === from.getTime() ? null : { from: clamped, to: end };
+  return unchanged ? null : { from: start, to: finish };
 }
 
 export function hasUrlStateChanged(prev: DateRangeState, next: DateRangeState): boolean {

@@ -77,6 +77,12 @@ describe("clampCustomRange", () => {
       to: TO,
     });
   });
+
+  it("swaps a reversed range instead of passing it on", () => {
+    const after = new Date("2026-10-01T00:00:00Z");
+
+    expect(clampCustomRange(after, TO)).toEqual({ from: TO, to: after });
+  });
 });
 
 describe("normalizeCustomRange", () => {
@@ -106,6 +112,12 @@ describe("normalizeCustomRange", () => {
       from: new Date(TO.getTime() - 365 * 86_400_000),
       to: TO,
     });
+  });
+
+  it("repairs a reversed range by swapping it", () => {
+    const after = new Date("2026-10-01T00:00:00Z");
+
+    expect(normalizeCustomRange(after, TO)).toEqual({ from: TO, to: after });
   });
 });
 

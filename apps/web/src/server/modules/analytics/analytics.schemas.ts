@@ -1,11 +1,7 @@
-import { StatusSchema } from "@doxynix/shared";
+import { ANALYTICS_MAX_RANGE_DAYS, StatusSchema } from "@doxynix/shared";
 import * as z from "zod";
 
-import {
-  ANALYTICS_PERIODS,
-  type AnalyticsPeriod,
-  MAX_CUSTOM_RANGE_DAYS,
-} from "@/shared/lib/analytics-periods";
+import { ANALYTICS_PERIODS, type AnalyticsPeriod } from "@/shared/lib/analytics-periods";
 
 import { dateRangeMustBeOrdered } from "@/server/utils/pagination";
 
@@ -88,7 +84,7 @@ export const TrendsSchema = z.array(
   }),
 );
 
-const MAX_CUSTOM_RANGE_MS = MAX_CUSTOM_RANGE_DAYS * 86_400_000;
+const MAX_CUSTOM_RANGE_MS = ANALYTICS_MAX_RANGE_DAYS * 86_400_000;
 
 const AnalyticsPeriodSchema = z.enum(ANALYTICS_PERIODS);
 
@@ -118,7 +114,7 @@ function customRangeIssues(
   if (spanMs > MAX_CUSTOM_RANGE_MS) {
     ctx.addIssue({
       code: "custom",
-      message: `A custom range cannot span more than ${MAX_CUSTOM_RANGE_DAYS} days`,
+      message: `A custom range cannot span more than ${ANALYTICS_MAX_RANGE_DAYS} days`,
       path: ["to"],
     });
   }
