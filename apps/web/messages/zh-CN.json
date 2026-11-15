@@ -52,8 +52,7 @@
     "operation_updated": "更新",
     "origin_system": "系统",
     "page_desc": "应用在所有操作者下的全部写入记录。控制台审计日志只显示你自己的操作，此处显示全部。",
-    "page_title": "审计日志",
-    "total_count": "{total} 条中的 {filtered} 条"
+    "page_title": "审计日志"
   },
   "AdminBannedEmails": {
     "col_actions": "操作",
@@ -121,8 +120,7 @@
     "status_analyzing": "分析中",
     "status_completed": "已完成",
     "status_failed": "失败",
-    "status_pending": "待处理",
-    "total_count": "{total} 条中的 {filtered} 条"
+    "status_pending": "待处理"
   },
   "AdminUsers": {
     "ban_action": "封禁",
@@ -195,7 +193,6 @@
     "toast_role_updated": "{name} 已成为管理员",
     "toast_session_revoked": "会话已撤销",
     "toast_unbanned": "已解除封禁",
-    "total_count": "共 {total} 位用户，其中 {filtered} 位",
     "unban_action": "解除封禁"
   },
   "Agent": {

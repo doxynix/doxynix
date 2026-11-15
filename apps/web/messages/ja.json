@@ -52,8 +52,7 @@
     "operation_updated": "更新",
     "origin_system": "システム",
     "page_desc": "アプリがすべてのアクターで行ったすべての書き込み。ダッシュボードの監査ログは自分の操作のみを表示しますが、こちらはすべて表示します。",
-    "page_title": "監査ログ",
-    "total_count": "{total} 件中 {filtered} 件"
+    "page_title": "監査ログ"
   },
   "AdminBannedEmails": {
     "col_actions": "操作",
@@ -121,8 +120,7 @@
     "status_analyzing": "解析中",
     "status_completed": "完了",
     "status_failed": "失敗",
-    "status_pending": "保留中",
-    "total_count": "{total} 件中 {filtered} 件"
+    "status_pending": "保留中"
   },
   "AdminUsers": {
     "ban_action": "禁止",
@@ -195,7 +193,6 @@
     "toast_role_updated": "{name} を管理者にしました",
     "toast_session_revoked": "セッションを破棄しました",
     "toast_unbanned": "禁止を解除しました",
-    "total_count": "全 {total} 件中 {filtered} 件",
     "unban_action": "禁止解除"
   },
   "Agent": {

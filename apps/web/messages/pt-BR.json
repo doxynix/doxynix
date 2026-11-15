@@ -52,8 +52,7 @@
     "operation_updated": "Atualizado",
     "origin_system": "sistema",
     "page_desc": "Cada escrita da aplicação, de todos os atores. O registro no painel mostra apenas a sua atividade; este mostra todas.",
-    "page_title": "Registro de auditoria",
-    "total_count": "{filtered} de {total} registros"
+    "page_title": "Registro de auditoria"
   },
   "AdminBannedEmails": {
     "col_actions": "Ações",
@@ -121,8 +120,7 @@
     "status_analyzing": "Analisando",
     "status_completed": "Concluído",
     "status_failed": "Falhou",
-    "status_pending": "Pendente",
-    "total_count": "{filtered} de {total} revisões"
+    "status_pending": "Pendente"
   },
   "AdminUsers": {
     "ban_action": "Banir",
@@ -195,7 +193,6 @@
     "toast_role_updated": "{name} agora é admin",
     "toast_session_revoked": "Sessão revogada",
     "toast_unbanned": "Ban removido",
-    "total_count": "{filtered} de {total} usuários",
     "unban_action": "Desbanir"
   },
   "Agent": {

@@ -52,8 +52,7 @@
     "operation_updated": "Actualizado",
     "origin_system": "sistema",
     "page_desc": "Cada escritura de la aplicación, de todos los actores. El registro del dashboard solo muestra su propia actividad; este no.",
-    "page_title": "Registro de auditoría",
-    "total_count": "{filtered} de {total} entradas"
+    "page_title": "Registro de auditoría"
   },
   "AdminBannedEmails": {
     "col_actions": "Acciones",
@@ -121,8 +120,7 @@
     "status_analyzing": "Analizando",
     "status_completed": "Completado",
     "status_failed": "Fallido",
-    "status_pending": "Pendiente",
-    "total_count": "{filtered} de {total} revisiones"
+    "status_pending": "Pendiente"
   },
   "AdminUsers": {
     "ban_action": "Bloquear",
@@ -195,7 +193,6 @@
     "toast_role_updated": "{name} ahora es administrador",
     "toast_session_revoked": "Sesión revocada",
     "toast_unbanned": "Usuario desbloqueado",
-    "total_count": "{filtered} de {total} usuarios",
     "unban_action": "Desbloquear"
   },
   "Agent": {

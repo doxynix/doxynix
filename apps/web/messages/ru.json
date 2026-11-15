@@ -52,8 +52,7 @@
     "operation_updated": "Обновлено",
     "origin_system": "система",
     "page_desc": "Все записи приложения по всем акторам. Журнал в дашборде показывает только вашу активность, этот — все.",
-    "page_title": "Журнал аудита",
-    "total_count": "{filtered} из {total} записей"
+    "page_title": "Журнал аудита"
   },
   "AdminBannedEmails": {
     "col_actions": "Действия",
@@ -121,8 +120,7 @@
     "status_analyzing": "Анализ",
     "status_completed": "Завершён",
     "status_failed": "Ошибка",
-    "status_pending": "В очереди",
-    "total_count": "{filtered} из {total} ревью"
+    "status_pending": "В очереди"
   },
   "AdminUsers": {
     "ban_action": "Заблокировать",
@@ -195,7 +193,6 @@
     "toast_role_updated": "{name} теперь админ",
     "toast_session_revoked": "Сессия отозвана",
     "toast_unbanned": "Пользователь разбанен",
-    "total_count": "{filtered} из {total} пользователей",
     "unban_action": "Разблокировать"
   },
   "Agent": {
