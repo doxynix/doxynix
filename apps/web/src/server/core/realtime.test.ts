@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { publishMock, requestMock } = vi.hoisted(() => ({
+const { appLoggerMock, publishMock, requestMock } = vi.hoisted(() => ({
+  appLoggerMock: { error: vi.fn() },
   publishMock: vi.fn(),
   requestMock: vi.fn(),
 }));
@@ -13,6 +14,8 @@ vi.mock("ably", () => ({
     },
   },
 }));
+
+vi.mock("@/server/core/app-logger", () => ({ appLogger: appLoggerMock }));
 
 // The real flags short-circuit every publish on `IS_TEST`, which is what the suite runs under.
 vi.mock("@/shared/config/env.flags", () => ({
@@ -37,10 +40,10 @@ describe("realtimeService.userBatch", () => {
     vi.clearAllMocks();
   });
 
-  it("publishes every event in one batch request", async () => {
-    requestMock.mockResolvedValue({});
+  it("publishes every event in one accepted batch request", async () => {
+    requestMock.mockResolvedValue({ statusCode: 201, success: true });
 
-    await expect(realtimeService.userBatch("user-1", [...events])).resolves.toBe(true);
+    await realtimeService.userBatch("user-1", [...events]);
 
     expect(requestMock).toHaveBeenCalledTimes(1);
     expect(requestMock).toHaveBeenCalledWith(
@@ -54,20 +57,43 @@ describe("realtimeService.userBatch", () => {
       },
     );
     expect(publishMock).not.toHaveBeenCalled();
+    expect(appLoggerMock.error).not.toHaveBeenCalled();
   });
 
-  it("falls back to sequential publishes when the batch request fails", async () => {
+  it("falls back to sequential publishes when the request rejects", async () => {
     requestMock.mockRejectedValue(new Error("batch unavailable"));
 
-    await expect(realtimeService.userBatch("user-1", [...events])).resolves.toBe(false);
+    await realtimeService.userBatch("user-1", [...events]);
 
     expect(requestMock).toHaveBeenCalledTimes(1);
     expect(publishMock.mock.calls).toStrictEqual(events.map(({ data, name }) => [name, data]));
+    expect(appLoggerMock.error).toHaveBeenCalledTimes(1);
+  });
+
+  it("falls back when Ably answers with an error status", async () => {
+    requestMock.mockResolvedValue({
+      errorCode: 40_020,
+      errorMessage: "batch publish failed",
+      statusCode: 500,
+      success: false,
+    });
+
+    await realtimeService.userBatch("user-1", [...events]);
+
+    expect(publishMock.mock.calls).toStrictEqual(events.map(({ data, name }) => [name, data]));
+    expect(appLoggerMock.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        channel: "user:user-1",
+        errorCode: 40_020,
+        statusCode: 500,
+        userId: "user-1",
+      }),
+    );
   });
 
   it("skips the request when there is no channel or nothing to send", async () => {
-    await expect(realtimeService.userBatch(null, [...events])).resolves.toBe(false);
-    await expect(realtimeService.userBatch("user-1", [])).resolves.toBe(false);
+    await realtimeService.userBatch(null, [...events]);
+    await realtimeService.userBatch("user-1", []);
 
     expect(requestMock).not.toHaveBeenCalled();
     expect(publishMock).not.toHaveBeenCalled();

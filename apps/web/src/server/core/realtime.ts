@@ -78,7 +78,7 @@ async function safeBatchPublish(
   meta: Record<string, unknown>,
 ): Promise<boolean> {
   try {
-    await realtimeServer.request(
+    const response = await realtimeServer.request(
       "post",
       "/messages",
       2,
@@ -88,7 +88,22 @@ async function safeBatchPublish(
         messages: events,
       },
     );
-    return true;
+
+    // `request` resolves for error responses too, so only a 2xx means the batch was accepted.
+    if (response.success) {
+      return true;
+    }
+
+    // A partial failure still retries every event: a duplicate beats a dropped completion.
+    appLogger.error({
+      channel: channelName,
+      errorCode: response.errorCode,
+      errorMessage: response.errorMessage,
+      msg: "Batch publish rejected by Ably, falling back to sequential publish",
+      statusCode: response.statusCode,
+      ...meta,
+    });
+    return false;
   } catch (error) {
     appLogger.error({
       channel: channelName,
@@ -147,26 +162,19 @@ export const realtimeService = {
   }),
 
   userBatch: async (userId: null | string | undefined, events: UserBatchEvent[]) => {
-    if (userId == null || events.length === 0) {
-      return false;
-    }
-
-    // Test credentials are placeholders, so the request always 401s after a ~1s round trip.
-    if (IS_TEST) {
-      return false;
+    if (userId == null || events.length === 0 || IS_TEST) {
+      return;
     }
 
     const channelName = REALTIME_CONFIG.channels.user(String(userId));
     const meta = { userId: String(userId) };
 
     if (await safeBatchPublish(channelName, events, meta)) {
-      return true;
+      return;
     }
 
     for (const { data, name } of events) {
       await safePublish(channelName, name, data, meta);
     }
-
-    return false;
   },
 };
