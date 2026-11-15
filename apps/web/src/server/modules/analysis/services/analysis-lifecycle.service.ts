@@ -1,13 +1,12 @@
 import { DocType, MessageCode, Status } from "@doxynix/shared";
 import type { Prisma, Repo } from "@prisma/client";
-import { acquireAdvisoryLock } from "@prisma/client/sql";
 import { auth, runs, tasks } from "@trigger.dev/sdk";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
-import { type DbClient, prisma } from "@/server/core/db";
+import { type DbClient, prisma, withAdvisoryLock } from "@/server/core/db";
 import { assertAnalysisAllowed, getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { getBranchHeadSha } from "@/server/core/github/github-api";
 import { trackServerEvent } from "@/server/core/posthog-events";
@@ -114,8 +113,7 @@ export const analysisLifecycleService = {
 
     try {
       if (cachedSha == null) {
-        await prisma.$transaction(async (tx) => {
-          await tx.$queryRawTyped(acquireAdvisoryLock(`analysis-quota:${workspaceId}`));
+        await withAdvisoryLock(prisma, `analysis-quota:${workspaceId}`, async (tx) => {
           // `fresh` is mandatory here: the request memo already holds the pre-lock snapshot that
           // the router middleware read, so the quota check would pass on stale counters.
           assertAnalysisAllowed(

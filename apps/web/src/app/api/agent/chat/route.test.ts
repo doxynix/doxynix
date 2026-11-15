@@ -27,7 +27,9 @@ vi.mock("next/headers", () => ({
   headers: async () => new Headers({ "x-workspace-id": "ws-1" }),
 }));
 
-vi.mock("@/server/core/db", () => {
+vi.mock("@/server/core/db", async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>;
+
   const tx = {
     $queryRawTyped: vi.fn().mockResolvedValue([]),
     chatMessage: { create: mocks.chatMessageCreate },
@@ -35,6 +37,7 @@ vi.mock("@/server/core/db", () => {
   };
 
   return {
+    ...actual,
     prisma: {
       $transaction: (fn: (client: typeof tx) => Promise<unknown>) => fn(tx),
       chatMessage: { create: mocks.chatMessageCreate },

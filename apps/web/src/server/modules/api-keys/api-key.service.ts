@@ -4,7 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { AppError } from "@/server/core/api-error";
-import type { DbClient } from "@/server/core/db";
+import { type DbClient, withTransaction } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
 import { handlePrismaError } from "@/server/utils/handle-error";
 import { extractPayloadFromKey, generateApiKey, getApiKeyHash } from "@/server/utils/hash";
@@ -218,8 +218,7 @@ export const apiKeyService = {
     };
 
     // Create-then-revoke must be atomic: a crash between the two would leave the old key live forever.
-    const { fullKey, replacement } =
-      "$transaction" in db ? await db.$transaction(rotateKey) : await rotateKey(db);
+    const { fullKey, replacement } = await withTransaction(db, rotateKey);
 
     void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.apiKeyUpdated, {});
 

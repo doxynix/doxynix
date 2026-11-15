@@ -5,6 +5,7 @@ import { AuditModel } from "@doxynix/shared";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { type Prisma, PrismaClient } from "@prisma/client";
+import { acquireAdvisoryLock } from "@prisma/client/sql";
 import { Pool } from "pg";
 
 import { IS_DEV, IS_TEST } from "@/shared/config/env.flags";
@@ -289,6 +290,33 @@ export type PrismaClientExtended = ReturnType<typeof createPrismaInstance>;
 export type TransactionClient = Parameters<Parameters<PrismaClientExtended["$transaction"]>[0]>[0];
 
 export type DbClient = PrismaClientExtended | TransactionClient;
+
+// Root client or an already-open transaction: a nested `$transaction` would commit outside the
+// caller's atomic block.
+export async function withTransaction<T>(
+  db: DbClient,
+  fn: (tx: TransactionClient) => Promise<T>,
+): Promise<T> {
+  if (!("$transaction" in db)) {
+    return fn(db);
+  }
+
+  return db.$transaction(fn);
+}
+
+// Serialises a workspace/user-scoped critical section; the lock is transaction-scoped and released
+// with it.
+export async function withAdvisoryLock<T>(
+  db: DbClient,
+  key: string,
+  fn: (tx: TransactionClient) => Promise<T>,
+): Promise<T> {
+  return withTransaction(db, async (tx) => {
+    await tx.$queryRawTyped(acquireAdvisoryLock(key));
+
+    return fn(tx);
+  });
+}
 
 // Irreducible: `globalThis` has no `prisma`; this is the Next.js dev-HMR singleton idiom, so one client is reused across hot reloads instead of leaking pools.
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClientExtended };

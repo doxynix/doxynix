@@ -11,7 +11,7 @@ import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { recordBillingMetric } from "@/server/core/billing/metrics";
 import { getStripeClient } from "@/server/core/billing/stripe-client";
-import type { DbClient } from "@/server/core/db";
+import { type DbClient, withTransaction } from "@/server/core/db";
 
 import { PROCESS_STRIPE_EVENT_TASK_ID, STRIPE_PROVIDER } from "./billing.constants";
 import { ownershipKeyFromPayload } from "./billing.ownership";
@@ -250,7 +250,7 @@ export async function resolveBillingIssue(
     return projected;
   };
 
-  const projected = "$transaction" in db ? await db.$transaction(resolve) : await resolve(db);
+  const projected = await withTransaction(db, resolve);
 
   if (projected != null && !projected.ownsAccess && projection != null) {
     appLogger.warn({

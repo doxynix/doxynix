@@ -4,9 +4,11 @@ import { prisma } from "@/server/core/db";
 
 import { workspaceService } from "./workspace.service";
 
-vi.mock("@/server/core/db", () => ({
-  prisma: { user: { findUnique: vi.fn() } },
-}));
+vi.mock("@/server/core/db", async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>;
+
+  return { ...actual, prisma: { user: { findUnique: vi.fn() } } };
+});
 
 const seatSyncMock = vi.hoisted(() => vi.fn());
 const issueMock = vi.hoisted(() => vi.fn());

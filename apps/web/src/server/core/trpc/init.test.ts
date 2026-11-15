@@ -30,6 +30,9 @@ vi.mock("@prisma/client/runtime/library", () => ({
 vi.mock("@prisma/client", () => ({
   Prisma: { PrismaClientKnownRequestError: MockPrismaClientKnownRequestError },
 }));
+// This suite only exercises error formatting; the module graph reaches `core/db.ts` and must not
+// build a real client on top of the partial `@prisma/client` mock above.
+vi.mock("@/server/core/db", () => ({ prisma: {} }));
 
 const prismaError = (code: string) =>
   new MockPrismaClientKnownRequestError("db failed", { clientVersion: "test", code });

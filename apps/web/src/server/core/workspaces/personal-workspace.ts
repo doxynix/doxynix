@@ -1,7 +1,6 @@
 import { PlanCode } from "@doxynix/shared";
-import { acquireAdvisoryLock } from "@prisma/client/sql";
 
-import { prisma } from "../db";
+import { prisma, withAdvisoryLock } from "../db";
 
 export const PERSONAL_WORKSPACE_ENTITLEMENT = {
   accessState: "ACTIVE",
@@ -26,9 +25,7 @@ export async function createPersonalWorkspace(
   userId: string,
   name?: null | string,
 ): Promise<string> {
-  return prisma.$transaction(async (tx) => {
-    await tx.$queryRawTyped(acquireAdvisoryLock(userId));
-
+  return withAdvisoryLock(prisma, userId, async (tx) => {
     const existing = await tx.workspaceMember.findFirst({
       orderBy: { createdAt: "asc" },
       select: { workspaceId: true },

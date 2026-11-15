@@ -1,7 +1,6 @@
 import { headers } from "next/headers";
 import { ApiKeyScope, ChatRole, MessageCode } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
-import { acquireAdvisoryLock } from "@prisma/client/sql";
 import {
   convertToModelMessages,
   createUIMessageStreamResponse,
@@ -20,7 +19,7 @@ import { google } from "@/server/core/ai/google";
 import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { resolveRequestUserId } from "@/server/core/auth/resolve-session";
-import { prisma } from "@/server/core/db";
+import { prisma, withAdvisoryLock } from "@/server/core/db";
 import { getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { realtimeService } from "@/server/core/realtime";
 import { releaseUsage, reserveUsage, settleUsage } from "@/server/core/usage/usage";
@@ -181,9 +180,7 @@ async function handler(req: Request) {
 - Automatically assume this repository for all tools requiring "repoId" (e.g., quickFileAudit, triggerRepositoryAnalysis, etc.). You do not need to ask the user or search for it.
 - Only prompt for a repository ID if the user explicitly wants to target a completely different project.`;
 
-  await prisma.$transaction(async (tx) => {
-    await tx.$queryRawTyped(acquireAdvisoryLock(`agent-quota:${workspace.id}`));
-
+  await withAdvisoryLock(prisma, `agent-quota:${workspace.id}`, async (tx) => {
     const fresh = await getWorkspaceEntitlement(tx, workspace.id, new Date(), { fresh: true });
 
     if (fresh == null || !fresh.hasAccess) {

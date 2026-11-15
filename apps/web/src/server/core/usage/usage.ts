@@ -2,7 +2,7 @@ import { UsageEventKind as USAGE_EVENT_KIND } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
 import { upsertWorkspaceUsage } from "@prisma/client/sql";
 
-import type { DbClient } from "@/server/core/db";
+import { type DbClient, withTransaction } from "@/server/core/db";
 
 import { costCentsFor, type TokenUsage, totalTokens } from "./price";
 
@@ -20,17 +20,6 @@ export type SettledUsage = {
 // The quota period is a UTC calendar month; `@db.Date` keeps it comparable across time zones.
 export function periodStartOf(now: Date): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-}
-
-// `DbClient` is a union: a transaction client has no `$transaction`, so nested calls run inline.
-// Accepts the root client or an already-open transaction: inside a caller's transaction we must
-// reuse it, because a nested `$transaction` would commit outside the caller's atomic block.
-async function withTransaction<T>(db: DbClient, fn: (tx: DbClient) => Promise<T>): Promise<T> {
-  if (!("$transaction" in db)) {
-    return fn(db);
-  }
-
-  return db.$transaction(fn);
 }
 
 function isUniqueViolation(error: unknown): boolean {

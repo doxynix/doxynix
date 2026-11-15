@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 
 import { MessageCode, PlanCode, PlanCodeSchema, type WorkspaceRole } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
-import { acquireAdvisoryLock, claimWorkspaceInvite } from "@prisma/client/sql";
+import { claimWorkspaceInvite } from "@prisma/client/sql";
 
 import { APP_URL } from "@/shared/config/env.client";
 
@@ -10,7 +10,7 @@ import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { upsertBillingIssue } from "@/server/core/billing/issue";
 import { syncWorkspaceSeats } from "@/server/core/billing/seat-sync";
-import { type DbClient, prisma } from "@/server/core/db";
+import { type DbClient, prisma, withAdvisoryLock } from "@/server/core/db";
 import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import { sendWorkspaceInviteEmail } from "@/server/core/workspaces/send-workspace-invite";
 import { maskEmail, normalizeEmail } from "@/server/utils/email-guard";
@@ -170,9 +170,7 @@ export const workspaceService = {
 
     await requirePaidWorkspace(prisma, invite.workspaceId);
 
-    const memberId = await prisma.$transaction(async (tx) => {
-      await tx.$queryRawTyped(acquireAdvisoryLock(invite.workspaceId));
-
+    const memberId = await withAdvisoryLock(prisma, invite.workspaceId, async (tx) => {
       // Single-use: the first accept wins, and a concurrent second one rolls back.
       const claimed = await tx.$queryRawTyped(claimWorkspaceInvite(invite.id));
 
@@ -235,11 +233,9 @@ export const workspaceService = {
     }
 
     try {
-      const member = await db.$transaction(async (tx) => {
-        // Serialises seat accounting per workspace; without it two concurrent adds both pass the
-        // seatLimit check and create an unpaid seat.
-        await tx.$queryRawTyped(acquireAdvisoryLock(workspaceId));
-
+      // Serialises seat accounting per workspace; without it two concurrent adds both pass the
+      // seatLimit check and create an unpaid seat.
+      const member = await withAdvisoryLock(db, workspaceId, async (tx) => {
         const existing = await tx.workspaceMember.findUnique({
           select: { id: true },
           where: { workspaceId_userId: { userId: user.id, workspaceId } },
