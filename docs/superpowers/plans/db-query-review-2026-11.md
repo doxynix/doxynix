@@ -6,10 +6,10 @@ Live checklist for the second static pass over `apps/web`. Companion to
 [`db-index-audit.md`](../../db/db-index-audit.md) (what the shapes cost) and
 [`db-ui-map.md`](../../db/db-ui-map.md) (where latency lands).
 
-**Closed: 19 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
-PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3, R6, R7, R9, R11, R18, R19, R21, R26, R29, R34,
-K1 and K2 closed 2026-11-15, and R14 and R30 are **partially** done (see the item text and the
-progress note below the scoreboard).
+**Closed: 30 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
+PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3, R6, R7, R9, R11, R13, R15, R16, R17, R18,
+R19, R20, R21, R22, R26, R28, R29, R30, R31, R32, R34, K1 and K2 closed 2026-11-15 (R24 closed as
+dropped). Six items are partial: R1, R10, R12, R14, R23, R25 (see below).
 
 ## What this round covers that round 1 did not
 
@@ -72,11 +72,23 @@ reviewed and is correct.
 | correctness (adjacent) | 2 | K1–K2 |
 | verified clean (do not re-report) | 11 | FP1–FP11 |
 
-### Progress since the last pass (2026-11-15)
+### Partial items after the 2026-11-15 pass
 
-R14 and R30 moved without closing: their verification lines still fail, so the checkboxes stay
-unticked and the item text below says what is left. R3 (the third partial item from the last pass),
-R6, R7, R9, R18, R19, R21, R26, R29, R34, K1 and K2 have since closed (see the closing log).
+These six stay unticked because their verification lines still fail; each has a progress note in
+the closing log.
+
+- **R1** — bookkeeping writes are skipped and the audit Ably publish is coalesced per request, but
+  the "not 8 rows per analysis" target needs `audit-log-architecture.md` step 2 (`audit_events`).
+- **R10** — the per-milestone onboarding refetch and the duplicate `DONE` invalidations are gone;
+  a completion still triggers the four `analysisUpdated` invalidations (staging needs them).
+- **R12** — the sequential loop is gone (one trigger wave + one typed-SQL update), but the SDK's
+  `batchTrigger` exposes no per-run ids, so the sweep still makes one HTTP call per event.
+- **R14** — `getWorkspace` reads one document per type and `getDocumentContent` uses a narrow ref;
+  the per-keystroke structure-map cache in `searchWorkspace` is not implemented.
+- **R23** — `assertRepoAccess` is narrowed; merging the cache probe and removing the trailing
+  `jobId` update need an API change outside this plan.
+- **R25** — both before-hooks select narrow fields; the `session.create.after` read remains
+  because Better Auth has no before→after channel.
 
 - **R14** — `getWorkspace` no longer reads every document when `aid` is set (fixed by R33, `311bd6a7`),
   and `getDocumentContent` now reads a narrow ref with a capped document read (2026-11-15). Still
@@ -366,7 +378,7 @@ R6, R7, R9, R18, R19, R21, R26, R29, R34, K1 and K2 have since closed (see the c
   - **Effort:** S · **Verify:** sweep with 50 stale events completes in 2 round trips; replay
     count/idempotency semantics unchanged (`billing.events.test.ts`).
 
-- [ ] **R13 · Reconciliation is a per-subscription loop of 5–7 queries and 1–2 Stripe calls**
+- [x] **R13 · Reconciliation is a per-subscription loop of 5–7 queries and 1–2 Stripe calls**
   — `src/server/modules/billing/billing.reconciliation.ts:206-300, 332-360, 401-430`
   - **What:** for every Stripe subscription: `billingCustomer.findFirst`, `billingSubscription.findUnique`,
     `currentSlotHolder`, `workspaceEntitlement.findUnique`, `workspaceMember.count`, then a
@@ -405,7 +417,7 @@ R6, R7, R9, R18, R19, R21, R26, R29, R34, K1 and K2 have since closed (see the c
   - **Effort:** M · **Verify:** `analysis.getDocumentContent` reads no JSON columns; search p95
     stops tracking keystrokes.
 
-- [ ] **R15 · `revokeOtherSessions` deletes sessions one by one**
+- [x] **R15 · `revokeOtherSessions` deletes sessions one by one**
   — `src/server/modules/users/user.service.ts:268-283`
   - **What:** `session.findMany` then `Promise.all(others.map(s => deleteSession(token)))` — the
     better-auth internal adapter runs one DELETE per token **and** one secondary-storage delete
@@ -417,7 +429,7 @@ R6, R7, R9, R18, R19, R21, R26, R29, R34, K1 and K2 have since closed (see the c
   - **Effort:** XS · **Verify:** "sign out everywhere" produces 1 SQL DELETE and 1 Redis pipeline;
     the session cookie cache is still invalidated.
 
-- [ ] **R16 · `repos.getMyRepos` reads the GitHub token twice and queries installations twice**
+- [x] **R16 · `repos.getMyRepos` reads the GitHub token twice and queries installations twice**
   — `src/server/modules/repos/github-app.service.ts:38-98, 291-360`
   - **What:** `getMyRepos` → `syncInstallations` (`:45`) → `getValidToken` (`:296`) →
     `githubInstallation.findMany` (`:317`) → `github-api.getMyRepos` → `githubInstallation.findMany`
@@ -435,7 +447,7 @@ R6, R7, R9, R18, R19, R21, R26, R29, R34, K1 and K2 have since closed (see the c
   - **Effort:** S · **Verify:** dialog open = 1 token read, 1 installations read; the installation
     list in the UI is unchanged.
 
-- [ ] **R17 · The task middleware disconnects a *shared* Prisma pool at the end of every run**
+- [x] **R17 · The task middleware disconnects a *shared* Prisma pool at the end of every run**
   — `src/server/modules/analysis/tasks/init.ts:31-76`
   - **What:** `tasks.middleware("prisma-connection-manager")` calls `prisma.$connect()` at start
     and `prisma.$disconnect()` in `finally`, plus `$disconnect` on `onWait` and `$connect` on
@@ -483,7 +495,7 @@ R6, R7, R9, R18, R19, R21, R26, R29, R34, K1 and K2 have since closed (see the c
   - **Effort:** XS · **Verify:** `getStructureMap` with `aid` = 1 operation, same payload;
     `NOT_FOUND` for an unknown `aid` preserved.
 
-- [ ] **R20 · Independent reads and writes are awaited in sequence**
+- [x] **R20 · Independent reads and writes are awaited in sequence**
   — `users/user.service.ts:145-175`, `analysis/services/docs.service.ts:193-260`,
     `analysis/services/fixes.service.ts:27-60, 229-290`
   - **What:** `disconnectAccount` runs `account.findUnique` → `account.count` → `user.findUnique`
@@ -518,7 +530,7 @@ R6, R7, R9, R18, R19, R21, R26, R29, R34, K1 and K2 have since closed (see the c
   > JSON. A blob with none of the recognised top-level keys yields `{}`, which is also the null-row
   > fallback in the task. Token count and quality spot-check not measured.
 
-- [ ] **R22 · PR-impact page can read the repository snapshot twice**
+- [x] **R22 · PR-impact page can read the repository snapshot twice**
   — `src/server/modules/analysis/services/pr-impact.service.ts:43-56`
   - **What:** `getRepoBySha(...)` (repo + the analysis at `headSha`) and, when that returns
     `null`, `getRepoSnapshot(...)` — a second full read of the same repo with a different
@@ -550,7 +562,7 @@ R6, R7, R9, R18, R19, R21, R26, R29, R34, K1 and K2 have since closed (see the c
 
 ## LOW
 
-- [ ] **R24 · Admin audit list and detail read the full row, `payload` included**
+- [x] **R24 · Admin audit list and detail read the full row, `payload` included**
   — `src/server/modules/audit-logs/admin-audit.service.ts:78, 91` — `findMany`/`findUnique`
     without `select`, so every page row carries its `payload` JSON (`payloadHtml` re-reads it
     separately anyway, `:99-110`). **Fix:** `select` the summary columns. **Effort:** XS.
@@ -574,7 +586,7 @@ R6, R7, R9, R18, R19, R21, R26, R29, R34, K1 and K2 have since closed (see the c
     through `userMapper.toPublic`. **Fix:** select the public projection
     (`PublicUserSchema`). **Effort:** XS.
 
-- [ ] **R28 · Chat persist path re-reads the session title for every assistant message**
+- [x] **R28 · Chat persist path re-reads the session title for every assistant message**
   — `src/app/api/agent/chat/route.ts:270-312` — after `chatMessage.create`, a
     `chatSession.findUnique({ select: { title } })` inside `onEnd`, then possibly a
     title-generation LLM call and an update. The read exists only to detect `title === "New Chat"`.
@@ -585,7 +597,7 @@ R6, R7, R9, R18, R19, R21, R26, R29, R34, K1 and K2 have since closed (see the c
     no `take` (a narrow `select` landed in `f17088dd`, but there is no pagination). **Fix:** `take` +
     pagination. **Effort:** XS.
 
-- [ ] **R30 · Webhook handlers read full repo rows**
+- [x] **R30 · Webhook handlers read full repo rows**
   — `modules/webhooks/issue-comment-webhook-handler.ts:17-19`,
     `modules/webhooks/review-comment-webhook-handler.ts:20-22` — `repo.findMany` without `select`
     (the issue-comment one then passes whole rows around). The PR and push handlers were narrowed
@@ -593,12 +605,12 @@ R6, R7, R9, R18, R19, R21, R26, R29, R34, K1 and K2 have since closed (see the c
     `webhooks/push-webhook-handler.ts:28`). Repo rows are small, but the handlers run on every
     GitHub delivery. **Fix:** `select` on the two remaining handlers. **Effort:** XS.
 
-- [ ] **R31 · `fixes.createFix` validates the PR analysis with an extra query before the repo read**
+- [x] **R31 · `fixes.createFix` validates the PR analysis with an extra query before the repo read**
   — `analysis/services/fixes.service.ts:129-142` — `pullRequestAnalysis.findFirst` then
     `repo.findUnique`; the first result is only used to null out an invalid FK. **Fix:** read both
     in `Promise.all`, or connect through a nested `findFirst` on the repo. **Effort:** XS.
 
-- [ ] **R32 · Several Ably publishes per single user action**
+- [x] **R32 · Several Ably publishes per single user action**
   — `analysis/services/analysis-lifecycle.service.ts:494-519` (`userUpdated`, `notification`,
     `analysisUpdated`), `users/user.service.ts:263,280,302,313`, plus one publish per audited
     business write (R1). Each is a separate REST call with no batching. **Fix:** batch by channel
@@ -692,11 +704,23 @@ These were checked and found correct. Listed so a third round does not repeat th
 | R33 | 2026-11-01 | `311bd6a7` | `documents` relation filtered by `analysisId` in SQL when `aid` is set; the JS `.filter()` in `getRepoSnapshotWithDocuments` is gone. B5e removed that select entirely (`c0517117`). |
 | K2 | 2026-11-15 | `84ad37d7` | `loadRelatedDocSections` takes the request's `aid` and forwards it to `loadLatestDocumentsWithContent`, so the related-docs panel lists only the pinned analysis's documents. |
 | R34 | 2026-11-15 | `f232f133` | The `per_repo_top` lateral takes `LIMIT 1`, so no repo's history is sorted just to throw four rows away. `recentActivity` is therefore the newest analysis of each repo (one card per repo, five cards) and the outer `LIMIT 5` is its only cap; the comment says so instead of claiming a global top-5. |
+| R13 | 2026-11-15 | `35d3870e` | One `ReconcileContext` per Stripe page (customers, local subscriptions, entitlements, member counts), so the per-subscription `findFirst`/`findUnique` calls become map hits; missing keys fall back to a query and the repair path re-reads live rows. |
+| R15 | 2026-11-15 | `5379b00d` | `revokeOtherSessions` deletes the other sessions with one `deleteMany` and one Redis pipeline instead of one adapter call per token. |
+| R16 | 2026-11-15 | `ce69bd01` | `getValidToken` is memoised per request and the resolved token is passed into `syncInstallations`, so opening the add-repository dialog reads the token once. |
+| R17 | 2026-11-15 | `24c60499` | The run wrapper only sets `locals`; `$connect`/`$disconnect` are gone, and `onWait`/`onResume` remain the only release point. `pg_stat_activity` was not measured (no live worker). |
+| R20 | 2026-11-15 | `2492848a` | Independent reads in `disconnectAccount`, `pinAuditToDocs`, `applyFix` and `openPullRequest` run in `Promise.all`. |
+| R22 | 2026-11-15 | `363b82a0` | One heavy repo snapshot; a head-SHA miss costs one narrow `analysis.findFirst` instead of a second snapshot. Works for a head SHA at any depth. |
+| R24 | 2026-11-15 | dropped | `auditMapper.toDto` derives `targetName`, `details` and `rawPayload` from `payload`, and the admin table renders the first two; a summary-only select would blank the Target column. Needs a denormalized `target` column (migration) or dropping the column. |
+| R28 | 2026-11-15 | `d7c7cf59` | The new-chat flag is carried from the existing session probe into `onEnd`; the title re-read is gone. |
+| R30 | 2026-11-15 | `a65c18e3` | The issue-comment and review-comment handlers select only the four columns their replies read. |
+| R31 | 2026-11-15 | `0f8a685d` | `createFix` validates the PR analysis alongside the repo read in `Promise.all`. |
+| R32 | 2026-11-15 | `bf2f3d7d`, `664c2016` | The completion burst (`userUpdated`/`notification`/`analysisUpdated`) is one Ably batch request with a sequential fallback on a non-2xx response; `getStagedFiles` invalidation stays because staging/fix flows publish the same event. |
 | K1 | 2026-11-15 | `5cb192d0` | Both SQL files filter `repos.workspace_id = $1::uuid` (the parameter and the `user_repos` CTE are renamed `workspace_id` / `workspace_repos`), `getDashboardStats`/`getTrends` take a `workspaceId`, and `analytics.*` moved from `protectedProcedure` to `workspaceProcedure`. The dashboard and the repository list now count the same set for an invited member; `dashboard-stats` and `analytics-trends` each seed a second member's repositories into one workspace. |
 
-The first six shipped in PR #2356 and are on `main`; R3, R6, R7, R9, R11, R18, R19, R21, R26, R29, R34, K1
-and K2 landed on `perf/dxnx-310-db-query-review-round-2` and the "working tree" marker from the
-original log is now historical.
+The first six shipped in PR #2356 and are on `main`; the rest landed on
+`perf/dxnx-310-db-query-review-round-2` (draft PR #2412) and the "working tree" marker from the
+original log is now historical. R1, R10, R12, R14, R23 and R25 remain partial, and the list-read /
+date-filter audits below stay outside the 36-item counter.
 
 ## Verification recipes
 
