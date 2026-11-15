@@ -1,5 +1,5 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { GitPullRequest } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -18,17 +18,20 @@ export function RepoPullsListContainer({ name, owner, repoId }: Readonly<Props>)
   const trpc = useTRPC();
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
-  const { data: pulls, isLoading } = useQuery(
-    trpc.analysis.listByRepository.queryOptions({
-      repoId,
-    }),
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
+    trpc.analysis.listByRepository.infiniteQueryOptions(
+      { limit: 50, repoId },
+      { getNextPageParam: (page) => page.meta.nextCursor },
+    ),
   );
 
   if (isLoading) {
     return <div>{tCommon("loading")}</div>;
   }
 
-  if (pulls == null || pulls.items.length === 0) {
+  const pulls = data?.pages.flatMap((page) => page.items) ?? [];
+
+  if (pulls.length === 0) {
     return (
       <div className="flex h-150 items-center justify-center rounded-xl border border-dashed">
         <EmptyState
@@ -62,11 +65,10 @@ export function RepoPullsListContainer({ name, owner, repoId }: Readonly<Props>)
 
   return (
     <RepoPullsList
-      capped={pulls.capped}
       name={name}
       owner={owner}
-      pulls={pulls.items}
-      total={pulls.total}
+      pagination={{ hasNextPage, isFetchingNextPage, onLoadMore: fetchNextPage }}
+      pulls={pulls}
     />
   );
 }

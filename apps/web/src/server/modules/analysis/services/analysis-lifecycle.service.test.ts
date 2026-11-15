@@ -196,3 +196,95 @@ describe("analysisLifecycleService.analyze analytics", () => {
     expect(trackMock).not.toHaveBeenCalled();
   });
 });
+
+describe("analysisLifecycleService.getHistory", () => {
+  const WORKSPACE_ID = "workspace-1";
+  const REPO_ID = "018f0000-0000-7000-8000-0000000000cc";
+
+  function makeHistoryRow(overrides?: Record<string, unknown>) {
+    return {
+      commitSha: "abc1234",
+      createdAt: new Date("2026-03-01T10:00:00.000Z"),
+      id: "018f0000-0000-7000-8000-000000000001",
+      message: "Completed successfully",
+      score: 88,
+      status: "DONE",
+      ...overrides,
+    };
+  }
+
+  function buildHistoryDb(rows: unknown[], total = rows.length) {
+    const count = vi.fn().mockResolvedValue(total);
+    const findMany = vi.fn().mockResolvedValue(rows);
+    const db = { analysis: { count, findMany } } as unknown as DbClient;
+
+    return { count, db, findMany };
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("reads one probe row past the page in the newest-first order", async () => {
+    const { db, findMany } = buildHistoryDb([
+      makeHistoryRow({ id: "018f0000-0000-7000-8000-00000000000a" }),
+      makeHistoryRow({ id: "018f0000-0000-7000-8000-00000000000b" }),
+      makeHistoryRow({ id: "018f0000-0000-7000-8000-00000000000c" }),
+    ]);
+
+    const result = await analysisLifecycleService.getHistory(db, REPO_ID, WORKSPACE_ID, {
+      limit: 2,
+    });
+
+    expect(result.items.map((item) => item.id)).toStrictEqual([
+      "018f0000-0000-7000-8000-00000000000a",
+      "018f0000-0000-7000-8000-00000000000b",
+    ]);
+    expect(result.meta).toStrictEqual({
+      hasNextPage: true,
+      nextCursor: "018f0000-0000-7000-8000-00000000000c",
+    });
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cursor: undefined,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 3,
+        where: { repo: { id: REPO_ID, workspaceId: WORKSPACE_ID } },
+      }),
+    );
+  });
+
+  it("keysets past the cursor id", async () => {
+    const { db, findMany } = buildHistoryDb([makeHistoryRow()]);
+    const cursor = "018f0000-0000-7000-8000-00000000000b";
+
+    await analysisLifecycleService.getHistory(db, REPO_ID, WORKSPACE_ID, { cursor, limit: 2 });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: { id: cursor }, take: 3 }),
+    );
+  });
+
+  it("reports the last page without a cursor when the probe row is missing", async () => {
+    const { db } = buildHistoryDb([makeHistoryRow()]);
+
+    const result = await analysisLifecycleService.getHistory(db, REPO_ID, WORKSPACE_ID, {
+      limit: 2,
+    });
+
+    expect(result.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
+  });
+
+  it("keeps the total from the count query independent of the page", async () => {
+    const { count, db } = buildHistoryDb([makeHistoryRow()], 620);
+
+    const result = await analysisLifecycleService.getHistory(db, REPO_ID, WORKSPACE_ID, {
+      limit: 50,
+    });
+
+    expect(result.total).toBe(620);
+    expect(count).toHaveBeenCalledWith({
+      where: { repo: { id: REPO_ID, workspaceId: WORKSPACE_ID } },
+    });
+  });
+});

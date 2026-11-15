@@ -1,11 +1,13 @@
 import * as z from "zod";
 
 import { workspaceProcedure } from "@/server/core/trpc/init";
+import { cursorPageSchema } from "@/server/utils/pagination";
 
 import {
   AnalysisScopeInputSchema,
   NodeContextInputSchema,
   NodeContextOutputSchema,
+  PullListOutputSchema,
 } from "./analysis.schemas";
 import { PostCommentToPROutput, prCommentsService } from "./services/pr-comments.service";
 import { prImpactService } from "./services/pr-impact.service";
@@ -67,9 +69,10 @@ export const analysisRepoRouter = {
       );
     }),
   listByRepository: workspaceProcedure
-    .input(z.object({ repoId: z.uuid() }))
+    .input(z.object({ repoId: z.uuid() }).extend(cursorPageSchema(50).shape))
+    .output(PullListOutputSchema)
     .query(async ({ ctx, input }) => {
-      return prImpactService.listByRepository(ctx.db, input.repoId, ctx.workspace.id);
+      return prImpactService.listByRepository(ctx.db, input.repoId, ctx.workspace.id, input);
     }),
   postCommentToPR: workspaceProcedure
     .input(

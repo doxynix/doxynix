@@ -111,3 +111,83 @@ describe("prImpactService.getByRepoAndPRNumber", () => {
     expect(mocks.buildTopFindings).not.toHaveBeenCalled();
   });
 });
+
+describe("prImpactService.listByRepository", () => {
+  const WORKSPACE_ID = "ws-1";
+
+  function makePullRow(overrides?: Record<string, unknown>) {
+    return {
+      _count: { comments: 2 },
+      createdAt: new Date("2026-03-01T10:00:00.000Z"),
+      headSha: "head-sha-1",
+      id: "018f0000-0000-7000-8000-000000000001",
+      prNumber: 42,
+      riskScore: 5,
+      status: "COMPLETED",
+      ...overrides,
+    };
+  }
+
+  function buildPullDb(rows: unknown[], total = rows.length) {
+    const count = vi.fn().mockResolvedValue(total);
+    const findMany = vi.fn().mockResolvedValue(rows);
+    const db = { pullRequestAnalysis: { count, findMany } } as unknown as DbClient;
+
+    return { count, db, findMany };
+  }
+
+  it("reads one probe row past the page in the newest-first order", async () => {
+    const { db, findMany } = buildPullDb([
+      makePullRow({ id: "018f0000-0000-7000-8000-00000000000a" }),
+      makePullRow({ id: "018f0000-0000-7000-8000-00000000000b" }),
+      makePullRow({ id: "018f0000-0000-7000-8000-00000000000c" }),
+    ]);
+
+    const result = await prImpactService.listByRepository(db, REPO_ID, WORKSPACE_ID, { limit: 2 });
+
+    expect(result.items.map((item) => item.id)).toStrictEqual([
+      "018f0000-0000-7000-8000-00000000000a",
+      "018f0000-0000-7000-8000-00000000000b",
+    ]);
+    expect(result.meta).toStrictEqual({
+      hasNextPage: true,
+      nextCursor: "018f0000-0000-7000-8000-00000000000c",
+    });
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cursor: undefined,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 3,
+        where: { repo: { id: REPO_ID, workspaceId: WORKSPACE_ID } },
+      }),
+    );
+  });
+
+  it("keysets past the cursor id", async () => {
+    const { db, findMany } = buildPullDb([makePullRow()]);
+    const cursor = "018f0000-0000-7000-8000-00000000000b";
+
+    await prImpactService.listByRepository(db, REPO_ID, WORKSPACE_ID, { cursor, limit: 2 });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: { id: cursor }, take: 3 }),
+    );
+  });
+
+  it("reports the last page without a cursor when the probe row is missing", async () => {
+    const { db } = buildPullDb([makePullRow()]);
+
+    const result = await prImpactService.listByRepository(db, REPO_ID, WORKSPACE_ID, { limit: 2 });
+
+    expect(result.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
+  });
+
+  it("keeps the comment count mapping and the total from the count query", async () => {
+    const { db } = buildPullDb([makePullRow({ _count: { comments: 7 } })], 620);
+
+    const result = await prImpactService.listByRepository(db, REPO_ID, WORKSPACE_ID, { limit: 50 });
+
+    expect(result.items[0]?.findingCount).toBe(7);
+    expect(result.total).toBe(620);
+  });
+});

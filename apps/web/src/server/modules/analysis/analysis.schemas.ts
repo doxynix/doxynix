@@ -1,3 +1,4 @@
+import { CursorMetaSchema, PRAnalysisStatusSchema, StatusSchema } from "@doxynix/shared";
 import * as z from "zod";
 
 const FileActionConfidenceSchema = z.enum(["high", "medium", "low"]);
@@ -203,6 +204,37 @@ export const PrAiReviewOutputSchema = z.object({
 });
 
 export const AnalysisScopeInputSchema = z.object({ aid: z.string().optional(), repoId: z.uuid() });
+
+export const AnalysisHistoryItemSchema = z.object({
+  commitSha: z.string().nullable(),
+  createdAt: z.date(),
+  id: z.uuid(),
+  message: z.string().nullable(),
+  score: z.number().int().nullable(),
+  status: StatusSchema,
+});
+
+export const AnalysisHistoryOutputSchema = z.object({
+  items: z.array(AnalysisHistoryItemSchema),
+  meta: CursorMetaSchema,
+  total: z.number().int(),
+});
+
+export const PullListSummarySchema = z.object({
+  createdAt: z.date(),
+  findingCount: z.number().int(),
+  headSha: z.string(),
+  id: z.uuid(),
+  prNumber: z.number().int(),
+  riskScore: z.number().int().nullable(),
+  status: PRAnalysisStatusSchema,
+});
+
+export const PullListOutputSchema = z.object({
+  items: z.array(PullListSummarySchema),
+  meta: CursorMetaSchema,
+  total: z.number().int(),
+});
 
 export const NodeContextInputSchema = z.object({
   aid: z.string().optional(),

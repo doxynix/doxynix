@@ -13,7 +13,12 @@ export default async function RepoPullsPage({ params }: Readonly<RepoPageProps>)
 
   const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 
-  await prefetch(trpcProxy.analysis.listByRepository.queryOptions({ repoId: repo.id }));
+  await prefetch(
+    trpcProxy.analysis.listByRepository.infiniteQueryOptions(
+      { limit: 50, repoId: repo.id },
+      { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
+    ),
+  );
 
   return (
     <HydrateClient>

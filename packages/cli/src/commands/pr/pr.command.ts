@@ -83,7 +83,7 @@ export function registerPrCommand(program: Command) {
       );
       p.outro(
         brand.muted(
-          prPage.capped
+          prPage.meta.hasNextPage
             ? `Showing ${prList.length} of ${prPage.total} analyzed pull requests.`
             : `Total analyzed pull requests: ${prList.length}`,
         ),

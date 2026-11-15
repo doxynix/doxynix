@@ -1,5 +1,5 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { GitCommit } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
@@ -17,6 +17,8 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
+const LOAD_MORE = "__load_more__";
+
 type Props = { repoId: string };
 
 export function RepoVersionSelector({ repoId }: Readonly<Props>) {
@@ -26,7 +28,18 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
   const [selectedAid, setAid] = useQueryState("aid", parseAsString.withDefault(""));
 
-  const { data: history, isLoading } = useQuery(trpc.analysis.getHistory.queryOptions({ repoId }));
+  const {
+    data: history,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useInfiniteQuery(
+    trpc.analysis.getHistory.infiniteQueryOptions(
+      { limit: 50, repoId },
+      { getNextPageParam: (page) => page.meta.nextCursor },
+    ),
+  );
 
   if (isLoading || history == null) {
     return (
@@ -44,7 +57,8 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
     );
   }
 
-  const { capped, items, total } = history;
+  const items = history.pages.flatMap((page) => page.items);
+  const total = history.pages[0]?.total ?? 0;
 
   if (items.length === 0) {
     return null;
@@ -52,7 +66,13 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
 
   return (
     <Select
-      onValueChange={(e) => void setAid(e)}
+      onValueChange={(value) => {
+        if (value === LOAD_MORE) {
+          void fetchNextPage();
+          return;
+        }
+        void setAid(value);
+      }}
       value={selectedAid || items[0]?.id}
     >
       <SelectTrigger
@@ -61,7 +81,7 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
       >
         <GitCommit />
         <SelectValue placeholder={t("repo_version_placeholder")} />
-        {capped && (
+        {total > items.length && (
           <span className="ml-auto text-muted-foreground text-xs">
             {t("repo_version_capped", { shown: items.length, total })}
           </span>
@@ -96,6 +116,16 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
             </div>
           </SelectItem>
         ))}
+        {hasNextPage && (
+          <SelectItem
+            disabled={isFetchingNextPage}
+            value={LOAD_MORE}
+          >
+            <span className="text-muted-foreground text-xs">
+              {isFetchingNextPage ? tCommon("loading") : tCommon("more")}
+            </span>
+          </SelectItem>
+        )}
       </SelectContent>
     </Select>
   );

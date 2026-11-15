@@ -16,9 +16,8 @@ import {
   recordCacheHitUsage,
   releaseAnalysisUsage,
 } from "@/server/core/usage/usage";
+import { keysetArgs, ORDER_CREATED_AT_DESC, splitKeysetPage } from "@/server/utils/pagination";
 import { safeJsonClone } from "@/server/utils/safe-json";
-
-const HISTORY_LIMIT = 500;
 
 import { analysisLatestSelect } from "../analysis-latest.schemas";
 import type { AIResult } from "../engine/core/analysis-result.schemas";
@@ -279,10 +278,16 @@ export const analysisLifecycleService = {
     return { success: true };
   },
 
-  async getHistory(db: DbClient, repoId: string, workspaceId: string) {
-    const [items, total] = await Promise.all([
+  async getHistory(
+    db: DbClient,
+    repoId: string,
+    workspaceId: string,
+    input: { cursor?: null | string; limit: number },
+  ) {
+    const [rows, total] = await Promise.all([
       db.analysis.findMany({
-        orderBy: { createdAt: "desc" },
+        ...keysetArgs(input.cursor, input.limit),
+        orderBy: ORDER_CREATED_AT_DESC,
         select: {
           commitSha: true,
           createdAt: true,
@@ -291,14 +296,14 @@ export const analysisLifecycleService = {
           score: true,
           status: true,
         },
-        take: HISTORY_LIMIT,
         where: { repo: { id: repoId, workspaceId } },
       }),
       db.analysis.count({ where: { repo: { id: repoId, workspaceId } } }),
     ]);
 
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, input.limit);
+
     return {
-      capped: total > HISTORY_LIMIT,
       items: items.map((h) => ({
         commitSha: h.commitSha,
         createdAt: h.createdAt,
@@ -307,6 +312,7 @@ export const analysisLifecycleService = {
         score: h.score,
         status: h.status,
       })),
+      meta: { hasNextPage, nextCursor },
       total,
     };
   },

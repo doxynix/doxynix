@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  AnalysisHistoryOutputSchema,
   CodeDocEditSchema,
   changedFileSnapshotSchema,
   DocumentFilePreviewSchema,
   FixApplicationPayloadSchema,
   PrAiReviewFindingSchema,
   PrAiReviewOutputSchema,
+  PullListOutputSchema,
   persistedFindingSchema,
   QuickFileAuditSchema,
 } from "./analysis.schemas";
@@ -197,5 +199,57 @@ describe("PrAiReviewOutputSchema", () => {
 
   it("parses a valid fixture", () => {
     expect(PrAiReviewOutputSchema.parse(valid)).toEqual(valid);
+  });
+});
+
+describe("AnalysisHistoryOutputSchema", () => {
+  const item = {
+    commitSha: "abc1234",
+    createdAt: new Date("2026-03-01T10:00:00.000Z"),
+    id: "018f0000-0000-7000-8000-000000000001",
+    message: "Completed successfully",
+    score: 88,
+    status: "DONE" as const,
+  };
+
+  it("carries the page, its keyset meta and the total", () => {
+    const parsed = AnalysisHistoryOutputSchema.parse({
+      items: [item],
+      meta: { hasNextPage: true, nextCursor: item.id },
+      total: 620,
+    });
+
+    expect(parsed.items).toEqual([item]);
+    expect(parsed.meta).toEqual({ hasNextPage: true, nextCursor: item.id });
+    expect(parsed.total).toBe(620);
+  });
+
+  it("accepts a closed page with no cursor", () => {
+    expect(
+      AnalysisHistoryOutputSchema.parse({ items: [], meta: { hasNextPage: false }, total: 0 }),
+    ).toEqual({ items: [], meta: { hasNextPage: false }, total: 0 });
+  });
+});
+
+describe("PullListOutputSchema", () => {
+  it("parses a page of PR summaries with the keyset meta", () => {
+    const item = {
+      createdAt: new Date("2026-03-01T10:00:00.000Z"),
+      findingCount: 2,
+      headSha: "head-sha-1",
+      id: "018f0000-0000-7000-8000-000000000002",
+      prNumber: 42,
+      riskScore: 5,
+      status: "COMPLETED" as const,
+    };
+
+    const parsed = PullListOutputSchema.parse({
+      items: [item],
+      meta: { hasNextPage: false, nextCursor: undefined },
+      total: 1,
+    });
+
+    expect(parsed.items[0]).toEqual(item);
+    expect(parsed.total).toBe(1);
   });
 });

@@ -2,6 +2,7 @@ import { MessageCode } from "@doxynix/shared";
 
 import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
+import { keysetArgs, ORDER_CREATED_AT_DESC, splitKeysetPage } from "@/server/utils/pagination";
 
 import { analysisMapper } from "../analysis.mapper";
 import { analysisRepo } from "../analysis.repository";
@@ -9,8 +10,6 @@ import { createAnalyzeContextBuilder } from "../logic/analyze-context-builder";
 import { buildTopLevelNodes } from "../logic/graph-navigator";
 import { mapChangedFilesToImpactNodes } from "../logic/impact-file-mapper";
 import type { PRImpactPayload } from "../logic/pr.types";
-
-const PULL_LIST_LIMIT = 500;
 
 export const prImpactService = {
   async getAnalysis(db: DbClient, analysisId: string, workspaceId: string) {
@@ -134,10 +133,16 @@ export const prImpactService = {
     } satisfies PRImpactPayload;
   },
 
-  async listByRepository(db: DbClient, repoId: string, workspaceId: string) {
-    const [items, total] = await Promise.all([
+  async listByRepository(
+    db: DbClient,
+    repoId: string,
+    workspaceId: string,
+    input: { cursor?: null | string; limit: number },
+  ) {
+    const [rows, total] = await Promise.all([
       db.pullRequestAnalysis.findMany({
-        orderBy: { createdAt: "desc" },
+        ...keysetArgs(input.cursor, input.limit),
+        orderBy: ORDER_CREATED_AT_DESC,
         select: {
           _count: {
             select: { comments: true },
@@ -149,7 +154,6 @@ export const prImpactService = {
           riskScore: true,
           status: true,
         },
-        take: PULL_LIST_LIMIT,
         where: {
           repo: {
             id: repoId,
@@ -160,8 +164,9 @@ export const prImpactService = {
       db.pullRequestAnalysis.count({ where: { repo: { id: repoId, workspaceId } } }),
     ]);
 
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, input.limit);
+
     return {
-      capped: total > PULL_LIST_LIMIT,
       items: items.map((item) => ({
         createdAt: item.createdAt,
         findingCount: item._count.comments,
@@ -171,6 +176,7 @@ export const prImpactService = {
         riskScore: item.riskScore,
         status: item.status,
       })),
+      meta: { hasNextPage, nextCursor },
       total,
     };
   },
