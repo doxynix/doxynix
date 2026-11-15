@@ -34,7 +34,30 @@ export async function verifyAndUseApiKey(token: string) {
   const hashedToken = getApiKeyHash(payload);
 
   const keyRecord = await prisma.apiKey.findUnique({
-    include: { user: true },
+    select: {
+      expiresAt: true,
+      id: true,
+      lastUsed: true,
+      revoked: true,
+      revokedAfter: true,
+      scopes: true,
+      user: {
+        select: {
+          banned: true,
+          createdAt: true,
+          email: true,
+          emailVerified: true,
+          id: true,
+          image: true,
+          name: true,
+          role: true,
+          twoFactorEnabled: true,
+          updatedAt: true,
+        },
+      },
+      userId: true,
+      workspaceId: true,
+    },
     where: { hashedKey: hashedToken },
   });
 
