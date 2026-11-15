@@ -12,8 +12,10 @@ export type SessionMessage = {
   role: ChatMessage["role"];
 };
 
+export type SessionMessageRow = Pick<ChatMessage, "createdAt" | "id" | "parts" | "role">;
+
 export const agentMapper = {
-  toSessionMessage(message: ChatMessage): SessionMessage {
+  toSessionMessage(message: SessionMessageRow): SessionMessage {
     let parts: SessionMessagePart[];
 
     try {

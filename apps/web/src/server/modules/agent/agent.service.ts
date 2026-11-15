@@ -8,6 +8,9 @@ import { realtimeService } from "@/server/core/realtime";
 
 import { agentMapper } from "./agent.mapper";
 
+const SESSION_HISTORY_LIMIT = 200;
+const SESSION_LIST_LIMIT = 100;
+
 export type CreateSessionInput = {
   repoId?: string;
   title: string;
@@ -74,11 +77,13 @@ export const agentService = {
 
   async getSessionHistory(db: DbClient, userId: string, sessionId: string) {
     const rawMessages = await db.chatMessage.findMany({
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true, id: true, parts: true, role: true },
+      take: SESSION_HISTORY_LIMIT,
       where: { session: { userId }, sessionId },
     });
 
-    return rawMessages.map((msg) => agentMapper.toSessionMessage(msg));
+    return rawMessages.toReversed().map((msg) => agentMapper.toSessionMessage(msg));
   },
 
   async listSessions(
@@ -104,8 +109,16 @@ export const agentService = {
     }
 
     return db.chatSession.findMany({
-      include: { repo: { select: { name: true, owner: true } } },
       orderBy: { updatedAt: "desc" },
+      select: {
+        createdAt: true,
+        id: true,
+        repo: { select: { name: true, owner: true } },
+        repoId: true,
+        title: true,
+        updatedAt: true,
+      },
+      take: SESSION_LIST_LIMIT,
       where: { repoId: internalRepoId, userId },
     });
   },
