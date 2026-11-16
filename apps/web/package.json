@@ -70,9 +70,9 @@
     "with-doppler": "bun ../../scripts/doppler.ts"
   },
   "dependencies": {
-    "@ai-sdk/google": "4.0.118",
-    "@ai-sdk/openai": "4.0.115",
-    "@ai-sdk/react": "4.0.174",
+    "@ai-sdk/google": "4.0.119",
+    "@ai-sdk/openai": "4.0.116",
+    "@ai-sdk/react": "4.0.175",
     "@axiomhq/js": "2.0.0",
     "@axiomhq/logging": "0.4.1",
     "@better-auth/passkey": "catalog:",
@@ -149,7 +149,7 @@
     "@xyflow/react": "12.12.1",
     "@zenstackhq/runtime": "2.22.3",
     "ably": "2.30.0",
-    "ai": "7.0.170",
+    "ai": "7.0.171",
     "better-auth": "catalog:",
     "class-variance-authority": "0.7.1",
     "clsx": "catalog:",
