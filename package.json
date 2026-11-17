@@ -78,7 +78,7 @@
     "@cspell/dict-tr-tr": "3.0.8",
     "@secretlint/secretlint-rule-preset-recommend": "13.1.0",
     "@types/node": "26.6.6",
-    "cspell": "10.5.0",
+    "cspell": "10.5.1",
     "jscpd": "5.4.3",
     "knip": "6.45.1",
     "lefthook": "2.2.2",
