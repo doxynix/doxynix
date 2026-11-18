@@ -83,7 +83,7 @@ export const fixesService = {
 
       await redis.del(REDIS_CONFIG.keys.prStaging(userId, input.repoId));
 
-      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
+      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.stagingUpdated, {});
 
       return {
         prNumber: result.prNumber,
@@ -175,7 +175,7 @@ export const fixesService = {
         },
       );
 
-      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
+      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.stagingUpdated, {});
 
       return {
         fixId: fix.id,
@@ -323,7 +323,7 @@ export const fixesService = {
 
       await redis.del(cacheKey);
 
-      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
+      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.stagingUpdated, {});
 
       return {
         fixId: fix.id,

@@ -20,6 +20,7 @@ export const REALTIME_CONFIG = {
       prCommentReceived: "pr-comment-received",
       repoUpdated: "repo-updated",
       sessionUpdated: "session-updated",
+      stagingUpdated: "staging-updated",
       userUpdated: "user-updated",
     },
   },

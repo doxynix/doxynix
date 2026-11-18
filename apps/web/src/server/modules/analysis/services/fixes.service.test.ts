@@ -21,6 +21,8 @@ vi.mock("../tasks/generate-fix.task", () => ({
   generateFixTask: { trigger: mocks.trigger },
 }));
 
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
+
 import type { DbClient } from "@/server/core/db";
 
 import { fixesService } from "./fixes.service";
@@ -78,6 +80,7 @@ describe("fixesService.createFix", () => {
     // The gate opens only once both reads are in flight, so a sequential body would hang.
     expect(order.sort()).toEqual(["prAnalysis", "repo"]);
     expect(result).toStrictEqual({ fixId: FIX_ID, status: "PENDING", success: true });
+    expect(mocks.publish).toHaveBeenCalledWith(REALTIME_CONFIG.events.user.stagingUpdated, {});
   });
 
   it("nulls the FK when the PR analysis does not belong to the workspace", async () => {

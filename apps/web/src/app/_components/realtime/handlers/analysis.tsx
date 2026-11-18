@@ -45,10 +45,6 @@ export function analysisHandlers({
     [REALTIME_CONFIG.events.user.analysisUpdated]: () => {
       void queryClient.invalidateQueries(trpc.analysis.getLatest.pathFilter());
       void queryClient.invalidateQueries(trpc.analysis.getHistory.pathFilter());
-      void queryClient.invalidateQueries(trpc.analysis.getVersionRef.pathFilter());
-      // Staging and fix services publish this event too, so other tabs still need the staged list.
-      void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
-      void queryClient.invalidateQueries(trpc.user.getOnboardingState.pathFilter());
     },
     [REALTIME_CONFIG.events.user.fileActionCompleted]: (message) => {
       const payload = parseRealtimePayload(RealtimeUserPayloads.fileActionCompleted, message.data);
@@ -77,6 +73,9 @@ export function analysisHandlers({
       toast.success(
         payload.type === "AUDIT" ? t("realtime_file_audit_done") : t("realtime_file_document_done"),
       );
+    },
+    [REALTIME_CONFIG.events.user.stagingUpdated]: () => {
+      void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
     },
   };
 }

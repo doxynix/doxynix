@@ -55,6 +55,7 @@ export type UserEventPayloads = {
     sessionId: string;
     title: string;
   };
+  [REALTIME_CONFIG.events.user.stagingUpdated]: Record<string, never>;
 };
 
 export type SystemEventPayloads = {
