@@ -192,7 +192,7 @@ describe("prImpactService.listByRepository", () => {
     await createPullRequestAnalysis(db, fixture, { prNumber: 1 });
     await createPullRequestAnalysis(db, fixture, { prNumber: 2 });
 
-    const { items, meta, total } = await prImpactService.listByRepository(
+    const { items, meta } = await prImpactService.listByRepository(
       db,
       fixture.repoId,
       fixture.workspaceId,
@@ -204,7 +204,6 @@ describe("prImpactService.listByRepository", () => {
     ]);
     expect(new Set(items.map((item) => item.id)).size).toBe(2);
     // Two rows on a 50-row page, so the list must not claim there is another page.
-    expect(total).toBe(2);
     expect(meta).toEqual({ hasNextPage: false, nextCursor: undefined });
   });
 

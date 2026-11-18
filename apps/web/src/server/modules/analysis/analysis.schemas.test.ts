@@ -254,17 +254,15 @@ describe("PullListOutputSchema", () => {
     const parsed = PullListOutputSchema.parse({
       items: [item],
       meta: { hasNextPage: false, nextCursor: undefined },
-      total: 1,
     });
 
     expect(parsed.items[0]).toEqual(item);
-    expect(parsed.total).toBe(1);
   });
 
-  it("accepts a later page that carries no count", () => {
+  it("accepts a later page without a cursor", () => {
     expect(
-      PullListOutputSchema.parse({ items: [], meta: { hasNextPage: true }, total: null }).total,
-    ).toBeNull();
+      PullListOutputSchema.parse({ items: [], meta: { hasNextPage: true } }).meta.hasNextPage,
+    ).toBe(true);
   });
 });
 
