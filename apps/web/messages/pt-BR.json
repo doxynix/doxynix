@@ -426,7 +426,7 @@
     "beta": "BETA",
     "breadcrumb": "Trilha de navegação",
     "cancel": "Cancelar",
-    "capped_hint": "Exibindo os primeiros {count}. Narrow os filtros ou escolha um intervalo de datas.",
+    "capped_hint": "Exibindo os primeiros {count}. Refine os resultados para ver o restante.",
     "change_language": "Alterar idioma",
     "check_system_status": "Verificar status do sistema",
     "clipboard_unavailable": "API da área de transferência indisponível",

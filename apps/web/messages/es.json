@@ -426,7 +426,7 @@
     "beta": "BETA",
     "breadcrumb": "Ruta de navegación",
     "cancel": "Cancelar",
-    "capped_hint": "Mostrando los primeros {count}. Filtra más o elige un rango de fechas.",
+    "capped_hint": "Mostrando los primeros {count}. Ajusta los filtros para ver el resto.",
     "change_language": "Cambiar idioma",
     "check_system_status": "Verificar estado del sistema",
     "clipboard_unavailable": "API del portapapeles no disponible",

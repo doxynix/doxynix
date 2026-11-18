@@ -426,7 +426,7 @@
     "beta": "BETA",
     "breadcrumb": "Gezinti yolu",
     "cancel": "İptal",
-    "capped_hint": "İlk {count} kayıt gösteriliyor. Kalanı için filtreyi daraltın veya bir tarih aralığı seçin.",
+    "capped_hint": "İlk {count} kayıt gösteriliyor. Kalanı görmek için sonuçları daraltın.",
     "change_language": "Dili değiştir",
     "check_system_status": "Sistem Durumunu Kontrol Et",
     "clipboard_unavailable": "Pano API'si kullanılamıyor",

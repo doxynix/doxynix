@@ -426,7 +426,7 @@
     "beta": "BETA",
     "breadcrumb": "Ścieżka nawigacji",
     "cancel": "Anuluj",
-    "capped_hint": "Pokazuję pierwsze {count}. Zawęź filtry lub wybierz zakres dat.",
+    "capped_hint": "Pokazuję pierwsze {count}. Zawęź wyniki, aby zobaczyć resztę.",
     "change_language": "Zmień język",
     "check_system_status": "Sprawdź status systemu",
     "clipboard_unavailable": "API schowka niedostępne",

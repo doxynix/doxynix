@@ -426,7 +426,7 @@
     "beta": "BETA",
     "breadcrumb": "Breadcrumb",
     "cancel": "Cancel",
-    "capped_hint": "Showing the first {count}. Narrow your filters or pick a date range to see the rest.",
+    "capped_hint": "Showing the first {count}. Narrow the results to see the rest.",
     "change_language": "Change Language",
     "check_system_status": "Check System Status",
     "clipboard_unavailable": "Clipboard API not available",

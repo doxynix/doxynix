@@ -426,7 +426,7 @@
     "beta": "BETA",
     "breadcrumb": "Brotkrumennavigation",
     "cancel": "Abbrechen",
-    "capped_hint": "Die ersten {count} werden angezeigt. Filtere ein oder wähle einen Zeitraum.",
+    "capped_hint": "Die ersten {count} werden angezeigt. Grenze die Ergebnisse ein, um den Rest zu sehen.",
     "change_language": "Sprache ändern",
     "check_system_status": "Systemstatus prüfen",
     "clipboard_unavailable": "Zwischenablage-API nicht verfügbar",

@@ -426,7 +426,7 @@
     "beta": "BETA",
     "breadcrumb": "パンくずリスト",
     "cancel": "キャンセル",
-    "capped_hint": "最初の {count} 件を表示しています。フィルターを絞り込むか期間を選択してください。",
+    "capped_hint": "最初の {count} 件を表示しています。絞り込むと残りを表示できます。",
     "change_language": "言語を変更",
     "check_system_status": "システムステータスを確認",
     "clipboard_unavailable": "クリップボード API を利用できません",

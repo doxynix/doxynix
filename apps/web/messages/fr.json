@@ -426,7 +426,7 @@
     "beta": "BÊTA",
     "breadcrumb": "Fil d'Ariane",
     "cancel": "Annuler",
-    "capped_hint": "Affichage des {count} premiers. Affinez les filtres ou choisissez une plage de dates.",
+    "capped_hint": "Affichage des {count} premiers. Affinez les résultats pour voir le reste.",
     "change_language": "Changer de langue",
     "check_system_status": "Vérifier l'état du système",
     "clipboard_unavailable": "API du presse-papiers indisponible",
