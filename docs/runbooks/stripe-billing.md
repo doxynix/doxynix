@@ -81,15 +81,18 @@
   пересчитает доступ.
 - **Диагностика события**:
   ```sql
-  SELECT id, type, status, attempts, replay_count, last_error, trigger_run_id, received_at
+  SELECT id, type, status, attempts, replay_count, last_error, trigger_run_id,
+         trigger_batch_id, received_at
   FROM billing_events WHERE status <> 'PROCESSED' ORDER BY received_at;
   ```
-  `last_error` — усечённый код/сообщение, без payload.
+  `last_error` — усечённый код/сообщение, без payload. У переигранных sweeper'ом строк
+  `trigger_run_id` пуст, а идентификатор прогона — `trigger_batch_id`.
 - **Reconciliation вручную**: Trigger-таск `billing-reconcile-stripe` (cron `17 4 * * *` UTC)
   можно запустить из Dashboard/CLI; повторный запуск в тот же UTC-день пропускается
   (`billing_reconciliation_runs.scheduled_for_date` unique). Никаких Stripe writes.
 - **Sweeper**: `billing-sweep-stripe-events` каждые 15 минут (окно 5 минут) переигрывает
-  `RECEIVED/PROCESSING` старше 15 минут и `ENQUEUED` старше 30 минут.
+  `RECEIVED/PROCESSING` старше 15 минут и `ENQUEUED` старше 30 минут. Один прогон — один batch;
+  такой batch отменяется из Trigger Dashboard (у запуска нет отдельного run id).
 
 ## 4. Локальная разработка
 
