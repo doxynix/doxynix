@@ -50,7 +50,7 @@ type TaskPayload = {
 export const analyzeRepoTask = task({
   id: "analyze-repo",
   ...TASK_CONFIGS.analyzeRepo,
-  run: async (payload: TaskPayload) => {
+  run: async (payload: TaskPayload, { ctx }) => {
     const {
       analysisId,
       docTypes,
@@ -68,6 +68,8 @@ export const analyzeRepoTask = task({
     const channelName = REALTIME_CONFIG.channels.user(userId);
 
     try {
+      await analysisLifecycleService.attachRunId(analysisId, ctx.run.id);
+
       await analysisProgress.milestone({
         analysisId,
         msg: "Initializing analysis engine",
