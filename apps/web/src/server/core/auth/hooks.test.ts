@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   accountFindFirst: vi.fn(),
   bannedEmailFindUnique: vi.fn(),
+  info: vi.fn(),
   userFindUnique: vi.fn(),
   userUpdate: vi.fn(),
 }));
@@ -18,15 +19,23 @@ vi.mock("@/server/core/db", () => ({
 }));
 
 vi.mock("@/server/core/app-logger", () => ({
-  appLogger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
+  appLogger: { error: vi.fn(), info: mocks.info, warn: vi.fn() },
 }));
 
 const { auth } = await import("./index");
 
 const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 
-// The five profile columns the create hooks read; everything else on `User` is unused there.
-const PROFILE_SELECT = { email: true, emailHash: true, id: true, image: true, name: true };
+// The seven profile columns the create hooks read; everything else on `User` is unused there.
+const PROFILE_SELECT = {
+  createdAt: true,
+  email: true,
+  emailHash: true,
+  id: true,
+  image: true,
+  name: true,
+  role: true,
+};
 
 type Hooks = {
   account?: {
@@ -47,11 +56,13 @@ const hooks = (auth.options as unknown as { databaseHooks: Hooks }).databaseHook
 
 function dbUser(overrides: Record<string, unknown> = {}) {
   return {
+    createdAt: new Date("2020-01-01T00:00:00.000Z"),
     email: "karen@example.com",
     emailHash: "hash-of-karen",
     id: USER_ID,
     image: "https://cdn/old.png",
     name: "karen",
+    role: "USER",
     ...overrides,
   };
 }
@@ -101,7 +112,7 @@ describe("account.create.before", () => {
 });
 
 describe("session.create.before", () => {
-  it("reads only the profile columns the ban check and the OAuth sync need", async () => {
+  it("reads the profile columns the ban check, the OAuth sync and the sign-in log need", async () => {
     mocks.userFindUnique.mockResolvedValue(dbUser());
     mocks.accountFindFirst.mockResolvedValue(null);
 
@@ -129,6 +140,35 @@ describe("session.create.before", () => {
     });
   });
 
+  it("logs the sign-in from the row it already read", async () => {
+    mocks.userFindUnique.mockResolvedValue(dbUser({ role: "ADMIN" }));
+    mocks.accountFindFirst.mockResolvedValue(null);
+
+    await hooks.session?.create?.before?.({ userId: USER_ID });
+
+    expect(mocks.info).toHaveBeenCalledWith({
+      msg: "User signed in",
+      role: "ADMIN",
+      type: "auth.signin",
+      userId: USER_ID,
+    });
+    expect(mocks.info).not.toHaveBeenCalledWith(
+      expect.objectContaining({ msg: "First time login experience triggered" }),
+    );
+  });
+
+  it("flags the first sign-in of a freshly created user", async () => {
+    mocks.userFindUnique.mockResolvedValue(dbUser({ createdAt: new Date() }));
+    mocks.accountFindFirst.mockResolvedValue(null);
+
+    await hooks.session?.create?.before?.({ userId: USER_ID });
+
+    expect(mocks.info).toHaveBeenCalledWith({
+      msg: "First time login experience triggered",
+      userId: USER_ID,
+    });
+  });
+
   it("rejects a banned email without touching the account row", async () => {
     mocks.userFindUnique.mockResolvedValue(dbUser());
     mocks.bannedEmailFindUnique.mockResolvedValue({ id: "ban-1" });
@@ -137,22 +177,10 @@ describe("session.create.before", () => {
       body: { message: "EmailBanned" },
     });
     expect(mocks.accountFindFirst).not.toHaveBeenCalled();
+    expect(mocks.info).not.toHaveBeenCalled();
   });
-});
 
-describe("session.create.after", () => {
-  it("still reads the three columns the sign-in log needs", async () => {
-    mocks.userFindUnique.mockResolvedValue({
-      createdAt: new Date(),
-      id: USER_ID,
-      role: "USER",
-    });
-
-    await hooks.session?.create?.after?.({ userId: USER_ID });
-
-    expect(mocks.userFindUnique).toHaveBeenCalledWith({
-      select: { createdAt: true, id: true, role: true },
-      where: { id: USER_ID },
-    });
+  it("registers no session.create.after hook", () => {
+    expect(hooks.session?.create?.after).toBeUndefined();
   });
 });

@@ -63,11 +63,13 @@ const yandexProfileSchema = z.object({
 
 // The profile columns both create hooks read; anything else is decrypted and parsed for nothing.
 const AUTH_PROFILE_SELECT = {
+  createdAt: true,
   email: true,
   emailHash: true,
   id: true,
   image: true,
   name: true,
+  role: true,
 } satisfies Prisma.UserSelect;
 
 async function assertEmailNotBanned(
@@ -227,35 +229,6 @@ export const auth = betterAuth({
     },
     session: {
       create: {
-        after: async (session) => {
-          const dbUser = await prisma.user.findUnique({
-            select: { createdAt: true, id: true, role: true },
-            where: { id: session.userId },
-          });
-
-          if (dbUser != null) {
-            const isNewUser = Date.now() - dbUser.createdAt.getTime() < 10_000;
-            if (isNewUser) {
-              appLogger.info({
-                msg: "First time login experience triggered",
-                userId: String(dbUser.id),
-              });
-            }
-
-            appLogger.info({
-              msg: "User signed in",
-              role: dbUser.role,
-              type: "auth.signin",
-              userId: String(session.userId),
-            });
-          } else {
-            appLogger.info({
-              msg: "User signed in",
-              type: "auth.signin",
-              userId: String(session.userId),
-            });
-          }
-        },
         before: async (session) => {
           const dbUser = await prisma.user.findUnique({
             select: AUTH_PROFILE_SELECT,
@@ -296,6 +269,21 @@ export const auth = betterAuth({
                 });
               }
             }
+
+            const isNewUser = Date.now() - dbUser.createdAt.getTime() < 10_000;
+            if (isNewUser) {
+              appLogger.info({
+                msg: "First time login experience triggered",
+                userId: String(dbUser.id),
+              });
+            }
+
+            appLogger.info({
+              msg: "User signed in",
+              role: dbUser.role,
+              type: "auth.signin",
+              userId: String(session.userId),
+            });
           }
 
           return { data: session };
