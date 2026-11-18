@@ -222,16 +222,14 @@ export const analysisLifecycleService = {
   },
 
   // The run id only exists after `tasks.trigger`, so the worker stores it instead of the request
-  // path paying one more round trip. A cancelled row is no longer `PENDING` and stops the run.
-  async attachRunId(analysisId: string, jobId: string): Promise<void> {
+  // path paying one more round trip. A cancelled row is no longer `PENDING`, and the caller skips.
+  async attachRunId(analysisId: string, jobId: string): Promise<boolean> {
     const { count } = await prisma.analysis.updateMany({
       data: { jobId },
       where: { id: analysisId, status: "PENDING" },
     });
 
-    if (count === 0) {
-      throw new Error("Analysis is no longer pending");
-    }
+    return count > 0;
   },
 
   async cancel(db: DbClient, analysisId: string, workspaceId: string) {

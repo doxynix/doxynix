@@ -68,7 +68,13 @@ export const analyzeRepoTask = task({
     const channelName = REALTIME_CONFIG.channels.user(userId);
 
     try {
-      await analysisLifecycleService.attachRunId(analysisId, ctx.run.id);
+      const attached = await analysisLifecycleService.attachRunId(analysisId, ctx.run.id);
+
+      if (!attached) {
+        // The row was cancelled (or failed) before the worker started; leave its message alone.
+        taskLogger.log("Analysis is no longer pending; skipping the run");
+        return { reason: "NOT_PENDING", skipped: true };
+      }
 
       await analysisProgress.milestone({
         analysisId,
