@@ -736,6 +736,7 @@ model BillingEvent {
   replayCount       Int                  @default(0) @map("replay_count")
   lastError         String?              @map("last_error") @db.Text()
   triggerRunId      String?              @map("trigger_run_id")
+  triggerBatchId    String?              @map("trigger_batch_id")
   receivedAt        DateTime             @default(now()) @map("received_at") @db.Timestamptz(3)
   processedAt       DateTime?            @map("processed_at") @db.Timestamptz(3)
   createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -745,6 +746,7 @@ model BillingEvent {
   @@index([status, receivedAt])
   @@index([type, externalCreatedAt])
   @@index([externalCreatedAt, id])
+  @@index([triggerBatchId])
   @@map("billing_events")
 }
 
