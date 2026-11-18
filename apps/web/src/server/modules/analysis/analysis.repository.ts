@@ -172,9 +172,6 @@ export async function loadDocumentsPerType<W extends boolean = false>(
   return withContent;
 }
 
-export type RepoRefRecord = Awaited<ReturnType<typeof analysisRepo.getRepoRef>>;
-export type RepoRef = NonNullable<RepoRefRecord>;
-
 export type AnalysisRef = {
   analysisId: string;
   commitSha: null | string;
@@ -470,11 +467,13 @@ export const analysisRepo = {
       return null;
     }
 
-    if (repo.analyses.length === 0) {
+    const analysis = repo.analyses[0];
+
+    if (analysis == null) {
       throw missingAnalysisError(aid);
     }
 
-    return repo;
+    return { ...repo, analysisId: analysis.id };
   },
 
   async getRepoSnapshot(db: DbClient, repoId: string, workspaceId: string, aid?: string) {

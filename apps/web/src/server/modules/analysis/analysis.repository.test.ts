@@ -510,7 +510,7 @@ describe("analysisRepo.getRepoRef", () => {
 
     const ref = await analysisRepo.getRepoRef(db, REPO_ID, WORKSPACE_ID, ANALYSIS_ID);
 
-    expect(ref?.analyses[0]?.id).toBe(ANALYSIS_ID);
+    expect(ref?.analysisId).toBe(ANALYSIS_ID);
     expect(calls).toHaveLength(1);
     expect(Object.keys(calls[0]?.select ?? {}).sort()).toStrictEqual([
       "analyses",

@@ -78,15 +78,6 @@ export const docsService = {
         publicMessage: "Repository not found",
       });
     }
-    const analysis = repo.analyses[0];
-
-    if (analysis == null) {
-      throw new AppError({
-        code: "NOT_FOUND",
-        messageCode: MessageCode.ANALYSIS_NOT_FOUND,
-        publicMessage: "Analysis not found",
-      });
-    }
 
     const doc = await db.document.findFirst({
       where: {
@@ -98,7 +89,7 @@ export const docsService = {
         ...(path != null ? { path } : {}),
         ...(path == null && {
           analysis: {
-            id: analysis.id,
+            id: repo.analysisId,
           },
         }),
       },
