@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.15.8](https://github.com/doxynix/doxynix/compare/web-v5.15.7...web-v5.15.8) (2026-11-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency react-virtuoso to v4.18.23 ([#2425](https://github.com/doxynix/doxynix/issues/2425)) ([eaa15d9](https://github.com/doxynix/doxynix/commit/eaa15d9be1c593a9309be387d68aaea59886a227))
+
 ## [5.15.7](https://github.com/doxynix/doxynix/compare/web-v5.15.6...web-v5.15.7) (2026-11-17)
 
 
