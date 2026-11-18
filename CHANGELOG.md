@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.15.8](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.7...doxynix-v6.15.8) (2026-11-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency react-virtuoso to v4.18.23 ([#2425](https://github.com/doxynix/doxynix/issues/2425)) ([eaa15d9](https://github.com/doxynix/doxynix/commit/eaa15d9be1c593a9309be387d68aaea59886a227))
+
 ## [6.15.7](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.6...doxynix-v6.15.7) (2026-11-17)
 
 
