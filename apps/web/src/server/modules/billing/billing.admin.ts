@@ -86,6 +86,7 @@ export async function replayBillingEvent(
     },
   );
 
+  // Sweeps store a batch id, not a run id, so a stuck sweep is cancelled from the Trigger dashboard.
   await db.billingEvent.update({
     data: {
       replayCount: { increment: 1 },

@@ -6,9 +6,9 @@ import { sweepStaleStripeEvents } from "@/server/modules/billing/billing.events"
 
 import { cleanupDatabase } from "../helpers";
 
-const triggerMock = vi.hoisted(() => vi.fn());
+const batchTriggerMock = vi.hoisted(() => vi.fn());
 
-vi.mock("@trigger.dev/sdk", () => ({ tasks: { trigger: triggerMock } }));
+vi.mock("@trigger.dev/sdk", () => ({ tasks: { batchTrigger: batchTriggerMock } }));
 
 const MINUTE_MS = 60 * 1000;
 
@@ -45,7 +45,11 @@ function staleBy(minutes: number, now: Date = new Date()): Date {
 describe("stale event sweep", () => {
   beforeEach(async () => {
     await cleanupDatabase();
-    triggerMock.mockReset();
+    batchTriggerMock.mockReset().mockResolvedValue({
+      batchId: "batch_sweep_1",
+      publicAccessToken: "token_1",
+      runCount: 1,
+    });
   });
 
   it("enqueues the guardable rows in one statement and leaves the processed one alone", async () => {
@@ -55,15 +59,35 @@ describe("stale event sweep", () => {
     const enqueued = await createEvent("evt_enqueued", "ENQUEUED", staleAt);
     const processed = await createEvent("evt_processed", "PROCESSED", staleAt);
 
-    triggerMock.mockImplementation(
-      async (_taskId: string, payload: { billingEventId: string }) => ({
-        id: `run_${payload.billingEventId}`,
-      }),
-    );
-
     const result = await sweepStaleStripeEvents(now);
 
     expect(result).toEqual({ requeued: 2 });
+    expect(batchTriggerMock).toHaveBeenCalledTimes(1);
+
+    const items = batchTriggerMock.mock.calls[0]?.[1] as Array<{
+      options: { concurrencyKey: string; idempotencyKey: string };
+      payload: { billingEventId: string };
+    }>;
+
+    expect(items).toHaveLength(2);
+    expect(items).toEqual(
+      expect.arrayContaining([
+        {
+          options: {
+            concurrencyKey: "customer:cus_sweep",
+            idempotencyKey: "evt_received:replay:1",
+          },
+          payload: { billingEventId: received },
+        },
+        {
+          options: {
+            concurrencyKey: "customer:cus_sweep",
+            idempotencyKey: "evt_enqueued:replay:1",
+          },
+          payload: { billingEventId: enqueued },
+        },
+      ]),
+    );
 
     const rows = await prisma.billingEvent.findMany({
       select: {
@@ -71,6 +95,7 @@ describe("stale event sweep", () => {
         id: true,
         replayCount: true,
         status: true,
+        triggerBatchId: true,
         triggerRunId: true,
         updatedAt: true,
       },
@@ -83,7 +108,8 @@ describe("stale event sweep", () => {
 
       expect(row?.status).toBe("ENQUEUED");
       expect(row?.replayCount).toBe(1);
-      expect(row?.triggerRunId).toBe(`run_${id}`);
+      expect(row?.triggerBatchId).toBe("batch_sweep_1");
+      expect(row?.triggerRunId).toBeNull();
       expect(row?.updatedAt.getTime()).toBeGreaterThan(staleAt.getTime() + 1000);
     }
 
@@ -91,6 +117,7 @@ describe("stale event sweep", () => {
 
     expect(untouched?.status).toBe("PROCESSED");
     expect(untouched?.replayCount).toBe(0);
+    expect(untouched?.triggerBatchId).toBeNull();
     expect(untouched?.triggerRunId).toBeNull();
     expect(untouched?.updatedAt.getTime()).toBe(staleAt.getTime());
   });
@@ -99,14 +126,14 @@ describe("stale event sweep", () => {
     const received = await createEvent("evt_raced", "RECEIVED", staleBy(60));
 
     // A worker picking the event up between the select and the bookkeeping write.
-    triggerMock.mockImplementation(async (_taskId: string, payload: { billingEventId: string }) => {
+    batchTriggerMock.mockImplementation(async () => {
       await prisma.$executeRaw`
           UPDATE "billing_events"
           SET "status" = 'PROCESSING', "updated_at" = now()
-          WHERE "id" = ${payload.billingEventId}::uuid
+          WHERE "id" = ${received}::uuid
         `;
 
-      return { id: "run_raced" };
+      return { batchId: "batch_raced", publicAccessToken: "token_1", runCount: 1 };
     });
 
     const result = await sweepStaleStripeEvents();
@@ -114,12 +141,13 @@ describe("stale event sweep", () => {
     expect(result).toEqual({ requeued: 0 });
 
     const row = await prisma.billingEvent.findUnique({
-      select: { replayCount: true, status: true, triggerRunId: true },
+      select: { replayCount: true, status: true, triggerBatchId: true, triggerRunId: true },
       where: { id: received },
     });
 
     expect(row?.status).toBe("PROCESSING");
     expect(row?.replayCount).toBe(0);
+    expect(row?.triggerBatchId).toBeNull();
     expect(row?.triggerRunId).toBeNull();
   });
 });
