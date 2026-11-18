@@ -63,10 +63,8 @@ function createFakeDb() {
   const statements: CapturedStatement[] = [];
   let eventCount = 0;
 
-  // Mirrors the single INSERT … ON CONFLICT statement in `prisma/sql/upsertWorkspaceUsage.sql`:
-  // insert clamps at zero, the conflict branch adds the raw delta and clamps the total. The real
-  // semantics are only asserted against a real database (integration suite); here the SQL text is
-  // asserted directly.
+  // Mirrors the single INSERT … ON CONFLICT in `prisma/sql/upsertWorkspaceUsage.sql`: both branches
+  // clamp at zero. The SQL text is asserted here, the semantics in the integration suite.
   const queryRawTyped = vi.fn(
     async (query: { sql: string; values: readonly unknown[] }): Promise<unknown[]> => {
       statements.push(captureStatement(query));

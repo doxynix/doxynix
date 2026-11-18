@@ -195,6 +195,10 @@ export const analysisMapper = {
           right.riskLevel - left.riskLevel || left.filePath.localeCompare(right.filePath),
       );
 
+    const cacheKey = [owner, name, cacheScope.analysisId, cacheScope.version]
+      .map((part) => part ?? "unknown")
+      .join("-");
+
     return unstable_cache(
       async () =>
         Promise.all(
@@ -211,9 +215,7 @@ export const analysisMapper = {
             };
           }),
         ),
-      [
-        `finding-html-${owner ?? "unknown"}-${name ?? "unknown"}-${cacheScope.analysisId}-${cacheScope.version}`,
-      ],
+      [`finding-html-${cacheKey}`],
       {
         revalidate: 3600,
         tags: ["findings", owner ?? "unknown", name ?? "unknown", cacheScope.analysisId],
