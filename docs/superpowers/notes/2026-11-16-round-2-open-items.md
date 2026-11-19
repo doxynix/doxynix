@@ -16,10 +16,10 @@ missing fix in this branch.
 | ID | State | Record |
 | --- | --- | --- |
 | R1 | open | Bookkeeping writes are no longer audited and the Ably publish coalesces per request, but every write left in `saveResults` is a semantic row (analysis, user, five documents, notification). "Not 8 rows" needs `audit_events` (`audit-log-architecture.md` step 2). |
-| R10 | closed | `82dec26b` — completion invalidates `getLatest` + `getHistory`; staging/fixes publish `stagingUpdated` → `getStagedFiles`; onboarding follows `userUpdated`; `getVersionRef` refreshes on the FAILED path only (it labels a pinned old version). The DONE/FAILED progress path still refreshes the mounted widget (dashboard stats or the repo cards) — that is the completion contract, not a fan-out. |
-| R12 | closed | `8c1ae61c`, `0c9045a0` — one `tasks.batchTrigger` for the sweep and one typed-SQL update, with `billing_events.trigger_batch_id` replacing the per-run id the batch API does not return. |
-| R23 | closed | `989fd1af`, `d302fb0a` — the worker attaches `jobId` with one guarded `updateMany` (`status = PENDING`) instead of the request path writing it after `tasks.trigger`; a row cancelled before the worker starts is left untouched and the run returns early. The cache probe stays separate because its key is the branch-head SHA. |
-| R25 | closed | `35eb6a90` — the sign-in log moved into `session.create.before`, which already holds the profile (`createdAt`, `role` joined the select); `session.create.after` is gone. |
+| R10 | closed | `5ef3ef7f` — completion invalidates `getLatest` + `getHistory`; staging/fixes publish `stagingUpdated` → `getStagedFiles`; onboarding follows `userUpdated`; `getVersionRef` refreshes on the FAILED path only (it labels a pinned old version). The DONE/FAILED progress path still refreshes the mounted widget (dashboard stats or the repo cards) — that is the completion contract, not a fan-out. |
+| R12 | closed | `f7d6d952`, `3e40732d` — one `tasks.batchTrigger` for the sweep and one typed-SQL update, with `billing_events.trigger_batch_id` replacing the per-run id the batch API does not return. |
+| R23 | closed | `9073bf9b`, `9b8bc3a5` — the worker attaches `jobId` with one guarded `updateMany` (`status = PENDING`) instead of the request path writing it after `tasks.trigger`; a row cancelled before the worker starts is left untouched and the run returns early. The cache probe stays separate because its key is the branch-head SHA. |
+| R25 | closed | `16e71fbb` — the sign-in log moved into `session.create.before`, which already holds the profile (`createdAt`, `role` joined the select); `session.create.after` is gone. |
 
 R1's verification line still fails by design, so the item stays unticked in the plan.
 
@@ -62,15 +62,15 @@ R1's verification line still fails by design, so the item stays unticked in the 
 ## 3. Follow-ups from this doc that are now done
 
 - **`capped_hint` copy** — “Narrow the results to see the rest.” in all 12 locales, so the message is
-  true on the PR comment and fix cards, which have no date filter (`e8302e17`).
+  true on the PR comment and fix cards, which have no date filter (`eee6ff67`).
 - **Dead exports** — `RepoRefRecord` / `RepoRef` removed; `fixesMapper.toPublic` and
   `GeneratedFixDTO` turned out to have a live caller (`fixes.service.listFixes`) and stay.
 - **Unreachable branch** — `docs.getDocumentContent` no longer re-checks a missing analysis:
-  `analysisRepo.getRepoRef` returns `analysisId` or throws first (`bf7aab05`).
+  `analysisRepo.getRepoRef` returns `analysisId` or throws first (`9517cfd2`).
 - **`billing.events` chunking** — moot after R12: the sweep now makes one `batchTrigger` call and
   the test asserts the item list.
 - **Comment and line-length minors** — the three-line comments are two lines and the 114-column
-  cache key is built from a list (`3e69ffeb`).
+  cache key is built from a list (`00b4e74b`).
 - **`check:index-parity`** — run against a fresh database built from all 106 migrations:
   154 indexes on both sides, sets and definitions identical.
 
