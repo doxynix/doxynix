@@ -15,10 +15,10 @@ const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 
 function freshToken() {
   return {
-    accessToken: "gho_valid",
+    accessToken: "access-token-value",
     accessTokenExpiresAt: new Date(Date.now() + 60 * 60 * 1000),
     id: "account-1",
-    refreshToken: "ghr_valid",
+    refreshToken: "refresh-token-value",
   };
 }
 
@@ -44,8 +44,8 @@ describe("githubTokenService.getValidToken", () => {
       ]),
     );
 
-    expect(first).toBe("gho_valid");
-    expect(second).toBe("gho_valid");
+    expect(first).toBe("access-token-value");
+    expect(second).toBe("access-token-value");
     expect(findFirst).toHaveBeenCalledTimes(1);
   });
 
