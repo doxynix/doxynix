@@ -132,13 +132,14 @@ describe("prImpactService.listByRepository", () => {
   it("returns an empty list for a repository without analyses", async () => {
     const { db, fixture } = await createRepoFixture("OwnerEmpty");
 
-    // Shape matters as much as the values: an empty repo still reports a closed cursor, so the
-    // client never has to distinguish "no rows" from "no more pages".
+    // Shape matters as much as the values: an empty repo still reports a total and a closed
+    // cursor, so the client never has to distinguish "no rows" from "no more pages".
     await expect(
       prImpactService.listByRepository(db, fixture.repoId, fixture.workspaceId, { limit: 50 }),
     ).resolves.toEqual({
       items: [],
       meta: { hasNextPage: false, nextCursor: undefined },
+      total: 0,
     });
   });
 
@@ -191,7 +192,7 @@ describe("prImpactService.listByRepository", () => {
     await createPullRequestAnalysis(db, fixture, { prNumber: 1 });
     await createPullRequestAnalysis(db, fixture, { prNumber: 2 });
 
-    const { items, meta } = await prImpactService.listByRepository(
+    const { items, meta, total } = await prImpactService.listByRepository(
       db,
       fixture.repoId,
       fixture.workspaceId,
@@ -203,6 +204,7 @@ describe("prImpactService.listByRepository", () => {
     ]);
     expect(new Set(items.map((item) => item.id)).size).toBe(2);
     // Two rows on a 50-row page, so the list must not claim there is another page.
+    expect(total).toBe(2);
     expect(meta).toEqual({ hasNextPage: false, nextCursor: undefined });
   });
 

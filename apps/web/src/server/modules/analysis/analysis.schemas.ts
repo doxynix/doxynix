@@ -240,6 +240,7 @@ export const PullListSummarySchema = z.object({
 export const PullListOutputSchema = z.object({
   items: z.array(PullListSummarySchema),
   meta: CursorMetaSchema,
+  total: z.number().int().nullable(),
 });
 
 export const PRCommentSchema = z.object({

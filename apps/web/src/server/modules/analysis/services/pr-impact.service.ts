@@ -137,22 +137,28 @@ export const prImpactService = {
     workspaceId: string,
     input: { cursor?: null | string; limit: number },
   ) {
-    const rows = await db.pullRequestAnalysis.findMany({
-      ...keysetArgs(input.cursor, input.limit),
-      orderBy: ORDER_CREATED_AT_DESC,
-      select: {
-        _count: {
-          select: { comments: true },
+    const [rows, total] = await Promise.all([
+      db.pullRequestAnalysis.findMany({
+        ...keysetArgs(input.cursor, input.limit),
+        orderBy: ORDER_CREATED_AT_DESC,
+        select: {
+          _count: {
+            select: { comments: true },
+          },
+          createdAt: true,
+          headSha: true,
+          id: true,
+          prNumber: true,
+          riskScore: true,
+          status: true,
         },
-        createdAt: true,
-        headSha: true,
-        id: true,
-        prNumber: true,
-        riskScore: true,
-        status: true,
-      },
-      where: { repo: { id: repoId, workspaceId } },
-    });
+        where: { repo: { id: repoId, workspaceId } },
+      }),
+      // Only the first page renders the total, so a later page must not pay for a COUNT(*).
+      input.cursor == null
+        ? db.pullRequestAnalysis.count({ where: { repo: { id: repoId, workspaceId } } })
+        : null,
+    ]);
 
     const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, input.limit);
 
@@ -167,6 +173,7 @@ export const prImpactService = {
         status: item.status,
       })),
       meta: { hasNextPage, nextCursor },
+      total,
     };
   },
 
