@@ -6,10 +6,10 @@ Live checklist for the second static pass over `apps/web`. Companion to
 [`db-index-audit.md`](../../db/db-index-audit.md) (what the shapes cost) and
 [`db-ui-map.md`](../../db/db-ui-map.md) (where latency lands).
 
-**Closed: 31 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
+**Closed: 35 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
 PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3, R6, R7, R9, R11, R13, R15, R16, R17, R18,
 R19, R20, R21, R22, R26, R28, R29, R30, R31, R32, R34, K1 and K2 closed 2026-11-15 (R24 closed as
-dropped). Five items are partial: R1, R10, R12, R23, R25 (see below).
+dropped). R10, R12, R23 and R25 closed 2026-11-18; R1 is the only partial item left (see below).
 
 ## What this round covers that round 1 did not
 
@@ -72,21 +72,15 @@ reviewed and is correct.
 | correctness (adjacent) | 2 | K1–K2 |
 | verified clean (do not re-report) | 11 | FP1–FP11 |
 
-### Partial items after the 2026-11-15 pass
+### Partial item after the 2026-11-18 pass
 
-These five stay unticked because their verification lines still fail; each has a progress note in
-the closing log.
+One item stays unticked because its verification line still fails; it has a progress note in the
+closing log.
 
 - **R1** — bookkeeping writes are skipped and the audit Ably publish is coalesced per request, but
   the "not 8 rows per analysis" target needs `audit-log-architecture.md` step 2 (`audit_events`).
-- **R10** — the per-milestone onboarding refetch and the duplicate `DONE` invalidations are gone;
-  a completion still triggers the four `analysisUpdated` invalidations (staging needs them).
-- **R12** — the sequential loop is gone (one trigger wave + one typed-SQL update), but the SDK's
-  `batchTrigger` exposes no per-run ids, so the sweep still makes one HTTP call per event.
-- **R23** — `assertRepoAccess` is narrowed; merging the cache probe and removing the trailing
-  `jobId` update need an API change outside this plan.
-- **R25** — both before-hooks select narrow fields; the `session.create.after` read remains
-  because Better Auth has no before→after channel.
+  Every audited write in `saveResults` is a semantic row (analysis, user, five documents,
+  notification), so the remaining gap is the event-sourced audit layer, not a missing exclusion.
 
 ---
 
@@ -135,8 +129,10 @@ the closing log.
     analysis; Ably publish count per analysis run drops accordingly.
   > Progress 2026-11-15: `ApiKey.lastUsed` and `Notification.isRead` writes are no longer audited,
   > and the Ably publish is coalesced to one per request. `Analysis.progress` stays as a guard only —
-  > every write carrying it also carries `logs`/`message`/`status`. The "not 8 rows" target still
-  > needs `audit-log-architecture.md` step 2.
+  > every write carrying it also carries `logs`/`message`/`status`. 2026-11-18: every remaining
+  > audited write in `saveResults` is a distinct semantic row (analysis, user, five documents,
+  > notification), so the "not 8 rows" target is the `audit_events` layer from step 2, not another
+  > exclusion. Still open.
 
 - [x] **R2 · `repo.getByName` / `getByOwner` read `resultJson`, `metricsJson` and `logs` to render a header**
   — `src/server/modules/repos/repo.service.ts:248-276`
@@ -314,10 +310,16 @@ the closing log.
   - **Effort:** S · **Verify:** statement count per AI call drops by one; the clamp still holds
     after a `releaseUsage` that would go negative (`usage.test.ts`).
 
-- [ ] **R10 · One realtime event fans out into 1–5 tRPC re-fetches, including the heaviest aggregate**
+- [x] **R10 · One realtime event fans out into 1–5 tRPC re-fetches, including the heaviest aggregate**
   — `src/app/_components/realtime/handlers/analysis.tsx:18-48`
   (the provider was split into `src/app/_components/realtime/` in `#2386`; this is the analysis
   handler it dispatches to)
+  > Closed 2026-11-18 (`82dec26b`): staging and fixes publish `stagingUpdated`, so completion
+  > invalidates `getLatest` + `getHistory` only; the per-milestone onboarding refetch is gone and
+  > onboarding follows `userUpdated`. `getVersionRef` labels a pinned old version, so it is no
+  > longer refreshed on completion (the FAILED path still refreshes it). The DONE/FAILED progress
+  > path still refreshes the widget the completion changed (dashboard stats or the repo cards,
+  > whichever is mounted) — that refresh is the contract, not a fan-out.
   - **What:** `analysisUpdated` → invalidate `getLatest`, `getHistory` (500 rows + `count`),
     `getStagedFiles`, `getByRepository` (no `take`), `getOnboardingState`. `analysisProgress` →
     invalidate `getOnboardingState` on **every** milestone (≈6 per run) and, on `DONE`/`FAILED`,
@@ -356,8 +358,11 @@ the closing log.
   - **Effort:** XS (schema + migration) · **Verify:** `EXPLAIN` uses the new index for both
     queries; `check:index-parity` stays in sync.
 
-- [ ] **R12 · Stale-event sweep triggers Trigger.dev and updates the row inside a sequential loop**
+- [x] **R12 · Stale-event sweep triggers Trigger.dev and updates the row inside a sequential loop**
   — `src/server/modules/billing/billing.events.ts:309-368`
+  > Closed 2026-11-18 (`8c1ae61c`, `0c9045a0`): one `tasks.batchTrigger` for the whole sweep and
+  > one typed-SQL update. The batch returns no per-run ids, so the rows carry
+  > `billing_events.trigger_batch_id` (and a null `trigger_run_id`) instead.
   - **What:** `for (const event of stale)` → `await tasks.trigger(...)` + `await
     prisma.billingEvent.update(...)`, up to `SWEEP_BATCH_SIZE = 50`.
   - **Why it costs:** 50 sequential HTTP round trips to Trigger.dev plus 50 sequential UPDATEs,
@@ -534,10 +539,15 @@ the closing log.
     `Promise.all` (though that does not remove the second fetch).
   - **Effort:** S · **Verify:** query count for the fallback path = 2 (PR analysis + repo), not 3.
 
-- [ ] **R23 · `analysis.analyze` performs 9–10 operations before the client gets an answer**
+- [x] **R23 · `analysis.analyze` performs 9–10 operations before the client gets an answer**
   — `src/server/modules/analysis/services/analysis-lifecycle.service.ts:92-201`
-  > Progress 2026-11-15: `assertRepoAccess` narrowed; the cache-probe merge and the trailing
-  > `jobId` update are not implemented (see report).
+  > Closed 2026-11-18 (`989fd1af`, `d302fb0a`): the trailing `jobId` write moved into the worker
+  > (`analysisLifecycleService.attachRunId`, guarded by `status = PENDING`), so the request path is
+  > one operation shorter and the run is still identified before the first milestone; a row
+  > cancelled in the gap is left untouched and the run returns early. The cache probe cannot merge
+  > with the repo read — its key is the branch-head SHA, which only exists after the GitHub call.
+  > Seven statements remain, six of them inside the advisory-lock transaction; the "≤ 6" target
+  > needs the quota check folded into the usage SQL (round 3 candidate).
   - **What:** `assertRepoAccess` (full repo row) → GitHub branch-head call → `analysis.findFirst`
     (cache probe) → transaction (advisory lock, entitlement read (2 queries), usage event,
     upsert + clamp UPDATE) → `analysis.create` → `tasks.trigger` → `analysis.update(jobId)`.
@@ -559,7 +569,7 @@ the closing log.
     without `select`, so every page row carries its `payload` JSON (`payloadHtml` re-reads it
     separately anyway, `:99-110`). **Fix:** `select` the summary columns. **Effort:** XS.
 
-- [ ] **R25 · Auth hooks run sequential full-row reads**
+- [x] **R25 · Auth hooks run sequential full-row reads**
   — `src/server/core/auth/index.ts:187-215, 247-292` — `account.create.before` does
     `user.findUnique` (all columns, so the field-encryption extension decrypts what it reads)
     before possibly updating; `session.create.before` does `user.findUnique` →
@@ -567,6 +577,9 @@ the closing log.
     `createdAt, id, role` (`:219-223`) but still runs. Sign-in only, so frequency is low, but three
     round trips on the login path are avoidable. **Fix:** `select` narrow fields; merge the
     after-hook read into the before-hook result. **Effort:** XS.
+  > Closed 2026-11-18 (`35eb6a90`): the sign-in log moved into `session.create.before`, which already
+  > holds the row (`createdAt` and `role` joined `AUTH_PROFILE_SELECT`), and the after-hook was
+  > deleted. The login path is one user read and one conditional account read.
 
 - [x] **R26 · `apikey.list` returns every key of the workspace, unpaginated**
   — `src/server/modules/api-keys/api-key.service.ts:90-124` — `findMany` with no `take`; keys are
@@ -686,7 +699,9 @@ These were checked and found correct. Listed so a third round does not repeat th
 | R7 | 2026-11-15 | `39d08034` | `getSessionHistory` takes the newest 200 rows (desc → reversed) with a four-field `select`; `listSessions` takes 100 with a `select` that keeps every output field. Follow-up: the ad-hoc `take` constants became cursor pagination through the shared `pagination.ts` primitives (`keysetArgs` / `splitKeysetPage` / `orderWithTiebreak`) — newest page plus `nextCursor`; the UI still renders the first page only. The array → `{ items, meta }` output is a breaking wire change for an older published `dxnx` (release-please ships CLI and server together). `listSessions` keysets on `updatedAt`, which moves on rename/append, so a multi-page walk can duplicate or skip before a "load older" UI ships. B2d flipped that last caveat: the web agent now pages history through `firstItemIndex`/`startReached` and the session list through an intersection sentinel, so a multi-page walk is live and the rename/append caveat now applies to it. |
 | R8 | 2026-11-01 | `311bd6a7` | `analysisRepo.getByRepoAndPRNumber` selects `id` instead of `include: { comments, generatedFixes }`; its only caller (the PR webhook) reads `id`. |
 | R9 | 2026-11-15 | `5420536e` | `bumpUsage` is one `INSERT … ON CONFLICT` statement per event; both paths clamp, and the conflict branch binds the raw delta (`+ $6::int`), so a negative release is not swallowed by `EXCLUDED`. `usage.test.ts` asserts the SQL text and params; `entitlements.test.ts` asserts the 900 → 0 clamp against a real database. |
+| R10 | 2026-11-18 | `82dec26b` | `analysisUpdated` now invalidates `getLatest` + `getHistory` only; staging and fixes publish `stagingUpdated` (→ `getStagedFiles`), onboarding follows `userUpdated`, and `getVersionRef` is refreshed only on the FAILED progress path. |
 | R11 | 2026-11-15 | `4eaf34d2` | `@@index([repoId, commitSha])` on `analyses`, plus seven keyset indexes — `analyses` and `pull_request_analyses` `(repo_id, created_at DESC, id DESC)`, `chat_sessions` `(user_id, repo_id, updated_at DESC, id DESC)`, `chat_messages` `(session_id, created_at DESC, id DESC)`, `sessions` `(user_id, created_at DESC, id DESC)`, `api_keys` `(workspace_id, created_at DESC, id DESC)`, `workspace_members` `(workspace_id, created_at, id)` — in `20261115120000_keyset_indexes`. `EXPLAIN` was not run (the round's research covers it); `pg_indexes` on the local `dxnx_web` lists all eight and `migrate diff` from the schema is empty. |
+| R12 | 2026-11-18 | `8c1ae61c`, `0c9045a0` | One `tasks.batchTrigger` for the whole 50-event sweep and one typed-SQL update; rows store `trigger_batch_id` (new column + index) with a null `trigger_run_id`, because the batch API returns no per-run ids. A rejected batch retries on the next 15-minute tick instead of partially draining. |
 | R18 | 2026-11-15 | `a90fdb07` | `getHistory` and `listByRepository` return cursor pages (`{ items, meta, total }`, `take: limit + 1` + `splitKeysetPage` over `ORDER_CREATED_AT_DESC`, `limit` default 50) instead of 500-row reads, and the `capped` flag is gone: the version selector appends pages from a "More" item, the PR list from an intersection sentinel, and both keep the `count` as `total`. `getByRepoId` (fixes) is paginated too (`baaa229e`): the 200-row cap is gone; the CLI walk is paged with a 10-page safety bound. |
 | R19 | 2026-11-15 | `c004fc44` | `getRepoSnapshot`, `getRepoSnapshotWithDocuments` and `getAnalysisPayloadForRepo` resolve the requested `aid` inside the single `repo.findUnique` (`analyses: { orderBy: createdAt desc, take: 1, where: { id, status: "DONE" } }`), so an `aid`-scoped read is one operation. A missing or foreign `aid` still throws `ANALYSIS_VERSION_NOT_FOUND`; an empty latest still throws `ANALYSIS_NOT_COMPLETED`. `getRepoDocsPayload` keeps its second lookup (out of this batch); B5e deleted `getRepoSnapshotWithDocuments` when the documents read left the repo select (`c0517117`). |
 | R21 | 2026-11-15 | `39d08034` | `logic/project-result-overview.ts` replaces `JSON.stringify(resultJson)` in `analyze-pr.task.ts` with a bounded projection capped at 4096 chars. |
@@ -703,16 +718,18 @@ These were checked and found correct. Listed so a third round does not repeat th
 | R17 | 2026-11-15 | `24c60499` | The run wrapper only sets `locals`; `$connect`/`$disconnect` are gone, and `onWait`/`onResume` remain the only release point. `pg_stat_activity` was not measured (no live worker). |
 | R20 | 2026-11-15 | `2492848a` | Independent reads in `disconnectAccount`, `pinAuditToDocs`, `applyFix` and `openPullRequest` run in `Promise.all`. |
 | R22 | 2026-11-15 | `363b82a0` | One heavy repo snapshot; a head-SHA miss costs one narrow `analysis.findFirst` instead of a second snapshot. Works for a head SHA at any depth. |
+| R23 | 2026-11-18 | `989fd1af` | `analysis.analyze` no longer writes `jobId` after `tasks.trigger`; the worker sets it with one guarded `updateMany` (`status = PENDING`) before the first milestone, which also stops a cancelled run. The cache probe stays separate — its key is the branch-head SHA from GitHub. Seven statements remain; ≤6 needs the quota check inside the usage SQL. |
 | R24 | 2026-11-15 | dropped | `auditMapper.toDto` derives `targetName`, `details` and `rawPayload` from `payload`, and the admin table renders the first two; a summary-only select would blank the Target column. Needs a denormalized `target` column (migration) or dropping the column. |
+| R25 | 2026-11-18 | `35eb6a90` | The sign-in log moved into `session.create.before`, which already reads the profile; `createdAt`/`role` joined `AUTH_PROFILE_SELECT` and `session.create.after` was deleted, so the login path makes one user read instead of two. |
 | R28 | 2026-11-15 | `d7c7cf59` | The new-chat flag is carried from the existing session probe into `onEnd`; the title re-read is gone. |
 | R30 | 2026-11-15 | `a65c18e3` | The issue-comment and review-comment handlers select only the four columns their replies read. |
 | R31 | 2026-11-15 | `0f8a685d` | `createFix` validates the PR analysis alongside the repo read in `Promise.all`. |
-| R32 | 2026-11-15 | `bf2f3d7d`, `664c2016` | The completion burst (`userUpdated`/`notification`/`analysisUpdated`) is one Ably batch request with a sequential fallback on a non-2xx response; `getStagedFiles` invalidation stays because staging/fix flows publish the same event. |
+| R32 | 2026-11-15 | `bf2f3d7d`, `664c2016` | The completion burst (`userUpdated`/`notification`/`analysisUpdated`) is one Ably batch request with a sequential fallback on a non-2xx response. The staging/fix publishes were split onto `stagingUpdated` by R10, so this batch no longer carries a `getStagedFiles` invalidation. |
 | K1 | 2026-11-15 | `5cb192d0` | Both SQL files filter `repos.workspace_id = $1::uuid` (the parameter and the `user_repos` CTE are renamed `workspace_id` / `workspace_repos`), `getDashboardStats`/`getTrends` take a `workspaceId`, and `analytics.*` moved from `protectedProcedure` to `workspaceProcedure`. The dashboard and the repository list now count the same set for an invited member; `dashboard-stats` and `analytics-trends` each seed a second member's repositories into one workspace. |
 
 The first six shipped in PR #2356 and are on `main`; the rest landed on
 `perf/dxnx-310-db-query-review-round-2` (draft PR #2412) and the "working tree" marker from the
-original log is now historical. R1, R10, R12, R23 and R25 remain partial, and the list-read /
+original log is now historical. R1 remains partial (event-sourced audit layer); the list-read /
 date-filter audits below stay outside the 36-item counter.
 
 ## Pagination completeness (2026-11-15)
@@ -729,7 +746,8 @@ Closed after the 36-item counter above; these are follow-ups from the list-read 
   past `MAX_PAGE`; a single hint states the reachable row count and points at the date/search
   filters, which is how the older rows stay reachable. (`c65b533b`)
 - Keyset lists have supporting composite indexes (B5i) plus the fixes-list index; `COUNT(*)` runs
-  only on the first page of history and the PR list.
+  only on the first page of the analysis history. The PR list does not count at all: its `total`
+  had no consumer and was removed (`36ad9162`).
 
 ## Usage metering accuracy (2026-11-15)
 
@@ -828,8 +846,9 @@ they are one screen each and close in batches, so they stay out of the 36-item c
   on `sessions`, `(workspace_id, created_at DESC, id DESC)` on `api_keys`, and
   `(workspace_id, created_at, id)` on `workspace_members` — all in `20261115120000_keyset_indexes`.
   `4eaf34d2`
-- [x] **B5i · first-page total** — `getHistory` and `listByRepository` count only when `cursor` is
-  null and answer `total: null` on later pages; the CLI folds the walk through
-  `summarizeCursorPages` (`@doxynix/shared`) and keeps the first non-null total, while the version
-  selector still reads page one. `2c39e6d3`
+- [x] **B5i · first-page total** — `getHistory` counts only when `cursor` is null and answers
+  `total: null` on later pages; the CLI folds the walk through `summarizeCursorPages`
+  (`@doxynix/shared`) and keeps the first non-null total, while the version selector still reads
+  page one. `2c39e6d3`. `listByRepository` had no `total` consumer, so its count and field were
+  removed (`36ad9162`).
 

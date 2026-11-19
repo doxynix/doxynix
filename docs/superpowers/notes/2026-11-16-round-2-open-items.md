@@ -1,23 +1,27 @@
-# Round 2 — open items, decisions and deferred work (2026-11-16)
+# Round 2 — decisions and closure record (2026-11-16, closed 2026-11-18)
 
-Companion to [`db-query-review-2026-11.md`](../plans/db-query-review-2026-11.md). Written so the
-branch can be reviewed and merged without reading the per-batch reports (they are git-ignored under
-`.superpowers/sdd/`).
+Companion to [`db-query-review-2026-11.md`](../plans/db-query-review-2026-11.md). The per-batch
+reports that this file summarises are git-ignored under `.superpowers/sdd/`, so everything a
+reviewer needs is recorded here.
 
-Scope: everything left open after the round-2 branch
-`perf/dxnx-310-db-query-review-round-2` (draft PR #2412).
+Scope: the round-2 branch `perf/dxnx-310-db-query-review-round-2` (draft PR #2412).
 
 ---
 
-## 1. Plan items left partial (5 of 36)
+## 1. Plan items — final state
 
-| ID | What remains | Why it is not closed |
+**35 / 36 closed.** Only R1 stays open, and its remainder is a separate architecture step, not a
+missing fix in this branch.
+
+| ID | State | Record |
 | --- | --- | --- |
-| R1 | “not 8 audit rows per analysis” | Needs `audit_events` (`audit-log-architecture.md` step 2). The interceptor already skips bookkeeping writes and coalesces the Ably publish. |
-| R10 | four invalidations on completion | Staging, onboarding, latest and history each have a consumer; the per-milestone burst is gone. A lower number needs an event-contract change. |
-| R12 | one HTTP trigger call per event | SDK 4.8.5 `batchTrigger` exposes no per-run ids; `trigger_run_id` is used for diagnostics/cancel. The DB side is one statement, triggers are chunked 10 at a time. |
-| R23 | merge the cache probe; drop the trailing `jobId` update | The SHA only exists after the GitHub call, and the update needs a create/trigger ordering change (API decision). `assertRepoAccess` is already narrowed. |
-| R25 | `session.create.after` user read | Better Auth has no before→after channel; merging needs a module-level side map. The two before-hooks are narrowed. |
+| R1 | open | Bookkeeping writes are no longer audited and the Ably publish coalesces per request, but every write left in `saveResults` is a semantic row (analysis, user, five documents, notification). "Not 8 rows" needs `audit_events` (`audit-log-architecture.md` step 2). |
+| R10 | closed | `82dec26b` — completion invalidates `getLatest` + `getHistory`; staging/fixes publish `stagingUpdated` → `getStagedFiles`; onboarding follows `userUpdated`; `getVersionRef` refreshes on the FAILED path only (it labels a pinned old version). The DONE/FAILED progress path still refreshes the mounted widget (dashboard stats or the repo cards) — that is the completion contract, not a fan-out. |
+| R12 | closed | `8c1ae61c`, `0c9045a0` — one `tasks.batchTrigger` for the sweep and one typed-SQL update, with `billing_events.trigger_batch_id` replacing the per-run id the batch API does not return. |
+| R23 | closed | `989fd1af`, `d302fb0a` — the worker attaches `jobId` with one guarded `updateMany` (`status = PENDING`) instead of the request path writing it after `tasks.trigger`; a row cancelled before the worker starts is left untouched and the run returns early. The cache probe stays separate because its key is the branch-head SHA. |
+| R25 | closed | `35eb6a90` — the sign-in log moved into `session.create.before`, which already holds the profile (`createdAt`, `role` joined the select); `session.create.after` is gone. |
+
+R1's verification line still fails by design, so the item stays unticked in the plan.
 
 ## 2. Decisions taken during the round (do not “fix” them back)
 
@@ -27,8 +31,10 @@ Scope: everything left open after the round-2 branch
   small tables (repo list, banned emails, notifications page) with date/search for reachability; a
   cap + visible total only for child lists where a bulk action needs the whole set. The UI never
   offers a page past `MAX_PAGE`.
-- **Comments/fixes are cursor-paginated; `fixAll` is server-side** (`analysis.fixAllComments`), so it
-  no longer depends on the loaded page.
+- **`total` is a contract field only where it is rendered.** `getHistory` keeps it for the version
+  selector and the CLI; `listByRepository` lost both the field and its `COUNT(*)` (`36ad9162`).
+- **Comments/fixes are cursor-paginated; `fixAll` is server-side** (`analysis.fixAllComments`), so
+  it no longer depends on the loaded page.
 - **Cents are rounded, not ceil** in `costCentsFor`; sub-cent calls record `0`. The rollup is a
   quota/cost estimate, not an invoice.
 - **Reservations cap output at 8 192 tokens** (`maxOutputTokens` remains the model limit).
@@ -37,75 +43,74 @@ Scope: everything left open after the round-2 branch
   serializable structure in Redis would be a separate design.
 - **`onWait` still disconnects the shared pool**, `onResume` reconnects. Removing that would let
   parked runs hold pool connections; it stays until per-run clients exist.
-- **Root `export *` is allowed; nested barrels are not.** `packages/shared/src/utils/index.ts` no
-  longer re-exports siblings.
-- **Server mappers are `*.mapper.ts`** (`usage.mapper.ts`, `analysis.mapper.ts`); pure helpers are
-  kebab-case without `-utils`.
-- **Transaction mechanics live in `core/db.ts`**: `withTransaction` (root client or an
-  already-open transaction) and `withAdvisoryLock` (transaction-scoped lock via typed SQL). The
-  serializable retry policy stays in `users/user.service.ts` because it carries `TRPCError`/retry
-  semantics, not database ones. Plain `prisma.$transaction([...])` array calls and the
-  `plan-changes` try-lock stay as they are.
+- **Root `export *` is allowed; nested barrels are not.**
+- **Server mappers are `*.mapper.ts`**; pure helpers are kebab-case without `-utils`.
+- **Transaction mechanics live in `core/db.ts`**: `withTransaction` (root client or an open
+  transaction) and `withAdvisoryLock` (transaction-scoped lock via typed SQL). The serializable
+  retry policy stays in `users/user.service.ts` because it carries `TRPCError`/retry semantics.
+  Array-form `prisma.$transaction([...])`, the auth adapter and the `plan-changes` try-lock are
+  deliberately left alone.
+- **Files stay cohesive instead of hitting a line count.** `billing.reconciliation.ts` (a state
+  machine whose functions share invariants), `analysis.repository.ts` (one data-access surface for
+  the slice), `billing.events.ts` and `api-key.service.test.ts` are long because their parts share
+  context; splitting them by line count would spread invariants across files. A split is only
+  justified when a real seam appears (as with `usage.mapper.ts` and `analysis.mapper.ts`).
 - **Legacy comments on old rows render empty** instead of being reconstructed from
   `pull_request_comments` — accepted owner trade-off.
 
-## 3. Deferred refactors
+## 3. Follow-ups from this doc that are now done
 
-- **File size** (all pre-existing breaches, worsened by the round): `billing.reconciliation.ts`
-  ~760 lines, `analysis.repository.ts` ~715, `billing.events.ts` ~419,
-  `api-key.service.test.ts` > 500. Split in a separate refactor PR, not mixed with behaviour changes.
-- **`fixesMapper.toPublic` / `GeneratedFixDTO`** have no production caller after the cursor move
-  (the router maps rows itself). Remove with the next dead-code pass (`knip` is non-gating).
-- **`RepoRefRecord`/`RepoRef`** may still be exported without an importer.
-- **`docs.service.ts` `ANALYSIS_NOT_FOUND`** branch is unreachable after `getRepoRef` (it throws
-  earlier). Remove or keep the response contract deliberately.
-- **`billing.reconciliation` customer miss-fallback is dead** after negative caching; the map always
-  seeds every page customer. Kept as a guard for future callers.
-- **`billing.events` chunking is not asserted** (only the total call count); a mutation that removes
-  the chunk loop would still pass.
-- **`usage.ts` still has three similar event-create payloads** (`ANALYSIS`, `ANALYSIS_RELEASE`,
-  `CACHE_HIT`). Parameterising them would make the money path less explicit; jscpd records 2 small
-  clones.
+- **`listByRepository` total** — the field was unused by the UI and the CLI; the query, the schema
+  field and the first-page `COUNT(*)` are gone (`36ad9162`).
+- **`capped_hint` copy** — “Narrow the results to see the rest.” in all 12 locales, so the message is
+  true on the PR comment and fix cards, which have no date filter (`e8302e17`).
+- **Dead exports** — `RepoRefRecord` / `RepoRef` removed; `fixesMapper.toPublic` and
+  `GeneratedFixDTO` turned out to have a live caller (`fixes.service.listFixes`) and stay.
+- **Unreachable branch** — `docs.getDocumentContent` no longer re-checks a missing analysis:
+  `analysisRepo.getRepoRef` returns `analysisId` or throws first (`bf7aab05`).
+- **`billing.events` chunking** — moot after R12: the sweep now makes one `batchTrigger` call and
+  the test asserts the item list.
+- **Comment and line-length minors** — the three-line comments are two lines and the 114-column
+  cache key is built from a list (`3e69ffeb`).
+- **`check:index-parity`** — run against a fresh database built from all 106 migrations:
+  154 indexes on both sides, sets and definitions identical.
 
-## 4. Parked minor findings (accepted, not fixed)
+## 4. Accepted as they are (deliberate, not deferred)
 
-- CLI cursor walks stop after **10 pages** (`collectCursorPages`): 1 000 rows per list. Raising it is
-  a one-argument change; the bound is documented in the plans.
-- `agent.tools.listApiKeys` pages active + archived up to the same 10-page bound; a workspace with
-  > 1 000 keys is not fully visible to the agent tool.
-- `capped_hint` copy says “narrow filters or pick a date range” on the PR comment/fix cards, which
-  have no date filter (no new i18n copy was allowed).
-- `RepoPullsList` does not render `total`; the field stays in the wire contract for the CLI.
-- `clampPage` / `clampIntegerParam` keep their names while delegating to `es-toolkit` `clamp`;
-  inlining would touch ~10 services and 3 test suites.
-- `session-pages.test.ts` was removed with the helper; dedupe is now `uniqBy` from `es-toolkit`.
-- `analysis.mapper.ts` has one ~114-column line (no max-len rule).
-- `usage.test.ts` and `audit-filters.test.ts` have a 3-line comment each (AGENTS caps at 2).
+- **CLI cursor walks stop after 10 pages** (`MAX_CURSOR_PAGES`), and the agent's `listApiKeys`
+  shares that bound (1 000 rows per list). The bound is a parameter; it is deliberate protection
+  against an unbounded walk on a pathological data set.
+- **`clampPage` / `clampIntegerParam` keep their names** while delegating to `es-toolkit` `clamp`:
+  they carry the domain rule (`MAX_PAGE`, NaN/float rejection) that the call sites would otherwise
+  repeat.
+- **The three `usageEvent.create` payloads stay explicit.** They differ in tokens, kind and cost,
+  and this is the money path; a parameterised builder was tried and made the differences harder to
+  see (jscpd records two small clones).
+- **`customerFor`'s query fallback stays** in the reconciliation page context. Every current caller
+  is seeded by the prefetch, so it does not run today, but returning “unowned” on a cache miss would
+  be a wrong repair rather than a slow one.
+- **Sub-cent calls record `0` cents.** Correct for quota and estimation; if the rollup ever becomes
+  invoice-grade, the precision decision (round vs ceil vs micro-cents) is a billing change, not a
+  database one.
 
-## 5. Not verified locally
+## 5. Not verifiable in this environment
 
-- **`check:index-parity`** — no `dxnx_web_stress` clone in this environment; the script exits 0 when
-  the clone DB is absent, and CI does the same. The new indexes were applied to `dxnx_web` and
-  confirmed in `pg_indexes`.
-- **R17 live effect** — no Trigger.dev worker here; `pg_stat_activity`/`pgPoolConnects` were not
-  measured. Unit tests prove `$connect`/`$disconnect` are gone from the run wrapper.
-- **UI behaviour in a browser** — no component/e2e harness runs in this worktree: sentinels
-  (especially the one inside Radix `SelectContent`), `ErrorState` retry, the version dropdown’s
-  automatic paging, and toolbar reset are type-checked and unit-tested only.
-- **`billing.reconciliation` two-page run** and the sweep’s optimistic guard were run against a
-  private clone (`dxnx_b6_test`) because parallel batches reset `dxnx_web_test` mid-run; the
-  integration files are committed and pass.
+- **R17's live effect** — no Trigger.dev worker here, so `pg_stat_activity` / `poolConnects` were not
+  measured during parallel runs. Unit tests prove `$connect`/`$disconnect` are gone from the run
+  wrapper.
+- **Browser behaviour** — the Playwright harness has a single unauthenticated smoke spec and no
+  test-auth fixture, so sentinels (including the one inside Radix `SelectContent`), `ErrorState`
+  retry, the version dropdown's paging and toolbar reset are covered by unit-tested helpers and the
+  type-checker only. A real spec needs an authenticated fixture, which is its own change.
+- **Benchmarks** — this round still has no `bench:*` numbers; every claim is derived from the call
+  graph and statement count, as the plan states.
 
 ## 6. Next round (candidates, not started)
 
-1. `audit_events` + outbox drain (R1 / audit-log-architecture step 2–3).
-2. Event-contract change for completion invalidation (R10).
-3. `billing_events.batch_id` only if per-run id can be dropped from the sweep (R12).
-4. Create/trigger/jobId ordering (R23) and a Better Auth before→after channel (R25).
-5. File splits listed in §3.
-6. Playwright coverage for the pagination UI (sentinels, error state, dropdown paging).
-7. Index parity in CI with a disposable clone.
-8. Dead-code pass: `fixesMapper.toPublic`, `GeneratedFixDTO`, unused `RepoRef*`, unreachable
-   `ANALYSIS_NOT_FOUND`.
-9. Precision decision for `costCents` (round vs ceil vs micro-cents) if the rollup ever becomes
-   invoice-grade.
+1. `audit_events` + outbox drain (`audit-log-architecture.md` steps 2–3) — the only way to close R1.
+2. Fold the analysis quota check into the usage SQL, so `analysis.analyze` drops from seven
+   statements to six and the advisory-lock transaction loses a read.
+3. A Playwright auth fixture, so the pagination UI can be tested where it actually renders.
+4. Invoice-grade precision for `costCents`, if the rollup stops being an estimate.
+5. `getBillingUsageDays.sql` (landed after this round) under the same treatment as the other typed
+   SQL files.
