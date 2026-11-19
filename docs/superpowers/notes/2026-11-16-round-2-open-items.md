@@ -105,10 +105,17 @@ R1's verification line still fails by design, so the item stays unticked in the 
   type-checker only. A real spec needs an authenticated fixture, which is its own change.
 - **Benchmarks** — this round still has no `bench:*` numbers; every claim is derived from the call
   graph and statement count, as the plan states.
+- **GitGuardian** flags one “Generic High Entropy Secret” in
+  `src/server/core/github/github-access-token.test.ts:63` (commit `8c204ef6`). It is a test UUID
+  (`0195a1b2-…-0c1d2e3f4a5e`), not a credential. Clearing it means marking the incident as a false
+  positive in the GitGuardian dashboard or rewriting the branch history; it is the only red check
+  on the PR.
 
 ## 6. Next round (candidates, not started)
 
-1. `audit_events` + outbox drain (`audit-log-architecture.md` steps 2–3) — the only way to close R1.
+1. [`audit-log-architecture.md`](../plans/audit-log-architecture.md) steps 1–4 — the only way to
+   close R1. Step 1 is half-done (bookkeeping writes skipped, Ably coalesced); what remains is
+   dropping `payload` for the noisy models and tightening the policy to `@@allow('create', false)`.
 2. Fold the analysis quota check into the usage SQL, so `analysis.analyze` drops from seven
    statements to six and the advisory-lock transaction loses a read.
 3. A Playwright auth fixture, so the pagination UI can be tested where it actually renders.
