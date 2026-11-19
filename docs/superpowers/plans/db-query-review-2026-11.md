@@ -746,8 +746,8 @@ Closed after the 36-item counter above; these are follow-ups from the list-read 
   past `MAX_PAGE`; a single hint states the reachable row count and points at the date/search
   filters, which is how the older rows stay reachable. (`c65b533b`)
 - Keyset lists have supporting composite indexes (B5i) plus the fixes-list index; `COUNT(*)` runs
-  only on the first page of the analysis history. The PR list does not count at all: its `total`
-  had no consumer and was removed (`36ad9162`).
+  only on the first page of history and the PR list. The web PR list does not render that `total`;
+  the CLI does (`dxnx pr review` prints “Showing N of M”).
 
 ## Usage metering accuracy (2026-11-15)
 
@@ -846,9 +846,8 @@ they are one screen each and close in batches, so they stay out of the 36-item c
   on `sessions`, `(workspace_id, created_at DESC, id DESC)` on `api_keys`, and
   `(workspace_id, created_at, id)` on `workspace_members` — all in `20261115120000_keyset_indexes`.
   `4eaf34d2`
-- [x] **B5i · first-page total** — `getHistory` counts only when `cursor` is null and answers
-  `total: null` on later pages; the CLI folds the walk through `summarizeCursorPages`
-  (`@doxynix/shared`) and keeps the first non-null total, while the version selector still reads
-  page one. `2c39e6d3`. `listByRepository` had no `total` consumer, so its count and field were
-  removed (`36ad9162`).
+- [x] **B5i · first-page total** — `getHistory` and `listByRepository` count only when `cursor` is
+  null and answer `total: null` on later pages; the CLI folds the walk through
+  `summarizeCursorPages` (`@doxynix/shared`) and keeps the first non-null total, while the version
+  selector still reads page one and `dxnx pr review` prints “Showing N of M”. `2c39e6d3`
 

@@ -31,8 +31,9 @@ R1's verification line still fails by design, so the item stays unticked in the 
   small tables (repo list, banned emails, notifications page) with date/search for reachability; a
   cap + visible total only for child lists where a bulk action needs the whole set. The UI never
   offers a page past `MAX_PAGE`.
-- **`total` is a contract field only where it is rendered.** `getHistory` keeps it for the version
-  selector and the CLI; `listByRepository` lost both the field and its `COUNT(*)` (`36ad9162`).
+- **`total` is a contract field only where something renders it.** `getHistory` feeds the version
+  selector, the PR list feeds `dxnx pr review`; the web PR list shows cards only, which is why its
+  `total` is unused there (removal was tried and reverted — the CLI reads it).
 - **Comments/fixes are cursor-paginated; `fixAll` is server-side** (`analysis.fixAllComments`), so
   it no longer depends on the loaded page.
 - **Cents are rounded, not ceil** in `costCentsFor`; sub-cent calls record `0`. The rollup is a
@@ -60,8 +61,6 @@ R1's verification line still fails by design, so the item stays unticked in the 
 
 ## 3. Follow-ups from this doc that are now done
 
-- **`listByRepository` total** — the field was unused by the UI and the CLI; the query, the schema
-  field and the first-page `COUNT(*)` are gone (`36ad9162`).
 - **`capped_hint` copy** — “Narrow the results to see the rest.” in all 12 locales, so the message is
   true on the PR comment and fix cards, which have no date filter (`e8302e17`).
 - **Dead exports** — `RepoRefRecord` / `RepoRef` removed; `fixesMapper.toPublic` and
@@ -80,6 +79,8 @@ R1's verification line still fails by design, so the item stays unticked in the 
 - **CLI cursor walks stop after 10 pages** (`MAX_CURSOR_PAGES`), and the agent's `listApiKeys`
   shares that bound (1 000 rows per list). The bound is a parameter; it is deliberate protection
   against an unbounded walk on a pathological data set.
+- **`RepoPullsList` does not render `total`** while the wire contract keeps it: `dxnx pr review`
+  prints “Showing N of M”, so the field has a consumer and the `COUNT(*)` stays first-page-only.
 - **`clampPage` / `clampIntegerParam` keep their names** while delegating to `es-toolkit` `clamp`:
   they carry the domain rule (`MAX_PAGE`, NaN/float rejection) that the call sites would otherwise
   repeat.
