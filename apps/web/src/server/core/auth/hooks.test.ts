@@ -1,4 +1,4 @@
-process.env.RESEND_API_KEY ??= "re_test_auth_hooks";
+process.env.RESEND_API_KEY ??= "test-resend-key";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
