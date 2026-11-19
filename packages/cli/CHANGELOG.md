@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.5.31](https://github.com/doxynix/doxynix/compare/cli-v5.5.30...cli-v5.5.31) (2026-11-19)
+
+
+### Performance Improvements
+
+* **web:** close round-2 query review and pagination gaps ([#2412](https://github.com/doxynix/doxynix/issues/2412)) ([c1afeb9](https://github.com/doxynix/doxynix/commit/c1afeb9d6f58cad0d61fe8be55d92420f29f90bc))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/shared bumped to 0.10.1
+    * @doxynix/web bumped to 5.15.10
+
 ## [5.5.30](https://github.com/doxynix/doxynix/compare/cli-v5.5.29...cli-v5.5.30) (2026-11-18)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/doxynix/doxynix/compare/shared-v0.10.0...shared-v0.10.1) (2026-11-19)
+
+
+### Performance Improvements
+
+* **web:** close round-2 query review and pagination gaps ([#2412](https://github.com/doxynix/doxynix/issues/2412)) ([c1afeb9](https://github.com/doxynix/doxynix/commit/c1afeb9d6f58cad0d61fe8be55d92420f29f90bc))
+
 ## [0.10.0](https://github.com/doxynix/doxynix/compare/shared-v0.9.0...shared-v0.10.0) (2026-11-11)
 
 

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.15.10](https://github.com/doxynix/doxynix/compare/web-v5.15.9...web-v5.15.10) (2026-11-19)
+
+
+### Performance Improvements
+
+* **web:** close round-2 query review and pagination gaps ([#2412](https://github.com/doxynix/doxynix/issues/2412)) ([c1afeb9](https://github.com/doxynix/doxynix/commit/c1afeb9d6f58cad0d61fe8be55d92420f29f90bc))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @doxynix/shared bumped to 0.10.1
+
 ## [5.15.9](https://github.com/doxynix/doxynix/compare/web-v5.15.8...web-v5.15.9) (2026-11-18)
 
 
