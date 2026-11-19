@@ -132,14 +132,13 @@ describe("prImpactService.listByRepository", () => {
   it("returns an empty list for a repository without analyses", async () => {
     const { db, fixture } = await createRepoFixture("OwnerEmpty");
 
-    // Shape matters as much as the values: an empty repo still reports a total and a closed
-    // cursor, so the client never has to distinguish "no rows" from "no more pages".
+    // Shape matters as much as the values: an empty repo still reports a closed cursor, so the
+    // client never has to distinguish "no rows" from "no more pages".
     await expect(
       prImpactService.listByRepository(db, fixture.repoId, fixture.workspaceId, { limit: 50 }),
     ).resolves.toEqual({
       items: [],
       meta: { hasNextPage: false, nextCursor: undefined },
-      total: 0,
     });
   });
 
