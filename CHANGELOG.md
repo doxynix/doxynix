@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.15.10](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.9...doxynix-v6.15.10) (2026-11-19)
+
+
+### Performance Improvements
+
+* **web:** close round-2 query review and pagination gaps ([#2412](https://github.com/doxynix/doxynix/issues/2412)) ([c1afeb9](https://github.com/doxynix/doxynix/commit/c1afeb9d6f58cad0d61fe8be55d92420f29f90bc))
+
 ## [6.15.9](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.8...doxynix-v6.15.9) (2026-11-18)
 
 

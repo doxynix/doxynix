@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.2](https://github.com/doxynix/doxynix/compare/siem-server-v0.7.1...siem-server-v0.7.2) (2026-11-19)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @doxynix/shared bumped to 0.10.1
+
 ## [0.7.1](https://github.com/doxynix/doxynix/compare/siem-server-v0.7.0...siem-server-v0.7.1) (2026-11-15)
 
 
