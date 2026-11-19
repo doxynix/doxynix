@@ -1,5 +1,54 @@
 # Changelog
 
+## [6.15.9](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.8...doxynix-v6.15.9) (2026-11-18)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2428](https://github.com/doxynix/doxynix/issues/2428)) ([39253a2](https://github.com/doxynix/doxynix/commit/39253a25fb1f1d79024bed21c2d4523a0d769109))
+
+## [6.15.8](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.7...doxynix-v6.15.8) (2026-11-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency react-virtuoso to v4.18.23 ([#2425](https://github.com/doxynix/doxynix/issues/2425)) ([eaa15d9](https://github.com/doxynix/doxynix/commit/eaa15d9be1c593a9309be387d68aaea59886a227))
+
+## [6.15.7](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.6...doxynix-v6.15.7) (2026-11-17)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2423](https://github.com/doxynix/doxynix/issues/2423)) ([c25102f](https://github.com/doxynix/doxynix/commit/c25102f5fee3c512c29b1cc87eca36e78eac7b1c))
+
+## [6.15.6](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.5...doxynix-v6.15.6) (2026-11-17)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2421](https://github.com/doxynix/doxynix/issues/2421)) ([4767356](https://github.com/doxynix/doxynix/commit/4767356ad4a270cd1e882574b1997596db179ada))
+
+## [6.15.5](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.4...doxynix-v6.15.5) (2026-11-16)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2419](https://github.com/doxynix/doxynix/issues/2419)) ([834db99](https://github.com/doxynix/doxynix/commit/834db99d3d8268e8a66d71e80308b153fad8d304))
+
+## [6.15.4](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.3...doxynix-v6.15.4) (2026-11-16)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2417](https://github.com/doxynix/doxynix/issues/2417)) ([5bbe556](https://github.com/doxynix/doxynix/commit/5bbe556b695d4dce6e4f4005a69ea1608a78bf09))
+
+## [6.15.3](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.2...doxynix-v6.15.3) (2026-11-16)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2415](https://github.com/doxynix/doxynix/issues/2415)) ([53805ce](https://github.com/doxynix/doxynix/commit/53805ce0da7c77362710976ba2df982136cad75f))
+
 ## [6.15.2](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.1...doxynix-v6.15.2) (2026-11-15)
 
 

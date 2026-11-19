@@ -1,5 +1,68 @@
 # Changelog
 
+## [5.5.30](https://github.com/doxynix/doxynix/compare/cli-v5.5.29...cli-v5.5.30) (2026-11-18)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 5.15.9
+
+## [5.5.29](https://github.com/doxynix/doxynix/compare/cli-v5.5.28...cli-v5.5.29) (2026-11-18)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 5.15.8
+
+## [5.5.28](https://github.com/doxynix/doxynix/compare/cli-v5.5.27...cli-v5.5.28) (2026-11-17)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 5.15.7
+
+## [5.5.27](https://github.com/doxynix/doxynix/compare/cli-v5.5.26...cli-v5.5.27) (2026-11-17)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 5.15.6
+
+## [5.5.26](https://github.com/doxynix/doxynix/compare/cli-v5.5.25...cli-v5.5.26) (2026-11-16)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 5.15.5
+
+## [5.5.25](https://github.com/doxynix/doxynix/compare/cli-v5.5.24...cli-v5.5.25) (2026-11-16)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 5.15.4
+
+## [5.5.24](https://github.com/doxynix/doxynix/compare/cli-v5.5.23...cli-v5.5.24) (2026-11-16)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 5.15.3
+
 ## [5.5.23](https://github.com/doxynix/doxynix/compare/cli-v5.5.22...cli-v5.5.23) (2026-11-15)
 
 
