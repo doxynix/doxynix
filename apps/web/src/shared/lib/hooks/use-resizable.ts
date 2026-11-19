@@ -32,6 +32,23 @@ function readWidth(storageKey: string | undefined, fallback: number, min: number
   return Number.isFinite(stored) ? clamp(stored, min, max) : clamp(fallback, min, max);
 }
 
+type BodyCursorSnapshot = { cursor: string; userSelect: string };
+
+// React Compiler rejects DOM mutation inside a hook, so the body styles are written out here.
+function lockBodyCursor(): BodyCursorSnapshot {
+  const { style } = document.body;
+  const snapshot = { cursor: style.cursor, userSelect: style.userSelect };
+  style.cursor = "col-resize";
+  style.userSelect = "none";
+  return snapshot;
+}
+
+function restoreBodyCursor(snapshot: BodyCursorSnapshot): void {
+  const { style } = document.body;
+  style.cursor = snapshot.cursor;
+  style.userSelect = snapshot.userSelect;
+}
+
 export function useResizable({
   cssVar,
   defaultWidth = 256,
@@ -125,11 +142,7 @@ export function useResizable({
       return;
     }
 
-    const body = document.body;
-    const previousCursor = body.style.cursor;
-    const previousUserSelect = body.style.userSelect;
-    body.style.cursor = "col-resize";
-    body.style.userSelect = "none";
+    const cursorSnapshot = lockBodyCursor();
 
     const update = () => {
       const delta = pointerXRef.current - originRef.current.startX;
@@ -164,8 +177,7 @@ export function useResizable({
         finalWidth = update();
       }
 
-      body.style.cursor = previousCursor;
-      body.style.userSelect = previousUserSelect;
+      restoreBodyCursor(cursorSnapshot);
       setLiveWidth(finalWidth);
       setIsResizing(false);
       onDragEndRef.current?.(finalWidth, pointerXRef.current !== originRef.current.startX);
@@ -183,8 +195,7 @@ export function useResizable({
         cancelAnimationFrame(frameRef.current);
       }
       frameRef.current = null;
-      body.style.cursor = previousCursor;
-      body.style.userSelect = previousUserSelect;
+      restoreBodyCursor(cursorSnapshot);
     };
   }, [cssVar, isResizing, maxBound, minBound, side]);
 
