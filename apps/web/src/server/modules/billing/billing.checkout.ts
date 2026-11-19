@@ -8,7 +8,7 @@ import { DEFAULT_LOCALE } from "@/shared/config/locales";
 import { AppError } from "@/server/core/api-error";
 import { billingIdempotencyKey } from "@/server/core/billing/idempotency";
 import { getStripeClient, providerEnvironment } from "@/server/core/billing/stripe-client";
-import type { DbClient } from "@/server/core/db";
+import { type DbClient, withAdvisoryLock } from "@/server/core/db";
 
 import { proPlan } from "./billing.catalog";
 import { STRIPE_PROVIDER } from "./billing.constants";
@@ -137,14 +137,13 @@ export async function createCheckoutSession(
 
       type Blocked = { id: string; kind: "open" | "paid" | "pending" };
       const pendingSessionId = `pending:${input.requestId}`;
-      let blocked: Blocked | null = null;
 
       // Check and write inside one advisory-locked transaction: the row must exist before the
       // Stripe call, otherwise two concurrent requests with different requestIds both pass.
-      if ("$transaction" in input.db) {
-        blocked = await input.db.$transaction(async (tx) => {
-          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`checkout:${input.workspaceId}`}))`;
-
+      const blocked = await withAdvisoryLock(
+        input.db,
+        `checkout:${input.workspaceId}`,
+        async (tx): Promise<Blocked | null> => {
           const recent = await tx.billingCheckoutSession.findFirst({
             orderBy: { createdAt: "desc" },
             select: { createdAt: true, externalCheckoutSessionId: true, externalStatus: true },
@@ -187,8 +186,8 @@ export async function createCheckoutSession(
           });
 
           return null;
-        });
-      }
+        },
+      );
 
       if (blocked?.kind === "open") {
         const existing = await getStripeClient()

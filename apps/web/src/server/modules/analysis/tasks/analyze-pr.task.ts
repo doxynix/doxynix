@@ -19,6 +19,7 @@ import { DifferentialAnalyzer } from "../logic/differential-analyzer";
 import { healAndPartitionFindings } from "../logic/patch-healer";
 import { mergePrBody } from "../logic/pr-body";
 import { PRConfigService } from "../logic/pr-config";
+import { projectResultOverview } from "../logic/project-result-overview";
 
 const MAX_FILE_CONTENT_BYTES = 1_000_000;
 const MAX_FILE_CONTENTS_BYTES = 20_000_000;
@@ -103,7 +104,9 @@ export const analyzePrTask = task({
       });
 
       const projectOverviewJson =
-        lastFullAnalysis?.resultJson != null ? JSON.stringify(lastFullAnalysis.resultJson) : "{}";
+        lastFullAnalysis?.resultJson != null
+          ? projectResultOverview(lastFullAnalysis.resultJson)
+          : "{}";
 
       const config = await PRConfigService.getConfig(repo.id, payload.workspaceId, prisma);
 

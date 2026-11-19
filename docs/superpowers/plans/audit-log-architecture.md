@@ -17,6 +17,12 @@ answer, not a taste answer.
 `audit_events` table, no `recordAudit`, no `stream`/`workspace_id`/`delivered_at` column). The
 migration steps at the end are checkboxes so they can be tracked like the round-2 list.
 
+> Revalidated 2026-11-18 on `8fed807c`: round 2 changed two of the inputs. The audit hook already
+> skips bookkeeping writes (`ApiKey.lastUsed`, `Notification.isRead`, `Analysis.progress` alone) and
+> coalesces the Ably publish to one per request. Step 1 therefore only has the remaining halves —
+> drop `payload` for the noisy models and tighten the policy to `@@allow('create', false)` — and the
+> per-write Ably publish still exists, it is just deduplicated.
+
 ## Method and honesty section
 
 - Read: `core/db.ts`, `prisma/models/core.zmodel`, `modules/audit-logs/*`,

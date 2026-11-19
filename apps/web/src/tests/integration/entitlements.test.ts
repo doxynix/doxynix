@@ -11,6 +11,8 @@ import {
   periodStartOf,
   recordAnalysisUsage,
   releaseAnalysisUsage,
+  releaseUsage,
+  reserveUsage,
 } from "@/server/core/usage/usage";
 
 import { cleanupDatabase, createBareTestUser, createTestUser } from "../helpers";
@@ -85,6 +87,31 @@ describe("workspace entitlement reader", () => {
     const entitlement = await getWorkspaceEntitlement(prisma, alice.workspace.id);
 
     expect(entitlement?.usedAnalyses).toBe(0);
+  });
+
+  it("clamps the token rollup at zero when the reservation is released", async () => {
+    const alice = await createTestUser("Alice");
+    const key = "call:released";
+
+    await reserveUsage(prisma, {
+      analysisId: null,
+      estimatedTokens: 900,
+      idempotencyKey: key,
+      workspaceId: alice.workspace.id,
+    });
+    await releaseUsage(prisma, {
+      analysisId: null,
+      idempotencyKey: key,
+      workspaceId: alice.workspace.id,
+    });
+
+    const usage = await prisma.workspaceUsage.findFirstOrThrow({
+      where: { periodStart: periodStartOf(new Date()), workspaceId: alice.workspace.id },
+    });
+
+    // 900 reserved then released must land on 0; an EXCLUDED-based conflict branch would stay at 900.
+    expect(usage.aiTokensUsed).toBe(0);
+    expect(usage.costCents).toBe(BigInt(0));
   });
 
   it("reads counters that were forced negative as zero", async () => {

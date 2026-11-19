@@ -20,3 +20,22 @@ export function urlStateFromSearchParams<P extends Record<string, ParserLike>>(
 export function hasAnySearchParam(query: SearchParams, keys: readonly string[]): boolean {
   return keys.some((key) => query[key] != null);
 }
+
+const PAGING_KEYS = new Set(["limit", "page"]);
+
+export function hasActiveFilters(
+  values: Record<string, unknown>,
+  defaults: Record<string, unknown> = {},
+): boolean {
+  return Object.entries(values).some(([key, value]) => {
+    if (PAGING_KEYS.has(key) || value == null) {
+      return false;
+    }
+
+    if (typeof value === "string" && value.trim() === "") {
+      return false;
+    }
+
+    return value !== defaults[key];
+  });
+}

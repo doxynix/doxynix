@@ -90,7 +90,7 @@ function createFakeDb(
   const findById = (id: string) => [...operations.values()].find((row) => row.id === id);
 
   const db = {
-    $executeRaw: async () => 0,
+    $queryRawTyped: async () => [],
     billingCheckoutSession: {
       create: async ({ data }: { data: SessionRow }) => {
         sessions.push(data);

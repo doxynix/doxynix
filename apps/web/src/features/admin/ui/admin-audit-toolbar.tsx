@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
+import { hasActiveFilters } from "@/shared/lib/url-state";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Select,
@@ -24,14 +25,20 @@ export function AdminAuditToolbar() {
 
   const [filters, setFilters] = useQueryStates(adminAuditParsers);
 
-  const hasFilters = filters.model !== null || filters.operation !== null || filters.search !== "";
+  const hasFilters = hasActiveFilters(filters);
 
   const update = (key: "model" | "operation", value: null | string) => {
-    void setFilters({ [key]: value, page: null });
+    void setFilters({ [key]: value });
   };
 
   const reset = () => {
-    void setFilters({ model: null, operation: null, page: null, search: null });
+    void setFilters({
+      from: null,
+      model: null,
+      operation: null,
+      search: null,
+      to: null,
+    });
   };
 
   return (

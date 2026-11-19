@@ -115,4 +115,61 @@ describe("AnalyticsInputSchema", () => {
     expect(result.from).toEqual(from);
     expect(result.to).toEqual(to);
   });
+
+  it("rejects a period outside the preset list", () => {
+    expect(AnalyticsInputSchema.safeParse({ period: "1y" }).success).toBe(false);
+  });
+
+  it("rejects a reversed range", () => {
+    const result = AnalyticsInputSchema.safeParse({
+      from: new Date("2026-03-01"),
+      period: "custom",
+      to: new Date("2026-01-01"),
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("requires from on a custom range", () => {
+    const result = AnalyticsInputSchema.safeParse({ period: "custom" });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("caps a custom range at 366 days", () => {
+    const from = new Date("2026-01-01T00:00:00Z");
+    const tooLong = new Date(from.getTime() + 367 * 86_400_000);
+    const atCap = new Date(from.getTime() + 366 * 86_400_000);
+
+    expect(AnalyticsInputSchema.safeParse({ from, period: "custom", to: tooLong }).success).toBe(
+      false,
+    );
+    expect(AnalyticsInputSchema.safeParse({ from, period: "custom", to: atCap }).success).toBe(
+      true,
+    );
+  });
+
+  it("caps an open-ended custom range against now", () => {
+    const from = new Date(Date.now() - 400 * 86_400_000);
+
+    expect(AnalyticsInputSchema.safeParse({ from, period: "custom" }).success).toBe(false);
+  });
+
+  it("ignores from/to when the period is a preset", () => {
+    const from = new Date("1970-01-01");
+    const result = AnalyticsInputSchema.parse({ from, period: "7d", to: new Date("2026-01-01") });
+
+    expect(result.period).toBe("7d");
+    expect(result.from).toEqual(from);
+  });
+
+  it("accepts a preset with reversed dates, because the service never reads them", () => {
+    const result = AnalyticsInputSchema.safeParse({
+      from: new Date("2026-03-01"),
+      period: "30d",
+      to: new Date("2026-01-01"),
+    });
+
+    expect(result.success).toBe(true);
+  });
 });

@@ -7,6 +7,8 @@ export const mapFiltersToInput = (filters?: NotificationsParsersState): MarkAllI
   }
 
   return {
+    ...(filters.from != null ? { from: filters.from } : {}),
+    ...(filters.to != null ? { to: filters.to } : {}),
     repoName: filters.repo ?? undefined,
     repoOwner: filters.owner ?? undefined,
     search: filters.search || undefined,

@@ -52,8 +52,7 @@
     "operation_updated": "Aggiornato",
     "origin_system": "sistema",
     "page_desc": "Ogni scrittura dell'app, per tutti gli attori. Il registro della dashboard mostra solo la tua attività; questo no.",
-    "page_title": "Registro di controllo",
-    "total_count": "{filtered} di {total} voci"
+    "page_title": "Registro di controllo"
   },
   "AdminBannedEmails": {
     "col_actions": "Azioni",
@@ -121,8 +120,7 @@
     "status_analyzing": "Analisi",
     "status_completed": "Completato",
     "status_failed": "Fallito",
-    "status_pending": "In attesa",
-    "total_count": "{filtered} di {total} revisioni"
+    "status_pending": "In attesa"
   },
   "AdminUsers": {
     "ban_action": "Blocca",
@@ -195,7 +193,6 @@
     "toast_role_updated": "{name} ora è admin",
     "toast_session_revoked": "Sessione revocata",
     "toast_unbanned": "Ban rimosso",
-    "total_count": "{filtered} di {total} utenti",
     "unban_action": "Sblocca"
   },
   "Agent": {
@@ -429,7 +426,7 @@
     "beta": "BETA",
     "breadcrumb": "Percorso di navigazione",
     "cancel": "Annulla",
-    "capped_hint": "Mostrati i primi {count}. Affina i filtri o scegli un intervallo di date.",
+    "capped_hint": "Mostrati i primi {count}. Affina i risultati per vedere il resto.",
     "change_language": "Cambia lingua",
     "check_system_status": "Controlla lo stato del sistema",
     "clipboard_unavailable": "API degli appunti non disponibile",

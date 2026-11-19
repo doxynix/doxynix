@@ -80,7 +80,7 @@ export const repoService = {
       // `owner` is citext, so plain equality is already case-insensitive and stays index-friendly;
       // `mode: "insensitive"` would make Prisma emit ILIKE, which cannot use the btree index.
       normalizedOwner != null && normalizedOwner.length > 0 ? { owner: normalizedOwner } : {},
-      buildDateRangeWhere(filters, "updatedAt"),
+      buildDateRangeWhere(filters, "createdAt"),
       statusFilter,
       searchFilter,
     ]);
@@ -198,10 +198,10 @@ export const repoService = {
   },
 
   async getAll(db: DbClient, input: RepoFiltersInput, workspaceId: string) {
-    const { limit, owner, page, search, sortBy, sortOrder, status, visibility } = input;
+    const { limit, page, search, sortBy, sortOrder } = input;
 
-    const where = { workspaceId, ...this.buildWhereClause({ owner, search, status, visibility }) };
-    const contextWhere: Prisma.RepoWhereInput = owner == null ? {} : { owner };
+    const where = { workspaceId, ...this.buildWhereClause(input) };
+    const isUnfiltered = Object.keys(where).every((key) => key === "workspaceId");
 
     const orderBy = orderWithTiebreak(sortBy, sortOrder);
 
@@ -215,8 +215,7 @@ export const repoService = {
     const { items, meta } = await getPaginatedList({
       countCap: cap,
       countFiltered: () => countMatching(where),
-      countUnfiltered:
-        owner != null && Object.keys(where).length > 0 ? () => countMatching(contextWhere) : null,
+      countUnfiltered: isUnfiltered ? null : () => countMatching({ workspaceId }),
       fetchItems: ({ skip, take }) =>
         db.repo.findMany({
           include: {

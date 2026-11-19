@@ -132,13 +132,13 @@ describe("prImpactService.listByRepository", () => {
   it("returns an empty list for a repository without analyses", async () => {
     const { db, fixture } = await createRepoFixture("OwnerEmpty");
 
-    // Shape matters as much as the values: an empty repo still reports a total, so the client
-    // never has to distinguish "no rows" from "capped to nothing".
+    // Shape matters as much as the values: an empty repo still reports a total and a closed
+    // cursor, so the client never has to distinguish "no rows" from "no more pages".
     await expect(
-      prImpactService.listByRepository(db, fixture.repoId, fixture.workspaceId),
+      prImpactService.listByRepository(db, fixture.repoId, fixture.workspaceId, { limit: 50 }),
     ).resolves.toEqual({
-      capped: false,
       items: [],
+      meta: { hasNextPage: false, nextCursor: undefined },
       total: 0,
     });
   });
@@ -172,6 +172,7 @@ describe("prImpactService.listByRepository", () => {
       db,
       fixture.repoId,
       fixture.workspaceId,
+      { limit: 50 },
     );
     const [listed] = items;
 
@@ -191,19 +192,44 @@ describe("prImpactService.listByRepository", () => {
     await createPullRequestAnalysis(db, fixture, { prNumber: 1 });
     await createPullRequestAnalysis(db, fixture, { prNumber: 2 });
 
-    const { capped, items, total } = await prImpactService.listByRepository(
+    const { items, meta, total } = await prImpactService.listByRepository(
       db,
       fixture.repoId,
       fixture.workspaceId,
+      { limit: 50 },
     );
 
     expect(items.map((item) => item.prNumber).sort((a: number, b: number) => a - b)).toEqual([
       1, 2,
     ]);
     expect(new Set(items.map((item) => item.id)).size).toBe(2);
-    // Two rows, so the cap must not claim the list was truncated.
+    // Two rows on a 50-row page, so the list must not claim there is another page.
     expect(total).toBe(2);
-    expect(capped).toBe(false);
+    expect(meta).toEqual({ hasNextPage: false, nextCursor: undefined });
+  });
+
+  it("walks past the cursor without repeating or skipping a row", async () => {
+    const { db, fixture } = await createRepoFixture("OwnerKeyset");
+
+    for (const prNumber of [1, 2, 3]) {
+      await createPullRequestAnalysis(db, fixture, { prNumber });
+    }
+
+    const first = await prImpactService.listByRepository(db, fixture.repoId, fixture.workspaceId, {
+      limit: 2,
+    });
+    const second = await prImpactService.listByRepository(db, fixture.repoId, fixture.workspaceId, {
+      cursor: first.meta.nextCursor,
+      limit: 2,
+    });
+
+    expect(first.items).toHaveLength(2);
+    expect(first.meta.hasNextPage).toBe(true);
+    // The cursor is inclusive, so the probe row is the first row of the next page.
+    expect(second.items.map((item) => item.id)).toContain(first.meta.nextCursor);
+    expect(second.items).toHaveLength(1);
+    expect(new Set([...first.items, ...second.items].map((item) => item.id)).size).toBe(3);
+    expect(second.meta.hasNextPage).toBe(false);
   });
 
   it("does not leak analyses from another repository", async () => {
@@ -213,7 +239,9 @@ describe("prImpactService.listByRepository", () => {
     await createPullRequestAnalysis(db, mine, { prNumber: 7 });
     await createPullRequestAnalysis(db, other, { prNumber: 8 });
 
-    const { items } = await prImpactService.listByRepository(db, mine.repoId, mine.workspaceId);
+    const { items } = await prImpactService.listByRepository(db, mine.repoId, mine.workspaceId, {
+      limit: 50,
+    });
 
     expect(items).toHaveLength(1);
     expect(items[0]?.prNumber).toBe(7);

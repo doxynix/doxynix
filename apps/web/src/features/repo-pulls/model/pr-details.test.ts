@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { PRNumber } from "@/entities/pr/model/pr.types";
 
-import { buildImpactStats, buildPrDetailItems, toFixFinding } from "./pr-details";
+import { buildImpactStats, buildPrDetailItems } from "./pr-details";
 
 const labels = {
   affectedZones: "zones",
@@ -90,18 +90,5 @@ describe("buildImpactStats", () => {
     });
 
     expect(stats[3]).toEqual({ label: "view", value: "none" });
-  });
-});
-
-describe("toFixFinding", () => {
-  it("normalises the finding type and maps the fields", () => {
-    expect(
-      toFixFinding({
-        bodyHtml: "<p>x</p>",
-        filePath: "src/a.ts",
-        findingType: "SECURITY",
-        line: 42,
-      }),
-    ).toEqual({ file: "src/a.ts", line: 42, suggestion: "<p>x</p>", type: "security" });
   });
 });

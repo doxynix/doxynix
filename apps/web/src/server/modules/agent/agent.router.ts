@@ -1,87 +1,49 @@
-import * as z from "zod";
-
 import { createTRPCRouter, protectedProcedure, workspaceProcedure } from "@/server/core/trpc/init";
 
+import {
+  CreateSessionInputSchema,
+  CreateSessionOutputSchema,
+  DeleteSessionInputSchema,
+  GetSessionHistoryInputSchema,
+  GetSessionHistoryOutputSchema,
+  ListSessionsInputSchema,
+  ListSessionsOutputSchema,
+  UpdateSessionInputSchema,
+  UpdateSessionOutputSchema,
+} from "./agent.schemas";
 import { agentService } from "./agent.service";
-
-const SessionListItemSchema = z.object({
-  createdAt: z.date(),
-  id: z.uuid(),
-  repo: z
-    .object({
-      name: z.string(),
-      owner: z.string(),
-    })
-    .nullable(),
-  title: z.string(),
-  updatedAt: z.date(),
-});
-
-const ListSessionsOutput = z.array(SessionListItemSchema);
-
-const CreateSessionOutput = z.object({
-  createdAt: z.date(),
-  id: z.uuid(),
-  title: z.string(),
-  updatedAt: z.date(),
-});
-
-const UpdateSessionOutput = z.object({
-  id: z.uuid(),
-  title: z.string(),
-});
 
 export const agentChatRouter = createTRPCRouter({
   createSession: workspaceProcedure
-    .input(
-      z.object({
-        repoId: z.uuid().optional().describe("Public repo UUID, if chat in project"),
-        title: z.string().default("New Chat"),
-      }),
-    )
-    .output(CreateSessionOutput)
+    .input(CreateSessionInputSchema)
+    .output(CreateSessionOutputSchema)
     .mutation(async ({ ctx, input }) => {
       return agentService.createSession(ctx.db, ctx.session.user.id, ctx.workspace.id, input);
     }),
 
   deleteSession: protectedProcedure
-    .input(z.object({ sessionId: z.uuid() }))
+    .input(DeleteSessionInputSchema)
     .mutation(async ({ ctx, input }) => {
       return agentService.deleteSession(ctx.db, ctx.session.user.id, input);
     }),
 
   getSessionHistory: protectedProcedure
-    .input(z.object({ sessionId: z.uuid() }))
+    .input(GetSessionHistoryInputSchema)
+    .output(GetSessionHistoryOutputSchema)
     .query(async ({ ctx, input }) => {
-      return agentService.getSessionHistory(ctx.db, ctx.session.user.id, input.sessionId);
+      return agentService.getSessionHistory(ctx.db, ctx.session.user.id, input);
     }),
 
   listSessions: workspaceProcedure
-    .input(
-      z
-        .object({
-          currentRepo: z
-            .object({
-              name: z.string(),
-              owner: z.string(),
-            })
-            .optional(),
-        })
-        .optional(),
-    )
-    .output(ListSessionsOutput)
+    .input(ListSessionsInputSchema)
+    .output(ListSessionsOutputSchema)
     .query(async ({ ctx, input }) => {
       return agentService.listSessions(ctx.db, ctx.session.user.id, ctx.workspace.id, input);
     }),
 
   updateSession: protectedProcedure
-    .input(
-      z.object({
-        sessionId: z.uuid(),
-        title: z.string().trim().min(1).max(200),
-      }),
-    )
-    .output(UpdateSessionOutput)
+    .input(UpdateSessionInputSchema)
+    .output(UpdateSessionOutputSchema)
     .mutation(async ({ ctx, input }) => {
       const session = await agentService.updateSession(ctx.db, ctx.session.user.id, input);
 

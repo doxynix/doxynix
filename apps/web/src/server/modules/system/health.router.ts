@@ -1,3 +1,4 @@
+import { healthCheck } from "@prisma/client/sql";
 import * as z from "zod";
 
 import { createTRPCRouter, publicProcedure } from "@/server/core/trpc/init";
@@ -13,7 +14,7 @@ export const healthRouter = createTRPCRouter({
     )
     .query(async ({ ctx }) => {
       try {
-        await ctx.prisma.$queryRaw`SELECT 1`;
+        await ctx.prisma.$queryRawTyped(healthCheck());
         return { status: "ok" };
       } catch (error) {
         handlePrismaError(error, {

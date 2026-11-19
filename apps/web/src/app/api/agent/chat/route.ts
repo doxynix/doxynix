@@ -19,10 +19,11 @@ import { google } from "@/server/core/ai/google";
 import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { resolveRequestUserId } from "@/server/core/auth/resolve-session";
-import { prisma } from "@/server/core/db";
+import { prisma, withAdvisoryLock } from "@/server/core/db";
 import { getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { realtimeService } from "@/server/core/realtime";
 import { releaseUsage, reserveUsage, settleUsage } from "@/server/core/usage/usage";
+import { mapUsageToTokenUsage } from "@/server/core/usage/usage.mapper";
 import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import {
   AGENT_SYSTEM_PROMPT,
@@ -37,6 +38,8 @@ export const maxDuration = 60;
 
 // Reservation for the whole streamed turn; `settleUsage` releases the difference on finish.
 const AGENT_TOKEN_ESTIMATE = 2000;
+
+const NEW_CHAT_TITLE = "New Chat";
 
 async function handler(req: Request) {
   const { currentRepo, currentRepoId, messages, sessionId } = await req.json();
@@ -85,6 +88,9 @@ async function handler(req: Request) {
 
   let resolvedRepoId: string | undefined;
   let internalRepoId: null | string = null;
+  // A title is still owed while the session carries the default one; the existence probe below
+  // reads it, so `onEnd` no longer has to.
+  let needsTitle = false;
 
   if (currentRepoId != null) {
     const dbRepo = await prisma.repo.findUnique({
@@ -119,9 +125,11 @@ async function handler(req: Request) {
 
       await prisma.$transaction(async (tx) => {
         const sessionExists = await tx.chatSession.findUnique({
-          select: { id: true },
+          select: { id: true, title: true },
           where: { id: sessionId, userId },
         });
+
+        needsTitle = sessionExists == null || sessionExists.title === NEW_CHAT_TITLE;
 
         if (sessionExists == null) {
           try {
@@ -129,7 +137,7 @@ async function handler(req: Request) {
               data: {
                 id: sessionId,
                 repoId: internalRepoId,
-                title: "New Chat",
+                title: NEW_CHAT_TITLE,
                 userId,
               },
             });
@@ -172,9 +180,7 @@ async function handler(req: Request) {
 - Automatically assume this repository for all tools requiring "repoId" (e.g., quickFileAudit, triggerRepositoryAnalysis, etc.). You do not need to ask the user or search for it.
 - Only prompt for a repository ID if the user explicitly wants to target a completely different project.`;
 
-  await prisma.$transaction(async (tx) => {
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`agent-quota:${workspace.id}`}))`;
-
+  await withAdvisoryLock(prisma, `agent-quota:${workspace.id}`, async (tx) => {
     const fresh = await getWorkspaceEntitlement(tx, workspace.id, new Date(), { fresh: true });
 
     if (fresh == null || !fresh.hasAccess) {
@@ -220,11 +226,7 @@ async function handler(req: Request) {
           idempotencyKey: usageKey,
           model: agentModelId,
           provider: "google",
-          usage: {
-            cachedInputTokens: usage.inputTokenDetails.cacheReadTokens ?? 0,
-            inputTokens: usage.inputTokens ?? 0,
-            outputTokens: usage.outputTokens ?? 0,
-          },
+          usage: mapUsageToTokenUsage(usage),
           workspaceId: workspace.id,
         });
       } catch (error) {
@@ -267,12 +269,7 @@ async function handler(req: Request) {
         });
 
         try {
-          const currentSession = await prisma.chatSession.findUnique({
-            select: { title: true },
-            where: { id: sessionId, userId },
-          });
-
-          if (currentSession?.title === "New Chat") {
+          if (needsTitle) {
             const firstUserMessage = callbackMessages.find((m) => m.role === "user");
 
             let rawUserText = "";

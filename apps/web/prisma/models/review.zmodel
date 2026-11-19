@@ -43,6 +43,8 @@ model Analysis {
 
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
+  @@index([repoId, createdAt(sort: Desc), id(sort: Desc)])
+  @@index([repoId, commitSha])
   @@index([jobId])
   @@map("analyses")
 }
@@ -115,6 +117,7 @@ model PullRequestAnalysis {
   @@index([jobId])
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
+  @@index([repoId, createdAt(sort: Desc), id(sort: Desc)])
   @@index([status])
   @@index([createdAt(sort: Desc), id(sort: Desc)], map: "pull_request_analyses_created_at_id_idx")
   @@map("pull_request_analyses")
@@ -205,7 +208,9 @@ model GeneratedFix {
 
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
+  @@index([repoId, createdAt(sort: Desc), id(sort: Desc)])
   @@index([prAnalysisId])
+  @@index([prAnalysisId, createdAt(sort: Desc), id(sort: Desc)])
   @@map("generated_fixes")
 }
 

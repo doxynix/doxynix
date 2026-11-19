@@ -1,6 +1,6 @@
 import type { RouterOutput } from "@/shared/api/trpc";
 
-export type AgentSession = RouterOutput["agent"]["listSessions"][number];
+export type AgentSession = RouterOutput["agent"]["listSessions"]["items"][number];
 
 export type LocalFileAttachment = {
   contentType: string;

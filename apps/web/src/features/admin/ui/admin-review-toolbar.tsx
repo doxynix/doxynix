@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
+import { hasActiveFilters } from "@/shared/lib/url-state";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Select,
@@ -24,23 +25,20 @@ export function AdminReviewToolbar() {
 
   const [filters, setFilters] = useQueryStates(adminReviewParsers);
 
-  const hasFilters =
-    filters.status !== null ||
-    filters.fixStatus !== null ||
-    filters.minRiskScore !== null ||
-    filters.search !== "";
+  const hasFilters = hasActiveFilters(filters);
 
   const update = (key: "fixStatus" | "minRiskScore" | "status", value: null | string) => {
-    void setFilters({ [key]: value, page: null });
+    void setFilters({ [key]: value });
   };
 
   const reset = () => {
     void setFilters({
       fixStatus: null,
+      from: null,
       minRiskScore: null,
-      page: null,
       search: null,
       status: null,
+      to: null,
     });
   };
 

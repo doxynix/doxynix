@@ -6,7 +6,7 @@ import { analysisDocsRouter } from "./analysis-docs.router";
 import { analysisPrFixesRouter } from "./analysis-pr-fixes.router";
 import { analysisRepoRouter } from "./analysis-repo.router";
 
-// Client calls `trpc.analysis.<name>`, so the composed router must stay a FLAT map of the same 36 procedures.
+// Client calls `trpc.analysis.<name>`, so the composed router must stay a FLAT map of the same 38 procedures.
 const ALL_PROCEDURES = [
   "analyze",
   "applyFix",
@@ -15,6 +15,7 @@ const ALL_PROCEDURES = [
   "configureRepository",
   "createFix",
   "documentFile",
+  "fixAllComments",
   "getAnalysis",
   "getAvailableDocs",
   "getById",
@@ -31,10 +32,12 @@ const ALL_PROCEDURES = [
   "getStagedFiles",
   "getStructureMap",
   "getStructureNode",
+  "getVersionRef",
   "getWithGraphLinks",
   "getWorkspace",
   "highlightFile",
   "listByRepository",
+  "listFixes",
   "openPullRequest",
   "pinAuditToDocs",
   "postCommentToPR",
@@ -54,7 +57,7 @@ const proceduresOf = (router: object): string[] =>
     .sort();
 
 describe("analysisRouter", () => {
-  it("exposes exactly the 36 procedures the client calls", () => {
+  it("exposes exactly the 38 procedures the client calls", () => {
     expect(proceduresOf(analysisRouter)).toEqual(ALL_PROCEDURES);
   });
 

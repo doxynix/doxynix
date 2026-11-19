@@ -4,9 +4,14 @@ import * as z from "zod";
 import { AppError } from "@/server/core/api-error";
 import { analysisStartLimiter } from "@/server/core/ratelimit";
 import { entitlementProcedure, workspaceProcedure } from "@/server/core/trpc/init";
+import { cursorPageSchema } from "@/server/utils/pagination";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 
-import { AnalysisScopeInputSchema } from "./analysis.schemas";
+import {
+  AnalysisHistoryOutputSchema,
+  AnalysisScopeInputSchema,
+  AnalysisVersionRefSchema,
+} from "./analysis.schemas";
 import { AnalysisLatestOutputSchema } from "./analysis-latest.schemas";
 import { analysisLifecycleService } from "./services/analysis-lifecycle.service";
 import { workspaceService } from "./services/workspace.service";
@@ -50,15 +55,27 @@ export const analysisCoreRouter = {
       return workspaceService.getDetailedMetrics(ctx.db, input.repoId, ctx.workspace.id, input.aid);
     }),
   getHistory: workspaceProcedure
-    .input(z.object({ repoId: z.uuid() }))
+    .input(z.object({ repoId: z.uuid() }).extend(cursorPageSchema(50).shape))
+    .output(AnalysisHistoryOutputSchema)
     .query(async ({ ctx, input }) => {
-      return analysisLifecycleService.getHistory(ctx.db, input.repoId, ctx.workspace.id);
+      return analysisLifecycleService.getHistory(ctx.db, input.repoId, ctx.workspace.id, input);
     }),
   getLatest: workspaceProcedure
     .input(z.object({ repoId: z.uuid() }))
     .output(AnalysisLatestOutputSchema)
     .query(async ({ ctx, input }) => {
       return analysisLifecycleService.getLatest(ctx.db, input.repoId, ctx.workspace.id);
+    }),
+  getVersionRef: workspaceProcedure
+    .input(z.object({ analysisId: z.string(), repoId: z.uuid() }))
+    .output(AnalysisVersionRefSchema.nullable())
+    .query(async ({ ctx, input }) => {
+      return analysisLifecycleService.getVersionRef(
+        ctx.db,
+        input.repoId,
+        ctx.workspace.id,
+        input.analysisId,
+      );
     }),
   getWorkspace: workspaceProcedure.input(AnalysisScopeInputSchema).query(async ({ ctx, input }) => {
     return workspaceService.getWorkspace(ctx.db, input.repoId, ctx.workspace.id, input.aid);

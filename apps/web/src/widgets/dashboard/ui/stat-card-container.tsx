@@ -1,6 +1,8 @@
 "use client";
 import { useLocale, useTranslations } from "next-intl";
 
+import { ErrorState } from "@/shared/ui/kit/error-state";
+
 import { StatCard } from "@/entities/repo/ui/stat-card";
 
 import { getStats } from "../model/get-stats";
@@ -11,10 +13,19 @@ export function StatCardContainer() {
   const locale = useLocale();
   const t = useTranslations("Dashboard");
 
-  const { data, isLoading } = useDashboardStats();
+  const { data, error, isError, isLoading, refetch } = useDashboardStats();
 
-  if (isLoading || data == null) {
+  if (isLoading) {
     return <StatCardsSkeleton />;
+  }
+
+  if (isError || data == null) {
+    return (
+      <ErrorState
+        error={error}
+        onRetry={() => void refetch()}
+      />
+    );
   }
 
   const items = getStats(data, t, locale);

@@ -189,6 +189,7 @@ model Session {
   @@allow('create', (auth() != null && userId == auth().id) || auth().role == 'ADMIN')
 
   @@index([userId])
+  @@index([userId, createdAt(sort: Desc), id(sort: Desc)])
   @@index([expiresAt])
   @@map("sessions")
 }

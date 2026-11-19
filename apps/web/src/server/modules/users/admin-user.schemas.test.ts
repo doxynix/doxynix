@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   AdminDeleteUserSchema,
   AdminSetBannedSchema,
+  AdminUserSessionsInputSchema,
   AdminUsersFilterSchema,
 } from "./admin-user.schemas";
 
@@ -83,9 +84,23 @@ describe("AdminDeleteUserSchema", () => {
   });
 });
 
+describe("AdminUserSessionsInputSchema", () => {
+  it("defaults the page size for the sessions block of the user sheet", () => {
+    expect(AdminUserSessionsInputSchema.parse({ id: USER_ID })).toStrictEqual({
+      id: USER_ID,
+      limit: 50,
+    });
+  });
+});
+
 describe("AdminUsersFilterSchema", () => {
   it("defaults the page size so a client cannot request the whole table", () => {
-    expect(AdminUsersFilterSchema.parse({}).limit).toBe(10);
+    expect(AdminUsersFilterSchema.parse({}).limit).toBe(50);
+  });
+
+  it("takes a cursor instead of a page number", () => {
+    expect(AdminUsersFilterSchema.parse({ cursor: USER_ID }).cursor).toBe(USER_ID);
+    expect(AdminUsersFilterSchema.parse({ page: 4 })).not.toHaveProperty("page");
   });
 
   it("accepts role and banned filters and rejects anything outside the enums", () => {

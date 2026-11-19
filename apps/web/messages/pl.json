@@ -52,8 +52,7 @@
     "operation_updated": "Zaktualizowano",
     "origin_system": "system",
     "page_desc": "Każdy zapis aplikacji, dla wszystkich aktorów. Dziennik audytu w panelu pokazuje tylko Twoją aktywność; ten pokazuje wszystko.",
-    "page_title": "Dziennik audytu",
-    "total_count": "{filtered} z {total} wpisów"
+    "page_title": "Dziennik audytu"
   },
   "AdminBannedEmails": {
     "col_actions": "Akcje",
@@ -121,8 +120,7 @@
     "status_analyzing": "Analizowanie",
     "status_completed": "Zakończony",
     "status_failed": "Niepowodzenie",
-    "status_pending": "Oczekujące",
-    "total_count": "{filtered} z {total} recenzji"
+    "status_pending": "Oczekujące"
   },
   "AdminUsers": {
     "ban_action": "Zablokuj",
@@ -195,7 +193,6 @@
     "toast_role_updated": "{name} jest teraz administratorem",
     "toast_session_revoked": "Sesja unieważniona",
     "toast_unbanned": "Blokada zdjęta",
-    "total_count": "{filtered} z {total} użytkowników",
     "unban_action": "Odblokuj"
   },
   "Agent": {
@@ -429,7 +426,7 @@
     "beta": "BETA",
     "breadcrumb": "Ścieżka nawigacji",
     "cancel": "Anuluj",
-    "capped_hint": "Pokazuję pierwsze {count}. Zawęź filtry lub wybierz zakres dat.",
+    "capped_hint": "Pokazuję pierwsze {count}. Zawęź wyniki, aby zobaczyć resztę.",
     "change_language": "Zmień język",
     "check_system_status": "Sprawdź status systemu",
     "clipboard_unavailable": "API schowka niedostępne",

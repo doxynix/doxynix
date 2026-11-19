@@ -6,6 +6,7 @@ export function accountHandlers({ queryClient, trpc }: RealtimeDeps): RealtimeHa
   return {
     [REALTIME_CONFIG.events.user.apiKeyUpdated]: () => {
       void queryClient.invalidateQueries(trpc.apikey.list.pathFilter());
+      void queryClient.invalidateQueries(trpc.apikey.listArchived.pathFilter());
     },
     [REALTIME_CONFIG.events.user.auditUpdated]: () => {
       void queryClient.invalidateQueries(trpc.audit.getActivityLogs.pathFilter());

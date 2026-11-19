@@ -1,8 +1,9 @@
 import { MAX_PAGE, MAX_PAGE_SIZE } from "@doxynix/shared";
+import { clamp } from "es-toolkit";
 import * as z from "zod";
 
 export function clampPage(page: null | number | undefined): number {
-  return Math.min(Math.max(1, page ?? 1), MAX_PAGE);
+  return clamp(page ?? 1, 1, MAX_PAGE);
 }
 
 export function getPaginationMeta(params: {
@@ -59,10 +60,25 @@ export const dateRangeMustBeOrdered = (
 
 export type DateRangeInput = z.infer<typeof DateRangeSchema>;
 
+const DAY_MS = 86_400_000;
+
+// A date-only `to` arrives at UTC midnight, so `lte` would drop that whole day. `lt` of the next
+// day is the bound getTrends/getDashboardStats use; a real timestamp keeps `lte`.
+function endBound(to: Date | null | undefined): Record<string, Date> {
+  if (to == null) {
+    return {};
+  }
+
+  const isUtcMidnight =
+    to.getTime() === Date.UTC(to.getUTCFullYear(), to.getUTCMonth(), to.getUTCDate());
+
+  return isUtcMidnight ? { lt: new Date(to.getTime() + DAY_MS) } : { lte: to };
+}
+
 export function buildDateRangeWhere(
   range: { from?: Date | null; to?: Date | null },
   column: "createdAt" | "updatedAt",
-): Record<string, { gte?: Date; lte?: Date }> {
+): Record<string, { gte?: Date; lt?: Date; lte?: Date }> {
   if (range.from == null && range.to == null) {
     return {};
   }
@@ -70,7 +86,7 @@ export function buildDateRangeWhere(
   return {
     [column]: {
       ...(range.from != null ? { gte: range.from } : {}),
-      ...(range.to != null ? { lte: range.to } : {}),
+      ...endBound(range.to),
     },
   };
 }
@@ -86,6 +102,11 @@ export const CursorSchema = z.object({
   limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(10),
   search: z.string().trim().max(1000).optional(),
 });
+
+export const cursorPageSchema = (defaultLimit: number) =>
+  CursorSchema.omit({ search: true }).extend({
+    limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(defaultLimit),
+  });
 
 export const ORDER_CREATED_AT_DESC = [{ createdAt: "desc" as const }, { id: "desc" as const }];
 

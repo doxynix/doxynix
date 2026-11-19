@@ -44,14 +44,30 @@ type Props = {
 export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
   const tCommon = useTranslations("Common");
-  const { comments, fixAll, fixOne, isCommentsLoading, isFixing, isStaging, stageFix } =
-    usePrDetails({ analysis, impact, repoId });
+  const {
+    comments,
+    commentsTotal,
+    fetchNextCommentsPage,
+    fetchNextFixesPage,
+    fixAll,
+    fixOne,
+    fixes,
+    hasNextCommentsPage,
+    hasNextFixesPage,
+    isCommentsLoading,
+    isFetchingNextCommentsPage,
+    isFetchingNextFixesPage,
+    isFixing,
+    isStaging,
+    stageFix,
+  } = usePrDetails({ analysis, impact, repoId });
 
   const changedFiles = impact?.changedFiles ?? [];
   const affectedZones = impact?.affectedZones ?? [];
   const affectedNodes = impact?.affectedNodes ?? [];
   const topFindings = impact?.topFindings ?? [];
-  const fixes = impact?.fixes ?? [];
+  const commentsCount = commentsTotal ?? 0;
+  const linkedFixes = impact?.summary.linkedFixes ?? 0;
 
   const detailItems = buildPrDetailItems({
     analysis,
@@ -66,8 +82,8 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
   });
 
   const impactStats = buildImpactStats({
-    commentsCount: comments?.renderedComments.length ?? 0,
-    fixesCount: fixes.length,
+    commentsCount,
+    fixesCount: linkedFixes,
     impact,
     labels: {
       findings: t("repo_pull_stat_findings"),
@@ -259,9 +275,9 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
               <ShieldCheck />
-              {t("repo_pull_detected_issues")} ({comments?.renderedComments.length ?? 0})
+              {t("repo_pull_detected_issues")} ({commentsCount})
             </CardTitle>
-            {comments != null && comments.renderedComments.length > 0 && (
+            {comments.length > 0 && (
               <LoadingButton
                 aria-label={t("repo_pull_autofix_all")}
                 className="bg-success font-semibold text-success-foreground hover:bg-success/90"
@@ -309,9 +325,9 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                   </>
                 )}
               />
-            ) : comments != null && comments.renderedComments.length > 0 ? (
+            ) : comments.length > 0 ? (
               <div className="flex flex-col gap-4">
-                {comments.renderedComments.map((comment) => (
+                {comments.map((comment) => (
                   <div
                     className="group relative overflow-hidden rounded-xl border p-4"
                     key={comment.id}
@@ -348,6 +364,18 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     </div>
                   </div>
                 ))}
+                {hasNextCommentsPage && (
+                  <LoadingButton
+                    className="w-full"
+                    disabled={isFetchingNextCommentsPage}
+                    isLoading={isFetchingNextCommentsPage}
+                    onClick={() => void fetchNextCommentsPage()}
+                    size="sm"
+                    variant="ghost"
+                  >
+                    {tCommon("more")}
+                  </LoadingButton>
+                )}
               </div>
             ) : (
               <p className="text-muted-foreground text-sm">{t("repo_pull_no_comments")}</p>
@@ -463,10 +491,12 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           </CardContent>
         </Card>
 
-        {fixes.length > 0 && (
+        {linkedFixes > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">{t("repo_pull_linked_fixes")}</CardTitle>
+              <CardTitle className="text-base">
+                {t("repo_pull_linked_fixes")} ({linkedFixes})
+              </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               {fixes.map((fix) => (
@@ -497,6 +527,18 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                   </div>
                 </div>
               ))}
+              {hasNextFixesPage && (
+                <LoadingButton
+                  className="w-full"
+                  disabled={isFetchingNextFixesPage}
+                  isLoading={isFetchingNextFixesPage}
+                  onClick={() => void fetchNextFixesPage()}
+                  size="sm"
+                  variant="ghost"
+                >
+                  {tCommon("more")}
+                </LoadingButton>
+              )}
             </CardContent>
           </Card>
         )}

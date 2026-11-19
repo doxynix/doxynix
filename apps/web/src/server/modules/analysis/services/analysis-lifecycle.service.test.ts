@@ -33,7 +33,7 @@ vi.mock("@/server/core/usage/usage", () => ({
 }));
 
 const prismaMock = vi.hoisted(() => ({
-  $executeRaw: vi.fn().mockResolvedValue(0),
+  $queryRawTyped: vi.fn().mockResolvedValue([]),
   $transaction: vi.fn(async (fn: (tx: unknown) => unknown) => fn(prismaMock)),
 }));
 
@@ -56,7 +56,13 @@ function buildDb(): DbClient {
       update: vi.fn().mockResolvedValue({ id: "analysis-1" }),
     },
     repo: {
-      findFirst: vi.fn().mockResolvedValue({ id: "repo-1", name: "demo", owner: "acme" }),
+      findFirst: vi.fn().mockResolvedValue({
+        defaultBranch: "main",
+        id: "repo-1",
+        name: "demo",
+        owner: "acme",
+        workspaceId: "workspace-1",
+      }),
     },
   } as unknown as DbClient;
 }
@@ -164,6 +170,17 @@ describe("analysisLifecycleService.analyze analytics", () => {
     expect(trackMock).not.toHaveBeenCalled();
   });
 
+  it("reads only the repo columns the access check needs", async () => {
+    const db = buildDb();
+
+    await analysisLifecycleService.assertRepoAccess(db, "workspace-1", "repo-1");
+
+    expect(db.repo.findFirst).toHaveBeenCalledWith({
+      select: { defaultBranch: true, id: true, name: true, owner: true, workspaceId: true },
+      where: { id: "repo-1", workspaceId: "workspace-1" },
+    });
+  });
+
   it("does not track when the task could not be triggered", async () => {
     triggerMock.mockRejectedValue(new Error("queue unavailable"));
 
@@ -177,5 +194,149 @@ describe("analysisLifecycleService.analyze analytics", () => {
     ).rejects.toThrow("queue unavailable");
 
     expect(trackMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("analysisLifecycleService.getHistory", () => {
+  const WORKSPACE_ID = "workspace-1";
+  const REPO_ID = "018f0000-0000-7000-8000-0000000000cc";
+
+  function makeHistoryRow(overrides?: Record<string, unknown>) {
+    return {
+      commitSha: "abc1234",
+      createdAt: new Date("2026-03-01T10:00:00.000Z"),
+      id: "018f0000-0000-7000-8000-000000000001",
+      message: "Completed successfully",
+      score: 88,
+      status: "DONE",
+      ...overrides,
+    };
+  }
+
+  function buildHistoryDb(rows: unknown[], total = rows.length) {
+    const count = vi.fn().mockResolvedValue(total);
+    const findMany = vi.fn().mockResolvedValue(rows);
+    const db = { analysis: { count, findMany } } as unknown as DbClient;
+
+    return { count, db, findMany };
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("reads one probe row past the page in the newest-first order", async () => {
+    const { db, findMany } = buildHistoryDb([
+      makeHistoryRow({ id: "018f0000-0000-7000-8000-00000000000a" }),
+      makeHistoryRow({ id: "018f0000-0000-7000-8000-00000000000b" }),
+      makeHistoryRow({ id: "018f0000-0000-7000-8000-00000000000c" }),
+    ]);
+
+    const result = await analysisLifecycleService.getHistory(db, REPO_ID, WORKSPACE_ID, {
+      limit: 2,
+    });
+
+    expect(result.items.map((item) => item.id)).toStrictEqual([
+      "018f0000-0000-7000-8000-00000000000a",
+      "018f0000-0000-7000-8000-00000000000b",
+    ]);
+    expect(result.meta).toStrictEqual({
+      hasNextPage: true,
+      nextCursor: "018f0000-0000-7000-8000-00000000000c",
+    });
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cursor: undefined,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 3,
+        where: { repo: { id: REPO_ID, workspaceId: WORKSPACE_ID } },
+      }),
+    );
+  });
+
+  it("keysets past the cursor id", async () => {
+    const { db, findMany } = buildHistoryDb([makeHistoryRow()]);
+    const cursor = "018f0000-0000-7000-8000-00000000000b";
+
+    await analysisLifecycleService.getHistory(db, REPO_ID, WORKSPACE_ID, { cursor, limit: 2 });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: { id: cursor }, take: 3 }),
+    );
+  });
+
+  it("reports the last page without a cursor when the probe row is missing", async () => {
+    const { db } = buildHistoryDb([makeHistoryRow()]);
+
+    const result = await analysisLifecycleService.getHistory(db, REPO_ID, WORKSPACE_ID, {
+      limit: 2,
+    });
+
+    expect(result.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
+  });
+
+  it("counts the whole history on the first page", async () => {
+    const { count, db } = buildHistoryDb([makeHistoryRow()], 620);
+
+    const result = await analysisLifecycleService.getHistory(db, REPO_ID, WORKSPACE_ID, {
+      limit: 50,
+    });
+
+    expect(result.total).toBe(620);
+    expect(count).toHaveBeenCalledWith({
+      where: { repo: { id: REPO_ID, workspaceId: WORKSPACE_ID } },
+    });
+  });
+
+  it("skips the count once a cursor is given", async () => {
+    const { count, db } = buildHistoryDb([makeHistoryRow()], 620);
+
+    const result = await analysisLifecycleService.getHistory(db, REPO_ID, WORKSPACE_ID, {
+      cursor: "018f0000-0000-7000-8000-00000000000b",
+      limit: 2,
+    });
+
+    expect(result.total).toBeNull();
+    expect(count).not.toHaveBeenCalled();
+  });
+});
+
+describe("analysisLifecycleService.getVersionRef", () => {
+  const WORKSPACE_ID = "workspace-1";
+  const REPO_ID = "018f0000-0000-7000-8000-0000000000cc";
+  const ANALYSIS_ID = "018f0000-0000-7000-8000-000000000001";
+
+  function buildRefDb(row: unknown) {
+    const findFirst = vi.fn().mockResolvedValue(row);
+    const db = { analysis: { findFirst } } as unknown as DbClient;
+
+    return { db, findFirst };
+  }
+
+  it("reads one row for a version the loaded page does not contain", async () => {
+    const ref = {
+      commitSha: "abc1234",
+      createdAt: new Date("2026-03-01T10:00:00.000Z"),
+      id: ANALYSIS_ID,
+      status: "DONE",
+    };
+    const { db, findFirst } = buildRefDb(ref);
+
+    await expect(
+      analysisLifecycleService.getVersionRef(db, REPO_ID, WORKSPACE_ID, ANALYSIS_ID),
+    ).resolves.toStrictEqual(ref);
+
+    expect(findFirst).toHaveBeenCalledWith({
+      select: { commitSha: true, createdAt: true, id: true, status: true },
+      where: { id: ANALYSIS_ID, repo: { id: REPO_ID, workspaceId: WORKSPACE_ID } },
+    });
+  });
+
+  it("returns null for a version outside the repository scope", async () => {
+    const { db } = buildRefDb(null);
+
+    await expect(
+      analysisLifecycleService.getVersionRef(db, REPO_ID, WORKSPACE_ID, ANALYSIS_ID),
+    ).resolves.toBeNull();
   });
 });

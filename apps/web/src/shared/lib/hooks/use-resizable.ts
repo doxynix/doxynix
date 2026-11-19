@@ -2,6 +2,7 @@
 
 import type { KeyboardEvent, PointerEvent } from "react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { clamp } from "es-toolkit";
 
 type UseResizableOptions = {
   // CSS custom property written on `panelRef` during a drag. Omit to write `width` instead.
@@ -25,14 +26,27 @@ const VIEWPORT_GUTTER = 32;
 
 const noopSubscribe = () => () => {};
 
-function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max);
-}
-
 function readWidth(storageKey: string | undefined, fallback: number, min: number, max: number) {
   const raw = storageKey === undefined ? null : localStorage.getItem(storageKey);
   const stored = raw === null ? Number.NaN : Number(raw);
   return Number.isFinite(stored) ? clamp(stored, min, max) : clamp(fallback, min, max);
+}
+
+type BodyCursorSnapshot = { cursor: string; userSelect: string };
+
+// React Compiler rejects DOM mutation inside a hook, so the body styles are written out here.
+function lockBodyCursor(): BodyCursorSnapshot {
+  const { style } = document.body;
+  const snapshot = { cursor: style.cursor, userSelect: style.userSelect };
+  style.cursor = "col-resize";
+  style.userSelect = "none";
+  return snapshot;
+}
+
+function restoreBodyCursor(snapshot: BodyCursorSnapshot): void {
+  const { style } = document.body;
+  style.cursor = snapshot.cursor;
+  style.userSelect = snapshot.userSelect;
 }
 
 export function useResizable({
@@ -93,7 +107,7 @@ export function useResizable({
   );
   const minBound = Math.min(minWidth, maxBound);
 
-  const currentWidth = Math.min(Math.max(liveWidth ?? width, minBound), maxBound);
+  const currentWidth = clamp(liveWidth ?? width, minBound, maxBound);
 
   // Discrete changes (keyboard, double-click reset, reopen drag) still go through state.
   const applyWidth = (next: number) => {
@@ -128,11 +142,7 @@ export function useResizable({
       return;
     }
 
-    const body = document.body;
-    const previousCursor = body.style.cursor;
-    const previousUserSelect = body.style.userSelect;
-    body.style.cursor = "col-resize";
-    body.style.userSelect = "none";
+    const cursorSnapshot = lockBodyCursor();
 
     const update = () => {
       const delta = pointerXRef.current - originRef.current.startX;
@@ -167,8 +177,7 @@ export function useResizable({
         finalWidth = update();
       }
 
-      body.style.cursor = previousCursor;
-      body.style.userSelect = previousUserSelect;
+      restoreBodyCursor(cursorSnapshot);
       setLiveWidth(finalWidth);
       setIsResizing(false);
       onDragEndRef.current?.(finalWidth, pointerXRef.current !== originRef.current.startX);
@@ -186,8 +195,7 @@ export function useResizable({
         cancelAnimationFrame(frameRef.current);
       }
       frameRef.current = null;
-      body.style.cursor = previousCursor;
-      body.style.userSelect = previousUserSelect;
+      restoreBodyCursor(cursorSnapshot);
     };
   }, [cssVar, isResizing, maxBound, minBound, side]);
 

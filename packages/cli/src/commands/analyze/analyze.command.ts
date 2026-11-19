@@ -218,7 +218,7 @@ export function registerAnalyzeCommand(program: Command) {
       );
       p.outro(
         brand.muted(
-          history.capped
+          history.meta.hasNextPage
             ? `Total runs: ${history.total} (showing the ${history.items.length} most recent)`
             : `Total runs: ${history.total}`,
         ),

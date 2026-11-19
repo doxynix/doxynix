@@ -1,0 +1,293 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const mocks = vi.hoisted(() => ({
+  buildAffectedNodes: vi.fn(() => []),
+  buildAffectedZones: vi.fn(() => []),
+  buildTopFindings: vi.fn(async () => []),
+  buildTopLevelNodes: vi.fn(() => []),
+  countFindingsByFile: vi.fn(() => new Map<string, number>()),
+  createAnalyzeContextBuilder: vi.fn(() => ({
+    getStructureContext: () => null,
+    getStructureNode: vi.fn(() => null),
+  })),
+  getByPrAnalysisId: vi.fn(),
+  getRepoForImpact: vi.fn(),
+  loadImpactAnalysis: vi.fn(),
+  mapChangedFilesToImpactNodes: vi.fn(() => []),
+  parseChangedFilesSnapshot: vi.fn((_analysis: unknown) => []),
+  parsePersistedFindings: vi.fn((_analysis: unknown) => []),
+  selectPrimaryFile: vi.fn(() => null),
+}));
+
+vi.mock("../analysis.mapper", () => ({
+  analysisMapper: {
+    buildAffectedNodes: mocks.buildAffectedNodes,
+    buildAffectedZones: mocks.buildAffectedZones,
+    buildTopFindings: mocks.buildTopFindings,
+    countFindingsByFile: mocks.countFindingsByFile,
+    parseChangedFilesSnapshot: mocks.parseChangedFilesSnapshot,
+    parsePersistedFindings: mocks.parsePersistedFindings,
+    selectPrimaryFile: mocks.selectPrimaryFile,
+  },
+}));
+vi.mock("../analysis.repository", () => ({
+  analysisRepo: {
+    getByPrAnalysisId: mocks.getByPrAnalysisId,
+    getRepoForImpact: mocks.getRepoForImpact,
+    loadImpactAnalysis: mocks.loadImpactAnalysis,
+  },
+}));
+vi.mock("../logic/analyze-context-builder", () => ({
+  createAnalyzeContextBuilder: mocks.createAnalyzeContextBuilder,
+}));
+vi.mock("../logic/graph-navigator", () => ({ buildTopLevelNodes: mocks.buildTopLevelNodes }));
+vi.mock("../logic/impact-file-mapper", () => ({
+  mapChangedFilesToImpactNodes: mocks.mapChangedFilesToImpactNodes,
+}));
+
+import type { DbClient } from "@/server/core/db";
+
+import { prImpactService } from "./pr-impact.service";
+
+const ANALYSIS_ID = "018f0000-0000-7000-8000-0000000000aa";
+const UPDATED_AT = new Date("2026-03-01T12:00:00.000Z");
+const REPO_ID = "018f0000-0000-7000-8000-0000000000cc";
+
+function stubAnalysis() {
+  return {
+    _count: { generatedFixes: 0 },
+    baseSha: "base",
+    changedFilesJson: [],
+    createdAt: new Date("2026-03-01T11:00:00.000Z"),
+    findingsJson: [],
+    headSha: "head",
+    id: ANALYSIS_ID,
+    prNumber: 7,
+    riskScore: null,
+    status: "COMPLETED",
+    updatedAt: UPDATED_AT,
+  };
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+
+describe("prImpactService.getByRepoAndPRNumber", () => {
+  it("hands the findings cache the analysis id and its version separately", async () => {
+    mocks.loadImpactAnalysis.mockResolvedValue(stubAnalysis());
+    mocks.getRepoForImpact.mockResolvedValue({ name: "doxynix", owner: "ivan" });
+
+    const payload = await prImpactService.getByRepoAndPRNumber({} as DbClient, REPO_ID, 7, "ws-1");
+
+    expect(mocks.buildTopFindings).toHaveBeenCalledTimes(1);
+    expect(mocks.buildTopFindings).toHaveBeenCalledWith(
+      [],
+      [],
+      expect.any(Map),
+      "ivan",
+      "doxynix",
+      { analysisId: ANALYSIS_ID, version: String(UPDATED_AT.getTime()) },
+    );
+    expect(payload).not.toBeNull();
+    expect(payload?.analysis.id).toBe(ANALYSIS_ID);
+  });
+
+  it("reports the counted fixes without shipping their rows", async () => {
+    mocks.loadImpactAnalysis.mockResolvedValue({
+      ...stubAnalysis(),
+      _count: { generatedFixes: 137 },
+    });
+    mocks.getRepoForImpact.mockResolvedValue({ name: "doxynix", owner: "ivan" });
+
+    const payload = await prImpactService.getByRepoAndPRNumber({} as DbClient, REPO_ID, 7, "ws-1");
+
+    expect(payload?.summary.linkedFixes).toBe(137);
+    expect(payload).not.toHaveProperty("fixes");
+  });
+
+  it("parses both persisted snapshots from the analysis row alone", async () => {
+    const analysis = stubAnalysis();
+    mocks.loadImpactAnalysis.mockResolvedValue(analysis);
+    mocks.getRepoForImpact.mockResolvedValue({ name: "doxynix", owner: "ivan" });
+
+    await prImpactService.getByRepoAndPRNumber({} as DbClient, REPO_ID, 7, "ws-1");
+
+    expect(mocks.parseChangedFilesSnapshot).toHaveBeenCalledWith(analysis);
+    expect(mocks.parsePersistedFindings).toHaveBeenCalledWith(analysis);
+  });
+
+  it("returns null when the analysis or the repo snapshot is missing", async () => {
+    mocks.loadImpactAnalysis.mockResolvedValue(null);
+
+    await expect(
+      prImpactService.getByRepoAndPRNumber({} as DbClient, REPO_ID, 7, "ws-1"),
+    ).resolves.toBeNull();
+
+    mocks.loadImpactAnalysis.mockResolvedValue(stubAnalysis());
+    mocks.getRepoForImpact.mockResolvedValue(null);
+
+    await expect(
+      prImpactService.getByRepoAndPRNumber({} as DbClient, REPO_ID, 7, "ws-1"),
+    ).resolves.toBeNull();
+    expect(mocks.buildTopFindings).not.toHaveBeenCalled();
+  });
+});
+
+describe("prImpactService.listFixes", () => {
+  const WORKSPACE_ID = "ws-1";
+
+  function makeFixRow(overrides: Record<string, unknown> = {}) {
+    return {
+      githubPrNumber: 12,
+      githubPrUrl: "https://pr/12",
+      id: "018f0000-0000-7000-8000-0000000000f1",
+      status: "DRAFT",
+      title: "fix",
+      ...overrides,
+    };
+  }
+
+  it("keeps the probe row out of the page and hands it back as the cursor", async () => {
+    mocks.getByPrAnalysisId.mockResolvedValue([
+      makeFixRow({ id: "018f0000-0000-7000-8000-0000000000f1" }),
+      makeFixRow({ id: "018f0000-0000-7000-8000-0000000000f2" }),
+      makeFixRow({ id: "018f0000-0000-7000-8000-0000000000f3" }),
+    ]);
+
+    const result = await prImpactService.listFixes({} as DbClient, ANALYSIS_ID, WORKSPACE_ID, {
+      limit: 2,
+    });
+
+    expect(result.items.map((fix) => fix.id)).toStrictEqual([
+      "018f0000-0000-7000-8000-0000000000f1",
+      "018f0000-0000-7000-8000-0000000000f2",
+    ]);
+    expect(result.meta).toStrictEqual({
+      hasNextPage: true,
+      nextCursor: "018f0000-0000-7000-8000-0000000000f3",
+    });
+  });
+
+  it("maps the fix summary the linked-fixes card renders", async () => {
+    mocks.getByPrAnalysisId.mockResolvedValueOnce([makeFixRow()]);
+
+    const result = await prImpactService.listFixes({} as DbClient, ANALYSIS_ID, WORKSPACE_ID, {
+      limit: 20,
+    });
+
+    expect(result.items[0]).toStrictEqual({
+      githubPrNumber: 12,
+      githubPrUrl: "https://pr/12",
+      id: "018f0000-0000-7000-8000-0000000000f1",
+      status: "DRAFT",
+      title: "fix",
+    });
+  });
+
+  it("passes the cursor and the limit through to the workspace-scoped read", async () => {
+    mocks.getByPrAnalysisId.mockResolvedValue([]);
+
+    await prImpactService.listFixes({} as DbClient, ANALYSIS_ID, WORKSPACE_ID, {
+      cursor: "018f0000-0000-7000-8000-0000000000f2",
+      limit: 20,
+    });
+
+    expect(mocks.getByPrAnalysisId).toHaveBeenCalledWith(expect.anything(), ANALYSIS_ID, "ws-1", {
+      cursor: "018f0000-0000-7000-8000-0000000000f2",
+      limit: 20,
+    });
+  });
+});
+
+describe("prImpactService.listByRepository", () => {
+  const WORKSPACE_ID = "ws-1";
+
+  function makePullRow(overrides?: Record<string, unknown>) {
+    return {
+      _count: { comments: 2 },
+      createdAt: new Date("2026-03-01T10:00:00.000Z"),
+      headSha: "head-sha-1",
+      id: "018f0000-0000-7000-8000-000000000001",
+      prNumber: 42,
+      riskScore: 5,
+      status: "COMPLETED",
+      ...overrides,
+    };
+  }
+
+  function buildPullDb(rows: unknown[], total = rows.length) {
+    const count = vi.fn().mockResolvedValue(total);
+    const findMany = vi.fn().mockResolvedValue(rows);
+    const db = { pullRequestAnalysis: { count, findMany } } as unknown as DbClient;
+
+    return { count, db, findMany };
+  }
+
+  it("reads one probe row past the page in the newest-first order", async () => {
+    const { db, findMany } = buildPullDb([
+      makePullRow({ id: "018f0000-0000-7000-8000-00000000000a" }),
+      makePullRow({ id: "018f0000-0000-7000-8000-00000000000b" }),
+      makePullRow({ id: "018f0000-0000-7000-8000-00000000000c" }),
+    ]);
+
+    const result = await prImpactService.listByRepository(db, REPO_ID, WORKSPACE_ID, { limit: 2 });
+
+    expect(result.items.map((item) => item.id)).toStrictEqual([
+      "018f0000-0000-7000-8000-00000000000a",
+      "018f0000-0000-7000-8000-00000000000b",
+    ]);
+    expect(result.meta).toStrictEqual({
+      hasNextPage: true,
+      nextCursor: "018f0000-0000-7000-8000-00000000000c",
+    });
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cursor: undefined,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 3,
+        where: { repo: { id: REPO_ID, workspaceId: WORKSPACE_ID } },
+      }),
+    );
+  });
+
+  it("keysets past the cursor id", async () => {
+    const { db, findMany } = buildPullDb([makePullRow()]);
+    const cursor = "018f0000-0000-7000-8000-00000000000b";
+
+    await prImpactService.listByRepository(db, REPO_ID, WORKSPACE_ID, { cursor, limit: 2 });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: { id: cursor }, take: 3 }),
+    );
+  });
+
+  it("reports the last page without a cursor when the probe row is missing", async () => {
+    const { db } = buildPullDb([makePullRow()]);
+
+    const result = await prImpactService.listByRepository(db, REPO_ID, WORKSPACE_ID, { limit: 2 });
+
+    expect(result.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
+  });
+
+  it("keeps the comment count mapping and counts the first page", async () => {
+    const { db } = buildPullDb([makePullRow({ _count: { comments: 7 } })], 620);
+
+    const result = await prImpactService.listByRepository(db, REPO_ID, WORKSPACE_ID, { limit: 50 });
+
+    expect(result.items[0]?.findingCount).toBe(7);
+    expect(result.total).toBe(620);
+  });
+
+  it("skips the count once a cursor is given", async () => {
+    const { count, db } = buildPullDb([makePullRow()], 620);
+
+    const result = await prImpactService.listByRepository(db, REPO_ID, WORKSPACE_ID, {
+      cursor: "018f0000-0000-7000-8000-00000000000b",
+      limit: 2,
+    });
+
+    expect(result.total).toBeNull();
+    expect(count).not.toHaveBeenCalled();
+  });
+});

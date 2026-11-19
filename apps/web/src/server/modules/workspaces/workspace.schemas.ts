@@ -1,5 +1,7 @@
-import { PlanCodeSchema, WorkspaceRole } from "@doxynix/shared";
+import { CursorMetaSchema, PlanCodeSchema, WorkspaceRole } from "@doxynix/shared";
 import * as z from "zod";
+
+import { cursorPageSchema } from "@/server/utils/pagination";
 
 export const WorkspaceEntitlementSummarySchema = z.object({
   aiTokensPerMonth: z.number().int().nullable(),
@@ -29,6 +31,15 @@ export const WorkspaceMemberSummarySchema = z.object({
     name: z.string().nullable(),
   }),
   userId: z.uuid(),
+});
+
+export const WorkspaceMembersInputSchema = cursorPageSchema(50);
+
+export const WorkspaceMembersOutputSchema = z.object({
+  items: z.array(WorkspaceMemberSummarySchema),
+  meta: CursorMetaSchema,
+  ownerCount: z.number().int(),
+  total: z.number().int(),
 });
 
 export const AddWorkspaceMemberSchema = z.object({

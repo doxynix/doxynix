@@ -50,7 +50,9 @@ export const NotificationsBulkFilterSchema = z
     ...repoIdentityFields,
     search: z.string().trim().max(1000).optional(),
     type: z.enum(NotifyType).optional(),
+    ...DateRangeSchema.shape,
   })
-  .superRefine(validateRepoPair);
+  .superRefine(validateRepoPair)
+  .superRefine(dateRangeMustBeOrdered);
 
 export type NotificationsBulkFilterInput = z.infer<typeof NotificationsBulkFilterSchema>;

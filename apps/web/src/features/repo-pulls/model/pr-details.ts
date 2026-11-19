@@ -72,24 +72,3 @@ export function buildImpactStats({
     { label: labels.generatedFixes, value: fixesCount },
   ];
 }
-
-type CommentInput = {
-  bodyHtml: string;
-  filePath: string;
-  findingType: string;
-  line: number;
-};
-
-export type FixFinding = {
-  file: string;
-  line: number;
-  suggestion: string;
-  type: string;
-};
-
-export const toFixFinding = (comment: CommentInput): FixFinding => ({
-  file: comment.filePath,
-  line: comment.line,
-  suggestion: comment.bodyHtml,
-  type: comment.findingType.toLowerCase(),
-});

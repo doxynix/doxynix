@@ -4,7 +4,7 @@ import { normalize } from "pathe";
 import type { DbClient } from "@/server/core/db";
 
 import { analysisMapper } from "../analysis.mapper";
-import { analysisRepo } from "../analysis.repository";
+import { analysisRepo, loadDocumentsPerType } from "../analysis.repository";
 import { createAnalyzeContextBuilder } from "../logic/analyze-context-builder";
 import { buildInteractiveBriefNodePayload } from "../logic/brief";
 import { matchDocSections } from "../logic/doc-section-matcher";
@@ -57,6 +57,7 @@ export const workspaceService = {
         structureNode.node.label,
         relatedFiles,
         analyzeContext,
+        aid,
       ),
       analysisRepo.loadRelatedPrFindings(db, repoId, workspaceId, relatedFiles),
     ]);
@@ -110,12 +111,13 @@ export const workspaceService = {
     workspaceId: string,
     aid?: string,
   ): Promise<null | RepoWorkspacePayload> {
-    const repo = await analysisRepo.getRepoSnapshotWithDocuments(db, repoId, workspaceId, aid);
+    const repo = await analysisRepo.getRepoSnapshot(db, repoId, workspaceId, aid);
     if (repo == null) {
       return null;
     }
+    const documents = await loadDocumentsPerType(db, repoId, workspaceId, { aid, perType: 1 });
     const analyzeContext = createAnalyzeContextBuilder(repo);
-    const overview = analysisMapper.toOverview(repo);
+    const overview = analysisMapper.toOverview({ ...repo, documents });
     const structure = analyzeContext.getStructureMap();
 
     if (overview == null || structure == null) {
@@ -133,8 +135,9 @@ export const workspaceService = {
     nodeLabel: string,
     relatedFiles: string[],
     analyzeContext: ReturnType<typeof createAnalyzeContextBuilder>,
+    aid?: string,
   ) {
-    const docs = await analysisRepo.loadLatestDocumentsWithContent(db, repoId, workspaceId);
+    const docs = await analysisRepo.loadLatestDocumentsWithContent(db, repoId, workspaceId, aid);
 
     return matchDocSections({
       docs,

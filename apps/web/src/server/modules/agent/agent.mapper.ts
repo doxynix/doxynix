@@ -3,7 +3,7 @@ import type { UIDataTypes, UIMessagePart, UITools } from "ai";
 
 import { appLogger } from "@/server/core/app-logger";
 
-type SessionMessagePart = UIMessagePart<UIDataTypes, UITools>;
+export type SessionMessagePart = UIMessagePart<UIDataTypes, UITools>;
 
 export type SessionMessage = {
   createdAt: Date;
@@ -12,8 +12,10 @@ export type SessionMessage = {
   role: ChatMessage["role"];
 };
 
+export type SessionMessageRow = Pick<ChatMessage, "createdAt" | "id" | "parts" | "role">;
+
 export const agentMapper = {
-  toSessionMessage(message: ChatMessage): SessionMessage {
+  toSessionMessage(message: SessionMessageRow): SessionMessage {
     let parts: SessionMessagePart[];
 
     try {

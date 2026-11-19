@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useTRPC } from "@/shared/api/trpc";
 import { sidebarMenu } from "@/shared/config/navigation";
 import { useNavLabels } from "@/shared/config/navigation-labels";
-import { REPO_LIST_PAGE_SIZE } from "@/shared/config/repos";
+import { REPO_LIST_PAGE_SIZE } from "@/shared/config/pagination";
 import { cn } from "@/shared/lib/cn";
 import { useAppearancePreferences } from "@/shared/lib/hooks/use-appearance-preferences";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/core/collapsible";

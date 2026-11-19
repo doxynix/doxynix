@@ -39,13 +39,67 @@ function uniqueViolation() {
   });
 }
 
+type CapturedStatement = { sql: string; values: unknown[] };
+
+// The generated typed query carries the statement text and its positional values, so the fake keeps
+// both and the assertions below still cover the SQL, not only the parameters.
+function captureStatement(query: { sql: string; values: readonly unknown[] }): CapturedStatement {
+  return { sql: query.sql, values: [...query.values] };
+}
+
+function statementAt(statements: CapturedStatement[], index: number): CapturedStatement {
+  const statement = statements[index];
+
+  if (statement == null) {
+    throw new Error(`expected a captured statement at index ${index}`);
+  }
+
+  return statement;
+}
+
 function createFakeDb() {
   const events = new Map<string, EventRow>();
   const rollups = new Map<string, RollupRow>();
+  const statements: CapturedStatement[] = [];
   let eventCount = 0;
 
+  // Mirrors the single INSERT … ON CONFLICT in `prisma/sql/upsertWorkspaceUsage.sql`: both branches
+  // clamp at zero. The SQL text is asserted here, the semantics in the integration suite.
+  const queryRawTyped = vi.fn(
+    async (query: { sql: string; values: readonly unknown[] }): Promise<unknown[]> => {
+      statements.push(captureStatement(query));
+
+      const [workspaceId, periodStart, tokens, analyses, costCents] = query.values as [
+        string,
+        string,
+        number,
+        number,
+        bigint,
+      ];
+      const key = `${workspaceId}:${new Date(`${periodStart}T00:00:00.000Z`).toISOString()}`;
+      const existing = rollups.get(key);
+
+      if (existing == null) {
+        rollups.set(key, {
+          aiTokensUsed: Math.max(0, tokens),
+          analysesCount: analyses,
+          costCents: costCents > BigInt(0) ? costCents : BigInt(0),
+        });
+
+        return [];
+      }
+
+      existing.aiTokensUsed = Math.max(0, existing.aiTokensUsed + tokens);
+      existing.analysesCount += analyses;
+      const total = existing.costCents + costCents;
+      existing.costCents = total > BigInt(0) ? total : BigInt(0);
+
+      return [];
+    },
+  );
+
   const db = {
-    $executeRaw: vi.fn().mockResolvedValue(0),
+    $queryRawTyped: queryRawTyped,
     $transaction: vi.fn(async (fn: (tx: unknown) => unknown) => fn(db)),
     usageEvent: {
       create: vi.fn(async ({ data }: { data: Omit<EventRow, "id"> }) => {
@@ -64,46 +118,9 @@ function createFakeDb() {
           events.get(where.idempotencyKey) ?? null,
       ),
     },
-    workspaceUsage: {
-      upsert: vi.fn(
-        async ({
-          create,
-          update,
-          where,
-        }: {
-          create: RollupRow & { periodStart: Date; workspaceId: string };
-          update: {
-            aiTokensUsed: { increment: number };
-            analysesCount: { increment: number };
-            costCents: { increment: bigint };
-          };
-          where: { workspaceId_periodStart: { periodStart: Date; workspaceId: string } };
-        }) => {
-          const key = `${where.workspaceId_periodStart.workspaceId}:${where.workspaceId_periodStart.periodStart.toISOString()}`;
-          const existing = rollups.get(key);
-
-          if (existing == null) {
-            const row: RollupRow = {
-              aiTokensUsed: create.aiTokensUsed,
-              analysesCount: create.analysesCount,
-              costCents: create.costCents,
-            };
-            rollups.set(key, row);
-
-            return row;
-          }
-
-          existing.aiTokensUsed += update.aiTokensUsed.increment;
-          existing.analysesCount += update.analysesCount.increment;
-          existing.costCents += update.costCents.increment;
-
-          return existing;
-        },
-      ),
-    },
   };
 
-  return { db: db as unknown as DbClient, events, rollups };
+  return { db: db as unknown as DbClient, events, rollups, statements };
 }
 
 function rollupFor(rollups: Map<string, RollupRow>, at: Date): RollupRow | undefined {
@@ -152,7 +169,31 @@ describe("reserve and settle", () => {
     expect(settled.tokens).toBe(700);
     expect(settled.releasedTokens).toBe(500);
     expect(rollupFor(fake.rollups, JANUARY)?.aiTokensUsed).toBe(700);
-    expect(rollupFor(fake.rollups, JANUARY)?.costCents).toBeGreaterThan(BigInt(0));
+    // A 500-input-token call is worth a fraction of a cent, and rounding must not inflate it.
+    expect(rollupFor(fake.rollups, JANUARY)?.costCents).toBe(BigInt(0));
+  });
+
+  it("charges whole cents once a call costs more than one", async () => {
+    const fake = createFakeDb();
+
+    await reserveUsage(fake.db, {
+      estimatedTokens: 1200,
+      idempotencyKey: "call-1",
+      now: JANUARY,
+      workspaceId: WORKSPACE_ID,
+    });
+    const settled = await settleUsage(fake.db, {
+      idempotencyKey: "call-1",
+      model: MODEL,
+      now: JANUARY,
+      provider: "google",
+      usage: { cachedInputTokens: 0, inputTokens: 1_000_000, outputTokens: 0 },
+      workspaceId: WORKSPACE_ID,
+    });
+
+    // 7.5 cents at the input rate, rounded to the nearest cent instead of up.
+    expect(settled.costCents).toBe(BigInt(8));
+    expect(rollupFor(fake.rollups, JANUARY)?.costCents).toBe(BigInt(8));
   });
 
   it("does not double count a duplicate reservation", async () => {
@@ -224,6 +265,45 @@ describe("reserve and settle", () => {
 
     expect(rollupFor(fake.rollups, JANUARY)?.aiTokensUsed).toBe(0);
     expect(fake.events.get("call-1:release")?.kind).toBe("SETTLE");
+  });
+
+  it("writes the rollup with one clamped statement per event", async () => {
+    const fake = createFakeDb();
+
+    await reserveUsage(fake.db, {
+      estimatedTokens: 900,
+      idempotencyKey: "call-1",
+      now: JANUARY,
+      workspaceId: WORKSPACE_ID,
+    });
+    await releaseUsage(fake.db, {
+      idempotencyKey: "call-1",
+      now: JANUARY,
+      workspaceId: WORKSPACE_ID,
+    });
+
+    // One statement per event, not an upsert followed by a clamp UPDATE.
+    expect(fake.statements).toHaveLength(2);
+    const reserve = statementAt(fake.statements, 0);
+    const release = statementAt(fake.statements, 1);
+
+    // Both paths clamp: the insert at zero, the conflict branch on the running total.
+    expect(reserve.sql).toContain("GREATEST(0, $3::int)");
+    expect(reserve.sql).toContain("GREATEST(0, $5::bigint)");
+    expect(reserve.sql).toContain(
+      '"ai_tokens_used" = GREATEST(0, "workspace_usage"."ai_tokens_used" + $3::int)',
+    );
+    expect(reserve.sql).toContain(
+      '"cost_cents" = GREATEST(0, "workspace_usage"."cost_cents" + $5::bigint)',
+    );
+    // The regression this guards: `EXCLUDED."ai_tokens_used"` is already GREATEST(0, …), so a
+    // negative release would be added as 0 and never come off the total.
+    expect(reserve.sql).not.toContain('EXCLUDED."ai_tokens_used"');
+    expect(release.sql).toBe(reserve.sql);
+
+    expect(reserve.values).toEqual([WORKSPACE_ID, "2026-01-01", 900, 0, BigInt(0)]);
+    expect(release.values).toEqual([WORKSPACE_ID, "2026-01-01", -900, 0, BigInt(0)]);
+    expect(rollupFor(fake.rollups, JANUARY)?.aiTokensUsed).toBe(0);
   });
 
   it("keeps separate rollups per calendar month", async () => {

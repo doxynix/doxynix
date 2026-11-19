@@ -1,7 +1,8 @@
 "use client";
 
 import { type KeyboardEvent, useState, useTransition } from "react";
-import type { PaginationMeta } from "@doxynix/shared";
+import { MAX_PAGE, type PaginationMeta } from "@doxynix/shared";
+import { clamp } from "es-toolkit";
 import { useTranslations } from "next-intl";
 import { parseAsInteger, useQueryState } from "nuqs";
 
@@ -48,6 +49,12 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
     }
   }
 
+  // The server clamps `page` to MAX_PAGE, so a control that offers more would fetch page 100 again.
+  const maxPage = clamp(meta.totalPages, 1, MAX_PAGE);
+  // Both caps mean the same thing to the reader: rows past `reachableRows` need a filter or a date.
+  const showCapHint = meta.capped || maxPage < meta.totalPages;
+  const reachableRows = maxPage * meta.pageSize;
+
   const handlePageChange = (targetPage: number, btnType: "next" | "prev" | number) => {
     if (targetPage === page) {
       return;
@@ -64,7 +71,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
       e.preventDefault();
       const target = Number.parseInt(inputValue, 10);
 
-      if (!Number.isNaN(target) && target >= 1 && target <= meta.totalPages) {
+      if (!Number.isNaN(target) && target >= 1 && target <= maxPage) {
         if (target !== meta.currentPage) {
           handlePageChange(target, target);
         }
@@ -81,11 +88,11 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
   const handleBlur = () => {
     const target = Number.parseInt(inputValue, 10);
 
-    setInputValue(String(target));
+    setInputValue(String(Number.isNaN(target) ? meta.currentPage : Math.min(target, maxPage)));
   };
 
   const isPrevDisabled = isAnyLoading || meta.currentPage <= 1;
-  const isNextDisabled = isAnyLoading || meta.currentPage >= meta.totalPages;
+  const isNextDisabled = isAnyLoading || meta.currentPage >= maxPage;
 
   const isPrevLoading = isAnyLoading && clickedButton === "prev";
   const isNextLoading = isAnyLoading && clickedButton === "next";
@@ -117,7 +124,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
             className="size-8 px-1 text-center font-medium text-foreground"
             disabled={isAnyLoading}
             inputMode="numeric"
-            max={meta.totalPages}
+            max={maxPage}
             min={1}
             onBlur={handleBlur}
             onChange={(e) => {
@@ -130,7 +137,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
             value={inputValue}
           />
           <span>
-            {t("of")} {meta.totalPages}
+            {t("of")} {maxPage}
           </span>
         </PaginationItem>
 
@@ -144,9 +151,9 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
         </PaginationItem>
       </PaginationContent>
 
-      {meta.capped && (
+      {showCapHint && (
         <p className="mt-2 text-center text-muted-foreground text-xs">
-          {t("capped_hint", { count: meta.filteredCount })}
+          {t("capped_hint", { count: reachableRows })}
         </p>
       )}
     </Pagination>

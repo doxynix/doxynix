@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { ChevronDown, Keyboard, Link2, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -12,7 +12,6 @@ import { formatShortcut, SHORTCUTS } from "@/shared/config/shortcuts";
 import { useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
-import { useIntersectionObserver } from "@/shared/lib/hooks/use-intersection-observer";
 import { useModifierKey } from "@/shared/lib/hooks/use-modifier-key";
 import { AppButton } from "@/shared/ui/core/button";
 import {
@@ -28,8 +27,8 @@ import {
 } from "@/shared/ui/core/command";
 import { Kbd, KbdGroup } from "@/shared/ui/core/kbd";
 import { ShortcutHint } from "@/shared/ui/core/shortcut-hint";
-import { Spinner } from "@/shared/ui/core/spinner";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
+import { AppInfiniteSentinel } from "@/shared/ui/kit/app-infinite-sentinel";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dialog.store";
@@ -96,35 +95,6 @@ export function AppCommandMenu() {
       },
     ),
   );
-
-  const observerTarget = useRef<HTMLDivElement>(null);
-
-  const { observe, unobserve } = useIntersectionObserver(
-    (entries) => {
-      const entry = entries[0];
-      if (entry?.isIntersecting) {
-        void fetchNextPage();
-      }
-    },
-    { threshold: 0.1 },
-  );
-
-  useEffect(() => {
-    if (!hasNextPage || isFetchingNextPage || !isReposExpanded) {
-      return;
-    }
-
-    const currentTarget = observerTarget.current;
-    if (currentTarget) {
-      observe(currentTarget);
-    }
-
-    return () => {
-      if (currentTarget) {
-        unobserve(currentTarget);
-      }
-    };
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage, isReposExpanded, observe, unobserve]);
 
   const navigate = (path: string) => {
     setOpen(false);
@@ -286,14 +256,11 @@ export function AppCommandMenu() {
                       </div>
                     </CommandItem>
                   ))}
-                {hasNextPage && (
-                  <div
-                    className="my-2 flex items-center justify-center"
-                    ref={observerTarget}
-                  >
-                    {isFetchingNextPage && <Spinner />}
-                  </div>
-                )}
+                <AppInfiniteSentinel
+                  hasNextPage={hasNextPage}
+                  isFetchingNextPage={isFetchingNextPage}
+                  onLoadMore={fetchNextPage}
+                />
               </>
             )}
           </CommandGroup>

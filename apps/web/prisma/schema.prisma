@@ -377,6 +377,7 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([userId, createdAt(sort: Desc), id(sort: Desc)])
   @@index([expiresAt])
   @@map("sessions")
 }
@@ -536,6 +537,7 @@ model WorkspaceMember {
   @@unique([workspaceId, userId])
   @@index([userId, workspaceId])
   @@index([workspaceId, role])
+  @@index([workspaceId, createdAt, id])
   @@map("workspace_members")
 }
 
@@ -612,6 +614,7 @@ model ApiKey {
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId])
+  @@index([workspaceId, createdAt(sort: Desc), id(sort: Desc)])
   @@index([userId])
   @@index([expiresAt])
   @@index([revokedAfter])
@@ -733,6 +736,7 @@ model BillingEvent {
   replayCount       Int                  @default(0) @map("replay_count")
   lastError         String?              @map("last_error") @db.Text()
   triggerRunId      String?              @map("trigger_run_id")
+  triggerBatchId    String?              @map("trigger_batch_id")
   receivedAt        DateTime             @default(now()) @map("received_at") @db.Timestamptz(3)
   processedAt       DateTime?            @map("processed_at") @db.Timestamptz(3)
   createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -742,6 +746,7 @@ model BillingEvent {
   @@index([status, receivedAt])
   @@index([type, externalCreatedAt])
   @@index([externalCreatedAt, id])
+  @@index([triggerBatchId])
   @@map("billing_events")
 }
 
@@ -896,6 +901,8 @@ model Analysis {
 
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
+  @@index([repoId, createdAt(sort: Desc), id(sort: Desc)])
+  @@index([repoId, commitSha])
   @@index([jobId])
   @@map("analyses")
 }
@@ -950,6 +957,7 @@ model PullRequestAnalysis {
   @@index([jobId])
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
+  @@index([repoId, createdAt(sort: Desc), id(sort: Desc)])
   @@index([status])
   @@index([createdAt(sort: Desc), id(sort: Desc)], map: "pull_request_analyses_created_at_id_idx")
   @@map("pull_request_analyses")
@@ -1019,7 +1027,9 @@ model GeneratedFix {
 
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
+  @@index([repoId, createdAt(sort: Desc), id(sort: Desc)])
   @@index([prAnalysisId])
+  @@index([prAnalysisId, createdAt(sort: Desc), id(sort: Desc)])
   @@map("generated_fixes")
 }
 
@@ -1112,6 +1122,7 @@ model ChatSession {
 
   @@index([repoId])
   @@index([userId, updatedAt(sort: Desc)])
+  @@index([userId, repoId, updatedAt(sort: Desc), id(sort: Desc)])
   @@map("chat_sessions")
 }
 
@@ -1125,5 +1136,6 @@ model ChatMessage {
   createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
 
   @@index([sessionId, createdAt(sort: Asc)])
+  @@index([sessionId, createdAt(sort: Desc), id(sort: Desc)])
   @@map("chat_messages")
 }

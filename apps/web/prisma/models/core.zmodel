@@ -151,6 +151,7 @@ model ChatSession {
 
   @@index([repoId])
   @@index([userId, updatedAt(sort: Desc)])
+  @@index([userId, repoId, updatedAt(sort: Desc), id(sort: Desc)])
 
   @@deny('all', auth() == null)
   @@allow(
@@ -181,6 +182,7 @@ model ChatMessage {
   )
 
   @@index([sessionId, createdAt(sort: Asc)])
+  @@index([sessionId, createdAt(sort: Desc), id(sort: Desc)])
   @@map("chat_messages")
 }
 

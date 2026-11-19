@@ -2,13 +2,9 @@ import { AbortTaskRunError, task } from "@trigger.dev/sdk";
 
 import { TASK_CONFIGS } from "@/server/utils/task-config";
 
-import { PROCESS_STRIPE_EVENT_TASK_ID } from "../billing.constants";
+import { PROCESS_STRIPE_EVENT_TASK_ID, type ProcessStripeEventPayload } from "../billing.constants";
 import { NonRetryableBillingError } from "../billing.errors";
 import { markEventDeadLetter, processStripeEvent } from "../billing.events";
-
-export type ProcessStripeEventPayload = {
-  billingEventId: string;
-};
 
 export const processStripeEventTask = task({
   id: PROCESS_STRIPE_EVENT_TASK_ID,

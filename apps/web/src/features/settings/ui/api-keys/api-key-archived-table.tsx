@@ -16,15 +16,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/ui/core/table";
+import { AppInfiniteSentinel } from "@/shared/ui/kit/app-infinite-sentinel";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
 import type { UiApiKey } from "@/entities/api-key/model/api-keys.types";
 
-type Props = {
-  archived: UiApiKey[];
+export type ArchivedPagination = {
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  onLoadMore: () => Promise<unknown>;
 };
 
-export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
+type Props = {
+  archived: UiApiKey[];
+  pagination: ArchivedPagination;
+};
+
+export function ApiKeyArchivedTable({ archived, pagination }: Readonly<Props>) {
   const locale = useLocale();
   const [isArchivedOpen, setIsArchivedOpen] = useState(false);
   const tCommon = useTranslations("Common");
@@ -40,7 +48,10 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
         <div className="flex items-center gap-2">
           <HistoryIcon className="text-muted-foreground" />
           <h3 className="font-medium text-sm">{t("settings_api_keys_history_revoked")}</h3>
-          <AppBadge className="ml-1 text-xs">{archived.length}</AppBadge>
+          <AppBadge className="ml-1 text-xs">
+            {archived.length}
+            {pagination.hasNextPage && "+"}
+          </AppBadge>
         </div>
 
         <CollapsibleTrigger asChild>
@@ -97,6 +108,12 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
             </TableBody>
           </Table>
         </div>
+
+        <AppInfiniteSentinel
+          hasNextPage={pagination.hasNextPage}
+          isFetchingNextPage={pagination.isFetchingNextPage}
+          onLoadMore={pagination.onLoadMore}
+        />
       </CollapsibleContent>
     </Collapsible>
   );

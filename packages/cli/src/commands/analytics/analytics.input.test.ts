@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { buildAnalyticsInput, buildTrendsInput } from "./analytics.input";
+import { buildAnalyticsInput } from "./analytics.input";
 
 const AT = "2026-01-01T00:00:00Z";
 
@@ -84,20 +84,57 @@ describe("date range flags reach the server", () => {
   });
 });
 
-describe("buildTrendsInput", () => {
-  it("returns an empty input when no filters are given", () => {
-    expect(buildTrendsInput({})).toEqual({ input: {}, ok: true });
+describe("one-sided flags are completed before they reach the schema", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("fills --from from a lone --to, because a custom period needs both bounds", () => {
+    const result = buildAnalyticsInput({ to: "2026-10-02" });
+
+    expect(result).toHaveProperty("input.from", new Date("2026-09-02"));
+    expect(result).toHaveProperty("input.to", new Date("2026-10-02"));
   });
 
-  it("carries repoId", () => {
-    expect(buildTrendsInput({}, "repo-9")).toEqual({ input: { repoId: "repo-9" }, ok: true });
+  it("fills --to from now when only --from is supplied", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(AT);
+    const result = buildAnalyticsInput({ from: "2026-01-01" });
+
+    expect(result).toHaveProperty("input.from", new Date("2026-01-01"));
+    expect(result).toHaveProperty("input.to", new Date(AT));
   });
 
-  it("parses a valid --to into a Date", () => {
-    expect(buildTrendsInput({ to: AT })).toHaveProperty("input.to", new Date(AT));
+  it("clamps a range longer than 366 days to the server cap", () => {
+    const to = new Date("2026-01-01");
+    const result = buildAnalyticsInput({ from: "2020-01-01", to: "2026-01-01" });
+
+    expect(result).toHaveProperty("input.to", to);
+    expect(result).toHaveProperty("input.from", new Date(to.getTime() - 365 * 86_400_000));
   });
 
-  it("rejects an unparseable date instead of silently dropping it", () => {
-    expect(buildTrendsInput({ to: "garbage" }).ok).toBe(false);
+  it("clamps a lone --from that is older than the cap", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(AT);
+    const result = buildAnalyticsInput({ from: "2020-01-01" });
+
+    expect(result).toHaveProperty("input.to", new Date(AT));
+    expect(result).toHaveProperty(
+      "input.from",
+      new Date(new Date(AT).getTime() - 365 * 86_400_000),
+    );
+  });
+
+  it("runs a lone future --from backwards into the last 30 days", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(AT);
+    const result = buildAnalyticsInput({ from: "2027-01-01" });
+
+    expect(result.ok).toBe(true);
+    expect(result).toHaveProperty("input.period", "custom");
+    expect(result).toHaveProperty("input.to", new Date(AT));
+    expect(result).toHaveProperty("input.from", new Date(new Date(AT).getTime() - 30 * 86_400_000));
+
+    const input = (result as { input: { from: Date; to: Date } }).input;
+    expect(input.from.getTime()).toBeLessThanOrEqual(input.to.getTime());
+    expect(input.to.getTime() - input.from.getTime()).toBeLessThanOrEqual(366 * 86_400_000);
   });
 });

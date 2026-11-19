@@ -9,12 +9,16 @@ import { AppButton } from "@/shared/ui/core/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/core/collapsible";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { AppInfiniteSentinel } from "@/shared/ui/kit/app-infinite-sentinel";
 
 import type { AgentSession } from "../model/agent-types";
 import { DeleteChatDialog } from "./delete-chat-dialog";
 import { RenameChatDialog } from "./rename-chat-dialog";
 
 type Props = {
+  fetchNextPage: () => Promise<unknown>;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
   onNewChat: () => void;
   onSessionDeleted?: (sessionId: string) => void;
   sessionId: null | string;
@@ -78,6 +82,9 @@ function ChatSessionRow({ isActive, onDeleted, onSelect, session }: Readonly<Cha
 }
 
 export function AgentSidebar({
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
   onNewChat,
   onSessionDeleted,
   sessionId,
@@ -169,6 +176,12 @@ export function AgentSidebar({
             {sessions.length === 0 && (
               <p className="mt-8 text-center text-muted-foreground text-xs">{t("no_past_chats")}</p>
             )}
+
+            <AppInfiniteSentinel
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              onLoadMore={fetchNextPage}
+            />
           </div>
         </ScrollArea>
       )}

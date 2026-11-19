@@ -1,10 +1,11 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { GitCommit } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { REPO_ANALYSIS_PAGE_SIZE } from "@/shared/config/pagination";
 import { AppBadge } from "@/shared/ui/core/badge";
 import {
   Select,
@@ -14,8 +15,16 @@ import {
   SelectValue,
 } from "@/shared/ui/core/select";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { AppInfiniteSentinel } from "@/shared/ui/kit/app-infinite-sentinel";
 import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
+
+type VersionRef = {
+  commitSha: string | null;
+  createdAt: Date;
+  id: string;
+  status: string;
+};
 
 type Props = { repoId: string };
 
@@ -26,7 +35,57 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
   const [selectedAid, setAid] = useQueryState("aid", parseAsString.withDefault(""));
 
-  const { data: history, isLoading } = useQuery(trpc.analysis.getHistory.queryOptions({ repoId }));
+  const {
+    data: history,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useInfiniteQuery(
+    trpc.analysis.getHistory.infiniteQueryOptions(
+      { limit: REPO_ANALYSIS_PAGE_SIZE, repoId },
+      { getNextPageParam: (page) => page.meta.nextCursor },
+    ),
+  );
+
+  const items = history?.pages.flatMap((page) => page.items) ?? [];
+  const pinnedInPage = selectedAid !== "" && items.some((item) => item.id === selectedAid);
+
+  // A version pinned from an old link can sit past the first page, so its label has to come from
+  // a single-row read instead of the loaded pages.
+  const { data: pinnedRef } = useQuery(
+    trpc.analysis.getVersionRef.queryOptions(
+      { analysisId: selectedAid, repoId },
+      { enabled: selectedAid !== "" && history != null && !pinnedInPage },
+    ),
+  );
+
+  const pinnedVersion = pinnedInPage ? undefined : pinnedRef;
+
+  function renderVersion(item: VersionRef) {
+    return (
+      <div className="flex items-center justify-between gap-4 text-xs">
+        <div className="flex items-center gap-2 font-medium">
+          <span className="max-w-30 truncate">
+            {item.commitSha?.slice(0, 7) ?? t("repo_version_unknown")}
+          </span>
+        </div>
+        <TimeAgo
+          className="ml-auto text-xs"
+          date={item.createdAt}
+          locale={locale}
+        />
+        {item.status === "FAILED" && (
+          <AppBadge
+            className="text-destructive text-xs"
+            variant="outline"
+          >
+            {tCommon("failed")}
+          </AppBadge>
+        )}
+      </div>
+    );
+  }
 
   if (isLoading || history == null) {
     return (
@@ -44,15 +103,15 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
     );
   }
 
-  const { capped, items, total } = history;
+  const total = history.pages[0]?.total ?? 0;
 
-  if (items.length === 0) {
+  if (items.length === 0 && pinnedVersion == null) {
     return null;
   }
 
   return (
     <Select
-      onValueChange={(e) => void setAid(e)}
+      onValueChange={(value) => void setAid(value)}
       value={selectedAid || items[0]?.id}
     >
       <SelectTrigger
@@ -61,41 +120,35 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
       >
         <GitCommit />
         <SelectValue placeholder={t("repo_version_placeholder")} />
-        {capped && (
+        {total > items.length && (
           <span className="ml-auto text-muted-foreground text-xs">
             {t("repo_version_capped", { shown: items.length, total })}
           </span>
         )}
       </SelectTrigger>
       <SelectContent>
+        {pinnedVersion != null && (
+          <SelectItem
+            disabled={pinnedVersion.status === "FAILED"}
+            value={pinnedVersion.id}
+          >
+            {renderVersion(pinnedVersion)}
+          </SelectItem>
+        )}
         {items.map((item) => (
           <SelectItem
             disabled={item.status === "FAILED"}
             key={item.id}
             value={item.id}
           >
-            <div className="flex items-center justify-between gap-4 text-xs">
-              <div className="flex items-center gap-2 font-medium">
-                <span className="max-w-30 truncate">
-                  {item.commitSha?.slice(0, 7) ?? t("repo_version_unknown")}
-                </span>
-              </div>
-              <TimeAgo
-                className="ml-auto text-xs"
-                date={item.createdAt}
-                locale={locale}
-              />
-              {item.status === "FAILED" && (
-                <AppBadge
-                  className="text-destructive text-xs"
-                  variant="outline"
-                >
-                  {tCommon("failed")}
-                </AppBadge>
-              )}
-            </div>
+            {renderVersion(item)}
           </SelectItem>
         ))}
+        <AppInfiniteSentinel
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          onLoadMore={fetchNextPage}
+        />
       </SelectContent>
     </Select>
   );

@@ -1,6 +1,9 @@
+import { collectCursorPages, MAX_PAGE_SIZE, summarizeCursorPages } from "@doxynix/shared";
+
 import { trpc } from "@/core/client";
 
 import type {
+  AnalysisHistoryPage,
   ConfigureRepositoryInput,
   GetDetailedMetricsInput,
   GetStructureMapInput,
@@ -27,7 +30,17 @@ export const analyzeService = {
   },
 
   async getHistory(repoId: string) {
-    return trpc.analysis.getHistory.query({ repoId });
+    const pages: AnalysisHistoryPage[] = [];
+
+    // Walks every page so a run older than the first one still resolves; `hasNextPage`
+    // survives only when the shared page bound truncates the walk.
+    await collectCursorPages(async (cursor) => {
+      const page = await trpc.analysis.getHistory.query({ cursor, limit: MAX_PAGE_SIZE, repoId });
+      pages.push(page);
+      return page;
+    });
+
+    return summarizeCursorPages(pages);
   },
 
   async getLatest(repoId: string) {

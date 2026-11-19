@@ -12,8 +12,9 @@ import { isSchemaMismatchError } from "@/server/core/ai/schema-mismatch";
 import { appLogger } from "@/server/core/app-logger";
 import { upsertBillingIssue } from "@/server/core/billing/issue";
 import { prisma } from "@/server/core/db";
-import { type TokenUsage, UnknownModelPriceError } from "@/server/core/usage/price";
+import { UnknownModelPriceError } from "@/server/core/usage/price";
 import { releaseUsage, reserveUsage, settleUsage } from "@/server/core/usage/usage";
+import { type MeterUsage, mapUsageToTokenUsage } from "@/server/core/usage/usage.mapper";
 import { taskLogger } from "@/server/utils/task-logger";
 
 const tracedAi = wrapAISDK(ai);
@@ -50,11 +51,9 @@ type UsageMeter = {
   workspaceId: string;
 };
 
-type MeterUsage = {
-  cachedInputTokens?: number;
-  inputTokens?: number;
-  outputTokens?: number;
-};
+// A reservation is a safety valve, not an invoice: capping the output side keeps a few concurrent
+// calls from inflating the quota, and settlement replaces the estimate with the actual usage.
+const MAX_RESERVED_OUTPUT_TOKENS = 8192;
 
 function readString(source: Record<string, unknown>, key: string): null | string {
   const value = source[key];
@@ -101,16 +100,11 @@ async function resolveUsageMeter(
   return repo == null ? null : { analysisId, workspaceId: repo.workspaceId };
 }
 
-function estimateTokens(system: string, prompt: string, maxOutputTokens: number): number {
-  return Math.ceil((system.length + prompt.length) / 4) + maxOutputTokens;
-}
-
-function toTokenUsage(usage: MeterUsage | null | undefined): TokenUsage {
-  return {
-    cachedInputTokens: usage?.cachedInputTokens ?? 0,
-    inputTokens: usage?.inputTokens ?? 0,
-    outputTokens: usage?.outputTokens ?? 0,
-  };
+export function estimateTokens(system: string, prompt: string, maxOutputTokens: number): number {
+  return (
+    Math.ceil((system.length + prompt.length) / 4) +
+    Math.min(maxOutputTokens, MAX_RESERVED_OUTPUT_TOKENS)
+  );
 }
 
 async function reserveAttempt(
@@ -176,7 +170,7 @@ async function settleAttempt(
       idempotencyKey,
       model,
       provider: "google",
-      usage: toTokenUsage(usage),
+      usage: mapUsageToTokenUsage(usage),
       workspaceId: meter.workspaceId,
     });
   } catch (error) {

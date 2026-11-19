@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
+import { hasActiveFilters } from "@/shared/lib/url-state";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Select,
@@ -54,19 +55,18 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
 
   const handleReset = () => {
     void setFilters({
+      from: null,
       isRead: null,
       owner: null,
       page: null,
       repo: null,
+      search: null,
+      to: null,
       type: null,
     });
   };
 
-  const hasFilters =
-    filters.isRead !== null ||
-    filters.owner !== null ||
-    filters.repo !== null ||
-    filters.type !== null;
+  const hasFilters = hasActiveFilters(filters);
 
   return (
     <div className="flex flex-col gap-4">

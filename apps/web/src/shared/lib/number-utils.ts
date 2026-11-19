@@ -1,3 +1,5 @@
+import { clamp } from "es-toolkit";
+
 export function clampIntegerParam(
   value: null | number | undefined,
   {
@@ -14,5 +16,5 @@ export function clampIntegerParam(
     return fallback;
   }
 
-  return Math.min(max, Math.max(min, value));
+  return clamp(value, min, max);
 }

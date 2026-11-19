@@ -55,6 +55,7 @@ export type UserEventPayloads = {
     sessionId: string;
     title: string;
   };
+  [REALTIME_CONFIG.events.user.stagingUpdated]: Record<string, never>;
 };
 
 export type SystemEventPayloads = {
@@ -65,6 +66,55 @@ export type SystemEventPayloads = {
 };
 
 export type AllEventPayloads = SystemEventPayloads & UserEventPayloads;
+
+export type UserBatchEvent = {
+  [K in keyof UserEventPayloads]: { data: UserEventPayloads[K]; name: K };
+}[keyof UserEventPayloads];
+
+// Ably's batch endpoint: one `POST /messages` for every event. The `2` is the REST API version
+// ably-js documents for `request()`, the same one its own `batchPublish` sends.
+async function safeBatchPublish(
+  channelName: string,
+  events: UserBatchEvent[],
+  meta: Record<string, unknown>,
+): Promise<boolean> {
+  try {
+    const response = await realtimeServer.request(
+      "post",
+      "/messages",
+      2,
+      {},
+      {
+        channels: [channelName],
+        messages: events,
+      },
+    );
+
+    // `request` resolves for error responses too, so only a 2xx means the batch was accepted.
+    if (response.success) {
+      return true;
+    }
+
+    // A partial failure still retries every event: a duplicate beats a dropped completion.
+    appLogger.error({
+      channel: channelName,
+      errorCode: response.errorCode,
+      errorMessage: response.errorMessage,
+      msg: "Batch publish rejected by Ably, falling back to sequential publish",
+      statusCode: response.statusCode,
+      ...meta,
+    });
+    return false;
+  } catch (error) {
+    appLogger.error({
+      channel: channelName,
+      error: error instanceof Error ? error.message : String(error),
+      msg: "Failed to batch publish realtime events, falling back to sequential publish",
+      ...meta,
+    });
+    return false;
+  }
+}
 
 async function safePublish(
   channelName: string,
@@ -111,4 +161,21 @@ export const realtimeService = {
           })
         : Promise.resolve(false),
   }),
+
+  userBatch: async (userId: null | string | undefined, events: UserBatchEvent[]) => {
+    if (userId == null || events.length === 0 || IS_TEST) {
+      return;
+    }
+
+    const channelName = REALTIME_CONFIG.channels.user(String(userId));
+    const meta = { userId: String(userId) };
+
+    if (await safeBatchPublish(channelName, events, meta)) {
+      return;
+    }
+
+    for (const { data, name } of events) {
+      await safePublish(channelName, name, data, meta);
+    }
+  },
 };

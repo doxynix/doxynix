@@ -96,13 +96,6 @@ export type PRImpactPayload = {
       zoneLabel: null | string;
     }
   >;
-  fixes: Array<{
-    githubPrNumber: null | number;
-    githubPrUrl: null | string;
-    id: string;
-    status: string;
-    title: string;
-  }>;
   navigationHints: {
     primaryFilePath: null | string;
     primaryNodeId: null | string;

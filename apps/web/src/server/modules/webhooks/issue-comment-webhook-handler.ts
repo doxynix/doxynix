@@ -1,3 +1,5 @@
+import { revalidateTag } from "next/cache";
+
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { normalizeError } from "@/server/core/api-error";
@@ -6,6 +8,7 @@ import { prisma } from "@/server/core/db";
 import type { IssueCommentCreatedPayload } from "@/server/core/github/github-webhook.types";
 import { realtimeService } from "@/server/core/realtime";
 import type { GithubMentionReply } from "@/server/domain/github-mention-reply";
+import { requestContext } from "@/server/utils/request-context";
 
 export async function handleIssueCommentEvent(
   payload: IssueCommentCreatedPayload,
@@ -15,6 +18,12 @@ export async function handleIssueCommentEvent(
   }
 
   const repos = await prisma.repo.findMany({
+    select: {
+      createdByUserId: true,
+      defaultBranch: true,
+      id: true,
+      workspaceId: true,
+    },
     where: { githubId: payload.repository.id },
   });
 
@@ -68,6 +77,13 @@ export async function handleIssueCommentEvent(
       prNumber: payload.issue.number,
     });
     return null;
+  }
+
+  // Outside a request scope Next has no static generation store and throws
+  if (requestContext.getStore() != null) {
+    for (const analysisId of new Set(prComments.map((comment) => comment.analysisId))) {
+      revalidateTag(analysisId, { expire: 0 });
+    }
   }
 
   const repoIdByAnalysis = new Map(prAnalyses.map((analysis) => [analysis.id, analysis.repoId]));

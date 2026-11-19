@@ -1,9 +1,18 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/server/core/db";
 import { bannedEmailService } from "@/server/modules/banned-emails/banned-email.service";
 
 import { cleanupDatabase, createTestUser } from "../helpers";
+
+// The sign-in guard decides between "blocked domain" and "temporary DNS failure, let it through"
+// by the error code. A real lookup makes that choice depend on the runner's resolver, so the
+// permanent-failure branch is pinned here.
+vi.mock("node:dns/promises", () => ({
+  resolveMx: vi
+    .fn()
+    .mockRejectedValue(Object.assign(new Error("not found"), { code: "ENOTFOUND" })),
+}));
 
 describe("bannedEmailService against ZenStack policies", () => {
   it("blocks and unblocks an address through the real BannedEmail policy", async () => {

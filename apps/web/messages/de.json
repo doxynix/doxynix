@@ -52,8 +52,7 @@
     "operation_updated": "Aktualisiert",
     "origin_system": "System",
     "page_desc": "Jeder Schreibvorgang der App, über alle Akteure hinweg. Das Audit-Protokoll im Dashboard zeigt nur Ihre eigene Aktivität, dieses nicht.",
-    "page_title": "Audit-Protokoll",
-    "total_count": "{filtered} von {total} Einträgen"
+    "page_title": "Audit-Protokoll"
   },
   "AdminBannedEmails": {
     "col_actions": "Aktionen",
@@ -121,8 +120,7 @@
     "status_analyzing": "Analysiert",
     "status_completed": "Abgeschlossen",
     "status_failed": "Fehlgeschlagen",
-    "status_pending": "Ausstehend",
-    "total_count": "{filtered} von {total} Reviews"
+    "status_pending": "Ausstehend"
   },
   "AdminUsers": {
     "ban_action": "Sperren",
@@ -195,7 +193,6 @@
     "toast_role_updated": "{name} ist jetzt Administrator",
     "toast_session_revoked": "Sitzung widerrufen",
     "toast_unbanned": "Benutzer entsperrt",
-    "total_count": "{filtered} von {total} Benutzern",
     "unban_action": "Entsperren"
   },
   "Agent": {
@@ -429,7 +426,7 @@
     "beta": "BETA",
     "breadcrumb": "Brotkrumennavigation",
     "cancel": "Abbrechen",
-    "capped_hint": "Die ersten {count} werden angezeigt. Filtere ein oder wähle einen Zeitraum.",
+    "capped_hint": "Die ersten {count} werden angezeigt. Grenze die Ergebnisse ein, um den Rest zu sehen.",
     "change_language": "Sprache ändern",
     "check_system_status": "Systemstatus prüfen",
     "clipboard_unavailable": "Zwischenablage-API nicht verfügbar",

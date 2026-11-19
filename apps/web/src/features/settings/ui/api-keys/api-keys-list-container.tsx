@@ -1,7 +1,9 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { API_KEYS_PAGE_SIZE } from "@/shared/config/pagination";
+import { AppInfiniteSentinel } from "@/shared/ui/kit/app-infinite-sentinel";
 import { SkeletonList } from "@/shared/ui/kit/app-skeleton";
 
 import { ApiKeyCardSkeleton } from "@/entities/api-key/ui/api-key-card-skeleton";
@@ -10,7 +12,25 @@ import { ApiKeysList } from "./api-keys-list";
 
 export function ApiKeysListContainer() {
   const trpc = useTRPC();
-  const { data, isLoading } = useQuery(trpc.apikey.list.queryOptions());
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
+    trpc.apikey.list.infiniteQueryOptions(
+      { limit: API_KEYS_PAGE_SIZE },
+      { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
+    ),
+  );
+
+  const {
+    data: archivedData,
+    fetchNextPage: fetchNextArchivedPage,
+    hasNextPage: hasNextArchivedPage,
+    isFetchingNextPage: isFetchingNextArchivedPage,
+  } = useInfiniteQuery(
+    trpc.apikey.listArchived.infiniteQueryOptions(
+      { limit: API_KEYS_PAGE_SIZE },
+      { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
+    ),
+  );
 
   if (isLoading || data == null) {
     return (
@@ -23,9 +43,22 @@ export function ApiKeysListContainer() {
   }
 
   return (
-    <ApiKeysList
-      active={data.active}
-      archived={data.archived}
-    />
+    <div className="flex w-full flex-col gap-6">
+      <ApiKeysList
+        active={data.pages.flatMap((page) => page.items)}
+        archived={archivedData?.pages.flatMap((page) => page.items) ?? []}
+        archivedPagination={{
+          hasNextPage: hasNextArchivedPage,
+          isFetchingNextPage: isFetchingNextArchivedPage,
+          onLoadMore: fetchNextArchivedPage,
+        }}
+      />
+
+      <AppInfiniteSentinel
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        onLoadMore={fetchNextPage}
+      />
+    </div>
   );
 }

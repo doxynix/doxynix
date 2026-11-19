@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { UserMinus } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -10,6 +10,7 @@ import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
+import { AppInfiniteSentinel } from "@/shared/ui/kit/app-infinite-sentinel";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { useWorkspace } from "@/entities/workspace/model/workspace-context";
@@ -17,13 +18,22 @@ import { useWorkspace } from "@/entities/workspace/model/workspace-context";
 import { InviteMemberDialog } from "./invite-member-dialog";
 import { RemoveMemberDialog } from "./remove-member-dialog";
 
+const PAGE_SIZE = 50;
+
 export function WorkspaceMembersPage() {
   const trpc = useTRPC();
   const t = useTranslations("Dashboard");
   const { activeWorkspace, isOwner } = useWorkspace();
-  const { data, isLoading } = useQuery(trpc.workspace.members.queryOptions());
 
-  const ownerCount = data?.items.filter((member) => member.role === "OWNER").length ?? 0;
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
+    trpc.workspace.members.infiniteQueryOptions(
+      { limit: PAGE_SIZE },
+      { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
+    ),
+  );
+
+  const members = data?.pages.flatMap((page) => page.items) ?? [];
+  const ownerCount = data?.pages[0]?.ownerCount ?? 0;
 
   const planCode = activeWorkspace?.entitlement?.planCode ?? "HOBBY";
   const isHobby = planCode === "HOBBY";
@@ -57,7 +67,7 @@ export function WorkspaceMembersPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {data.items.map((member) => (
+          {members.map((member) => (
             <div
               className="flex items-center justify-between gap-3 rounded-xl border p-3"
               key={member.id}
@@ -110,6 +120,12 @@ export function WorkspaceMembersPage() {
           ))}
         </div>
       )}
+
+      <AppInfiniteSentinel
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        onLoadMore={fetchNextPage}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
+import { hasActiveFilters } from "@/shared/lib/url-state";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Select,
@@ -24,14 +25,14 @@ export function AdminUsersToolbar() {
 
   const [filters, setFilters] = useQueryStates(adminUserParsers);
 
-  const hasFilters = filters.banned !== null || filters.role !== null || filters.search !== "";
+  const hasFilters = hasActiveFilters(filters);
 
   const update = (key: "banned" | "role", value: null | string) => {
-    void setFilters({ [key]: value, page: null });
+    void setFilters({ [key]: value });
   };
 
   const reset = () => {
-    void setFilters({ banned: null, page: null, role: null, search: null });
+    void setFilters({ banned: null, from: null, role: null, search: null, to: null });
   };
 
   return (

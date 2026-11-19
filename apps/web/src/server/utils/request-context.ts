@@ -12,7 +12,11 @@ type RequestStore = {
   // call shares it across procedures.
   entitlementMemo?: Map<string, Promise<unknown>>;
   appVersion?: string;
+  // Shared by reference across derived stores, like the memo maps, so one request publishes once.
+  auditRealtime?: { published: boolean };
   country: string;
+  // One GitHub token read (and at most one refresh) per request, keyed by user id.
+  githubTokenMemo?: Map<string, Promise<unknown>>;
   ip: null | string;
   method: string;
 
@@ -166,8 +170,10 @@ export function buildRequestStore(input: RequestContextInput): RequestStore {
   return {
     apiKeyScopes: input.apiKeyScopes,
     appVersion: APP_VERSION,
+    auditRealtime: { published: false },
     country: getCountry(input.req),
     entitlementMemo: new Map(),
+    githubTokenMemo: new Map(),
     ip: anonymizeIp(getIp(input.req)),
     method: input.method,
     origin: input.req.headers.get("origin") ?? undefined,

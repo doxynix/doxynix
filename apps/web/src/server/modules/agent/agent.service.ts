@@ -5,26 +5,21 @@ import { REALTIME_CONFIG } from "@/shared/config/realtime";
 import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
+import {
+  keysetArgs,
+  ORDER_CREATED_AT_DESC,
+  orderWithTiebreak,
+  splitKeysetPage,
+} from "@/server/utils/pagination";
 
 import { agentMapper } from "./agent.mapper";
-
-export type CreateSessionInput = {
-  repoId?: string;
-  title: string;
-};
-
-export type ListSessionsInput = {
-  currentRepo?: { name: string; owner: string };
-};
-
-export type UpdateSessionInput = {
-  sessionId: string;
-  title: string;
-};
-
-export type DeleteSessionInput = {
-  sessionId: string;
-};
+import type {
+  CreateSessionInput,
+  DeleteSessionInput,
+  GetSessionHistoryInput,
+  ListSessionsInput,
+  UpdateSessionInput,
+} from "./agent.schemas";
 
 export const agentService = {
   async createSession(
@@ -72,29 +67,36 @@ export const agentService = {
     return session;
   },
 
-  async getSessionHistory(db: DbClient, userId: string, sessionId: string) {
-    const rawMessages = await db.chatMessage.findMany({
-      orderBy: { createdAt: "asc" },
+  async getSessionHistory(db: DbClient, userId: string, input: GetSessionHistoryInput) {
+    const { cursor, limit, sessionId } = input;
+
+    const rows = await db.chatMessage.findMany({
+      ...keysetArgs(cursor, limit),
+      orderBy: ORDER_CREATED_AT_DESC,
+      select: { createdAt: true, id: true, parts: true, role: true },
       where: { session: { userId }, sessionId },
     });
 
-    return rawMessages.map((msg) => agentMapper.toSessionMessage(msg));
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
+
+    // The page is newest-first; the transcript renders oldest-first.
+    return {
+      items: items.toReversed().map((msg) => agentMapper.toSessionMessage(msg)),
+      meta: { hasNextPage, nextCursor },
+    };
   },
 
-  async listSessions(
-    db: DbClient,
-    userId: string,
-    workspaceId: string,
-    input: ListSessionsInput | undefined,
-  ) {
+  async listSessions(db: DbClient, userId: string, workspaceId: string, input: ListSessionsInput) {
+    const { cursor, currentRepo, limit } = input;
+
     let internalRepoId: null | string = null;
 
-    if (input?.currentRepo != null) {
+    if (currentRepo != null) {
       const repo = await db.repo.findFirst({
         select: { id: true },
         where: {
-          name: input.currentRepo.name,
-          owner: input.currentRepo.owner,
+          name: currentRepo.name,
+          owner: currentRepo.owner,
           workspaceId,
         },
       });
@@ -103,11 +105,23 @@ export const agentService = {
       }
     }
 
-    return db.chatSession.findMany({
-      include: { repo: { select: { name: true, owner: true } } },
-      orderBy: { updatedAt: "desc" },
+    const rows = await db.chatSession.findMany({
+      ...keysetArgs(cursor, limit),
+      orderBy: orderWithTiebreak("updatedAt", "desc"),
+      select: {
+        createdAt: true,
+        id: true,
+        repo: { select: { name: true, owner: true } },
+        repoId: true,
+        title: true,
+        updatedAt: true,
+      },
       where: { repoId: internalRepoId, userId },
     });
+
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
+
+    return { items, meta: { hasNextPage, nextCursor } };
   },
 
   async updateSession(db: DbClient, userId: string, input: UpdateSessionInput) {

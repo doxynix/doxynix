@@ -1,17 +1,19 @@
 "use client";
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { LogOut, Monitor, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { SESSIONS_PAGE_SIZE } from "@/shared/config/pagination";
 import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { authClient } from "@/shared/lib/auth-client";
 import { formatFullDate } from "@/shared/lib/date-utils";
 import { AppButton } from "@/shared/ui/core/button";
 import { Card, CardContent } from "@/shared/ui/core/card";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { AppInfiniteSentinel } from "@/shared/ui/kit/app-infinite-sentinel";
 import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
@@ -55,7 +57,14 @@ export function SessionsList() {
 
   const queryClient = useQueryClient();
 
-  const { data: sessions = [], isLoading } = useQuery(trpc.user.getActiveSessions.queryOptions());
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
+    trpc.user.getActiveSessions.infiniteQueryOptions(
+      { limit: SESSIONS_PAGE_SIZE },
+      { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
+    ),
+  );
+
+  const sessions = data?.pages.flatMap((page) => page.items) ?? [];
 
   const revokeSession = useMutation(
     trpc.user.revokeSession.mutationOptions({
@@ -164,6 +173,12 @@ export function SessionsList() {
           })}
         </div>
       )}
+
+      <AppInfiniteSentinel
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        onLoadMore={fetchNextPage}
+      />
     </div>
   );
 }

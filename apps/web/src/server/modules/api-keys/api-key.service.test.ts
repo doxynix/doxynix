@@ -1,8 +1,9 @@
-import { ApiKeySchema } from "@doxynix/shared";
+import { ApiKeySchema, isApiKeyDead } from "@doxynix/shared";
+import type { Prisma } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 
 import type { DbClient } from "@/server/core/db";
-import { apiKeyService, isApiKeyDead } from "@/server/modules/api-keys/api-key.service";
+import { apiKeyService } from "@/server/modules/api-keys/api-key.service";
 
 const KEY_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b";
 const WORKSPACE_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a70";
@@ -54,115 +55,135 @@ const SELECTED_COLUMNS = [
 ];
 
 describe("apiKeyService.list", () => {
-  it("should partition revoked and non-revoked keys without dropping either", async () => {
-    const active = makeApiKeyRow({ id: "active-id", revoked: false });
-    const archived = makeApiKeyRow({ id: "archived-id", revoked: true });
-    const { db } = createApiKeyDbMock([active, archived]);
+  const PAGE = { limit: 2 };
 
-    const result = await apiKeyService.list(db, WORKSPACE_ID);
+  it("reads one probe row past the page in the newest-first order", async () => {
+    const { db, findMany } = createApiKeyDbMock([
+      makeApiKeyRow({ id: "key-1" }),
+      makeApiKeyRow({ id: "key-2" }),
+      makeApiKeyRow({ id: "probe" }),
+    ]);
 
-    expect(result.active.map((key) => key.id)).toStrictEqual(["active-id"]);
-    expect(result.archived.map((key) => key.id)).toStrictEqual(["archived-id"]);
+    const result = await apiKeyService.list(db, WORKSPACE_ID, PAGE);
+
+    expect(result.items.map((key) => key.id)).toStrictEqual(["key-1", "key-2"]);
+    expect(result.meta).toStrictEqual({ hasNextPage: true, nextCursor: "probe" });
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cursor: undefined,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 3,
+        where: expect.objectContaining({ workspaceId: WORKSPACE_ID }),
+      }),
+    );
   });
 
-  it("should not apply the redundant revoked OR clause", async () => {
+  it("keysets past the cursor id", async () => {
+    const { db, findMany } = createApiKeyDbMock([makeApiKeyRow({ id: "key-3" })]);
+
+    await apiKeyService.list(db, WORKSPACE_ID, { cursor: KEY_ID, limit: 2 });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: { id: KEY_ID }, take: 3 }),
+    );
+  });
+
+  it("reports the last page without a cursor when the probe row is missing", async () => {
+    const { db } = createApiKeyDbMock([makeApiKeyRow({ id: "key-1" })]);
+
+    const result = await apiKeyService.list(db, WORKSPACE_ID, PAGE);
+
+    expect(result.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
+  });
+
+  it("scopes the page to the workspace and to live keys only", async () => {
     const { db, findMany } = createApiKeyDbMock();
 
-    await apiKeyService.list(db, WORKSPACE_ID);
+    await apiKeyService.list(db, WORKSPACE_ID, PAGE);
 
     expect(findMany).toHaveBeenCalledTimes(1);
+    const args = findMany.mock.calls[0]?.[0] as { where?: Record<string, unknown> };
+    const serialized = JSON.stringify(args.where);
+
+    // The tenant is the outer filter; the dead rows are excluded in SQL rather than by a
+    // client-side partition of the first page.
+    expect(args.where).toHaveProperty("workspaceId", WORKSPACE_ID);
+    expect(args.where).toHaveProperty("OR");
+    expect(serialized).not.toContain("lte");
+  });
+
+  it("pages archived keys with the same keyset as the live list", async () => {
+    const { db, findMany } = createApiKeyDbMock([
+      makeApiKeyRow({ id: "dead-1", revoked: true }),
+      makeApiKeyRow({ id: "probe", revoked: true }),
+    ]);
+
+    const result = await apiKeyService.listArchived(db, WORKSPACE_ID, { limit: 1 });
+
+    expect(result.items.map((key) => key.id)).toStrictEqual(["dead-1"]);
+    expect(result.meta).toStrictEqual({ hasNextPage: true, nextCursor: "probe" });
     expect(findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ orderBy: { createdAt: "desc" } }),
+      expect.objectContaining({
+        cursor: undefined,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 2,
+        where: expect.objectContaining({ workspaceId: WORKSPACE_ID }),
+      }),
     );
     const args = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
-    // The owner and nothing else — the redundant `revoked` OR clause must not come back, and
-    // `where` must be exactly the tenant rather than a filter that could later be widened.
-    expect(args.where).toStrictEqual({ workspaceId: WORKSPACE_ID });
-    expect(JSON.stringify(args)).not.toContain("OR");
+    expect(JSON.stringify(args.where)).not.toContain("gt");
+  });
+
+  it("keysets the archived list past the cursor id too", async () => {
+    const { db, findMany } = createApiKeyDbMock();
+
+    await apiKeyService.listArchived(db, WORKSPACE_ID, { cursor: KEY_ID, limit: 2 });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: { id: KEY_ID }, take: 3 }),
+    );
+  });
+
+  it("normalises the scopes of an archived key the same way", async () => {
+    const { db } = createApiKeyDbMock([makeApiKeyRow({ revoked: true, scopes: [] })]);
+
+    const result = await apiKeyService.listArchived(db, WORKSPACE_ID, { limit: 10 });
+
+    expect(result.items[0]?.scopes).toStrictEqual(["FULL"]);
   });
 
   it("should never read the hashed key", async () => {
     const { db, findMany } = createApiKeyDbMock();
 
-    await apiKeyService.list(db, WORKSPACE_ID);
+    await apiKeyService.list(db, WORKSPACE_ID, PAGE);
 
     const args = findMany.mock.calls[0]?.[0] as { select?: Record<string, boolean> };
     expect(Object.keys(args.select ?? {}).sort()).toStrictEqual(SELECTED_COLUMNS);
     expect(args.select).not.toHaveProperty("hashedKey");
   });
 
-  it("should file an expired key under archived even when revoked is still false", async () => {
-    const expired = makeApiKeyRow({
-      expiresAt: new Date(Date.now() - 60_000),
-      id: "expired-id",
-      revoked: false,
-    });
-    const { db } = createApiKeyDbMock([expired]);
-
-    const result = await apiKeyService.list(db, WORKSPACE_ID);
-
-    expect(result.active).toHaveLength(0);
-    expect(result.archived.map((key) => key.id)).toStrictEqual(["expired-id"]);
-  });
-
-  it("should keep a future-dated key active", async () => {
-    const { db } = createApiKeyDbMock([
-      makeApiKeyRow({ expiresAt: new Date(Date.now() + 60_000) }),
-    ]);
-
-    const result = await apiKeyService.list(db, WORKSPACE_ID);
-
-    expect(result.active).toHaveLength(1);
-    expect(result.archived).toHaveLength(0);
-  });
-
-  it("should keep a rotated key active while its grace window is open", async () => {
-    const { db } = createApiKeyDbMock([
-      makeApiKeyRow({ revoked: true, revokedAfter: new Date(Date.now() + 60_000) }),
-    ]);
-
-    const result = await apiKeyService.list(db, WORKSPACE_ID);
-
-    expect(result.active).toHaveLength(1);
-    expect(result.archived).toHaveLength(0);
-  });
-
-  it("should archive a rotated key once the grace window closes", async () => {
-    const { db } = createApiKeyDbMock([
-      makeApiKeyRow({ revoked: true, revokedAfter: new Date(Date.now() - 60_000) }),
-    ]);
-
-    const result = await apiKeyService.list(db, WORKSPACE_ID);
-
-    expect(result.active).toHaveLength(0);
-    expect(result.archived).toHaveLength(1);
-  });
-
   it("should grandfather an empty scopes array as full access", async () => {
     const { db } = createApiKeyDbMock([makeApiKeyRow({ scopes: [] })]);
 
-    const result = await apiKeyService.list(db, WORKSPACE_ID);
+    const result = await apiKeyService.list(db, WORKSPACE_ID, PAGE);
 
-    expect(result.active[0]?.scopes).toStrictEqual(["FULL"]);
+    expect(result.items[0]?.scopes).toStrictEqual(["FULL"]);
   });
 
   it("should preserve explicitly chosen scopes", async () => {
     const { db } = createApiKeyDbMock([makeApiKeyRow({ scopes: ["MCP"] })]);
 
-    const result = await apiKeyService.list(db, WORKSPACE_ID);
+    const result = await apiKeyService.list(db, WORKSPACE_ID, PAGE);
 
-    expect(result.active[0]?.scopes).toStrictEqual(["MCP"]);
+    expect(result.items[0]?.scopes).toStrictEqual(["MCP"]);
   });
 
   it("should return only the allowlisted columns for every key", async () => {
-    const { db } = createApiKeyDbMock([
-      makeApiKeyRow(),
-      makeApiKeyRow({ id: "revoked-id", revoked: true }),
-    ]);
+    const { db } = createApiKeyDbMock([makeApiKeyRow(), makeApiKeyRow({ id: "second-id" })]);
 
-    const result = await apiKeyService.list(db, WORKSPACE_ID);
+    const result = await apiKeyService.list(db, WORKSPACE_ID, PAGE);
 
-    for (const key of [...result.active, ...result.archived]) {
+    for (const key of result.items) {
       expect(Object.keys(key).sort()).toStrictEqual(SELECTED_COLUMNS);
       expect(key).not.toHaveProperty("hashedKey");
       expect(key).not.toHaveProperty("userId");
@@ -180,6 +201,130 @@ describe("apiKeyService.list", () => {
     expect(Object.keys(parsed).sort()).toStrictEqual(Object.keys(ApiKeySchema.shape).sort());
     expect(JSON.stringify(parsed)).not.toContain("leaked-hash");
     expect(JSON.stringify(parsed)).not.toContain("dxnx_plaintext_key");
+  });
+});
+
+describe("apiKeyService active/archived predicates", () => {
+  type LifecycleRow = { expiresAt: Date | null; revoked: boolean; revokedAfter: Date | null };
+
+  // Evaluates the narrow subset of Prisma filters these predicates emit, so the test compares
+  // them with `isApiKeyDead` instead of re-implementing the same branch order twice.
+  function matchesWhere(where: Prisma.ApiKeyWhereInput, row: LifecycleRow): boolean {
+    return Object.entries(where).every(([field, condition]) => {
+      if (field === "workspaceId") {
+        return true;
+      }
+
+      if (field === "OR") {
+        return (condition as Prisma.ApiKeyWhereInput[]).some((branch) => matchesWhere(branch, row));
+      }
+
+      const value = row[field as keyof LifecycleRow];
+
+      if (condition === null) {
+        return value == null;
+      }
+
+      if (typeof condition === "boolean") {
+        return value === condition;
+      }
+
+      const range = condition as { gt?: Date; lte?: Date };
+
+      if (!(value instanceof Date)) {
+        return false;
+      }
+
+      if (range.gt !== undefined) {
+        return value > range.gt;
+      }
+
+      if (range.lte !== undefined) {
+        return value <= range.lte;
+      }
+
+      throw new Error(`Unsupported predicate on ${field}`);
+    });
+  }
+
+  it("splits the truth table exactly where isApiKeyDead does", async () => {
+    const wheres: Prisma.ApiKeyWhereInput[] = [];
+    const findMany = vi.fn((args: { where: Prisma.ApiKeyWhereInput }) => {
+      wheres.push(args.where);
+
+      return Promise.resolve([]);
+    });
+    const db = { apiKey: { findMany } } as unknown as DbClient;
+
+    await apiKeyService.list(db, WORKSPACE_ID, { limit: 1 });
+    const activeWhere = wheres[0];
+    await apiKeyService.listArchived(db, WORKSPACE_ID, { limit: 10 });
+    const archivedWhere = wheres[1];
+
+    if (activeWhere == null || archivedWhere == null) {
+      throw new Error("both list and listArchived must query the database");
+    }
+
+    const now = Date.now();
+    const past = new Date(now - 60_000);
+    const future = new Date(now + 60_000);
+
+    for (const revokedAfter of [null, past, future]) {
+      for (const revoked of [false, true]) {
+        for (const expiresAt of [null, past, future]) {
+          const row = { expiresAt, revoked, revokedAfter };
+          const dead = isApiKeyDead(row, now);
+          const label = {
+            expiresAt: expiresAt?.toISOString() ?? "null",
+            revoked,
+            revokedAfter: revokedAfter?.toISOString() ?? "null",
+          };
+
+          expect({ ...label, active: matchesWhere(activeWhere, row) }).toStrictEqual({
+            ...label,
+            active: !dead,
+          });
+          expect({ ...label, archived: matchesWhere(archivedWhere, row) }).toStrictEqual({
+            ...label,
+            archived: dead,
+          });
+        }
+      }
+    }
+  });
+
+  it("puts a mixed fixture on the right side of the split", async () => {
+    const now = Date.now();
+    const past = new Date(now - 60_000);
+    const future = new Date(now + 60_000);
+
+    const rows = [
+      makeApiKeyRow({ id: "live" }),
+      makeApiKeyRow({ expiresAt: future, id: "expiring-later" }),
+      makeApiKeyRow({ expiresAt: past, id: "expired" }),
+      makeApiKeyRow({ id: "revoked", revoked: true }),
+      makeApiKeyRow({ id: "grace-open", revoked: true, revokedAfter: future }),
+      makeApiKeyRow({ id: "grace-closed", revoked: true, revokedAfter: past }),
+    ];
+
+    const findMany = vi.fn((args: { where: Prisma.ApiKeyWhereInput }) =>
+      Promise.resolve(rows.filter((row) => matchesWhere(args.where, row))),
+    );
+    const db = { apiKey: { findMany } } as unknown as DbClient;
+
+    const active = await apiKeyService.list(db, WORKSPACE_ID, { limit: 10 });
+    const archived = await apiKeyService.listArchived(db, WORKSPACE_ID, { limit: 10 });
+
+    expect(active.items.map((key) => key.id).sort()).toStrictEqual([
+      "expiring-later",
+      "grace-open",
+      "live",
+    ]);
+    expect(archived.items.map((key) => key.id).sort()).toStrictEqual([
+      "expired",
+      "grace-closed",
+      "revoked",
+    ]);
   });
 });
 
@@ -357,37 +502,5 @@ describe("apiKeyService mutations", () => {
 
     expect(result).toStrictEqual({ success: true });
     expect(JSON.stringify(result)).not.toContain("dxnx_");
-  });
-});
-
-describe("isApiKeyDead", () => {
-  const now = Date.UTC(2026, 0, 10);
-
-  it("keeps a live key alive", () => {
-    expect(isApiKeyDead({ expiresAt: null, revoked: false, revokedAfter: null }, now)).toBe(false);
-  });
-
-  it("kills a key revoked without a grace window", () => {
-    expect(isApiKeyDead({ expiresAt: null, revoked: true, revokedAfter: null }, now)).toBe(true);
-  });
-
-  it("respects an open grace window over the revoked flag", () => {
-    const live = isApiKeyDead(
-      { expiresAt: null, revoked: true, revokedAfter: new Date(now + 1) },
-      now,
-    );
-    const closed = isApiKeyDead(
-      { expiresAt: null, revoked: true, revokedAfter: new Date(now) },
-      now,
-    );
-
-    expect(live).toBe(false);
-    expect(closed).toBe(true);
-  });
-
-  it("kills a key past its expiry", () => {
-    expect(
-      isApiKeyDead({ expiresAt: new Date(now), revoked: false, revokedAfter: null }, now),
-    ).toBe(true);
   });
 });

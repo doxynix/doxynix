@@ -70,21 +70,12 @@ export const docsService = {
     aid?: string,
     path?: string,
   ) {
-    const repo = await analysisRepo.getRepoSnapshot(db, repoId, workspaceId, aid);
+    const repo = await analysisRepo.getRepoRef(db, repoId, workspaceId, aid);
     if (repo == null) {
       throw new AppError({
         code: "NOT_FOUND",
         messageCode: MessageCode.REPO_NOT_FOUND,
         publicMessage: "Repository not found",
-      });
-    }
-    const analysis = repo.analyses[0];
-
-    if (analysis == null) {
-      throw new AppError({
-        code: "NOT_FOUND",
-        messageCode: MessageCode.ANALYSIS_NOT_FOUND,
-        publicMessage: "Analysis not found",
       });
     }
 
@@ -98,7 +89,7 @@ export const docsService = {
         ...(path != null ? { path } : {}),
         ...(path == null && {
           analysis: {
-            id: analysis.id,
+            id: repo.analysisId,
           },
         }),
       },
@@ -210,19 +201,21 @@ export const docsService = {
 
     const { analysisId, commitSha } = cachedData;
 
-    let internalAnalysisId: string | undefined;
-    if (analysisId != null) {
-      const analysis = await db.analysis.findFirst({
+    // Two independent reads: the analysis that pins the document and the repo it belongs to.
+    const [analysis, repo] = await Promise.all([
+      analysisId == null
+        ? null
+        : db.analysis.findFirst({
+            select: { id: true },
+            where: { id: analysisId, repo: { workspaceId } },
+          }),
+      db.repo.findUnique({
         select: { id: true },
-        where: { id: analysisId, repo: { workspaceId } },
-      });
-      internalAnalysisId = analysis?.id;
-    }
+        where: { id: input.repoId, workspaceId },
+      }),
+    ]);
 
-    const repo = await db.repo.findUnique({
-      select: { id: true },
-      where: { id: input.repoId, workspaceId },
-    });
+    const internalAnalysisId = analysis?.id;
 
     if (repo == null) {
       throw new AppError({

@@ -1,4 +1,4 @@
-import { generateBranchName, MessageCode } from "@doxynix/shared";
+import { type CursorMeta, generateBranchName, MessageCode } from "@doxynix/shared";
 import type { Redis } from "@upstash/redis";
 import type * as z from "zod";
 
@@ -9,6 +9,7 @@ import { appLogger } from "@/server/core/app-logger";
 import type { DbClient } from "@/server/core/db";
 import { getClientContext, getInstallationClient } from "@/server/core/github/github-client";
 import { realtimeService } from "@/server/core/realtime";
+import { splitKeysetPage } from "@/server/utils/pagination";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 
 import { analysisRepo } from "../analysis.repository";
@@ -38,9 +39,12 @@ export const fixesService = {
     });
 
     try {
-      const repo = await db.repo.findUnique({
-        where: { id: input.repoId, workspaceId },
-      });
+      const [repo, fix] = await Promise.all([
+        db.repo.findUnique({
+          where: { id: input.repoId, workspaceId },
+        }),
+        analysisRepo.getById(db, input.fixId, workspaceId),
+      ]);
 
       if (repo == null) {
         throw new AppError({
@@ -51,8 +55,6 @@ export const fixesService = {
       }
 
       const clientContext = await getClientContext(db, userId, repo.owner);
-
-      const fix = await analysisRepo.getById(db, input.fixId, workspaceId);
 
       if (fix == null) {
         throw new AppError({
@@ -81,7 +83,7 @@ export const fixesService = {
 
       await redis.del(REDIS_CONFIG.keys.prStaging(userId, input.repoId));
 
-      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
+      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.stagingUpdated, {});
 
       return {
         prNumber: result.prNumber,
@@ -124,22 +126,21 @@ export const fixesService = {
     });
 
     try {
-      let validPrAnalysisId: string | undefined;
+      // Both reads only need the request input, so the PR-analysis check no longer sits in front of
+      // the repo read. An unusable PR analysis still just clears the FK.
+      const [prAnalysisRecord, repo] = await Promise.all([
+        input.prAnalysisId == null
+          ? null
+          : db.pullRequestAnalysis.findFirst({
+              select: { id: true },
+              where: { id: input.prAnalysisId, repo: { workspaceId } },
+            }),
+        db.repo.findUnique({
+          where: { id: input.repoId, workspaceId },
+        }),
+      ]);
 
-      if (input.prAnalysisId != null) {
-        const prAnalysisRecord = await db.pullRequestAnalysis.findFirst({
-          select: { id: true },
-          where: { id: input.prAnalysisId, repo: { workspaceId } },
-        });
-
-        if (prAnalysisRecord != null) {
-          validPrAnalysisId = prAnalysisRecord.id;
-        }
-      }
-
-      const repo = await db.repo.findUnique({
-        where: { id: input.repoId, workspaceId },
-      });
+      const validPrAnalysisId = prAnalysisRecord?.id;
 
       if (repo == null) {
         throw new AppError({
@@ -174,7 +175,7 @@ export const fixesService = {
         },
       );
 
-      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
+      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.stagingUpdated, {});
 
       return {
         fixId: fix.id,
@@ -221,9 +222,15 @@ export const fixesService = {
     db: DbClient,
     repoId: string,
     workspaceId: string,
-  ): Promise<Array<z.infer<typeof GeneratedFixDTO>>> {
-    const fixes = await analysisRepo.getByRepoId(db, repoId, workspaceId);
-    return fixes.map((fix) => fixesMapper.toPublic(fix));
+    input: { cursor?: null | string; limit: number },
+  ): Promise<{ items: Array<z.infer<typeof GeneratedFixDTO>>; meta: CursorMeta }> {
+    const rows = await analysisRepo.getByRepoId(db, repoId, workspaceId, input);
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, input.limit);
+
+    return {
+      items: items.map((fix) => fixesMapper.toPublic(fix)),
+      meta: { hasNextPage, nextCursor },
+    };
   },
 
   async openPullRequest(
@@ -240,9 +247,14 @@ export const fixesService = {
       userId,
     });
 
-    const repo = await db.repo.findUnique({
-      where: { id: input.repoId, workspaceId },
-    });
+    const cacheKey = REDIS_CONFIG.keys.prStaging(userId, input.repoId);
+    // The staged hash does not depend on the repo row, so the read rides along with it.
+    const [repo, staged] = await Promise.all([
+      db.repo.findUnique({
+        where: { id: input.repoId, workspaceId },
+      }),
+      redis.hgetall<Record<string, string>>(cacheKey),
+    ]);
 
     if (repo == null) {
       throw new AppError({
@@ -270,9 +282,6 @@ export const fixesService = {
     }
 
     const botOctokit = getInstallationClient(Number(installation.id));
-
-    const cacheKey = REDIS_CONFIG.keys.prStaging(userId, input.repoId);
-    const staged = await redis.hgetall<Record<string, string>>(cacheKey);
 
     if (staged == null || Object.keys(staged).length === 0) {
       throw new AppError({
@@ -314,7 +323,7 @@ export const fixesService = {
 
       await redis.del(cacheKey);
 
-      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
+      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.stagingUpdated, {});
 
       return {
         fixId: fix.id,

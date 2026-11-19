@@ -52,8 +52,7 @@
     "operation_updated": "Güncellendi",
     "origin_system": "sistem",
     "page_desc": "Uygulamanın tüm aktörler tarafından yaptığı tüm yazmalar. Pano denetim kaydı yalnızca kendi işleminizi gösterir; bu tümünü gösterir.",
-    "page_title": "Denetim kaydı",
-    "total_count": "{total} kayıttan {filtered} tanesi"
+    "page_title": "Denetim kaydı"
   },
   "AdminBannedEmails": {
     "col_actions": "İşlemler",
@@ -121,8 +120,7 @@
     "status_analyzing": "Analiz ediliyor",
     "status_completed": "Tamamlandı",
     "status_failed": "Başarısız",
-    "status_pending": "Beklemede",
-    "total_count": "{total} incelemeden {filtered} tanesi"
+    "status_pending": "Beklemede"
   },
   "AdminUsers": {
     "ban_action": "Yasakla",
@@ -195,7 +193,6 @@
     "toast_role_updated": "{name} artık yönetici",
     "toast_session_revoked": "Oturum sonlandırıldı",
     "toast_unbanned": "Yasak kaldırıldı",
-    "total_count": "{total} kullanıcıdan {filtered}",
     "unban_action": "Yasağı kaldır"
   },
   "Agent": {
@@ -429,7 +426,7 @@
     "beta": "BETA",
     "breadcrumb": "Gezinti yolu",
     "cancel": "İptal",
-    "capped_hint": "İlk {count} kayıt gösteriliyor. Kalanı için filtreyi daraltın veya bir tarih aralığı seçin.",
+    "capped_hint": "İlk {count} kayıt gösteriliyor. Kalanı görmek için sonuçları daraltın.",
     "change_language": "Dili değiştir",
     "check_system_status": "Sistem Durumunu Kontrol Et",
     "clipboard_unavailable": "Pano API'si kullanılamıyor",

@@ -43,6 +43,13 @@ describe("mapFiltersToInput", () => {
     });
   });
 
+  it("forwards the date range so bulk actions share the list window", () => {
+    const from = new Date("2026-01-01T00:00:00.000Z");
+    const to = new Date("2026-01-31T00:00:00.000Z");
+
+    expect(mapFiltersToInput(makeFilters({ from, to }))).toMatchObject({ from, to });
+  });
+
   it("keeps an empty repo string (??), but drops an empty search string (||)", () => {
     expect(mapFiltersToInput(makeFilters({ owner: "", repo: "", search: "" }))).toEqual({
       repoName: "",

@@ -28,20 +28,15 @@ function formatTaskError(error: unknown, defaultMessage: string): string {
   return defaultMessage;
 }
 
+// One worker hosts several runs and they share this pool, so a finished run must not release it.
 tasks.middleware("prisma-connection-manager", async ({ ctx, next }) => {
   locals.set(PrismaLocal, prisma);
+  appLogger.debug({
+    msg: "[Prisma Middleware] Exposing the shared PostgreSQL pool to the run...",
+    runId: ctx.run.id,
+  });
 
-  try {
-    appLogger.debug({ msg: "[Prisma Middleware] Connecting to PostgreSQL...", runId: ctx.run.id });
-    await prisma.$connect();
-    await next();
-  } finally {
-    appLogger.debug({
-      msg: "[Prisma Middleware] Releasing PostgreSQL connection...",
-      runId: ctx.run.id,
-    });
-    await prisma.$disconnect();
-  }
+  await next();
 });
 
 tasks.onWait("prisma-connection-manager", async ({ ctx }) => {

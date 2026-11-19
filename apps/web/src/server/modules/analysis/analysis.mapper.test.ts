@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   getLanguageColor: vi.fn(() => "#cccccc"),
   hasText: vi.fn((value: unknown) => typeof value === "string" && value.length > 0),
   markdownToHtml: vi.fn(async (input: { content: string }) => `<p>${input.content}</p>`),
-  unstable_cache: vi.fn((fn: () => unknown) => fn),
+  unstable_cache: vi.fn((fn: () => unknown, _key?: unknown[], _options?: unknown) => fn),
 }));
 
 vi.mock("next/cache", () => ({ unstable_cache: mocks.unstable_cache }));
@@ -196,10 +196,8 @@ const makeImpactAnalysis = (overrides: Record<string, unknown> = {}): ImpactAnal
   ({
     baseSha: "base",
     changedFilesJson: [],
-    comments: [],
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
     findingsJson: [],
-    generatedFixes: [],
     headSha: "head",
     id: "pa-1",
     prNumber: 1,
@@ -360,40 +358,15 @@ describe("parseChangedFilesSnapshot", () => {
     ]);
   });
 
-  it("invalid snapshot → legacy paths from comments and findings (modified, zeros)", () => {
+  it("invalid snapshot → empty list", () => {
     const analysis = makeImpactAnalysis({
       changedFilesJson: [{ additions: -1, deletions: 0, filePath: "", status: "bogus" }],
-      comments: [
-        {
-          body: "b",
-          filePath: "src/legacy.ts",
-          findingType: "BUG",
-          id: "c1",
-          line: 1,
-          riskLevel: 7,
-        },
-      ],
       findingsJson: [
         { file: "src/./other.ts", line: 2, message: "m", title: "t", type: "security" },
       ],
     });
 
-    expect(analysisMapper.parseChangedFilesSnapshot(analysis)).toEqual([
-      {
-        additions: 0,
-        deletions: 0,
-        filePath: "src/legacy.ts",
-        previousFilePath: null,
-        status: "modified",
-      },
-      {
-        additions: 0,
-        deletions: 0,
-        filePath: "src/other.ts",
-        previousFilePath: null,
-        status: "modified",
-      },
-    ]);
+    expect(analysisMapper.parseChangedFilesSnapshot(analysis)).toEqual([]);
   });
 });
 
@@ -408,24 +381,12 @@ describe("parsePersistedFindings", () => {
     ]);
   });
 
-  it("invalid findingsJson → falls back to comments", () => {
+  it("invalid findingsJson → no findings", () => {
     const analysis = makeImpactAnalysis({
-      comments: [
-        {
-          body: "b",
-          filePath: "src/c.ts",
-          findingType: "BUG",
-          id: "c1",
-          line: 1,
-          riskLevel: 7,
-        },
-      ],
       findingsJson: [{ file: "", line: 0, message: "", title: "", type: "" }],
     });
 
-    expect(analysisMapper.parsePersistedFindings(analysis)).toEqual([
-      { file: "src/c.ts", line: 1, message: "b", score: 7, title: "BUG", type: "BUG" },
-    ]);
+    expect(analysisMapper.parsePersistedFindings(analysis)).toEqual([]);
   });
 });
 
@@ -659,6 +620,7 @@ describe("buildTopFindings", () => {
       zoneLabels,
       "ivan",
       "doxynix",
+      { analysisId: "pa-1", version: "1772366400000" },
     );
 
     expect(result.map((item) => item.id)).toEqual([
@@ -682,14 +644,56 @@ describe("buildTopFindings", () => {
       name: "doxynix",
       owner: "ivan",
     });
+    expect(mocks.unstable_cache).toHaveBeenCalledTimes(1);
     expect(mocks.unstable_cache).toHaveBeenCalledWith(
       expect.any(Function),
-      [expect.stringContaining("finding-html-ivan-doxynix-src/b.ts:2")],
-      expect.objectContaining({
-        revalidate: false,
-        tags: ["findings", "ivan", "doxynix", "src/b.ts:2:performance:1"],
-      }),
+      ["finding-html-ivan-doxynix-pa-1-1772366400000"],
+      {
+        revalidate: 3600,
+        tags: ["findings", "ivan", "doxynix", "pa-1"],
+      },
     );
+  });
+
+  it("reads the page cache once for a three-finding page", async () => {
+    const findings = [
+      makeFinding({ file: "src/a.ts", line: 1, message: "a", score: 3 }),
+      makeFinding({ file: "src/b.ts", line: 2, message: "b", score: 5 }),
+      makeFinding({ file: "src/c.ts", line: 3, message: "c", score: 7 }),
+    ];
+
+    const result = await analysisMapper.buildTopFindings(
+      findings,
+      [],
+      new Map(),
+      "ivan",
+      "doxynix",
+      { analysisId: "pa-2", version: "1" },
+    );
+
+    expect(result).toHaveLength(3);
+    expect(result.every((item) => item.messageHtml.startsWith("<p>"))).toBe(true);
+    expect(mocks.unstable_cache).toHaveBeenCalledTimes(1);
+  });
+
+  it("keys the page on the analysis version, so a re-analysis misses the old entry", async () => {
+    const findings = [makeFinding()];
+
+    await analysisMapper.buildTopFindings(findings, [], new Map(), "ivan", "doxynix", {
+      analysisId: "pa-1",
+      version: "1000",
+    });
+    await analysisMapper.buildTopFindings(findings, [], new Map(), "ivan", "doxynix", {
+      analysisId: "pa-1",
+      version: "2000",
+    });
+
+    expect(mocks.unstable_cache.mock.calls[0]?.[1]).toStrictEqual([
+      "finding-html-ivan-doxynix-pa-1-1000",
+    ]);
+    expect(mocks.unstable_cache.mock.calls[1]?.[1]).toStrictEqual([
+      "finding-html-ivan-doxynix-pa-1-2000",
+    ]);
   });
 
   it("missing score → riskLevel 0; zoneLabel falls back to file.zoneLabel", async () => {
@@ -698,7 +702,14 @@ describe("buildTopFindings", () => {
       makeChangedFile({ filePath: "src/a.ts", zoneId: "group:src", zoneLabel: "src" }),
     ];
 
-    const result = await analysisMapper.buildTopFindings(findings, files, new Map());
+    const result = await analysisMapper.buildTopFindings(
+      findings,
+      files,
+      new Map(),
+      undefined,
+      undefined,
+      { analysisId: "pa-3", version: "1" },
+    );
 
     expect(result[0]).toMatchObject({ riskLevel: 0, zoneLabel: "src" });
   });

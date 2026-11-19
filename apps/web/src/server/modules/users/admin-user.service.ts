@@ -1,4 +1,4 @@
-import { MAX_PAGE, MessageCode } from "@doxynix/shared";
+import { MessageCode } from "@doxynix/shared";
 import type { Prisma, UserRole } from "@prisma/client";
 import * as z from "zod";
 
@@ -12,9 +12,10 @@ import { normalizeEmail } from "@/server/utils/email-guard";
 import { handlePrismaError } from "@/server/utils/handle-error";
 import {
   buildDateRangeWhere,
-  cappedCount,
-  getPaginatedList,
+  keysetArgs,
   ORDER_CREATED_AT_DESC,
+  orderWithTiebreak,
+  splitKeysetPage,
 } from "@/server/utils/pagination";
 import { normalizeSearchInput } from "@/server/utils/search";
 
@@ -38,6 +39,12 @@ export type ReauthInput = {
 };
 
 const ACTIVE_ADMIN_WHERE: Prisma.UserWhereInput = { banned: false, role: "ADMIN" };
+
+type AdminSessionsInput = {
+  cursor?: null | string;
+  limit: number;
+  userId: string;
+};
 
 const ADMIN_USER_SELECT = {
   banExpires: true,
@@ -215,34 +222,21 @@ export const adminUserService = {
   },
 
   async getAll(db: DbClient, input: AdminUsersFilterInput) {
-    const { limit, page } = input;
+    const { cursor, limit } = input;
 
-    const where = this.buildWhereClause(input);
-    const isUnfiltered = Object.keys(where).length === 0;
-
-    const cap = MAX_PAGE * limit;
-    const countMatching = (filterWhere: Prisma.UserWhereInput) =>
-      cappedCount(
-        (take) => db.user.findMany({ select: { id: true }, take, where: filterWhere }),
-        cap,
-      );
-
-    const { items, meta } = await getPaginatedList({
-      countCap: cap,
-      countFiltered: () => countMatching(where),
-      countUnfiltered: isUnfiltered ? null : () => countMatching({}),
-      fetchItems: ({ skip, take }) =>
-        db.user.findMany({
-          orderBy: ORDER_CREATED_AT_DESC,
-          select: ADMIN_USER_SELECT,
-          skip,
-          take,
-          where,
-        }),
-      input: { limit, page, ...(input.search != null ? { search: input.search } : {}) },
+    const rows = await db.user.findMany({
+      ...keysetArgs(cursor, limit),
+      orderBy: ORDER_CREATED_AT_DESC,
+      select: ADMIN_USER_SELECT,
+      where: this.buildWhereClause(input),
     });
 
-    return { items: items.map((item) => userMapper.toAdminSummary(item)), meta };
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
+
+    return {
+      items: items.map((item) => userMapper.toAdminSummary(item)),
+      meta: { hasNextPage, nextCursor },
+    };
   },
 
   async getDetail(db: DbClient, id: string) {
@@ -262,10 +256,13 @@ export const adminUserService = {
     return userMapper.toAdminDetail(user);
   },
 
-  async getSessions(db: DbClient, userId: string) {
+  async getSessions(db: DbClient, input: AdminSessionsInput) {
+    const { cursor, limit, userId } = input;
     const now = Date.now();
-    const sessions = await db.session.findMany({
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+
+    const rows = await db.session.findMany({
+      ...keysetArgs(cursor, limit),
+      orderBy: orderWithTiebreak("createdAt", "desc"),
       select: {
         createdAt: true,
         expiresAt: true,
@@ -276,8 +273,10 @@ export const adminUserService = {
       where: { userId },
     });
 
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
+
     return {
-      items: sessions.map((session) => ({
+      items: items.map((session) => ({
         createdAt: session.createdAt,
         expired: session.expiresAt.getTime() <= now,
         expiresAt: session.expiresAt,
@@ -285,6 +284,7 @@ export const adminUserService = {
         ipAddress: session.ipAddress,
         userAgent: session.userAgent,
       })),
+      meta: { hasNextPage, nextCursor },
     };
   },
 

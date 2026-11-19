@@ -17,7 +17,7 @@ const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
 
 const { sleepCalls } = vi.hoisted(() => ({ sleepCalls: [] as number[] }));
 
-const { authMock, prismaMock, revokeUserSessionsMock } = vi.hoisted(() => ({
+const { authMock, prismaMock, revokeUserSessionsMock, redisMock } = vi.hoisted(() => ({
   authMock: {
     deleteSession: vi.fn(),
     listSessions: vi.fn(),
@@ -25,6 +25,7 @@ const { authMock, prismaMock, revokeUserSessionsMock } = vi.hoisted(() => ({
   },
   prismaMock: {
     session: {
+      deleteMany: vi.fn(),
       findFirst: vi.fn(),
       findMany: vi.fn(),
     },
@@ -32,6 +33,7 @@ const { authMock, prismaMock, revokeUserSessionsMock } = vi.hoisted(() => ({
       findUnique: vi.fn(),
     },
   },
+  redisMock: { deleteMany: vi.fn() },
   revokeUserSessionsMock: vi.fn(),
 }));
 
@@ -60,6 +62,10 @@ vi.mock("@/server/core/auth", () => ({
     $context: Promise.resolve({ internalAdapter: { deleteSession: authMock.deleteSession } }),
     api: authMock,
   },
+}));
+
+vi.mock("@/server/core/redis", () => ({
+  redisService: { authStorage: { deleteMany: redisMock.deleteMany } },
 }));
 
 vi.mock("@/server/core/db", async (importOriginal) => {
@@ -210,6 +216,48 @@ describe("disconnectAccount: P2034 backoff", () => {
   });
 });
 
+describe("disconnectAccount: independent reads", () => {
+  it("issues the three validation reads concurrently and deletes last", async () => {
+    const order: string[] = [];
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    async function gated(name: string, value: unknown) {
+      order.push(name);
+      if (order.length === 3) {
+        release();
+      }
+      await gate;
+      return value;
+    }
+
+    const removeAccount = vi.fn().mockImplementation(() => order.push("delete"));
+    const tx = {
+      account: {
+        count: () => gated("count", 2),
+        delete: removeAccount,
+        findUnique: () => gated("findUnique", { id: "account-1" }),
+      },
+      user: {
+        findUnique: () => gated("user", { email: "ivan@doxynix.dev", emailVerified: true }),
+      },
+    };
+    const db = {
+      $transaction: (body: (client: typeof tx) => Promise<void>) => body(tx),
+    } as unknown as DbClient;
+
+    await expect(userService.disconnectAccount(db, USER_ID, "github")).resolves.toEqual({
+      success: true,
+    });
+
+    // The gate only opens once all three reads are in flight, so a sequential body would hang.
+    expect(order.slice(0, 3).sort()).toEqual(["count", "findUnique", "user"]);
+    expect(order.at(-1)).toBe("delete");
+  });
+});
+
 describe("deleteAccount", () => {
   const calls: string[] = [];
 
@@ -288,9 +336,19 @@ describe("revokeOtherSessions", () => {
   const USER_ID = "0195a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5d";
   const CURRENT_SESSION_ID = "018f0000-0000-7000-8000-0000000000a1";
 
-  it("deletes every session except the current one", async () => {
-    const other = { id: "018f0000-0000-7000-8000-0000000000a2", token: "other-token" };
-    prismaMock.session.findMany.mockResolvedValue([other]);
+  beforeEach(() => {
+    authMock.deleteSession.mockReset();
+    prismaMock.session.deleteMany.mockReset();
+    prismaMock.session.findMany.mockReset();
+    redisMock.deleteMany.mockReset();
+  });
+
+  it("deletes every other session with one statement and one redis pipeline", async () => {
+    const others = [
+      { id: "018f0000-0000-7000-8000-0000000000a2", token: "other-token" },
+      { id: "018f0000-0000-7000-8000-0000000000a3", token: "third-token" },
+    ];
+    prismaMock.session.findMany.mockResolvedValue(others);
 
     await expect(userService.revokeOtherSessions(USER_ID, CURRENT_SESSION_ID)).resolves.toEqual({
       success: true,
@@ -301,7 +359,26 @@ describe("revokeOtherSessions", () => {
         where: { id: { not: CURRENT_SESSION_ID }, userId: USER_ID },
       }),
     );
-    expect(authMock.deleteSession).toHaveBeenCalledWith(other.token);
+    expect(redisMock.deleteMany).toHaveBeenCalledTimes(1);
+    expect(redisMock.deleteMany).toHaveBeenCalledWith(["other-token", "third-token"]);
+    expect(prismaMock.session.deleteMany).toHaveBeenCalledTimes(1);
+    expect(prismaMock.session.deleteMany).toHaveBeenCalledWith({
+      where: { token: { in: ["other-token", "third-token"] } },
+    });
+    // The secondary storage record is gone, so a session restored from the cookie cache has
+    // nothing to resolve against once the cache expires.
+    expect(authMock.deleteSession).not.toHaveBeenCalled();
+  });
+
+  it("does not touch the database when the current session is the only one", async () => {
+    prismaMock.session.findMany.mockResolvedValue([]);
+
+    await expect(userService.revokeOtherSessions(USER_ID, CURRENT_SESSION_ID)).resolves.toEqual({
+      success: true,
+    });
+
+    expect(redisMock.deleteMany).not.toHaveBeenCalled();
+    expect(prismaMock.session.deleteMany).not.toHaveBeenCalled();
   });
 });
 
@@ -314,13 +391,61 @@ describe("getActiveSessions", () => {
     return { db: { session: { findMany } } as unknown as DbClient, findMany };
   }
 
-  it("reads the sessions of the user from the database", async () => {
-    const createdAt = new Date("2026-03-01T12:00:00Z");
+  function makeSession(id: string) {
+    return {
+      createdAt: new Date("2026-03-01T12:00:00Z"),
+      id,
+      ipAddress: "127.0.0.1",
+      userAgent: "internal",
+    };
+  }
+
+  it("reads one probe row past the page in the newest-first order", async () => {
     const { db, findMany } = mockDb([
-      { createdAt, id: "session-1", ipAddress: "127.0.0.1", userAgent: "internal" },
+      makeSession("session-1"),
+      makeSession("session-2"),
+      makeSession("probe"),
     ]);
 
-    await expect(userService.getActiveSessions(db, USER_ID, false)).resolves.toEqual([
+    const result = await userService.getActiveSessions(db, USER_ID, false, { limit: 2 });
+
+    expect(result.items.map((session) => session.id)).toStrictEqual(["session-1", "session-2"]);
+    expect(result.meta).toStrictEqual({ hasNextPage: true, nextCursor: "probe" });
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cursor: undefined,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 3,
+        where: { expiresAt: { gt: expect.any(Date) }, userId: USER_ID },
+      }),
+    );
+  });
+
+  it("keysets past the cursor id", async () => {
+    const { db, findMany } = mockDb([makeSession("session-3")]);
+
+    await userService.getActiveSessions(db, USER_ID, false, { cursor: "session-2", limit: 2 });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: { id: "session-2" }, take: 3 }),
+    );
+  });
+
+  it("reports the last page without a cursor when the probe row is missing", async () => {
+    const { db } = mockDb([makeSession("session-1")]);
+
+    const result = await userService.getActiveSessions(db, USER_ID, false, { limit: 2 });
+
+    expect(result.meta).toStrictEqual({ hasNextPage: false, nextCursor: undefined });
+  });
+
+  it("maps the user agent of every session", async () => {
+    const createdAt = new Date("2026-03-01T12:00:00Z");
+    const { db } = mockDb([makeSession("session-1")]);
+
+    const result = await userService.getActiveSessions(db, USER_ID, false, { limit: 2 });
+
+    expect(result.items).toStrictEqual([
       {
         createdAt,
         id: "session-1",
@@ -328,19 +453,12 @@ describe("getActiveSessions", () => {
         userAgent: "System",
       },
     ]);
-
-    expect(findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-        where: { expiresAt: { gt: expect.any(Date) }, userId: USER_ID },
-      }),
-    );
   });
 
   it("excludes expired sessions", async () => {
     const { db, findMany } = mockDb([]);
 
-    await userService.getActiveSessions(db, USER_ID, false);
+    await userService.getActiveSessions(db, USER_ID, false, { limit: 2 });
 
     const where = findMany.mock.calls[0]?.[0]?.where as { expiresAt: { gt: Date } };
     expect(where.expiresAt.gt).toBeInstanceOf(Date);
@@ -349,7 +467,10 @@ describe("getActiveSessions", () => {
   it("returns nothing for an API-key session, which has no session row", async () => {
     const { db, findMany } = mockDb([]);
 
-    await expect(userService.getActiveSessions(db, USER_ID, true)).resolves.toEqual([]);
+    await expect(userService.getActiveSessions(db, USER_ID, true, { limit: 2 })).resolves.toEqual({
+      items: [],
+      meta: { hasNextPage: false },
+    });
     expect(findMany).not.toHaveBeenCalled();
   });
 });

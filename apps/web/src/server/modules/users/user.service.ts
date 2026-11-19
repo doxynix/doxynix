@@ -17,8 +17,10 @@ import {
   type TransactionClient,
 } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
+import { redisService } from "@/server/core/redis";
 import { revokeUserSessions } from "@/server/utils/access-revocation";
 import { handlePrismaError } from "@/server/utils/handle-error";
+import { keysetArgs, orderWithTiebreak, splitKeysetPage } from "@/server/utils/pagination";
 
 import {
   assertNotSubscriptionOwner,
@@ -62,6 +64,11 @@ async function deleteAvatarBlob(input: {
 const SERIALIZABLE_MAX_ATTEMPTS = 3;
 const SERIALIZABLE_RETRY_BASE_MS = 20;
 const SERIALIZABLE_RETRY_JITTER_MS = 10;
+
+export type ActiveSessionsInput = {
+  cursor?: null | string;
+  limit: number;
+};
 
 function isWriteConflict(error: unknown): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034";
@@ -144,9 +151,18 @@ export const userService = {
 
   async disconnectAccount(db: DbClient, userId: string, provider: "github" | "google" | "yandex") {
     await runSerializableTransaction(asPolicyEnforcedDb(db), async (tx) => {
-      const accountToDelete = await tx.account.findUnique({
-        where: { userId_providerId: { providerId: provider, userId } },
-      });
+      // One await instead of three: the checks read different models, so they can share the
+      // serializable window without lengthening it.
+      const [accountToDelete, accountCount, user] = await Promise.all([
+        tx.account.findUnique({
+          where: { userId_providerId: { providerId: provider, userId } },
+        }),
+        tx.account.count({ where: { userId } }),
+        tx.user.findUnique({
+          select: { email: true, emailVerified: true },
+          where: { id: userId },
+        }),
+      ]);
 
       if (accountToDelete == null) {
         throw new AppError({
@@ -155,13 +171,6 @@ export const userService = {
           publicMessage: "Account not found or already disconnected.",
         });
       }
-
-      const accountCount = await tx.account.count({ where: { userId } });
-
-      const user = await tx.user.findUnique({
-        select: { email: true, emailVerified: true },
-        where: { id: userId },
-      });
 
       const hasEmailAuth = user?.email != null && user.emailVerified;
 
@@ -174,18 +183,31 @@ export const userService = {
 
     return { success: true };
   },
-  async getActiveSessions(db: DbClient, userId: string, isApiKeySession: boolean) {
+  async getActiveSessions(
+    db: DbClient,
+    userId: string,
+    isApiKeySession: boolean,
+    input: ActiveSessionsInput,
+  ) {
     if (isApiKeySession) {
-      return [];
+      return { items: [], meta: { hasNextPage: false } };
     }
 
-    const sessions = await db.session.findMany({
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    const { cursor, limit } = input;
+
+    const rows = await db.session.findMany({
+      ...keysetArgs(cursor, limit),
+      orderBy: orderWithTiebreak("createdAt", "desc"),
       select: { createdAt: true, id: true, ipAddress: true, userAgent: true },
       where: { expiresAt: { gt: new Date() }, userId },
     });
 
-    return sessions.map((session) => userMapper.toSession(session));
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
+
+    return {
+      items: items.map((session) => userMapper.toSession(session)),
+      meta: { hasNextPage, nextCursor },
+    };
   },
 
   async getLinkedAccounts(db: DbClient, userId: string) {
@@ -271,11 +293,14 @@ export const userService = {
       where: { id: { not: currentSessionId }, userId },
     });
 
-    const authContext = await auth.$context;
+    // `internalAdapter.deleteSessions` is one SQL delete plus one Redis delete per token; this is the
+    // same pair with a single pipeline, and there are no session-delete hooks to fire.
+    const tokens = others.map((session) => session.token);
 
-    await Promise.all(
-      others.map((session) => authContext.internalAdapter.deleteSession(session.token)),
-    );
+    if (tokens.length > 0) {
+      await redisService.authStorage.deleteMany(tokens);
+      await prisma.session.deleteMany({ where: { token: { in: tokens } } });
+    }
 
     void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.userUpdated, {});
 

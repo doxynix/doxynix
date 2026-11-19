@@ -10,6 +10,7 @@ import {
   AdminUserDetailSchema,
   AdminUserRefSchema,
   AdminUserSessionRefSchema,
+  AdminUserSessionsInputSchema,
   AdminUserSessionsListSchema,
   AdminUserSummarySchema,
   AdminUsersFilterSchema,
@@ -50,10 +51,14 @@ export const adminUserRouter = createTRPCRouter({
     }),
 
   listSessions: adminProcedure
-    .input(AdminUserRefSchema)
+    .input(AdminUserSessionsInputSchema)
     .output(AdminUserSessionsListSchema)
     .query(async ({ ctx, input }) => {
-      return adminUserService.getSessions(ctx.db, input.id);
+      return adminUserService.getSessions(ctx.db, {
+        cursor: input.cursor,
+        limit: input.limit,
+        userId: input.id,
+      });
     }),
 
   revokeSession: adminProcedure

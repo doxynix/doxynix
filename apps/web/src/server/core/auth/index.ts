@@ -1,6 +1,7 @@
 import { createElement } from "react";
 import { after } from "next/server";
 import { passkey } from "@better-auth/passkey";
+import type { Prisma } from "@prisma/client";
 import { render } from "@react-email/render";
 import { betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
@@ -59,6 +60,17 @@ const yandexProfileSchema = z.object({
   is_avatar_empty: z.boolean().nullish(),
   real_name: z.string().nullish(),
 });
+
+// The profile columns both create hooks read; anything else is decrypted and parsed for nothing.
+const AUTH_PROFILE_SELECT = {
+  createdAt: true,
+  email: true,
+  emailHash: true,
+  id: true,
+  image: true,
+  name: true,
+  role: true,
+} satisfies Prisma.UserSelect;
 
 async function assertEmailNotBanned(
   dbUser: { email: null | string; emailHash: null | string; id: string },
@@ -167,6 +179,7 @@ export const auth = betterAuth({
             userId: string;
           };
           const dbUser = await prisma.user.findUnique({
+            select: { id: true, image: true },
             where: { id: baAccount.userId },
           });
 
@@ -187,6 +200,7 @@ export const auth = betterAuth({
         before: async (account) => {
           const payload = { ...account } as Record<string, unknown>;
           const dbUser = await prisma.user.findUnique({
+            select: AUTH_PROFILE_SELECT,
             where: { id: payload.userId as string },
           });
 
@@ -215,37 +229,9 @@ export const auth = betterAuth({
     },
     session: {
       create: {
-        after: async (session) => {
-          const dbUser = await prisma.user.findUnique({
-            select: { createdAt: true, id: true, role: true },
-            where: { id: session.userId },
-          });
-
-          if (dbUser != null) {
-            const isNewUser = Date.now() - dbUser.createdAt.getTime() < 10_000;
-            if (isNewUser) {
-              appLogger.info({
-                msg: "First time login experience triggered",
-                userId: String(dbUser.id),
-              });
-            }
-
-            appLogger.info({
-              msg: "User signed in",
-              role: dbUser.role,
-              type: "auth.signin",
-              userId: String(session.userId),
-            });
-          } else {
-            appLogger.info({
-              msg: "User signed in",
-              type: "auth.signin",
-              userId: String(session.userId),
-            });
-          }
-        },
         before: async (session) => {
           const dbUser = await prisma.user.findUnique({
+            select: AUTH_PROFILE_SELECT,
             where: { id: session.userId },
           });
 
@@ -283,6 +269,21 @@ export const auth = betterAuth({
                 });
               }
             }
+
+            const isNewUser = Date.now() - dbUser.createdAt.getTime() < 10_000;
+            if (isNewUser) {
+              appLogger.info({
+                msg: "First time login experience triggered",
+                userId: String(dbUser.id),
+              });
+            }
+
+            appLogger.info({
+              msg: "User signed in",
+              role: dbUser.role,
+              type: "auth.signin",
+              userId: String(session.userId),
+            });
           }
 
           return { data: session };

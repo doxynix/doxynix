@@ -1,15 +1,16 @@
 "use client";
-import { type ChangeEvent, type SyntheticEvent, useEffect, useRef, useState } from "react";
+import { type ChangeEvent, type SyntheticEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import type { ChatStatus, UIMessage } from "ai";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
-import { ArrowDown } from "lucide-react";
+import { uniqBy } from "es-toolkit";
+import { ArrowDown, LoaderCircle } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { type Components, Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 
-import { useTRPC } from "@/shared/api/trpc";
+import { type RouterOutput, useTRPC } from "@/shared/api/trpc";
 import { EASING } from "@/shared/config/motion";
 import { cn } from "@/shared/lib/cn";
 import { useAppearancePreferences } from "@/shared/lib/hooks/use-appearance-preferences";
@@ -27,12 +28,30 @@ import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { TOOL_INVALIDATIONS, toolLabelKeys } from "../model/agent-config";
 import type { AgentMessagePart, LocalFileAttachment } from "../model/agent-types";
+import { decidePrepend, type HistoryWindow, resetHistoryWindow } from "../model/history-window";
 import { useAgentIsOpen } from "../model/use-agent.store";
 import { AgentForm } from "./agent-form";
 import { AgentHeader } from "./agent-header";
 import { AgentMessageRow } from "./agent-message";
 import { AgentSidebar } from "./agent-sidebar";
 import { AgentSuggestions } from "./agent-suggestions";
+
+const HISTORY_PAGE_SIZE = 100;
+const SESSION_PAGE_SIZE = 50;
+
+type HistoryItem = RouterOutput["agent"]["getSessionHistory"]["items"][number];
+
+// `submitMessage` stamps `createdAt`, so the chat message type has to carry it.
+type AgentUIMessage = UIMessage & { createdAt: Date };
+
+function toUIMessages(items: readonly HistoryItem[]): AgentUIMessage[] {
+  return items.map((message) => ({
+    createdAt: message.createdAt,
+    id: message.id,
+    parts: message.parts,
+    role: message.role as "assistant" | "system" | "user",
+  }));
+}
 
 function buildMessageParts(text: string, files: LocalFileAttachment[]): AgentMessagePart[] {
   const parts: AgentMessagePart[] = [];
@@ -53,10 +72,15 @@ function buildMessageParts(text: string, files: LocalFileAttachment[]): AgentMes
   return parts;
 }
 
-function AgentListFooter({ context }: Readonly<{ context?: ChatStatus }>) {
+type AgentListContext = {
+  isFetchingNextPage: boolean;
+  status: ChatStatus;
+};
+
+function AgentListFooter({ context }: Readonly<{ context?: AgentListContext }>) {
   const t = useTranslations("Agent");
 
-  if (context !== "submitted") {
+  if (context?.status !== "submitted") {
     return null;
   }
 
@@ -67,9 +91,25 @@ function AgentListFooter({ context }: Readonly<{ context?: ChatStatus }>) {
   );
 }
 
-// Hoisted so Virtuoso never remounts its footer when the panel re-renders.
-const AGENT_LIST_COMPONENTS: Components<UIMessage, ChatStatus> = {
+function AgentListHeader({ context }: Readonly<{ context?: AgentListContext }>) {
+  if (context?.isFetchingNextPage !== true) {
+    return null;
+  }
+
+  return (
+    <div className="flex justify-center py-2">
+      <LoaderCircle
+        aria-hidden
+        className="size-4 animate-spin text-muted-foreground"
+      />
+    </div>
+  );
+}
+
+// Hoisted so Virtuoso never remounts its header and footer when the panel re-renders.
+const AGENT_LIST_COMPONENTS: Components<UIMessage, AgentListContext> = {
   Footer: AgentListFooter,
+  Header: AgentListHeader,
 };
 
 const INCREASE_VIEWPORT_BY = { bottom: 400, top: 200 };
@@ -103,20 +143,46 @@ export function Agent() {
 
   const lastLoadedSessionIdRef = useRef<null | string>(sessionId);
 
+  const [storedWindow, setHistoryWindow] = useState<HistoryWindow>(resetHistoryWindow);
+
   const queryClient = useQueryClient();
   // Guards against two submits in the same tick, where `status` from the last render is stale.
   const submittingRef = useRef(false);
 
-  const { data: sessions } = useQuery(
-    trpc.agent.listSessions.queryOptions({ currentRepo }, { enabled: isOpen }),
+  const {
+    data: sessionPages,
+    fetchNextPage: fetchNextSessionPage,
+    hasNextPage: hasMoreSessions,
+    isFetchingNextPage: isFetchingNextSessionPage,
+  } = useInfiniteQuery(
+    trpc.agent.listSessions.infiniteQueryOptions(
+      { currentRepo, limit: SESSION_PAGE_SIZE },
+      { enabled: isOpen, getNextPageParam: (page) => page.meta.nextCursor },
+    ),
   );
 
-  const isSessionSaved = sessions?.some((s) => s.id === sessionId);
+  // `listSessions` keysets on `updatedAt`, which a rename moves, so a row can repeat across pages.
+  const sessions =
+    sessionPages == null
+      ? undefined
+      : uniqBy(
+          sessionPages.pages.flatMap((page) => page.items),
+          (session) => session.id,
+        );
 
-  const { data: history, isLoading: isHistoryLoading } = useQuery(
-    trpc.agent.getSessionHistory.queryOptions(
-      { sessionId: sessionId ?? "" },
-      { enabled: sessionId !== null && isOpen },
+  const {
+    data: historyPages,
+    fetchNextPage: fetchOlderHistory,
+    hasNextPage: hasOlderHistory,
+    isFetchingNextPage: isFetchingOlderHistory,
+    isPending: isHistoryLoading,
+  } = useInfiniteQuery(
+    trpc.agent.getSessionHistory.infiniteQueryOptions(
+      { limit: HISTORY_PAGE_SIZE, sessionId: sessionId ?? "" },
+      {
+        enabled: isOpen && sessionId != null,
+        getNextPageParam: (page) => page.meta.nextCursor,
+      },
     ),
   );
 
@@ -132,17 +198,11 @@ export function Agent() {
     stop,
   } = useChat({
     id: sessionId ?? undefined,
-    messages:
-      history?.map((msg) => ({
-        createdAt: msg.createdAt,
-        id: msg.id,
-        parts: msg.parts,
-        role: msg.role as "assistant" | "system" | "user",
-      })) ?? [],
+    messages: toUIMessages(historyPages?.pages[0]?.items ?? []),
     onFinish: () => {
       void queryClient.invalidateQueries(trpc.agent.listSessions.pathFilter());
       void queryClient.invalidateQueries(
-        trpc.agent.getSessionHistory.queryFilter({ sessionId: sessionId ?? "" }),
+        trpc.agent.getSessionHistory.infiniteQueryFilter({ sessionId: sessionId ?? "" }),
       );
     },
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
@@ -156,28 +216,52 @@ export function Agent() {
     }),
   });
 
+  const messagesRef = useRef(messages);
+
+  // Declared before the prepend effect so the transcript ids it dedupes against are never stale.
   useEffect(() => {
-    if (
-      sessionId != null &&
-      isSessionSaved === true &&
-      history != null &&
-      lastLoadedSessionIdRef.current !== sessionId
-    ) {
-      setMessages(
-        history.map((msg) => ({
-          createdAt: msg.createdAt,
-          id: msg.id,
-          parts: msg.parts,
-          role: msg.role as "assistant" | "system" | "user",
-        })),
-      );
-      lastLoadedSessionIdRef.current = sessionId;
-      setIsAtBottom(true);
-      requestAnimationFrame(() => {
-        virtuosoRef.current?.scrollToIndex({ align: "end", behavior: "auto", index: "LAST" });
-      });
+    messagesRef.current = messages;
+  }, [messages]);
+
+  // Seeding the count is independent of the message reset: a chat created in this mount streams its
+  // own messages and must still be able to prepend once it outgrows page 0.
+  useEffect(() => {
+    const firstPage = historyPages?.pages[0];
+
+    if (firstPage == null || lastLoadedSessionIdRef.current === sessionId) {
+      return;
     }
-  }, [history, sessionId, isSessionSaved, setMessages]);
+
+    const seeded = toUIMessages(firstPage.items);
+
+    setMessages(seeded);
+    messagesRef.current = seeded;
+    lastLoadedSessionIdRef.current = sessionId;
+    setIsAtBottom(true);
+    requestAnimationFrame(() => {
+      virtuosoRef.current?.scrollToIndex({ align: "end", behavior: "auto", index: "LAST" });
+    });
+  }, [historyPages, sessionId, setMessages]);
+
+  useEffect(() => {
+    if (historyPages == null) {
+      return;
+    }
+
+    const currentIds = new Set(messagesRef.current.map((message) => message.id));
+    const nextWindow = decidePrepend(storedWindow, historyPages.pages, currentIds);
+
+    if (nextWindow.window === storedWindow) {
+      return;
+    }
+
+    if (nextWindow.items.length > 0) {
+      setMessages((previous) => [...toUIMessages(nextWindow.items), ...previous]);
+    }
+
+    // oxlint-disable-next-line react/set-state-in-effect -- the window mirrors useChat state.
+    setHistoryWindow(nextWindow.window);
+  }, [historyPages, setMessages, storedWindow]);
 
   useEffect(() => {
     const lastMessage = messages.at(-1);
@@ -282,12 +366,19 @@ export function Agent() {
     setMessages([]);
     setIsAtBottom(true);
     lastLoadedSessionIdRef.current = newId;
+    setHistoryWindow(resetHistoryWindow());
   };
 
   const handleSessionChange = (id: null | string) => {
+    // Re-clicking the open chat is not a session change; resetting here would strand the window.
+    if (id === sessionId) {
+      return;
+    }
+
     void stop();
     setSessionId(id);
     setIsAtBottom(true);
+    setHistoryWindow(resetHistoryWindow());
   };
 
   const handleSessionDeleted = (deletedSessionId: string) => {
@@ -298,8 +389,16 @@ export function Agent() {
 
   const isLoading = status === "submitted" || status === "streaming" || isHistoryLoading;
 
-  const renderMessage = (index: number, message: UIMessage) => {
-    const isLastMessage = index === messages.length - 1;
+  const listContext = useMemo<AgentListContext>(
+    () => ({ isFetchingNextPage: isFetchingOlderHistory, status }),
+    [isFetchingOlderHistory, status],
+  );
+
+  // Virtuoso indices are shifted by `firstItemIndex`, so the newest message is found by id.
+  const lastMessageId = messages.at(-1)?.id;
+
+  const renderMessage = (_index: number, message: UIMessage) => {
+    const isLastMessage = message.id === lastMessageId;
 
     return (
       <AgentMessageRow
@@ -382,6 +481,9 @@ export function Agent() {
                       minSize="180px"
                     >
                       <AgentSidebar
+                        fetchNextPage={fetchNextSessionPage}
+                        hasNextPage={hasMoreSessions}
+                        isFetchingNextPage={isFetchingNextSessionPage}
                         onNewChat={handleNewChat}
                         onSessionDeleted={handleSessionDeleted}
                         sessionId={sessionId}
@@ -422,13 +524,19 @@ export function Agent() {
                         className="min-h-0 flex-1"
                         components={AGENT_LIST_COMPONENTS}
                         computeItemKey={computeMessageKey}
-                        context={status}
+                        context={listContext}
                         data={messages}
+                        firstItemIndex={storedWindow.firstItemIndex}
                         followOutput="auto"
                         increaseViewportBy={INCREASE_VIEWPORT_BY}
                         initialTopMostItemIndex={INITIAL_TOP_MOST_ITEM_INDEX}
                         itemContent={renderMessage}
                         ref={virtuosoRef}
+                        startReached={() => {
+                          if (hasOlderHistory && !isFetchingOlderHistory) {
+                            void fetchOlderHistory();
+                          }
+                        }}
                       />
                     )}
 

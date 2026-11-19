@@ -51,15 +51,40 @@ describe("verifyAndUseApiKey", () => {
     dbMock.apiKey.update.mockResolvedValue({});
   });
 
-  it("should look the key up by its hash, never by the token itself", async () => {
+  it("should look the key up by its hash and select only what the gate reads", async () => {
     dbMock.apiKey.findUnique.mockResolvedValue(makeKeyRecord({ lastUsed: new Date() }));
 
     await verifyAndUseApiKey(TOKEN);
 
-    expect(dbMock.apiKey.findUnique).toHaveBeenCalledWith({
-      include: { user: true },
-      where: { hashedKey: HASHED_KEY },
-    });
+    const call = dbMock.apiKey.findUnique.mock.calls[0]?.[0] as {
+      select: Record<string, unknown> & { user: { select: Record<string, true> } };
+      where: { hashedKey: string };
+    };
+
+    expect(call.where).toEqual({ hashedKey: HASHED_KEY });
+    expect(Object.keys(call.select).toSorted()).toEqual([
+      "expiresAt",
+      "id",
+      "lastUsed",
+      "revoked",
+      "revokedAfter",
+      "scopes",
+      "user",
+      "userId",
+      "workspaceId",
+    ]);
+    expect(Object.keys(call.select.user.select).toSorted()).toEqual([
+      "banned",
+      "createdAt",
+      "email",
+      "emailVerified",
+      "id",
+      "image",
+      "name",
+      "role",
+      "twoFactorEnabled",
+      "updatedAt",
+    ]);
   });
 
   it("should stamp lastUsed when the key has never been used", async () => {

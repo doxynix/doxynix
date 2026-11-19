@@ -1,3 +1,10 @@
+import {
+  collectCursorPages,
+  MAX_CURSOR_PAGES,
+  MAX_PAGE_SIZE,
+  summarizeCursorPages,
+} from "@doxynix/shared";
+
 import { trpc } from "@/core/client";
 
 import type {
@@ -7,6 +14,8 @@ import type {
   GetByPRNumberInput,
   OpenPullRequestInput,
   PostCommentInput,
+  PRCommentsPage,
+  PRListPage,
 } from "./pr.types";
 
 export const prService = {
@@ -27,7 +36,31 @@ export const prService = {
   },
 
   async getComments(analysisId: string) {
-    return trpc.analysis.getComments.query({ analysisId });
+    const pages: PRCommentsPage[] = [];
+    let cursor: string | undefined;
+
+    // The table prints one list, so the walk keeps the old single-payload shape: a bounded number
+    // of pages are folded back into `renderedComments`.
+    for (let page = 0; page < MAX_CURSOR_PAGES; page += 1) {
+      const result = await trpc.analysis.getComments.query({
+        analysisId,
+        cursor,
+        limit: MAX_PAGE_SIZE,
+      });
+      pages.push(result);
+
+      if (result.meta.nextCursor == null) {
+        break;
+      }
+
+      cursor = result.meta.nextCursor;
+    }
+
+    return {
+      meta: pages.at(-1)?.meta ?? { hasNextPage: false },
+      renderedComments: pages.flatMap((page) => page.renderedComments),
+      total: pages.find((page) => page.total != null)?.total ?? 0,
+    };
   },
 
   async getFixById(fixId: string) {
@@ -35,7 +68,21 @@ export const prService = {
   },
 
   async listByRepository(repoId: string) {
-    return trpc.analysis.listByRepository.query({ repoId });
+    const pages: PRListPage[] = [];
+
+    // Walks every page so `dxnx pr review <number>` resolves a PR older than the newest page;
+    // `hasNextPage` survives only when the shared page bound truncates the walk.
+    await collectCursorPages(async (cursor) => {
+      const page = await trpc.analysis.listByRepository.query({
+        cursor,
+        limit: MAX_PAGE_SIZE,
+        repoId,
+      });
+      pages.push(page);
+      return page;
+    });
+
+    return summarizeCursorPages(pages);
   },
 
   async openPullRequest(input: OpenPullRequestInput) {

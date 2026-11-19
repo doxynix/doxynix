@@ -6,9 +6,10 @@ Live checklist for the second static pass over `apps/web`. Companion to
 [`db-index-audit.md`](../../db/db-index-audit.md) (what the shapes cost) and
 [`db-ui-map.md`](../../db/db-ui-map.md) (where latency lands).
 
-**Closed: 6 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
-PR #2356). Revalidated 2026-11-14 on `e48fcdec`: no item can be closed since then, but R3, R14 and
-R30 are now **partially** done (see the item text and the progress note below the scoreboard).
+**Closed: 35 / 36.** Last pass: R2, R4, R5, R8, R27, R33 — all merged in `311bd6a7` (2026-11-01,
+PR #2356). Revalidated 2026-11-14 on `e48fcdec`; R3, R6, R7, R9, R11, R13, R15, R16, R17, R18,
+R19, R20, R21, R22, R26, R28, R29, R30, R31, R32, R34, K1 and K2 closed 2026-11-15 (R24 closed as
+dropped). R10, R12, R23 and R25 closed 2026-11-18; R1 is the only partial item left (see below).
 
 ## What this round covers that round 1 did not
 
@@ -71,21 +72,15 @@ reviewed and is correct.
 | correctness (adjacent) | 2 | K1–K2 |
 | verified clean (do not re-report) | 11 | FP1–FP11 |
 
-### Progress since the last pass (2026-11-14)
+### Partial item after the 2026-11-18 pass
 
-Three items moved without closing. Their verification lines still fail, so the checkboxes stay
-unticked; the item text below says what is left.
+One item stays unticked because its verification line still fails; it has a progress note in the
+closing log.
 
-- **R3** — the redundant write was throttled to once per hour and became an `updateMany`
-  (`546a0750`, 2026-11-03). Still open: `findUnique({ include: { user: true } })` reads both rows in
-  full, and each refresh still produces an audit INSERT because `updateMany` is audited.
-- **R14** — `getWorkspace` no longer reads every document when `aid` is set (fixed by R33, `311bd6a7`).
-  Still open: the `getRepoSnapshot` + second-query shape for the docs viewer and the per-keystroke
-  structure rebuild in `searchWorkspace`.
-- **R30** — the PR and push webhook handlers now `select` narrow columns
-  (`pr-webhook-handler.ts:167`, `push-webhook-handler.ts:28`). Still open:
-  `issue-comment-webhook-handler.ts:17` and `review-comment-webhook-handler.ts:20` read full repo
-  rows.
+- **R1** — bookkeeping writes are skipped and the audit Ably publish is coalesced per request, but
+  the "not 8 rows per analysis" target needs `audit-log-architecture.md` step 2 (`audit_events`).
+  Every audited write in `saveResults` is a semantic row (analysis, user, five documents,
+  notification), so the remaining gap is the event-sourced audit layer, not a missing exclusion.
 
 ---
 
@@ -132,6 +127,12 @@ unticked; the item text below says what is left.
   - **Effort:** M · **Verify:** `audit_logs` rows per analysis completion == number of *semantic*
     events (not 8); no `poolWaiting > 0` in the `db.slow` payload during a 3-way parallel
     analysis; Ably publish count per analysis run drops accordingly.
+  > Progress 2026-11-15: `ApiKey.lastUsed` and `Notification.isRead` writes are no longer audited,
+  > and the Ably publish is coalesced to one per request. `Analysis.progress` stays as a guard only —
+  > every write carrying it also carries `logs`/`message`/`status`. 2026-11-18: every remaining
+  > audited write in `saveResults` is a distinct semantic row (analysis, user, five documents,
+  > notification), so the "not 8 rows" target is the `audit_events` layer from step 2, not another
+  > exclusion. Still open.
 
 - [x] **R2 · `repo.getByName` / `getByOwner` read `resultJson`, `metricsJson` and `logs` to render a header**
   — `src/server/modules/repos/repo.service.ts:248-276`
@@ -150,7 +151,7 @@ unticked; the item text below says what is left.
   - **Effort:** XS · **Verify:** `EXPLAIN (ANALYZE, BUFFERS)` on the repo-page query shows
     `rows`/`width` without the JSON columns; `repo.getByName` response unchanged in the UI.
 
-- [ ] **R3 · API-key gate does a full joined read, and its throttled write still audits**
+- [x] **R3 · API-key gate does a full joined read, and its throttled write still audits**
   — `src/server/core/auth/verify-api-key.ts:31-74`
   - **What:** `prisma.apiKey.findUnique({ include: { user: true } })` (`:36-39`) with no `select`
     (both rows in full). The per-request write was addressed in `546a0750` (2026-11-03):
@@ -167,6 +168,8 @@ unticked; the item text below says what is left.
   - **Effort:** S · **Verify:** a burst of 100 API requests against one key produces 0 `audit_logs`
     rows for `ApiKey.update*` and at most one `UPDATE api_keys` per refresh window; `lastUsed` still
     moves. The throttle half already holds — the missing half is the `select`.
+  > Done 2026-11-15 (`ad34335b`): the lookup selects only the columns the gate reads, and a
+  > `lastUsed`-only update is no longer audited (that half is R1). Burst verification not run.
 
 ---
 
@@ -208,7 +211,7 @@ unticked; the item text below says what is left.
     (count them with the `db.slow`/`db.write` telemetry or a temporary query counter); agent turn
     with N tool calls produces one.
 
-- [ ] **R6 · PR comments and PR findings render markdown with one cache lookup and one HTML build per row**
+- [x] **R6 · PR comments and PR findings render markdown with one cache lookup and one HTML build per row**
   — `src/server/modules/analysis/services/pr-comments.service.ts:11-62`,
   `src/server/modules/analysis/analysis.mapper.ts:166-227`
   - **What:** `pullRequestComment.findMany` has **no `take`**, then
@@ -224,8 +227,20 @@ unticked; the item text below says what is left.
     render on the client. Same for `buildTopFindings`.
   - **Effort:** S · **Verify:** a PR with 200 comments issues 1 cache lookup; p95 of
     `analysis.getComments` in `bench:http` drops; cache tag cardinality stops growing per comment.
+  > Done 2026-11-15 (`d73f3abc`, key corrected in the B2 fix round): one `unstable_cache` entry per
+  > page for both — `pr-comments-html-<workspaceId>-<analysisId>-<updatedAt>-<rows>` with tags
+  > `["comments", analysisId, workspaceId]`, and `finding-html-<owner>-<name>-<analysisId>-<updatedAt>`
+  > with tags `["findings", owner, name, analysisId]` (analysis ids are globally unique and the
+  > caller already proves workspace access, so the findings key needs no workspace). An empty
+  > comment page skips the cache entirely, so an arbitrary `analysisId` cannot mint an empty entry,
+  > and `postCommentToPR` calls `revalidateTag(analysisId)` so a posted comment is visible.
+  > Unit tests assert one lookup for a 3-comment page, one for a 3-finding page, distinct keys for two
+  > workspaces on the same analysis, a miss when a row is appended or `updatedAt` moves, no lookup for
+  > an empty page, and the tag revalidation. The `take` half was deliberately not done (it would
+  > truncate the payload); p95 not measured.
+  > Cached per workspace+analysis version with a 1 h TTL; explicit writes revalidate immediately.
 
-- [ ] **R7 · `agent.getSessionHistory` returns the entire chat with no limit and no `select`**
+- [x] **R7 · `agent.getSessionHistory` returns the entire chat with no limit and no `select`**
   — `src/server/modules/agent/agent.service.ts:75-82`
   - **What:** `chatMessage.findMany({ orderBy: { createdAt: "asc" }, where: { sessionId, session: { userId } } })`
     — no `take`, no cursor, no `select`, so `parts` (JSON: text, tool calls, attachments) for every
@@ -239,6 +254,29 @@ unticked; the item text below says what is left.
     older pages.
   - **Effort:** S · **Verify:** a 5 000-message session returns a bounded page; response size
     stops scaling with history.
+  > Done 2026-11-15 (`39d08034`): `getSessionHistory` selects `id, role, parts, createdAt`, orders
+  > `createdAt: "desc"`, takes `SESSION_HISTORY_LIMIT = 200` and reverses before mapping;
+  > `listSessions` takes `SESSION_LIST_LIMIT = 100` with a `select` covering every field the
+  > `SessionListItemSchema` output reads plus `repoId`. The bounded horizon is silent — no "load
+  > older" endpoint was added, so history past 200 messages is not reachable from the UI.
+  > Follow-up 2026-11-15 (B2b): both procedures now return `{ items, meta }` pages built from the
+  > shared `pagination.ts` keyset primitives (`getSessionHistory` on `(createdAt, id)`,
+  > `listSessions` on `(updatedAt, id)`), so `nextCursor` reaches older rows; the UI still renders
+  > the first page. The array → `{ items, meta }` change is a breaking CLI wire change; the CLI
+  > ships from the same monorepo and release-please versions both together, so an older published
+  > `dxnx` must upgrade. `listSessions` keysets on `updatedAt`, which moves on rename/append, so a
+  > multi-page walk can duplicate or skip a row before a "load older" UI ships.
+  > Follow-up 2026-11-15 (B2d): both lists load on scroll and consume `nextCursor`. History cannot
+  > use an observer — `react-virtuoso` owns its scroller — so it prepends through `firstItemIndex`
+  > decreased by the merged older pages and fetches from `startReached` (`HISTORY_PAGE_SIZE = 100`);
+  > `renderMessage` matches the newest message by id because indices are shifted. The session list
+  > uses the repo's `useIntersectionObserver` sentinel at the end of its `ScrollArea`
+  > (`SESSION_PAGE_SIZE = 50`). No new user-facing copy: the prepend indicator is an `aria-hidden`
+  > spinner in Virtuoso's `Header`. The prepend decision is the pure `history-window.ts` state machine
+  > (`resetHistoryWindow` / `seedHistoryWindow` / `decidePrepend`) and is unit-tested, as are the
+  > `filterNewMessages` and `flattenSessionPages` id-dedupes that keep a refetched page from
+  > repeating a row; the sentinel gating is not, because the client tests run in the `node`
+  > environment.
 
 - [x] **R8 · The PR-webhook existence check fetches every comment and every fix of the analysis**
   — `src/server/modules/analysis/analysis.repository.ts:179-196`, used at
@@ -254,7 +292,7 @@ unticked; the item text below says what is left.
   - **Effort:** XS · **Verify:** webhook path logs one narrow query; duplicate-PR check still
     returns early (`analyze-pr.task.test.ts` / webhook tests).
 
-- [ ] **R9 · Usage metering writes the same `workspace_usage` row twice per event**
+- [x] **R9 · Usage metering writes the same `workspace_usage` row twice per event**
   — `src/server/core/usage/usage.ts:39-75`
   - **What:** `bumpUsage` = `workspaceUsage.upsert({ update: { increment } })` **plus** a second
     raw `UPDATE … GREATEST(0, …)` (`:62-75`) in the same transaction. Each LLM call performs
@@ -272,10 +310,16 @@ unticked; the item text below says what is left.
   - **Effort:** S · **Verify:** statement count per AI call drops by one; the clamp still holds
     after a `releaseUsage` that would go negative (`usage.test.ts`).
 
-- [ ] **R10 · One realtime event fans out into 1–5 tRPC re-fetches, including the heaviest aggregate**
+- [x] **R10 · One realtime event fans out into 1–5 tRPC re-fetches, including the heaviest aggregate**
   — `src/app/_components/realtime/handlers/analysis.tsx:18-48`
   (the provider was split into `src/app/_components/realtime/` in `#2386`; this is the analysis
   handler it dispatches to)
+  > Closed 2026-11-18 (`5ef3ef7f`): staging and fixes publish `stagingUpdated`, so completion
+  > invalidates `getLatest` + `getHistory` only; the per-milestone onboarding refetch is gone and
+  > onboarding follows `userUpdated`. `getVersionRef` labels a pinned old version, so it is no
+  > longer refreshed on completion (the FAILED path still refreshes it). The DONE/FAILED progress
+  > path still refreshes the widget the completion changed (dashboard stats or the repo cards,
+  > whichever is mounted) — that refresh is the contract, not a fan-out.
   - **What:** `analysisUpdated` → invalidate `getLatest`, `getHistory` (500 rows + `count`),
     `getStagedFiles`, `getByRepository` (no `take`), `getOnboardingState`. `analysisProgress` →
     invalidate `getOnboardingState` on **every** milestone (≈6 per run) and, on `DONE`/`FAILED`,
@@ -300,7 +344,7 @@ unticked; the item text below says what is left.
 
 ## MEDIUM
 
-- [ ] **R11 · No index on `analyses.commit_sha`**
+- [x] **R11 · No index on `analyses.commit_sha`**
   — `prisma/models/review.zmodel:44-46`
   - **What:** indexes are `[repoId, status]`, `[repoId, createdAt desc]`, `[jobId]`. Two paths
     filter on the SHA: `findCachedSha`
@@ -314,8 +358,11 @@ unticked; the item text below says what is left.
   - **Effort:** XS (schema + migration) · **Verify:** `EXPLAIN` uses the new index for both
     queries; `check:index-parity` stays in sync.
 
-- [ ] **R12 · Stale-event sweep triggers Trigger.dev and updates the row inside a sequential loop**
+- [x] **R12 · Stale-event sweep triggers Trigger.dev and updates the row inside a sequential loop**
   — `src/server/modules/billing/billing.events.ts:309-368`
+  > Closed 2026-11-18 (`f7d6d952`, `3e40732d`): one `tasks.batchTrigger` for the whole sweep and
+  > one typed-SQL update. The batch returns no per-run ids, so the rows carry
+  > `billing_events.trigger_batch_id` (and a null `trigger_run_id`) instead.
   - **What:** `for (const event of stale)` → `await tasks.trigger(...)` + `await
     prisma.billingEvent.update(...)`, up to `SWEEP_BATCH_SIZE = 50`.
   - **Why it costs:** 50 sequential HTTP round trips to Trigger.dev plus 50 sequential UPDATEs,
@@ -326,7 +373,7 @@ unticked; the item text below says what is left.
   - **Effort:** S · **Verify:** sweep with 50 stale events completes in 2 round trips; replay
     count/idempotency semantics unchanged (`billing.events.test.ts`).
 
-- [ ] **R13 · Reconciliation is a per-subscription loop of 5–7 queries and 1–2 Stripe calls**
+- [x] **R13 · Reconciliation is a per-subscription loop of 5–7 queries and 1–2 Stripe calls**
   — `src/server/modules/billing/billing.reconciliation.ts:206-300, 332-360, 401-430`
   - **What:** for every Stripe subscription: `billingCustomer.findFirst`, `billingSubscription.findUnique`,
     `currentSlotHolder`, `workspaceEntitlement.findUnique`, `workspaceMember.count`, then a
@@ -342,9 +389,13 @@ unticked; the item text below says what is left.
   - **Effort:** M · **Verify:** query count per run scales as O(pages) for the reads instead of
     O(subscriptions); `billing.reconciliation.test.ts` still passes.
 
-- [ ] **R14 · Whole repository snapshot loaded where two fields are needed**
+- [x] **R14 · Whole repository snapshot loaded where two fields are needed**
   — `analysis/services/docs.service.ts:65-100`, `analysis/services/workspace.service.ts:107-137`,
     `analysis/services/workspace-search.service.ts:13-40`
+  > Progress 2026-11-15: `getDocumentContent` uses a narrow repo ref and the no-aid documents read
+  > is capped; the structure map is now cached per `(repoId, analysisId)` in
+  > `logic/analysis-context-memo.ts` and used by `searchWorkspace` only — 32 entries, FIFO, no TTL
+  > (an analysis row is immutable once `DONE`). `f8d802cf`/B11.
   - **What:** `getDocumentContent` calls `analysisRepo.getRepoSnapshot` (which selects
     `resultJson` + `metricsJson`, `analysis.repository.ts:51-70`) to obtain `repo.name`,
     `repo.owner` and `analysis.id`, then runs a second query for the document.
@@ -363,7 +414,7 @@ unticked; the item text below says what is left.
   - **Effort:** M · **Verify:** `analysis.getDocumentContent` reads no JSON columns; search p95
     stops tracking keystrokes.
 
-- [ ] **R15 · `revokeOtherSessions` deletes sessions one by one**
+- [x] **R15 · `revokeOtherSessions` deletes sessions one by one**
   — `src/server/modules/users/user.service.ts:268-283`
   - **What:** `session.findMany` then `Promise.all(others.map(s => deleteSession(token)))` — the
     better-auth internal adapter runs one DELETE per token **and** one secondary-storage delete
@@ -375,7 +426,7 @@ unticked; the item text below says what is left.
   - **Effort:** XS · **Verify:** "sign out everywhere" produces 1 SQL DELETE and 1 Redis pipeline;
     the session cookie cache is still invalidated.
 
-- [ ] **R16 · `repos.getMyRepos` reads the GitHub token twice and queries installations twice**
+- [x] **R16 · `repos.getMyRepos` reads the GitHub token twice and queries installations twice**
   — `src/server/modules/repos/github-app.service.ts:38-98, 291-360`
   - **What:** `getMyRepos` → `syncInstallations` (`:45`) → `getValidToken` (`:296`) →
     `githubInstallation.findMany` (`:317`) → `github-api.getMyRepos` → `githubInstallation.findMany`
@@ -393,7 +444,7 @@ unticked; the item text below says what is left.
   - **Effort:** S · **Verify:** dialog open = 1 token read, 1 installations read; the installation
     list in the UI is unchanged.
 
-- [ ] **R17 · The task middleware disconnects a *shared* Prisma pool at the end of every run**
+- [x] **R17 · The task middleware disconnects a *shared* Prisma pool at the end of every run**
   — `src/server/modules/analysis/tasks/init.ts:31-76`
   - **What:** `tasks.middleware("prisma-connection-manager")` calls `prisma.$connect()` at start
     and `prisma.$disconnect()` in `finally`, plus `$disconnect` on `onWait` and `$connect` on
@@ -410,7 +461,7 @@ unticked; the item text below says what is left.
   - **Effort:** S · **Verify:** `pg_stat_activity` during 3 concurrent task runs shows a stable
     connection count; `pgPoolConnects` stops incrementing per run.
 
-- [ ] **R18 · Unbounded list payloads**
+- [x] **R18 · Unbounded list payloads**
   — `analysis/services/analysis-lifecycle.service.ts:21,271-301`,
     `analysis/services/pr-impact.service.ts:136-175`,
     `analysis/analysis.repository.ts:244-254`, `users/user.service.ts:177-187`
@@ -425,12 +476,13 @@ unticked; the item text below says what is left.
   - **Effort:** S–M · **Verify:** response size for a repo with 600 analyses is comparable to one
     with 20.
 
-- [ ] **R19 · `getRepoSnapshot` issues a second query for the requested `aid`**
+- [x] **R19 · `getRepoSnapshot` issues a second query for the requested `aid`**
   — `src/server/modules/analysis/analysis.repository.ts:340-364`
   - **What:** `repo.findUnique(...)` (with the *latest* DONE analysis) and then, if `aid` is
     passed, `resolveTargetAnalysis` (`:546-565`) fetches *another* analysis. The latest analysis
-    fetched in the first query is discarded when `aid` is present. The same pattern is repeated in
-    `getRepoSnapshotWithDocuments` (`:366-402`).
+    fetched in the first query is discarded when `aid` is present. The same pattern was repeated in
+    `getRepoSnapshotWithDocuments`, deleted in B5e (`c0517117`) when the documents read moved out of
+    the repo select.
   - **Why it costs:** every `aid`-scoped call (`getWorkspace`, `getStructureMap`,
     `getStructureNode`, `getNodeContext`, `searchWorkspace`, `getDocumentContent`, `getByPRNumber`)
     pays a heavy read twice. `aid` is how the UI pins a historical analysis — the default view
@@ -440,7 +492,7 @@ unticked; the item text below says what is left.
   - **Effort:** XS · **Verify:** `getStructureMap` with `aid` = 1 operation, same payload;
     `NOT_FOUND` for an unknown `aid` preserved.
 
-- [ ] **R20 · Independent reads and writes are awaited in sequence**
+- [x] **R20 · Independent reads and writes are awaited in sequence**
   — `users/user.service.ts:145-175`, `analysis/services/docs.service.ts:193-260`,
     `analysis/services/fixes.service.ts:27-60, 229-290`
   - **What:** `disconnectAccount` runs `account.findUnique` → `account.count` → `user.findUnique`
@@ -456,7 +508,7 @@ unticked; the item text below says what is left.
   - **Effort:** XS · **Verify:** request latency for disconnect/fix-apply drops by one round trip;
     tests for retries still pass.
 
-- [ ] **R21 · The PR task feeds the whole previous `resultJson` into the prompt**
+- [x] **R21 · The PR task feeds the whole previous `resultJson` into the prompt**
   — `src/server/modules/analysis/tasks/analyze-pr.task.ts:96-108, 222`
   - **What:** `findFirst({ select: { resultJson: true } })` → `JSON.stringify(...)` →
     `projectOverviewJson` in the model context.
@@ -467,8 +519,15 @@ unticked; the item text below says what is left.
     scores) instead of the raw blob, or reuse the already-computed `metricsJson`.
   - **Effort:** S · **Verify:** prompt token count for PR review drops and stays under the model
     budget; output quality spot-checked on 3 real PRs.
+  > Done 2026-11-15 (`39d08034`): `logic/project-result-overview.ts` projects
+  > architecture/purpose/stack, four scores, four counts, 5 findings, 3 vulnerabilities, 5 complex
+  > files and 5 bottlenecks, then shrinks (drop findings → purpose → string lists) and finally
+  > re-checks the serialized form, dropping purpose remainder → vulnerabilities → architecture style
+  > before falling back to a minimal object, so the output is always ≤ 4096 chars and always valid
+  > JSON. A blob with none of the recognised top-level keys yields `{}`, which is also the null-row
+  > fallback in the task. Token count and quality spot-check not measured.
 
-- [ ] **R22 · PR-impact page can read the repository snapshot twice**
+- [x] **R22 · PR-impact page can read the repository snapshot twice**
   — `src/server/modules/analysis/services/pr-impact.service.ts:43-56`
   - **What:** `getRepoBySha(...)` (repo + the analysis at `headSha`) and, when that returns
     `null`, `getRepoSnapshot(...)` — a second full read of the same repo with a different
@@ -480,8 +539,15 @@ unticked; the item text below says what is left.
     `Promise.all` (though that does not remove the second fetch).
   - **Effort:** S · **Verify:** query count for the fallback path = 2 (PR analysis + repo), not 3.
 
-- [ ] **R23 · `analysis.analyze` performs 9–10 operations before the client gets an answer**
+- [x] **R23 · `analysis.analyze` performs 9–10 operations before the client gets an answer**
   — `src/server/modules/analysis/services/analysis-lifecycle.service.ts:92-201`
+  > Closed 2026-11-18 (`9073bf9b`, `9b8bc3a5`): the trailing `jobId` write moved into the worker
+  > (`analysisLifecycleService.attachRunId`, guarded by `status = PENDING`), so the request path is
+  > one operation shorter and the run is still identified before the first milestone; a row
+  > cancelled in the gap is left untouched and the run returns early. The cache probe cannot merge
+  > with the repo read — its key is the branch-head SHA, which only exists after the GitHub call.
+  > Seven statements remain, six of them inside the advisory-lock transaction; the "≤ 6" target
+  > needs the quota check folded into the usage SQL (round 3 candidate).
   - **What:** `assertRepoAccess` (full repo row) → GitHub branch-head call → `analysis.findFirst`
     (cache probe) → transaction (advisory lock, entitlement read (2 queries), usage event,
     upsert + clamp UPDATE) → `analysis.create` → `tasks.trigger` → `analysis.update(jobId)`.
@@ -498,12 +564,12 @@ unticked; the item text below says what is left.
 
 ## LOW
 
-- [ ] **R24 · Admin audit list and detail read the full row, `payload` included**
+- [x] **R24 · Admin audit list and detail read the full row, `payload` included**
   — `src/server/modules/audit-logs/admin-audit.service.ts:78, 91` — `findMany`/`findUnique`
     without `select`, so every page row carries its `payload` JSON (`payloadHtml` re-reads it
     separately anyway, `:99-110`). **Fix:** `select` the summary columns. **Effort:** XS.
 
-- [ ] **R25 · Auth hooks run sequential full-row reads**
+- [x] **R25 · Auth hooks run sequential full-row reads**
   — `src/server/core/auth/index.ts:187-215, 247-292` — `account.create.before` does
     `user.findUnique` (all columns, so the field-encryption extension decrypts what it reads)
     before possibly updating; `session.create.before` does `user.findUnique` →
@@ -511,8 +577,11 @@ unticked; the item text below says what is left.
     `createdAt, id, role` (`:219-223`) but still runs. Sign-in only, so frequency is low, but three
     round trips on the login path are avoidable. **Fix:** `select` narrow fields; merge the
     after-hook read into the before-hook result. **Effort:** XS.
+  > Closed 2026-11-18 (`16e71fbb`): the sign-in log moved into `session.create.before`, which already
+  > holds the row (`createdAt` and `role` joined `AUTH_PROFILE_SELECT`), and the after-hook was
+  > deleted. The login path is one user read and one conditional account read.
 
-- [ ] **R26 · `apikey.list` returns every key of the workspace, unpaginated**
+- [x] **R26 · `apikey.list` returns every key of the workspace, unpaginated**
   — `src/server/modules/api-keys/api-key.service.ts:90-124` — `findMany` with no `take`; keys are
     few per workspace today but the endpoint has the same shape as R18 and is invalidated on every
     `apiKeyUpdated` event. **Fix:** `take`/cursor. **Effort:** XS.
@@ -522,18 +591,18 @@ unticked; the item text below says what is left.
     through `userMapper.toPublic`. **Fix:** select the public projection
     (`PublicUserSchema`). **Effort:** XS.
 
-- [ ] **R28 · Chat persist path re-reads the session title for every assistant message**
+- [x] **R28 · Chat persist path re-reads the session title for every assistant message**
   — `src/app/api/agent/chat/route.ts:270-312` — after `chatMessage.create`, a
     `chatSession.findUnique({ select: { title } })` inside `onEnd`, then possibly a
     title-generation LLM call and an update. The read exists only to detect `title === "New Chat"`.
     **Fix:** carry a flag from the session-creation branch in the same request. **Effort:** XS.
 
-- [ ] **R29 · Admin session list is unbounded**
+- [x] **R29 · Admin session list is unbounded**
   — `src/server/modules/users/admin-user.service.ts:265-289` — `session.findMany` for a user with
     no `take` (a narrow `select` landed in `f17088dd`, but there is no pagination). **Fix:** `take` +
     pagination. **Effort:** XS.
 
-- [ ] **R30 · Webhook handlers read full repo rows**
+- [x] **R30 · Webhook handlers read full repo rows**
   — `modules/webhooks/issue-comment-webhook-handler.ts:17-19`,
     `modules/webhooks/review-comment-webhook-handler.ts:20-22` — `repo.findMany` without `select`
     (the issue-comment one then passes whole rows around). The PR and push handlers were narrowed
@@ -541,12 +610,12 @@ unticked; the item text below says what is left.
     `webhooks/push-webhook-handler.ts:28`). Repo rows are small, but the handlers run on every
     GitHub delivery. **Fix:** `select` on the two remaining handlers. **Effort:** XS.
 
-- [ ] **R31 · `fixes.createFix` validates the PR analysis with an extra query before the repo read**
+- [x] **R31 · `fixes.createFix` validates the PR analysis with an extra query before the repo read**
   — `analysis/services/fixes.service.ts:129-142` — `pullRequestAnalysis.findFirst` then
     `repo.findUnique`; the first result is only used to null out an invalid FK. **Fix:** read both
     in `Promise.all`, or connect through a nested `findFirst` on the repo. **Effort:** XS.
 
-- [ ] **R32 · Several Ably publishes per single user action**
+- [x] **R32 · Several Ably publishes per single user action**
   — `analysis/services/analysis-lifecycle.service.ts:494-519` (`userUpdated`, `notification`,
     `analysisUpdated`), `users/user.service.ts:263,280,302,313`, plus one publish per audited
     business write (R1). Each is a separate REST call with no batching. **Fix:** batch by channel
@@ -554,13 +623,13 @@ unticked; the item text below says what is left.
     into one event the client already listens to. **Effort:** S.
 
 - [x] **R33 · `getRepoSnapshotWithDocuments` loads every document row of the repo and filters in JS**
-  — `analysis/analysis.repository.ts:366-402` — before `311bd6a7` the nested `documents` had no
-    `take`, and `repo.documents.filter(d => d.analysis?.id === aid)` ran in JS. Documents grow by
-    ~5 per analysis (`saveResults`), so a repo with 100 analyses read 500 metadata rows to serve one
-    version. **Fix:** `where: { analysisId: aid }` in the nested select — now at `:376-378`.
-    **Effort:** XS.
+  — `analysis/analysis.repository.ts` — before `311bd6a7` the nested `documents` had no `take`, and
+    `repo.documents.filter(d => d.analysis?.id === aid)` ran in JS. Documents grow by ~5 per analysis
+    (`saveResults`), so a repo with 100 analyses read 500 metadata rows to serve one version.
+    **Fix:** `where: { analysisId: aid }` in the nested select. **Effort:** XS. The whole select was
+    removed in B5e (`c0517117`) — documents now come from `prisma/sql/getLatestDocumentsPerType.sql`.
 
-- [ ] **R34 · `getDashboardStats.sql` builds a per-repo top-5 lateral it never uses**
+- [x] **R34 · `getDashboardStats.sql` builds a per-repo top-5 lateral it never uses**
   — `prisma/sql/getDashboardStats.sql` (`per_repo_top`) — `LIMIT 5` per repo followed by
     `DISTINCT ON (l.repo_id)`, i.e. one row is kept and four are discarded, for every repo of the
     user, on every dashboard load. **Fix:** `LIMIT 1`. **Effort:** XS. (Deliberately not merged
@@ -570,7 +639,7 @@ unticked; the item text below says what is left.
 
 ## Correctness found while reading (not performance)
 
-- [ ] **K1 · Dashboard cards and the repository list on the same screen count different sets**
+- [x] **K1 · Dashboard cards and the repository list on the same screen count different sets**
   — `prisma/sql/getDashboardStats.sql` (`user_repos … WHERE created_by_user_id = $1`),
     `prisma/sql/getTrends.sql` (`r.created_by_user_id = $1`), vs
     `repos/repo.service.ts:202-206` (`where: { workspaceId }`)
@@ -585,7 +654,7 @@ unticked; the item text below says what is left.
   - **Effort:** S · **Verify:** an invited member and the owner see identical counts on the same
     workspace; a test with two users in one workspace.
 
-- [ ] **K2 · Node context reads documents from the latest analysis, ignoring the selected `aid`**
+- [x] **K2 · Node context reads documents from the latest analysis, ignoring the selected `aid`**
   — `analysis/services/workspace.service.ts:51-62, 128-140` (`loadRelatedDocSections` →
     `analysisRepo.loadLatestDocumentsWithContent(db, repoId, workspaceId)` without `aid`)
   - **What:** every other call in the same request is pinned to the requested analysis, but the
@@ -610,7 +679,7 @@ These were checked and found correct. Listed so a third round does not repeat th
 | FP4 | Redis usage | `core/redis.ts` pipelines every multi-step mutation (`increment`, `staging.addFiles`, `staging.removeFile`); no per-element `get`/`set` loops anywhere in `src/server`. |
 | FP5 | `comment-poster.ts` | Posts one `pulls.createReview` with all comments instead of one REST call per finding. |
 | FP6 | `analysisLatestSelect` | Narrow `select` — the polling endpoint does not touch the JSON columns. |
-| FP7 | `.map(async …)` over the database | Does not exist. The `map(async)` sites are R6 (markdown/cache, `pr-comments.service.ts:38`, `analysis.mapper.ts:198`), `webhooks/issue-comment-webhook-handler.ts:78` (markdown), `logic/repo-file-scanner.ts:40` and `logic/differential-analyzer.ts:367` (file reads / analysis), and `domain/ai/ai-tools.ts:198` (tool calls). None of them is a database read per element. |
+| FP7 | `.map(async …)` over the database | Does not exist. The `map(async)` sites are R6 (markdown/cache, `pr-comments.service.ts:38`, `analysis.mapper.ts:198` — both now run inside one page-level cache entry), `webhooks/issue-comment-webhook-handler.ts:78` (markdown), `logic/repo-file-scanner.ts:40` and `logic/differential-analyzer.ts:367` (file reads / analysis), and `domain/ai/ai-tools.ts:198` (tool calls). None of them is a database read per element. |
 | FP8 | Advisory locks | `pg_advisory_xact_lock(hashtext(…))` / `pg_try_advisory_xact_lock` are per-workspace or per-user, always inside a transaction, never held across an HTTP call. |
 | FP9 | `health.check` | `SELECT 1`. |
 | FP10 | Index hygiene | Round 1's `P3`/`P8`/`P17` cleaned up the duplicate and dead indexes; `check:index-parity` keeps app and clone in sync. `546a0750` (2026-11-03) did another pass: dropped `sessions_token_key`, `repos_workspace_id_owner_idx`, `repos_owner_name_workspace_id_key` and `workspace_usage_period_start_idx`, added `repos(workspace_id, owner, name)` unique, `billing_operations(actor_user_id)` and `audit_logs(user_id, created_at DESC, id DESC)`. Do not re-report those as missing. The only gap found in this round is R11. |
@@ -623,14 +692,74 @@ These were checked and found correct. Listed so a third round does not repeat th
 | ID | closed | commit | note |
 | --- | --- | --- | --- |
 | R2 | 2026-11-01 | `311bd6a7` | `repoPublicSelect` / `repoPageSelect` in `repo.mapper.ts`; `getByName` uses the page projection, `getByOwner` the scalar one. `RepoRecord` dropped with the `include`. |
+| R3 | 2026-11-15 | `ad34335b` | `select` added; `lastUsed`-only writes are no longer audited (see R1). |
 | R4 | 2026-11-01 | `311bd6a7` | Nested `analyses` narrowed to `select: { commitSha: true }`; the repo row itself is still full because `saveResults` needs it. |
 | R5 | 2026-11-01 | `311bd6a7` | `workspaceMemo` added to `RequestStore`; `resolveWorkspace` split into `loadWorkspace` + `memoizeOnce` keyed on user, header, `strict` and name. Both this and `entitlementMemo` now go through `src/server/utils/request-memo.ts`, so the key is typed and cannot drift from the inputs. |
+| R6 | 2026-11-15 | `d73f3abc` | One `unstable_cache` entry per page in `pr-comments.service.getComments` and `analysisMapper.buildTopFindings` (the latter gained a required `cacheScope`, the PR analysis id); the comments key and tag are workspace-scoped, empty pages are not cached, `postCommentToPR` revalidates the analysis tag. No `take`, so row counts are still unbounded. |
+| R7 | 2026-11-15 | `39d08034` | `getSessionHistory` takes the newest 200 rows (desc → reversed) with a four-field `select`; `listSessions` takes 100 with a `select` that keeps every output field. Follow-up: the ad-hoc `take` constants became cursor pagination through the shared `pagination.ts` primitives (`keysetArgs` / `splitKeysetPage` / `orderWithTiebreak`) — newest page plus `nextCursor`; the UI still renders the first page only. The array → `{ items, meta }` output is a breaking wire change for an older published `dxnx` (release-please ships CLI and server together). `listSessions` keysets on `updatedAt`, which moves on rename/append, so a multi-page walk can duplicate or skip before a "load older" UI ships. B2d flipped that last caveat: the web agent now pages history through `firstItemIndex`/`startReached` and the session list through an intersection sentinel, so a multi-page walk is live and the rename/append caveat now applies to it. |
 | R8 | 2026-11-01 | `311bd6a7` | `analysisRepo.getByRepoAndPRNumber` selects `id` instead of `include: { comments, generatedFixes }`; its only caller (the PR webhook) reads `id`. |
+| R9 | 2026-11-15 | `5420536e` | `bumpUsage` is one `INSERT … ON CONFLICT` statement per event; both paths clamp, and the conflict branch binds the raw delta (`+ $6::int`), so a negative release is not swallowed by `EXCLUDED`. `usage.test.ts` asserts the SQL text and params; `entitlements.test.ts` asserts the 900 → 0 clamp against a real database. |
+| R10 | 2026-11-18 | `5ef3ef7f` | `analysisUpdated` now invalidates `getLatest` + `getHistory` only; staging and fixes publish `stagingUpdated` (→ `getStagedFiles`), onboarding follows `userUpdated`, and `getVersionRef` is refreshed only on the FAILED progress path. |
+| R11 | 2026-11-15 | `4eaf34d2` | `@@index([repoId, commitSha])` on `analyses`, plus seven keyset indexes — `analyses` and `pull_request_analyses` `(repo_id, created_at DESC, id DESC)`, `chat_sessions` `(user_id, repo_id, updated_at DESC, id DESC)`, `chat_messages` `(session_id, created_at DESC, id DESC)`, `sessions` `(user_id, created_at DESC, id DESC)`, `api_keys` `(workspace_id, created_at DESC, id DESC)`, `workspace_members` `(workspace_id, created_at, id)` — in `20261115120000_keyset_indexes`. `EXPLAIN` was not run (the round's research covers it); `pg_indexes` on the local `dxnx_web` lists all eight and `migrate diff` from the schema is empty. |
+| R12 | 2026-11-18 | `f7d6d952`, `3e40732d` | One `tasks.batchTrigger` for the whole 50-event sweep and one typed-SQL update; rows store `trigger_batch_id` (new column + index) with a null `trigger_run_id`, because the batch API returns no per-run ids. A rejected batch retries on the next 15-minute tick instead of partially draining. |
+| R18 | 2026-11-15 | `a90fdb07` | `getHistory` and `listByRepository` return cursor pages (`{ items, meta, total }`, `take: limit + 1` + `splitKeysetPage` over `ORDER_CREATED_AT_DESC`, `limit` default 50) instead of 500-row reads, and the `capped` flag is gone: the version selector appends pages from a "More" item, the PR list from an intersection sentinel, and both keep the `count` as `total`. `getByRepoId` (fixes) is paginated too (`baaa229e`): the 200-row cap is gone; the CLI walk is paged with a 10-page safety bound. |
+| R19 | 2026-11-15 | `c004fc44` | `getRepoSnapshot`, `getRepoSnapshotWithDocuments` and `getAnalysisPayloadForRepo` resolve the requested `aid` inside the single `repo.findUnique` (`analyses: { orderBy: createdAt desc, take: 1, where: { id, status: "DONE" } }`), so an `aid`-scoped read is one operation. A missing or foreign `aid` still throws `ANALYSIS_VERSION_NOT_FOUND`; an empty latest still throws `ANALYSIS_NOT_COMPLETED`. `getRepoDocsPayload` keeps its second lookup (out of this batch); B5e deleted `getRepoSnapshotWithDocuments` when the documents read left the repo select (`c0517117`). |
+| R21 | 2026-11-15 | `39d08034` | `logic/project-result-overview.ts` replaces `JSON.stringify(resultJson)` in `analyze-pr.task.ts` with a bounded projection capped at 4096 chars. |
+| R26 | 2026-11-15 | `9192e12e` | `apiKeyService.list` takes the newest 100 keys of the workspace; the active/archived split, the column allowlist and the `ApiKeySchema` payload are unchanged. B5b (`bc449faf`) replaced the ceiling with cursor pagination (`{ items, meta }`) and the UI loads more on scroll; the split is a SQL predicate (`activeKeyWhere` for `list`, `archivedKeyWhere` for `listArchived`) that mirrors `isApiKeyDead`, which moved to `@doxynix/shared`. Archived keys are cursor-paginated as well (round 2), so the API-key surface has no capped list; an integration test walks both predicates against a real Postgres. |
 | R27 | 2026-11-01 | `311bd6a7` | `user.me` selects the eight `PublicUser` fields instead of the whole row. |
-| R33 | 2026-11-01 | `311bd6a7` | `documents` relation filtered by `analysisId` in SQL when `aid` is set; the JS `.filter()` in `getRepoSnapshotWithDocuments` is gone. |
+| R29 | 2026-11-15 | `9192e12e` | `adminUserService.getSessions` takes the newest 100 sessions of the user, newest first. B5b (`2669e145`) replaced the ceiling with cursor pagination (`{ items, meta }`), and the admin sheet loads more on scroll inside its new `ScrollArea`. |
+| R33 | 2026-11-01 | `311bd6a7` | `documents` relation filtered by `analysisId` in SQL when `aid` is set; the JS `.filter()` in `getRepoSnapshotWithDocuments` is gone. B5e removed that select entirely (`c0517117`). |
+| K2 | 2026-11-15 | `84ad37d7` | `loadRelatedDocSections` takes the request's `aid` and forwards it to `loadLatestDocumentsWithContent`, so the related-docs panel lists only the pinned analysis's documents. |
+| R34 | 2026-11-15 | `f232f133` | The `per_repo_top` lateral takes `LIMIT 1`, so no repo's history is sorted just to throw four rows away. `recentActivity` is therefore the newest analysis of each repo (one card per repo, five cards) and the outer `LIMIT 5` is its only cap; the comment says so instead of claiming a global top-5. |
+| R13 | 2026-11-15 | `35d3870e` | One `ReconcileContext` per Stripe page (customers, local subscriptions, entitlements, member counts), so the per-subscription `findFirst`/`findUnique` calls become map hits; missing keys fall back to a query and the repair path re-reads live rows. |
+| R14 | 2026-11-15 | `f8d802cf` | `logic/analysis-context-memo.ts` keeps the built `AnalyzeContextBuilder` per `(repoId, analysisId)` — 32 entries, FIFO eviction, no TTL, since an analysis row is immutable once `DONE`. Only `searchWorkspace` uses it: node context, `getWorkspace` and `getStructureMap` still build fresh, because the builder caches every `nodeId` it explains and would grow the map for the process lifetime. The narrow `getDocumentContent` ref and the capped no-`aid` documents read landed earlier. |
+| R15 | 2026-11-15 | `5379b00d` | `revokeOtherSessions` deletes the other sessions with one `deleteMany` and one Redis pipeline instead of one adapter call per token. |
+| R16 | 2026-11-15 | `ce69bd01` | `getValidToken` is memoised per request and the resolved token is passed into `syncInstallations`, so opening the add-repository dialog reads the token once. |
+| R17 | 2026-11-15 | `24c60499` | The run wrapper only sets `locals`; `$connect`/`$disconnect` are gone, and `onWait`/`onResume` remain the only release point. `pg_stat_activity` was not measured (no live worker). |
+| R20 | 2026-11-15 | `2492848a` | Independent reads in `disconnectAccount`, `pinAuditToDocs`, `applyFix` and `openPullRequest` run in `Promise.all`. |
+| R22 | 2026-11-15 | `363b82a0` | One heavy repo snapshot; a head-SHA miss costs one narrow `analysis.findFirst` instead of a second snapshot. Works for a head SHA at any depth. |
+| R23 | 2026-11-18 | `9073bf9b`, `9b8bc3a5` | `analysis.analyze` no longer writes `jobId` after `tasks.trigger`; the worker sets it with one guarded `updateMany` (`status = PENDING`) before the first milestone, and skips a run whose row was cancelled in the gap. The cache probe stays separate — its key is the branch-head SHA from GitHub. Seven statements remain; ≤6 needs the quota check inside the usage SQL. |
+| R24 | 2026-11-15 | dropped | `auditMapper.toDto` derives `targetName`, `details` and `rawPayload` from `payload`, and the admin table renders the first two; a summary-only select would blank the Target column. Needs a denormalized `target` column (migration) or dropping the column. |
+| R25 | 2026-11-18 | `16e71fbb` | The sign-in log moved into `session.create.before`, which already reads the profile; `createdAt`/`role` joined `AUTH_PROFILE_SELECT` and `session.create.after` was deleted, so the login path makes one user read instead of two. |
+| R28 | 2026-11-15 | `d7c7cf59` | The new-chat flag is carried from the existing session probe into `onEnd`; the title re-read is gone. |
+| R30 | 2026-11-15 | `a65c18e3` | The issue-comment and review-comment handlers select only the four columns their replies read. |
+| R31 | 2026-11-15 | `0f8a685d` | `createFix` validates the PR analysis alongside the repo read in `Promise.all`. |
+| R32 | 2026-11-15 | `bf2f3d7d`, `664c2016` | The completion burst (`userUpdated`/`notification`/`analysisUpdated`) is one Ably batch request with a sequential fallback on a non-2xx response. The staging/fix publishes were split onto `stagingUpdated` by R10, so this batch no longer carries a `getStagedFiles` invalidation. |
+| K1 | 2026-11-15 | `5cb192d0` | Both SQL files filter `repos.workspace_id = $1::uuid` (the parameter and the `user_repos` CTE are renamed `workspace_id` / `workspace_repos`), `getDashboardStats`/`getTrends` take a `workspaceId`, and `analytics.*` moved from `protectedProcedure` to `workspaceProcedure`. The dashboard and the repository list now count the same set for an invited member; `dashboard-stats` and `analytics-trends` each seed a second member's repositories into one workspace. |
 
-All six shipped in PR #2356 and are on `main`; the "working tree" marker from the original log is
-now historical.
+The first six shipped in PR #2356 and are on `main`; the rest landed on
+`perf/dxnx-310-db-query-review-round-2` (draft PR #2412) and the "working tree" marker from the
+original log is now historical. R1 remains partial (event-sourced audit layer); the list-read /
+date-filter audits below stay outside the 36-item counter.
+
+## Pagination completeness (2026-11-15)
+
+Closed after the 36-item counter above; these are follow-ups from the list-read audit.
+
+- PR comments are cursor-paginated (`{ renderedComments, meta, total }`), and `fixAll` moved to a
+  server mutation (`analysis.fixAllComments`) that reads every comment of the analysis, so it no
+  longer depends on the loaded page. (`8b425664`)
+- PR fixes have their own cursor procedure (`analysis.listFixes`); the card loads pages and the
+  stat keeps the `_count` total. (`8b425664`)
+- Admin review fixes have `adminReview.listFixes`; `getDetail` returns only `fixCount`. (`59025a76`)
+- The offset tables that remain (repo list, banned emails, notifications page) never offer a page
+  past `MAX_PAGE`; a single hint states the reachable row count and points at the date/search
+  filters, which is how the older rows stay reachable. (`c65b533b`)
+- Keyset lists have supporting composite indexes (B5i) plus the fixes-list index; `COUNT(*)` runs
+  only on the first page of history and the PR list. The web PR list does not render that `total`;
+  the CLI does (`dxnx pr review` prints “Showing N of M”).
+
+## Usage metering accuracy (2026-11-15)
+
+- `ai` v7 exposes `inputTokenDetails.{noCacheTokens,cacheReadTokens,cacheWriteTokens}` and no
+  `cachedInputTokens`; the old reader always saw zero and billed cache hits at the full input rate.
+  `core/usage/usage.mapper.ts` now maps the v7 shape, and both `utils/call.ts` and the agent chat
+  route use it, so cached tokens are billed once at the cached rate. (`7a131d76`, `6b7f3c5b`)
+- `costCentsFor` rounds to the nearest cent instead of up, so many small calls stop accumulating a
+  one-cent overcharge per call.
+- The per-call reservation caps its output estimate at 8 192 tokens instead of the full
+  `maxOutputTokens` (65 536), so parallel calls no longer inflate `workspace_usage` enough to trip
+  `aiTokensPerMonth` before settling.
 
 ## Verification recipes
 
@@ -657,3 +786,68 @@ bun --filter @doxynix/web test src/server/modules/analysis
 bun --filter @doxynix/web test src/server/modules/billing
 bun --filter @doxynix/web test src/server/core
 ```
+
+## List-read audit follow-ups (2026-11-15)
+
+[`list-read-audit.md`](../../../.superpowers/sdd/db-query-review-2026-11/list-read-audit.md) re-read
+the seven unbounded reads (`U*`) and the eight capped ones (`C*`) this scoreboard does not carry:
+they are one screen each and close in batches, so they stay out of the 36-item counter above.
+
+- [x] **U2 · `loadImpactAnalysis` loaded every comment of the PR analysis** —
+  `analysis.repository.ts` dropped the `comments` relation; findings come from `findingsJson`.
+  `dcfc6a65`
+- [x] **U3 · `loadImpactAnalysis` loaded every linked fix** — `generatedFixes` takes 50
+  (`MAX_IMPACT_FIXES`) and the select carries `_count.generatedFixes`; `summary.linkedFixes` is that
+  count, `fixes` is the page. `dcfc6a65`
+- [x] **U4 · `getComments` rendered every comment of one analysis** — `take: 500`
+  (`MAX_ANALYSIS_COMMENTS`) with a matching `count` in the same `Promise.all`, output
+  `{ renderedComments, total }`, cache key still `workspace + analysis version + total`, and the PR
+  card renders `Common.capped_hint` when the page is short. `fixAll` still maps the loaded page.
+  `dcfc6a65`
+- [x] **U7 · `adminReview.getDetail` loaded every fix** — `take: 100` (`MAX_DETAIL_FIXES`); the
+  detail's `fixCount` is the `_count` the summary already selects. `dcfc6a65`
+- [x] **U1 · `getRepoDocsPayload` reads every document version** — the nested `documents` relation is
+  gone; `prisma/sql/getLatestDocumentsPerType.sql` windows rows per `(type, path)` and the service asks
+  for one row per kind. `c0517117`
+- [x] **U5 · `workspace.listMembers` reads every membership** — keyset on `(createdAt, id)` with
+  `cursorPageSchema(50)`; the service returns `{ items, meta, ownerCount, total }` from two counts in
+  the same `Promise.all` as the page, and the members page loads pages through a sentinel. `55695647`
+- [x] **U6 · `getTrends` has no range bound** — `period` is now a `z.enum` of the presets plus
+  `custom` (`shared/lib/analytics-periods.ts`), and a `superRefine` requires `from` and caps the span
+  at 366 days, measuring an open-ended range against now. The dashboard's own URL parser accepts only
+  those literals, and `resolveDateRange` shows the preset window when the period is not `custom`.
+  `652f2316` — the calendar stops one day short of the cap, a bare `?period=custom` is repaired to a
+  30-day window before it fetches, and a query that still fails renders `QueryError` with a retry
+  instead of a skeleton (`89c05f63`).
+- [x] **C1 · `getHistory`** — cursor pages, `{ items, meta, total }` (`a90fdb07`, B5c).
+- [x] **C2 · `listByRepository`** — cursor pages, `{ items, meta, total }` (`a90fdb07`, B5c).
+- [x] **C3 · `getByRepoId` (`take: 200`)** — live consumer: `packages/cli`; cursor-paginated, no cap.
+- [x] **C4 · `getRepoSnapshotWithDocuments` documents (`take: 500`)** — the method and
+  `MAX_REPO_DOCUMENTS` are deleted; `getWorkspace` composes one row per kind onto `getRepoSnapshot`,
+  and `getRepoBySha` no longer carries the unused documents relation. `c0517117`
+- [x] **C5 · `loadLatestDocumentsWithContent` (`take: 24`)** — the global `take` is replaced by three
+  versions per `(type, path)`, and `pickLatestDocsByType` is gone. `c0517117`
+- [x] **C6 · `loadRelatedFixes` (`take: 8`)** — dropped; explicit top-N widget (`related` panel).
+- [x] **C7 · `loadRelatedPrFindings` (`take: 12`)** — dropped; explicit top-N widget (`related`
+  panel).
+- [x] **C8 · `getDashboardStats` `per_repo_top` LATERAL** — the `LIMIT 1` half landed in
+  `f232f133`; `recentActivity` is defined as the latest analysis per repo (product decision).
+- [x] **O2 · `adminAudit.list` page ceiling** — keyset on `(createdAt desc, id desc)` with
+  `cursorPageSchema(50)` and every existing filter; the three capped counts are gone and the table
+  walks pages through an intersection sentinel. `8dae57da`
+- [x] **O3 · `adminReview.list` page ceiling** — the same keyset contract as O2, so rows past the old
+  page 100 are reachable instead of repeating page 100. `8dae57da`
+- [x] **O4 · `adminUser.list` page ceiling** — same keyset contract; `page` is gone from
+  `adminUserParsers` / `adminReviewParsers` / `adminAuditParsers`, so the URL carries only filters.
+  `8dae57da`
+- [x] **B5i · keyset indexes** — `(repo_id, created_at DESC, id DESC)` on `analyses` and
+  `pull_request_analyses`, `(user_id, repo_id, updated_at DESC, id DESC)` on `chat_sessions`,
+  `(session_id, created_at DESC, id DESC)` on `chat_messages`, `(user_id, created_at DESC, id DESC)`
+  on `sessions`, `(workspace_id, created_at DESC, id DESC)` on `api_keys`, and
+  `(workspace_id, created_at, id)` on `workspace_members` — all in `20261115120000_keyset_indexes`.
+  `4eaf34d2`
+- [x] **B5i · first-page total** — `getHistory` and `listByRepository` count only when `cursor` is
+  null and answer `total: null` on later pages; the CLI folds the walk through
+  `summarizeCursorPages` (`@doxynix/shared`) and keeps the first non-null total, while the version
+  selector still reads page one and `dxnx pr review` prints “Showing N of M”. `2c39e6d3`
+

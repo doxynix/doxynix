@@ -1,3 +1,5 @@
+import { collectCursorPages, MAX_PAGE_SIZE } from "@doxynix/shared";
+
 import { trpc } from "@/core/client";
 
 import type { CreateApiKeyInput, UpdateApiKeyInput } from "./keys.types";
@@ -8,7 +10,14 @@ export const keysService = {
   },
 
   async list() {
-    return trpc.apikey.list.query({});
+    const [active, archived] = await Promise.all([
+      collectCursorPages((cursor) => trpc.apikey.list.query({ cursor, limit: MAX_PAGE_SIZE })),
+      collectCursorPages((cursor) =>
+        trpc.apikey.listArchived.query({ cursor, limit: MAX_PAGE_SIZE }),
+      ),
+    ]);
+
+    return { active, archived };
   },
 
   async revoke(id: string) {

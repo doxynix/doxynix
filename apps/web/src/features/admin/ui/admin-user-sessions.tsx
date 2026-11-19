@@ -1,7 +1,7 @@
 "use client";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { LogOut } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -19,6 +19,7 @@ import {
   DialogTrigger,
 } from "@/shared/ui/core/dialog";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { AppInfiniteSentinel } from "@/shared/ui/kit/app-infinite-sentinel";
 import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
@@ -30,12 +31,21 @@ type Props = {
   userId: string;
 };
 
+const SESSIONS_PAGE_SIZE = 20;
+
 export function AdminUserSessions({ actions, userId }: Readonly<Props>) {
   const trpc = useTRPC();
   const t = useTranslations("AdminUsers");
   const locale = useLocale();
 
-  const { data, isLoading } = useQuery(trpc.adminUser.listSessions.queryOptions({ id: userId }));
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
+    trpc.adminUser.listSessions.infiniteQueryOptions(
+      { id: userId, limit: SESSIONS_PAGE_SIZE },
+      { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
+    ),
+  );
+
+  const sessions = data?.pages.flatMap((page) => page.items) ?? [];
 
   return (
     <div className="flex flex-col gap-2">
@@ -60,51 +70,59 @@ export function AdminUserSessions({ actions, userId }: Readonly<Props>) {
             </div>
           </li>
         </ul>
-      ) : data.items.length === 0 ? (
+      ) : sessions.length === 0 ? (
         <span className="text-muted-foreground text-sm">{t("sessions_empty")}</span>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {data.items.map((session) => (
-            <li
-              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border p-3 text-sm"
-              key={session.id}
-            >
-              <div className="flex flex-col">
-                <span className="text-xs">
-                  {t("sessions_since", { date: formatFullDate(session.createdAt, locale) })}
-                </span>
-                <span className="text-muted-foreground text-xs">
-                  {session.ipAddress ?? t("sessions_unknown_origin")}
-                  {session.userAgent != null && ` · ${session.userAgent}`}
-                </span>
-              </div>
+        <>
+          <ul className="flex flex-col gap-2">
+            {sessions.map((session) => (
+              <li
+                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border p-3 text-sm"
+                key={session.id}
+              >
+                <div className="flex flex-col">
+                  <span className="text-xs">
+                    {t("sessions_since", { date: formatFullDate(session.createdAt, locale) })}
+                  </span>
+                  <span className="text-muted-foreground text-xs">
+                    {session.ipAddress ?? t("sessions_unknown_origin")}
+                    {session.userAgent != null && ` · ${session.userAgent}`}
+                  </span>
+                </div>
 
-              <div className="flex items-center gap-2">
-                {session.expired ? (
-                  <AppBadge variant="outline">{t("sessions_expired")}</AppBadge>
-                ) : (
-                  <AppBadge variant="secondary">{t("sessions_active")}</AppBadge>
-                )}
-                <AdminUserRevokeSessionDialog
-                  actions={actions}
-                  sessionId={session.id}
-                  trigger={
-                    <AppTooltip content={t("sessions_revoke")}>
-                      <AppButton
-                        aria-label={t("sessions_revoke")}
-                        className="text-destructive"
-                        size="icon"
-                        variant="ghost"
-                      >
-                        <LogOut />
-                      </AppButton>
-                    </AppTooltip>
-                  }
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
+                <div className="flex items-center gap-2">
+                  {session.expired ? (
+                    <AppBadge variant="outline">{t("sessions_expired")}</AppBadge>
+                  ) : (
+                    <AppBadge variant="secondary">{t("sessions_active")}</AppBadge>
+                  )}
+                  <AdminUserRevokeSessionDialog
+                    actions={actions}
+                    sessionId={session.id}
+                    trigger={
+                      <AppTooltip content={t("sessions_revoke")}>
+                        <AppButton
+                          aria-label={t("sessions_revoke")}
+                          className="text-destructive"
+                          size="icon"
+                          variant="ghost"
+                        >
+                          <LogOut />
+                        </AppButton>
+                      </AppTooltip>
+                    }
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <AppInfiniteSentinel
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            onLoadMore={fetchNextPage}
+          />
+        </>
       )}
     </div>
   );

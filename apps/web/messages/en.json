@@ -52,8 +52,7 @@
     "operation_updated": "Updated",
     "origin_system": "system",
     "page_desc": "Every write the app made, across every actor. The dashboard audit log only shows your own activity; this one does not.",
-    "page_title": "Audit log",
-    "total_count": "{filtered} of {total} entries"
+    "page_title": "Audit log"
   },
   "AdminBannedEmails": {
     "col_actions": "Actions",
@@ -121,8 +120,7 @@
     "status_analyzing": "Analyzing",
     "status_completed": "Completed",
     "status_failed": "Failed",
-    "status_pending": "Pending",
-    "total_count": "{filtered} of {total} reviews"
+    "status_pending": "Pending"
   },
   "AdminUsers": {
     "ban_action": "Ban",
@@ -195,7 +193,6 @@
     "toast_role_updated": "{name} is now an admin",
     "toast_session_revoked": "Session revoked",
     "toast_unbanned": "User unbanned",
-    "total_count": "{filtered} of {total} users",
     "unban_action": "Unban"
   },
   "Agent": {
@@ -429,7 +426,7 @@
     "beta": "BETA",
     "breadcrumb": "Breadcrumb",
     "cancel": "Cancel",
-    "capped_hint": "Showing the first {count}. Narrow your filters or pick a date range to see the rest.",
+    "capped_hint": "Showing the first {count}. Narrow the results to see the rest.",
     "change_language": "Change Language",
     "check_system_status": "Check System Status",
     "clipboard_unavailable": "Clipboard API not available",

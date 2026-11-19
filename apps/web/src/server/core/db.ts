@@ -5,6 +5,7 @@ import { AuditModel } from "@doxynix/shared";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { type Prisma, PrismaClient } from "@prisma/client";
+import { acquireAdvisoryLock } from "@prisma/client/sql";
 import { Pool } from "pg";
 
 import { IS_DEV, IS_TEST } from "@/shared/config/env.flags";
@@ -19,6 +20,7 @@ import { AUDIT_BUSINESS_MODELS } from "../utils/constants";
 import { requestContext } from "../utils/request-context";
 import { maskSensitiveFields, sanitizePayload } from "../utils/sanitize-payload";
 import { appLogger } from "./app-logger";
+import { isBookkeepingWrite, shouldPublishAuditUpdated } from "./audit-filters";
 import { AUDIT_OPERATION_BY_WIRE_NAME } from "./audit-operations";
 import { fieldEncryptionExtension } from "./field-encryption";
 import { realtimeService } from "./realtime";
@@ -27,7 +29,7 @@ let cachedAfterFn: null | typeof NextAfterFn = null;
 let isAfterChecked = false;
 
 // Dynamic on purpose: Trigger.dev runs on the node runtime, where `next/server` is not
-// always resolvable, and a failed import must degrade to a direct await, never crash db.ts.
+// always resolvable, and a failed import must degrade to execution, never crash db.ts.
 async function getNextAfterApi() {
   if (isAfterChecked) {
     return cachedAfterFn;
@@ -45,6 +47,9 @@ async function getNextAfterApi() {
 // Prefers Next.js `after()` and falls back to a direct await elsewhere; the import is dynamic so Trigger.dev tasks and builds, which have no Next.js request context, still work.
 export async function runAsBackgroundTask(task: () => Promise<void>): Promise<void> {
   const afterFn = await getNextAfterApi();
+  // A missing `after` or a rejected call is the only signal that separates a task/worker (and a bare
+  // route handler) from a Next request: both have no request store, so the store proves nothing.
+  let isTaskContext = afterFn == null;
 
   if (afterFn) {
     try {
@@ -57,7 +62,9 @@ export async function runAsBackgroundTask(task: () => Promise<void>): Promise<vo
           error.message.includes("request context") ||
           error.message.includes("lifecycle"));
 
-      if (!isContextError) {
+      if (isContextError) {
+        isTaskContext = true;
+      } else {
         appLogger.warn({ error, msg: "afterFn failed unexpectedly, falling back to execution" });
       }
     }
@@ -70,9 +77,15 @@ export async function runAsBackgroundTask(task: () => Promise<void>): Promise<vo
     return;
   }
 
-  await task().catch((error) => {
+  const auditWrite = task().catch((error) => {
     appLogger.error({ error, msg: "Background task failed in production fallback mode" });
   });
+
+  if (isTaskContext) {
+    return;
+  }
+
+  await auditWrite;
 }
 
 // Held here so the slow-query log can read queue depth off the pool Prisma actually uses.
@@ -185,7 +198,12 @@ function createPrismaInstance() {
           const duration = performance.now() - start;
           const auditOperation = AUDIT_OPERATION_BY_WIRE_NAME[operation];
 
-          if (auditOperation != null && model !== "AuditLog" && isAuditedModel(model)) {
+          if (
+            auditOperation != null &&
+            model !== "AuditLog" &&
+            isAuditedModel(model) &&
+            !isBookkeepingWrite(model, operation, args)
+          ) {
             const auditModel = model;
             const ctxStore = requestContext.getStore();
             const userId = ctxStore?.userId ?? null;
@@ -211,7 +229,11 @@ function createPrismaInstance() {
                   },
                 });
 
-                if (userId != null && AUDIT_BUSINESS_MODELS.includes(auditModel)) {
+                if (
+                  userId != null &&
+                  AUDIT_BUSINESS_MODELS.includes(auditModel) &&
+                  shouldPublishAuditUpdated(ctxStore)
+                ) {
                   await realtimeService
                     .user(userId)
                     .publish(REALTIME_CONFIG.events.user.auditUpdated, {});
@@ -268,6 +290,33 @@ export type PrismaClientExtended = ReturnType<typeof createPrismaInstance>;
 export type TransactionClient = Parameters<Parameters<PrismaClientExtended["$transaction"]>[0]>[0];
 
 export type DbClient = PrismaClientExtended | TransactionClient;
+
+// Root client or an already-open transaction: a nested `$transaction` would commit outside the
+// caller's atomic block.
+export async function withTransaction<T>(
+  db: DbClient,
+  fn: (tx: TransactionClient) => Promise<T>,
+): Promise<T> {
+  if (!("$transaction" in db)) {
+    return fn(db);
+  }
+
+  return db.$transaction(fn);
+}
+
+// Serialises a workspace/user-scoped critical section; the lock is transaction-scoped and released
+// with it.
+export async function withAdvisoryLock<T>(
+  db: DbClient,
+  key: string,
+  fn: (tx: TransactionClient) => Promise<T>,
+): Promise<T> {
+  return withTransaction(db, async (tx) => {
+    await tx.$queryRawTyped(acquireAdvisoryLock(key));
+
+    return fn(tx);
+  });
+}
 
 // Irreducible: `globalThis` has no `prisma`; this is the Next.js dev-HMR singleton idiom, so one client is reused across hot reloads instead of leaking pools.
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClientExtended };

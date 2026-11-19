@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
+import { hasActiveFilters } from "@/shared/lib/url-state";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Select,
@@ -24,14 +25,14 @@ export function AdminBannedEmailsToolbar() {
 
   const [filters, setFilters] = useQueryStates(bannedEmailParsers);
 
-  const hasFilters = filters.reason !== null || filters.search !== "";
+  const hasFilters = hasActiveFilters(filters);
 
   const update = (value: keyof typeof BannedEmailReason | null) => {
     void setFilters({ page: null, reason: value });
   };
 
   const reset = () => {
-    void setFilters({ page: null, reason: null, search: null });
+    void setFilters({ from: null, page: null, reason: null, search: null, to: null });
   };
 
   return (

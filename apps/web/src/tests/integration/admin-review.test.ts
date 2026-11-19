@@ -87,8 +87,12 @@ describe("adminReviewService against ZenStack policies", () => {
     expect(list.items[0]).toMatchObject({ fixCount: 2, id: review.id });
 
     const detail = await adminReviewService.getDetail(admin.db, review.id);
-    expect(detail.fixes).toHaveLength(2);
-    expect(detail.fixes.map((fix) => fix.title).sort()).toEqual(["One", "Two"]);
+    expect(detail.fixCount).toBe(2);
+    expect(detail).not.toHaveProperty("fixes");
+
+    const fixes = await adminReviewService.listFixes(admin.db, review.id, { limit: 50 });
+    expect(fixes.items).toHaveLength(2);
+    expect(fixes.items.map((fix) => fix.title).sort()).toEqual(["One", "Two"]);
   });
 
   it("filters by status, risk score and fix status", async () => {
@@ -174,16 +178,22 @@ describe("adminReviewService against ZenStack policies", () => {
     }
 
     const filter = { limit: 3, search: "repo-ownerpage" };
-    const pages = await Promise.all([
-      adminReviewService.getAll(admin.db, { ...filter, page: 1 }),
-      adminReviewService.getAll(admin.db, { ...filter, page: 2 }),
-      adminReviewService.getAll(admin.db, { ...filter, page: 3 }),
-    ]);
+    const first = await adminReviewService.getAll(admin.db, filter);
+    const second = await adminReviewService.getAll(admin.db, {
+      ...filter,
+      cursor: first.meta.nextCursor,
+    });
+    const third = await adminReviewService.getAll(admin.db, {
+      ...filter,
+      cursor: second.meta.nextCursor,
+    });
 
-    const ids = pages.flatMap((page) => page.items.map((item) => item.id));
+    const ids = [...first.items, ...second.items, ...third.items].map((item) => item.id);
+
+    expect(ids).toHaveLength(7);
     expect(new Set(ids).size).toBe(7);
-    expect(pages[0].meta.totalPages).toBe(3);
-    expect(pages[2].meta.hasNextPage).toBe(false);
+    expect(first.meta.hasNextPage).toBe(true);
+    expect(third.meta.hasNextPage).toBe(false);
   });
 
   it("reports a missing review as NOT_FOUND", async () => {

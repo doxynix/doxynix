@@ -52,8 +52,7 @@
     "operation_updated": "Mis à jour",
     "origin_system": "système",
     "page_desc": "Chaque écriture de l'application, tous acteurs confondus. Le journal du tableau de bord ne montre que votre activité ; celui-ci montre tout.",
-    "page_title": "Journal d'audit",
-    "total_count": "{filtered} sur {total} entrées"
+    "page_title": "Journal d'audit"
   },
   "AdminBannedEmails": {
     "col_actions": "Actions",
@@ -121,8 +120,7 @@
     "status_analyzing": "Analyse",
     "status_completed": "Terminé",
     "status_failed": "Échec",
-    "status_pending": "En attente",
-    "total_count": "{filtered} sur {total} revues"
+    "status_pending": "En attente"
   },
   "AdminUsers": {
     "ban_action": "Bannir",
@@ -195,7 +193,6 @@
     "toast_role_updated": "{name} est désormais administrateur",
     "toast_session_revoked": "Session révoquée",
     "toast_unbanned": "Bannissement de l'utilisateur levé",
-    "total_count": "{filtered} sur {total} utilisateurs",
     "unban_action": "Lever le bannissement"
   },
   "Agent": {
@@ -429,7 +426,7 @@
     "beta": "BÊTA",
     "breadcrumb": "Fil d'Ariane",
     "cancel": "Annuler",
-    "capped_hint": "Affichage des {count} premiers. Affinez les filtres ou choisissez une plage de dates.",
+    "capped_hint": "Affichage des {count} premiers. Affinez les résultats pour voir le reste.",
     "change_language": "Changer de langue",
     "check_system_status": "Vérifier l'état du système",
     "clipboard_unavailable": "API du presse-papiers indisponible",

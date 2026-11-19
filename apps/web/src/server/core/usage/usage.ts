@@ -1,7 +1,8 @@
 import { UsageEventKind as USAGE_EVENT_KIND } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
+import { upsertWorkspaceUsage } from "@prisma/client/sql";
 
-import type { DbClient } from "@/server/core/db";
+import { type DbClient, withTransaction } from "@/server/core/db";
 
 import { costCentsFor, type TokenUsage, totalTokens } from "./price";
 
@@ -21,19 +22,26 @@ export function periodStartOf(now: Date): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
 }
 
-// `DbClient` is a union: a transaction client has no `$transaction`, so nested calls run inline.
-// Accepts the root client or an already-open transaction: inside a caller's transaction we must
-// reuse it, because a nested `$transaction` would commit outside the caller's atomic block.
-async function withTransaction<T>(db: DbClient, fn: (tx: DbClient) => Promise<T>): Promise<T> {
-  if (!("$transaction" in db)) {
-    return fn(db);
-  }
-
-  return db.$transaction(fn);
-}
-
 function isUniqueViolation(error: unknown): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+}
+
+// Returns false when the idempotency key already exists; the caller decides what that means.
+async function applyUsageEvent(
+  db: DbClient,
+  work: (tx: DbClient) => Promise<void>,
+): Promise<boolean> {
+  try {
+    await withTransaction(db, work);
+
+    return true;
+  } catch (error) {
+    if (!isUniqueViolation(error)) {
+      throw error;
+    }
+
+    return false;
+  }
 }
 
 async function bumpUsage(
@@ -46,32 +54,17 @@ async function bumpUsage(
     workspaceId: string;
   },
 ): Promise<void> {
-  const periodStart = periodStartOf(input.now);
+  const periodStart = periodStartOf(input.now).toISOString().slice(0, 10);
 
-  await tx.workspaceUsage.upsert({
-    create: {
-      aiTokensUsed: Math.max(0, input.tokens),
-      analysesCount: input.analyses,
-      costCents: input.costCents,
+  await tx.$queryRawTyped(
+    upsertWorkspaceUsage(
+      input.workspaceId,
       periodStart,
-      workspaceId: input.workspaceId,
-    },
-    update: {
-      aiTokensUsed: { increment: input.tokens },
-      analysesCount: { increment: input.analyses },
-      costCents: { increment: input.costCents },
-    },
-    where: { workspaceId_periodStart: { periodStart, workspaceId: input.workspaceId } },
-  });
-
-  // A release can make a counter negative; the rollup is a quota read model, never a debt.
-  await tx.$executeRaw`
-    UPDATE "workspace_usage"
-    SET "ai_tokens_used" = GREATEST(0, "ai_tokens_used"),
-        "cost_cents" = GREATEST(0, "cost_cents")
-    WHERE "workspace_id" = ${input.workspaceId}::uuid
-      AND "period_start" = ${periodStart.toISOString().slice(0, 10)}::date
-  `;
+      input.tokens,
+      input.analyses,
+      input.costCents,
+    ),
+  );
 }
 
 async function reservedTokensOf(db: DbClient, idempotencyKey: string): Promise<number> {
@@ -98,33 +91,29 @@ export async function reserveUsage(
   const now = input.now ?? new Date();
   const estimatedTokens = Math.max(0, Math.trunc(input.estimatedTokens));
 
-  try {
-    await withTransaction(db, async (tx) => {
-      await tx.usageEvent.create({
-        data: {
-          analysisId: input.analysisId ?? null,
-          costCents: BigInt(0),
-          idempotencyKey: input.idempotencyKey,
-          inputTokens: estimatedTokens,
-          kind: USAGE_EVENT_KIND.RESERVE,
-          occurredAt: now,
-          workspaceId: input.workspaceId,
-        },
-      });
-
-      await bumpUsage(tx, {
-        analyses: 0,
+  const applied = await applyUsageEvent(db, async (tx) => {
+    await tx.usageEvent.create({
+      data: {
+        analysisId: input.analysisId ?? null,
         costCents: BigInt(0),
-        now,
-        tokens: estimatedTokens,
+        idempotencyKey: input.idempotencyKey,
+        inputTokens: estimatedTokens,
+        kind: USAGE_EVENT_KIND.RESERVE,
+        occurredAt: now,
         workspaceId: input.workspaceId,
-      });
+      },
     });
-  } catch (error) {
-    if (!isUniqueViolation(error)) {
-      throw error;
-    }
 
+    await bumpUsage(tx, {
+      analyses: 0,
+      costCents: BigInt(0),
+      now,
+      tokens: estimatedTokens,
+      workspaceId: input.workspaceId,
+    });
+  });
+
+  if (!applied) {
     return {
       idempotencyKey: input.idempotencyKey,
       reservedTokens: await reservedTokensOf(db, input.idempotencyKey),
@@ -152,37 +141,33 @@ export async function settleUsage(
   const costCents = costCentsFor(input.model, input.usage, now);
   const reservedTokens = await reservedTokensOf(db, input.idempotencyKey);
 
-  try {
-    await withTransaction(db, async (tx) => {
-      await tx.usageEvent.create({
-        data: {
-          analysisId: input.analysisId ?? null,
-          cachedInputTokens: input.usage.cachedInputTokens,
-          costCents,
-          idempotencyKey: `${input.idempotencyKey}:settle`,
-          inputTokens: input.usage.inputTokens,
-          kind: USAGE_EVENT_KIND.SETTLE,
-          model: input.model,
-          occurredAt: now,
-          outputTokens: input.usage.outputTokens,
-          provider: input.provider,
-          workspaceId: input.workspaceId,
-        },
-      });
-
-      await bumpUsage(tx, {
-        analyses: 0,
+  const applied = await applyUsageEvent(db, async (tx) => {
+    await tx.usageEvent.create({
+      data: {
+        analysisId: input.analysisId ?? null,
+        cachedInputTokens: input.usage.cachedInputTokens,
         costCents,
-        now,
-        tokens: tokens - reservedTokens,
+        idempotencyKey: `${input.idempotencyKey}:settle`,
+        inputTokens: input.usage.inputTokens,
+        kind: USAGE_EVENT_KIND.SETTLE,
+        model: input.model,
+        occurredAt: now,
+        outputTokens: input.usage.outputTokens,
+        provider: input.provider,
         workspaceId: input.workspaceId,
-      });
+      },
     });
-  } catch (error) {
-    if (!isUniqueViolation(error)) {
-      throw error;
-    }
 
+    await bumpUsage(tx, {
+      analyses: 0,
+      costCents,
+      now,
+      tokens: tokens - reservedTokens,
+      workspaceId: input.workspaceId,
+    });
+  });
+
+  if (!applied) {
     // Already settled: the rollup must not move twice.
     return { costCents: BigInt(0), releasedTokens: 0, tokens: 0 };
   }
@@ -207,33 +192,27 @@ export async function releaseUsage(
   const now = input.now ?? new Date();
   const reservedTokens = await reservedTokensOf(db, input.idempotencyKey);
 
-  try {
-    await withTransaction(db, async (tx) => {
-      await tx.usageEvent.create({
-        data: {
-          analysisId: input.analysisId ?? null,
-          costCents: BigInt(0),
-          idempotencyKey: `${input.idempotencyKey}:release`,
-          inputTokens: 0,
-          kind: USAGE_EVENT_KIND.SETTLE,
-          occurredAt: now,
-          workspaceId: input.workspaceId,
-        },
-      });
-
-      await bumpUsage(tx, {
-        analyses: 0,
+  await applyUsageEvent(db, async (tx) => {
+    await tx.usageEvent.create({
+      data: {
+        analysisId: input.analysisId ?? null,
         costCents: BigInt(0),
-        now,
-        tokens: -reservedTokens,
+        idempotencyKey: `${input.idempotencyKey}:release`,
+        inputTokens: 0,
+        kind: USAGE_EVENT_KIND.SETTLE,
+        occurredAt: now,
         workspaceId: input.workspaceId,
-      });
+      },
     });
-  } catch (error) {
-    if (!isUniqueViolation(error)) {
-      throw error;
-    }
-  }
+
+    await bumpUsage(tx, {
+      analyses: 0,
+      costCents: BigInt(0),
+      now,
+      tokens: -reservedTokens,
+      workspaceId: input.workspaceId,
+    });
+  });
 }
 
 // A cached re-analysis is free: it records a zero-cost event and does not consume a quota unit.
@@ -248,8 +227,8 @@ export async function recordCacheHitUsage(
 ): Promise<void> {
   const now = input.now ?? new Date();
 
-  try {
-    await db.usageEvent.create({
+  await applyUsageEvent(db, async (tx) => {
+    await tx.usageEvent.create({
       data: {
         analysisId: input.analysisId ?? null,
         costCents: BigInt(0),
@@ -260,11 +239,7 @@ export async function recordCacheHitUsage(
         workspaceId: input.workspaceId,
       },
     });
-  } catch (error) {
-    if (!isUniqueViolation(error)) {
-      throw error;
-    }
-  }
+  });
 }
 
 // One fresh analysis consumes one quota unit; the AI-call events only add tokens and cost.
@@ -279,33 +254,27 @@ export async function recordAnalysisUsage(
 ): Promise<void> {
   const now = input.now ?? new Date();
 
-  try {
-    await withTransaction(db, async (tx) => {
-      await tx.usageEvent.create({
-        data: {
-          analysisId: input.analysisId ?? null,
-          costCents: BigInt(0),
-          idempotencyKey: input.idempotencyKey,
-          inputTokens: 0,
-          kind: USAGE_EVENT_KIND.ANALYSIS,
-          occurredAt: now,
-          workspaceId: input.workspaceId,
-        },
-      });
-
-      await bumpUsage(tx, {
-        analyses: 1,
+  await applyUsageEvent(db, async (tx) => {
+    await tx.usageEvent.create({
+      data: {
+        analysisId: input.analysisId ?? null,
         costCents: BigInt(0),
-        now,
-        tokens: 0,
+        idempotencyKey: input.idempotencyKey,
+        inputTokens: 0,
+        kind: USAGE_EVENT_KIND.ANALYSIS,
+        occurredAt: now,
         workspaceId: input.workspaceId,
-      });
+      },
     });
-  } catch (error) {
-    if (!isUniqueViolation(error)) {
-      throw error;
-    }
-  }
+
+    await bumpUsage(tx, {
+      analyses: 1,
+      costCents: BigInt(0),
+      now,
+      tokens: 0,
+      workspaceId: input.workspaceId,
+    });
+  });
 }
 
 // Returns the quota unit when the analysis never started (queue failure), so a broken enqueue does
@@ -321,31 +290,25 @@ export async function releaseAnalysisUsage(
 ): Promise<void> {
   const now = input.now ?? new Date();
 
-  try {
-    await withTransaction(db, async (tx) => {
-      await tx.usageEvent.create({
-        data: {
-          analysisId: input.analysisId ?? null,
-          costCents: BigInt(0),
-          idempotencyKey: `${input.idempotencyKey}:release`,
-          inputTokens: 0,
-          kind: USAGE_EVENT_KIND.ANALYSIS_RELEASE,
-          occurredAt: now,
-          workspaceId: input.workspaceId,
-        },
-      });
-
-      await bumpUsage(tx, {
-        analyses: -1,
+  await applyUsageEvent(db, async (tx) => {
+    await tx.usageEvent.create({
+      data: {
+        analysisId: input.analysisId ?? null,
         costCents: BigInt(0),
-        now,
-        tokens: 0,
+        idempotencyKey: `${input.idempotencyKey}:release`,
+        inputTokens: 0,
+        kind: USAGE_EVENT_KIND.ANALYSIS_RELEASE,
+        occurredAt: now,
         workspaceId: input.workspaceId,
-      });
+      },
     });
-  } catch (error) {
-    if (!isUniqueViolation(error)) {
-      throw error;
-    }
-  }
+
+    await bumpUsage(tx, {
+      analyses: -1,
+      costCents: BigInt(0),
+      now,
+      tokens: 0,
+      workspaceId: input.workspaceId,
+    });
+  });
 }

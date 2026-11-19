@@ -1,5 +1,7 @@
 "use client";
 
+import { ErrorState } from "@/shared/ui/kit/error-state";
+
 import { useDashboardStats } from "../model/use-dashboard-stats";
 import {
   EcosystemStatusWidget,
@@ -11,10 +13,20 @@ import {
 import { DashboardInsightsSkeleton } from "./dashboard-insights-skeleton";
 
 export function DashboardInsightsContainer() {
-  const { data, isLoading } = useDashboardStats();
+  const { data, error, isError, isLoading, refetch } = useDashboardStats();
 
-  if (isLoading || data == null) {
+  if (isLoading) {
     return <DashboardInsightsSkeleton />;
+  }
+
+  if (isError || data == null) {
+    return (
+      <ErrorState
+        className="lg:col-span-4"
+        error={error}
+        onRetry={() => void refetch()}
+      />
+    );
   }
 
   return (

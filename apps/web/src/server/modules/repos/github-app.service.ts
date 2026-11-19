@@ -42,14 +42,15 @@ export const githubAppService = {
     userId: string,
     workspaceId: string,
   ) {
-    await this.syncInstallations(prisma, userId, workspaceId);
+    const validToken = await githubTokenService.getValidToken(userId);
+
+    await this.syncInstallations(prisma, userId, workspaceId, validToken);
 
     const installations = await db.githubInstallation.findMany({
       orderBy: { createdAt: "asc" },
       where: { isSuspended: false, workspaceId },
     });
 
-    const validToken = await githubTokenService.getValidToken(userId);
     const oauthStatus = validToken != null ? "valid" : "invalid";
 
     if (installations.length === 0 && validToken == null) {
@@ -292,8 +293,11 @@ export const githubAppService = {
     prisma: PrismaClientExtended,
     userId: string,
     workspaceId: string,
+    // A caller that already resolved the token for this request passes it in; `null` means the
+    // resolver ran and found nothing, `undefined` means "resolve it".
+    token?: null | string,
   ): Promise<void> {
-    const validToken = await githubTokenService.getValidToken(userId);
+    const validToken = token === undefined ? await githubTokenService.getValidToken(userId) : token;
     if (validToken == null) {
       return;
     }

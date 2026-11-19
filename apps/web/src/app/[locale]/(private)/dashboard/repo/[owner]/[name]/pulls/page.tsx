@@ -1,3 +1,4 @@
+import { REPO_ANALYSIS_PAGE_SIZE } from "@/shared/config/pagination";
 import { createRepoMetadata } from "@/shared/lib/metadata";
 import type { RepoPageProps } from "@/shared/lib/next.types";
 
@@ -13,7 +14,12 @@ export default async function RepoPullsPage({ params }: Readonly<RepoPageProps>)
 
   const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 
-  await prefetch(trpcProxy.analysis.listByRepository.queryOptions({ repoId: repo.id }));
+  await prefetch(
+    trpcProxy.analysis.listByRepository.infiniteQueryOptions(
+      { limit: REPO_ANALYSIS_PAGE_SIZE, repoId: repo.id },
+      { getNextPageParam: (lastPage) => lastPage.meta.nextCursor },
+    ),
+  );
 
   return (
     <HydrateClient>

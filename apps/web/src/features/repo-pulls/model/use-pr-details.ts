@@ -1,14 +1,15 @@
 import { useEffect } from "react";
-import { skipToken, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { skipToken, useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { useTRPC } from "@/shared/api/trpc";
+import { type RouterOutput, useTRPC } from "@/shared/api/trpc";
+import { PR_COMMENTS_PAGE_SIZE, PR_FIXES_PAGE_SIZE } from "@/shared/config/pagination";
+import { commentToFinding } from "@/shared/lib/comment-to-finding";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
 
 import type { PRNumber } from "@/entities/pr/model/pr.types";
 
-import { toFixFinding } from "./pr-details";
 import { usePrStage } from "./use-pr-stage";
 
 type Options = {
@@ -17,21 +18,43 @@ type Options = {
   repoId: string;
 };
 
+type RenderedComment = RouterOutput["analysis"]["getComments"]["renderedComments"][number];
+
 export function usePrDetails({ analysis, impact, repoId }: Options) {
   const trpc = useTRPC();
   const t = useTranslations("Dashboard");
-  const queryClient = useQueryClient();
 
-  const { data: comments, isLoading: isCommentsLoading } = useQuery(
-    trpc.analysis.getComments.queryOptions(
-      analysis?.analysis.id ? { analysisId: analysis.analysis.id } : skipToken,
+  const prAnalysisId = analysis?.analysis.id;
+  const commentsInput =
+    prAnalysisId == null ? skipToken : { analysisId: prAnalysisId, limit: PR_COMMENTS_PAGE_SIZE };
+
+  const {
+    data: commentsData,
+    fetchNextPage: fetchNextCommentsPage,
+    hasNextPage: hasNextCommentsPage,
+    isFetchingNextPage: isFetchingNextCommentsPage,
+    isLoading: isCommentsLoading,
+  } = useInfiniteQuery(
+    trpc.analysis.getComments.infiniteQueryOptions(commentsInput, {
+      getNextPageParam: (page) => page.meta.nextCursor,
+    }),
+  );
+
+  const {
+    data: fixesData,
+    fetchNextPage: fetchNextFixesPage,
+    hasNextPage: hasNextFixesPage,
+    isFetchingNextPage: isFetchingNextFixesPage,
+  } = useInfiniteQuery(
+    trpc.analysis.listFixes.infiniteQueryOptions(
+      prAnalysisId == null ? skipToken : { limit: PR_FIXES_PAGE_SIZE, prAnalysisId },
+      { getNextPageParam: (page) => page.meta.nextCursor },
     ),
   );
 
   const { isStaging, stageFix } = usePrStage(repoId);
 
   const findingsCount = impact?.summary.findings ?? 0;
-  const prAnalysisId = analysis?.analysis.id;
   const riskScore = impact?.analysis.riskScore ?? analysis?.analysis.riskScore;
 
   useEffect(() => {
@@ -48,55 +71,73 @@ export function usePrDetails({ analysis, impact, repoId }: Options) {
     });
   }, [analysis?.analysis.prNumber, findingsCount, prAnalysisId, repoId, riskScore]);
 
+  const onFixQueued = (data: { fixId?: string; success?: boolean }) => {
+    if (data.success === true && data.fixId != null) {
+      toast.success(t("repo_pull_fix_queued"), {
+        description: t("repo_pull_fix_queued_desc"),
+      });
+      trackClientEvent("fix_requested", {
+        findings_count: findingsCount,
+        fix_id: data.fixId,
+        repo_id: repoId,
+      });
+    }
+  };
+
+  const onFixError = (err: { message: string }) => {
+    toast.error(t("repo_pull_fix_error"), {
+      description: err.message,
+    });
+  };
+
   const createFixMutation = useMutation(
-    trpc.analysis.createFix.mutationOptions({
-      onError: (err) => {
-        toast.error(t("repo_pull_fix_error"), {
-          description: err.message,
-        });
-      },
-      onSuccess: (data) => {
-        if (data.success === true && data.fixId != null) {
-          toast.success(t("repo_pull_fix_queued"), {
-            description: t("repo_pull_fix_queued_desc"),
-          });
-          trackClientEvent("fix_requested", {
-            findings_count: findingsCount,
-            fix_id: data.fixId,
-            repo_id: repoId,
-          });
-          void queryClient.invalidateQueries(trpc.analysis.getByRepository.queryFilter({ repoId }));
-        }
-      },
-    }),
+    trpc.analysis.createFix.mutationOptions({ onError: onFixError, onSuccess: onFixQueued }),
   );
 
-  const fixOne = (comment: Parameters<typeof toFixFinding>[0]) => {
+  const fixAllMutation = useMutation(
+    trpc.analysis.fixAllComments.mutationOptions({ onError: onFixError, onSuccess: onFixQueued }),
+  );
+
+  const fixOne = (comment: RenderedComment) => {
     createFixMutation.mutate({
-      findings: [toFixFinding(comment)],
-      prAnalysisId: analysis?.analysis.id,
+      findings: [
+        commentToFinding({
+          filePath: comment.filePath,
+          findingType: comment.findingType,
+          line: comment.line,
+          suggestion: comment.bodyHtml,
+        }),
+      ],
+      prAnalysisId,
       repoId,
     });
   };
 
   const fixAll = () => {
-    if (comments == null || comments.renderedComments.length === 0) {
+    if (prAnalysisId == null) {
       return;
     }
 
-    createFixMutation.mutate({
-      findings: comments.renderedComments.map((comment) => toFixFinding(comment)),
-      prAnalysisId: analysis?.analysis.id,
-      repoId,
-    });
+    fixAllMutation.mutate({ prAnalysisId });
   };
+
+  const comments = commentsData?.pages.flatMap((page) => page.renderedComments) ?? [];
+  const fixes = fixesData?.pages.flatMap((page) => page.items) ?? [];
 
   return {
     comments,
+    commentsTotal: commentsData?.pages[0]?.total ?? null,
+    fetchNextCommentsPage,
+    fetchNextFixesPage,
     fixAll,
+    fixes,
     fixOne,
+    hasNextCommentsPage,
+    hasNextFixesPage,
     isCommentsLoading,
-    isFixing: createFixMutation.isPending,
+    isFetchingNextCommentsPage,
+    isFetchingNextFixesPage,
+    isFixing: createFixMutation.isPending || fixAllMutation.isPending,
     isStaging,
     stageFix,
   };

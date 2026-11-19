@@ -1,20 +1,20 @@
-import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
+import { createTRPCRouter, workspaceProcedure } from "@/server/core/trpc/init";
 
 import { AnalyticsInputSchema, DashboardStatsSchema, TrendsSchema } from "./analytics.schemas";
 import { analyticsService } from "./analytics.service";
 
 export const analyticsRouter = createTRPCRouter({
-  getDashboardStats: protectedProcedure
+  getDashboardStats: workspaceProcedure
     .input(AnalyticsInputSchema)
     .output(DashboardStatsSchema)
     .query(async ({ ctx, input }) => {
-      return analyticsService.getDashboardStats(ctx.db, input, ctx.session.user.id);
+      return analyticsService.getDashboardStats(ctx.db, input, ctx.workspace.id);
     }),
 
-  getTrends: protectedProcedure
+  getTrends: workspaceProcedure
     .input(AnalyticsInputSchema)
     .output(TrendsSchema)
     .query(async ({ ctx, input }) => {
-      return analyticsService.getTrends(ctx.db, input, ctx.session.user.id);
+      return analyticsService.getTrends(ctx.db, input, ctx.workspace.id);
     }),
 });

@@ -1,5 +1,5 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 
 import { useTRPC } from "@/shared/api/trpc";
@@ -16,6 +16,9 @@ import {
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
+import { LoadingButton } from "@/shared/ui/kit/loading-button";
+
+const FIXES_PAGE_SIZE = 50;
 
 type Props = {
   onOpenChange: (open: boolean) => void;
@@ -26,11 +29,26 @@ type Props = {
 export function AdminReviewSheet({ onOpenChange, open, reviewId }: Readonly<Props>) {
   const trpc = useTRPC();
   const t = useTranslations("AdminReview");
+  const tCommon = useTranslations("Common");
   const locale = useLocale();
 
   const { data, isLoading } = useQuery(
     trpc.adminReview.detail.queryOptions({ id: reviewId }, { enabled: open }),
   );
+
+  const {
+    data: fixesData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery(
+    trpc.adminReview.listFixes.infiniteQueryOptions(
+      { id: reviewId, limit: FIXES_PAGE_SIZE },
+      { enabled: open, getNextPageParam: (page) => page.meta.nextCursor },
+    ),
+  );
+
+  const fixes = fixesData?.pages.flatMap((page) => page.items) ?? [];
 
   return (
     <Sheet
@@ -154,11 +172,11 @@ export function AdminReviewSheet({ onOpenChange, open, reviewId }: Readonly<Prop
 
               <div className="flex flex-col gap-2">
                 <span className="font-medium text-sm">{t("detail_fix_list")}</span>
-                {data.fixes.length === 0 ? (
+                {fixes.length === 0 ? (
                   <span className="text-muted-foreground text-sm">{t("fixes_none")}</span>
                 ) : (
                   <ul className="flex flex-col gap-2">
-                    {data.fixes.map((fix) => (
+                    {fixes.map((fix) => (
                       <li
                         className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border p-3 text-sm"
                         key={fix.id}
@@ -173,6 +191,18 @@ export function AdminReviewSheet({ onOpenChange, open, reviewId }: Readonly<Prop
                       </li>
                     ))}
                   </ul>
+                )}
+                {hasNextPage && (
+                  <LoadingButton
+                    className="w-full"
+                    disabled={isFetchingNextPage}
+                    isLoading={isFetchingNextPage}
+                    onClick={() => void fetchNextPage()}
+                    size="sm"
+                    variant="ghost"
+                  >
+                    {tCommon("more")}
+                  </LoadingButton>
                 )}
               </div>
             </div>

@@ -1,4 +1,5 @@
 import { MessageCode } from "@doxynix/shared";
+import { tryAdvisoryLock } from "@prisma/client/sql";
 
 import { AppError } from "@/server/core/api-error";
 import { billingIdempotencyKey } from "@/server/core/billing/idempotency";
@@ -63,11 +64,9 @@ async function withWorkspaceLock<T>(
   }
 
   return db.$transaction(async (tx) => {
-    const rows = await tx.$queryRaw<Array<{ locked: boolean }>>`
-      SELECT pg_try_advisory_xact_lock(hashtext(${workspaceId})) AS locked
-    `;
+    const [row] = await tx.$queryRawTyped(tryAdvisoryLock(workspaceId));
 
-    if (rows[0]?.locked !== true) {
+    if (row?.locked !== true) {
       throw new AppError({
         code: "CONFLICT",
         messageCode: MessageCode.CONCURRENT_SEAT_CHANGE,

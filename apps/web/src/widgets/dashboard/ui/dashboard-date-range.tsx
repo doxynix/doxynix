@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { subDays, subHours, subMinutes } from "date-fns";
 import { useLocale, useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
@@ -11,7 +11,12 @@ import { AppDateRange } from "@/shared/ui/kit/app-date-range";
 
 import { dashboardParsers } from "@/features/repo-analytics/model/dashboard-parsers";
 
-import { hasUrlStateChanged, resolveDateRange } from "../model/date-range";
+import {
+  clampCustomRange,
+  hasUrlStateChanged,
+  normalizeCustomRange,
+  resolveDateRange,
+} from "../model/date-range";
 
 const DATE_PERIODS = [
   {
@@ -67,6 +72,24 @@ export function DashboardDatePeriod() {
 
   const activePeriod = DATE_PERIODS.find((p) => p.key === urlState.period);
 
+  // A hand-edited `?period=custom` with no `from`, or with a span the schema rejects, would fail
+  // every fetch behind the RSC prefetch. Rewrite it once so the query can succeed.
+  const normalized =
+    urlState.period === "custom" ? normalizeCustomRange(urlState.from, urlState.to) : null;
+  const normalizedFrom = normalized?.from.getTime() ?? null;
+  const normalizedTo = normalized?.to.getTime() ?? null;
+
+  useEffect(() => {
+    if (normalizedFrom == null || normalizedTo == null) {
+      return;
+    }
+    void setUrlState({
+      from: new Date(normalizedFrom),
+      period: "custom",
+      to: new Date(normalizedTo),
+    });
+  }, [normalizedFrom, normalizedTo, setUrlState]);
+
   const handleChange = (newDate: DateRange | undefined) => {
     setTempDate(newDate);
     const from = newDate?.from;
@@ -83,7 +106,9 @@ export function DashboardDatePeriod() {
         void setUrlState({ from: null, period: matched.key, to: null });
         return;
       }
-      void setUrlState({ from, period: "custom", to });
+      const clamped = clampCustomRange(from, to);
+      setTempDate(clamped);
+      void setUrlState({ from: clamped.from, period: "custom", to: clamped.to });
       return;
     }
     void setUrlState({ from: null, period: null, to: null });

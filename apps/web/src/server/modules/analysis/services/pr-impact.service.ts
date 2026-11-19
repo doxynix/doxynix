@@ -2,15 +2,15 @@ import { MessageCode } from "@doxynix/shared";
 
 import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
+import { keysetArgs, ORDER_CREATED_AT_DESC, splitKeysetPage } from "@/server/utils/pagination";
 
 import { analysisMapper } from "../analysis.mapper";
 import { analysisRepo } from "../analysis.repository";
+import { fixesMapper } from "../fixes.mapper";
 import { createAnalyzeContextBuilder } from "../logic/analyze-context-builder";
 import { buildTopLevelNodes } from "../logic/graph-navigator";
 import { mapChangedFilesToImpactNodes } from "../logic/impact-file-mapper";
 import type { PRImpactPayload } from "../logic/pr.types";
-
-const PULL_LIST_LIMIT = 500;
 
 export const prImpactService = {
   async getAnalysis(db: DbClient, analysisId: string, workspaceId: string) {
@@ -49,8 +49,12 @@ export const prImpactService = {
     const changedFiles = analysisMapper.parseChangedFilesSnapshot(analysis);
     const findings = analysisMapper.parsePersistedFindings(analysis);
 
-    const repo = await analysisRepo.getRepoBySha(db, repoId, analysis.headSha, workspaceId);
-    const repoSnapshot = repo ?? (await analysisRepo.getRepoSnapshot(db, repoId, workspaceId));
+    const repoSnapshot = await analysisRepo.getRepoForImpact(
+      db,
+      repoId,
+      workspaceId,
+      analysis.headSha,
+    );
 
     if (repoSnapshot == null) {
       return null;
@@ -87,6 +91,7 @@ export const prImpactService = {
       nodeById,
       repoSnapshot.owner,
       repoSnapshot.name,
+      { analysisId: analysis.id, version: String(analysis.updatedAt.getTime()) },
     );
     const primaryFile = analysisMapper.selectPrimaryFile(changedFileItems);
     const primaryNodeId =
@@ -105,13 +110,6 @@ export const prImpactService = {
         status: analysis.status,
       },
       changedFiles: changedFileItems,
-      fixes: analysis.generatedFixes.map((fix) => ({
-        githubPrNumber: fix.githubPrNumber,
-        githubPrUrl: fix.githubPrUrl,
-        id: fix.id,
-        status: fix.status,
-        title: fix.title,
-      })),
       navigationHints: {
         primaryFilePath: primaryFile?.filePath ?? null,
         primaryNodeId,
@@ -127,16 +125,22 @@ export const prImpactService = {
         affectedNodes: affectedNodes.length,
         affectedZones: affectedZones.length,
         findings: findings.length,
-        linkedFixes: analysis.generatedFixes.length,
+        linkedFixes: analysis._count.generatedFixes,
       },
       topFindings,
     } satisfies PRImpactPayload;
   },
 
-  async listByRepository(db: DbClient, repoId: string, workspaceId: string) {
-    const [items, total] = await Promise.all([
+  async listByRepository(
+    db: DbClient,
+    repoId: string,
+    workspaceId: string,
+    input: { cursor?: null | string; limit: number },
+  ) {
+    const [rows, total] = await Promise.all([
       db.pullRequestAnalysis.findMany({
-        orderBy: { createdAt: "desc" },
+        ...keysetArgs(input.cursor, input.limit),
+        orderBy: ORDER_CREATED_AT_DESC,
         select: {
           _count: {
             select: { comments: true },
@@ -148,19 +152,17 @@ export const prImpactService = {
           riskScore: true,
           status: true,
         },
-        take: PULL_LIST_LIMIT,
-        where: {
-          repo: {
-            id: repoId,
-            workspaceId,
-          },
-        },
+        where: { repo: { id: repoId, workspaceId } },
       }),
-      db.pullRequestAnalysis.count({ where: { repo: { id: repoId, workspaceId } } }),
+      // Only the first page renders the total, so a later page must not pay for a COUNT(*).
+      input.cursor == null
+        ? db.pullRequestAnalysis.count({ where: { repo: { id: repoId, workspaceId } } })
+        : null,
     ]);
 
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, input.limit);
+
     return {
-      capped: total > PULL_LIST_LIMIT,
       items: items.map((item) => ({
         createdAt: item.createdAt,
         findingCount: item._count.comments,
@@ -170,7 +172,23 @@ export const prImpactService = {
         riskScore: item.riskScore,
         status: item.status,
       })),
+      meta: { hasNextPage, nextCursor },
       total,
+    };
+  },
+
+  async listFixes(
+    db: DbClient,
+    prAnalysisId: string,
+    workspaceId: string,
+    input: { cursor?: null | string; limit: number },
+  ) {
+    const rows = await analysisRepo.getByPrAnalysisId(db, prAnalysisId, workspaceId, input);
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, input.limit);
+
+    return {
+      items: items.map((fix) => fixesMapper.toSummary(fix)),
+      meta: { hasNextPage, nextCursor },
     };
   },
 };

@@ -50,7 +50,8 @@ describe("adminUserService against ZenStack policies", () => {
     const asAlice = await adminUserService.getAll(alice.db, { limit: 100 });
 
     expect(asAdmin.items.map((item) => item.email)).toContain(alice.email);
-    expect(asAdmin.meta.totalCount).toBe(await prisma.user.count());
+    expect(asAdmin.items).toHaveLength(await prisma.user.count());
+    expect(asAdmin.meta.hasNextPage).toBe(false);
     expect(asAlice.items).toHaveLength(1);
     expect(asAlice.items[0]?.id).toBe(alice.user.id);
   });
@@ -283,7 +284,10 @@ describe("adminUserService against ZenStack policies", () => {
       },
     });
 
-    const listed = await adminUserService.getSessions(admin.db, bob.user.id);
+    const listed = await adminUserService.getSessions(admin.db, {
+      limit: 20,
+      userId: bob.user.id,
+    });
     expect(listed.items).toHaveLength(2);
     expect(listed.items.find((item) => item.id === first.id)).toMatchObject({
       expired: false,
@@ -310,7 +314,10 @@ describe("adminUserService against ZenStack policies", () => {
       },
     });
 
-    const listed = await adminUserService.getSessions(admin.db, bob.user.id);
+    const listed = await adminUserService.getSessions(admin.db, {
+      limit: 20,
+      userId: bob.user.id,
+    });
     expect(listed.items[0]?.expired).toBe(true);
   });
 
@@ -328,7 +335,10 @@ describe("adminUserService against ZenStack policies", () => {
       },
     });
 
-    const listed = await adminUserService.getSessions(admin.db, bob.user.id);
+    const listed = await adminUserService.getSessions(admin.db, {
+      limit: 20,
+      userId: bob.user.id,
+    });
 
     expect(JSON.stringify(listed)).not.toContain("bob-secret");
     expect(listed.items[0]).not.toHaveProperty("token");
@@ -359,7 +369,10 @@ describe("adminUserService against ZenStack policies", () => {
       },
     });
 
-    const listed = await adminUserService.getSessions(alice.db, bob.user.id);
+    const listed = await adminUserService.getSessions(alice.db, {
+      limit: 20,
+      userId: bob.user.id,
+    });
     expect(listed.items).toHaveLength(0);
   });
 

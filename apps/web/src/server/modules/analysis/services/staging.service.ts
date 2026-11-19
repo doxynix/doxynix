@@ -21,7 +21,7 @@ export const stagingService = {
   async clearStaging(userId: string, repoId: string) {
     await redisService.staging.clear(userId, repoId);
 
-    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.stagingUpdated, {});
 
     return { success: true };
   },
@@ -35,7 +35,7 @@ export const stagingService = {
       [filePath]: content,
     });
 
-    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.stagingUpdated, {});
 
     return { stagedCount, success: true };
   },
@@ -93,7 +93,7 @@ export const stagingService = {
 
     const stagedCount = await redis.hlen(cacheKey);
 
-    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.stagingUpdated, {});
 
     return {
       stagedCount,
@@ -105,7 +105,7 @@ export const stagingService = {
   async unstageFile(userId: string, repoId: string, filePath: string) {
     const stagedCount = await redisService.staging.removeFile(userId, repoId, filePath);
 
-    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
+    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.stagingUpdated, {});
 
     return { stagedCount, success: true };
   },

@@ -25,8 +25,6 @@ export function analysisHandlers({
         return;
       }
 
-      void queryClient.invalidateQueries(trpc.user.getOnboardingState.pathFilter());
-
       queryClient.setQueriesData(
         trpc.analytics.getDashboardStats.pathFilter(),
         (oldData: DashboardStats | undefined) => patchAnalysisProgress(oldData, payload),
@@ -34,17 +32,19 @@ export function analysisHandlers({
 
       if (payload.status === "DONE" || payload.status === "FAILED") {
         invalidate();
+      }
 
+      // `analysisUpdated` covers the success path, but a failed run publishes only progress, so the
+      // analysis queries are refreshed here for `FAILED` alone.
+      if (payload.status === "FAILED") {
         void queryClient.invalidateQueries(trpc.analysis.getLatest.pathFilter());
         void queryClient.invalidateQueries(trpc.analysis.getHistory.pathFilter());
+        void queryClient.invalidateQueries(trpc.analysis.getVersionRef.pathFilter());
       }
     },
     [REALTIME_CONFIG.events.user.analysisUpdated]: () => {
       void queryClient.invalidateQueries(trpc.analysis.getLatest.pathFilter());
       void queryClient.invalidateQueries(trpc.analysis.getHistory.pathFilter());
-      void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
-      void queryClient.invalidateQueries(trpc.analysis.getByRepository.pathFilter());
-      void queryClient.invalidateQueries(trpc.user.getOnboardingState.pathFilter());
     },
     [REALTIME_CONFIG.events.user.fileActionCompleted]: (message) => {
       const payload = parseRealtimePayload(RealtimeUserPayloads.fileActionCompleted, message.data);
@@ -73,6 +73,9 @@ export function analysisHandlers({
       toast.success(
         payload.type === "AUDIT" ? t("realtime_file_audit_done") : t("realtime_file_document_done"),
       );
+    },
+    [REALTIME_CONFIG.events.user.stagingUpdated]: () => {
+      void queryClient.invalidateQueries(trpc.analysis.getStagedFiles.pathFilter());
     },
   };
 }

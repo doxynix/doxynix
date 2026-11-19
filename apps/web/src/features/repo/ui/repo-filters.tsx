@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
+import { hasActiveFilters } from "@/shared/lib/url-state";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Select,
@@ -23,12 +24,7 @@ export function RepoFilters() {
 
   const [filters, setFilters] = useQueryStates(repoParsers);
 
-  const hasFilters =
-    filters.status !== null ||
-    filters.visibility !== null ||
-    filters.sortBy !== "updatedAt" ||
-    filters.from !== null ||
-    filters.to !== null;
+  const hasFilters = hasActiveFilters(filters, { sortBy: "updatedAt" });
 
   const handleUpdate = (key: keyof typeof repoParsers, value: null | number | string) => {
     void setFilters({
@@ -41,6 +37,7 @@ export function RepoFilters() {
     void setFilters({
       from: null,
       page: null,
+      search: null,
       sortBy: null,
       status: null,
       to: null,

@@ -9,6 +9,7 @@ import { useTRPC } from "@/shared/api/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import type { ChartConfig } from "@/shared/ui/core/chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
+import { ErrorState } from "@/shared/ui/kit/error-state";
 
 import { dashboardParsers, dashboardRangeInput } from "../model/dashboard-parsers";
 import { TrendsWidgetsSkeleton } from "./repo-trends-widget-skeleton";
@@ -24,7 +25,7 @@ export function TrendsWidget({ className, repoId }: Readonly<Props>) {
   const trpc = useTRPC();
   const [urlParams] = useQueryStates(dashboardParsers);
 
-  const { data, isLoading } = useQuery(
+  const { data, error, isError, isLoading, refetch } = useQuery(
     trpc.analytics.getTrends.queryOptions({
       ...dashboardRangeInput(urlParams),
       repoId: repoId ?? undefined,
@@ -45,8 +46,6 @@ export function TrendsWidget({ className, repoId }: Readonly<Props>) {
   if (isLoading) {
     return <TrendsWidgetsSkeleton />;
   }
-
-  const hasData = Array.isArray(data) && data.length > 0;
 
   return (
     <Card className={className}>
@@ -89,7 +88,12 @@ export function TrendsWidget({ className, repoId }: Readonly<Props>) {
       </CardHeader>
 
       <CardContent className="pt-6">
-        {!hasData ? (
+        {isError || data == null ? (
+          <ErrorState
+            error={error}
+            onRetry={() => void refetch()}
+          />
+        ) : data.length === 0 ? (
           <div className="flex h-80 w-full flex-col items-center justify-center gap-2 rounded-xl border">
             <p className="text-muted-foreground text-sm">{t("repo_trends_no_data")}</p>
           </div>

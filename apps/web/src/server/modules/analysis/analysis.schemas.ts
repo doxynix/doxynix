@@ -1,3 +1,4 @@
+import { CursorMetaSchema, PRAnalysisStatusSchema, StatusSchema } from "@doxynix/shared";
 import * as z from "zod";
 
 const FileActionConfidenceSchema = z.enum(["high", "medium", "low"]);
@@ -204,6 +205,59 @@ export const PrAiReviewOutputSchema = z.object({
 
 export const AnalysisScopeInputSchema = z.object({ aid: z.string().optional(), repoId: z.uuid() });
 
+export const AnalysisHistoryItemSchema = z.object({
+  commitSha: z.string().nullable(),
+  createdAt: z.date(),
+  id: z.uuid(),
+  message: z.string().nullable(),
+  score: z.number().int().nullable(),
+  status: StatusSchema,
+});
+
+export const AnalysisHistoryOutputSchema = z.object({
+  items: z.array(AnalysisHistoryItemSchema),
+  meta: CursorMetaSchema,
+  total: z.number().int().nullable(),
+});
+
+export const AnalysisVersionRefSchema = z.object({
+  commitSha: z.string().nullable(),
+  createdAt: z.date(),
+  id: z.uuid(),
+  status: StatusSchema,
+});
+
+export const PullListSummarySchema = z.object({
+  createdAt: z.date(),
+  findingCount: z.number().int(),
+  headSha: z.string(),
+  id: z.uuid(),
+  prNumber: z.number().int(),
+  riskScore: z.number().int().nullable(),
+  status: PRAnalysisStatusSchema,
+});
+
+export const PullListOutputSchema = z.object({
+  items: z.array(PullListSummarySchema),
+  meta: CursorMetaSchema,
+  total: z.number().int().nullable(),
+});
+
+export const PRCommentSchema = z.object({
+  bodyHtml: z.string(),
+  filePath: z.string(),
+  findingType: z.string(),
+  id: z.uuid(),
+  line: z.number().int(),
+  riskLevel: z.number().int(),
+});
+
+export const PRCommentsOutputSchema = z.object({
+  meta: CursorMetaSchema,
+  renderedComments: z.array(PRCommentSchema),
+  total: z.number().int().nullable(),
+});
+
 export const NodeContextInputSchema = z.object({
   aid: z.string().optional(),
   nodeId: z.string(),
@@ -329,6 +383,13 @@ const RelatedFixSummarySchema = z.object({
   status: z.string(),
   title: z.string(),
 });
+
+export const PRFixesOutputSchema = z.object({
+  items: z.array(RelatedFixSummarySchema),
+  meta: CursorMetaSchema,
+});
+
+export type PRFixSummary = z.infer<typeof RelatedFixSummarySchema>;
 
 export const NodeContextOutputSchema = z
   .object({

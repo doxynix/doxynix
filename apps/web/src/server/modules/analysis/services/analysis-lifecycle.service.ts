@@ -6,19 +6,18 @@ import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
-import { type DbClient, prisma } from "@/server/core/db";
+import { type DbClient, prisma, withAdvisoryLock } from "@/server/core/db";
 import { assertAnalysisAllowed, getWorkspaceEntitlement } from "@/server/core/entitlements";
 import { getBranchHeadSha } from "@/server/core/github/github-api";
 import { trackServerEvent } from "@/server/core/posthog-events";
-import { realtimeService } from "@/server/core/realtime";
+import { realtimeService, type UserBatchEvent } from "@/server/core/realtime";
 import {
   recordAnalysisUsage,
   recordCacheHitUsage,
   releaseAnalysisUsage,
 } from "@/server/core/usage/usage";
+import { keysetArgs, ORDER_CREATED_AT_DESC, splitKeysetPage } from "@/server/utils/pagination";
 import { safeJsonClone } from "@/server/utils/safe-json";
-
-const HISTORY_LIMIT = 500;
 
 import { analysisLatestSelect } from "../analysis-latest.schemas";
 import type { AIResult } from "../engine/core/analysis-result.schemas";
@@ -50,8 +49,18 @@ export type SaveResultsParams = {
   workspaceId: string;
 };
 
+const repoAccessSelect = {
+  defaultBranch: true,
+  id: true,
+  name: true,
+  owner: true,
+  workspaceId: true,
+} satisfies Prisma.RepoSelect;
+
+type RepoAccess = Prisma.RepoGetPayload<{ select: typeof repoAccessSelect }>;
+
 async function findCachedSha(
-  repo: Repo,
+  repo: RepoAccess,
   userId: string,
   branch: string | undefined,
 ): Promise<null | string> {
@@ -104,8 +113,7 @@ export const analysisLifecycleService = {
 
     try {
       if (cachedSha == null) {
-        await prisma.$transaction(async (tx) => {
-          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`analysis-quota:${workspaceId}`}))`;
+        await withAdvisoryLock(prisma, `analysis-quota:${workspaceId}`, async (tx) => {
           // `fresh` is mandatory here: the request memo already holds the pre-lock snapshot that
           // the router middleware read, so the quota check would pass on stale counters.
           assertAnalysisAllowed(
@@ -160,11 +168,6 @@ export const analysisLifecycleService = {
           ttl: "30m",
         },
       );
-
-      await db.analysis.update({
-        data: { jobId: handle.id },
-        where: { id: analysis.id },
-      });
     } catch (error) {
       if (reserved) {
         await releaseAnalysisUsage(prisma, {
@@ -201,8 +204,9 @@ export const analysisLifecycleService = {
     return { jobId: handle.id, publicAccessToken: handle.publicAccessToken, status: "QUEUED" };
   },
 
-  async assertRepoAccess(db: DbClient, workspaceId: string, repoId: string) {
+  async assertRepoAccess(db: DbClient, workspaceId: string, repoId: string): Promise<RepoAccess> {
     const repo = await db.repo.findFirst({
+      select: repoAccessSelect,
       where: { id: repoId, workspaceId },
     });
 
@@ -215,6 +219,17 @@ export const analysisLifecycleService = {
       });
     }
     return repo;
+  },
+
+  // The run id only exists after `tasks.trigger`, so the worker stores it instead of the request
+  // path paying one more round trip. A cancelled row is no longer `PENDING`, and the caller skips.
+  async attachRunId(analysisId: string, jobId: string): Promise<boolean> {
+    const { count } = await prisma.analysis.updateMany({
+      data: { jobId },
+      where: { id: analysisId, status: "PENDING" },
+    });
+
+    return count > 0;
   },
 
   async cancel(db: DbClient, analysisId: string, workspaceId: string) {
@@ -268,10 +283,16 @@ export const analysisLifecycleService = {
     return { success: true };
   },
 
-  async getHistory(db: DbClient, repoId: string, workspaceId: string) {
-    const [items, total] = await Promise.all([
+  async getHistory(
+    db: DbClient,
+    repoId: string,
+    workspaceId: string,
+    input: { cursor?: null | string; limit: number },
+  ) {
+    const [rows, total] = await Promise.all([
       db.analysis.findMany({
-        orderBy: { createdAt: "desc" },
+        ...keysetArgs(input.cursor, input.limit),
+        orderBy: ORDER_CREATED_AT_DESC,
         select: {
           commitSha: true,
           createdAt: true,
@@ -280,14 +301,17 @@ export const analysisLifecycleService = {
           score: true,
           status: true,
         },
-        take: HISTORY_LIMIT,
         where: { repo: { id: repoId, workspaceId } },
       }),
-      db.analysis.count({ where: { repo: { id: repoId, workspaceId } } }),
+      // Only the first page renders the total, so a later page must not pay for a COUNT(*).
+      input.cursor == null
+        ? db.analysis.count({ where: { repo: { id: repoId, workspaceId } } })
+        : null,
     ]);
 
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, input.limit);
+
     return {
-      capped: total > HISTORY_LIMIT,
       items: items.map((h) => ({
         commitSha: h.commitSha,
         createdAt: h.createdAt,
@@ -296,6 +320,7 @@ export const analysisLifecycleService = {
         score: h.score,
         status: h.status,
       })),
+      meta: { hasNextPage, nextCursor },
       total,
     };
   },
@@ -334,6 +359,13 @@ export const analysisLifecycleService = {
       ...analysis,
       publicAccessToken,
     };
+  },
+
+  async getVersionRef(db: DbClient, repoId: string, workspaceId: string, analysisId: string) {
+    return db.analysis.findFirst({
+      select: { commitSha: true, createdAt: true, id: true, status: true },
+      where: { id: analysisId, repo: { id: repoId, workspaceId } },
+    });
   },
 
   async saveResults(params: SaveResultsParams): Promise<number> {
@@ -491,7 +523,6 @@ export const analysisLifecycleService = {
     });
 
     if (activated) {
-      void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.userUpdated, {});
       trackServerEvent(
         "onboarding_activated",
         { analysis_id: analysisId, repo_id: repo.id },
@@ -499,10 +530,21 @@ export const analysisLifecycleService = {
       );
     }
 
-    await realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.notification, {
-      id: notification.id,
-      title: notification.title,
-    });
+    // One batch request for the whole completion burst instead of three sequential publishes:
+    // `userUpdated` (first activation only), the notification, and the completion event.
+    const realtimeEvents: UserBatchEvent[] = [
+      {
+        data: { id: notification.id, title: notification.title },
+        name: REALTIME_CONFIG.events.user.notification,
+      },
+      { data: {}, name: REALTIME_CONFIG.events.user.analysisUpdated },
+    ];
+
+    if (activated) {
+      realtimeEvents.unshift({ data: {}, name: REALTIME_CONFIG.events.user.userUpdated });
+    }
+
+    await realtimeService.userBatch(userId, realtimeEvents);
 
     appLogger.info({ analysisId, commitSha: currentSha, msg: "Results saved", repoId: repo.id });
 
@@ -515,8 +557,6 @@ export const analysisLifecycleService = {
           repoId: repo.id,
         });
       });
-
-    void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.analysisUpdated, {});
 
     return finalHealthScore;
   },

@@ -2,6 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 
 import { MessageCode, PlanCode, PlanCodeSchema, type WorkspaceRole } from "@doxynix/shared";
 import { Prisma } from "@prisma/client";
+import { claimWorkspaceInvite } from "@prisma/client/sql";
 
 import { APP_URL } from "@/shared/config/env.client";
 
@@ -9,11 +10,12 @@ import { AppError } from "@/server/core/api-error";
 import { appLogger } from "@/server/core/app-logger";
 import { upsertBillingIssue } from "@/server/core/billing/issue";
 import { syncWorkspaceSeats } from "@/server/core/billing/seat-sync";
-import { type DbClient, prisma } from "@/server/core/db";
+import { type DbClient, prisma, withAdvisoryLock } from "@/server/core/db";
 import { resolveWorkspace } from "@/server/core/workspaces/resolve-workspace";
 import { sendWorkspaceInviteEmail } from "@/server/core/workspaces/send-workspace-invite";
 import { maskEmail, normalizeEmail } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
+import { keysetArgs, orderWithTiebreak, splitKeysetPage } from "@/server/utils/pagination";
 
 import type { WorkspaceSummary } from "./workspace.schemas";
 
@@ -168,17 +170,11 @@ export const workspaceService = {
 
     await requirePaidWorkspace(prisma, invite.workspaceId);
 
-    const memberId = await prisma.$transaction(async (tx) => {
-      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${invite.workspaceId}))`;
-
+    const memberId = await withAdvisoryLock(prisma, invite.workspaceId, async (tx) => {
       // Single-use: the first accept wins, and a concurrent second one rolls back.
-      const claimed = await tx.$executeRaw`
-        UPDATE "workspace_invites"
-        SET "accepted_at" = now()
-        WHERE "id" = ${invite.id}::uuid AND "accepted_at" IS NULL
-      `;
+      const claimed = await tx.$queryRawTyped(claimWorkspaceInvite(invite.id));
 
-      if (claimed === 0) {
+      if (claimed.length === 0) {
         throw invalidInvite();
       }
 
@@ -237,11 +233,9 @@ export const workspaceService = {
     }
 
     try {
-      const member = await db.$transaction(async (tx) => {
-        // Serialises seat accounting per workspace; without it two concurrent adds both pass the
-        // seatLimit check and create an unpaid seat.
-        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${workspaceId}))`;
-
+      // Serialises seat accounting per workspace; without it two concurrent adds both pass the
+      // seatLimit check and create an unpaid seat.
+      const member = await withAdvisoryLock(db, workspaceId, async (tx) => {
         const existing = await tx.workspaceMember.findUnique({
           select: { id: true },
           where: { workspaceId_userId: { userId: user.id, workspaceId } },
@@ -374,17 +368,34 @@ export const workspaceService = {
     };
   },
 
-  async listMembers(db: DbClient, workspaceId: string) {
-    return db.workspaceMember.findMany({
-      orderBy: { createdAt: "asc" },
-      select: {
-        id: true,
-        role: true,
-        user: { select: { id: true, image: true, name: true } },
-        userId: true,
-      },
-      where: { workspaceId },
-    });
+  async listMembers(
+    db: DbClient,
+    workspaceId: string,
+    input: { cursor?: null | string; limit: number },
+  ) {
+    const { cursor, limit } = input;
+
+    const [rows, ownerCount, total] = await Promise.all([
+      db.workspaceMember.findMany({
+        ...keysetArgs(cursor, limit),
+        orderBy: orderWithTiebreak("createdAt", "asc"),
+        select: {
+          id: true,
+          role: true,
+          user: { select: { id: true, image: true, name: true } },
+          userId: true,
+        },
+        where: { workspaceId },
+      }),
+      // Counted in SQL: the page only holds one cursor window, so a client-side owner tally
+      // would shrink as members are paged in.
+      db.workspaceMember.count({ where: { role: "OWNER", workspaceId } }),
+      db.workspaceMember.count({ where: { workspaceId } }),
+    ]);
+
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
+
+    return { items, meta: { hasNextPage, nextCursor }, ownerCount, total };
   },
 
   async previewInvite(token: string) {

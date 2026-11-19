@@ -1,17 +1,21 @@
-import { UpdatePRConfigInput } from "@doxynix/shared";
+import { CursorMetaSchema, UpdatePRConfigInput } from "@doxynix/shared";
 import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 import { entitlementProcedure, workspaceProcedure } from "@/server/core/trpc/init";
+import { cursorPageSchema } from "@/server/utils/pagination";
 
 import {
   FindingForFixSchema,
   FixApplicationPayloadSchema,
   GeneratedFixDetailedDTO,
   GeneratedFixDTO,
+  PRFixesOutputSchema,
 } from "./analysis.schemas";
 import { PRConfigService } from "./logic/pr-config";
 import { fixesService } from "./services/fixes.service";
+import { prCommentsService } from "./services/pr-comments.service";
+import { prImpactService } from "./services/pr-impact.service";
 import { stagingService } from "./services/staging.service";
 
 export const analysisPrFixesRouter = {
@@ -75,6 +79,24 @@ export const analysisPrFixesRouter = {
     .mutation(async ({ ctx, input }) => {
       return fixesService.createFix(ctx.db, ctx.session.user.id, input, ctx.workspace.id);
     }),
+  fixAllComments: entitlementProcedure
+    .input(z.object({ prAnalysisId: z.uuid() }))
+    .output(
+      z.object({
+        error: z.string().optional(),
+        fixId: z.uuid().optional(),
+        status: z.string().optional(),
+        success: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return prCommentsService.fixAllComments(
+        ctx.db,
+        ctx.session.user.id,
+        input.prAnalysisId,
+        ctx.workspace.id,
+      );
+    }),
   getById: workspaceProcedure
     .input(z.object({ fixId: z.uuid() }))
     .output(GeneratedFixDetailedDTO)
@@ -82,10 +104,10 @@ export const analysisPrFixesRouter = {
       return fixesService.getById(ctx.db, ctx.redis, input.fixId, ctx.workspace.id);
     }),
   getByRepository: workspaceProcedure
-    .input(z.object({ repoId: z.uuid() }))
-    .output(z.array(GeneratedFixDTO))
+    .input(z.object({ repoId: z.uuid() }).extend(cursorPageSchema(50).shape))
+    .output(z.object({ items: z.array(GeneratedFixDTO), meta: CursorMetaSchema }))
     .query(async ({ ctx, input }) => {
-      return fixesService.getByRepository(ctx.db, input.repoId, ctx.workspace.id);
+      return fixesService.getByRepository(ctx.db, input.repoId, ctx.workspace.id, input);
     }),
   getRepoConfig: workspaceProcedure
     .input(z.object({ repoId: z.uuid() }))
@@ -96,6 +118,12 @@ export const analysisPrFixesRouter = {
     .input(z.object({ repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
       return stagingService.getStagedFiles(ctx.session.user.id, input.repoId);
+    }),
+  listFixes: workspaceProcedure
+    .input(z.object({ prAnalysisId: z.uuid() }).extend(cursorPageSchema(50).shape))
+    .output(PRFixesOutputSchema)
+    .query(async ({ ctx, input }) => {
+      return prImpactService.listFixes(ctx.db, input.prAnalysisId, ctx.workspace.id, input);
     }),
   openPullRequest: workspaceProcedure
     .input(

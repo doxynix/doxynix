@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { markBillingEventsEnqueued } from "@prisma/client/sql";
 import { tasks } from "@trigger.dev/sdk";
 import type Stripe from "stripe";
 
@@ -8,7 +9,7 @@ import { captureBillingAlert, recordBillingMetric } from "@/server/core/billing/
 import { STRIPE_API_VERSION } from "@/server/core/billing/stripe-version";
 import { type DbClient, prisma } from "@/server/core/db";
 
-import { PROCESS_STRIPE_EVENT_TASK_ID } from "./billing.constants";
+import { PROCESS_STRIPE_EVENT_TASK_ID, type ProcessStripeEventTask } from "./billing.constants";
 import { NonRetryableBillingError } from "./billing.errors";
 import { applyInvoiceEvent, retrieveSubscriptionForInvoice } from "./billing.invoices";
 import { ownershipKeyFromPayload } from "./billing.ownership";
@@ -305,7 +306,8 @@ export async function markEventDeadLetter(billingEventId: string, error: unknown
 }
 
 // Sweeps events that no worker picked up or that died mid-run. A fresh replay key is required:
-// Trigger would otherwise return the old failed run for the same key.
+// Trigger would otherwise return the old failed run for the same key. The whole sweep is one batch,
+// so the batch id is stored instead of per-run ids; cancel a sweep from the Trigger dashboard.
 export async function sweepStaleStripeEvents(
   now: Date = new Date(),
 ): Promise<{ requeued: number }> {
@@ -314,7 +316,13 @@ export async function sweepStaleStripeEvents(
 
   const stale = await prisma.billingEvent.findMany({
     orderBy: { receivedAt: "asc" },
-    select: { externalEventId: true, id: true, payload: true, replayCount: true },
+    select: {
+      externalEventId: true,
+      id: true,
+      payload: true,
+      replayCount: true,
+      updatedAt: true,
+    },
     take: SWEEP_BATCH_SIZE,
     where: {
       OR: [
@@ -327,42 +335,52 @@ export async function sweepStaleStripeEvents(
     },
   });
 
-  let requeued = 0;
+  if (stale.length === 0) {
+    return { requeued: 0 };
+  }
 
-  for (const event of stale) {
-    try {
-      const runId = await tasks.trigger(
-        PROCESS_STRIPE_EVENT_TASK_ID,
-        { billingEventId: event.id },
-        {
+  let batchId: string;
+
+  try {
+    const batch = await tasks.batchTrigger<ProcessStripeEventTask>(
+      PROCESS_STRIPE_EVENT_TASK_ID,
+      stale.map((event) => ({
+        options: {
           concurrencyKey: ownershipKeyFromPayload(event.payload),
           idempotencyKey: `${event.externalEventId}:replay:${event.replayCount + 1}`,
         },
-      );
+        payload: { billingEventId: event.id },
+      })),
+    );
 
-      await prisma.billingEvent.update({
-        data: {
-          replayCount: { increment: 1 },
-          status: "ENQUEUED",
-          triggerRunId: runId.id,
-        },
-        where: {
-          id: event.id,
-          status: {
-            in: ["RECEIVED", "PROCESSING", "ENQUEUED"],
-          },
-        },
-      });
+    batchId = batch.batchId;
+  } catch (error) {
+    // A batch is all-or-nothing: nothing was queued, so the rows stay stale for the next tick.
+    appLogger.error({ error, events: stale.length, msg: "stripe_event_sweep_failed" });
 
-      requeued += 1;
-    } catch (error) {
-      appLogger.error({
-        error,
-        externalEventId: event.externalEventId,
-        msg: "stripe_event_sweep_failed",
-      });
-    }
+    return { requeued: 0 };
   }
 
-  return { requeued };
+  const updated = await prisma.$queryRawTyped(
+    markBillingEventsEnqueued(
+      {
+        items: stale.map(({ id, updatedAt }) => ({
+          expected_updated_at: updatedAt.toISOString(),
+          id,
+        })),
+      },
+      batchId,
+    ),
+  );
+
+  if (updated.length < stale.length) {
+    // The status/freshness guard skipped a row: a worker picked it up between the select and here.
+    appLogger.warn({
+      msg: "stripe_event_sweep_skipped",
+      queued: stale.length,
+      updated: updated.length,
+    });
+  }
+
+  return { requeued: updated.length };
 }

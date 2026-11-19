@@ -1,13 +1,14 @@
-import { type FixStatus, MessageCode, PRAnalysisStatus } from "@doxynix/shared";
+import { type DocType, type FixStatus, MessageCode, PRAnalysisStatus } from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
+import { getLatestDocumentsPerType } from "@prisma/client/sql";
 import { uniq } from "es-toolkit";
 import type { z } from "zod";
 
 import { AppError } from "@/server/core/api-error";
 import type { DbClient } from "@/server/core/db";
+import { keysetArgs, ORDER_CREATED_AT_DESC } from "@/server/utils/pagination";
 
 import type { persistedFindingSchema } from "./analysis.schemas";
-import { MAX_SEARCHABLE_DOCUMENT_FETCH, pickLatestDocsByType } from "./analysis.utils";
 import { fixesMapper } from "./fixes.mapper";
 import type { PRChangedFileSnapshot } from "./logic/pr.types";
 
@@ -48,6 +49,35 @@ export type AnalysisPayloadRecord = Prisma.AnalysisGetPayload<{
   select: typeof analysisPayloadSelect;
 }>;
 
+// The requested analysis and the latest completed one are the same query, filtered by `aid`.
+function targetAnalysisArgs<const S extends Prisma.AnalysisSelect>(
+  aid: string | undefined,
+  select: S,
+) {
+  return {
+    orderBy: { createdAt: "desc" as const },
+    select,
+    take: 1,
+    where: aid == null ? { status: "DONE" as const } : { id: aid, status: "DONE" as const },
+  };
+}
+
+function missingAnalysisError(aid: string | undefined) {
+  return new AppError(
+    aid == null
+      ? {
+          code: "NOT_FOUND",
+          messageCode: MessageCode.ANALYSIS_NOT_COMPLETED,
+          publicMessage: "No completed analysis found",
+        }
+      : {
+          code: "NOT_FOUND",
+          messageCode: MessageCode.ANALYSIS_VERSION_NOT_FOUND,
+          publicMessage: "Analysis version not found",
+        },
+  );
+}
+
 export const repoWithLatestAnalysisSelect = {
   analyses: {
     orderBy: { createdAt: "desc" },
@@ -73,35 +103,74 @@ export const repoWithLatestAnalysisSelect = {
   visibility: true,
 } satisfies Prisma.RepoSelect;
 
-export const repoDocumentsSelect = {
-  analysis: {
-    select: {
-      id: true,
-    },
-  },
-  createdAt: true,
-  id: true,
-  path: true,
-  type: true,
-  updatedAt: true,
-  version: true,
-} satisfies Prisma.DocumentSelect;
-
-export const repoWithLatestAnalysisAndDocsSelect = {
-  ...repoWithLatestAnalysisSelect,
-  documents: {
-    orderBy: { updatedAt: "desc" },
-    select: repoDocumentsSelect,
-  },
-} satisfies Prisma.RepoSelect;
-
-export type RepoWithLatestAnalysisAndDocs = Prisma.RepoGetPayload<{
-  select: typeof repoWithLatestAnalysisAndDocsSelect;
-}>;
-
 export type RepoSnapshot = Prisma.RepoGetPayload<{
   select: typeof repoWithLatestAnalysisSelect;
 }>;
+
+export type RepoDocument = {
+  analysis: { id: string } | null;
+  createdAt: Date;
+  id: string;
+  path: null | string;
+  type: DocType;
+  updatedAt: Date;
+  version: string;
+};
+
+export type RepoDocumentWithContent = RepoDocument & { content: string };
+
+type RepoDocuments<W extends boolean> = Array<
+  W extends true ? RepoDocumentWithContent : RepoDocument
+>;
+
+// The workspace view composes documents onto the snapshot instead of carrying them in the select,
+// so they are bounded per document type.
+export type RepoWithLatestAnalysisAndDocs = RepoSnapshot & { documents: RepoDocument[] };
+
+// Raw SQL does not pass through `fieldEncryptionExtension`, so content is read separately through
+// Prisma: `Document.content` is encrypted at rest and this query only picks which rows to read.
+export async function loadDocumentsPerType<W extends boolean = false>(
+  db: DbClient,
+  repoId: string,
+  workspaceId: string,
+  options: { aid?: string; perType: number; withContent?: W },
+): Promise<RepoDocuments<W>> {
+  const rows = await db.$queryRawTyped(
+    getLatestDocumentsPerType(repoId, workspaceId, options.aid ?? null, options.perType),
+  );
+
+  const documents = rows.map(
+    (row): RepoDocument => ({
+      analysis: row.analysisId == null ? null : { id: row.analysisId },
+      createdAt: row.createdAt,
+      id: row.id,
+      path: row.path,
+      type: row.type,
+      updatedAt: row.updatedAt,
+      version: row.version,
+    }),
+  );
+
+  if (options.withContent !== true || documents.length === 0) {
+    return documents as RepoDocuments<W>;
+  }
+
+  const contents = await db.document.findMany({
+    select: { content: true, id: true },
+    where: {
+      id: { in: documents.map((document) => document.id) },
+      repo: { id: repoId, workspaceId },
+    },
+  });
+  const contentById = new Map(contents.map((row) => [row.id, row.content]));
+
+  const withContent = documents.flatMap((document) => {
+    const content = contentById.get(document.id);
+    return content == null ? [] : [{ ...document, content }];
+  });
+
+  return withContent;
+}
 
 export type AnalysisRef = {
   analysisId: string;
@@ -113,6 +182,7 @@ export type ImpactAnalysisRecord = Awaited<ReturnType<typeof analysisRepo.loadIm
 export type ImpactAnalysis = NonNullable<ImpactAnalysisRecord>;
 
 export const analysisRepo = {
+  // No revalidateTag: a task has no Next store; readers miss the old page via the analysis version.
   async addComments(
     db: DbClient,
     analysisId: string,
@@ -186,18 +256,9 @@ export const analysisRepo = {
     workspaceId: string,
     aid?: string,
   ): Promise<AnalysisPayloadRecord | null> {
-    if (aid != null) {
-      return this.resolveTargetAnalysis(db, aid, workspaceId);
-    }
-
     const repo = await db.repo.findUnique({
       select: {
-        analyses: {
-          orderBy: { createdAt: "desc" },
-          select: analysisPayloadSelect,
-          take: 1,
-          where: { status: "DONE" },
-        },
+        analyses: targetAnalysisArgs(aid, analysisPayloadSelect),
       },
       where: { id: repoId, workspaceId },
     });
@@ -209,11 +270,7 @@ export const analysisRepo = {
     const analysis = repo.analyses[0];
 
     if (analysis == null) {
-      throw new AppError({
-        code: "NOT_FOUND",
-        messageCode: MessageCode.ANALYSIS_NOT_COMPLETED,
-        publicMessage: "No completed analysis found",
-      });
+      throw missingAnalysisError(aid);
     }
 
     return analysis;
@@ -222,6 +279,26 @@ export const analysisRepo = {
   async getById(db: DbClient, id: string, workspaceId: string) {
     return db.generatedFix.findFirst({
       where: { id, repo: { workspaceId } },
+    });
+  },
+
+  async getByPrAnalysisId(
+    db: DbClient,
+    prAnalysisId: string,
+    workspaceId: string,
+    input: { cursor?: null | string; limit: number },
+  ) {
+    return db.generatedFix.findMany({
+      ...keysetArgs(input.cursor, input.limit),
+      orderBy: ORDER_CREATED_AT_DESC,
+      select: {
+        githubPrNumber: true,
+        githubPrUrl: true,
+        id: true,
+        status: true,
+        title: true,
+      },
+      where: { prAnalysisId, repo: { workspaceId } },
     });
   },
 
@@ -241,18 +318,19 @@ export const analysisRepo = {
     });
   },
 
-  async getByRepoId(db: DbClient, repoId: string, workspaceId: string, status?: FixStatus) {
+  async getByRepoId(
+    db: DbClient,
+    repoId: string,
+    workspaceId: string,
+    input: { cursor?: null | string; limit: number },
+  ) {
     return db.generatedFix.findMany({
-      orderBy: { createdAt: "desc" },
-      where: {
-        repo: {
-          id: repoId,
-          workspaceId,
-        },
-        ...(status != null && { status }),
-      },
+      ...keysetArgs(input.cursor, input.limit),
+      orderBy: ORDER_CREATED_AT_DESC,
+      where: { repo: { id: repoId, workspaceId } },
     });
   },
+
   async getLatestRef(
     db: DbClient,
     repoId: string,
@@ -284,10 +362,10 @@ export const analysisRepo = {
     repoId: string,
     commitSha: string,
     workspaceId: string,
-  ): Promise<null | RepoWithLatestAnalysisAndDocs> {
+  ): Promise<null | RepoSnapshot> {
     return db.repo.findUnique({
       select: {
-        ...repoWithLatestAnalysisAndDocsSelect,
+        ...repoWithLatestAnalysisSelect,
         analyses: {
           orderBy: { createdAt: "desc" },
           select: latestCompletedAnalysisSelect,
@@ -308,11 +386,6 @@ export const analysisRepo = {
           take: 1,
           where: { status: "DONE" },
         },
-        documents: {
-          orderBy: { updatedAt: "desc" },
-          select: repoDocumentsSelect,
-          ...(aid == null ? {} : { where: { analysisId: aid } }),
-        },
       },
       where: { id: repoId, workspaceId },
     });
@@ -322,11 +395,8 @@ export const analysisRepo = {
     }
 
     const target = await this.resolveTargetAnalysis(db, aid, workspaceId);
-    if (target != null) {
-      return { ...repo, analyses: [target] };
-    }
 
-    if (repo.analyses.length === 0) {
+    if (target == null && repo.analyses.length === 0) {
       throw new AppError({
         code: "NOT_FOUND",
         messageCode: MessageCode.ANALYSIS_NOT_COMPLETED,
@@ -334,10 +404,24 @@ export const analysisRepo = {
       });
     }
 
-    return repo;
+    const documents = await loadDocumentsPerType(db, repoId, workspaceId, { aid, perType: 1 });
+
+    if (target != null) {
+      return { analyses: [target], documents };
+    }
+
+    return { ...repo, documents };
   },
 
-  async getRepoSnapshot(db: DbClient, repoId: string, workspaceId: string, aid?: string) {
+  // The impact page needs the repo plus the analysis at the PR's head SHA, falling back to the
+  // newest completed one. One heavy repo read; the head SHA costs one narrow analysis row, and only
+  // when it is not the latest — an old commit can be any distance back in the history.
+  async getRepoForImpact(
+    db: DbClient,
+    repoId: string,
+    workspaceId: string,
+    headSha: string,
+  ): Promise<null | RepoSnapshot> {
     const repo = await db.repo.findUnique({
       select: repoWithLatestAnalysisSelect,
       where: { id: repoId, workspaceId },
@@ -347,35 +431,34 @@ export const analysisRepo = {
       return null;
     }
 
-    const target = await this.resolveTargetAnalysis(db, aid, workspaceId);
-    if (target != null) {
-      return { ...repo, analyses: [target] };
+    const latest = repo.analyses[0];
+
+    if (latest == null) {
+      throw missingAnalysisError(undefined);
     }
 
-    if (repo.analyses.length === 0) {
-      throw new AppError({
-        code: "NOT_FOUND",
-        messageCode: MessageCode.ANALYSIS_NOT_COMPLETED,
-        publicMessage: "No completed analysis found",
-      });
+    if (latest.commitSha === headSha) {
+      return repo;
     }
 
-    return repo;
+    const pinned = await db.analysis.findFirst({
+      orderBy: { createdAt: "desc" },
+      select: latestCompletedAnalysisSelect,
+      where: { commitSha: headSha, repo: { id: repoId, workspaceId }, status: "DONE" },
+    });
+
+    return pinned == null ? repo : { ...repo, analyses: [pinned] };
   },
 
-  async getRepoSnapshotWithDocuments(
-    db: DbClient,
-    repoId: string,
-    workspaceId: string,
-    aid?: string,
-  ) {
+  async getRepoRef(db: DbClient, repoId: string, workspaceId: string, aid?: string) {
     const repo = await db.repo.findUnique({
       select: {
-        ...repoWithLatestAnalysisAndDocsSelect,
-        documents: {
-          ...repoWithLatestAnalysisAndDocsSelect.documents,
-          ...(aid == null ? {} : { where: { analysisId: aid } }),
-        },
+        analyses: targetAnalysisArgs(aid, { id: true }),
+        defaultBranch: true,
+        id: true,
+        name: true,
+        owner: true,
+        url: true,
       },
       where: { id: repoId, workspaceId },
     });
@@ -384,20 +467,30 @@ export const analysisRepo = {
       return null;
     }
 
-    const target = await this.resolveTargetAnalysis(db, aid, workspaceId);
-    if (target != null) {
-      return {
-        ...repo,
-        analyses: [target],
-      };
+    const analysis = repo.analyses[0];
+
+    if (analysis == null) {
+      throw missingAnalysisError(aid);
+    }
+
+    return { ...repo, analysisId: analysis.id };
+  },
+
+  async getRepoSnapshot(db: DbClient, repoId: string, workspaceId: string, aid?: string) {
+    const repo = await db.repo.findUnique({
+      select: {
+        ...repoWithLatestAnalysisSelect,
+        analyses: targetAnalysisArgs(aid, latestCompletedAnalysisSelect),
+      },
+      where: { id: repoId, workspaceId },
+    });
+
+    if (repo == null) {
+      return null;
     }
 
     if (repo.analyses.length === 0) {
-      throw new AppError({
-        code: "NOT_FOUND",
-        messageCode: MessageCode.ANALYSIS_NOT_COMPLETED,
-        publicMessage: "No completed analysis found",
-      });
+      throw missingAnalysisError(aid);
     }
 
     return repo;
@@ -407,36 +500,17 @@ export const analysisRepo = {
     return db.pullRequestAnalysis.findFirst({
       orderBy: { createdAt: "desc" },
       select: {
+        _count: { select: { generatedFixes: true } },
         baseSha: true,
         changedFilesJson: true,
-        comments: {
-          orderBy: [{ riskLevel: "desc" }, { filePath: "asc" }, { line: "asc" }],
-          select: {
-            body: true,
-            filePath: true,
-            findingType: true,
-            id: true,
-            line: true,
-            riskLevel: true,
-          },
-        },
         createdAt: true,
         findingsJson: true,
-        generatedFixes: {
-          orderBy: { createdAt: "desc" },
-          select: {
-            githubPrNumber: true,
-            githubPrUrl: true,
-            id: true,
-            status: true,
-            title: true,
-          },
-        },
         headSha: true,
         id: true,
         prNumber: true,
         riskScore: true,
         status: true,
+        updatedAt: true,
       },
       where: {
         prNumber,
@@ -445,30 +519,19 @@ export const analysisRepo = {
     });
   },
 
+  // One row per kind: search and the related-docs panel only ever showed the newest document of a
+  // type, and a per-kind window stops one type's history from starving the others.
   async loadLatestDocumentsWithContent(
     db: DbClient,
     repoId: string,
     workspaceId: string,
     aid?: string,
   ) {
-    const docs = await db.document.findMany({
-      orderBy: [{ type: "asc" }, { updatedAt: "desc" }],
-      select: {
-        analysis: { select: { id: true } },
-        content: true,
-        id: true,
-        type: true,
-        updatedAt: true,
-        version: true,
-      },
-      take: MAX_SEARCHABLE_DOCUMENT_FETCH,
-      where: {
-        repo: { id: repoId, workspaceId },
-        ...(aid != null ? { analysis: { id: aid } } : {}),
-      },
+    return loadDocumentsPerType(db, repoId, workspaceId, {
+      aid,
+      perType: 1,
+      withContent: true,
     });
-
-    return pickLatestDocsByType(docs);
   },
 
   async loadRelatedFixes(db: DbClient, analysisIds: string[], workspaceId: string) {

@@ -67,5 +67,7 @@ export function costCentsFor(model: string, usage: TokenUsage, at: Date = new Da
       usage.outputTokens * priceFor(model, "output", at)) /
     1_000_000;
 
-  return BigInt(Math.ceil(cents));
+  // Nearest cent: a sub-cent call is a rounding error, not a charge, so N small calls do not add up
+  // to N extra cents.
+  return BigInt(Math.round(cents));
 }

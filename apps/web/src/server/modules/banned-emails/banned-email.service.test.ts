@@ -38,6 +38,25 @@ describe("bannedEmailService.buildWhereClause", () => {
 });
 
 describe("bannedEmailService.getAll", () => {
+  // A date range is the only way a moderator reaches a row older than the first page, so it has to
+  // reach the list query and both counts — a filter that only decorates the URL shows nothing.
+  it("pushes the date range into the page and both counts", async () => {
+    const from = new Date("2025-01-01T00:00:00.000Z");
+    const to = new Date("2025-01-31T00:00:00.000Z");
+    const findMany = vi.fn().mockResolvedValue([{ id: "old" }]);
+    const db = { bannedEmail: { findMany } };
+
+    await bannedEmailService.getAll(db as never, { from, limit: 10, to });
+
+    const range = { createdAt: { gte: from, lt: new Date("2025-02-01T00:00:00.000Z") } };
+
+    expect(findMany).toHaveBeenNthCalledWith(1, expect.objectContaining({ where: range }));
+    expect(findMany).toHaveBeenNthCalledWith(2, expect.objectContaining({ where: range }));
+    // The denominator stays the unfiltered table, so "1 of 2" still reads as filtered.
+    expect(findMany).toHaveBeenNthCalledWith(3, expect.objectContaining({ where: {} }));
+    expect(findMany).toHaveBeenCalledTimes(3);
+  });
+
   it("filters a search term after decrypting the rows", async () => {
     const rows = [
       {

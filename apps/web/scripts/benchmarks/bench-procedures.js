@@ -59,12 +59,12 @@ const NAME = ID("REPO_NAME");
 const PROCEDURES = [
   // --- admin: need an admin session, and an admin with no data measures empty results ---
   ["adminAudit.detail", { id: AUDIT }],
-  ["adminAudit.list", { limit: 20, page: 1 }],
+  ["adminAudit.list", { limit: 20 }],
   ["adminAudit.payloadHtml", { id: AUDIT }],
   ["adminReview.detail", { id: PR_AID }],
-  ["adminReview.list", { limit: 20, page: 1 }],
+  ["adminReview.list", { limit: 20 }],
   ["adminUser.getDetail", { id: ADMIN }],
-  ["adminUser.list", { cursor: 1, limit: 20 }],
+  ["adminUser.list", { limit: 20 }],
   ["adminUser.listSessions", { id: ADMIN }],
   ["bannedEmail.list", { limit: 20, page: 1 }],
 
@@ -76,7 +76,7 @@ const PROCEDURES = [
   ["analysis.getAvailableDocs", { aid: AID, repoId: REPO }],
   ["analysis.getStructureMap", { repoId: REPO }],
   ["analysis.listByRepository", { repoId: REPO }],
-  ["analysis.getByRepository", { repoId: REPO }],
+  ["analysis.getByRepository", { limit: 20, repoId: REPO }],
   ["analysis.getRepoConfig", { repoId: REPO }],
   ["analysis.getStagedFiles", { repoId: REPO }],
   ["analysis.getWithGraphLinks", { repoId: REPO }],

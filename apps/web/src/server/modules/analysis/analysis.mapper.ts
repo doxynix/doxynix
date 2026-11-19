@@ -167,8 +167,9 @@ export const analysisMapper = {
     findings: ParsedFinding[],
     changedFiles: Array<PRImpactPayload["changedFiles"][number]>,
     zoneNodeById: Map<string, Pick<TopLevelImpactNode, "label">>,
-    owner?: string,
-    name?: string,
+    owner: string | undefined,
+    name: string | undefined,
+    cacheScope: { analysisId: string; version: string },
   ) {
     const fileByPath = new Map(changedFiles.map((file) => [file.filePath, file] as const));
 
@@ -194,28 +195,32 @@ export const analysisMapper = {
           right.riskLevel - left.riskLevel || left.filePath.localeCompare(right.filePath),
       );
 
-    return Promise.all(
-      sortedFindings.map(async (finding) => {
-        const messageHtml = await unstable_cache(
-          async () =>
-            markdownToHtml({
+    const cacheKey = [owner, name, cacheScope.analysisId, cacheScope.version]
+      .map((part) => part ?? "unknown")
+      .join("-");
+
+    return unstable_cache(
+      async () =>
+        Promise.all(
+          sortedFindings.map(async (finding) => {
+            const messageHtml = await markdownToHtml({
               content: finding.message,
               name,
               owner,
-            }),
-          [`finding-html-${owner ?? "unknown"}-${name ?? "unknown"}-${finding.id}`],
-          {
-            revalidate: false,
-            tags: ["findings", owner ?? "unknown", name ?? "unknown", finding.id],
-          },
-        )();
+            });
 
-        return {
-          ...finding,
-          messageHtml,
-        };
-      }),
-    );
+            return {
+              ...finding,
+              messageHtml,
+            };
+          }),
+        ),
+      [`finding-html-${cacheKey}`],
+      {
+        revalidate: 3600,
+        tags: ["findings", owner ?? "unknown", name ?? "unknown", cacheScope.analysisId],
+      },
+    )();
   },
 
   computeImpactScore(
@@ -277,23 +282,7 @@ export const analysisMapper = {
       }));
     }
 
-    const legacyPaths = new Set<string>();
-    for (const comment of analysis.comments) {
-      legacyPaths.add(normalize(comment.filePath));
-    }
-
-    const findings = this.parsePersistedFindings(analysis);
-    for (const finding of findings) {
-      legacyPaths.add(normalize(finding.file));
-    }
-
-    return [...legacyPaths].map((filePath) => ({
-      additions: 0,
-      deletions: 0,
-      filePath,
-      previousFilePath: null,
-      status: "modified" as const,
-    }));
+    return [];
   },
 
   parsePersistedFindings(analysis: ImpactAnalysis): ParsedFinding[] {
@@ -305,14 +294,7 @@ export const analysisMapper = {
       }));
     }
 
-    return analysis.comments.map((comment) => ({
-      file: normalize(comment.filePath),
-      line: comment.line,
-      message: comment.body,
-      score: comment.riskLevel,
-      title: comment.findingType,
-      type: comment.findingType,
-    }));
+    return [];
   },
 
   resolveMatchedNode(

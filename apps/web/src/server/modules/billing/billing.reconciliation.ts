@@ -59,7 +59,7 @@ function seconds(date: Date | null): null | number {
   return date == null ? null : Math.floor(date.getTime() / 1000);
 }
 
-async function* listAllSubscriptions(stripe: Stripe): AsyncGenerator<Stripe.Subscription> {
+async function* listSubscriptionPages(stripe: Stripe): AsyncGenerator<Stripe.Subscription[]> {
   let startingAfter: string | undefined;
 
   do {
@@ -70,8 +70,8 @@ async function* listAllSubscriptions(stripe: Stripe): AsyncGenerator<Stripe.Subs
       status: "all",
     });
 
-    for (const subscription of page.data) {
-      yield subscription;
+    if (page.data.length > 0) {
+      yield page.data;
     }
 
     startingAfter = page.has_more ? page.data.at(-1)?.id : undefined;
@@ -99,6 +99,161 @@ function differs(local: Record<string, unknown>, subscription: Stripe.Subscripti
     seconds(local.currentPeriodEnd as Date) !== item.current_period_end ||
     local.cancelAtPeriodEnd !== subscription.cancel_at_period_end
   );
+}
+
+const ENTITLEMENT_SELECT = {
+  aiTokensPerMonth: true,
+  analysesPerMonth: true,
+  autoResync: true,
+  historyDays: true,
+  planCode: true,
+  privateReposAllowed: true,
+  prReviews: true,
+  reposLimit: true,
+  sourceSubscriptionId: true,
+  workspaceId: true,
+} as const;
+
+type EntitlementRow = Prisma.WorkspaceEntitlementGetPayload<{ select: typeof ENTITLEMENT_SELECT }>;
+type LocalSubscription = Prisma.BillingSubscriptionGetPayload<Record<string, never>>;
+type CustomerRef = { id: string; workspaceId: string };
+
+// Built once per Stripe page (100 subscriptions), so the maps stay bounded. A key that was not
+// prefetched still falls back to a query: a webhook can project a row while the loop is running.
+// `null` in `customers` is a negative cache entry — the page already knows that customer is unowned.
+type ReconcileContext = {
+  customers: Map<string, CustomerRef | null>;
+  entitlements: Map<string, EntitlementRow>;
+  memberCounts: Map<string, number>;
+  subscriptionIdsByWorkspace: Map<string, Set<string>>;
+  subscriptions: Map<string, LocalSubscription>;
+};
+
+async function buildPageContext(page: Stripe.Subscription[]): Promise<ReconcileContext> {
+  const externalCustomerIds = page.flatMap((subscription) => {
+    const customerId = idOf(subscription.customer);
+
+    return customerId == null ? [] : [customerId];
+  });
+
+  const [customers, subscriptions] = await Promise.all([
+    prisma.billingCustomer.findMany({
+      select: { externalCustomerId: true, id: true, workspaceId: true },
+      where: { externalCustomerId: { in: externalCustomerIds }, provider: STRIPE_PROVIDER },
+    }),
+    prisma.billingSubscription.findMany({
+      where: { externalSubscriptionId: { in: page.map((subscription) => subscription.id) } },
+    }),
+  ]);
+  const workspaceIds = [...new Set(customers.map((customer) => customer.workspaceId))];
+  const [entitlements, memberCounts] = await Promise.all([
+    prisma.workspaceEntitlement.findMany({
+      select: ENTITLEMENT_SELECT,
+      where: { workspaceId: { in: workspaceIds } },
+    }),
+    prisma.workspaceMember.groupBy({
+      _count: { _all: true },
+      by: ["workspaceId"],
+      where: { workspaceId: { in: workspaceIds } },
+    }),
+  ]);
+
+  const countByWorkspace = new Map(memberCounts.map((row) => [row.workspaceId, row._count._all]));
+  const customerByExternalId: Map<string, CustomerRef | null> = new Map(
+    externalCustomerIds.map((externalCustomerId) => [externalCustomerId, null]),
+  );
+  const subscriptionIdsByWorkspace = new Map<string, Set<string>>();
+
+  for (const customer of customers) {
+    customerByExternalId.set(customer.externalCustomerId, {
+      id: customer.id,
+      workspaceId: customer.workspaceId,
+    });
+  }
+
+  for (const local of subscriptions) {
+    const ids = subscriptionIdsByWorkspace.get(local.workspaceId) ?? new Set<string>();
+
+    ids.add(local.externalSubscriptionId);
+    subscriptionIdsByWorkspace.set(local.workspaceId, ids);
+  }
+
+  return {
+    customers: customerByExternalId,
+    entitlements: new Map(
+      entitlements.map((entitlement) => [entitlement.workspaceId, entitlement]),
+    ),
+    // `groupBy` omits workspaces without members; 0 is the truth for those, not a cache miss.
+    memberCounts: new Map(workspaceIds.map((id) => [id, countByWorkspace.get(id) ?? 0])),
+    subscriptionIdsByWorkspace,
+    subscriptions: new Map(subscriptions.map((local) => [local.externalSubscriptionId, local])),
+  };
+}
+
+// A repair rewrites the mirror, the entitlement and the previous holder's `isCurrent`, so later
+// subscriptions on the same page must re-read that workspace instead of trusting the prefetch.
+function forgetWorkspaceState(ctx: ReconcileContext, workspaceId: string): void {
+  ctx.entitlements.delete(workspaceId);
+
+  for (const externalSubscriptionId of ctx.subscriptionIdsByWorkspace.get(workspaceId) ?? []) {
+    ctx.subscriptions.delete(externalSubscriptionId);
+  }
+}
+
+async function customerFor(customerId: string, ctx: ReconcileContext): Promise<null | CustomerRef> {
+  const known = ctx.customers.get(customerId);
+
+  if (known !== undefined) {
+    return known;
+  }
+
+  const found = await prisma.billingCustomer.findFirst({
+    select: { id: true, workspaceId: true },
+    where: { externalCustomerId: customerId, provider: STRIPE_PROVIDER },
+  });
+
+  ctx.customers.set(customerId, found);
+
+  return found;
+}
+
+async function localFor(
+  externalSubscriptionId: string,
+  ctx: ReconcileContext,
+): Promise<LocalSubscription | null> {
+  const known = ctx.subscriptions.get(externalSubscriptionId);
+
+  if (known != null) {
+    return known;
+  }
+
+  return prisma.billingSubscription.findUnique({ where: { externalSubscriptionId } });
+}
+
+async function entitlementFor(
+  workspaceId: string,
+  ctx: ReconcileContext,
+): Promise<EntitlementRow | null> {
+  const known = ctx.entitlements.get(workspaceId);
+
+  if (known != null) {
+    return known;
+  }
+
+  return prisma.workspaceEntitlement.findUnique({
+    select: ENTITLEMENT_SELECT,
+    where: { workspaceId },
+  });
+}
+
+async function memberCountFor(workspaceId: string, ctx: ReconcileContext): Promise<number> {
+  const known = ctx.memberCounts.get(workspaceId);
+
+  if (known != null) {
+    return known;
+  }
+
+  return prisma.workspaceMember.count({ where: { workspaceId } });
 }
 
 async function unownedIssue(externalObjectId: string): Promise<void> {
@@ -165,21 +320,7 @@ async function holderIsTerminal(holder: {
   }
 }
 
-async function entitlementLimitsStale(workspaceId: string): Promise<boolean> {
-  const entitlement = await prisma.workspaceEntitlement.findUnique({
-    select: {
-      aiTokensPerMonth: true,
-      analysesPerMonth: true,
-      autoResync: true,
-      historyDays: true,
-      planCode: true,
-      privateReposAllowed: true,
-      prReviews: true,
-      reposLimit: true,
-    },
-    where: { workspaceId },
-  });
-
+function entitlementLimitsStale(entitlement: EntitlementRow | null): boolean {
   if (entitlement == null) {
     return true;
   }
@@ -205,18 +346,11 @@ async function entitlementLimitsStale(workspaceId: string): Promise<boolean> {
 async function reconcileSubscription(
   subscription: Stripe.Subscription,
   now: Date,
+  ctx: ReconcileContext,
 ): Promise<boolean> {
   const customerId = idOf(subscription.customer);
-  const mapping =
-    customerId == null
-      ? null
-      : await prisma.billingCustomer.findFirst({
-          select: { id: true, workspaceId: true },
-          where: { externalCustomerId: customerId, provider: STRIPE_PROVIDER },
-        });
-  const local = await prisma.billingSubscription.findUnique({
-    where: { externalSubscriptionId: subscription.id },
-  });
+  const mapping = customerId == null ? null : await customerFor(customerId, ctx);
+  const local = await localFor(subscription.id, ctx);
 
   if (mapping == null) {
     // Never guess a tenant: an object without a workspace mapping is fail-closed.
@@ -236,6 +370,7 @@ async function reconcileSubscription(
       now,
       { allowTakeover: takeover },
     );
+    forgetWorkspaceState(ctx, mapping.workspaceId);
 
     return true;
   }
@@ -254,10 +389,7 @@ async function reconcileSubscription(
     return true;
   }
 
-  const entitlement = await prisma.workspaceEntitlement.findUnique({
-    select: { sourceSubscriptionId: true },
-    where: { workspaceId: mapping.workspaceId },
-  });
+  const entitlement = await entitlementFor(mapping.workspaceId, ctx);
   const ownsEntitlement =
     local.isCurrent === true || entitlement?.sourceSubscriptionId === local.id;
 
@@ -284,7 +416,7 @@ async function reconcileSubscription(
   if (
     differs(local, subscription) ||
     local.needsReview ||
-    (ownsEntitlement && (await entitlementLimitsStale(mapping.workspaceId))) ||
+    (ownsEntitlement && entitlementLimitsStale(entitlement)) ||
     slotFreed ||
     takeover
   ) {
@@ -294,15 +426,14 @@ async function reconcileSubscription(
       now,
       { allowTakeover: takeover },
     );
+    forgetWorkspaceState(ctx, mapping.workspaceId);
     changed = true;
   }
 
   // Seats are derived from membership, not from the local mirror: a failed or skipped post-commit
   // sync would otherwise leave the customer paying for a seat that no longer exists.
   const item = itemOf(subscription);
-  const members = await prisma.workspaceMember.count({
-    where: { workspaceId: mapping.workspaceId },
-  });
+  const members = await memberCountFor(mapping.workspaceId, ctx);
 
   if (
     (projected?.ownsAccess ?? ownsEntitlement) &&
@@ -314,6 +445,7 @@ async function reconcileSubscription(
       requestId: `reconcile:${subscription.id}:${now.getTime()}`,
       workspaceId: mapping.workspaceId,
     });
+    forgetWorkspaceState(ctx, mapping.workspaceId);
 
     changed = true;
   }
@@ -327,36 +459,33 @@ async function reconcileMissingLocal(seen: Set<string>, now: Date): Promise<numb
     select: { externalSubscriptionId: true, workspaceId: true },
     where: { isCurrent: true },
   });
+  const drifted = locals.filter((local) => !seen.has(local.externalSubscriptionId));
+
+  if (drifted.length === 0) {
+    return 0;
+  }
+
   let mismatches = 0;
+  const present: Array<{
+    customerId: null | string;
+    externalSubscriptionId: string;
+    subscription: Stripe.Subscription;
+    workspaceId: string;
+  }> = [];
 
-  for (const local of locals) {
-    if (seen.has(local.externalSubscriptionId)) {
-      continue;
-    }
-
+  for (const local of drifted) {
     try {
       // A direct retrieve separates a pagination gap from a genuinely deleted subscription.
       const subscription = await stripe.subscriptions.retrieve(local.externalSubscriptionId, {
         expand: ["latest_invoice"],
       });
-      const customerId = idOf(subscription.customer);
-      const mapping =
-        customerId == null
-          ? null
-          : await prisma.billingCustomer.findFirst({
-              select: { id: true },
-              where: { externalCustomerId: customerId, provider: STRIPE_PROVIDER },
-            });
 
-      if (mapping != null) {
-        await repair(
-          subscription,
-          { billingCustomerId: mapping.id, customerId, workspaceId: local.workspaceId },
-          now,
-        );
-      }
-
-      mismatches += 1;
+      present.push({
+        customerId: idOf(subscription.customer),
+        externalSubscriptionId: local.externalSubscriptionId,
+        subscription,
+        workspaceId: local.workspaceId,
+      });
     } catch (error) {
       if (!isMissingResource(error)) {
         throw error;
@@ -382,6 +511,40 @@ async function reconcileMissingLocal(seen: Set<string>, now: Date): Promise<numb
 
       mismatches += 1;
     }
+  }
+
+  if (present.length === 0) {
+    return mismatches;
+  }
+
+  // The customer mapping is only known after the Stripe reads, so it is resolved once for the whole
+  // drifted set instead of once per subscription.
+  const customers = await prisma.billingCustomer.findMany({
+    select: { externalCustomerId: true, id: true },
+    where: {
+      externalCustomerId: {
+        in: present.flatMap((item) => (item.customerId == null ? [] : [item.customerId])),
+      },
+      provider: STRIPE_PROVIDER,
+    },
+  });
+  const customerIdByExternalId = new Map(
+    customers.map((customer) => [customer.externalCustomerId, customer.id]),
+  );
+
+  for (const item of present) {
+    const billingCustomerId =
+      item.customerId == null ? undefined : customerIdByExternalId.get(item.customerId);
+
+    if (billingCustomerId != null) {
+      await repair(
+        item.subscription,
+        { billingCustomerId, customerId: item.customerId, workspaceId: item.workspaceId },
+        now,
+      );
+    }
+
+    mismatches += 1;
   }
 
   return mismatches;
@@ -537,12 +700,16 @@ export async function runStripeReconciliation(
     const stripe = getStripeClient();
     const seen = new Set<string>();
 
-    for await (const subscription of listAllSubscriptions(stripe)) {
-      checkedSubscriptions += 1;
-      seen.add(subscription.id);
+    for await (const page of listSubscriptionPages(stripe)) {
+      const context = await buildPageContext(page);
 
-      if (await reconcileSubscription(subscription, now)) {
-        mismatchCount += 1;
+      for (const subscription of page) {
+        checkedSubscriptions += 1;
+        seen.add(subscription.id);
+
+        if (await reconcileSubscription(subscription, now, context)) {
+          mismatchCount += 1;
+        }
       }
     }
 

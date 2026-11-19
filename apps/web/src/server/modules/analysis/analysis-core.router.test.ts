@@ -9,6 +9,7 @@ const EXPECTED = [
   "getDetailedMetrics",
   "getHistory",
   "getLatest",
+  "getVersionRef",
   "getWorkspace",
 ];
 

@@ -1,12 +1,14 @@
-import { ApiKeyScope, MessageCode } from "@doxynix/shared";
+import { ApiKeyScope, isApiKeyDead, MessageCode } from "@doxynix/shared";
+import type { Prisma } from "@prisma/client";
 
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { AppError } from "@/server/core/api-error";
-import type { DbClient } from "@/server/core/db";
+import { type DbClient, withTransaction } from "@/server/core/db";
 import { realtimeService } from "@/server/core/realtime";
 import { handlePrismaError } from "@/server/utils/handle-error";
 import { extractPayloadFromKey, generateApiKey, getApiKeyHash } from "@/server/utils/hash";
+import { keysetArgs, orderWithTiebreak, splitKeysetPage } from "@/server/utils/pagination";
 
 type CreateKeyInput = {
   description?: string;
@@ -23,25 +25,57 @@ type UpdateKeyInput = {
   scopes?: ApiKeyScope[];
 };
 
+type ListKeysInput = {
+  cursor?: null | string;
+  limit: number;
+};
+
 const ROTATION_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
 
-export function isApiKeyDead(
-  key: {
-    expiresAt: Date | null;
-    revoked: boolean;
-    revokedAfter: Date | null;
-  },
-  now: number,
-): boolean {
-  if (key.revokedAfter != null) {
-    return key.revokedAfter.getTime() <= now;
-  }
+const API_KEY_SELECT = {
+  createdAt: true,
+  description: true,
+  expiresAt: true,
+  id: true,
+  lastUsed: true,
+  name: true,
+  prefix: true,
+  revoked: true,
+  revokedAfter: true,
+  scopes: true,
+  updatedAt: true,
+} satisfies Prisma.ApiKeySelect;
 
-  if (key.revoked) {
-    return true;
-  }
+// Mirrors `isApiKeyDead` in SQL: a key with an open grace window is live, otherwise revoked or
+// expired means dead. Keep the two predicates in step — the unit test walks their truth table.
+function activeKeyWhere(now: Date): Prisma.ApiKeyWhereInput {
+  return {
+    OR: [
+      { revokedAfter: { gt: now } },
+      {
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+        revoked: false,
+        revokedAfter: null,
+      },
+    ],
+  };
+}
 
-  return key.expiresAt != null && key.expiresAt.getTime() <= now;
+function archivedKeyWhere(now: Date): Prisma.ApiKeyWhereInput {
+  return {
+    OR: [
+      { revokedAfter: { lte: now } },
+      { revoked: true, revokedAfter: null },
+      { expiresAt: { lte: now }, revoked: false, revokedAfter: null },
+    ],
+  };
+}
+
+function normalizeKey(key: Prisma.ApiKeyGetPayload<{ select: typeof API_KEY_SELECT }>) {
+  return {
+    ...key,
+    scopes: key.scopes.length > 0 ? key.scopes : [ApiKeyScope.FULL],
+  };
 }
 
 export const apiKeyService = {
@@ -87,40 +121,40 @@ export const apiKeyService = {
     return { key: fullKey };
   },
 
-  async list(db: DbClient, workspaceId: string) {
-    const allKeys = await db.apiKey.findMany({
-      orderBy: { createdAt: "desc" },
-      select: {
-        createdAt: true,
-        description: true,
-        expiresAt: true,
-        id: true,
-        lastUsed: true,
-        name: true,
-        prefix: true,
-        revoked: true,
-        revokedAfter: true,
-        scopes: true,
-        updatedAt: true,
-      },
-      where: { workspaceId },
+  async list(db: DbClient, workspaceId: string, input: ListKeysInput) {
+    const { cursor, limit } = input;
+    const now = new Date();
+
+    const rows = await db.apiKey.findMany({
+      ...keysetArgs(cursor, limit),
+      orderBy: orderWithTiebreak("createdAt", "desc"),
+      select: API_KEY_SELECT,
+      where: { workspaceId, ...activeKeyWhere(now) },
     });
 
-    const now = Date.now();
-
-    const isRetired = (k: (typeof allKeys)[number]) =>
-      isApiKeyDead(
-        { expiresAt: k.expiresAt, revoked: k.revoked, revokedAfter: k.revokedAfter },
-        now,
-      );
-    const normalize = (k: (typeof allKeys)[number]) => ({
-      ...k,
-      scopes: k.scopes.length > 0 ? k.scopes : [ApiKeyScope.FULL],
-    });
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
 
     return {
-      active: allKeys.filter((k) => !isRetired(k)).map(normalize),
-      archived: allKeys.filter(isRetired).map(normalize),
+      items: items.map(normalizeKey),
+      meta: { hasNextPage, nextCursor },
+    };
+  },
+
+  async listArchived(db: DbClient, workspaceId: string, input: ListKeysInput) {
+    const { cursor, limit } = input;
+
+    const rows = await db.apiKey.findMany({
+      ...keysetArgs(cursor, limit),
+      orderBy: orderWithTiebreak("createdAt", "desc"),
+      select: API_KEY_SELECT,
+      where: { workspaceId, ...archivedKeyWhere(new Date()) },
+    });
+
+    const { hasNextPage, items, nextCursor } = splitKeysetPage(rows, limit);
+
+    return {
+      items: items.map(normalizeKey),
+      meta: { hasNextPage, nextCursor },
     };
   },
 
@@ -184,8 +218,7 @@ export const apiKeyService = {
     };
 
     // Create-then-revoke must be atomic: a crash between the two would leave the old key live forever.
-    const { fullKey, replacement } =
-      "$transaction" in db ? await db.$transaction(rotateKey) : await rotateKey(db);
+    const { fullKey, replacement } = await withTransaction(db, rotateKey);
 
     void realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.apiKeyUpdated, {});
 

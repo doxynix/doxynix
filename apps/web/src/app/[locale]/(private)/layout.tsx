@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { cookies, headers } from "next/headers";
 import { unauthorized } from "next/navigation";
 
-import { REPO_LIST_PAGE_SIZE } from "@/shared/config/repos";
+import { REPO_LIST_PAGE_SIZE } from "@/shared/config/pagination";
 import { SidebarInset, SidebarProvider } from "@/shared/ui/core/sidebar";
 import { SentryUserIdentificator } from "@/shared/ui/kit/sentry-user-identificator";
 

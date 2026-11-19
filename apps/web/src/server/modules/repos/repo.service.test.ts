@@ -358,6 +358,68 @@ describe("repoService.getAll page clamping", () => {
   });
 });
 
+describe("repoService.getAll date range", () => {
+  const from = new Date("2026-01-01T00:00:00.000Z");
+  const to = new Date("2026-01-31T00:00:00.000Z");
+  const afterEndDay = new Date("2026-02-01T00:00:00.000Z");
+  const rangeWhere = { createdAt: { gte: from, lt: afterEndDay }, workspaceId: WORKSPACE_ID };
+
+  function mockCounts(findMany: ReturnType<typeof createRepoDbMock>["findMany"]) {
+    findMany
+      .mockResolvedValueOnce([]) // page
+      .mockResolvedValueOnce([{ id: "f1" }]) // filtered count
+      .mockResolvedValueOnce([{ id: "u1" }, { id: "u2" }]); // unfiltered count
+  }
+
+  it("should apply the date filter to the list and to both counts", async () => {
+    const { db, findMany } = createRepoDbMock();
+    mockCounts(findMany);
+
+    const result = await repoService.getAll(db, { ...REPO_INPUT, from, to }, WORKSPACE_ID);
+
+    expect(findMany).toHaveBeenNthCalledWith(1, expect.objectContaining({ where: rangeWhere }));
+    expect(findMany).toHaveBeenNthCalledWith(2, expect.objectContaining({ where: rangeWhere }));
+    expect(findMany).toHaveBeenCalledTimes(3);
+    expect(result.meta.filteredCount).toBe(1);
+    expect(result.meta.totalCount).toBe(2);
+  });
+
+  // The range used to be read off `updatedAt`, which no other list filters on, while `getAll`
+  // dropped every date field on the floor: the toolbar changed the URL and nothing else.
+  it("should filter on createdAt rather than updatedAt", async () => {
+    const { db, findMany } = createRepoDbMock();
+
+    await repoService.getAll(db, { ...REPO_INPUT, from, to }, WORKSPACE_ID);
+
+    const where = findMany.mock.calls[0]?.[0]?.where as Record<string, unknown> | undefined;
+    expect(where).toHaveProperty("createdAt");
+    expect(where).not.toHaveProperty("updatedAt");
+  });
+
+  it("should not treat a date-only filter as unfiltered", async () => {
+    const { db, findMany } = createRepoDbMock();
+    mockCounts(findMany);
+
+    await repoService.getAll(db, { ...REPO_INPUT, from, to }, WORKSPACE_ID);
+
+    expect(findMany).toHaveBeenCalledTimes(3);
+  });
+
+  // The owner page passes `owner` on every request, so an owner-derived denominator made
+  // "42 repos by acme" read as "42 repos in total". The denominator is the workspace.
+  it("should count the whole workspace as the total on the owner page", async () => {
+    const { db, findMany } = createRepoDbMock();
+    mockCounts(findMany);
+
+    await repoService.getAll(db, { ...REPO_INPUT, owner: "acme" }, WORKSPACE_ID);
+
+    expect(findMany).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({ where: { workspaceId: WORKSPACE_ID } }),
+    );
+  });
+});
+
 describe("repoService.getSlim keyset", () => {
   it("should page by cursor and not by skip", async () => {
     const { db, findMany } = createRepoDbMock();

@@ -1,0 +1,93 @@
+import { ChatRoleSchema, CursorMetaSchema } from "@doxynix/shared";
+import * as z from "zod";
+
+import { cursorPageSchema } from "@/server/utils/pagination";
+
+import type { SessionMessage, SessionMessagePart } from "./agent.mapper";
+
+export const SessionMessageSchema: z.ZodType<SessionMessage> = z.object({
+  createdAt: z.date(),
+  id: z.uuid(),
+  parts: z.array(z.custom<SessionMessagePart>()),
+  role: ChatRoleSchema,
+});
+
+export const GetSessionHistoryOutputSchema = z.object({
+  items: z.array(SessionMessageSchema),
+  meta: CursorMetaSchema,
+});
+
+export type GetSessionHistoryOutput = z.infer<typeof GetSessionHistoryOutputSchema>;
+
+export const SessionListItemSchema = z.object({
+  createdAt: z.date(),
+  id: z.uuid(),
+  repo: z
+    .object({
+      name: z.string(),
+      owner: z.string(),
+    })
+    .nullable(),
+  title: z.string(),
+  updatedAt: z.date(),
+});
+
+export type SessionListItem = z.infer<typeof SessionListItemSchema>;
+
+export const ListSessionsOutputSchema = z.object({
+  items: z.array(SessionListItemSchema),
+  meta: CursorMetaSchema,
+});
+
+export type ListSessionsOutput = z.infer<typeof ListSessionsOutputSchema>;
+
+export const GetSessionHistoryInputSchema = cursorPageSchema(100).extend({
+  sessionId: z.uuid(),
+});
+
+export type GetSessionHistoryInput = z.infer<typeof GetSessionHistoryInputSchema>;
+
+export const ListSessionsInputSchema = cursorPageSchema(50).extend({
+  currentRepo: z
+    .object({
+      name: z.string(),
+      owner: z.string(),
+    })
+    .optional(),
+});
+
+export type ListSessionsInput = z.infer<typeof ListSessionsInputSchema>;
+
+export const CreateSessionInputSchema = z.object({
+  repoId: z.uuid().optional().describe("Public repo UUID, if chat in project"),
+  title: z.string().default("New Chat"),
+});
+
+export type CreateSessionInput = z.infer<typeof CreateSessionInputSchema>;
+
+export const CreateSessionOutputSchema = z.object({
+  createdAt: z.date(),
+  id: z.uuid(),
+  title: z.string(),
+  updatedAt: z.date(),
+});
+
+export type CreateSessionOutput = z.infer<typeof CreateSessionOutputSchema>;
+
+export const DeleteSessionInputSchema = z.object({ sessionId: z.uuid() });
+
+export type DeleteSessionInput = z.infer<typeof DeleteSessionInputSchema>;
+
+export const UpdateSessionInputSchema = z.object({
+  sessionId: z.uuid(),
+  title: z.string().trim().min(1).max(200),
+});
+
+export type UpdateSessionInput = z.infer<typeof UpdateSessionInputSchema>;
+
+export const UpdateSessionOutputSchema = z.object({
+  id: z.uuid(),
+  title: z.string(),
+});
+
+export type UpdateSessionOutput = z.infer<typeof UpdateSessionOutputSchema>;
