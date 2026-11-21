@@ -186,7 +186,7 @@
     "picomatch": "4.0.7",
     "pino": "10.4.0",
     "posthog-js": "1.450.0",
-    "posthog-node": "5.74.0",
+    "posthog-node": "6.0.4",
     "qrcode.react": "4.2.0",
     "react": "catalog:",
     "react-arborist": "4.0.1",
