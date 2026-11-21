@@ -444,8 +444,8 @@ export function Agent() {
   );
 
   const insets = expanded
-    ? { bottom: 0, right: 0, top: isRepoOwnerPage ? 126 : 86 }
-    : { bottom: 0, right: 0, top: "calc(100vh - 740px)" };
+    ? { bottom: 16, right: 16, top: isRepoOwnerPage ? 126 : 86 }
+    : { bottom: 20, right: 20, top: "calc(100vh - 740px)" };
 
   return (
     <AnimatePresence>
@@ -462,7 +462,7 @@ export function Agent() {
             aria-label={t("assistant_name")}
             className="flex h-full w-full"
           >
-            <div className="flex h-full w-full flex-col overflow-hidden rounded-tl-2xl border-border border-t border-l bg-card">
+            <div className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-border bg-card">
               <ResizablePanelGroup
                 className="flex h-full"
                 defaultLayout={defaultLayout}
