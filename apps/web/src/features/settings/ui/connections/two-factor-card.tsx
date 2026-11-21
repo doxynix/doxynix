@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ShieldAlert, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -47,6 +47,26 @@ export function TwoFactorCard() {
   const [backupCodes, setBackupCodes] = useState<null | string[]>(null);
   const [totpUri, setTotpUri] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const resetTimer = useRef<null | number>(null);
+
+  const handleOpenChange = (open: boolean) => {
+    setIsSetupOpen(open);
+
+    if (open) {
+      if (resetTimer.current != null) {
+        window.clearTimeout(resetTimer.current);
+        resetTimer.current = null;
+      }
+      return;
+    }
+
+    resetTimer.current = window.setTimeout(() => {
+      setBackupCodes(null);
+      setVerificationCode("");
+      setTotpUri("");
+      resetTimer.current = null;
+    }, 250);
+  };
 
   const handleOpenSetup = async () => {
     setIsSetupOpen(true);
@@ -168,19 +188,13 @@ export function TwoFactorCard() {
             <ShieldAlert className="size-5 text-muted-foreground" />
           )
         }
-        status={isEnabled ? t("settings_auth_status_connected") : undefined}
+        status={isEnabled ? t("settings_auth_status_connected") : t("settings_pr_style_off")}
+        statusTone={isEnabled ? "success" : "warning"}
         title={t("settings_2fa_title")}
       />
 
       <Dialog
-        onOpenChange={(open) => {
-          setIsSetupOpen(open);
-          if (!open) {
-            setBackupCodes(null);
-            setVerificationCode("");
-            setTotpUri("");
-          }
-        }}
+        onOpenChange={handleOpenChange}
         open={isSetupOpen}
       >
         <DialogContent
@@ -188,7 +202,7 @@ export function TwoFactorCard() {
           onEscapeKeyDown={(e) => backupCodes != null && e.preventDefault()}
           onPointerDownOutside={(e) => backupCodes != null && e.preventDefault()}
         >
-          <DialogHeader>
+          <DialogHeader className="pr-12">
             <DialogTitle>{t("settings_2fa_setup_dialog_title")}</DialogTitle>
             <DialogDescription>{t("settings_2fa_setup_dialog_desc")}</DialogDescription>
           </DialogHeader>

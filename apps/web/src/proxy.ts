@@ -10,7 +10,12 @@ import { REDIS_CONFIG } from "./server/utils/redis";
 import { generateRequestId, getIp, sanitizeRequestId } from "./server/utils/request-context";
 import { routing } from "./shared/i18n/routing";
 import { getCookieName } from "./shared/lib/cookies";
-import { isBypassRoute, resolveDocsPath, resolvePageRedirect } from "./shared/lib/proxy-routing";
+import {
+  buildRateLimitBody,
+  isBypassRoute,
+  resolveDocsPath,
+  resolvePageRedirect,
+} from "./shared/lib/proxy-routing";
 
 const cookieName = getCookieName();
 
@@ -35,6 +40,7 @@ async function handleRateLimitAndSize(
   request: NextRequest,
   pathname: string,
   ip: string,
+  requestId: string,
 ): Promise<NextResponse | null> {
   if (isBypassRoute(pathname)) {
     return null;
@@ -49,21 +55,15 @@ async function handleRateLimitAndSize(
       const { limit, remaining, reset, success } = await ratelimit.limit(identifier);
 
       if (!success) {
-        return new NextResponse(
-          JSON.stringify({
-            error: "Too Many Requests",
-            message: "You're sending requests too often. Please wait.",
-          }),
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "X-RateLimit-Limit": limit.toString(),
-              "X-RateLimit-Remaining": remaining.toString(),
-              "X-RateLimit-Reset": reset.toString(),
-            },
-            status: 429,
+        return new NextResponse(JSON.stringify(buildRateLimitBody(pathname, requestId)), {
+          headers: {
+            "Content-Type": "application/json",
+            "X-RateLimit-Limit": limit.toString(),
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString(),
           },
-        );
+          status: 429,
+        });
       }
     } catch (error) {
       appLogger.error({ error, msg: "Global rate limiter experienced an error. Bypassing." });
@@ -92,7 +92,7 @@ async function handleApiRequest(
 ): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
 
-  const rateLimitResponse = await handleRateLimitAndSize(request, pathname, ip);
+  const rateLimitResponse = await handleRateLimitAndSize(request, pathname, ip, requestId);
   if (rateLimitResponse) {
     return attachRequestMeta(rateLimitResponse, requestId);
   }

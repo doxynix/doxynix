@@ -19,10 +19,10 @@ export function ArchitecturePreview() {
   return (
     <div className="flex h-full flex-col gap-2 overflow-hidden rounded-xl border bg-background/60 p-3">
       <div className="flex items-center justify-between gap-2">
-        <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-wide">
+        <span className="font-medium text-2xs text-muted-foreground uppercase">
           {t("preview_architecture")}
         </span>
-        <span className="rounded-full border bg-card px-2 py-0.5 text-[10px] text-muted-foreground">
+        <span className="rounded-full border bg-card px-2 py-0.5 text-2xs text-muted-foreground">
           {t("preview_modules", { count: 142, layers: 6 })}
         </span>
       </div>
@@ -35,7 +35,7 @@ export function ArchitecturePreview() {
       />
 
       <div className="flex items-center justify-end">
-        <span className="rounded-full border bg-card px-2 py-0.5 text-[10px] text-muted-foreground">
+        <span className="rounded-full border bg-card px-2 py-0.5 text-2xs text-muted-foreground">
           {t("preview_health", { score: 84 })}
         </span>
       </div>

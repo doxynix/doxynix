@@ -56,7 +56,7 @@ export default async function AnalyzePage({ params, searchParams }: Readonly<Rep
 
   return (
     <HydrateClient>
-      <div className="mx-auto px-4 py-6">
+      <div className="mx-auto flex min-h-0 w-full flex-col px-4 py-6 lg:h-[var(--repo-workspace-height)]">
         {isRunning ? (
           <RepoAnalysisLive
             accessToken={lastAnalysis.publicAccessToken ?? ""}
@@ -69,7 +69,7 @@ export default async function AnalyzePage({ params, searchParams }: Readonly<Rep
             repoId={repo.id}
           />
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex min-h-0 flex-1 flex-col gap-4">
             {isOnboarding && (
               <Alert>
                 <Sparkles />

@@ -123,3 +123,32 @@ describe("userMapper.toAdminDetail", () => {
     expect(mapped.id).toBe("018f0000-0000-7000-8000-0000000000b2");
   });
 });
+
+type LinkedAccountRecord = Parameters<typeof userMapper.toLinkedAccount>[0];
+
+function makeLinkedAccount(overrides?: Partial<LinkedAccountRecord>): LinkedAccountRecord {
+  return {
+    accountId: "123456",
+    email: "octocat@github.example",
+    image: null,
+    name: "octocat",
+    providerId: "github",
+    ...overrides,
+  };
+}
+
+describe("userMapper.toLinkedAccount", () => {
+  it("keeps the provider email when present", () => {
+    expect(userMapper.toLinkedAccount(makeLinkedAccount()).email).toBe("octocat@github.example");
+  });
+
+  it("falls back to the user's email for legacy rows without one", () => {
+    expect(
+      userMapper.toLinkedAccount(makeLinkedAccount({ email: null }), "user@example.com").email,
+    ).toBe("user@example.com");
+  });
+
+  it("returns null when neither email exists", () => {
+    expect(userMapper.toLinkedAccount(makeLinkedAccount({ email: null }), null).email).toBeNull();
+  });
+});

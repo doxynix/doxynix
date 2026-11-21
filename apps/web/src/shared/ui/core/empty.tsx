@@ -35,7 +35,7 @@ const emptyMediaVariants = cva(
     variants: {
       variant: {
         default: "bg-transparent",
-        icon: "flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground [&_svg:not([class*='size-'])]:size-6",
+        icon: "flex size-10 shrink-0 items-center justify-center rounded-tile bg-muted text-foreground [&_svg:not([class*='size-'])]:size-6",
       },
     },
   },
@@ -59,7 +59,7 @@ function EmptyMedia({
 function EmptyTitle({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
-      className={cn("font-medium text-lg tracking-tight", className)}
+      className={cn("font-medium text-lg", className)}
       data-slot="empty-title"
       {...props}
     />

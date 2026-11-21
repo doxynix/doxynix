@@ -4,7 +4,7 @@ import type { Route } from "next";
 import { Book, SlashIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { LOCALES, type Locale } from "@/shared/config/locales";
+import { isLocale } from "@/shared/config/locales";
 import { userNavMenu } from "@/shared/config/navigation";
 import { useNavLabels } from "@/shared/config/navigation-labels";
 import { Link, usePathname } from "@/shared/i18n/navigation";
@@ -30,7 +30,7 @@ import { NotificationsNav } from "./notifications-nav";
 function stripLocalePrefix(pathname: string) {
   const segments = pathname.split("/").filter(Boolean);
   const first = segments[0];
-  if (first != null && LOCALES.includes(first as Locale)) {
+  if (first != null && isLocale(first)) {
     segments.shift();
   }
   return `/${segments.join("/")}`;

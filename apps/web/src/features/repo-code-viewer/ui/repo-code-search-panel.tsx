@@ -147,11 +147,11 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
               onClick={() => toggleOption("regexp")}
               tooltipText={t("repo_code_regexp")}
             >
-              <span className="font-bold text-[10px] leading-none">.*</span>
+              <span className="font-bold text-2xs leading-none">.*</span>
             </RepoCodeActionButton>
           </kbd>
         </div>
-        <p className="pointer-events-none rounded bg-muted px-1.5 py-0.5 font-medium text-[10px] text-muted-foreground">
+        <p className="pointer-events-none rounded bg-muted px-1.5 py-0.5 font-medium text-2xs text-muted-foreground">
           {stats.totalMatches > 0
             ? t("repo_code_match_of", { current: stats.currentMatch, total: stats.totalMatches })
             : t("repo_code_no_results")}

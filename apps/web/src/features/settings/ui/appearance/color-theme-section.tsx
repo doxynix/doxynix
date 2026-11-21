@@ -8,8 +8,9 @@ import { THEMES, type Theme } from "@/shared/lib/appearance-preferences";
 import { cn } from "@/shared/lib/cn";
 import { useAppearancePreferences } from "@/shared/lib/hooks/use-appearance-preferences";
 import { useMounted } from "@/shared/lib/hooks/use-mounted";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Label } from "@/shared/ui/core/label";
+
+import { AppearanceSection } from "./appearance-section";
 
 // Swatch tints are exaggerated (~2x the real interface chroma) so the theme reads at thumbnail size
 const THEME_SWATCHES: Record<Theme, { ch: number; hue: number }> = {
@@ -123,14 +124,14 @@ function ThemeSwatch({
             />
             <div className="grid flex-1 grid-cols-2 gap-1">
               <div
-                className="rounded-[2px]"
+                className="rounded-2xs"
                 style={{
                   backgroundColor: palette.card,
                   boxShadow: `inset 0 0 0 1px ${palette.cardRing}`,
                 }}
               />
               <div
-                className="rounded-[2px]"
+                className="rounded-2xs"
                 style={{
                   backgroundColor: palette.card,
                   boxShadow: `inset 0 0 0 1px ${palette.cardRing}`,
@@ -177,32 +178,29 @@ export function ColorThemeSection() {
   const activeTheme = mounted ? preferences.theme : undefined;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("settings_appearance_color_theme_title")}</CardTitle>
-        <CardDescription>{t("settings_appearance_color_theme_desc")}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {THEMES.map((theme) => {
-            const swatch = THEME_SWATCHES[theme];
-            return (
-              <ThemeSwatch
-                ch={swatch.ch}
-                hue={swatch.hue}
-                key={theme}
-                label={labelByTheme[theme]}
-                onSelect={() => {
-                  update({ theme });
-                }}
-                selected={activeTheme === theme}
-                theme={theme}
-                tone={tone}
-              />
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
+    <AppearanceSection
+      description={t("settings_appearance_color_theme_desc")}
+      title={t("settings_appearance_color_theme_title")}
+    >
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {THEMES.map((theme) => {
+          const swatch = THEME_SWATCHES[theme];
+          return (
+            <ThemeSwatch
+              ch={swatch.ch}
+              hue={swatch.hue}
+              key={theme}
+              label={labelByTheme[theme]}
+              onSelect={() => {
+                update({ theme });
+              }}
+              selected={activeTheme === theme}
+              theme={theme}
+              tone={tone}
+            />
+          );
+        })}
+      </div>
+    </AppearanceSection>
   );
 }

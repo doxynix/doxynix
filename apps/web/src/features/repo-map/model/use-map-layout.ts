@@ -64,10 +64,9 @@ export function createLayoutEdges(sourceEdges: readonly RepoMapEdgeInput[]): Edg
       labelBgPadding: [4, 2],
       labelBgStyle: { fill: "var(--background)", fillOpacity: 0.8 },
       labelStyle: {
-        fill: isCycle || isRisk ? "var(--status-error)" : "#888",
+        fill: isCycle || isRisk ? "var(--status-error)" : "var(--muted-foreground)",
         fontSize: 9,
         fontWeight: 600,
-        textTransform: "uppercase",
       },
       selectable: true,
       source: e.source,

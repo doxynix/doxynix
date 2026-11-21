@@ -320,15 +320,17 @@ export function AgentMessageRow({
           )}
 
           {!isAssistant && !isEditing && (
-            <AppButton
-              aria-label={tCommon("edit")}
-              className="opacity-0 duration-300 group-hover:opacity-100"
-              onClick={() => onEdit(fullText)}
-              size="icon"
-              variant="ghost"
-            >
-              <Pencil />
-            </AppButton>
+            <AppTooltip content={tCommon("edit")}>
+              <AppButton
+                aria-label={tCommon("edit")}
+                className="opacity-0 duration-300 group-hover:opacity-100 focus-visible:opacity-100"
+                onClick={() => onEdit(fullText)}
+                size="icon"
+                variant="ghost"
+              >
+                <Pencil />
+              </AppButton>
+            </AppTooltip>
           )}
         </MessageFooter>
       </MessageContent>

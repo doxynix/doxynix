@@ -11,7 +11,7 @@ export async function CTASection() {
     <section className="container relative mx-auto flex w-full flex-col items-center justify-center overflow-hidden">
       <BackgroundBeamsWithCollision className="h-full py-24">
         <div className="flex flex-col items-center justify-center gap-6 px-4 text-center">
-          <h2 className="font-bold text-4xl tracking-tight md:text-6xl">
+          <h2 className="font-bold text-4xl md:text-6xl">
             {t("section_cta_title_1")} <br /> {t("section_cta_title_2")}
           </h2>
           <p className="mx-auto text-muted-foreground">{t("section_cta_desc")}</p>

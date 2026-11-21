@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CircleAlert, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -10,7 +11,7 @@ import { Link, useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
 import { setWorkspaceCookie } from "@/shared/lib/workspace-cookie";
 import { AppButton } from "@/shared/ui/core/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { Card } from "@/shared/ui/core/card";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { ActionErrorAlert } from "@/shared/ui/kit/action-error-alert";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
@@ -60,16 +61,21 @@ export function InvitePageCard({ token }: Readonly<Props>) {
 
   if (!isValid) {
     return (
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>{t("invite_page_title")}</CardTitle>
-          <CardDescription>{t("invite_page_invalid")}</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <Card className="w-full max-w-md gap-0 p-6">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="flex size-10 items-center justify-center rounded-tile bg-surface-hover text-muted-foreground">
+            <CircleAlert className="size-5" />
+          </div>
+
+          <div>
+            <p className="font-semibold">{t("invite_page_title")}</p>
+            <p className="mt-1 text-muted-foreground text-sm">{t("invite_page_invalid")}</p>
+          </div>
+
           <AppButton asChild>
             <Link href={isAuthenticated ? "/dashboard" : "/auth"}>{tCommon("back_home")}</Link>
           </AppButton>
-        </CardContent>
+        </div>
       </Card>
     );
   }
@@ -77,12 +83,19 @@ export function InvitePageCard({ token }: Readonly<Props>) {
   const signInHref = `/auth?next=${encodeURIComponent(`/invite/${token}`)}`;
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>{t("invite_page_title")}</CardTitle>
-        <CardDescription>{t("invite_page_desc", { workspace: workspaceName })}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+    <Card className="w-full max-w-md gap-0 p-6">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <div className="flex size-10 items-center justify-center rounded-tile bg-info/10 text-info">
+          <UserPlus className="size-5" />
+        </div>
+
+        <div>
+          <p className="font-semibold">{t("invite_page_title")}</p>
+          <p className="mt-1 text-muted-foreground text-sm">
+            {t("invite_page_desc", { workspace: workspaceName })}
+          </p>
+        </div>
+
         {error != null && (
           <ActionErrorAlert
             error={error}
@@ -92,21 +105,18 @@ export function InvitePageCard({ token }: Readonly<Props>) {
 
         {isAuthenticated ? (
           <LoadingButton
-            className="w-fit gap-2"
+            className="gap-2"
             isLoading={accept.isPending}
             onClick={() => accept.mutate({ token })}
           >
             {t("invite_page_accept")}
           </LoadingButton>
         ) : (
-          <AppButton
-            asChild
-            className="w-fit"
-          >
+          <AppButton asChild>
             <Link href={signInHref}>{t("invite_page_sign_in")}</Link>
           </AppButton>
         )}
-      </CardContent>
+      </div>
     </Card>
   );
 }

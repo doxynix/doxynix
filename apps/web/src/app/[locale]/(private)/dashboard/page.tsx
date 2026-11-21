@@ -80,7 +80,7 @@ export default async function DashboardPage({ searchParams }: Readonly<PageProps
         <div className="flex flex-col gap-8 lg:col-span-8">
           <section className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg">{t("recent_repositories")}</h2>
+              <h2 className="font-semibold text-lg">{t("recent_repositories")}</h2>
               <CreateRepoButton />
             </div>
             <Suspense
@@ -88,6 +88,7 @@ export default async function DashboardPage({ searchParams }: Readonly<PageProps
                 <RepoListSkeleton
                   count={DASHBOARD_REPO_LIMIT}
                   showTotalCount={false}
+                  variant="brief"
                 />
               }
             >
@@ -156,6 +157,7 @@ async function RepoListSection({ query }: Readonly<{ query: RepoQuery }>) {
     <HydrateClient>
       <RepoListContainer
         config={{
+          cardVariant: "brief",
           limit: DASHBOARD_REPO_LIMIT,
           showPagination: false,
           showTotalCount: false,

@@ -8,6 +8,7 @@ import { AppButton } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
+import { StatusBadge } from "@/shared/ui/kit/status-badge";
 
 import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
 import { repoStatusConfig } from "@/entities/repo/model/repo-status-config";
@@ -55,12 +56,7 @@ export function RepoDetailsHeader({ repo }: Readonly<Props>) {
           >
             {t(visibility.labelKey)}
           </AppBadge>
-          <AppBadge
-            className={status.color}
-            variant="outline"
-          >
-            {t(status.labelKey)}
-          </AppBadge>
+          <StatusBadge tone={status.tone}>{t(status.labelKey)}</StatusBadge>
           <PrDraftSheet repoId={repo.id} />
           <AppButton
             asChild

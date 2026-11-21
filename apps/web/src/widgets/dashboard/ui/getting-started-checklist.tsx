@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AlertCircle, CheckCircle2, Circle } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -10,7 +10,7 @@ import { useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
 import { AppButton } from "@/shared/ui/core/button";
-import { Card, CardContent } from "@/shared/ui/core/card";
+import { Card } from "@/shared/ui/core/card";
 import { Spinner } from "@/shared/ui/core/spinner";
 
 import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dialog.store";
@@ -29,18 +29,18 @@ const LABEL_KEYS = {
 
 function StepIcon({ state }: Readonly<{ state: GettingStartedStep["state"] }>) {
   if (state === "done") {
-    return <CheckCircle2 className="text-success" />;
+    return <CheckCircle2 className="size-3.5 shrink-0 text-success" />;
   }
 
   if (state === "error") {
-    return <AlertCircle className="text-destructive" />;
+    return <AlertCircle className="size-3.5 shrink-0 text-destructive" />;
   }
 
   if (state === "current") {
-    return <Spinner className="text-foreground" />;
+    return <Spinner className="size-3.5 shrink-0 text-foreground" />;
   }
 
-  return <Circle className="text-muted-foreground" />;
+  return <Circle className="size-3.5 shrink-0 text-muted-foreground" />;
 }
 
 export function GettingStartedChecklist() {
@@ -105,59 +105,75 @@ export function GettingStartedChecklist() {
 
   const primaryStep = steps.find((step) => step.state !== "done") ?? steps[0];
 
+  const primaryLabel =
+    primaryStep?.id === "github"
+      ? t("github_cta")
+      : primaryStep?.id === "repo"
+        ? t("repo_cta")
+        : state.latestAnalysis?.status === "FAILED"
+          ? t("analysis_retry")
+          : state.latestAnalysis?.status === "PENDING"
+            ? t("analysis_running")
+            : t("analysis_cta");
+
   return (
-    <Card className="border-border-strong/60 bg-card/60">
-      <CardContent className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-col gap-1">
-          <p className="font-semibold">{t("title")}</p>
-          <p className="text-muted-foreground text-sm">{t("desc")}</p>
+    <Card
+      className="gap-3"
+      size="compact"
+    >
+      <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold text-sm">{t("title")}</p>
+          <p className="mt-0.5 text-muted-foreground text-xs">{t("desc")}</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          {steps.map((step) => (
-            <button
-              className={cn(
-                "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-standard",
-                step.state === "current" && "border-border-strong bg-surface-selected",
-                step.state === "error" && "border-destructive/40 text-destructive",
-                step.state === "pending" && "text-muted-foreground",
-              )}
-              key={step.id}
-              onClick={() => handleStepClick(step)}
-              type="button"
-            >
-              <StepIcon state={step.state} />
-              {t(LABEL_KEYS[step.id])}
-            </button>
+        <span className="shrink-0 text-muted-foreground text-xs">
+          {t("progress", { done: doneCount, total })}
+        </span>
+
+        <AppButton
+          className="shrink-0"
+          onClick={() => setCollapsed(true)}
+          size="sm"
+          variant="ghost"
+        >
+          {t("hide")}
+        </AppButton>
+      </div>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex flex-1 flex-wrap items-center gap-2">
+          {steps.map((step, index) => (
+            <Fragment key={step.id}>
+              {index > 0 && <span className="hidden h-px min-w-3 flex-1 bg-border sm:block" />}
+
+              <button
+                className={cn(
+                  "flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-standard",
+                  step.state === "current" &&
+                    "border-border-strong bg-surface-selected text-foreground",
+                  step.state === "error" && "border-destructive/40 text-destructive",
+                  step.state === "pending" && "border-border text-muted-foreground",
+                  step.state === "done" && "border-border text-muted-foreground",
+                )}
+                onClick={() => handleStepClick(step)}
+                type="button"
+              >
+                <StepIcon state={step.state} />
+                {t(LABEL_KEYS[step.id])}
+              </button>
+            </Fragment>
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-muted-foreground text-xs">
-            {t("progress", { done: doneCount, total })}
-          </span>
-          <AppButton
-            onClick={() => setCollapsed(true)}
-            size="sm"
-            variant="ghost"
-          >
-            {t("hide")}
-          </AppButton>
-          <AppButton
-            onClick={() => primaryStep != null && handleStepClick(primaryStep)}
-            size="sm"
-          >
-            {primaryStep?.id === "github" && t("github_cta")}
-            {primaryStep?.id === "repo" && t("repo_cta")}
-            {primaryStep?.id === "analysis" &&
-              (state.latestAnalysis?.status === "FAILED"
-                ? t("analysis_retry")
-                : state.latestAnalysis?.status === "PENDING"
-                  ? t("analysis_running")
-                  : t("analysis_cta"))}
-          </AppButton>
-        </div>
-      </CardContent>
+        <AppButton
+          className="w-full shrink-0 sm:w-auto"
+          onClick={() => primaryStep != null && handleStepClick(primaryStep)}
+          size="sm"
+        >
+          {primaryLabel}
+        </AppButton>
+      </div>
     </Card>
   );
 }

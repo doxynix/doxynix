@@ -12,6 +12,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/u
 import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
 import type { FileNode } from "@/entities/repo/model/repo-setup.types";
 import { useNodeContext } from "@/entities/repo/model/use-node-context";
+import { useRepoBranch } from "@/entities/repo/model/use-repo-branch";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { RepoCodeBrowser } from "./repo-code-browser";
@@ -29,6 +30,7 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
   const [node, setNode] = useQueryState("node", parseAsString);
   const [treeApi, setTreeApi] = useState<TreeApi<FileNode> | undefined>();
   const { aid } = useRepoParams();
+  const { branch } = useRepoBranch(repo);
 
   const { data: nodeContext } = useNodeContext({
     aid: aid ?? undefined,
@@ -38,7 +40,7 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
 
   const { data, isLoading } = useQuery(
     trpc.githubBrowse.getFileContent.queryOptions(
-      { path: path ?? "", repoId: repo.id },
+      { branch, path: path ?? "", repoId: repo.id },
       { enabled: path != null && path !== "" },
     ),
   );
@@ -67,14 +69,16 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
   const { defaultLayout, onLayoutChanged } = usePanelLayout("repo-code");
 
   return (
-    <div className="flex h-[calc(100dvh-260px)] overflow-hidden rounded-xl border bg-background">
+    <div className="flex h-[var(--repo-workspace-height)] min-h-[30rem] min-w-0 overflow-hidden rounded-xl border bg-background">
       <ResizablePanelGroup
+        className="min-h-0 min-w-0"
         defaultLayout={defaultLayout}
         id="repo-code"
         onLayoutChanged={onLayoutChanged}
         orientation="horizontal"
       >
         <ResizablePanel
+          className="min-h-0 min-w-0"
           defaultSize="50%"
           id="repo-code-tree"
           maxSize="50%"
@@ -95,6 +99,7 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
         <ResizableHandle />
 
         <ResizablePanel
+          className="min-h-0 min-w-0"
           defaultSize="50%"
           id="repo-code-browser"
         >

@@ -100,25 +100,38 @@ const todoHighlighter = ViewPlugin.fromClass(
   },
 );
 
-function createUniversalSyntaxLinter(syntaxErrorMessage: string) {
-  return linter((view) => {
-    const diagnostics: Diagnostic[] = [];
+type SyntaxTree = ReturnType<typeof syntaxTree>;
 
-    syntaxTree(view.state)
-      .cursor()
-      .iterate((node) => {
-        if (node.type.isError) {
-          diagnostics.push({
-            from: node.from,
-            message: syntaxErrorMessage,
-            severity: "error",
-            to: node.to,
-          });
-        }
+export function diagnosticsFromTree(tree: SyntaxTree, syntaxErrorMessage: string): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+
+  tree.cursor().iterate((node) => {
+    if (node.type.isError) {
+      diagnostics.push({
+        from: node.from,
+        message: syntaxErrorMessage,
+        severity: "error",
+        to: node.to,
       });
-
-    return diagnostics;
+    }
   });
+
+  return diagnostics;
+}
+
+export function collectSyntaxDiagnostics(
+  state: EditorState,
+  syntaxErrorMessage: string,
+): Diagnostic[] {
+  return diagnosticsFromTree(syntaxTree(state), syntaxErrorMessage);
+}
+
+function createUniversalSyntaxLinter(syntaxErrorMessage: string) {
+  return linter((view) => collectSyntaxDiagnostics(view.state, syntaxErrorMessage));
+}
+
+export function buildSyntaxLinter(syntaxErrorMessage: string): Extension {
+  return createUniversalSyntaxLinter(syntaxErrorMessage);
 }
 
 const BASE_EXTENSIONS: Extension[] = [
@@ -161,7 +174,7 @@ const BASE_EXTENSIONS: Extension[] = [
   ]),
 ];
 
-function getIdeOnlyExtensions(labels: { syntaxError: string }): Extension[] {
+function getIdeOnlyExtensions(labels: { syntaxError: string }, syntaxLint: boolean): Extension[] {
   return [
     search({ top: true }),
     lineNumbers(),
@@ -184,7 +197,7 @@ function getIdeOnlyExtensions(labels: { syntaxError: string }): Extension[] {
     }),
 
     lintGutter(),
-    createUniversalSyntaxLinter(labels.syntaxError),
+    ...(syntaxLint ? [createUniversalSyntaxLinter(labels.syntaxError)] : []),
     tooltips({ position: "absolute" }),
   ];
 }
@@ -322,10 +335,13 @@ const THEME_EXTENSION = EditorView.theme({
   "&.cm-focused .cm-cursor": { borderLeftColor: "var(--foreground)" },
 });
 
-export function buildEditorExtensions(options: { syntaxError: string }): Extension[] {
+export function buildEditorExtensions(options: {
+  syntaxError: string;
+  syntaxLint?: boolean;
+}): Extension[] {
   return [
     ...BASE_EXTENSIONS,
-    ...getIdeOnlyExtensions({ syntaxError: options.syntaxError }),
+    ...getIdeOnlyExtensions({ syntaxError: options.syntaxError }, options.syntaxLint ?? true),
     THEME_EXTENSION,
   ];
 }

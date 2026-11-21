@@ -1,20 +1,45 @@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@radix-ui/react-collapsible";
-import {
-  AlertTriangle,
-  Binary,
-  CheckCircle2,
-  FileCode,
-  ShieldAlert,
-  Sparkles,
-  Terminal,
-} from "lucide-react";
+import { AlertTriangle, Binary, CheckCircle2, ShieldAlert, Sparkles, Terminal } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { cn } from "@/shared/lib/cn";
 import { AppBadge } from "@/shared/ui/core/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { AppButton } from "@/shared/ui/core/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/core/card";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import type { RepoMetricsItem } from "../model/repo.types";
+
+function riskTone(risk: string) {
+  if (risk === "CRITICAL" || risk === "HIGH") {
+    return "border-destructive/30 text-destructive";
+  }
+
+  if (risk === "MODERATE") {
+    return "border-warning/30 text-warning";
+  }
+
+  return undefined;
+}
+
+function riskDot(risk: string) {
+  if (risk === "CRITICAL" || risk === "HIGH") {
+    return "bg-destructive";
+  }
+
+  if (risk === "MODERATE") {
+    return "bg-warning";
+  }
+
+  return "bg-muted-foreground";
+}
 
 export function ArchitectureAndDataFlowCard({
   reference,
@@ -31,16 +56,19 @@ export function ArchitectureAndDataFlowCard({
   return (
     <Card className="lg:col-span-2">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Binary className="size-5" /> {t("repo_analytics_arch_data_flow")}
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Binary className="text-muted-foreground" /> {t("repo_analytics_arch_data_flow")}
         </CardTitle>
         <CardDescription>{t("repo_analytics_arch_data_flow_desc")}</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <CardContent className="flex flex-col">
         {flows.map((flow) => (
-          <div key={flow.label}>
-            <p className="mb-2 font-medium text-sm">{flow.label}</p>
-            <p className="text-muted-foreground text-sm leading-relaxed">{flow.value}</p>
+          <div
+            className="border-t py-3 first:border-t-0 first:pt-0 last:pb-0"
+            key={flow.label}
+          >
+            <p className="text-muted-foreground text-xs">{flow.label}</p>
+            <p className="mt-1 text-sm">{flow.value}</p>
           </div>
         ))}
       </CardContent>
@@ -54,26 +82,58 @@ export function RisksCard({ risks }: Readonly<{ risks: NonNullable<RepoMetricsIt
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <AlertTriangle /> {t("repo_analytics_risks")}
+        <CardTitle className="flex items-center gap-2 text-base">
+          <AlertTriangle className="text-warning" /> {t("repo_analytics_risks")}
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3">
-        {risks.topRisks.length > 0 ? (
-          risks.topRisks.map((risk) => (
-            <div
-              className="rounded-lg border p-3"
-              key={risk.id}
-            >
-              <div className="mb-1 flex items-center justify-between gap-2">
-                <p className="font-medium text-sm">{risk.title}</p>
-                <AppBadge variant="outline">{risk.severity}</AppBadge>
-              </div>
-              <p className="text-muted-foreground text-xs">{risk.summary}</p>
-            </div>
-          ))
+      <CardContent className="flex flex-col">
+        {risks.topRisks.length === 0 ? (
+          <p className="py-6 text-center text-muted-foreground text-sm">
+            {t("repo_analytics_no_risks")}
+          </p>
         ) : (
-          <p className="text-muted-foreground text-sm">{t("repo_analytics_no_risks")}</p>
+          risks.topRisks.map((risk) => {
+            const isHigh = risk.severity === "CRITICAL" || risk.severity === "HIGH";
+            const isModerate = risk.severity === "MODERATE";
+
+            return (
+              <div
+                className="flex items-start gap-2.5 border-t py-2.5 first:border-t-0 first:pt-0 last:pb-0"
+                key={risk.id}
+              >
+                <span
+                  className={
+                    isHigh
+                      ? "mt-1.5 size-1.5 shrink-0 rounded-full bg-destructive"
+                      : isModerate
+                        ? "mt-1.5 size-1.5 shrink-0 rounded-full bg-warning"
+                        : "mt-1.5 size-1.5 shrink-0 rounded-full bg-muted-foreground"
+                  }
+                />
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-medium text-sm">{risk.title}</p>
+
+                    <AppBadge
+                      className={
+                        isHigh
+                          ? "border-destructive/30 text-destructive"
+                          : isModerate
+                            ? "border-warning/30 text-warning"
+                            : undefined
+                      }
+                      variant="outline"
+                    >
+                      {risk.severity}
+                    </AppBadge>
+                  </div>
+
+                  <p className="mt-0.5 text-muted-foreground text-xs">{risk.summary}</p>
+                </div>
+              </div>
+            );
+          })
         )}
       </CardContent>
     </Card>
@@ -168,18 +228,18 @@ export function ReferenceAndRoutesCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <Terminal /> {t("repo_analytics_reference_routes")}
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Terminal className="text-muted-foreground" /> {t("repo_analytics_reference_routes")}
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <CardContent className="flex flex-col">
         {sections.map((sec) => (
           <div
-            className="text-xs"
+            className="border-t py-3 first:border-t-0 first:pt-0 last:pb-0"
             key={sec.title}
           >
-            <p className="mb-2 text-muted-foreground uppercase">{sec.title}</p>
-            {sec.content}
+            <p className="text-muted-foreground text-xs">{sec.title}</p>
+            <div className="mt-1.5">{sec.content}</div>
           </div>
         ))}
       </CardContent>
@@ -216,140 +276,133 @@ export function SecurityOverviewCard({
   };
 
   return (
-    <Card className="border-destructive/20 bg-background">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-        <CardTitle className="flex items-center gap-2 font-bold text-xl tracking-tight">
-          <ShieldAlert className="size-5 text-destructive" />{" "}
-          {t("repo_analytics_security_overview")}
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldAlert className="text-destructive" /> {t("repo_analytics_security_overview")}
         </CardTitle>
-        <div className="flex flex-col items-end">
-          <span className="font-black text-3xl text-destructive tracking-tighter">
+
+        <CardDescription>
+          {t("repo_analytics_scan_status", { status: security.securityScanStatus })}
+          {" · "}
+          {t("repo_analytics_vulnerabilities", { count: security.vulnerabilities.length })}
+        </CardDescription>
+
+        <CardAction>
+          <span
+            className={cn(
+              "font-semibold text-2xl",
+              security.score >= 7
+                ? "text-success"
+                : security.score >= 4
+                  ? "text-warning"
+                  : "text-destructive",
+            )}
+          >
             {security.score}
-            <span className="font-normal text-muted-foreground text-sm">/10</span>
+            <span className="font-normal text-muted-foreground text-xs">/10</span>
           </span>
-        </div>
+        </CardAction>
       </CardHeader>
 
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <AppBadge
-            className="font-bold text-[10px] uppercase tracking-wider"
-            variant={security.securityScanStatus === "ok" ? "default" : "secondary"}
-          >
-            {t("repo_analytics_scan_status", { status: security.securityScanStatus })}
-          </AppBadge>
-          <AppBadge
-            className="font-bold text-[10px]"
-            variant={security.vulnerabilities.length > 0 ? "destructive" : "outline"}
-          >
-            {t("repo_analytics_vulnerabilities", { count: security.vulnerabilities.length })}
-          </AppBadge>
-          <AppBadge
-            className="font-medium text-[10px] text-muted-foreground"
-            variant="outline"
-          >
-            {t("repo_analytics_raw_findings", { count: security.findings.length })}
-          </AppBadge>
-        </div>
-
-        {security.risks.length > 0 && (
-          <div className="flex flex-col gap-2 border-border border-t pt-3">
-            <span className="font-bold text-[11px] text-muted-foreground uppercase tracking-wider">
-              {t("repo_analytics_identified_attack_vectors")}
-            </span>
-            <div className="flex flex-col gap-1.5">
-              {security.risks.map((item) => (
-                <div
-                  className="flex items-start gap-2 text-foreground/90 text-xs leading-relaxed"
-                  key={item}
-                >
-                  <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-amber-500" />
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
+      <CardContent className="flex flex-col">
+        {security.vulnerabilities.length === 0 ? (
+          <div className="flex items-center gap-2 py-2 text-success text-xs">
+            <CheckCircle2 />
+            <span>{t("repo_analytics_no_critical_vulns")}</span>
           </div>
-        )}
+        ) : (
+          security.vulnerabilities.map((vuln) => {
+            const isCurrentlyFixing = runningFixId === vuln.file;
 
-        {security.vulnerabilities.length > 0 ? (
-          <div className="flex flex-col gap-2 border-border border-t pt-3">
-            <span className="font-bold text-[11px] text-muted-foreground uppercase tracking-wider">
-              {t("repo_analytics_critical_vulns")}
-            </span>
-            <div className="flex flex-col gap-2">
-              {security.vulnerabilities.map((vuln) => {
-                const isCurrentlyFixing = runningFixId === vuln.file;
+            return (
+              <Collapsible
+                className="group border-t py-3 first:border-t-0 first:pt-0 last:pb-0"
+                key={vuln.file}
+              >
+                <div className="flex items-start gap-2.5">
+                  <span
+                    className={cn("mt-1.5 size-1.5 shrink-0 rounded-full", riskDot(vuln.risk))}
+                  />
 
-                return (
-                  <Collapsible
-                    className="group rounded-lg border border-border bg-muted/30 p-2.5 transition-standard hover:bg-muted/50"
-                    key={vuln.file}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1.5 font-mono font-semibold text-foreground/80 text-xs">
-                          <FileCode className="size-3.5 text-muted-foreground" />
-                          <span className="max-w-60 truncate md:max-w-xs">{`[[${vuln.file}]]`}</span>
-                          {vuln.lineHint != null && (
-                            <span className="rounded bg-border px-1 font-medium text-[10px] text-muted-foreground">
-                              {vuln.lineHint}
-                            </span>
-                          )}
-                        </div>
-                        <p className="pl-5 font-medium text-foreground/90 text-xs leading-snug">
-                          {vuln.description}
-                        </p>
-                      </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <p className="min-w-0 truncate font-medium text-sm">
+                        {vuln.file}
+                        {vuln.lineHint != null && `:${vuln.lineHint}`}
+                      </p>
 
                       <AppBadge
-                        className="shrink-0 font-extrabold text-[9px] uppercase"
-                        variant={
-                          vuln.risk === "CRITICAL" || vuln.risk === "HIGH"
-                            ? "destructive"
-                            : "secondary"
-                        }
+                        className={riskTone(vuln.risk)}
+                        variant="outline"
                       >
-                        {vuln.risk}
+                        {vuln.risk.toLowerCase()}
                       </AppBadge>
                     </div>
 
-                    <CollapsibleContent className="mt-2.5 flex flex-col gap-1.5 border-border border-t pt-2 pl-5">
-                      <div className="flex items-center gap-1 font-bold text-[10px] text-destructive uppercase tracking-wider">
-                        <Terminal className="size-3" />{" "}
-                        {t("repo_analytics_recommended_remediation")}
-                      </div>
-                      <p className="whitespace-pre-wrap rounded-md border border-border bg-background/50 p-2 font-mono text-[11px] text-muted-foreground leading-normal">
-                        {vuln.suggestion}
-                      </p>
-                      <LoadingButton
-                        className="mt-3 w-full gap-2 font-bold uppercase"
-                        disabled={runningFixId != null}
-                        isLoading={isCurrentlyFixing}
-                        onClick={() => handleRunFix(vuln)}
-                        size="sm"
-                        variant="destructive"
-                      >
-                        <Sparkles /> {t("repo_analytics_auto_patch")}
-                      </LoadingButton>
-                    </CollapsibleContent>
+                    <p className="mt-0.5 text-muted-foreground text-xs">{vuln.description}</p>
 
-                    <CollapsibleTrigger className="mt-1.5 flex w-full items-center justify-center font-semibold text-[10px] text-muted-foreground transition-colors hover:text-foreground">
-                      <span className="group-data-[state=open]:hidden">
-                        {t("repo_analytics_show_remediation")}
-                      </span>
-                      <span className="group-data-[state=closed]:hidden">
-                        {t("repo_analytics_hide_remediation")}
-                      </span>
-                    </CollapsibleTrigger>
-                  </Collapsible>
-                );
-              })}
+                    {vuln.suggestion.length > 0 && (
+                      <CollapsibleTrigger asChild>
+                        <AppButton
+                          className="mt-1 h-auto px-0 py-0 text-xs"
+                          size="sm"
+                          variant="ghost"
+                        >
+                          <span className="group-data-[state=open]:hidden">
+                            {t("repo_analytics_show_remediation")}
+                          </span>
+                          <span className="group-data-[state=closed]:hidden">
+                            {t("repo_analytics_hide_remediation")}
+                          </span>
+                        </AppButton>
+                      </CollapsibleTrigger>
+                    )}
+                  </div>
+                </div>
+
+                <CollapsibleContent className="mt-2 pl-4">
+                  <p className="text-muted-foreground text-xs">
+                    {t("repo_analytics_recommended_remediation")}
+                  </p>
+
+                  <pre className="mt-1 whitespace-pre-wrap rounded-lg bg-surface-hover/40 p-2.5 font-mono text-2xs">
+                    {vuln.suggestion}
+                  </pre>
+
+                  <LoadingButton
+                    className="mt-2 gap-1.5"
+                    disabled={runningFixId != null}
+                    isLoading={isCurrentlyFixing}
+                    onClick={() => handleRunFix(vuln)}
+                    size="sm"
+                    variant="destructive"
+                  >
+                    <Sparkles className="size-3.5" /> {t("repo_analytics_auto_patch")}
+                  </LoadingButton>
+                </CollapsibleContent>
+              </Collapsible>
+            );
+          })
+        )}
+
+        {security.risks.length > 0 && (
+          <div className="border-t pt-3">
+            <p className="text-muted-foreground text-xs">
+              {t("repo_analytics_identified_attack_vectors")}
+            </p>
+
+            <div className="mt-1.5 flex flex-col gap-1.5">
+              {security.risks.map((item) => (
+                <p
+                  className="flex items-start gap-2 text-xs"
+                  key={item}
+                >
+                  <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-warning" />
+                  <span>{item}</span>
+                </p>
+              ))}
             </div>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 font-medium text-emerald-500 text-xs">
-            <CheckCircle2 />
-            <span>{t("repo_analytics_no_critical_vulns")}</span>
           </div>
         )}
       </CardContent>

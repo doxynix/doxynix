@@ -22,31 +22,31 @@ type Props = {
 
 const configMap = {
   CAUTION: {
-    className: "border-red-500/30 bg-red-500/5 text-red-500",
+    className: "border-destructive/30 bg-destructive/5 text-destructive",
     icon: ShieldAlert,
     titleKey: "alert_caution",
     variant: "destructive" as const,
   },
   IMPORTANT: {
-    className: "border-purple-500/30 bg-purple-500/5 text-purple-500",
+    className: "border-brand-ai/30 bg-brand-ai/5 text-brand-ai",
     icon: Terminal,
     titleKey: "alert_important",
     variant: "default" as const,
   },
   NOTE: {
-    className: "border-blue-500/30 bg-blue-500/5 text-blue-500",
+    className: "border-info/30 bg-info/5 text-info",
     icon: Info,
     titleKey: "alert_note",
     variant: "default" as const,
   },
   TIP: {
-    className: "border-success/30 bg-success/5 text-emerald-500",
+    className: "border-success/30 bg-success/5 text-success",
     icon: Lightbulb,
     titleKey: "alert_tip",
     variant: "default" as const,
   },
   WARNING: {
-    className: "border-amber-500/30 bg-amber-500/5 text-amber-500",
+    className: "border-warning/30 bg-warning/5 text-warning",
     icon: AlertTriangle,
     titleKey: "alert_warning",
     variant: "default" as const,
@@ -139,7 +139,7 @@ function Blockquote({ children, className }: ClassableBlockProps) {
         variant={alertConfig.variant}
       >
         <IconComponent className="absolute top-4 left-4 size-4" />
-        <AlertTitle className="mb-1 font-bold font-sans text-xs uppercase tracking-wider">
+        <AlertTitle className="mb-1 font-bold font-sans text-xs">
           {t(alertConfig.titleKey)}
         </AlertTitle>
         <AlertDescription className="font-sans text-xs leading-relaxed opacity-90">

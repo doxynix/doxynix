@@ -64,7 +64,7 @@ export function getGitMetrics(repo: GitMetrics, locale: string): Props[] {
       tooltipKey: "git_metric_stars",
     },
     {
-      color: "text-green-700",
+      color: "text-success",
       icon: GitFork,
       id: "Forks",
       label: repo.forks,

@@ -3,6 +3,7 @@
 import { BellOff, Eye, EyeOff, SearchX, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { Card } from "@/shared/ui/core/card";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
 import type {
@@ -18,7 +19,6 @@ type Props = { meta?: NotificationMeta; notifications: UiNotification[] };
 
 export function NotificationsList({ meta, notifications }: Readonly<Props>) {
   const { deleteOne, markAs } = useNotificationActions();
-  const isPending = markAs.isPending || deleteOne.isPending;
   const t = useTranslations("Notifications");
   const tCommon = useTranslations("Common");
 
@@ -52,32 +52,38 @@ export function NotificationsList({ meta, notifications }: Readonly<Props>) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {notifications.map((n) => (
-        <NotificationCard
-          actions={
-            <>
-              <NotificationActionButton
-                disabled={isPending}
-                icon={n.isRead ? EyeOff : Eye}
-                isPending={markAs.pendingIds.includes(n.id)}
-                onClick={() => markAs.mutate(n.id, !n.isRead)}
-                tooltip={n.isRead ? t("mark_as_unread") : t("mark_as_read")}
-              />
-              <NotificationActionButton
-                className="hover:text-destructive"
-                disabled={isPending}
-                icon={Trash2}
-                isPending={deleteOne.pendingIds.includes(n.id)}
-                onClick={() => deleteOne.mutate(n.id)}
-                tooltip={t("delete_notification")}
-              />
-            </>
-          }
-          key={n.id}
-          notification={n}
-        />
-      ))}
-    </div>
+    <Card className="gap-0 divide-y divide-border overflow-hidden p-0">
+      {notifications.map((n) => {
+        const isMarking = markAs.pendingIds.includes(n.id);
+        const isDeleting = deleteOne.pendingIds.includes(n.id);
+        const isCardPending = isMarking || isDeleting;
+
+        return (
+          <NotificationCard
+            actions={
+              <>
+                <NotificationActionButton
+                  disabled={isCardPending}
+                  icon={n.isRead ? EyeOff : Eye}
+                  isPending={isMarking}
+                  onClick={() => markAs.mutate(n.id, !n.isRead)}
+                  tooltip={n.isRead ? t("mark_as_unread") : t("mark_as_read")}
+                />
+                <NotificationActionButton
+                  className="hover:text-destructive"
+                  disabled={isCardPending}
+                  icon={Trash2}
+                  isPending={isDeleting}
+                  onClick={() => deleteOne.mutate(n.id)}
+                  tooltip={t("delete_notification")}
+                />
+              </>
+            }
+            key={n.id}
+            notification={n}
+          />
+        );
+      })}
+    </Card>
   );
 }

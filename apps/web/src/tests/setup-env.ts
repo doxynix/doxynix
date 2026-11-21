@@ -2,6 +2,18 @@ import { randomBytes } from "node:crypto";
 
 import { MEMORY_REDIS_PORT } from "./memory-redis";
 
+if (typeof window !== "undefined" && typeof window.matchMedia !== "function") {
+  window.matchMedia = (query: string) =>
+    ({
+      addEventListener: () => undefined,
+      dispatchEvent: () => false,
+      matches: false,
+      media: query,
+      onchange: null,
+      removeEventListener: () => undefined,
+    }) as unknown as MediaQueryList;
+}
+
 const scheme = "k1";
 const cipher = "aesgcm256";
 const key = randomBytes(32).toString("base64url");

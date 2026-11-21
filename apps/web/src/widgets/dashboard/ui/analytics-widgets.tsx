@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import {
   AlertTriangle,
   ArrowLeftRight,
@@ -11,9 +12,8 @@ import {
   Flame,
   GitMerge,
   HeartPulse,
+  type LucideIcon,
   Target,
-  Trophy,
-  Users,
   XCircle,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -21,7 +21,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { AppBadge } from "@/shared/ui/core/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { Card } from "@/shared/ui/core/card";
 import { Progress } from "@/shared/ui/core/progress";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
@@ -32,313 +32,420 @@ import type { DashboardStats } from "../model/dashboard.types";
 
 type Props = { data: DashboardStats };
 
+const TILE_TONES = {
+  danger: "bg-destructive/10 text-destructive",
+  default: "bg-surface-hover text-muted-foreground",
+  success: "bg-success/10 text-success",
+  warning: "bg-warning/10 text-warning",
+} as const;
+
+type WidgetTone = keyof typeof TILE_TONES;
+
+type WidgetHeaderProps = {
+  action?: ReactNode;
+  icon: LucideIcon;
+  title: string;
+  tone?: WidgetTone;
+};
+
+function WidgetHeader({
+  action,
+  icon: Icon,
+  title,
+  tone = "default",
+}: Readonly<WidgetHeaderProps>) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <div
+        className={cn(
+          "flex size-8 shrink-0 items-center justify-center rounded-lg",
+          TILE_TONES[tone],
+        )}
+      >
+        <Icon />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold text-sm">{title}</p>
+      </div>
+
+      {action != null && <div className="flex shrink-0 items-center gap-1.5">{action}</div>}
+    </div>
+  );
+}
+
+function WidgetEmpty({ children }: Readonly<{ children: ReactNode }>) {
+  return <p className="py-6 text-center text-muted-foreground text-sm">{children}</p>;
+}
+
+function SummaryRow({ label, value }: Readonly<{ label: string; value: ReactNode }>) {
+  return (
+    <div className="flex items-center justify-between gap-3 py-2 text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium">{value}</span>
+    </div>
+  );
+}
+
+const STATUS_LABEL_KEYS = {
+  DONE: "analysis_completed",
+  FAILED: "analysis_failed",
+  NEW: "analysis_started",
+  PENDING: "analysis_started",
+} as const;
+
 export function EcosystemStatusWidget({ data }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
-  const repoCount = data.overview.repoCount;
-  const docsCount = data.overview.docsCount;
-  const maxPossibleDocs = data.overview.repoCount * 5;
+  const locale = useLocale();
+
+  const { docsCount, repoCount, totalLoc } = data.overview;
+  const maxPossibleDocs = repoCount * 5;
   const docCoverage =
     maxPossibleDocs > 0 ? Math.min(100, Math.round((docsCount / maxPossibleDocs) * 100)) : 0;
 
-  const isEmpty = repoCount === 0;
-
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="border-b pb-4">
-        <CardTitle className="flex items-center justify-between text-base">
-          <span className="flex items-center gap-2">
-            <BookOpenCheck />
-            {t("ecosystem_status")}
-          </span>
-          {!isEmpty && (
-            <AppBadge
-              className="font-mono"
-              variant="outline"
-            >
+    <Card
+      className="gap-3"
+      size="compact"
+    >
+      <WidgetHeader
+        action={
+          repoCount > 0 ? (
+            <AppBadge variant="outline">
               {docCoverage}% {t("documented")}
             </AppBadge>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-4">
-        {isEmpty ? (
-          <div className="flex h-62.5 flex-col items-center justify-center gap-2 rounded-xl border">
-            <p className="text-muted-foreground text-sm">{t("no_repositories_in_ecosystem")}</p>
+          ) : undefined
+        }
+        icon={BookOpenCheck}
+        title={t("ecosystem_status")}
+      />
+
+      {repoCount === 0 ? (
+        <WidgetEmpty>{t("no_repositories_in_ecosystem")}</WidgetEmpty>
+      ) : (
+        <>
+          <QualityRadar
+            className="h-56"
+            scores={data.overview.avgScores}
+          />
+
+          <div className="flex flex-col divide-y divide-border">
+            <SummaryRow
+              label={t("repo_repositories")}
+              value={repoCount}
+            />
+            <SummaryRow
+              label={t("sidebar_documentation")}
+              value={docsCount}
+            />
+            <SummaryRow
+              label={t("tooltip_lines")}
+              value={totalLoc.toLocaleString(locale)}
+            />
           </div>
-        ) : (
-          <QualityRadar scores={data.overview.avgScores} />
-        )}
-      </CardContent>
+        </>
+      )}
     </Card>
   );
 }
 
 export function SystemRisksWidget({ data }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
+  const busFactorRepos = data.risks.busFactorRepos;
 
   return (
-    <Card className="border-destructive/20">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-destructive text-sm">
-          <AlertTriangle /> {t("global_risks")}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {data.risks.busFactorRepos === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("no_data_yet")}</p>
-        ) : (
-          <div className="flex gap-3 text-sm">
-            <Users />
-            <div className="flex flex-col gap-1">
-              <p>{t("knowledge_concentration")}</p>
-              <p className="mt-1 text-muted-foreground text-xs">
-                <span className="font-bold text-destructive">{data.risks.busFactorRepos}</span>{" "}
-                {t("bus_factor_description")}
-              </p>
-            </div>
+    <Card
+      className="gap-3"
+      size="compact"
+    >
+      <WidgetHeader
+        icon={AlertTriangle}
+        title={t("global_risks")}
+        tone={busFactorRepos > 0 ? "danger" : "default"}
+      />
+
+      {busFactorRepos === 0 ? (
+        <WidgetEmpty>{t("no_data_yet")}</WidgetEmpty>
+      ) : (
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <span className="size-1.5 shrink-0 rounded-full bg-destructive" />
+            <p className="min-w-0 flex-1 font-medium text-sm">{t("knowledge_concentration")}</p>
+            <AppBadge
+              className="border-destructive/30 text-destructive"
+              variant="outline"
+            >
+              {t("repo_needs_attention")}
+            </AppBadge>
           </div>
-        )}
-      </CardContent>
+
+          <p className="pl-3.5 text-muted-foreground text-xs">
+            {busFactorRepos} {t("bus_factor_description")}
+          </p>
+        </div>
+      )}
     </Card>
   );
 }
 
 export function RefactoringTargetsWidget({ data }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
+
   const hasHotspots = data.risks.topHotspots.length > 0;
   const hasCoupling = data.risks.topCoupling.length > 0;
-  const isEmpty = !hasHotspots && !hasCoupling;
 
   return (
-    <Card>
-      <CardHeader className="border-b pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <Flame className="text-destructive" /> {t("high_impact_action_items")}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className={cn("grid grid-cols-1 gap-6 pt-4", !isEmpty && "md:grid-cols-2")}>
-        {isEmpty ? (
-          <div className="col-span-full py-10 text-center">
-            <p className="text-muted-foreground text-sm">{t("no_high_impact_risks")}</p>
-          </div>
-        ) : (
-          <>
-            {hasHotspots && (
-              <div className="flex flex-col gap-2">
-                <p className="flex items-center gap-1 text-muted-foreground text-sm">
-                  <Target /> {t("refactoring_targets")}
-                </p>
-                {data.risks.topHotspots.map((h) => (
+    <Card
+      className="gap-4"
+      size="compact"
+    >
+      <WidgetHeader
+        icon={Flame}
+        title={t("high_impact_action_items")}
+        tone={hasHotspots || hasCoupling ? "warning" : "default"}
+      />
+
+      {!hasHotspots && !hasCoupling ? (
+        <WidgetEmpty>{t("no_high_impact_risks")}</WidgetEmpty>
+      ) : (
+        <div
+          className={cn("grid grid-cols-1 gap-4", hasHotspots && hasCoupling && "md:grid-cols-2")}
+        >
+          {hasHotspots && (
+            <section className="min-w-0">
+              <p className="mb-1 text-muted-foreground text-xs">{t("refactoring_targets")}</p>
+
+              <div className="flex flex-col divide-y divide-border">
+                {data.risks.topHotspots.map((hotspot) => (
                   <div
-                    className="flex items-center justify-between rounded-xl border border-border p-2 text-xs"
-                    key={`${h.repo_name}/${h.path}`}
+                    className="flex items-center gap-2 py-2"
+                    key={`${hotspot.repo_name}/${hotspot.path}`}
                   >
-                    <span className="max-w-50 truncate text-muted-foreground">
-                      {h.repo_name}/
-                      <span className="font-bold text-foreground">{h.path.split("/").pop()}</span>
+                    <Target className="size-3.5 shrink-0 text-muted-foreground" />
+
+                    <span className="min-w-0 flex-1 truncate text-xs">
+                      <span className="text-muted-foreground">{hotspot.repo_name}/</span>
+                      <span className="font-medium text-foreground">
+                        {hotspot.path.split("/").pop()}
+                      </span>
                     </span>
+
                     <AppBadge
-                      className="h-5 text-[10px]"
-                      variant="destructive"
+                      className="border-destructive/30 text-destructive"
+                      variant="outline"
                     >
-                      {t("points", { count: h.score })}
+                      {t("points", { count: hotspot.score })}
                     </AppBadge>
                   </div>
                 ))}
               </div>
-            )}
+            </section>
+          )}
 
-            {hasCoupling && (
-              <div className="flex flex-col gap-2">
-                <p className="flex items-center gap-1 text-muted-foreground text-sm">
-                  <GitMerge /> {t("hidden_dependencies")}
-                </p>
-                {data.risks.topCoupling.map((c) => (
+          {hasCoupling && (
+            <section className="min-w-0">
+              <p className="mb-1 text-muted-foreground text-xs">{t("hidden_dependencies")}</p>
+
+              <div className="flex flex-col divide-y divide-border">
+                {data.risks.topCoupling.map((coupling) => (
                   <div
-                    className="flex items-center gap-2 rounded-xl border border-border p-2 text-xs"
-                    key={`${c.repo_name}:${c.from_path}->${c.to_path}`}
+                    className="flex items-center gap-2 py-2 text-xs"
+                    key={`${coupling.repo_name}:${coupling.from_path}->${coupling.to_path}`}
                   >
-                    <span className="truncate">{c.from_path.split("/").pop()}</span>
-                    <ArrowLeftRight />
-                    <span className="truncate">{c.to_path.split("/").pop()}</span>
-                    <span className="ml-auto text-muted-foreground">
-                      {c.commits} <span>{t("commits")}</span>
+                    <GitMerge className="size-3.5 shrink-0 text-muted-foreground" />
+
+                    <span className="min-w-0 flex-1 truncate">
+                      {coupling.from_path.split("/").pop()}
+                    </span>
+
+                    <ArrowLeftRight className="size-3 shrink-0 text-muted-foreground" />
+
+                    <span className="min-w-0 flex-1 truncate">
+                      {coupling.to_path.split("/").pop()}
+                    </span>
+
+                    <span className="shrink-0 text-muted-foreground">
+                      {coupling.commits} {t("commits")}
                     </span>
                   </div>
                 ))}
               </div>
-            )}
-          </>
-        )}
-      </CardContent>
+            </section>
+          )}
+        </div>
+      )}
     </Card>
   );
 }
 
 export function HealthExtremesWidget({ data }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
-  const hasData = !!(data.highlights.topPerformer ?? data.highlights.mostCritical);
+  const { mostCritical, topPerformer } = data.highlights;
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <HeartPulse /> {t("health_extremes")}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-2">
-        {!hasData ? (
-          <p className="text-muted-foreground text-sm">{t("no_extremes")}</p>
-        ) : (
-          <>
-            {data.highlights.topPerformer && (
-              <div className="flex items-center justify-between rounded-xl border border-success/20 p-2">
-                <div className="flex items-center gap-2">
-                  <Trophy className="text-success" />
-                  <span className="font-medium text-sm">{data.highlights.topPerformer.name}</span>
-                </div>
-                <span className="font-bold text-success">{data.highlights.topPerformer.score}</span>
-              </div>
-            )}
-            {data.highlights.mostCritical && (
-              <div className="flex items-center justify-between rounded-xl border border-destructive/20 p-2">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="text-destructive" />
-                  <span className="font-medium text-sm">{data.highlights.mostCritical.name}</span>
-                </div>
-                <span className="font-bold text-destructive">
-                  {data.highlights.mostCritical.score}
-                </span>
-              </div>
-            )}
-          </>
-        )}
-      </CardContent>
+    <Card
+      className="gap-3"
+      size="compact"
+    >
+      <WidgetHeader
+        icon={HeartPulse}
+        title={t("health_extremes")}
+      />
+
+      {topPerformer == null && mostCritical == null ? (
+        <WidgetEmpty>{t("no_extremes")}</WidgetEmpty>
+      ) : (
+        <div className="flex flex-col divide-y divide-border">
+          {topPerformer != null && (
+            <div className="flex items-center gap-2.5 py-2.5">
+              <span className="size-1.5 shrink-0 rounded-full bg-success" />
+              <span className="min-w-0 flex-1 truncate text-sm">{topPerformer.name}</span>
+              <span className="font-semibold text-sm text-success">{topPerformer.score}</span>
+            </div>
+          )}
+
+          {mostCritical != null && (
+            <div className="flex items-center gap-2.5 py-2.5">
+              <span className="size-1.5 shrink-0 rounded-full bg-destructive" />
+              <span className="min-w-0 flex-1 truncate text-sm">{mostCritical.name}</span>
+              <span className="font-semibold text-destructive text-sm">{mostCritical.score}</span>
+            </div>
+          )}
+        </div>
+      )}
     </Card>
   );
 }
 
 export function LanguagesWidget({ data }: Readonly<Props>) {
-  const locale = useLocale();
   const t = useTranslations("Dashboard");
+  const locale = useLocale();
+  const totalLoc = data.overview.totalLoc;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 font-semibold text-base">
-          <FileCode2 />
-          {t("languages_distribution")}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col gap-4">
-          {data.languages.length === 0 ? (
-            <p className="text-muted-foreground text-sm">{t("no_data_yet")}</p>
-          ) : (
-            data.languages.map((lang) => {
-              const percentage =
-                data.overview.totalLoc > 0 ? (lang.value / data.overview.totalLoc) * 100 : 0;
+    <Card
+      className="gap-3"
+      size="compact"
+    >
+      <WidgetHeader
+        action={
+          <span className="text-muted-foreground text-xs">
+            {totalLoc.toLocaleString(locale)} {t("lines")}
+          </span>
+        }
+        icon={FileCode2}
+        title={t("languages_distribution")}
+      />
+
+      {data.languages.length === 0 ? (
+        <WidgetEmpty>{t("no_data_yet")}</WidgetEmpty>
+      ) : (
+        <>
+          <div className="flex h-2 w-full overflow-hidden rounded-full">
+            {data.languages.map((language) => {
+              const percentage = totalLoc > 0 ? (language.value / totalLoc) * 100 : 0;
 
               return (
                 <div
-                  className="flex flex-col gap-1"
-                  key={lang.name}
-                >
-                  <div className="flex justify-between text-xs">
-                    <div className="flex items-center gap-1">
-                      <span
-                        className="block h-2.5 w-2.5 rounded-full"
-                        style={{ backgroundColor: lang.color }}
-                      />
-                      <span className="font-medium">{lang.name}</span>
-                    </div>
-                    <span className="text-muted-foreground">
-                      {lang.value.toLocaleString(locale)} {t("lines")}
-                      {` (${percentage.toFixed(1)}%)`}
-                    </span>
-                  </div>
+                  key={language.name}
+                  style={{
+                    backgroundColor: language.color,
+                    width: `${percentage}%`,
+                  }}
+                />
+              );
+            })}
+          </div>
 
-                  <Progress
-                    aria-label={t("stat_lang_usage", { lang: lang.name })}
-                    indicatorStyle={{ backgroundColor: lang.color }}
-                    value={percentage}
+          <div className="flex flex-col divide-y divide-border">
+            {data.languages.map((language) => {
+              const percentage = totalLoc > 0 ? (language.value / totalLoc) * 100 : 0;
+
+              return (
+                <div
+                  className="flex items-center gap-2 py-2 text-xs"
+                  key={language.name}
+                >
+                  <span
+                    className="size-2 shrink-0 rounded-sm"
+                    style={{ backgroundColor: language.color }}
                   />
+                  <span className="min-w-0 flex-1 truncate font-medium">{language.name}</span>
+                  <span className="shrink-0 text-muted-foreground">{Math.round(percentage)}%</span>
                 </div>
               );
-            })
-          )}
-        </div>
-      </CardContent>
+            })}
+          </div>
+        </>
+      )}
     </Card>
   );
 }
 
 export function RecentActivityWidget({ data }: Readonly<Props>) {
-  const locale = useLocale();
   const t = useTranslations("Dashboard");
+  const locale = useLocale();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 font-semibold">
-          <Clock />
-          {t("recent_activity")}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col gap-4">
-          {data.recentActivity.length === 0 ? (
-            <p className="text-muted-foreground text-sm">{t("no_recent_analyses")}</p>
-          ) : (
-            data.recentActivity.map((activity) => (
-              <div
-                className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
-                key={activity.id}
-              >
-                <div className="flex min-w-0 items-center gap-3">
-                  {activity.status === "DONE" && <CheckCircle2 className="text-success" />}
-                  {activity.status === "FAILED" && <XCircle className="text-destructive" />}
-                  {activity.status === "PENDING" && <Spinner className="text-warning" />}
-                  {activity.status === "NEW" && <CircleDot />}
+    <Card
+      className="gap-3"
+      size="compact"
+    >
+      <WidgetHeader
+        icon={Clock}
+        title={t("recent_activity")}
+      />
 
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <Link
-                      className="block w-full truncate font-medium text-sm hover:underline"
-                      href={`/dashboard/repo/${activity.repoOwner}/${activity.repoName}`}
-                    >
-                      <span className="truncate font-bold text-muted-foreground">
-                        {activity.repoOwner}
-                      </span>
-                      <span className="text-muted-foreground">/</span>
-                      <span className="truncate font-bold">{activity.repoName}</span>
-                    </Link>
-                    <span className="text-muted-foreground text-xs">
-                      {activity.status === "DONE" && t("analysis_completed")}
-                      {activity.status === "FAILED" && t("analysis_failed")}
-                      {activity.status === "PENDING" && t("analysis_started")}
-                      {" • "}
-                      <TimeAgo
-                        date={activity.createdAt}
-                        locale={locale}
-                      />
-                    </span>
-                    {activity.status === "PENDING" && (
-                      <div className="mt-1 flex items-center gap-1">
-                        <Progress
-                          className="h-1 flex-1"
-                          indicatorStyle={{ backgroundColor: "var(--status-warning)" }}
-                          value={activity.progress}
-                        />
-                        <span className="font-bold text-warning text-xs">{activity.progress}%</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+      {data.recentActivity.length === 0 ? (
+        <WidgetEmpty>{t("no_recent_analyses")}</WidgetEmpty>
+      ) : (
+        <div className="flex flex-col divide-y divide-border">
+          {data.recentActivity.map((activity) => (
+            <div
+              className="flex items-start gap-2.5 py-2.5"
+              key={activity.id}
+            >
+              <div className="mt-0.5 flex size-4 shrink-0 items-center justify-center">
+                {activity.status === "DONE" && <CheckCircle2 className="text-success" />}
+                {activity.status === "FAILED" && <XCircle className="text-destructive" />}
+                {activity.status === "PENDING" && <Spinner className="text-warning" />}
+                {activity.status === "NEW" && <CircleDot className="text-muted-foreground" />}
               </div>
-            ))
-          )}
+
+              <div className="min-w-0 flex-1">
+                <Link
+                  className="block truncate font-medium text-sm hover:underline"
+                  href={`/dashboard/repo/${activity.repoOwner}/${activity.repoName}`}
+                >
+                  <span className="text-muted-foreground">{activity.repoOwner}</span>
+                  <span className="text-muted-foreground">/</span>
+                  <span>{activity.repoName}</span>
+                </Link>
+
+                <p className="mt-0.5 text-muted-foreground text-xs">
+                  {t(STATUS_LABEL_KEYS[activity.status])}
+                  {" · "}
+                  <TimeAgo
+                    date={activity.createdAt}
+                    locale={locale}
+                  />
+                </p>
+
+                {activity.status === "PENDING" && (
+                  <div className="mt-1.5 flex items-center gap-2">
+                    <Progress
+                      className="h-1 flex-1"
+                      indicatorStyle={{ backgroundColor: "var(--status-warning)" }}
+                      value={activity.progress}
+                    />
+                    <span className="text-warning text-xs">{activity.progress}%</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
-      </CardContent>
+      )}
     </Card>
   );
 }

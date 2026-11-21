@@ -33,7 +33,7 @@ export async function BrandsSection() {
       id="brands"
     >
       <div className="mx-auto">
-        <p className="mb-8 text-center font-medium text-muted-foreground text-sm uppercase tracking-widest">
+        <p className="mb-8 text-center font-medium text-muted-foreground text-sm uppercase">
           {t("section_brands_title")}
         </p>
         <div className="mask-[linear-gradient(to_right,transparent,white_20%,white_80%,transparent)] relative flex w-full flex-col items-center justify-center overflow-hidden">

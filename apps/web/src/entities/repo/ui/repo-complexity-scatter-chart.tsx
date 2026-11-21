@@ -94,7 +94,7 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
                 const data = payload[0]?.payload;
                 return (
                   <div className="rounded-md border border-border bg-popover p-2">
-                    <p className="font-mono text-[10px] text-blue-400">{data.name}</p>
+                    <p className="font-mono text-2xs text-info">{data.name}</p>
                     <div className="mt-1 flex flex-col gap-1">
                       <p className="text-foreground text-xs">
                         {`${t("tooltip_complexity")}: `}
@@ -104,7 +104,7 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
                         {`${t("tooltip_lines")}: `}
                         <span className="font-bold">{data.x}</span>
                       </p>
-                      <p className="text-orange-500 text-xs">
+                      <p className="text-warning text-xs">
                         {`${t("tooltip_risk_score")}: `}
                         <span className="font-bold">{data.z}</span>
                       </p>

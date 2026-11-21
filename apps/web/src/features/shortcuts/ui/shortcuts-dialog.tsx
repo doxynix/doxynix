@@ -69,7 +69,7 @@ export function ShortcutsDialog() {
                 key={group}
               >
                 <h3
-                  className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wide"
+                  className="mb-2 font-medium text-muted-foreground text-xs"
                   id={`shortcuts-${group}`}
                 >
                   {groupLabels[group]}

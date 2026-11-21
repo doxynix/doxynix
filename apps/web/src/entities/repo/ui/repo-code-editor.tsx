@@ -1,7 +1,7 @@
 "use client";
 
-import { type ComponentType, useEffect, useState } from "react";
-import { diagnosticCount } from "@codemirror/lint";
+import { type ComponentType, useEffect, useRef, useState } from "react";
+import { diagnosticCount, setDiagnostics } from "@codemirror/lint";
 import { getSearchQuery, setSearchQuery } from "@codemirror/search";
 import { EditorState, type Extension } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
@@ -11,7 +11,7 @@ import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import CodeMirrorMerge from "react-codemirror-merge";
 
-import { buildEditorExtensions } from "../model/editor-extensions";
+import { buildEditorExtensions, buildSyntaxLinter } from "../model/editor-extensions";
 import { loadLanguageExtension } from "../model/editor-language-loader";
 import { isReadOnly, type RepoCodeDiff, type RepoCodeMode } from "../model/editor-mode";
 import type { EditorStats } from "../model/editor-stats.types";
@@ -39,25 +39,31 @@ export function RepoCodeEditor({
 }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
   const [ext, setExt] = useState<Extension[]>(() =>
-    buildEditorExtensions({ syntaxError: t("editor_syntax_error") }),
+    buildEditorExtensions({ syntaxError: t("editor_syntax_error"), syntaxLint: false }),
   );
   const { resolvedTheme } = useTheme();
+  const viewRef = useRef<EditorView | null>(null);
+  const lastErrorsRef = useRef<null | number>(null);
 
   useEffect(() => {
     let cancelled = false;
     async function loadDynamicLanguage() {
-      const baseExtensions = buildEditorExtensions({ syntaxError: t("editor_syntax_error") });
-      const dynamicExt: Extension[] = [...baseExtensions];
+      const baseExtensions = buildEditorExtensions({
+        syntaxError: t("editor_syntax_error"),
+        syntaxLint: false,
+      });
 
       try {
         const languageSupport = await loadLanguageExtension(path);
+        const nextExt: Extension[] = [...baseExtensions];
 
         if (languageSupport) {
-          dynamicExt.push(languageSupport);
+          nextExt.push(languageSupport);
+          nextExt.push(buildSyntaxLinter(t("editor_syntax_error")));
         }
 
         if (!cancelled) {
-          setExt(dynamicExt);
+          setExt(nextExt);
         }
       } catch (error) {
         console.error("Failed to load language support", error);
@@ -72,6 +78,16 @@ export function RepoCodeEditor({
       cancelled = true;
     };
   }, [path, t]);
+
+  useEffect(() => {
+    const view = viewRef.current;
+    if (view == null) {
+      return;
+    }
+
+    view.dispatch(setDiagnostics(view.state, []));
+    lastErrorsRef.current = null;
+  }, [path]);
 
   const readOnly = isReadOnly(mode);
   const mergeExtensionsReadOnly = [...ext, EditorState.readOnly.of(true)];
@@ -147,6 +163,7 @@ export function RepoCodeEditor({
         height="100%"
         onChange={onChange}
         onCreateEditor={(view) => {
+          viewRef.current = view;
           onViewCreated?.(view);
         }}
         onUpdate={(update) => {
@@ -154,7 +171,16 @@ export function RepoCodeEditor({
             tr.effects.some((e) => e.is(setSearchQuery)),
           );
 
-          if (onStats && (update.docChanged || update.selectionSet || searchChanged)) {
+          const errors = diagnosticCount(update.state);
+
+          if (
+            onStats &&
+            (update.docChanged ||
+              update.selectionSet ||
+              searchChanged ||
+              errors !== lastErrorsRef.current)
+          ) {
+            lastErrorsRef.current = errors;
             const { state } = update;
             const pos = state.selection.main.head;
             const query = getSearchQuery(state);
@@ -179,7 +205,7 @@ export function RepoCodeEditor({
             onStats({
               col: pos - lineAt.from + 1,
               currentMatch: totalMatches > 0 ? currentMatch : 0,
-              errors: diagnosticCount(state),
+              errors,
               isDirty: state.doc.toString() !== (initialValue ?? value),
               line: lineAt.number,
               totalLines: state.doc.lines,

@@ -33,7 +33,7 @@ export default async function AuthErrorPage({ searchParams }: Readonly<Props>) {
         <div className="flex size-20 items-center justify-center rounded-full bg-warning/10 text-warning">
           <LifeBuoy size={40} />
         </div>
-        <h1 className="font-bold text-3xl tracking-tight">{title}</h1>
+        <h1 className="font-bold text-3xl">{title}</h1>
         <p className="text-muted-foreground">{description}</p>
         <div className="flex flex-wrap items-center justify-center gap-2">
           <AppButton

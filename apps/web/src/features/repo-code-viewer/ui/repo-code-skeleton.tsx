@@ -30,7 +30,7 @@ const LINES = 32;
 
 export function CodeSkeleton() {
   return (
-    <div className="flex h-full w-full overflow-hidden font-mono text-[13px]">
+    <div className="flex h-full w-full overflow-hidden font-mono text-sm">
       <SkeletonList
         className="flex w-10 shrink-0 flex-col gap-0.5 border-r py-1"
         count={LINES}

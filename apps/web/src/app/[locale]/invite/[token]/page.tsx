@@ -1,6 +1,10 @@
+import { createMetadata } from "@/shared/lib/metadata";
+
 import { InvitePageCard } from "@/features/workspace/ui/invite-page-card";
 
 import { HydrateClient, prefetch, trpcProxy } from "@/server/core/trpc/prefetch";
+
+export const generateMetadata = createMetadata("invite_title", "invite_desc");
 
 export default async function InvitePage({
   params,

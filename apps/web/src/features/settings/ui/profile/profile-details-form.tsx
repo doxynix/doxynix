@@ -66,7 +66,7 @@ export function ProfileDetailsForm({ user }: Readonly<Props>) {
   return (
     <Form {...form}>
       <form
-        className="flex w-full flex-col gap-4"
+        className="grid w-full gap-4 sm:grid-cols-2"
         onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
       >
         <FormField
@@ -116,7 +116,7 @@ export function ProfileDetailsForm({ user }: Readonly<Props>) {
             </FormItem>
           )}
         />
-        <div className="flex justify-end">
+        <div className="flex justify-end sm:col-span-2">
           <LoadingButton
             disabled={!isDirty || !isValid || updateProfile.isPending}
             isLoading={updateProfile.isPending}

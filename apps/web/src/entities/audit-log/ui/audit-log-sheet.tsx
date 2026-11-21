@@ -56,11 +56,11 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
         <SheetTrigger asChild>
           <AppButton
             aria-label={t("view_raw")}
-            className="opacity-0 transition-opacity group-hover:opacity-100"
+            className="opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground focus-visible:opacity-100"
             size="icon"
             variant="ghost"
           >
-            <Eye className="text-muted-foreground hover:text-foreground" />
+            <Eye />
           </AppButton>
         </SheetTrigger>
       </AppTooltip>
@@ -73,13 +73,11 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
           storageKey: "sheet-audit-log-width",
         }}
       >
-        <div className="grid h-full grid-rows-[auto_1fr] gap-6">
+        <div className="grid h-full min-h-0 grid-rows-[auto_1fr] gap-6">
           <SheetHeader className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div className="flex flex-col gap-1">
-                <SheetTitle className="font-semibold text-xl tracking-tight">
-                  {t("event_details")}
-                </SheetTitle>
+                <SheetTitle className="font-semibold text-xl">{t("event_details")}</SheetTitle>
                 <SheetDescription className="text-muted-foreground text-xs">
                   {log.entityType} • {log.actionTitle}
                 </SheetDescription>
@@ -131,7 +129,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
               />
             </div>
           </SheetHeader>
-          <div className="relative flex-1 rounded-xl border">
+          <div className="relative min-h-0 flex-1 rounded-xl border">
             <ScrollArea className="h-full w-full">
               <div className="p-6">
                 {isLoading ? (

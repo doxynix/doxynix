@@ -7,11 +7,13 @@ import {
   AlertTriangle,
   Code2,
   Cpu,
+  FileCog,
   Flame,
   GitBranch,
   Laptop,
   Layers,
   Link2Off,
+  type LucideIcon,
   Network,
   Play,
   PlayCircle,
@@ -32,14 +34,16 @@ import { SkeletonText } from "@/shared/ui/kit/app-skeleton";
 
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
+import { activeStatKeys, type FloatingCardStatKey } from "../model/floating-card-stats";
+
 const MARKERS_CONFIG = {
   api: {
-    color: "border-none bg-blue-500/10 text-blue-500",
+    color: "border-none bg-info/10 text-info",
     icon: Terminal,
     markerKey: "marker_api_endpoint" as const,
   },
   client: {
-    color: "border-none bg-violet-500/10 text-violet-400",
+    color: "border-none bg-brand-ai/10 text-brand-ai",
     icon: Laptop,
     markerKey: "marker_client_side" as const,
   },
@@ -49,7 +53,7 @@ const MARKERS_CONFIG = {
     markerKey: "marker_config" as const,
   },
   entrypoint: {
-    color: "border-none bg-amber-500/10 text-amber-500",
+    color: "border-none bg-warning/10 text-warning",
     icon: Play,
     markerKey: "marker_entrypoint" as const,
   },
@@ -59,29 +63,33 @@ const MARKERS_CONFIG = {
     markerKey: "marker_high_risk" as const,
   },
   server: {
-    color: "border-none bg-emerald-500/10 text-emerald-400",
+    color: "border-none bg-success/10 text-success",
     icon: Server,
     markerKey: "marker_server_side" as const,
   },
   shared: {
-    color: "border-none bg-orange-500/10 text-orange-400",
+    color: "border-none bg-warning/10 text-warning",
     icon: Layers,
     markerKey: "marker_shared" as const,
   },
 } as const;
 
 const STATS_CONFIG = {
-  apiCount: { icon: Unplug, statKey: "stats_api_routes" as const },
-  changeCouplingCount: { icon: RefreshCw, statKey: "stats_couplings" as const },
-  churnCount: { icon: GitBranch, statKey: "stats_churns" as const },
-  dependencyHotspotCount: { icon: Network, statKey: "stats_centrality" as const },
-  entrypointCount: { icon: PlayCircle, statKey: "stats_entrypoints" as const },
-  frameworkCount: { icon: Cpu, statKey: "stats_frameworks" as const },
-  graphWarningCount: { icon: AlertCircle, statKey: "stats_unresolved" as const },
-  hotspotCount: { icon: Flame, statKey: "stats_hotspots" as const },
-  orphanCount: { icon: Link2Off, statKey: "stats_orphan" as const },
-  riskCount: { icon: ShieldAlert, isDestructive: true, statKey: "stats_vulnerabilities" as const },
-} as const;
+  apiCount: { icon: Unplug, statKey: "stats_api_routes" },
+  changeCouplingCount: { icon: RefreshCw, statKey: "stats_couplings" },
+  churnCount: { icon: GitBranch, statKey: "stats_churns" },
+  configCount: { icon: FileCog, statKey: "stats_configs" },
+  dependencyHotspotCount: { icon: Network, statKey: "stats_centrality" },
+  entrypointCount: { icon: PlayCircle, statKey: "stats_entrypoints" },
+  frameworkCount: { icon: Cpu, statKey: "stats_frameworks" },
+  graphWarningCount: { icon: AlertCircle, statKey: "stats_unresolved" },
+  hotspotCount: { icon: Flame, statKey: "stats_hotspots" },
+  orphanCount: { icon: Link2Off, statKey: "stats_orphan" },
+  riskCount: { icon: ShieldAlert, isDestructive: true, statKey: "stats_vulnerabilities" },
+} as const satisfies Record<
+  FloatingCardStatKey,
+  { icon: LucideIcon; isDestructive?: boolean; statKey: keyof IntlMessages["Dashboard"] }
+>;
 
 type Props = {
   anchorEl: HTMLElement | null;
@@ -138,19 +146,17 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
   const activeMarkers =
     node != null
       ? Object.entries(node.markers)
-          .filter(([_, isActive]) => isActive)
-          .map(([key]) => key as keyof typeof MARKERS_CONFIG)
+          .filter(([, isActive]) => isActive)
+          .flatMap(([key]) => (key in MARKERS_CONFIG ? [key as keyof typeof MARKERS_CONFIG] : []))
       : [];
 
   const activeStats =
     node != null
-      ? Object.entries(node.stats)
-          .filter(([key, value]) => typeof value === "number" && value > 0 && key !== "pathCount")
-          .map(([key, value]) => ({
-            config: STATS_CONFIG[key as keyof typeof STATS_CONFIG],
-            key,
-            value: value,
-          }))
+      ? activeStatKeys(node.stats).map((key) => ({
+          config: STATS_CONFIG[key],
+          key,
+          value: node.stats[key],
+        }))
       : [];
 
   return createPortal(
@@ -208,7 +214,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
               {node.label}
             </span>
             <AppBadge
-              className="text-[10px] uppercase"
+              className="text-2xs"
               variant="outline"
             >
               {node.kind}
@@ -225,7 +231,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
                 return (
                   <AppBadge
                     className={cn(
-                      "flex select-none items-center gap-1 px-2 py-0.5 font-semibold text-[9px]",
+                      "flex select-none items-center gap-1 px-2 py-0.5 font-semibold text-2xs",
                       marker.color,
                     )}
                     key={key}
@@ -241,7 +247,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
 
           <div className="flex flex-col gap-2 border-t pt-2.5">
             {node.score > 0 && (
-              <div className="flex items-center gap-1.5 font-bold text-[10px]">
+              <div className="flex items-center gap-1.5 font-bold text-2xs">
                 <AlertTriangle className="size-3" />
                 <span>{t("importance_score")}</span>
                 <span>{node.score}</span>
@@ -257,7 +263,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
 
                   return (
                     <div
-                      className="flex items-center justify-between gap-2 bg-popover p-2.5 font-mono text-[10px]"
+                      className="flex items-center justify-between gap-2 bg-popover p-2.5 font-mono text-2xs"
                       key={key}
                     >
                       <div className="flex min-w-0 items-center gap-1">

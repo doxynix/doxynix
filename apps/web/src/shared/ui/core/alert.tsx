@@ -39,7 +39,7 @@ function Alert({
 function AlertTitle({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
-      className={cn("col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight", className)}
+      className={cn("col-start-2 line-clamp-1 min-h-4 font-medium", className)}
       data-slot="alert-title"
       {...props}
     />
@@ -50,7 +50,7 @@ function AlertDescription({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       className={cn(
-        "col-start-2 grid justify-items-start gap-1 text-muted-foreground text-sm [&_p]:leading-relaxed",
+        "col-start-2 text-muted-foreground text-sm leading-relaxed [&>p+p]:mt-1",
         className,
       )}
       data-slot="alert-description"

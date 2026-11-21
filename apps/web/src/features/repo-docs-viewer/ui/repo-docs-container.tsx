@@ -66,7 +66,7 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
 
   if (isLoading) {
     return (
-      <div className="flex h-[calc(100dvh-250px)] w-full flex-row gap-10">
+      <div className="flex h-[var(--repo-workspace-height)] w-full flex-row gap-10">
         <div className="flex w-72 shrink-0 flex-col gap-4">
           <SkeletonText
             lines={1}

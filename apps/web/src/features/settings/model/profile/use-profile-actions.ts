@@ -162,7 +162,12 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
         };
       });
 
-      props.onAvatarUpdateSuccess?.(blobResult.url);
+      await new Promise<void>((resolve) => {
+        const image = new Image();
+        image.onload = () => resolve();
+        image.onerror = () => resolve();
+        image.src = blobResult.url;
+      });
 
       return blobResult;
     };
@@ -174,7 +179,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
       })
       .finally(() => {
         setIsProcessing(false);
-        URL.revokeObjectURL(localPreviewUrl);
+        window.setTimeout(() => URL.revokeObjectURL(localPreviewUrl), 5000);
       });
 
     toast.promise(uploadPromise, {

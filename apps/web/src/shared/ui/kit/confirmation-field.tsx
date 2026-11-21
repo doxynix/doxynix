@@ -9,7 +9,7 @@ import { Label } from "@/shared/ui/core/label";
 import { CopyButton } from "./copy-button";
 
 export function phraseMatches(value: string, phrase: string): boolean {
-  return value.trim().toLowerCase() === phrase.trim().toLowerCase();
+  return value.trim() === phrase.trim();
 }
 
 type Props = {

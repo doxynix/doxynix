@@ -23,10 +23,10 @@ export function MetricsPreview() {
             {t("preview_bus_factor", { count: 3, files: 142 })}
           </p>
           <div className="mt-1 flex gap-1">
-            <span className="rounded-full border bg-card px-2 py-0.5 text-[10px]">
+            <span className="rounded-full border bg-card px-2 py-0.5 text-2xs">
               {t("preview_risks", { count: 24 })}
             </span>
-            <span className="rounded-full border bg-card px-2 py-0.5 text-[10px]">
+            <span className="rounded-full border bg-card px-2 py-0.5 text-2xs">
               {t("preview_hotspots", { count: 12 })}
             </span>
           </div>
@@ -39,7 +39,7 @@ export function MetricsPreview() {
             className="flex flex-col gap-1"
             key={bar.labelKey}
           >
-            <div className="flex items-center justify-between text-[10px]">
+            <div className="flex items-center justify-between text-2xs">
               <span className="text-muted-foreground">{t(bar.labelKey)}</span>
               <span>{bar.value}%</span>
             </div>

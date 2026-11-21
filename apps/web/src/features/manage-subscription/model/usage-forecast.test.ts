@@ -220,4 +220,25 @@ describe("buildUsageForecast", () => {
 
     expect(forecast.chartRows[2]?.actual).toBe(9);
   });
+
+  it("does not duplicate today's actual usage as a forecast point", () => {
+    const { periodStart, periodEnd } = periodOf(11);
+    const now = new Date(periodStart.getTime() + 5.2 * DAY_MS);
+
+    const forecast = buildUsageForecast({
+      limit: 100,
+      now,
+      periodEnd,
+      periodStart,
+      series: [],
+      used: 30,
+    });
+
+    const today = forecast.chartRows.find((row) => row.day === forecast.daysElapsed);
+
+    expect(today?.actual).not.toBeNull();
+    expect(today?.forecast).toBeNull();
+    expect(forecast.chartRows.at(-1)?.day).toBe(forecast.daysTotal);
+    expect(forecast.chartRows.at(-1)?.forecast).toBe(forecast.projectedPercent);
+  });
 });

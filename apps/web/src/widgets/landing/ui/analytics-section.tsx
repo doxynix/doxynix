@@ -20,7 +20,7 @@ export async function AnalyticsSection() {
       </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-        <Card className="col-span-1 bg-landing-bg-light/50 md:col-span-2">
+        <Card className="col-span-1 md:col-span-2">
           <CardHeader>
             <CardTitle>{t("section_analytics_card_title")}</CardTitle>
             <CardDescription>{t("section_analytics_card_desc")}</CardDescription>
@@ -33,18 +33,14 @@ export async function AnalyticsSection() {
         </Card>
 
         <div className="flex flex-col gap-4">
-          <Card className="flex flex-1 flex-col justify-center bg-landing-bg-light/50 p-6">
-            <p className="text-muted-foreground text-sm uppercase tracking-widest">
-              {t("section_analytics_bus_factor")}
-            </p>
-            <span className="mt-2 font-bold text-5xl text-destructive">1.2</span>
+          <Card className="flex flex-1 flex-col justify-center p-6">
+            <p className="text-muted-foreground text-sm">{t("section_analytics_bus_factor")}</p>
+            <span className="mt-2 font-bold text-4xl text-destructive">1.2</span>
             <p className="mt-2 text-muted-foreground text-xs">{t("section_analytics_review")}</p>
           </Card>
-          <Card className="flex flex-1 flex-col justify-center bg-landing-bg-light/50 p-6">
-            <p className="text-muted-foreground text-sm uppercase tracking-widest">
-              {t("section_analytics_maintain")}
-            </p>
-            <span className="mt-2 font-bold text-5xl text-success">A+</span>
+          <Card className="flex flex-1 flex-col justify-center p-6">
+            <p className="text-muted-foreground text-sm">{t("section_analytics_maintain")}</p>
+            <span className="mt-2 font-bold text-4xl text-success">A+</span>
             <div className="mt-2 text-muted-foreground text-xs">
               {t("section_analytics_improve")}
             </div>

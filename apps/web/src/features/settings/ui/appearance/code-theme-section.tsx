@@ -14,7 +14,6 @@ import {
 } from "@/shared/lib/appearance-preferences";
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import {
   Command,
   CommandEmpty,
@@ -31,6 +30,7 @@ import {
   DEFAULT_CODE_SAMPLE_ID,
   findCodeSample,
 } from "../../model/appearance/code-samples";
+import { AppearanceRow, AppearanceSection } from "./appearance-section";
 import { CodePreview } from "./code-preview";
 
 export function CodeThemeSection({ preferences, update }: Readonly<AppearanceSectionProps>) {
@@ -119,19 +119,15 @@ export function CodeThemeSection({ preferences, update }: Readonly<AppearanceSec
     activeTheme !== "auto" ? activeTheme : AUTO_CODE_THEMES[appTone];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("settings_appearance_code_theme_title")}</CardTitle>
-        <CardDescription>{t("settings_appearance_code_theme_desc")}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-6">
-        <div className="flex items-center justify-between gap-6">
-          <div>
-            <p className="font-medium text-sm">{t("settings_appearance_code_theme_row_title")}</p>
-            <p className="text-muted-foreground text-xs">
-              {t("settings_appearance_code_theme_row_desc")}
-            </p>
-          </div>
+    <AppearanceSection
+      description={t("settings_appearance_code_theme_desc")}
+      title={t("settings_appearance_code_theme_title")}
+    >
+      <div className="flex flex-col gap-5">
+        <AppearanceRow
+          description={t("settings_appearance_code_theme_row_desc")}
+          title={t("settings_appearance_code_theme_row_title")}
+        >
           <Popover>
             <PopoverTrigger asChild>
               <AppButton
@@ -140,7 +136,7 @@ export function CodeThemeSection({ preferences, update }: Readonly<AppearanceSec
                 variant="outline"
               >
                 <span className="truncate">{labelByTheme[activeTheme]}</span>
-                <ChevronDown className="ml-2 size-3.5 opacity-50 shrink-0" />
+                <ChevronDown className="ml-2 size-3.5 opacity-50" />
               </AppButton>
             </PopoverTrigger>
             <PopoverContent
@@ -162,7 +158,7 @@ export function CodeThemeSection({ preferences, update }: Readonly<AppearanceSec
                       >
                         <Check
                           className={cn(
-                            "mr-2 size-4",
+                            "mr-2",
                             activeTheme === theme ? "opacity-100" : "opacity-0",
                           )}
                         />
@@ -174,14 +170,12 @@ export function CodeThemeSection({ preferences, update }: Readonly<AppearanceSec
               </Command>
             </PopoverContent>
           </Popover>
-        </div>
-        <div className="flex items-center justify-between gap-6">
-          <div>
-            <p className="font-medium text-sm">{t("settings_appearance_code_lang_row_title")}</p>
-            <p className="text-muted-foreground text-xs">
-              {t("settings_appearance_code_lang_row_desc")}
-            </p>
-          </div>
+        </AppearanceRow>
+
+        <AppearanceRow
+          description={t("settings_appearance_code_lang_row_desc")}
+          title={t("settings_appearance_code_lang_row_title")}
+        >
           <Popover>
             <PopoverTrigger asChild>
               <AppButton
@@ -190,7 +184,7 @@ export function CodeThemeSection({ preferences, update }: Readonly<AppearanceSec
                 variant="outline"
               >
                 <span className="truncate">{findCodeSample(sampleId).label}</span>
-                <ChevronDown className="ml-2 size-3.5 opacity-50 shrink-0" />
+                <ChevronDown className="ml-2 size-3.5 opacity-50" />
               </AppButton>
             </PopoverTrigger>
             <PopoverContent
@@ -224,15 +218,16 @@ export function CodeThemeSection({ preferences, update }: Readonly<AppearanceSec
               </Command>
             </PopoverContent>
           </Popover>
-        </div>
-        <CodePreview
-          code={findCodeSample(sampleId).sample}
-          lang={findCodeSample(sampleId).id}
-          theme={previewTheme}
-          title={findCodeSample(sampleId).label}
-          tone={appTone}
-        />
-      </CardContent>
-    </Card>
+        </AppearanceRow>
+      </div>
+
+      <CodePreview
+        code={findCodeSample(sampleId).sample}
+        lang={findCodeSample(sampleId).id}
+        theme={previewTheme}
+        title={findCodeSample(sampleId).label}
+        tone={appTone}
+      />
+    </AppearanceSection>
   );
 }

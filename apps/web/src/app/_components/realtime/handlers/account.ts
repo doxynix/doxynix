@@ -1,4 +1,5 @@
 import { REALTIME_CONFIG } from "@/shared/config/realtime";
+import { authClient } from "@/shared/lib/auth-client";
 
 import type { RealtimeDeps, RealtimeHandlers } from "../deps";
 
@@ -18,6 +19,7 @@ export function accountHandlers({ queryClient, trpc }: RealtimeDeps): RealtimeHa
       void queryClient.invalidateQueries(trpc.user.me.pathFilter());
       void queryClient.invalidateQueries(trpc.user.getActiveSessions.pathFilter());
       void queryClient.invalidateQueries(trpc.user.getOnboardingState.pathFilter());
+      authClient.$store.notify("$sessionSignal");
     },
   };
 }

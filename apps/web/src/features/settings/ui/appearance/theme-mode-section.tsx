@@ -8,8 +8,9 @@ import { withThemeTransition } from "@/shared/lib/appearance-preferences";
 import { cn } from "@/shared/lib/cn";
 import { useAppearancePreferences } from "@/shared/lib/hooks/use-appearance-preferences";
 import { useMounted } from "@/shared/lib/hooks/use-mounted";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Label } from "@/shared/ui/core/label";
+
+import { AppearanceSection } from "./appearance-section";
 
 const CARDS = [
   { muted: 0, widths: ["w-3/5", "w-9/10", "w-7/10"] },
@@ -29,7 +30,7 @@ function WindowMock({ tone }: Readonly<{ tone: WindowTone }>) {
           <div className="size-[5px] shrink-0 rounded-full bg-brand-ai" />
           <div className="h-[3px] w-3/5 rounded-full bg-border" />
         </div>
-        <div className="flex h-[7px] items-center rounded-[2px] bg-surface-selected px-[3px]">
+        <div className="flex h-[7px] items-center rounded-2xs bg-surface-selected px-[3px]">
           <div className="h-[2.5px] w-3/4 rounded-full bg-muted-foreground" />
         </div>
         <div className="flex h-[7px] items-center px-[3px]">
@@ -45,7 +46,7 @@ function WindowMock({ tone }: Readonly<{ tone: WindowTone }>) {
         <div className="grid flex-1 grid-cols-2 gap-1">
           {CARDS.map(({ muted, widths }) => (
             <div
-              className="flex flex-col gap-[2px] rounded-[2px] bg-card p-[3px] ring-1 ring-border ring-inset"
+              className="flex flex-col gap-[2px] rounded-2xs bg-card p-[3px] ring-1 ring-border ring-inset"
               key={widths.join()}
             >
               {widths.map((width, lineIndex) => (
@@ -61,7 +62,7 @@ function WindowMock({ tone }: Readonly<{ tone: WindowTone }>) {
             </div>
           ))}
         </div>
-        <div className="h-[7px] w-[26%] rounded-[2px] bg-foreground" />
+        <div className="h-[7px] w-[26%] rounded-2xs bg-foreground" />
       </div>
     </div>
   );
@@ -171,12 +172,11 @@ export function ThemeModeSection() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("settings_appearance_theme_title")}</CardTitle>
-        <CardDescription>{t("settings_appearance_theme_desc")}</CardDescription>
-      </CardHeader>
-      <CardContent
+    <AppearanceSection
+      description={t("settings_appearance_theme_desc")}
+      title={t("settings_appearance_theme_title")}
+    >
+      <div
         aria-label={tCommon("toggle_theme")}
         className="flex flex-col gap-3 sm:flex-row"
         role="radiogroup"
@@ -211,7 +211,7 @@ export function ThemeModeSection() {
           tone="system"
           value="system"
         />
-      </CardContent>
-    </Card>
+      </div>
+    </AppearanceSection>
   );
 }

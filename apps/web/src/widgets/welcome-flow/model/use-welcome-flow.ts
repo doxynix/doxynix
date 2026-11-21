@@ -84,9 +84,9 @@ export function useWelcomeFlow({ initialState, user }: Input) {
       return;
     }
 
-    toast.error(t("github_error"));
+    toast.error(errorMessage(error));
     void setError(null);
-  }, [error, setError, t]);
+  }, [error, errorMessage, setError]);
 
   const handleIntentChange = (nextIntent: OnboardingIntent) => {
     setIntent(nextIntent);

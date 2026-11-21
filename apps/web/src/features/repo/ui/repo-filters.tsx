@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/shared/ui/core/select";
 import { AppListDateFilter } from "@/shared/ui/kit/app-list-date-filter";
+import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { repoParsers } from "@/entities/repo/model/repo-parsers";
 
@@ -46,8 +47,8 @@ export function RepoFilters() {
   };
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex flex-wrap items-center justify-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Select
           onValueChange={(v) => handleUpdate("status", v === "all" ? null : v)}
           value={filters.status ?? "all"}
@@ -103,15 +104,18 @@ export function RepoFilters() {
 
         <AppListDateFilter parsers={repoParsers} />
 
-        <AppButton
-          className="px-2"
-          disabled={!hasFilters}
-          onClick={handleReset}
-          variant="outline"
-        >
-          {tCommon("reset")}
-          <X />
-        </AppButton>
+        <AppTooltip content={tCommon("reset")}>
+          <AppButton
+            aria-label={tCommon("reset")}
+            className="size-9 shrink-0"
+            disabled={!hasFilters}
+            onClick={handleReset}
+            size="icon"
+            variant="ghost"
+          >
+            <X />
+          </AppButton>
+        </AppTooltip>
       </div>
     </div>
   );

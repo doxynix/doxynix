@@ -46,9 +46,7 @@ export function AdminAuditPayloadSheet({ logId, onOpenChange, open }: Readonly<P
         <SheetHeader className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-1">
-              <SheetTitle className="font-semibold text-xl tracking-tight">
-                {t("detail_title")}
-              </SheetTitle>
+              <SheetTitle className="font-semibold text-xl">{t("detail_title")}</SheetTitle>
               <SheetDescription className="text-muted-foreground text-xs">{logId}</SheetDescription>
             </div>
             <CopyButton

@@ -91,10 +91,10 @@ export const userMapper = {
     };
   },
 
-  toLinkedAccount(account: LinkedAccountRecord) {
+  toLinkedAccount(account: LinkedAccountRecord, fallbackEmail?: string | null) {
     return {
       accountId: account.accountId,
-      email: account.email,
+      email: account.email ?? fallbackEmail ?? null,
       image: account.image,
       name: account.name,
       provider: account.providerId,

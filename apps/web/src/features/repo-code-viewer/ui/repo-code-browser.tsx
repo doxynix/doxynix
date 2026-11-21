@@ -421,7 +421,7 @@ export function RepoCodeBrowser({
         <div className="flex items-center gap-2 overflow-hidden">
           <FileIcon className="text-muted-foreground" />
           <AppBreadcrumbs
-            className="min-w-0 overflow-hidden text-[10px]"
+            className="min-w-0 overflow-hidden text-2xs"
             items={breadcrumbItems}
             listClassName="sm:gap-1"
           />
@@ -435,7 +435,7 @@ export function RepoCodeBrowser({
               <DropdownMenuTrigger asChild>
                 <AppButton
                   aria-label={t("repo_pr_draft_staged_label")}
-                  className="h-6 shrink-0 gap-1 rounded-full px-2 text-[10px]"
+                  className="h-6 shrink-0 gap-1 rounded-full px-2 text-2xs"
                   size="sm"
                   variant="outline"
                 >
@@ -584,9 +584,7 @@ export function RepoCodeBrowser({
           <div className="flex items-center gap-2">
             <Sparkles />
             <div className="flex flex-col">
-              <span className="font-semibold text-[11px] tracking-tight">
-                {t("repo_code_doc_preview")}
-              </span>
+              <span className="font-semibold text-2xs">{t("repo_code_doc_preview")}</span>
             </div>
           </div>
           <div className="flex items-center gap-2">

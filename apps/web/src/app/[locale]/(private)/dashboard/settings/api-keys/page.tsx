@@ -25,7 +25,7 @@ export default async function ApiKeysPage() {
       <div className="flex w-full flex-col gap-6">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-2">
-            <h2 className="font-bold text-2xl tracking-tight">{t("settings_api_keys_title")}</h2>
+            <h2 className="font-bold text-2xl">{t("settings_api_keys_title")}</h2>
             <p className="text-muted-foreground text-sm">{t("settings_api_keys_desc")}</p>
           </div>
         </div>

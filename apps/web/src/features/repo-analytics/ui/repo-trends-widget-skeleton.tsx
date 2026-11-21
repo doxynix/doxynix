@@ -1,29 +1,34 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { Card, CardAction, CardContent, CardHeader } from "@/shared/ui/core/card";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 
 export function TrendsWidgetsSkeleton() {
-  const t = useTranslations("Dashboard");
-
   return (
     <Card>
-      <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
-        <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-          <CardTitle className="text-xl">{t("trends_title")}</CardTitle>
-          <CardDescription>{t("trends_desc")}</CardDescription>
+      <CardHeader>
+        <div className="flex flex-col gap-1">
+          <SkeletonText
+            lines={1}
+            size="lg"
+            widths={["w-40"]}
+          />
+          <SkeletonText
+            lines={1}
+            size="sm"
+            widths={["w-64"]}
+          />
         </div>
-        <div className="flex items-center px-6 py-4 sm:py-0">
-          <Skeleton className="h-9 w-42" />
-        </div>
+
+        <CardAction>
+          <Skeleton className="h-8 w-42 rounded-lg" />
+        </CardAction>
       </CardHeader>
 
-      <CardContent className="px-6 pt-6">
+      <CardContent>
         <div className="relative h-75">
-          <div className="absolute top-0 left-0 flex h-full w-8 flex-col justify-between py-2 text-[10px]">
+          <div className="absolute top-0 left-0 flex h-full w-8 flex-col justify-between py-2 text-2xs">
             <SkeletonList
               className="flex h-full flex-col justify-between"
               count={5}

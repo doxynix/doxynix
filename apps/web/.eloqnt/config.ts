@@ -1,5 +1,7 @@
 import { defineConfig } from "@eloqnt/cli";
 
+import { DEFAULT_LOCALE, LOCALES } from "../src/shared/config/locales";
+
 export default defineConfig({
   lint: {
     overrides: [
@@ -33,9 +35,9 @@ export default defineConfig({
   },
   messages: {
     format: "json",
-    locales: ["en", "de", "es", "fr", "pt-BR", "ru", "zh-CN", "it", "ja", "ko", "pl", "tr"],
+    locales: [...LOCALES],
     path: "./messages",
-    sourceLocale: "en",
+    sourceLocale: DEFAULT_LOCALE,
   },
   srcPath: "./src",
 });

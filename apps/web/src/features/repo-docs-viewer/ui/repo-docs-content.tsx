@@ -200,31 +200,31 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
 
             const configMap = {
               CAUTION: {
-                className: "border-red-500/30 bg-red-500/5 text-red-500",
+                className: "border-destructive/30 bg-destructive/5 text-destructive",
                 icon: ShieldAlert,
                 title: t("alert_caution"),
                 variant: "destructive" as const,
               },
               IMPORTANT: {
-                className: "border-purple-500/30 bg-purple-500/5 text-purple-500",
+                className: "border-brand-ai/30 bg-brand-ai/5 text-brand-ai",
                 icon: Terminal,
                 title: t("alert_important"),
                 variant: "default" as const,
               },
               NOTE: {
-                className: "border-blue-500/30 bg-blue-500/5 text-blue-500",
+                className: "border-info/30 bg-info/5 text-info",
                 icon: Info,
                 title: t("alert_note"),
                 variant: "default" as const,
               },
               TIP: {
-                className: "border-emerald-500/30 bg-emerald-500/5 text-emerald-500",
+                className: "border-success/30 bg-success/5 text-success",
                 icon: Lightbulb,
                 title: t("alert_tip"),
                 variant: "default" as const,
               },
               WARNING: {
-                className: "border-amber-500/30 bg-amber-500/5 text-amber-500",
+                className: "border-warning/30 bg-warning/5 text-warning",
                 icon: AlertTriangle,
                 title: t("alert_warning"),
                 variant: "default" as const,
@@ -278,7 +278,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
                 variant={alertConfig.variant}
               >
                 <IconComponent className="absolute top-4 left-4" />
-                <AlertTitle className="mb-1 font-bold font-sans text-xs uppercase">
+                <AlertTitle className="mb-1 font-bold font-sans text-xs">
                   {alertConfig.title}
                 </AlertTitle>
 
@@ -340,7 +340,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
               }
             } else {
               result = (
-                <span className="select-none rounded border border-destructive/20 bg-destructive/5 px-1.5 py-0.5 font-mono text-[10px] text-destructive">
+                <span className="select-none rounded border border-destructive/20 bg-destructive/5 px-1.5 py-0.5 font-mono text-2xs text-destructive">
                   {t("blocked_unsafe_link")}
                 </span>
               );
@@ -405,7 +405,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
     <div className="fade-in slide-in-from-bottom-2 animate-in duration-200">
       <article
         aria-label={t("repo_docs_content_aria")}
-        className="prose dark:prose-invert wrap-break-word min-w-0 max-w-none prose-pre:bg-transparent prose-pre:p-0"
+        className="markdown-prose prose dark:prose-invert wrap-break-word min-w-0 max-w-none"
         ref={contentRef}
       >
         {mounted ? (

@@ -9,7 +9,7 @@ export function DocsPreview() {
     <div className="flex h-full flex-col gap-3 overflow-hidden rounded-xl border bg-background/60 p-4">
       <div className="flex items-center justify-between">
         <div className="h-4 w-2/5 rounded-full bg-foreground" />
-        <span className="rounded-full border bg-card px-2 py-0.5 text-[10px] text-muted-foreground">
+        <span className="rounded-full border bg-card px-2 py-0.5 text-2xs text-muted-foreground">
           {t("preview_generated")}
         </span>
       </div>
@@ -20,7 +20,7 @@ export function DocsPreview() {
         <div className="h-2 w-[92%] rounded-full bg-border" />
       </div>
 
-      <div className="mt-1 rounded-lg border bg-card p-3 font-mono text-[10px] leading-5">
+      <div className="mt-1 rounded-lg border bg-card p-3 font-mono text-2xs leading-5">
         <div>
           <span className="text-brand-ai">import</span>{" "}
           <span className="text-foreground">{"{ auth }"}</span>{" "}
@@ -37,7 +37,7 @@ export function DocsPreview() {
         <div>{"}"}</div>
       </div>
 
-      <div className="mt-auto flex items-center gap-2 text-[10px] text-muted-foreground">
+      <div className="mt-auto flex items-center gap-2 text-2xs text-muted-foreground">
         <span className="rounded-full border bg-card px-2 py-0.5">README</span>
         <span className="rounded-full border bg-card px-2 py-0.5">API</span>
         <span className="rounded-full border bg-card px-2 py-0.5">{t("preview_architecture")}</span>

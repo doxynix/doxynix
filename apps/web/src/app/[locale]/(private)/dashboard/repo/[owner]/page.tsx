@@ -46,13 +46,15 @@ export default async function OwnerPage({ params, searchParams }: Readonly<RepoP
         <h1 className="font-bold text-2xl">{owner}</h1>
       </div>
 
-      <div className="mb-4 flex w-full flex-wrap items-center justify-center gap-2 xl:justify-between">
-        <div className="flex flex-col items-center gap-4 xl:flex-row">
+      <div className="mb-4 grid w-full gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+        <div className="flex flex-col items-center gap-3 lg:flex-row lg:items-center">
           <AppSearch placeholder={t("repo_search_repository")} />
           <RepoFilters />
         </div>
-        <CreateRepoButton />
-        <DeleteByOwnerDialog owner={owner} />
+        <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-end">
+          <CreateRepoButton />
+          <DeleteByOwnerDialog owner={owner} />
+        </div>
       </div>
 
       <Suspense fallback={<RepoListSkeleton count={REPO_LIST_DEFAULT_LIMIT} />}>

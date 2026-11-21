@@ -54,7 +54,7 @@ export function AdminUserSheet({ actions, onOpenChange, open, userId }: Readonly
       >
         <SheetHeader className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <SheetTitle className="font-semibold text-xl tracking-tight">
+            <SheetTitle className="font-semibold text-xl">
               {data ? (data.name ?? data.id) : t("detail_loading")}
             </SheetTitle>
             <SheetDescription className="text-muted-foreground text-xs">

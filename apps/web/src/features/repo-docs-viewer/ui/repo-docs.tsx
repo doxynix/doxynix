@@ -219,7 +219,7 @@ export function RepoDocs({
 
   return (
     <Tabs
-      className="flex h-[calc(100dvh-250px)] w-full flex-row gap-10"
+      className="flex h-[var(--repo-workspace-height)] w-full flex-row gap-10"
       onValueChange={(value) => {
         const nextType = value as DocType;
         trackClientEvent("doc_viewed", { doc_type: nextType, repo_id: repoId });
@@ -283,7 +283,7 @@ export function RepoDocs({
                     </div>
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-3">
-                        <h2 className="font-bold text-2xl tracking-tight">
+                        <h2 className="font-bold text-2xl">
                           {doc.type === "API" && apiMode === "swagger"
                             ? t("repo_docs_interactive_console")
                             : cardTitle}

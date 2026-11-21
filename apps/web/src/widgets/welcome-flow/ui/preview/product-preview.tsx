@@ -70,7 +70,7 @@ export function ProductPreview({ intent }: Readonly<Props>) {
         </AnimatePresence>
       </div>
 
-      <div className="pointer-events-none absolute right-4 bottom-3 rounded-full border bg-background/80 px-2.5 py-1 text-[10px] text-muted-foreground">
+      <div className="pointer-events-none absolute right-4 bottom-3 rounded-full border bg-background/80 px-2.5 py-1 text-2xs text-muted-foreground">
         {t("preview_label")}
       </div>
     </div>

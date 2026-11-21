@@ -5,7 +5,7 @@ import { CloudUpload, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { authClient, type User } from "@/shared/lib/auth-client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { Card, CardContent, CardDescription, CardTitle } from "@/shared/ui/core/card";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
@@ -51,71 +51,62 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
   };
 
   return (
-    <div className="flex w-full flex-col gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("settings_profile_picture_title")}</CardTitle>
-          <CardDescription>{t("settings_profile_picture_desc")}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex items-center gap-6">
-          <div className="relative">
-            <AppAvatar
-              alt={currentUser.name}
-              className="size-24"
-              fallbackClassName="text-2xl"
-              fallbackText={currentUser.name}
-              priority={true}
-              sizeClassName="size-24"
-              src={avatarUrl}
-            />
-            {avatarUrl && (
-              <LoadingButton
-                aria-label={t("settings_profile_delete_avatar")}
-                className="absolute right-0 bottom-0"
-                disabled={removeAvatar.isPending}
-                isLoading={removeAvatar.isPending}
-                onClick={() => removeAvatar.mutate()}
-                size="icon"
-                variant="destructive"
-              >
-                <Trash2 />
-              </LoadingButton>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <input
-              accept=".jpg, .jpeg, .png, .webp"
-              className="hidden"
-              disabled={isUploading}
-              onChange={(e) => void handleImageSelect(e)}
-              ref={fileInputRef}
-              type="file"
-            />
+    <Card>
+      <div className="flex flex-wrap items-center gap-4 px-6">
+        <AppAvatar
+          alt={currentUser.name}
+          fallbackClassName="text-lg"
+          fallbackText={currentUser.name}
+          priority={true}
+          sizeClassName="size-14"
+          src={avatarUrl}
+        />
 
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <CardTitle className="truncate text-base">{currentUser.name}</CardTitle>
+          <CardDescription className="truncate text-sm">{currentUser.email}</CardDescription>
+          <p className="text-muted-foreground text-xs">
+            {t("settings_profile_avatar_requirements")}
+          </p>
+        </div>
+
+        <input
+          accept=".jpg, .jpeg, .png, .webp"
+          className="hidden"
+          disabled={isUploading}
+          onChange={(e) => void handleImageSelect(e)}
+          ref={fileInputRef}
+          type="file"
+        />
+
+        <div className="flex shrink-0 items-center gap-2">
+          <LoadingButton
+            isLoading={isUploading}
+            onClick={() => fileInputRef.current?.click()}
+            size="sm"
+            variant="outline"
+          >
+            <CloudUpload /> {t("settings_profile_upload_photo_button")}
+          </LoadingButton>
+
+          {avatarUrl && (
             <LoadingButton
-              isLoading={isUploading}
-              onClick={() => fileInputRef.current?.click()}
-              variant="outline"
+              aria-label={t("settings_profile_delete_avatar")}
+              disabled={removeAvatar.isPending}
+              isLoading={removeAvatar.isPending}
+              onClick={() => removeAvatar.mutate()}
+              size="icon-sm"
+              variant="ghost"
             >
-              <CloudUpload /> {t("settings_profile_upload_photo_button")}
+              <Trash2 />
             </LoadingButton>
+          )}
+        </div>
+      </div>
 
-            <p className="text-center text-muted-foreground text-xs">
-              {t("settings_profile_avatar_requirements")}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("settings_profile_personal_information_title")}</CardTitle>
-          <CardDescription>{t("settings_profile_personal_information_desc")}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <ProfileDetailsForm user={currentUser} />
-        </CardContent>
-      </Card>
-    </div>
+      <CardContent className="border-t pt-6">
+        <ProfileDetailsForm user={currentUser} />
+      </CardContent>
+    </Card>
   );
 }

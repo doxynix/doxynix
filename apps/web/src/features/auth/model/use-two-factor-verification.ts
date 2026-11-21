@@ -7,6 +7,7 @@ import { useQueryState } from "nuqs";
 import { toast } from "sonner";
 
 import { useRouter } from "@/shared/i18n/navigation";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { authClient } from "@/shared/lib/auth-client";
 
 import { codeLengthFor } from "./two-factor-code";
@@ -14,6 +15,7 @@ import { codeLengthFor } from "./two-factor-code";
 export function useTwoFactorVerification({ target }: { target: string }) {
   const t = useTranslations("Auth");
   const router = useRouter();
+  const errorMessage = useErrorMessage();
   const [twoFactorParam, setTwoFactorParam] = useQueryState("two_factor");
   const [code, setCode] = useState("");
   const [isBackupMode, setIsBackupMode] = useState(false);
@@ -54,8 +56,7 @@ export function useTwoFactorVerification({ target }: { target: string }) {
         router.replace(target);
       })
       .catch((error: unknown) => {
-        const message = error instanceof Error ? error.message : t("error_verification_failed");
-        toast.error(message);
+        toast.error(errorMessage(error));
       })
       .finally(() => {
         setIsVerifying(false);

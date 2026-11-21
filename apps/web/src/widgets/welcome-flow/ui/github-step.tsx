@@ -27,7 +27,7 @@ export function GithubStep({
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
       <div className="flex flex-col gap-2">
-        <h1 className="font-semibold text-2xl tracking-tight sm:text-3xl">{t("github_title")}</h1>
+        <h1 className="font-semibold text-2xl sm:text-3xl">{t("github_title")}</h1>
         <p className="text-muted-foreground">{t("github_desc")}</p>
       </div>
 

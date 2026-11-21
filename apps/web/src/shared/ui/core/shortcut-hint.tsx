@@ -52,7 +52,7 @@ export function ShortcutHint({ className, "data-slot": dataSlot, shortcut }: Sho
         <Fragment key={`${key}-${index}`}>
           {index > 0 && !sequence ? " " : null}
           {sequence && index > 0 ? (
-            <span className="text-[10px] text-muted-foreground"> then </span>
+            <span className="text-2xs text-muted-foreground"> then </span>
           ) : null}
           <Kbd>{key}</Kbd>
         </Fragment>

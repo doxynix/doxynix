@@ -8,10 +8,10 @@ import {
   TEXT_SCALES,
   type TextScale,
 } from "@/shared/lib/appearance-preferences";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { ToggleGroup, ToggleGroupItem } from "@/shared/ui/core/toggle-group";
 
 import type { AppearanceSectionProps } from "../../model/appearance/appearance.types";
+import { AppearanceRow, AppearanceSection } from "./appearance-section";
 
 export function ShapeSection({ preferences, update }: Readonly<AppearanceSectionProps>) {
   const t = useTranslations("Dashboard");
@@ -29,17 +29,15 @@ export function ShapeSection({ preferences, update }: Readonly<AppearanceSection
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("settings_appearance_shape_title")}</CardTitle>
-        <CardDescription>{t("settings_appearance_shape_desc")}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-6">
-        <div className="flex items-center justify-between gap-6">
-          <div>
-            <p className="font-medium text-sm">{t("settings_appearance_radius_title")}</p>
-            <p className="text-muted-foreground text-xs">{t("settings_appearance_radius_desc")}</p>
-          </div>
+    <AppearanceSection
+      description={t("settings_appearance_shape_desc")}
+      title={t("settings_appearance_shape_title")}
+    >
+      <div className="flex flex-col gap-5">
+        <AppearanceRow
+          description={t("settings_appearance_radius_desc")}
+          title={t("settings_appearance_radius_title")}
+        >
           <ToggleGroup
             className="inline-flex h-9 items-center rounded-lg border border-border bg-muted p-1"
             onValueChange={(radius) => {
@@ -61,12 +59,12 @@ export function ShapeSection({ preferences, update }: Readonly<AppearanceSection
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
-        </div>
-        <div className="flex items-center justify-between gap-6">
-          <div>
-            <p className="font-medium text-sm">{t("settings_appearance_text_title")}</p>
-            <p className="text-muted-foreground text-xs">{t("settings_appearance_text_desc")}</p>
-          </div>
+        </AppearanceRow>
+
+        <AppearanceRow
+          description={t("settings_appearance_text_desc")}
+          title={t("settings_appearance_text_title")}
+        >
           <ToggleGroup
             className="inline-flex h-9 items-center rounded-lg border border-border bg-muted p-1"
             onValueChange={(textScale) => {
@@ -88,12 +86,12 @@ export function ShapeSection({ preferences, update }: Readonly<AppearanceSection
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
-        </div>
-        <div className="flex items-center justify-between gap-6">
-          <div>
-            <p className="font-medium text-sm">{t("settings_appearance_border_title")}</p>
-            <p className="text-muted-foreground text-xs">{t("settings_appearance_border_desc")}</p>
-          </div>
+        </AppearanceRow>
+
+        <AppearanceRow
+          description={t("settings_appearance_border_desc")}
+          title={t("settings_appearance_border_title")}
+        >
           <ToggleGroup
             className="inline-flex h-9 items-center rounded-lg border border-border bg-muted p-1"
             onValueChange={(v) => {
@@ -119,8 +117,8 @@ export function ShapeSection({ preferences, update }: Readonly<AppearanceSection
               {t("settings_appearance_border_strong")}
             </ToggleGroupItem>
           </ToggleGroup>
-        </div>
-      </CardContent>
-    </Card>
+        </AppearanceRow>
+      </div>
+    </AppearanceSection>
   );
 }

@@ -131,12 +131,14 @@ export function buildUsageForecast(input: UsageForecastInput): UsageForecast {
     const actual = actualByDay.get(day) ?? null;
     let forecast: null | number = null;
 
-    if (day === daysElapsed) {
-      forecast = percent;
-    } else if (day === daysTotal) {
-      forecast = projectedPercent;
-    } else if (day > daysElapsed) {
-      forecast = projectable ? percent + (day - daysElapsed) * averagePercentPerDay : percent;
+    if (day > daysElapsed) {
+      if (day === daysTotal) {
+        forecast = projectedPercent;
+      } else if (projectable) {
+        forecast = percent + (day - daysElapsed) * averagePercentPerDay;
+      } else {
+        forecast = percent;
+      }
     }
 
     chartRows.push({ actual, day, forecast });

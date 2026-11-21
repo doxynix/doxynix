@@ -229,7 +229,7 @@ export const userService = {
       }),
     ]);
 
-    const mappedAccounts = accounts.map((acc) => userMapper.toLinkedAccount(acc));
+    const mappedAccounts = accounts.map((acc) => userMapper.toLinkedAccount(acc, user?.email));
 
     return { accounts: mappedAccounts, user };
   },

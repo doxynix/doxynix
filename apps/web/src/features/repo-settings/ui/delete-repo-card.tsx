@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { Card, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { Card, CardDescription, CardTitle } from "@/shared/ui/core/card";
 
 import { DeleteRepoDialog } from "./delete-repo-dialog";
 
@@ -12,18 +12,21 @@ export function DeleteRepoCard({ id, name }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
 
   return (
-    <Card className="border-destructive">
-      <CardHeader>
-        <CardTitle>{t("settings_danger_delete_all_repos_title")}</CardTitle>
-        <CardDescription className="muted-foreground mb-4 flex flex-col">
-          <span>{t("settings_danger_delete_all_repos_note_1")}</span>
-          <span>{t("settings_danger_delete_all_repos_note_2")}</span>
+    <Card
+      className="items-center"
+      size="row"
+      tone="danger"
+    >
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <CardTitle className="text-sm">{t("settings_repo_delete_title")}</CardTitle>
+        <CardDescription className="text-xs leading-5">
+          {t("settings_repo_delete_card_note")}
         </CardDescription>
-        <DeleteRepoDialog
-          id={id}
-          name={name}
-        />
-      </CardHeader>
+      </div>
+      <DeleteRepoDialog
+        id={id}
+        name={name}
+      />
     </Card>
   );
 }
