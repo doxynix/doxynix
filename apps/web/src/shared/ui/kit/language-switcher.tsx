@@ -4,10 +4,10 @@ import { useState, useTransition } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 
-import { LOCALES, type Locale } from "@/shared/config/locales";
+import { FLAGS, LOCALE_LABEL_KEYS, LOCALES } from "@/shared/config/locales";
 import { usePathname, useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { Card } from "@/shared/ui/core/card";
 import {
   Select,
   SelectContent,
@@ -18,28 +18,13 @@ import {
 
 import { Spinner } from "../core/spinner";
 
-export const FLAGS: Record<Locale, string> = {
-  de: "/icons/flags/de.svg",
-  en: "/icons/flags/us.svg",
-  es: "/icons/flags/es.svg",
-  fr: "/icons/flags/fr.svg",
-  it: "/icons/flags/it.svg",
-  ja: "/icons/flags/jp.svg",
-  ko: "/icons/flags/kr.svg",
-  pl: "/icons/flags/pl.svg",
-  "pt-BR": "/icons/flags/br.svg",
-  ru: "/icons/flags/ru.svg",
-  tr: "/icons/flags/tr.svg",
-  "zh-CN": "/icons/flags/cn.svg",
-};
-
 const loadedFlags = new Map<string, boolean>();
 
 export function Flag({ alt, src }: Readonly<{ alt: string; src: string }>) {
   const [loaded, setLoaded] = useState(loadedFlags.get(src) ?? false);
 
   return (
-    <div className="relative h-3.5 w-5 shrink-0 overflow-hidden rounded-[2px]">
+    <div className="relative h-3.5 w-5 shrink-0 overflow-hidden rounded-2xs">
       <Image
         alt={alt}
         className={cn(
@@ -72,18 +57,19 @@ export function LanguageSwitcher() {
       router.replace(pathname, { locale: nextLocale });
     });
   };
-  const translationKeys = LOCALES.map(
-    (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const,
-  );
 
   return (
-    <div className="flex w-full flex-col gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("settings_language_title")}</CardTitle>
-          <CardDescription>{t("settings_language_desc")}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex items-center gap-2">
+    <Card
+      className="gap-3 px-6 py-4"
+      size="compact"
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <div className="min-w-0">
+          <p className="font-medium text-sm">{t("settings_language_title")}</p>
+          <p className="mt-0.5 text-muted-foreground text-xs">{t("settings_language_desc")}</p>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2">
           <Select
             disabled={isPending}
             onValueChange={handleLanguageChange}
@@ -91,36 +77,30 @@ export function LanguageSwitcher() {
           >
             <SelectTrigger
               aria-label={tCommon("change_language")}
-              className="w-40"
+              className="w-52"
             >
               <SelectValue placeholder={t("settings_language_select_placeholder")} />
             </SelectTrigger>
             <SelectContent>
-              {LOCALES.map((l, i) => {
-                const key = translationKeys[i];
-                if (key == null) {
-                  return null;
-                }
-                return (
-                  <SelectItem
-                    key={l}
-                    value={l}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Flag
-                        alt=""
-                        src={FLAGS[l] || FLAGS.en}
-                      />
-                      <span>{t(key)}</span>
-                    </div>
-                  </SelectItem>
-                );
-              })}
+              {LOCALES.map((l) => (
+                <SelectItem
+                  key={l}
+                  value={l}
+                >
+                  <div className="flex items-center gap-3">
+                    <Flag
+                      alt=""
+                      src={FLAGS[l]}
+                    />
+                    <span>{t(LOCALE_LABEL_KEYS[l])}</span>
+                  </div>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           {isPending && <Spinner />}
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </div>
+    </Card>
   );
 }

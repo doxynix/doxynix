@@ -12,7 +12,7 @@ export default async function MembersPage() {
   return (
     <div className="flex w-full flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h2 className="font-bold text-2xl tracking-tight">{t("settings_members_title")}</h2>
+        <h2 className="font-bold text-2xl">{t("settings_members_title")}</h2>
         <p className="text-muted-foreground text-sm">{t("settings_members_desc")}</p>
       </div>
       <WorkspaceMembersPage />

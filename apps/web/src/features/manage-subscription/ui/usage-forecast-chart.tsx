@@ -62,7 +62,7 @@ function LegendItem({
         />
       ) : (
         <span
-          className="size-2 rounded-[2px]"
+          className="size-2 rounded-2xs"
           style={{ backgroundColor: color }}
         />
       )}
@@ -110,15 +110,18 @@ export function UsageForecastChart({ forecast, periodEnd, periodStart }: Readonl
   const overLimit = forecast.percent >= USAGE_CRITICAL_PERCENT;
   const nearLimit = !overLimit && forecast.percent >= USAGE_WARNING_PERCENT;
 
+  const chartRows = forecast.chartRows.map((row) =>
+    row.day === forecast.daysElapsed && row.forecast == null
+      ? { ...row, forecast: forecast.percent }
+      : row,
+  );
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap items-baseline gap-2">
           <span
-            className={cn(
-              "font-semibold text-3xl tabular-nums tracking-tight",
-              severityClass(forecast.severity),
-            )}
+            className={cn("font-semibold text-3xl tabular-nums", severityClass(forecast.severity))}
           >
             {formatCompactNumber(Math.round(forecast.percent), locale)}%
           </span>
@@ -171,7 +174,7 @@ export function UsageForecastChart({ forecast, periodEnd, periodStart }: Readonl
         config={chartConfig}
       >
         <ComposedChart
-          data={forecast.chartRows}
+          data={chartRows}
           margin={{ bottom: 0, left: 0, right: 8, top: 8 }}
         >
           <defs>
@@ -288,37 +291,48 @@ export function UsageForecastChart({ forecast, periodEnd, periodStart }: Readonl
           )}
 
           <ChartTooltip
-            content={
-              <ChartTooltipContent
-                formatter={(value, name, item) => {
-                  const label =
-                    name === "forecast"
-                      ? t("billing_usage_legend_forecast")
-                      : t("billing_usage_legend_usage");
+            content={(props) => {
+              const filtered = props.payload.filter((item) => {
+                const day = (item.payload as { day?: number } | undefined)?.day;
 
-                  return (
-                    <>
-                      <span
-                        className="mt-0.5 size-2.5 shrink-0 rounded-[2px]"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      <span className="flex flex-1 items-center justify-between gap-2">
-                        <span className="text-muted-foreground">{label}</span>
-                        <span className="font-medium font-mono text-foreground tabular-nums">
-                          {Math.round(Number(value))}%
+                return !(item.dataKey === "forecast" && day === forecast.daysElapsed);
+              });
+
+              return (
+                <ChartTooltipContent
+                  active={props.active}
+                  formatter={(value, name, item) => {
+                    const label =
+                      name === "forecast"
+                        ? t("billing_usage_legend_forecast")
+                        : t("billing_usage_legend_usage");
+
+                    return (
+                      <>
+                        <span
+                          className="mt-0.5 size-2.5 shrink-0 rounded-2xs"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span className="flex flex-1 items-center justify-between gap-2">
+                          <span className="text-muted-foreground">{label}</span>
+                          <span className="font-medium text-foreground tabular-nums">
+                            {Math.round(Number(value))}%
+                          </span>
                         </span>
-                      </span>
-                    </>
-                  );
-                }}
-                indicator="dot"
-                labelFormatter={(_, payload) => {
-                  const day = payload[0]?.payload?.day as number | undefined;
+                      </>
+                    );
+                  }}
+                  indicator="dot"
+                  label={props.label}
+                  labelFormatter={(_, payload) => {
+                    const day = payload[0]?.payload?.day as number | undefined;
 
-                  return day == null ? "" : formatUsageDate(dayToDate(day, periodStart), locale);
-                }}
-              />
-            }
+                    return day == null ? "" : formatUsageDate(dayToDate(day, periodStart), locale);
+                  }}
+                  payload={filtered}
+                />
+              );
+            }}
             cursor={false}
           />
         </ComposedChart>

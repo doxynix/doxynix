@@ -5,7 +5,7 @@ import { RepoMapSidebarSkeleton } from "./repo-map-sidebar-skeleton";
 
 export function RepoMapSkeleton() {
   return (
-    <div className="relative flex h-[calc(100dvh-260px)] w-full flex-col overflow-hidden rounded-xl border">
+    <div className="relative flex h-[var(--repo-workspace-height)] w-full flex-col overflow-hidden rounded-xl border">
       <div className="flex shrink-0 items-center justify-between p-3">
         <div className="flex items-center gap-1.5">
           <SkeletonText

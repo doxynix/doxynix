@@ -21,7 +21,7 @@ import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
 import { AppBadge } from "@/shared/ui/core/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { Card } from "@/shared/ui/core/card";
 import { Progress } from "@/shared/ui/core/progress";
 
 import type { RepoMapNodeData } from "../model/repo-map.types";
@@ -45,7 +45,7 @@ export const RepoNode = ({ data }: Props) => {
       show: isGroup,
       val: stats.pathCount,
     },
-    { color: "text-blue", icon: Globe, id: "api", show: stats.apiCount > 0, val: stats.apiCount },
+    { color: "text-info", icon: Globe, id: "api", show: stats.apiCount > 0, val: stats.apiCount },
     {
       color: "text-destructive",
       icon: ShieldAlert,
@@ -61,56 +61,56 @@ export const RepoNode = ({ data }: Props) => {
       val: stats.churnCount,
     },
     {
-      color: "text-orange-600",
+      color: "text-warning",
       icon: Flame,
       id: "hot",
       show: stats.hotspotCount > 0,
       val: stats.hotspotCount,
     },
     {
-      color: "text-purple-400",
+      color: "text-brand-ai",
       icon: Zap,
       id: "coupling",
       show: stats.dependencyHotspotCount > 0,
       val: stats.dependencyHotspotCount,
     },
     {
-      color: "text-orange-400",
+      color: "text-warning",
       icon: Layers,
       id: "coupled",
       show: stats.changeCouplingCount > 0,
       val: stats.changeCouplingCount,
     },
     {
-      color: "text-emerald-400",
+      color: "text-success",
       icon: ArrowRightCircle,
       id: "entry",
       show: stats.entrypointCount > 0,
       val: stats.entrypointCount,
     },
     {
-      color: "text-amber-500",
+      color: "text-warning",
       icon: AlertTriangle,
       id: "warns",
       show: stats.graphWarningCount > 0,
       val: stats.graphWarningCount,
     },
     {
-      color: "text-slate-400",
+      color: "text-muted-foreground",
       icon: Settings2,
       id: "configs",
       show: stats.configCount > 0,
       val: stats.configCount,
     },
     {
-      color: "text-gray-400",
+      color: "text-muted-foreground",
       icon: FileQuestion,
       id: "orphans",
       show: stats.orphanCount > 0,
       val: stats.orphanCount,
     },
     {
-      color: "text-indigo-400",
+      color: "text-brand-ai",
       icon: Boxes,
       id: "logic",
       show: stats.frameworkCount > 0,
@@ -131,46 +131,51 @@ export const RepoNode = ({ data }: Props) => {
         type="target"
       />
 
-      <Card className="w-96">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card
+        className="w-64 gap-2.5 p-3"
+        size="compact"
+      >
+        <div className="flex items-center gap-2">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-tile bg-surface-hover text-muted-foreground">
             {isGroup ? <Folder className="fill-current" /> : <File />}
-            <span className="flex-1 truncate font-bold text-xs">{label}</span>
-            <AppBadge variant="outline">{data.kind}</AppBadge>
-          </CardTitle>
-          <p className="text-muted-foreground text-xs">{description}</p>
-        </CardHeader>
+          </span>
 
-        <CardContent className="grid grid-cols-2 gap-2">
-          {metricsConfig.map(
-            (m) =>
-              m.show && (
-                <AppBadge
-                  key={m.id}
-                  variant="outline"
-                >
-                  <m.icon className={cn(m.color)} />
-                  <div className="flex gap-1 text-muted-foreground">
-                    <span className="text-[10px]">{m.val}</span>
-                    <span className="text-[10px]">{m.id}</span>
-                  </div>
-                </AppBadge>
-              ),
-          )}
+          <p className="min-w-0 flex-1 truncate font-medium text-sm">{label}</p>
 
-          {data.score > 0 && (
-            <div className="col-span-2 mt-1">
-              <div className="flex justify-between text-[10px] text-muted-foreground">
-                <span>{t("complexity_score")}</span>
-                <span>{data.score}</span>
-              </div>
-              <Progress
-                indicatorClassName={data.score > 200 ? "bg-destructive-fill" : "bg-foreground"}
-                value={data.score / 5}
-              />
+          <AppBadge variant="outline">{data.kind}</AppBadge>
+        </div>
+
+        <p className="line-clamp-1 text-2xs text-muted-foreground">{description}</p>
+
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-2xs text-muted-foreground">
+          {metricsConfig
+            .filter((metric) => metric.show)
+            .slice(0, 4)
+            .map((metric) => (
+              <span
+                className="flex items-center gap-1"
+                key={metric.id}
+              >
+                <metric.icon className={cn("size-3", metric.color)} />
+                {metric.val}
+              </span>
+            ))}
+        </div>
+
+        {data.score > 0 && (
+          <div>
+            <div className="flex justify-between text-2xs text-muted-foreground">
+              <span>{t("complexity_score")}</span>
+              <span>{data.score}</span>
             </div>
-          )}
-        </CardContent>
+
+            <Progress
+              className="mt-1 h-1"
+              indicatorClassName={data.score > 200 ? "bg-destructive-fill" : "bg-foreground"}
+              value={data.score / 5}
+            />
+          </div>
+        )}
       </Card>
       <Handle
         className="cursor-grab! opacity-0"

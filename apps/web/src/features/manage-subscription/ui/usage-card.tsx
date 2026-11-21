@@ -3,14 +3,25 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { cn } from "@/shared/lib/cn";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { AppBadge } from "@/shared/ui/core/badge";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/core/card";
 import { Progress } from "@/shared/ui/core/progress";
 import { ToggleGroup, ToggleGroupItem } from "@/shared/ui/core/toggle-group";
 
 import type { BillingEntitlement, BillingUsage } from "../model/billing.types";
-import { buildUsageForecast, type UsageForecast } from "../model/usage-forecast";
-import { formatCompactNumber } from "../model/usage-format";
+import {
+  buildUsageForecast,
+  type UsageForecast,
+  type UsageSeverity,
+} from "../model/usage-forecast";
+import { formatCompactNumber, formatUsageDate } from "../model/usage-format";
 import { UsageForecastChart } from "./usage-forecast-chart";
 
 type Metric = "analyses" | "tokens";
@@ -19,6 +30,12 @@ type Props = {
   entitlement: BillingEntitlement;
   usage: BillingUsage;
 };
+
+function severityBadgeClass(severity: UsageSeverity): string {
+  return severity === "critical"
+    ? "border-destructive/30 bg-destructive/10 text-destructive"
+    : "border-warning/30 bg-warning/10 text-warning";
+}
 
 function UsageRow({
   forecast,
@@ -33,28 +50,24 @@ function UsageRow({
     limit == null
       ? `${formatCompactNumber(used, locale)} · ${t("billing_usage_unlimited")}`
       : `${formatCompactNumber(used, locale)} / ${formatCompactNumber(limit, locale)}`;
-  const percentClass =
-    forecast.severity === "critical"
-      ? "text-destructive"
-      : forecast.severity === "warning"
-        ? "text-warning"
-        : "text-muted-foreground";
-  const indicatorClass =
-    forecast.severity === "critical"
-      ? "bg-destructive-fill"
-      : forecast.severity === "warning"
-        ? "bg-warning"
-        : undefined;
+  const isCritical = forecast.projectedSeverity === "critical";
+  const isWarning = forecast.projectedSeverity === "warning";
+  const indicatorClass = isCritical ? "bg-destructive-fill" : isWarning ? "bg-warning" : undefined;
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between gap-3 text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
         <span className="text-muted-foreground">{label}</span>
-        <span className="flex items-baseline gap-2 tabular-nums">
-          {limit != null && (
-            <span className={cn("font-medium text-xs", percentClass)}>
-              {Math.round(forecast.percent)}%
-            </span>
+        <span className="flex items-center gap-2 tabular-nums">
+          {(isCritical || isWarning) && (
+            <AppBadge
+              className={severityBadgeClass(forecast.projectedSeverity)}
+              variant="outline"
+            >
+              {forecast.percent >= 100
+                ? t("billing_usage_at_limit")
+                : t("billing_usage_near_limit")}
+            </AppBadge>
           )}
           <span>{value}</span>
         </span>
@@ -72,6 +85,7 @@ function UsageRow({
 
 export function UsageCard({ entitlement, usage }: Readonly<Props>) {
   const t = useTranslations("Billing");
+  const locale = useLocale();
   const now = usage.now;
 
   const limits: Record<Metric, null | number> = {
@@ -102,12 +116,32 @@ export function UsageCard({ entitlement, usage }: Readonly<Props>) {
   );
 
   const activeLimit = limits[metric];
+  const worstForecast =
+    forecasts.tokens.projectedPercent >= forecasts.analyses.projectedPercent
+      ? forecasts.tokens
+      : forecasts.analyses;
+  const headerSeverity = worstForecast.projectedSeverity;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>{t("billing_usage_title")}</CardTitle>
-        <CardDescription>{t("billing_usage_desc")}</CardDescription>
+        <CardDescription>
+          {t("billing_usage_resets", { date: formatUsageDate(usage.periodEnd, locale) })}
+        </CardDescription>
+        {headerSeverity !== "normal" && (
+          <CardAction>
+            <AppBadge
+              className={severityBadgeClass(headerSeverity)}
+              variant="outline"
+            >
+              {t("billing_usage_forecast", {
+                date: formatUsageDate(usage.periodEnd, locale),
+                percent: Math.round(worstForecast.projectedPercent),
+              })}
+            </AppBadge>
+          </CardAction>
+        )}
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         <UsageRow

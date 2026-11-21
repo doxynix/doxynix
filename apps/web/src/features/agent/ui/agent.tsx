@@ -17,7 +17,6 @@ import { useAppearancePreferences } from "@/shared/lib/hooks/use-appearance-pref
 import { usePanelLayout } from "@/shared/lib/hooks/use-panel-layout";
 import { DxnxLogo } from "@/shared/ui/branding/dxnx-logo";
 import { AppButton } from "@/shared/ui/core/button";
-import { Card } from "@/shared/ui/core/card";
 import { Empty, EmptyDescription, EmptyHeader } from "@/shared/ui/core/empty";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ui/core/resizable";
 import { useSidebar } from "@/shared/ui/core/sidebar";
@@ -445,8 +444,8 @@ export function Agent() {
   );
 
   const insets = expanded
-    ? { bottom: 16, right: 16, top: isRepoOwnerPage ? 126 : 86 }
-    : { bottom: 20, right: 20, top: "calc(100vh - 740px)" };
+    ? { bottom: 0, right: 0, top: isRepoOwnerPage ? 126 : 86 }
+    : { bottom: 0, right: 0, top: "calc(100vh - 740px)" };
 
   return (
     <AnimatePresence>
@@ -463,7 +462,7 @@ export function Agent() {
             aria-label={t("assistant_name")}
             className="flex h-full w-full"
           >
-            <Card className="flex h-full w-full flex-col overflow-hidden p-0">
+            <div className="flex h-full w-full flex-col overflow-hidden rounded-tl-2xl border-border border-t border-l bg-card">
               <ResizablePanelGroup
                 className="flex h-full"
                 defaultLayout={defaultLayout}
@@ -586,7 +585,7 @@ export function Agent() {
                   />
                 </ResizablePanel>
               </ResizablePanelGroup>
-            </Card>
+            </div>
           </aside>
         </motion.div>
       ) : null}

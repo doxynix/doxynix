@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { ChevronDown, Keyboard, Link2, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -8,6 +8,7 @@ import { useTRPC } from "@/shared/api/trpc";
 import { commandMenuItems } from "@/shared/config/navigation";
 import type { MenuItem } from "@/shared/config/navigation.types";
 import { useNavLabels } from "@/shared/config/navigation-labels";
+import { REPO_LIST_PAGE_SIZE } from "@/shared/config/pagination";
 import { formatShortcut, SHORTCUTS } from "@/shared/config/shortcuts";
 import { useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
@@ -81,20 +82,20 @@ export function AppCommandMenu() {
 
   const repoSearch =
     isOpening || search.trim().length === 0 ? undefined : debouncedSearch || undefined;
+  const repoQuery =
+    repoSearch === undefined
+      ? { limit: REPO_LIST_PAGE_SIZE }
+      : { limit: REPO_LIST_PAGE_SIZE, search: repoSearch };
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
-    trpc.repo.getSlim.infiniteQueryOptions(
-      {
-        limit: 5,
-        search: repoSearch,
-      },
-      {
+  const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage, isLoading } =
+    useInfiniteQuery(
+      trpc.repo.getSlim.infiniteQueryOptions(repoQuery, {
         enabled: open,
         getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
         initialCursor: undefined,
-      },
-    ),
-  );
+        placeholderData: keepPreviousData,
+      }),
+    );
 
   const navigate = (path: string) => {
     setOpen(false);
@@ -129,11 +130,14 @@ export function AppCommandMenu() {
     }
   };
 
-  const s = search.trim().toLowerCase();
+  const s = debouncedSearch.trim().toLowerCase();
 
   const filteredCommands = !s
     ? commandMenuItems
     : commandMenuItems.filter((item) => navLabels[item.labelKey].toLowerCase().includes(s));
+
+  const repoItems = data?.pages.flatMap((page) => page.items) ?? [];
+  const isReposPending = repoSearch !== undefined && (isLoading || isFetching);
 
   return (
     <>
@@ -166,13 +170,16 @@ export function AppCommandMenu() {
         shouldFilter={false}
       >
         <CommandInput
-          isLoading={isLoading}
+          isLoading={isLoading || isFetching}
           onValueChange={setSearch}
           placeholder={t("command_placeholder")}
           value={search}
         />
-        <CommandList label={tCommon("command_menu_title")}>
-          {filteredCommands.length === 0 && (
+        <CommandList
+          className="min-h-64"
+          label={tCommon("command_menu_title")}
+        >
+          {filteredCommands.length === 0 && repoItems.length === 0 && !isReposPending && (
             <CommandEmpty>{t("command_empty_results")}</CommandEmpty>
           )}
 
@@ -233,29 +240,25 @@ export function AppCommandMenu() {
           >
             {isReposExpanded && (
               <>
-                {data?.pages
-                  .flatMap((p) => p.items)
-                  .map((repo) => (
-                    <CommandItem
-                      key={repo.id}
-                      onSelect={() => navigate(`/dashboard/repo/${repo.owner}/${repo.name}`)}
-                      value={`${repo.owner}/${repo.name}`}
-                    >
-                      <AppAvatar
-                        alt=""
-                        fallbackText={repo.owner}
-                        sizeClassName="size-8"
-                        src={repo.avatar}
-                      />
-                      <div className="line-clamp-1 flex">
-                        <span className="truncate font-bold text-muted-foreground">
-                          {repo.owner}
-                        </span>
-                        <span className="text-muted-foreground">/</span>
-                        <span className="truncate font-bold">{repo.name}</span>
-                      </div>
-                    </CommandItem>
-                  ))}
+                {repoItems.map((repo) => (
+                  <CommandItem
+                    key={repo.id}
+                    onSelect={() => navigate(`/dashboard/repo/${repo.owner}/${repo.name}`)}
+                    value={`${repo.owner}/${repo.name}`}
+                  >
+                    <AppAvatar
+                      alt=""
+                      fallbackText={repo.owner}
+                      sizeClassName="size-8"
+                      src={repo.avatar}
+                    />
+                    <div className="line-clamp-1 flex">
+                      <span className="truncate font-bold text-muted-foreground">{repo.owner}</span>
+                      <span className="text-muted-foreground">/</span>
+                      <span className="truncate font-bold">{repo.name}</span>
+                    </div>
+                  </CommandItem>
+                ))}
                 <AppInfiniteSentinel
                   hasNextPage={hasNextPage}
                   isFetchingNextPage={isFetchingNextPage}
@@ -264,12 +267,6 @@ export function AppCommandMenu() {
               </>
             )}
           </CommandGroup>
-
-          {!isLoading && data?.pages[0]?.items.length === 0 && (
-            <div className="p-4 text-center text-muted-foreground text-xs">
-              {t("repo_empty_title")}
-            </div>
-          )}
         </CommandList>
         <div className="flex items-center justify-between gap-2 border-t px-3 py-2">
           <span className="text-muted-foreground text-xs">{tCommon("nav_help")}</span>

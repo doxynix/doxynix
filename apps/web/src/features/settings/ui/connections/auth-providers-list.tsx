@@ -88,7 +88,7 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
   };
 
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-3 sm:grid-cols-2">
       {OAUTH_PROVIDERS.map((provider) => {
         const linked = accounts.find((a: { provider: string }) => a.provider === provider.id);
         const identity = linked?.email ?? linked?.name ?? user?.email;
@@ -99,6 +99,7 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
             <AppAvatar
               alt={provider.name}
               fallbackText={provider.name}
+              sizeClassName="size-7"
               src={linked.image}
             />
           ) : (
@@ -128,8 +129,10 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
             }
             icon={customIcon}
             key={provider.id}
-            status={isConnected ? t("settings_auth_status_connected") : undefined}
+            status={isConnected ? t("settings_auth_status_connected") : t("settings_pr_style_off")}
+            statusTone={isConnected ? "success" : "muted"}
             title={provider.name}
+            variant="tile"
           />
         );
       })}

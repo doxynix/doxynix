@@ -23,8 +23,8 @@ export function RepoSetup({ initialDocTypes, repo, selectRecommendedOnLoad }: Re
   const isBusy = state.isLoading || state.isPending;
 
   return (
-    <div className="flex h-[calc(100dvh-260px)] w-full justify-center gap-6">
-      <div className="flex-1">
+    <div className="flex h-full min-h-0 flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(420px,620px)] xl:grid-cols-[minmax(0,1fr)_minmax(520px,720px)]">
+      <div className="h-[60vh] min-w-0 lg:h-auto lg:min-h-0">
         <RepoFileTree
           actions={actions}
           repo={repo}
@@ -34,6 +34,7 @@ export function RepoSetup({ initialDocTypes, repo, selectRecommendedOnLoad }: Re
       </div>
       <RepoAnalysisConfig
         actions={actions}
+        className="min-h-0"
         disabled={isBusy}
         state={state}
       />

@@ -150,6 +150,9 @@ Workflow: `.agents/skills/drizzle-migration/SKILL.md`, `.agents/skills/hono-rpc-
   `unicorn/filename-case` (kebab-case), `unicorn/error-message`, `no-underscore-dangle` (allowlist is
   small). Tests get a relaxed override; `vitest/no-focused-tests` and `vitest/expect-expect` are
   errors, so no `.only` and every test needs an `expect`-family call.
+- **Design system.** No arbitrary font sizes (`text-[13px]`), raw palette (`text-blue-500`,
+  `bg-[#...]`), or `tracking-*` in app code. Use the scale and semantic tokens from
+  `docs/DESIGN.md`; `bun --filter @doxynix/web check:styles` (part of `validate`) is the gate.
 - `cspell` runs on staged files in pre-commit — unusual product words need a `cspell.json` entry.
 
 ### Comments

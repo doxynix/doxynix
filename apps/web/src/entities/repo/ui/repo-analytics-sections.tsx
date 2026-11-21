@@ -1,6 +1,7 @@
+import type { ComponentType } from "react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@radix-ui/react-collapsible";
 import {
   CheckCircle2,
-  Code2,
   Cpu,
   Database,
   Fingerprint,
@@ -13,7 +14,9 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { cn } from "@/shared/lib/cn";
 import { AppBadge } from "@/shared/ui/core/badge";
+import { AppButton } from "@/shared/ui/core/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
@@ -27,6 +30,80 @@ type FixTriggerFinding = {
   type?: null | string;
 };
 
+type SnapshotTone = "danger" | "default" | "success" | "warning";
+
+const SNAPSHOT_TILES: Record<SnapshotTone, string> = {
+  danger: "bg-destructive/10 text-destructive",
+  default: "bg-surface-hover text-muted-foreground",
+  success: "bg-success/10 text-success",
+  warning: "bg-warning/10 text-warning",
+};
+
+const SNAPSHOT_VALUES: Record<SnapshotTone, string> = {
+  danger: "text-destructive",
+  default: "",
+  success: "text-success",
+  warning: "text-warning",
+};
+
+function SnapshotHeader({
+  icon: Icon,
+  title,
+  tone = "default",
+}: Readonly<{ icon: ComponentType<{ className?: string }>; title: string; tone?: SnapshotTone }>) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <div
+        className={cn(
+          "flex size-8 shrink-0 items-center justify-center rounded-lg",
+          SNAPSHOT_TILES[tone],
+        )}
+      >
+        <Icon />
+      </div>
+
+      <p className="min-w-0 flex-1 font-semibold text-sm">{title}</p>
+    </div>
+  );
+}
+
+function SnapshotRow({
+  label,
+  tone = "default",
+  value,
+}: Readonly<{ label: string; tone?: SnapshotTone; value: number | string }>) {
+  return (
+    <div className="flex items-center justify-between gap-3 border-t py-2 first:border-t-0 first:pt-0 last:pb-0">
+      <span className="text-muted-foreground text-xs">{label}</span>
+      <span className={cn("font-medium text-sm", SNAPSHOT_VALUES[tone])}>{value}</span>
+    </div>
+  );
+}
+
+function scoreTone(value: number): SnapshotTone {
+  if (value >= 75) {
+    return "success";
+  }
+
+  if (value >= 50) {
+    return "warning";
+  }
+
+  return "danger";
+}
+
+const LEVEL_TONES: Record<"HIGH" | "LOW" | "MEDIUM", string> = {
+  HIGH: "border-destructive/30 text-destructive",
+  LOW: "border-success/30 text-success",
+  MEDIUM: "border-warning/30 text-warning",
+};
+
+function formatEnumLabel(value: string) {
+  const normalized = value.toLowerCase().replaceAll("_", " ");
+
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
 export function SnapshotsSection({
   architecture,
   onboarding,
@@ -38,83 +115,121 @@ export function SnapshotsSection({
 }>) {
   const t = useTranslations("Dashboard");
 
-  const qualityStats = [
-    { label: t("quality_health"), value: quality.health },
-    { label: t("quality_complexity"), value: quality.complexity },
-    { label: t("quality_modularity"), value: quality.modularity },
-    { label: t("quality_tech_debt"), value: quality.techDebt },
-  ];
+  const cycles = architecture.dependencyCycles.length;
+  const orphans = architecture.orphanModules.length;
 
-  const architectureStats = [
-    { label: t("arch_entrypoints"), value: architecture.entrypoints.length },
-    { label: t("arch_cycles"), value: architecture.dependencyCycles.length },
-    { label: t("arch_orphans"), value: architecture.orphanModules.length },
-    { label: t("arch_operations"), value: architecture.routeInventory?.estimatedOperations ?? 0 },
-  ];
+  const qualityTone: SnapshotTone =
+    quality.health >= 75 ? "success" : quality.health >= 50 ? "warning" : "danger";
+
+  const architectureTone: SnapshotTone = cycles > 0 ? "warning" : "success";
+
+  const onboardingTone = scoreTone(onboarding.score);
 
   return (
     <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <GitBranch /> {t("quality_snapshot")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          {qualityStats.map((stat) => (
-            <div key={stat.label}>
-              <p className="font-bold text-[10px] text-muted-foreground uppercase">{stat.label}</p>
-              <p className="font-bold text-xl">{stat.value}</p>
-            </div>
-          ))}
-        </CardContent>
+      <Card
+        className="gap-3"
+        size="compact"
+      >
+        <SnapshotHeader
+          icon={GitBranch}
+          title={t("quality_snapshot")}
+          tone={qualityTone}
+        />
+
+        <div className="flex flex-col">
+          <SnapshotRow
+            label={t("quality_health")}
+            tone={scoreTone(quality.health)}
+            value={quality.health}
+          />
+          <SnapshotRow
+            label={t("quality_modularity")}
+            tone={scoreTone(quality.modularity)}
+            value={quality.modularity}
+          />
+          <SnapshotRow
+            label={t("quality_complexity")}
+            tone={
+              quality.complexity > 60 ? "danger" : quality.complexity > 40 ? "warning" : "success"
+            }
+            value={quality.complexity}
+          />
+          <SnapshotRow
+            label={t("quality_tech_debt")}
+            tone={quality.techDebt > 50 ? "danger" : quality.techDebt > 30 ? "warning" : "success"}
+            value={quality.techDebt}
+          />
+        </div>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <Network /> {t("architecture_snapshot")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3 text-sm">
-          {architectureStats.map((stat) => (
-            <div
-              className="flex items-center justify-between"
-              key={stat.label}
-            >
-              <span className="text-muted-foreground">{stat.label}</span>
-              <span className="font-medium">{stat.value}</span>
-            </div>
-          ))}
-        </CardContent>
+      <Card
+        className="gap-3"
+        size="compact"
+      >
+        <SnapshotHeader
+          icon={Network}
+          title={t("architecture_snapshot")}
+          tone={architectureTone}
+        />
+
+        <div className="flex flex-col">
+          <SnapshotRow
+            label={t("arch_entrypoints")}
+            value={architecture.entrypoints.length}
+          />
+          <SnapshotRow
+            label={t("arch_cycles")}
+            tone={cycles > 0 ? "danger" : "success"}
+            value={cycles}
+          />
+          <SnapshotRow
+            label={t("arch_orphans")}
+            tone={orphans > 0 ? "warning" : "success"}
+            value={orphans}
+          />
+          <SnapshotRow
+            label={t("arch_operations")}
+            value={architecture.routeInventory?.estimatedOperations ?? 0}
+          />
+        </div>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <Users /> {t("onboarding")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">{t("onboarding_score")}</span>
-            <span className="font-medium">{onboarding.score}</span>
-          </div>
-          <div>
-            <p className="mb-2 text-muted-foreground text-xs uppercase">{t("setup_steps")}</p>
-            <ul className="flex flex-col gap-2 text-xs">
-              {onboarding.guide.setup_steps.map((step) => (
-                <li
-                  className="flex items-start gap-2"
-                  key={step}
-                >
-                  <div className="mt-1 size-1.5 shrink-0 rounded-full bg-primary-accent" />
-                  <span>{step}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </CardContent>
+      <Card
+        className="gap-3"
+        size="compact"
+      >
+        <SnapshotHeader
+          icon={Users}
+          title={t("onboarding")}
+          tone={onboardingTone}
+        />
+
+        <div className="flex flex-col">
+          <SnapshotRow
+            label={t("onboarding_score")}
+            tone={onboardingTone}
+            value={onboarding.score}
+          />
+
+          <p className="pt-3 pb-1 text-muted-foreground text-xs">{t("setup_steps")}</p>
+
+          {onboarding.guide.setup_steps.length === 0 ? (
+            <p className="pt-1 text-muted-foreground text-xs">{t("no_data_yet")}</p>
+          ) : (
+            onboarding.guide.setup_steps.map((step, index) => (
+              <div
+                className="flex items-start gap-2.5 border-t py-2 last:pb-0"
+                key={step}
+              >
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-surface-hover text-2xs text-muted-foreground">
+                  {index + 1}
+                </span>
+                <span className="min-w-0 text-xs">{step}</span>
+              </div>
+            ))
+          )}
+        </div>
       </Card>
     </section>
   );
@@ -133,53 +248,63 @@ export function DomainIntelligenceSection({
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="flex items-center gap-2 font-bold text-lg tracking-tight">
-        <Fingerprint className="size-5 text-blue-400" /> {t("domain_intelligence")}
+      <h2 className="flex items-center gap-2 font-semibold text-lg">
+        <Fingerprint className="size-5 text-muted-foreground" /> {t("domain_intelligence")}
       </h2>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <CardHeader className="py-4">
-            <CardTitle className="font-semibold text-sm">{t("core_entities")}</CardTitle>
+          <CardHeader>
+            <CardTitle className="text-base">{t("core_entities")}</CardTitle>
             <CardDescription>{t("core_entities_desc")}</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {domain.analysis.core_entities.map((entity) => (
-              <div
-                className="rounded-md border bg-muted/30 p-3"
-                key={entity.name}
-              >
-                <div className="mb-1 flex items-center justify-between">
-                  <span className="font-bold font-mono text-blue-400 text-xs">{entity.name}</span>
-                  <AppBadge
-                    className="h-4 text-[10px]"
-                    variant="outline"
-                  >
-                    {entity.logic_complexity} {t("entity_complexity")}
-                  </AppBadge>
+          <CardContent className="flex flex-col">
+            {domain.analysis.core_entities.length === 0 ? (
+              <p className="py-4 text-muted-foreground text-sm">{t("no_data_yet")}</p>
+            ) : (
+              domain.analysis.core_entities.map((entity) => (
+                <div
+                  className="flex items-start justify-between gap-3 border-t py-2.5 first:border-t-0 first:pt-0 last:pb-0"
+                  key={entity.name}
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm">{entity.name}</p>
+                    <p className="mt-0.5 text-muted-foreground text-xs">{entity.responsibility}</p>
+                  </div>
+
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <span className="text-2xs text-muted-foreground">{t("entity_complexity")}</span>
+                    <AppBadge
+                      className={LEVEL_TONES[entity.logic_complexity]}
+                      variant="outline"
+                    >
+                      {formatEnumLabel(entity.logic_complexity)}
+                    </AppBadge>
+                  </div>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  {entity.responsibility}
-                </p>
-              </div>
-            ))}
+              ))
+            )}
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="py-4">
-            <CardTitle className="font-semibold text-sm">{t("business_rules")}</CardTitle>
+          <CardHeader>
+            <CardTitle className="text-base">{t("business_rules")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="flex flex-col gap-3">
-              {domain.analysis.business_rules.map((rule) => (
-                <li
-                  className="flex items-start gap-2 text-xs text-zinc-300"
-                  key={rule}
-                >
-                  <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-500" />
-                  <span>{rule}</span>
-                </li>
-              ))}
-            </ul>
+            {domain.analysis.business_rules.length === 0 ? (
+              <p className="py-4 text-muted-foreground text-sm">{t("no_data_yet")}</p>
+            ) : (
+              <ul className="flex flex-col">
+                {domain.analysis.business_rules.map((rule) => (
+                  <li
+                    className="flex items-start gap-2 border-t py-2 first:border-t-0 first:pt-0 last:pb-0"
+                    key={rule}
+                  >
+                    <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-success" />
+                    <span className="text-xs">{rule}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -197,40 +322,47 @@ export function TechDebtAndComplexitySection({
   const t = useTranslations("Dashboard");
 
   return (
-    <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <section className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
       <Card className="lg:col-span-1">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <HistoryIcon className="text-zinc-400" /> {t("tech_debt_inventory")}
+          <CardTitle className="flex items-center gap-2 text-base">
+            <HistoryIcon className="text-muted-foreground" /> {t("tech_debt_inventory")}
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          {recommendations.techDebtInventory?.map((item) => (
-            <div
-              className="flex items-center justify-between rounded border bg-muted/10 p-2"
-              key={`${item.type}:${item.description}`}
-            >
-              <div className="flex flex-col gap-0.5">
-                <span className="font-bold text-[10px] text-zinc-500 uppercase">{item.type}</span>
-                <span className="text-xs text-zinc-300">{item.description}</span>
-              </div>
-              <AppBadge
-                className="h-4 text-[9px]"
-                variant="outline"
+        <CardContent className="flex flex-col">
+          {recommendations.techDebtInventory == null ||
+          recommendations.techDebtInventory.length === 0 ? (
+            <p className="py-4 text-muted-foreground text-sm">{t("no_data_yet")}</p>
+          ) : (
+            recommendations.techDebtInventory.map((item) => (
+              <div
+                className="flex items-start justify-between gap-3 border-t py-2.5 first:border-t-0 first:pt-0 last:pb-0"
+                key={`${item.type}:${item.description}`}
               >
-                {item.remediation_effort} {t("remediation_effort")}
-              </AppBadge>
-            </div>
-          ))}
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-xs">{formatEnumLabel(item.type)}</p>
+                  <p className="mt-0.5 text-muted-foreground text-xs">{item.description}</p>
+                </div>
+
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <span className="text-2xs text-muted-foreground">{t("remediation_effort")}</span>
+                  <AppBadge
+                    className={LEVEL_TONES[item.remediation_effort]}
+                    variant="outline"
+                  >
+                    {formatEnumLabel(item.remediation_effort)}
+                  </AppBadge>
+                </div>
+              </div>
+            ))
+          )}
         </CardContent>
       </Card>
 
       <Card className="lg:col-span-2">
         <CardHeader>
-          <CardTitle className="font-semibold text-sm">
-            {t("complexity_vs_size_analysis")}
-          </CardTitle>
-          <CardDescription className="text-xs">{t("complexity_vs_size_desc")}</CardDescription>
+          <CardTitle className="text-base">{t("complexity_vs_size_analysis")}</CardTitle>
+          <CardDescription>{t("complexity_vs_size_desc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <ComplexityScatterChart data={architecture.hotspotSignals} />
@@ -251,82 +383,126 @@ export function RefactoringBacklogSection({
 }>) {
   const t = useTranslations("Dashboard");
 
-  return (
-    <section className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h2 className="flex items-center gap-2 font-bold text-lg tracking-tight">
-          <LayoutTemplate className="size-5 text-emerald-400" /> {t("refactoring_backlog")}
-        </h2>
-        <AppBadge
-          className="border-emerald-400/30 text-emerald-400"
-          variant="outline"
-        >
-          {t("targets_identified", { count: recommendations.refactoringTargets.length })}
-        </AppBadge>
-      </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {recommendations.refactoringTargets.map((item) => (
-          <Card
-            className="group transition-standard hover:border-emerald-500/40"
-            key={item.file}
-          >
-            <div className="flex items-center justify-between border-b bg-muted/20 px-4 py-2">
-              <div className="flex items-center gap-2 overflow-hidden">
-                <Code2 className="size-3.5 shrink-0 text-zinc-500" />
-                <code className="truncate font-mono text-[10px] text-zinc-400">{item.file}</code>
-              </div>
-              <div className="flex items-center gap-2">
-                <AppBadge className="h-4 border-none bg-emerald-500/10 text-[9px] text-emerald-400">
-                  {`+${item.impact_on_health} ${t("health")}`}
-                </AppBadge>
-                <AppBadge
-                  className="h-4 text-[9px] uppercase"
-                  variant="outline"
-                >
-                  {item.priority}
-                </AppBadge>
-              </div>
-            </div>
-            <CardContent className="flex flex-col gap-3 p-4">
-              <div className="flex flex-col gap-1">
-                <p className="font-bold text-[10px] text-zinc-500 uppercase tracking-widest">
-                  {item.issue_category}
-                </p>
-                <p className="text-sm text-zinc-200 leading-snug">{item.description}</p>
-              </div>
-              {item.original_code != null && (
-                <div className="relative">
-                  <div className="absolute top-2 right-2 font-bold text-[9px] text-destructive/50 uppercase">
-                    {t("legacy")}
-                  </div>
-                  <pre className="max-h-40 overflow-x-auto rounded border bg-zinc-950 p-3 font-mono text-[10px] text-zinc-500">
-                    {item.original_code}
-                  </pre>
-                </div>
-              )}
+  const targets = recommendations.refactoringTargets;
+  const totalImpact = targets.reduce((sum, item) => sum + (item.impact_on_health ?? 0), 0);
 
-              <div className="mt-4 border-t pt-2">
-                <LoadingButton
-                  aria-label={t("auto_refactor")}
-                  className="border-emerald-500/30 font-semibold text-emerald-400 hover:bg-emerald-500/10"
-                  isLoading={runningFixId !== null}
-                  onClick={() =>
-                    onTriggerFix(item.file, {
-                      line: 1,
-                      suggestion: item.description,
-                      type: "complexity",
-                    })
-                  }
-                  size="sm"
-                  variant="outline"
-                >
-                  <Sparkles className="size-3.5" />
-                </LoadingButton>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+  return (
+    <section>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <LayoutTemplate className="text-muted-foreground" /> {t("refactoring_backlog")}
+          </CardTitle>
+
+          <CardDescription>
+            {t("targets_identified", { count: targets.length })}
+            {totalImpact > 0 && ` · +${totalImpact} ${t("health")}`}
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="flex flex-col">
+          {targets.length === 0 ? (
+            <p className="py-6 text-center text-muted-foreground text-sm">{t("no_data_yet")}</p>
+          ) : (
+            targets.map((item) => (
+              <Collapsible
+                className="border-t py-3 first:border-t-0 first:pt-0 last:pb-0"
+                key={item.file}
+              >
+                <div className="flex items-start gap-2.5">
+                  <span
+                    className={cn(
+                      "mt-1.5 size-1.5 shrink-0 rounded-full",
+                      item.priority === "HIGH"
+                        ? "bg-destructive"
+                        : item.priority === "MEDIUM"
+                          ? "bg-warning"
+                          : "bg-muted-foreground",
+                    )}
+                  />
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="min-w-0 truncate font-medium text-sm">
+                        {item.file.split("/").pop()}
+                      </p>
+                      <AppBadge
+                        className={LEVEL_TONES[item.priority]}
+                        variant="outline"
+                      >
+                        {formatEnumLabel(item.priority)}
+                      </AppBadge>
+                      {item.impact_on_health != null && (
+                        <span className="font-medium text-success text-xs">
+                          +{item.impact_on_health} {t("health")}
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="mt-0.5 truncate text-muted-foreground text-xs">
+                      {item.file.split("/").slice(0, -1).join("/")}
+                    </p>
+
+                    <p className="mt-1 text-xs">
+                      {item.issue_category != null && (
+                        <>
+                          <span className="text-muted-foreground">
+                            {formatEnumLabel(item.issue_category)}
+                          </span>
+                          {" · "}
+                        </>
+                      )}
+                      {item.description}
+                    </p>
+                  </div>
+
+                  <div className="flex shrink-0 items-center gap-0.5">
+                    {item.original_code != null && (
+                      <CollapsibleTrigger asChild>
+                        <AppButton
+                          size="sm"
+                          variant="ghost"
+                        >
+                          {t("view_code")}
+                        </AppButton>
+                      </CollapsibleTrigger>
+                    )}
+
+                    <LoadingButton
+                      aria-label={t("auto_refactor")}
+                      className="gap-1.5"
+                      isLoading={runningFixId !== null}
+                      onClick={() =>
+                        onTriggerFix(item.file, {
+                          line: 1,
+                          suggestion: item.description,
+                          type: "complexity",
+                        })
+                      }
+                      size="sm"
+                      variant="outline"
+                    >
+                      <Sparkles className="size-3.5" /> {t("auto_refactor")}
+                    </LoadingButton>
+                  </div>
+                </div>
+
+                <CollapsibleContent>
+                  <div className="relative mt-3">
+                    <span className="absolute top-2 right-2 text-2xs text-muted-foreground">
+                      {t("legacy")}
+                    </span>
+
+                    <pre className="max-h-40 overflow-x-auto rounded-lg bg-surface-hover/40 p-3 font-mono text-2xs">
+                      {item.original_code}
+                    </pre>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            ))
+          )}
+        </CardContent>
+      </Card>
     </section>
   );
 }
@@ -342,85 +518,83 @@ export function PerformanceAndScalingSection({
 }>) {
   const t = useTranslations("Dashboard");
 
+  const audit = recommendations.performanceAudit ?? [];
+  const concurrencyRisks = recommendations.infrastructure?.concurrency_risks ?? [];
+
   return (
-    <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      <Card className="border-orange-500/20 bg-orange-500/5 lg:col-span-2">
-        <CardHeader className="py-4">
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <Cpu className="text-orange-400" /> {t("performance_audit")}
+    <section className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+      <Card className="lg:col-span-2">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Cpu className="text-warning" /> {t("performance_audit")}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-hidden rounded-md border border-orange-500/10">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-orange-500/10 font-bold text-orange-200 uppercase">
-                <tr>
-                  <th className="p-2">{t("table_issue")}</th>
-                  <th className="p-2">{t("table_location")}</th>
-                  <th className="p-2">{t("table_optimization_strategy")}</th>
-                  <th className="w-20 p-2 text-center">{t("table_action")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-orange-500/10">
-                {recommendations.performanceAudit?.map((item) => (
-                  <tr
-                    className="transition-colors hover:bg-orange-500/5"
-                    key={`${item.location}:${item.issue}`}
-                  >
-                    <td className="p-2 font-medium text-zinc-200">{item.issue}</td>
-                    <td className="p-2 font-mono text-[10px] text-orange-300/70">
+
+        <CardContent className="flex flex-col">
+          {audit.length === 0 ? (
+            <p className="py-6 text-center text-muted-foreground text-sm">{t("no_data_yet")}</p>
+          ) : (
+            audit.map((item) => (
+              <div
+                className="flex items-start gap-2.5 border-t py-3 first:border-t-0 first:pt-0 last:pb-0"
+                key={`${item.location}:${item.issue}`}
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <p className="font-medium text-sm">{item.issue}</p>
+                    <span className="min-w-0 truncate text-muted-foreground text-xs">
                       {item.location}
-                    </td>
-                    <td className="p-2 text-zinc-400">{item.optimization_strategy}</td>
-                    <td className="p-2 text-center">
-                      <LoadingButton
-                        aria-label={t("fix")}
-                        className="gap-1 border-orange-500/20 font-bold text-[10px] text-orange-400 hover:bg-orange-500/10"
-                        isLoading={runningFixId !== null}
-                        onClick={() =>
-                          onTriggerFix(item.location, {
-                            line: 1,
-                            suggestion: item.optimization_strategy,
-                            type: "performance",
-                          })
-                        }
-                        size="icon"
-                        variant="outline"
-                      >
-                        <Sparkles className="size-3" />
-                      </LoadingButton>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </span>
+                  </div>
+
+                  <p className="mt-0.5 text-muted-foreground text-xs">
+                    {item.optimization_strategy}
+                  </p>
+                </div>
+
+                <LoadingButton
+                  aria-label={t("fix")}
+                  className="shrink-0"
+                  isLoading={runningFixId !== null}
+                  onClick={() =>
+                    onTriggerFix(item.location, {
+                      line: 1,
+                      suggestion: item.optimization_strategy,
+                      type: "performance",
+                    })
+                  }
+                  size="icon-xs"
+                  variant="ghost"
+                >
+                  <Sparkles className="size-3.5" />
+                </LoadingButton>
+              </div>
+            ))
+          )}
         </CardContent>
       </Card>
 
-      <Card className="border-blue-500/20">
-        <CardHeader className="py-4">
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <Database className="text-blue-400" /> {t("scaling_and_state")}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Database className="text-muted-foreground" /> {t("scaling_and_state")}
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <p className="font-bold text-[10px] text-blue-400 uppercase">{t("statelessness")}</p>
-            <p className="text-xs text-zinc-300 leading-relaxed">
-              {recommendations.infrastructure?.statelessness_check}
-            </p>
+
+        <CardContent className="flex flex-col">
+          <div className="border-t py-3 first:border-t-0 first:pt-0 last:pb-0">
+            <p className="text-muted-foreground text-xs">{t("statelessness")}</p>
+            <p className="mt-0.5 text-sm">{recommendations.infrastructure?.statelessness_check}</p>
           </div>
-          <div className="flex flex-col gap-1">
-            <p className="font-bold text-[10px] text-blue-400 uppercase">
-              {t("concurrency_risks")}
-            </p>
-            <div className="flex flex-wrap gap-1">
-              {recommendations.infrastructure?.concurrency_risks.map((risk) => (
+
+          <div className="border-t py-3">
+            <p className="text-muted-foreground text-xs">{t("concurrency_risks")}</p>
+
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {concurrencyRisks.map((risk) => (
                 <AppBadge
-                  className="py-0 text-[9px]"
                   key={risk}
-                  variant="secondary"
+                  variant="outline"
                 >
                   {risk}
                 </AppBadge>

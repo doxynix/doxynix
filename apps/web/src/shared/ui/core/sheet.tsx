@@ -152,7 +152,7 @@ function SheetFooter({ className, ...props }: ComponentProps<"div">) {
 function SheetTitle({ className, ...props }: ComponentProps<typeof SheetPrimitive.Title>) {
   return (
     <SheetPrimitive.Title
-      className={cn("font-semibold text-foreground tracking-[-0.02em]", className)}
+      className={cn("font-semibold text-foreground", className)}
       data-slot="sheet-title"
       {...props}
     />

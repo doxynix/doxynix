@@ -144,6 +144,7 @@ export const TOOL_INVALIDATIONS: Record<string, (context: InvalidationContext) =
           disableCookieCache: true,
         },
       });
+      authClient.$store.notify("$sessionSignal");
     }
   },
 };

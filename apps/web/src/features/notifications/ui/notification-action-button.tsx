@@ -28,7 +28,7 @@ export function NotificationActionButton({
       <LoadingButton
         aria-label={tooltip}
         className={cn(
-          "z-10 size-6 text-muted-foreground not-md:opacity-100 opacity-0 transition-standard hover:text-foreground group-hover:opacity-100",
+          "z-10 size-6 text-muted-foreground not-md:opacity-100 opacity-0 transition-standard hover:text-foreground group-hover/notification:opacity-100",
           className,
         )}
         disabled={disabled}

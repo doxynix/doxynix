@@ -23,7 +23,7 @@ export default async function SessionsSettingsPage() {
     <HydrateClient>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="font-bold text-2xl tracking-tight">{t("page_title")}</h1>
+          <h1 className="font-bold text-2xl">{t("page_title")}</h1>
           <p className="text-muted-foreground text-sm">{t("page_desc")}</p>
         </div>
 

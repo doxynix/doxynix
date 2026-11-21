@@ -32,7 +32,7 @@
     },
     "apps/siem-server": {
       "name": "@doxynix/siem-server",
-      "version": "0.7.1",
+      "version": "0.7.2",
       "dependencies": {
         "@axiomhq/js": "2.0.0",
         "@better-auth/drizzle-adapter": "catalog:",
@@ -57,7 +57,7 @@
     },
     "apps/web": {
       "name": "@doxynix/web",
-      "version": "5.15.8",
+      "version": "5.15.10",
       "dependencies": {
         "@ai-sdk/google": "4.0.121",
         "@ai-sdk/openai": "4.0.118",
@@ -283,7 +283,7 @@
     },
     "packages/cli": {
       "name": "@doxynix/cli",
-      "version": "5.5.29",
+      "version": "5.5.31",
       "bin": {
         "doxynix": "./dist/index.js",
         "dxnx": "./dist/index.js",
@@ -312,7 +312,7 @@
     },
     "packages/shared": {
       "name": "@doxynix/shared",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "dependencies": {
         "zod": "catalog:",
       },

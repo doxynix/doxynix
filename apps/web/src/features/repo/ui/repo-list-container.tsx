@@ -17,6 +17,7 @@ import { RepoListSkeleton } from "./repo-list-skeleton";
 
 type Props = {
   config?: {
+    cardVariant?: "row" | "brief";
     forcedFilters?: {
       owner?: string;
       sortBy?: "createdAt" | "name" | "updatedAt";
@@ -67,6 +68,7 @@ export function RepoListContainer({ config }: Readonly<Props>) {
       <RepoListSkeleton
         count={safeLimit}
         showTotalCount={config?.showTotalCount !== false}
+        variant={config?.cardVariant}
       />
     );
   }
@@ -89,6 +91,7 @@ export function RepoListContainer({ config }: Readonly<Props>) {
         <RepoList
           meta={meta}
           repos={items}
+          variant={config?.cardVariant}
         />
       </div>
 

@@ -56,7 +56,7 @@
   --foreground: oklch(0.132 0.004 255);
   --card: oklch(0.998 0.001 255);
   --card-foreground: oklch(0.132 0.004 255);
-  --popover: oklch(1 0 0 / 0.96);
+  --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.132 0.004 255);
   --primary: oklch(0.45 0.015 50);
   --primary-foreground: oklch(0.988 0.001 255);
@@ -77,7 +77,7 @@
   --foreground: oklch(0.972 0.002 255);
   --card: oklch(0.188 0.004 255);
   --card-foreground: oklch(0.972 0.002 255);
-  --popover: oklch(0.208 0.004 255 / 0.92);
+  --popover: oklch(0.208 0.004 255);
   --popover-foreground: oklch(0.972 0.002 255);
   --primary: oklch(0.65 0.015 50);
   --primary-foreground: oklch(0.972 0.002 255);
@@ -150,9 +150,10 @@
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
 
-  --text-sm--letter-spacing: -0.006em;
-  --text-base--letter-spacing: -0.011em;
-  --text-lg--letter-spacing: -0.014em;
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-metric: 1.75rem;
+  --text-metric--line-height: 2rem;
 
   /* Semantic UI tokens */
   --color-card: var(--card);
@@ -215,6 +216,9 @@
   --color-brand-tech: var(--brand-tech);
 
   /* Radii */
+  --radius-2xs: 2px;
+  --radius-xs: calc(var(--radius) * 0.33);
+  --radius-tile: calc(var(--radius) * 0.8);
   --radius-sm: calc(var(--radius) * 0.72);
   --radius-md: calc(var(--radius) * 0.86);
   --radius-lg: var(--radius);
@@ -403,9 +407,10 @@
 .light {
   /* Base surfaces */
   --radius: 0.75rem;
+  --repo-workspace-height: calc(100dvh - 16.25rem);
   --surface-page: oklch(0.982 0.002 255);
   --surface-panel: oklch(0.998 0.001 255);
-  --surface-elevated: oklch(1 0 0 / 0.96);
+  --surface-elevated: oklch(1 0 0);
   --surface-subtle: oklch(0.973 0.002 255);
   --surface-hover: oklch(0.963 0.003 255);
   --surface-selected: oklch(0.947 0.004 255);
@@ -499,7 +504,7 @@
   /* Base surfaces */
   --surface-page: oklch(0.128 0.004 255);
   --surface-panel: oklch(0.188 0.004 255);
-  --surface-elevated: oklch(0.208 0.004 255 / 0.92);
+  --surface-elevated: oklch(0.208 0.004 255);
   --surface-subtle: oklch(0.172 0.004 255);
   --surface-hover: oklch(0.244 0.003 255);
   --surface-selected: oklch(0.282 0.003 255);
@@ -588,7 +593,7 @@
 :root[data-theme="violet"] {
   --surface-page: oklch(0.977 0.018 310);
   --surface-panel: oklch(0.994 0.014 310);
-  --surface-elevated: oklch(1 0 0 / 0.96);
+  --surface-elevated: oklch(1 0 0);
   --surface-subtle: oklch(0.966 0.018 310);
   --surface-hover: oklch(0.952 0.022 310);
   --surface-selected: oklch(0.93 0.03 310);
@@ -601,7 +606,7 @@
 :root.dark[data-theme="violet"] {
   --surface-page: oklch(0.132 0.022 310);
   --surface-panel: oklch(0.19 0.02 310);
-  --surface-elevated: oklch(0.21 0.02 310 / 0.92);
+  --surface-elevated: oklch(0.21 0.02 310);
   --surface-subtle: oklch(0.168 0.02 310);
   --surface-hover: oklch(0.248 0.025 310);
   --surface-selected: oklch(0.29 0.03 310);
@@ -616,7 +621,7 @@
 :root[data-theme="forest"] {
   --surface-page: oklch(0.977 0.016 150);
   --surface-panel: oklch(0.994 0.012 150);
-  --surface-elevated: oklch(1 0 0 / 0.96);
+  --surface-elevated: oklch(1 0 0);
   --surface-subtle: oklch(0.966 0.016 150);
   --surface-hover: oklch(0.952 0.02 150);
   --surface-selected: oklch(0.93 0.026 150);
@@ -629,7 +634,7 @@
 :root.dark[data-theme="forest"] {
   --surface-page: oklch(0.132 0.02 150);
   --surface-panel: oklch(0.19 0.018 150);
-  --surface-elevated: oklch(0.21 0.018 150 / 0.92);
+  --surface-elevated: oklch(0.21 0.018 150);
   --surface-subtle: oklch(0.168 0.018 150);
   --surface-hover: oklch(0.248 0.022 150);
   --surface-selected: oklch(0.29 0.026 150);
@@ -644,7 +649,7 @@
 :root[data-theme="sunset"] {
   --surface-page: oklch(0.977 0.016 25);
   --surface-panel: oklch(0.994 0.012 25);
-  --surface-elevated: oklch(1 0 0 / 0.96);
+  --surface-elevated: oklch(1 0 0);
   --surface-subtle: oklch(0.966 0.016 25);
   --surface-hover: oklch(0.952 0.02 25);
   --surface-selected: oklch(0.93 0.026 25);
@@ -657,7 +662,7 @@
 :root.dark[data-theme="sunset"] {
   --surface-page: oklch(0.135 0.018 25);
   --surface-panel: oklch(0.192 0.016 25);
-  --surface-elevated: oklch(0.212 0.016 25 / 0.92);
+  --surface-elevated: oklch(0.212 0.016 25);
   --surface-subtle: oklch(0.17 0.016 25);
   --surface-hover: oklch(0.25 0.02 25);
   --surface-selected: oklch(0.292 0.024 25);
@@ -672,7 +677,7 @@
 :root[data-theme="mocha"] {
   --surface-page: oklch(0.977 0.014 78);
   --surface-panel: oklch(0.994 0.01 78);
-  --surface-elevated: oklch(1 0 0 / 0.96);
+  --surface-elevated: oklch(1 0 0);
   --surface-subtle: oklch(0.966 0.014 78);
   --surface-hover: oklch(0.952 0.018 78);
   --surface-selected: oklch(0.93 0.024 78);
@@ -685,7 +690,7 @@
 :root.dark[data-theme="mocha"] {
   --surface-page: oklch(0.134 0.016 78);
   --surface-panel: oklch(0.192 0.014 78);
-  --surface-elevated: oklch(0.212 0.014 78 / 0.92);
+  --surface-elevated: oklch(0.212 0.014 78);
   --surface-subtle: oklch(0.17 0.014 78);
   --surface-hover: oklch(0.25 0.018 78);
   --surface-selected: oklch(0.292 0.022 78);
@@ -700,7 +705,7 @@
 :root[data-theme="ocean"] {
   --surface-page: oklch(0.977 0.018 238);
   --surface-panel: oklch(0.994 0.014 238);
-  --surface-elevated: oklch(1 0 0 / 0.96);
+  --surface-elevated: oklch(1 0 0);
   --surface-subtle: oklch(0.966 0.018 238);
   --surface-hover: oklch(0.952 0.022 238);
   --surface-selected: oklch(0.93 0.03 238);
@@ -713,7 +718,7 @@
 :root.dark[data-theme="ocean"] {
   --surface-page: oklch(0.132 0.022 238);
   --surface-panel: oklch(0.19 0.02 238);
-  --surface-elevated: oklch(0.21 0.02 238 / 0.92);
+  --surface-elevated: oklch(0.21 0.02 238);
   --surface-subtle: oklch(0.168 0.02 238);
   --surface-hover: oklch(0.248 0.025 238);
   --surface-selected: oklch(0.29 0.03 238);
@@ -846,7 +851,7 @@ body:has([data-public-theme="marketing-dark"]),
 [data-public-theme="marketing-dark"] {
   --surface-page: oklch(0.102 0.004 255);
   --surface-panel: oklch(0.168 0.004 255);
-  --surface-elevated: oklch(0.196 0.004 255 / 0.92);
+  --surface-elevated: oklch(0.196 0.004 255);
   --surface-subtle: oklch(0.152 0.004 255);
   --surface-hover: oklch(0.218 0.004 255);
   --surface-selected: oklch(0.255 0.004 255);
@@ -1032,7 +1037,7 @@ body:has([data-public-theme="marketing-dark"]),
   button,
   [role="button"],
   [role="tab"] {
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
   }
 
   button:not(:disabled),
@@ -1047,7 +1052,7 @@ body:has([data-public-theme="marketing-dark"]),
   h4,
   h5,
   h6 {
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
   }
 
   /* html {
@@ -1206,4 +1211,33 @@ body:has([data-public-theme="marketing-dark"]),
 
 .prose .markdown-alert .markdown-alert-title {
   margin-bottom: 0.25rem;
+}
+
+/* Server-rendered markdown outside the fumadocs shell (repo docs, PR findings). The renderers drop
+   shiki's inline background, and `--tw-prose-size` only exists inside `#nd-notebook-layout`, so
+   table cells collapse to zero padding. */
+.markdown-prose table {
+  border-color: var(--border);
+}
+
+.markdown-prose :is(th, td) {
+  padding: 0.5rem 0.75rem;
+  vertical-align: top;
+  border-color: var(--border);
+}
+
+.markdown-prose thead th {
+  font-weight: 600;
+  background-color: var(--muted);
+}
+
+.markdown-prose pre {
+  padding: 0.875rem 1rem;
+  margin-block: 1rem;
+  overflow-x: auto;
+  font-size: var(--text-sm);
+  line-height: 1.65;
+  background-color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
 }

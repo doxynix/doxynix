@@ -3,10 +3,10 @@
 import { useTranslations } from "next-intl";
 
 import type { SidebarVariant } from "@/shared/lib/appearance-preferences";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { ToggleGroup, ToggleGroupItem } from "@/shared/ui/core/toggle-group";
 
 import type { AppearanceSectionProps } from "../../model/appearance/appearance.types";
+import { AppearanceRow, AppearanceSection } from "./appearance-section";
 
 export function SidebarSection({ preferences, update }: Readonly<AppearanceSectionProps>) {
   const t = useTranslations("Dashboard");
@@ -22,19 +22,15 @@ export function SidebarSection({ preferences, update }: Readonly<AppearanceSecti
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("settings_appearance_sidebar_title")}</CardTitle>
-        <CardDescription>{t("settings_appearance_sidebar_desc")}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-6">
-        <div className="flex items-center justify-between gap-6">
-          <div>
-            <p className="font-medium text-sm">{t("settings_appearance_sidebar_style_label")}</p>
-            <p className="text-muted-foreground text-xs">
-              {t("settings_appearance_sidebar_style_desc")}
-            </p>
-          </div>
+    <AppearanceSection
+      description={t("settings_appearance_sidebar_desc")}
+      title={t("settings_appearance_sidebar_title")}
+    >
+      <div className="flex flex-col gap-5">
+        <AppearanceRow
+          description={t("settings_appearance_sidebar_style_desc")}
+          title={t("settings_appearance_sidebar_style_label")}
+        >
           <ToggleGroup
             className="inline-flex h-9 items-center rounded-lg border border-border bg-muted p-1"
             onValueChange={(variant) => {
@@ -56,14 +52,12 @@ export function SidebarSection({ preferences, update }: Readonly<AppearanceSecti
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
-        </div>
-        <div className="flex items-center justify-between gap-6">
-          <div>
-            <p className="font-medium text-sm">{t("settings_appearance_sidebar_collapse_title")}</p>
-            <p className="text-muted-foreground text-xs">
-              {t("settings_appearance_sidebar_collapse_desc")}
-            </p>
-          </div>
+        </AppearanceRow>
+
+        <AppearanceRow
+          description={t("settings_appearance_sidebar_collapse_desc")}
+          title={t("settings_appearance_sidebar_collapse_title")}
+        >
           <ToggleGroup
             className="inline-flex h-9 items-center rounded-lg border border-border bg-muted p-1"
             onValueChange={(collapsible) => {
@@ -85,8 +79,8 @@ export function SidebarSection({ preferences, update }: Readonly<AppearanceSecti
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
-        </div>
-      </CardContent>
-    </Card>
+        </AppearanceRow>
+      </div>
+    </AppearanceSection>
   );
 }

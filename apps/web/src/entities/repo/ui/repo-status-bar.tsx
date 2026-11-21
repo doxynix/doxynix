@@ -18,11 +18,11 @@ export function RepoStatusBar({ meta, mode, stats }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
   const readOnly = isReadOnly(mode);
   return (
-    <div className="flex items-center justify-between bg-card px-3 py-1.5 font-mono text-[11px]">
+    <div className="flex items-center justify-between bg-card px-3 py-1.5 font-mono text-2xs">
       <div className="flex items-center gap-3 font-semibold">
         <span
           className={cn(
-            "rounded border p-px font-bold text-[10px] uppercase",
+            "rounded border p-px font-bold text-2xs",
             readOnly
               ? "border-info/50 bg-info/10 text-info"
               : "border-success/50 bg-success/10 text-success",

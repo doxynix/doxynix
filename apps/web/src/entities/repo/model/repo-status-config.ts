@@ -9,12 +9,12 @@ export type RepoStatusLabelKey =
 export const repoStatusConfig: Record<
   RepoStatus,
   {
-    color: string;
     labelKey: RepoStatusLabelKey;
+    tone: "danger" | "neutral" | "success" | "warning";
   }
 > = {
-  DONE: { color: "text-success", labelKey: "repo_status_done" },
-  FAILED: { color: "text-error", labelKey: "repo_status_failed" },
-  NEW: { color: "text-foreground", labelKey: "repo_status_new" },
-  PENDING: { color: "text-warning", labelKey: "repo_status_in_progress" },
+  DONE: { labelKey: "repo_status_done", tone: "success" },
+  FAILED: { labelKey: "repo_status_failed", tone: "danger" },
+  NEW: { labelKey: "repo_status_new", tone: "neutral" },
+  PENDING: { labelKey: "repo_status_in_progress", tone: "warning" },
 };

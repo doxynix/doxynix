@@ -1,4 +1,4 @@
-import { SkeletonList } from "@/shared/ui/kit/app-skeleton";
+import { Card } from "@/shared/ui/core/card";
 
 import { NotificationCardSkeleton } from "@/entities/notification/ui/notification-card-skeleton";
 
@@ -6,10 +6,10 @@ type Props = { count: number };
 
 export function NotificationsListSkeleton({ count }: Readonly<Props>) {
   return (
-    <SkeletonList
-      className="flex flex-col gap-3"
-      count={count}
-      renderItem={() => <NotificationCardSkeleton />}
-    />
+    <Card className="gap-0 divide-y divide-border overflow-hidden p-0">
+      {Array.from({ length: count }, (_, index) => (
+        <NotificationCardSkeleton key={index} />
+      ))}
+    </Card>
   );
 }

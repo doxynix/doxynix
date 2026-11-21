@@ -2,10 +2,8 @@
 import {
   Activity,
   FileCode,
-  FileIcon,
   FileText,
   FolderTree,
-  Inspect,
   Map,
   Search,
   ShieldCheck,
@@ -16,9 +14,18 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/shared/i18n/navigation";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/core/card";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
+import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
@@ -40,6 +47,52 @@ type Props = {
   owner: string;
   repoId: string;
 };
+
+function formatEnumLabel(value: string) {
+  const normalized = value.toLowerCase().replaceAll("_", " ");
+
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
+function fileStatusTone(status: string) {
+  if (status === "added") {
+    return "border-success/30 text-success";
+  }
+
+  if (status === "removed") {
+    return "border-destructive/30 text-destructive";
+  }
+
+  if (status === "modified") {
+    return "border-warning/30 text-warning";
+  }
+
+  return undefined;
+}
+
+function impactTone(score: number) {
+  if (score >= 80) {
+    return "border-destructive/30 text-destructive";
+  }
+
+  if (score >= 50) {
+    return "border-warning/30 text-warning";
+  }
+
+  return undefined;
+}
+
+function riskTone(score: number) {
+  if (score >= 80) {
+    return "border-destructive/30 text-destructive";
+  }
+
+  if (score >= 50) {
+    return "border-warning/30 text-warning";
+  }
+
+  return undefined;
+}
 
 export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
@@ -102,202 +155,308 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <FolderTree />
-              {t("repo_pull_affected_zones")}
+              <FolderTree className="text-muted-foreground" />
+              {t("repo_pull_affected_title")}
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            {affectedZones.length > 0 ? (
-              affectedZones.map((zone) => (
-                <div
-                  className="rounded-xl border p-4"
-                  key={zone.nodeId}
-                >
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <div>
-                      <p className="font-medium">{zone.label}</p>
-                      <p className="text-muted-foreground text-xs">{zone.path}</p>
-                    </div>
-                    <AppBadge variant="outline">{zone.impactScore}</AppBadge>
-                  </div>
-                  <div className="mb-3 flex flex-wrap gap-3 text-muted-foreground text-xs">
-                    <span>
-                      {zone.fileCount} {t("repo_pull_unit_files")}
-                    </span>
-                    <span>
-                      {zone.findingCount} {t("repo_pull_unit_findings")}
-                    </span>
-                    <span>{zone.kind}</span>
-                    <span>{zone.relatedChangedFiles}</span>
-                  </div>
-                  <AppButton
-                    asChild
-                    size="sm"
-                    variant="outline"
-                  >
-                    <Link href={buildRepoMapHref({ name, nodeId: zone.nodeId, owner })}>
-                      <Map /> {t("repo_pull_open_in_map")}
-                    </Link>
-                  </AppButton>
-                </div>
-              ))
-            ) : (
-              <p className="text-muted-foreground text-sm">{t("repo_pull_no_zones")}</p>
-            )}
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Inspect /> {t("repo_pull_critical_hotspots")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            {affectedNodes.length > 0 ? (
-              affectedNodes.map((node) => (
-                <div
-                  className="rounded-xl border p-4"
-                  key={node.nodeId}
+          <CardContent>
+            <Tabs defaultValue="files">
+              <TabsList className="h-auto w-fit flex-wrap justify-start gap-0.5 p-0.5">
+                <TabsTrigger
+                  className="px-2.5 py-1 text-xs"
+                  value="files"
                 >
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <div>
-                      <p className="font-medium">{node.label}</p>
-                      <AppBadge className="text-xs">{node.nodeType}</AppBadge>
-                      <p className="text-muted-foreground text-xs">{node.path}</p>
-                    </div>
-                    <AppBadge variant="outline">{node.impactScore}</AppBadge>
-                  </div>
-                  <p className="text-muted-foreground text-xs">{node.whyAffected}</p>
-                  <div className="mb-3 flex flex-wrap gap-3 text-muted-foreground text-xs">
-                    <span>
-                      {node.fileCount} {t("repo_pull_unit_files")}
-                    </span>
-                    <span>
-                      {node.findingCount} {t("repo_pull_unit_findings")}
-                    </span>
-                    <span>{node.kind}</span>
-                    <span>{node.relatedChangedFiles}</span>
-                  </div>
-                  <AppButton
-                    asChild
-                    size="sm"
-                    variant="outline"
-                  >
-                    <Link href={buildRepoMapHref({ name, nodeId: node.nodeId, owner })}>
-                      <Map /> {t("repo_pull_open_in_map")}
-                    </Link>
-                  </AppButton>
-                </div>
-              ))
-            ) : (
-              <p className="text-muted-foreground text-sm">{t("repo_pull_no_zones")}</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <FileIcon />
-              {t("repo_pull_changed_files")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            {changedFiles.length > 0 ? (
-              changedFiles.map((file) => (
-                <div
-                  className="rounded-xl border p-4"
-                  key={file.filePath}
+                  {t("repo_pull_changed_files")}
+                  <span className="text-muted-foreground">{changedFiles.length}</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  className="px-2.5 py-1 text-xs"
+                  value="nodes"
                 >
-                  <div className="mb-2 flex items-center justify-between gap-3">
-                    <code className="text-sm">{file.filePath}</code>
-                    <AppBadge variant="outline">{file.status}</AppBadge>
-                  </div>
-                  <div className="mb-3 flex flex-wrap gap-3 text-muted-foreground text-xs">
-                    <span className="text-success">+{file.additions}</span>
-                    <span className="text-destructive">−{file.deletions}</span>
-                    <span>
-                      {file.findingCount} {t("repo_pull_unit_findings")}
-                    </span>
-                    {file.zoneLabel != null && <span>{file.zoneLabel}</span>}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <AppButton
-                      asChild
-                      size="sm"
-                      variant="ghost"
-                    >
-                      <Link
-                        href={buildRepoCodeHref({
-                          name,
-                          nodeId: file.nodeId,
-                          owner,
-                          path: file.filePath,
-                        })}
-                      >
-                        <FileCode />
-                        {t("repo_pull_view_code")}
-                      </Link>
-                    </AppButton>
-                    {file.zoneId != null && (
-                      <AppButton
-                        asChild
-                        size="sm"
-                        variant="ghost"
-                      >
-                        <Link href={buildRepoMapHref({ name, nodeId: file.zoneId, owner })}>
-                          <Map /> {t("repo_pull_view_map")}
-                        </Link>
-                      </AppButton>
-                    )}
-                    {file.nodeId != null && (
-                      <AppButton
-                        asChild
-                        size="sm"
-                        variant="ghost"
-                      >
-                        <Link href={buildRepoDocsHref({ name, nodeId: file.nodeId, owner })}>
-                          <FileText /> {t("repo_pull_view_docs")}
-                        </Link>
-                      </AppButton>
-                    )}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-muted-foreground text-sm">{t("repo_pull_no_changed_snapshot")}</p>
-            )}
-          </CardContent>
-        </Card>
+                  {t("repo_pull_stat_nodes")}
+                  <span className="text-muted-foreground">{affectedNodes.length}</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  className="px-2.5 py-1 text-xs"
+                  value="zones"
+                >
+                  {t("repo_pull_affected_zones")}
+                  <span className="text-muted-foreground">{affectedZones.length}</span>
+                </TabsTrigger>
+              </TabsList>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <ShieldCheck />
-              {t("repo_pull_detected_issues")} ({commentsCount})
-            </CardTitle>
-            {comments.length > 0 && (
-              <LoadingButton
-                aria-label={t("repo_pull_autofix_all")}
-                className="bg-success font-semibold text-success-foreground hover:bg-success/90"
-                isLoading={isFixing}
-                onClick={fixAll}
-                size="sm"
+              <TabsContent
+                className="mt-3 flex flex-col"
+                value="files"
               >
-                <Wand2 className="size-3.5" />
-              </LoadingButton>
+                {changedFiles.length === 0 ? (
+                  <p className="py-6 text-center text-muted-foreground text-sm">
+                    {t("repo_pull_no_changed_snapshot")}
+                  </p>
+                ) : (
+                  changedFiles.map((file) => {
+                    const fileName = file.filePath.split("/").pop() ?? file.filePath;
+                    const dirName = file.filePath.split("/").slice(0, -1).join("/");
+
+                    return (
+                      <div
+                        className="flex items-start gap-2.5 border-t py-2.5 first:border-t-0 first:pt-0 last:pb-0"
+                        key={file.filePath}
+                      >
+                        <AppBadge
+                          className={fileStatusTone(file.status)}
+                          variant="outline"
+                        >
+                          {formatEnumLabel(file.status)}
+                        </AppBadge>
+
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-medium text-sm">{fileName}</p>
+                          <p className="truncate text-muted-foreground text-xs">{dirName}</p>
+
+                          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                            <span className="text-success">+{file.additions}</span>
+                            <span className="text-destructive">−{file.deletions}</span>
+                            <span className="text-muted-foreground">
+                              {file.findingCount} {t("repo_pull_unit_findings")}
+                            </span>
+                            {file.zoneLabel != null && (
+                              <span className="text-muted-foreground">{file.zoneLabel}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex shrink-0 items-center gap-0.5">
+                          <AppTooltip content={t("repo_pull_view_code")}>
+                            <AppButton
+                              asChild
+                              size="icon-xs"
+                              variant="ghost"
+                            >
+                              <Link
+                                aria-label={t("repo_pull_view_code")}
+                                href={buildRepoCodeHref({
+                                  name,
+                                  nodeId: file.nodeId,
+                                  owner,
+                                  path: file.filePath,
+                                })}
+                              >
+                                <FileCode />
+                              </Link>
+                            </AppButton>
+                          </AppTooltip>
+
+                          {file.zoneId != null && (
+                            <AppTooltip content={t("repo_pull_view_map")}>
+                              <AppButton
+                                asChild
+                                size="icon-xs"
+                                variant="ghost"
+                              >
+                                <Link
+                                  aria-label={t("repo_pull_view_map")}
+                                  href={buildRepoMapHref({
+                                    name,
+                                    nodeId: file.zoneId,
+                                    owner,
+                                  })}
+                                >
+                                  <Map />
+                                </Link>
+                              </AppButton>
+                            </AppTooltip>
+                          )}
+
+                          {file.nodeId != null && (
+                            <AppTooltip content={t("repo_pull_view_docs")}>
+                              <AppButton
+                                asChild
+                                size="icon-xs"
+                                variant="ghost"
+                              >
+                                <Link
+                                  aria-label={t("repo_pull_view_docs")}
+                                  href={buildRepoDocsHref({
+                                    name,
+                                    nodeId: file.nodeId,
+                                    owner,
+                                  })}
+                                >
+                                  <FileText />
+                                </Link>
+                              </AppButton>
+                            </AppTooltip>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </TabsContent>
+
+              <TabsContent
+                className="mt-3 flex flex-col"
+                value="nodes"
+              >
+                {affectedNodes.length === 0 ? (
+                  <p className="py-6 text-center text-muted-foreground text-sm">
+                    {t("no_data_yet")}
+                  </p>
+                ) : (
+                  affectedNodes.map((node) => (
+                    <div
+                      className="flex items-start gap-2.5 border-t py-2.5 first:border-t-0 first:pt-0 last:pb-0"
+                      key={node.nodeId}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="min-w-0 truncate font-medium text-sm">{node.label}</p>
+                          <AppBadge variant="outline">{formatEnumLabel(node.nodeType)}</AppBadge>
+                          <AppBadge
+                            className={impactTone(node.impactScore)}
+                            variant="outline"
+                          >
+                            {node.impactScore}
+                          </AppBadge>
+                        </div>
+
+                        <p className="truncate text-muted-foreground text-xs">{node.path}</p>
+                        <p className="mt-0.5 text-muted-foreground text-xs">{node.whyAffected}</p>
+
+                        <div className="mt-1 flex flex-wrap gap-x-3 text-muted-foreground text-xs">
+                          <span>
+                            {node.fileCount} {t("repo_pull_unit_files")}
+                          </span>
+                          <span>
+                            {node.findingCount} {t("repo_pull_unit_findings")}
+                          </span>
+                        </div>
+                      </div>
+
+                      <AppTooltip content={t("repo_pull_open_in_map")}>
+                        <AppButton
+                          asChild
+                          size="icon-xs"
+                          variant="ghost"
+                        >
+                          <Link
+                            aria-label={t("repo_pull_open_in_map")}
+                            href={buildRepoMapHref({
+                              name,
+                              nodeId: node.nodeId,
+                              owner,
+                            })}
+                          >
+                            <Map />
+                          </Link>
+                        </AppButton>
+                      </AppTooltip>
+                    </div>
+                  ))
+                )}
+              </TabsContent>
+
+              <TabsContent
+                className="mt-3 flex flex-col"
+                value="zones"
+              >
+                {affectedZones.length === 0 ? (
+                  <p className="py-6 text-center text-muted-foreground text-sm">
+                    {t("repo_pull_no_zones")}
+                  </p>
+                ) : (
+                  affectedZones.map((zone) => (
+                    <div
+                      className="flex items-start gap-2.5 border-t py-2.5 first:border-t-0 first:pt-0 last:pb-0"
+                      key={zone.nodeId}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="min-w-0 truncate font-medium text-sm">{zone.label}</p>
+                          <AppBadge
+                            className={impactTone(zone.impactScore)}
+                            variant="outline"
+                          >
+                            {zone.impactScore}
+                          </AppBadge>
+                        </div>
+
+                        <p className="truncate text-muted-foreground text-xs">{zone.path}</p>
+
+                        <div className="mt-1 flex flex-wrap gap-x-3 text-muted-foreground text-xs">
+                          <span>
+                            {zone.fileCount} {t("repo_pull_unit_files")}
+                          </span>
+                          <span>
+                            {zone.findingCount} {t("repo_pull_unit_findings")}
+                          </span>
+                        </div>
+                      </div>
+
+                      <AppTooltip content={t("repo_pull_open_in_map")}>
+                        <AppButton
+                          asChild
+                          size="icon-xs"
+                          variant="ghost"
+                        >
+                          <Link
+                            aria-label={t("repo_pull_open_in_map")}
+                            href={buildRepoMapHref({
+                              name,
+                              nodeId: zone.nodeId,
+                              owner,
+                            })}
+                          >
+                            <Map />
+                          </Link>
+                        </AppButton>
+                      </AppTooltip>
+                    </div>
+                  ))
+                )}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ShieldCheck className="text-muted-foreground" />
+              {t("repo_pull_detected_issues")}
+            </CardTitle>
+
+            <CardDescription>
+              {t("repo_pull_card_issues", { count: commentsCount })}
+            </CardDescription>
+
+            {comments.length > 0 && (
+              <CardAction>
+                <LoadingButton
+                  aria-label={t("repo_pull_autofix_all")}
+                  className="gap-1.5"
+                  isLoading={isFixing}
+                  onClick={fixAll}
+                  size="sm"
+                  variant="outline"
+                >
+                  <Wand2 /> {t("repo_pull_autofix_all")}
+                </LoadingButton>
+              </CardAction>
             )}
           </CardHeader>
+
           <CardContent>
             {isCommentsLoading ? (
               <SkeletonList
-                className="flex flex-col gap-4"
+                className="flex flex-col"
                 count={3}
-                itemClassName="group relative overflow-hidden rounded-xl border p-4"
+                itemClassName="border-t py-3 first:border-t-0 first:pt-0"
                 renderItem={() => (
                   <>
-                    <div className="mb-2 flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-3">
                       <SkeletonText
                         lines={1}
                         widths={["w-56"]}
@@ -313,60 +472,63 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                         />
                       </div>
                     </div>
-                    <div className="mb-4">
+                    <div className="mt-2">
                       <SkeletonText
                         lines={3}
                         widths={["w-full", "w-full", "w-2/3"]}
                       />
                     </div>
-                    <div className="flex justify-end border-border border-t pt-3">
-                      <Skeleton className="h-8 w-32 rounded-xl" />
+                    <div className="mt-3 flex justify-end">
+                      <Skeleton className="h-8 w-24 rounded-lg" />
                     </div>
                   </>
                 )}
               />
             ) : comments.length > 0 ? (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col">
                 {comments.map((comment) => (
                   <div
-                    className="group relative overflow-hidden rounded-xl border p-4"
+                    className="border-t py-3 first:border-t-0 first:pt-0 last:pb-0"
                     key={comment.id}
                   >
-                    <div className="mb-2 flex items-center justify-between">
-                      <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-md bg-surface-hover px-1.5 py-0.5 text-xs">
                         {comment.filePath}:{comment.line}
-                      </code>
-                      <div className="flex items-center gap-3">
-                        <span className="font-bold text-muted-foreground text-xs uppercase tracking-wide">
-                          {comment.findingType}
-                        </span>
-                        <span className="font-bold text-muted-foreground text-xs">
-                          {t("repo_pull_risk_label", { level: comment.riskLevel })}
-                        </span>
-                      </div>
-                    </div>
-                    <article
-                      className="prose dark:prose-invert wrap-break-word mb-4 min-w-0 max-w-none prose-pre:bg-transparent prose-pre:p-0 text-xs"
-                      dangerouslySetInnerHTML={{ __html: comment.bodyHtml }} // Sanitized by markdownToHtml (rehype-sanitize) on the server.
-                    />
+                      </span>
 
-                    <div className="flex justify-end border-border border-t pt-3">
+                      <span className="text-muted-foreground text-xs">
+                        {formatEnumLabel(comment.findingType)}
+                      </span>
+
+                      <AppBadge
+                        className={riskTone(comment.riskLevel)}
+                        variant="outline"
+                      >
+                        {t("repo_pull_risk_label", { level: comment.riskLevel })}
+                      </AppBadge>
+
                       <LoadingButton
                         aria-label={t("repo_pull_autofix_single")}
-                        className="font-medium text-xs transition-standard hover:border-success/30 hover:bg-success/5 hover:text-success"
+                        className="ml-auto gap-1.5"
                         isLoading={isFixing}
                         onClick={() => fixOne(comment)}
                         size="sm"
                         variant="outline"
                       >
-                        <Wand2 className="size-3.5" />
+                        <Wand2 /> {t("fix")}
                       </LoadingButton>
                     </div>
+
+                    <article
+                      className="markdown-prose prose dark:prose-invert wrap-break-word mt-2 min-w-0 max-w-none text-xs"
+                      dangerouslySetInnerHTML={{ __html: comment.bodyHtml }} // Sanitized by markdownToHtml (rehype-sanitize) on the server.
+                    />
                   </div>
                 ))}
+
                 {hasNextCommentsPage && (
                   <LoadingButton
-                    className="w-full"
+                    className="mt-3 w-full"
                     disabled={isFetchingNextCommentsPage}
                     isLoading={isFetchingNextCommentsPage}
                     onClick={() => void fetchNextCommentsPage()}
@@ -378,7 +540,9 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                 )}
               </div>
             ) : (
-              <p className="text-muted-foreground text-sm">{t("repo_pull_no_comments")}</p>
+              <p className="py-6 text-center text-muted-foreground text-sm">
+                {t("repo_pull_no_comments")}
+              </p>
             )}
           </CardContent>
         </Card>
@@ -393,25 +557,23 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Activity />
+              <Activity className="text-muted-foreground" />
               {t("repo_pull_impact_summary")}
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            <div className="grid grid-cols-2 gap-3 text-sm">
+
+          <CardContent className="flex flex-col">
+            <div className="grid grid-cols-2 gap-4">
               {impactStats.map((stat) => (
-                <div
-                  className="rounded-lg border bg-muted p-3"
-                  key={stat.label}
-                >
-                  <p className="mb-1 font-bold text-muted-foreground text-xs">{stat.label}</p>
-                  <p className="font-black text-lg capitalize">{stat.value}</p>
+                <div key={stat.label}>
+                  <p className="text-muted-foreground text-xs">{stat.label}</p>
+                  <p className="mt-0.5 font-semibold text-lg capitalize">{stat.value}</p>
                 </div>
               ))}
             </div>
 
             {impact?.navigationHints.primaryNodeId != null && (
-              <div className="flex flex-wrap gap-2">
+              <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">
                 <AppButton
                   asChild
                   size="sm"
@@ -426,6 +588,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     <Search /> {t("repo_pull_inspect_primary")}
                   </Link>
                 </AppButton>
+
                 {impact.navigationHints.primaryFilePath != null && (
                   <AppButton
                     asChild
@@ -450,43 +613,58 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="flex flex-row items-center gap-2 text-base">
-              <Search />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Search className="text-muted-foreground" />
               {t("repo_pull_top_findings")}
             </CardTitle>
-            <LoadingButton
-              aria-label={t("repo_pull_autofix_all")}
-              className="bg-success font-semibold text-success-foreground hover:bg-success/90"
-              isLoading={isFixing}
-              onClick={fixAll}
-              size="sm"
-            >
-              <Wand2 className="size-3.5" />
-            </LoadingButton>
+
+            <CardAction>
+              <AppTooltip content={t("repo_pull_autofix_all")}>
+                <LoadingButton
+                  aria-label={t("repo_pull_autofix_all")}
+                  isLoading={isFixing}
+                  onClick={fixAll}
+                  size="icon-xs"
+                  variant="ghost"
+                >
+                  <Wand2 />
+                </LoadingButton>
+              </AppTooltip>
+            </CardAction>
           </CardHeader>
-          <CardContent className="flex flex-col gap-3">
+
+          <CardContent className="flex flex-col">
             {topFindings.length > 0 ? (
               topFindings.slice(0, 4).map((finding) => (
                 <div
-                  className="rounded-lg border p-3"
+                  className="border-t py-3 first:border-t-0 first:pt-0 last:pb-0"
                   key={finding.id}
                 >
-                  <div className="mb-1 flex items-center justify-between gap-2">
+                  <div className="flex items-start justify-between gap-2">
                     <p className="font-medium text-sm">{finding.title}</p>
-                    <AppBadge variant="outline">{finding.riskLevel}</AppBadge>
+                    <AppBadge
+                      className={riskTone(finding.riskLevel)}
+                      variant="outline"
+                    >
+                      {t("repo_pull_risk_label", { level: finding.riskLevel })}
+                    </AppBadge>
                   </div>
-                  <p className="mb-2 text-muted-foreground text-xs">
+
+                  <p className="mt-0.5 text-muted-foreground text-xs">
                     {finding.filePath}:{finding.line}
                   </p>
+
                   <article
-                    className="prose dark:prose-invert wrap-break-word min-w-0 max-w-none prose-pre:bg-transparent prose-pre:p-0 text-xs"
+                    className="markdown-prose prose dark:prose-invert wrap-break-word mt-1.5 min-w-0 max-w-none text-xs"
                     dangerouslySetInnerHTML={{ __html: finding.messageHtml }} // Sanitized by markdownToHtml (rehype-sanitize) on the server.
                   />
                 </div>
               ))
             ) : (
-              <p className="text-muted-foreground text-sm">{t("repo_pull_no_findings")}</p>
+              <p className="py-6 text-center text-muted-foreground text-sm">
+                {t("repo_pull_no_findings")}
+              </p>
             )}
           </CardContent>
         </Card>
@@ -495,20 +673,34 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <Card>
             <CardHeader>
               <CardTitle className="text-base">
-                {t("repo_pull_linked_fixes")} ({linkedFixes})
+                {t("repo_pull_linked_fixes")}
+                <span className="ml-1.5 text-muted-foreground">{linkedFixes}</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col gap-3">
+
+            <CardContent className="flex flex-col">
               {fixes.map((fix) => (
                 <div
-                  className="rounded-lg border p-3"
+                  className="border-t py-3 first:border-t-0 first:pt-0 last:pb-0"
                   key={fix.id}
                 >
-                  <div className="mb-1 flex items-center justify-between gap-2">
+                  <div className="flex items-start justify-between gap-2">
                     <p className="font-medium text-sm">{fix.title}</p>
-                    <AppBadge variant="outline">{fix.status}</AppBadge>
+                    <AppBadge
+                      className={
+                        fix.status === "COMPLETED"
+                          ? "border-success/30 text-success"
+                          : fix.status === "FAILED"
+                            ? "border-destructive/30 text-destructive"
+                            : undefined
+                      }
+                      variant="outline"
+                    >
+                      {formatEnumLabel(fix.status)}
+                    </AppBadge>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
                     {fix.status === "COMPLETED" && (
                       <AppButton
                         disabled={isStaging}
@@ -519,6 +711,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                         {t("repo_pull_add_to_draft")}
                       </AppButton>
                     )}
+
                     {fix.githubPrUrl != null && (
                       <ExternalLink href={fix.githubPrUrl}>
                         {t("repo_pull_open_github_pr", { number: fix.githubPrNumber ?? "?" })}
@@ -527,9 +720,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                   </div>
                 </div>
               ))}
+
               {hasNextFixesPage && (
                 <LoadingButton
-                  className="w-full"
+                  className="mt-3 w-full"
                   disabled={isFetchingNextFixesPage}
                   isLoading={isFetchingNextFixesPage}
                   onClick={() => void fetchNextFixesPage()}

@@ -13,6 +13,7 @@ import "../globals.css";
 
 import { APP_URL } from "@/shared/config/env.client";
 import { IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/config/env.flags";
+import { getOgLocale } from "@/shared/config/locales";
 import { routing } from "@/shared/i18n/routing";
 import { appearanceBootstrapScript } from "@/shared/lib/appearance-preferences";
 import { cn } from "@/shared/lib/cn";
@@ -50,21 +51,6 @@ export const viewport: Viewport = {
   width: "device-width",
 };
 
-const OG_LOCALE_MAP: Record<string, string> = {
-  de: "de_DE",
-  en: "en_US",
-  es: "es_ES",
-  fr: "fr_FR",
-  it: "it_IT",
-  ja: "ja_JP",
-  ko: "ko_KR",
-  pl: "pl_PL",
-  "pt-BR": "pt_BR",
-  ru: "ru_RU",
-  tr: "tr_TR",
-  "zh-CN": "zh_CN",
-};
-
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const t = await getTranslations("Metadata");
@@ -95,7 +81,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
     openGraph: {
       description,
-      locale: OG_LOCALE_MAP[locale] ?? "en_US",
+      locale: getOgLocale(locale),
       siteName: "Doxynix",
       title,
       type: "website",

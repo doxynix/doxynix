@@ -2,11 +2,10 @@
 
 import { useTranslations } from "next-intl";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
-import { Label } from "@/shared/ui/core/label";
 import { Switch } from "@/shared/ui/core/switch";
 
 import type { AppearanceSectionProps } from "../../model/appearance/appearance.types";
+import { AppearanceRow, AppearanceSection } from "./appearance-section";
 
 const POINTER_CURSOR_ID = "appearance-pointer-cursor";
 const REDUCE_MOTION_ID = "appearance-reduce-motion";
@@ -17,22 +16,16 @@ export function InteractionSection({ preferences, update }: Readonly<AppearanceS
   const t = useTranslations("Dashboard");
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("settings_appearance_behavior_title")}</CardTitle>
-        <CardDescription>{t("settings_appearance_behavior_desc")}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-6">
-        <div className="flex items-center justify-between gap-6">
-          <div>
-            <Label
-              className="text-sm"
-              htmlFor={POINTER_CURSOR_ID}
-            >
-              {t("settings_appearance_pointer_title")}
-            </Label>
-            <p className="text-muted-foreground text-xs">{t("settings_appearance_pointer_desc")}</p>
-          </div>
+    <AppearanceSection
+      description={t("settings_appearance_behavior_desc")}
+      title={t("settings_appearance_behavior_title")}
+    >
+      <div className="flex flex-col gap-5">
+        <AppearanceRow
+          description={t("settings_appearance_pointer_desc")}
+          htmlFor={POINTER_CURSOR_ID}
+          title={t("settings_appearance_pointer_title")}
+        >
           <Switch
             checked={preferences.pointerCursor}
             id={POINTER_CURSOR_ID}
@@ -40,19 +33,13 @@ export function InteractionSection({ preferences, update }: Readonly<AppearanceS
               update({ pointerCursor });
             }}
           />
-        </div>
-        <div className="flex items-center justify-between gap-6">
-          <div>
-            <Label
-              className="text-sm"
-              htmlFor={UNDERLINE_LINKS_ID}
-            >
-              {t("settings_appearance_underline_title")}
-            </Label>
-            <p className="text-muted-foreground text-xs">
-              {t("settings_appearance_underline_desc")}
-            </p>
-          </div>
+        </AppearanceRow>
+
+        <AppearanceRow
+          description={t("settings_appearance_underline_desc")}
+          htmlFor={UNDERLINE_LINKS_ID}
+          title={t("settings_appearance_underline_title")}
+        >
           <Switch
             checked={preferences.underlineLinks}
             id={UNDERLINE_LINKS_ID}
@@ -60,17 +47,13 @@ export function InteractionSection({ preferences, update }: Readonly<AppearanceS
               update({ underlineLinks });
             }}
           />
-        </div>
-        <div className="flex items-center justify-between gap-6">
-          <div>
-            <Label
-              className="text-sm"
-              htmlFor={REDUCE_MOTION_ID}
-            >
-              {t("settings_appearance_motion_title")}
-            </Label>
-            <p className="text-muted-foreground text-xs">{t("settings_appearance_motion_desc")}</p>
-          </div>
+        </AppearanceRow>
+
+        <AppearanceRow
+          description={t("settings_appearance_motion_desc")}
+          htmlFor={REDUCE_MOTION_ID}
+          title={t("settings_appearance_motion_title")}
+        >
           <Switch
             checked={preferences.reduceMotion}
             id={REDUCE_MOTION_ID}
@@ -78,19 +61,13 @@ export function InteractionSection({ preferences, update }: Readonly<AppearanceS
               update({ reduceMotion });
             }}
           />
-        </div>
-        <div className="flex items-center justify-between gap-6">
-          <div>
-            <Label
-              className="text-sm"
-              htmlFor={SINGLE_KEY_SHORTCUTS_ID}
-            >
-              {t("settings_appearance_shortcuts_title")}
-            </Label>
-            <p className="text-muted-foreground text-xs">
-              {t("settings_appearance_shortcuts_desc")}
-            </p>
-          </div>
+        </AppearanceRow>
+
+        <AppearanceRow
+          description={t("settings_appearance_shortcuts_desc")}
+          htmlFor={SINGLE_KEY_SHORTCUTS_ID}
+          title={t("settings_appearance_shortcuts_title")}
+        >
           <Switch
             checked={preferences.singleKeyShortcuts}
             id={SINGLE_KEY_SHORTCUTS_ID}
@@ -98,8 +75,8 @@ export function InteractionSection({ preferences, update }: Readonly<AppearanceS
               update({ singleKeyShortcuts });
             }}
           />
-        </div>
-      </CardContent>
-    </Card>
+        </AppearanceRow>
+      </div>
+    </AppearanceSection>
   );
 }

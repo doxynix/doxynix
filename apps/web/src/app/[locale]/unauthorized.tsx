@@ -25,7 +25,7 @@ export default function UnauthorizedPage() {
         <div className="flex size-20 items-center justify-center rounded-full bg-destructive/10 text-destructive">
           <ShieldAlert size={40} />
         </div>
-        <h1 className="font-bold text-3xl tracking-tight">{t("session_expired_title")}</h1>
+        <h1 className="font-bold text-3xl">{t("session_expired_title")}</h1>
         <p className="text-muted-foreground">{t("session_expired_desc")}</p>
         <AppButton
           asChild

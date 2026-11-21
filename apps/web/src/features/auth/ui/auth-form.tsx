@@ -179,13 +179,13 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
           </div>
         </div>
 
-        <div className="fade-in slide-in-from-bottom-4 relative flex w-full max-w-lg animate-in items-center justify-center">
+        <div className="fade-in slide-in-from-bottom-4 relative grid w-full max-w-lg animate-in items-center justify-items-center">
           <div
             className={cn(
-              "relative flex w-full flex-col gap-6 rounded-[1.75rem] border border-border bg-card p-6 transition-standard duration-300 ease-out sm:p-8",
+              "relative col-start-1 row-start-1 flex w-full flex-col gap-6 rounded-2xl border border-border bg-card p-6 transition-standard duration-300 ease-out sm:p-8",
               isSent || isTwoFactorRequired
-                ? "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"
-                : "relative scale-100 opacity-100",
+                ? "pointer-events-none scale-[0.98] opacity-0"
+                : "scale-100 opacity-100",
             )}
             inert={isSent || isTwoFactorRequired ? true : undefined}
           >
@@ -237,12 +237,12 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-border border-t" />
               </div>
-              <div className="relative flex justify-center text-[0.7rem] uppercase">
+              <div className="relative flex justify-center text-2xs">
                 <span className="bg-card px-3 text-muted-foreground">{t("or_divider")}</span>
               </div>
             </div>
 
-            <div className="flex flex-col gap-4 rounded-[1.35rem] border border-border bg-background p-5">
+            <div className="flex flex-col gap-4 rounded-xl border border-border bg-background p-5">
               <div className="flex flex-col gap-1">
                 <p className="font-medium text-foreground text-sm">{t("work_email")}</p>
                 <p className="text-muted-foreground text-sm">{t("work_email_description")}</p>
@@ -316,10 +316,10 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
 
           <div
             className={cn(
-              "relative flex w-full flex-col gap-6 rounded-[1.75rem] border border-border bg-card p-6 text-center transition-standard duration-300 ease-out sm:p-8",
+              "relative col-start-1 row-start-1 flex w-full flex-col gap-6 rounded-2xl border border-border bg-card p-6 text-center transition-standard duration-300 ease-out sm:p-8",
               isTwoFactorRequired
-                ? "relative scale-100 opacity-100"
-                : "pointer-events-none absolute inset-0 scale-[0.98] opacity-0",
+                ? "scale-100 opacity-100"
+                : "pointer-events-none scale-[0.98] opacity-0",
             )}
             inert={!isTwoFactorRequired ? true : undefined}
           >
@@ -332,7 +332,7 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
                   <h2 className="font-semibold text-sm">
                     {isBackupMode ? t("backup_recovery") : t("two_factor_verification")}
                   </h2>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-2xs text-muted-foreground">
                     {isBackupMode ? t("use_recovery_code") : t("enter_totp_code")}
                   </p>
                 </div>
@@ -354,7 +354,7 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
               <Input
                 aria-label={isBackupMode ? t("backup_recovery") : t("two_factor_verification")}
                 autoComplete={isBackupMode ? "off" : "one-time-code"}
-                className="h-12 rounded-2xl text-center font-mono text-lg tracking-widest"
+                className="h-12 rounded-2xl text-center font-mono text-lg"
                 disabled={isTwoFactorVerifying}
                 inputMode={isBackupMode ? "text" : "numeric"}
                 maxLength={twoFactorCodeLength}
@@ -387,10 +387,8 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
 
           <div
             className={cn(
-              "relative flex w-full flex-col items-center justify-center gap-4 rounded-[1.75rem] border border-border bg-card p-8 text-center transition-standard duration-300 ease-out",
-              isSent
-                ? "relative scale-100 opacity-100"
-                : "pointer-events-none absolute inset-0 scale-[0.98] opacity-0",
+              "relative col-start-1 row-start-1 flex w-full flex-col items-center justify-center gap-4 rounded-2xl border border-border bg-card p-8 text-center transition-standard duration-300 ease-out",
+              isSent ? "scale-100 opacity-100" : "pointer-events-none scale-[0.98] opacity-0",
             )}
             inert={!isSent ? true : undefined}
           >

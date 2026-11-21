@@ -221,7 +221,9 @@ export function CreateRepoDialog() {
                         />
                       </div>
                     </FormControl>
-                    <FormMessage />
+                    <div className="min-h-5">
+                      <FormMessage />
+                    </div>
                     {showSuggestions && suggestions && suggestions.length > 0 && (
                       <div className="absolute top-full right-0 left-0 z-10 mt-1 h-80 overflow-y-auto rounded-xl border bg-popover text-popover-foreground">
                         {suggestions.map((repo) => (
@@ -239,8 +241,8 @@ export function CreateRepoDialog() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between font-medium text-xs tracking-wider">
-                <div className="flex items-center gap-2 text-muted-foreground uppercase">
+              <div className="flex min-h-6 items-center justify-between font-medium text-xs">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <Book className="size-3" />
                   {t("repo_your_repos")}
                 </div>

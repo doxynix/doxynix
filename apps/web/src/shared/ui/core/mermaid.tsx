@@ -200,7 +200,7 @@ export function AppMermaid({
       {status === "error" && error && (
         <div className="flex w-full items-center justify-center rounded-lg border border-destructive/20 bg-destructive/5 p-6">
           <div className="flex max-w-md flex-col items-center gap-2 text-center">
-            <span className="font-bold text-destructive text-xs uppercase tracking-wider">
+            <span className="font-bold text-destructive text-xs uppercase">
               {tCommon("syntax_error")}
             </span>
             <code className="w-full break-all rounded bg-background/50 px-2 py-1 font-mono text-muted-foreground text-xs">

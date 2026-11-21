@@ -26,12 +26,14 @@ export default async function RepoSettingsPage({ params }: Readonly<Props>) {
 
   return (
     <HydrateClient>
-      <PRAnalysisConfigCard repoId={repo.id} />
-      <h2 className="font-bold text-2xl text-destructive">{t("settings_danger_title")}</h2>
-      <DeleteRepoCard
-        id={repo.id}
-        name={repo.name}
-      />
+      <div className="flex w-full flex-col gap-6">
+        <PRAnalysisConfigCard repoId={repo.id} />
+        <h2 className="font-bold text-2xl text-destructive">{t("settings_danger_title")}</h2>
+        <DeleteRepoCard
+          id={repo.id}
+          name={repo.name}
+        />
+      </div>
     </HydrateClient>
   );
 }

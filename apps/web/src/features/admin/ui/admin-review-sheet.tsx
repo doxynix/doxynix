@@ -67,7 +67,7 @@ export function AdminReviewSheet({ onOpenChange, open, reviewId }: Readonly<Prop
         <SheetHeader className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-1">
-              <SheetTitle className="font-semibold text-xl tracking-tight">
+              <SheetTitle className="font-semibold text-xl">
                 {data ? `${data.owner}/${data.repoName} #${data.prNumber}` : t("detail_loading")}
               </SheetTitle>
               <SheetDescription className="text-muted-foreground text-xs">

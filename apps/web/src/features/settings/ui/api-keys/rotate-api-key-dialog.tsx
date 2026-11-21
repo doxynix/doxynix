@@ -90,8 +90,8 @@ export function RotateApiKeyDialog({ apiKey }: Readonly<Props>) {
               </DialogDescription>
             </DialogHeader>
 
-            <Alert className="border-warning/20 bg-warning/10 text-warning-foreground">
-              <AlertTitle className="font-semibold">
+            <Alert className="border-warning/20 bg-warning/10">
+              <AlertTitle className="font-semibold text-foreground">
                 {t("settings_api_keys_rotate_note_title")}
               </AlertTitle>
               <AlertDescription>{t("settings_api_keys_rotate_note")}</AlertDescription>

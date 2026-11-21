@@ -5,7 +5,15 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { formatShortDate } from "@/shared/lib/date-utils";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/core/card";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import type { BillingEntitlement, BillingSubscription } from "../model/billing.types";
@@ -43,7 +51,15 @@ export function PlanCard({ canManage, entitlement, subscription }: Readonly<Prop
   const isHobby = entitlement.planCode === "HOBBY";
   const canUpgrade = isHobby || subscription == null;
   const planCopy = PLAN_COPY[entitlement.planCode];
+  const planName = planCopy.label == null ? entitlement.planCode : t(planCopy.label);
   const pending = checkout.isPending || portal.isPending;
+
+  const periodLabel =
+    subscription == null
+      ? null
+      : `${t(
+          subscription.cancelAtPeriodEnd ? "billing_ends_on_label" : "billing_renews_on_label",
+        )} ${formatShortDate(subscription.currentPeriodEnd, locale)}`;
 
   const startCheckout = () => {
     setError(null);
@@ -71,45 +87,37 @@ export function PlanCard({ canManage, entitlement, subscription }: Readonly<Prop
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("billing_plan_title")}</CardTitle>
-        <CardDescription>{t(planCopy.description)}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-muted-foreground text-sm">{t("billing_plan_current")}</span>
-          <span className="font-semibold">
-            {planCopy.label == null ? entitlement.planCode : t(planCopy.label)}
-          </span>
-        </div>
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-muted-foreground text-sm">{t("billing_state_label")}</span>
+        <CardTitle>{planName}</CardTitle>
+        <CardDescription>{periodLabel ?? t(planCopy.description)}</CardDescription>
+        <CardAction>
           <BillingStateBadge state={entitlement.accessState} />
-        </div>
-        {subscription != null && (
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-muted-foreground text-sm">
-              {subscription.cancelAtPeriodEnd
-                ? t("billing_ends_on_label")
-                : t("billing_renews_on_label")}
-            </span>
-            <span className="text-sm">
-              {formatShortDate(subscription.currentPeriodEnd, locale)}
-            </span>
-          </div>
+        </CardAction>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-2">
+        {periodLabel != null && (
+          <p className="text-muted-foreground text-sm">{t(planCopy.description)}</p>
         )}
+        <p
+          aria-live="polite"
+          className="min-h-5 text-destructive text-sm"
+        >
+          {error ?? ""}
+        </p>
+      </CardContent>
+      <CardFooter className="mt-auto justify-end border-t">
         {canManage ? (
           <LoadingButton
-            className="w-full"
             isLoading={pending}
             onClick={canUpgrade ? startCheckout : openPortal}
+            size="sm"
+            variant={canUpgrade ? "default" : "outline"}
           >
             {canUpgrade ? t("billing_upgrade") : t("billing_manage")}
           </LoadingButton>
         ) : (
           <p className="text-muted-foreground text-sm">{t("billing_read_only")}</p>
         )}
-        {error != null && <p className="text-destructive text-sm">{error}</p>}
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 }

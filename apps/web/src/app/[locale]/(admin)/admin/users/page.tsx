@@ -12,7 +12,7 @@ export default async function AdminUsersPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h1 className="font-bold text-2xl tracking-tight">{t("page_title")}</h1>
+        <h1 className="font-bold text-2xl">{t("page_title")}</h1>
         <p className="text-muted-foreground text-sm">{t("page_desc")}</p>
       </div>
 

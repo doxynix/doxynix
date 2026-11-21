@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { API_PREFIX } from "@/shared/config/env.client";
 import { DEFAULT_LOCALE } from "@/shared/config/locales";
+import { readErrorPayload } from "@/shared/i18n/use-error-message";
 import {
+  buildRateLimitBody,
   hasPathBoundary,
   isBypassRoute,
   resolveDocsPath,
@@ -141,5 +143,31 @@ describe("shared/lib/middleware-routing:resolveDocsPath", () => {
     expect(resolveDocsPath("/about")).toBeNull();
     expect(resolveDocsPath("/ru/dashboard")).toBeNull();
     expect(resolveDocsPath("/docsx")).toBeNull();
+  });
+});
+
+describe("shared/lib/middleware-routing:buildRateLimitBody", () => {
+  it("returns a tRPC envelope with a public message code for /trpc", () => {
+    const body = buildRateLimitBody("/api/trpc/repo.getAll", "req-1") as {
+      error: { json: Record<string, unknown> };
+    };
+
+    expect(body.error.json).toMatchObject({
+      code: -32_029,
+      data: { httpStatus: 429, messageCode: "MEMBER_RATE_LIMITED" },
+      message: "You're sending requests too often. Please wait.",
+    });
+    expect(readErrorPayload(body.error.json).messageCode).toBe("MEMBER_RATE_LIMITED");
+  });
+
+  it("keeps a plain JSON error for non-tRPC routes", () => {
+    expect(buildRateLimitBody("/api/webhooks/github", "req-1")).toEqual({
+      error: "Too Many Requests",
+      message: "You're sending requests too often. Please wait.",
+    });
+  });
+
+  it("also recognizes the legacy /trpc prefix", () => {
+    expect(buildRateLimitBody("/trpc/repo.getAll", "req-1")).toHaveProperty("error.json");
   });
 });

@@ -70,7 +70,7 @@ export function PricingSection() {
               key={plan.name}
             >
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-foreground px-3 py-1 font-bold text-background text-xs uppercase tracking-wide">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-foreground px-3 py-1 font-bold text-background text-xs uppercase">
                   {t("section_pricing_badge_popular")}
                 </div>
               )}

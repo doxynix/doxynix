@@ -13,9 +13,10 @@ import { RepoCard } from "@/entities/repo/ui/repo-card";
 type Props = {
   meta?: RepoMeta;
   repos: UiRepoListItem[];
+  variant?: "row" | "brief";
 };
 
-export function RepoList({ meta, repos }: Readonly<Props>) {
+export function RepoList({ meta, repos, variant = "row" }: Readonly<Props>) {
   const { setOpen } = useCreateRepoActions();
   const t = useTranslations("Dashboard");
   const tCommon = useTranslations("Common");
@@ -62,6 +63,7 @@ export function RepoList({ meta, repos }: Readonly<Props>) {
         <RepoCard
           key={repo.id}
           repo={repo}
+          variant={variant}
         />
       ))}
     </div>

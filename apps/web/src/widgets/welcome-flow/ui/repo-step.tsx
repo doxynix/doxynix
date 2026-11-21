@@ -20,7 +20,7 @@ export function RepoStep({ isImporting, onBack, onSelect, onSkip }: Readonly<Pro
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h1 className="font-semibold text-2xl tracking-tight sm:text-3xl">{t("repo_title")}</h1>
+        <h1 className="font-semibold text-2xl sm:text-3xl">{t("repo_title")}</h1>
         <p className="text-muted-foreground">{t("repo_desc")}</p>
       </div>
 

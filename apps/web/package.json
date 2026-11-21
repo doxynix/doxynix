@@ -30,6 +30,7 @@
     "build": "bun ../../scripts/clean-symlinks.ts && bun with-doppler \"bun scripts/check-migrations.ts && cross-env NODE_OPTIONS=\\\"--max-old-space-size=6144\\\" bun --bun next build --webpack\"",
     "build:turbopack": "bun ../../scripts/clean-symlinks.ts && bun with-doppler \"bun scripts/check-migrations.ts && cross-env NODE_OPTIONS=\\\"--max-old-space-size=4096\\\" bun --bun next build\"",
     "check:index-parity": "bun scripts/check-index-parity.ts",
+    "check:styles": "bun run scripts/check-styles.ts",
     "db:check-migrations": "bun scripts/check-migrations.ts",
     "db:generate": "bun with-doppler bun scripts/zenstack-gen.ts && bun with-doppler bun prisma generate --sql",
     "db:migrate": "bun with-doppler \"bun scripts/zenstack-gen.ts && prisma migrate dev && bun prisma generate --sql\"",
@@ -66,7 +67,7 @@
     "test:unit": "bun with-doppler \"cross-env TZ=UTC vitest run src --config vitest.config.ts\"",
     "type-check": "bun check -b",
     "type-check:coverage": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" type-coverage --detail",
-    "validate": "biome check . && oxlint && bun run lint:fsd && bun run lint:i18n && bun run lint:locales && bun run lint:message-codes && bun run lint:i18n-usage && bun run arch:check && bun run check:index-parity && bun type-check",
+    "validate": "biome check . && oxlint && bun run lint:fsd && bun run lint:i18n && bun run lint:locales && bun run lint:message-codes && bun run lint:i18n-usage && bun run arch:check && bun run check:index-parity && bun run check:styles && bun type-check",
     "with-doppler": "bun ../../scripts/doppler.ts"
   },
   "dependencies": {

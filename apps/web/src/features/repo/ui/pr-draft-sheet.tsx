@@ -3,7 +3,7 @@ import { useState } from "react";
 import { CreatePrSchema, type CreatePrValues, generateBranchName } from "@doxynix/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { GitPullRequest } from "lucide-react";
+import { Eye, EyeOff, GitPullRequest } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -46,9 +46,12 @@ type Props = {
 export function PrDraftSheet({ repoId }: Readonly<Props>) {
   const trpc = useTRPC();
   const t = useTranslations("Dashboard");
+  const tCommon = useTranslations("Common");
   const errorMessage = useErrorMessage();
   const [open, setOpen] = useState(false);
   const [removingFiles, setRemovingFiles] = useState<Set<string>>(new Set());
+  const [hiddenFiles, setHiddenFiles] = useState<Set<string>>(new Set());
+  const [showHidden, setShowHidden] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: stagedFiles, isLoading: isFilesLoading } = useQuery(
@@ -134,7 +137,22 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
     });
   };
 
+  const toggleHidden = (filePath: string) => {
+    setHiddenFiles((prev) => {
+      const next = new Set(prev);
+      if (next.has(filePath)) {
+        next.delete(filePath);
+      } else {
+        next.add(filePath);
+      }
+      return next;
+    });
+  };
+
   const filesCount = stagedFiles?.length ?? 0;
+  const visibleFiles = stagedFiles?.filter((file) => !hiddenFiles.has(file.filePath)) ?? [];
+  const hiddenStagedFiles = stagedFiles?.filter((file) => hiddenFiles.has(file.filePath)) ?? [];
+  const renderedFiles = showHidden ? [...visibleFiles, ...hiddenStagedFiles] : visibleFiles;
 
   return (
     <Sheet
@@ -156,7 +174,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
       </SheetTrigger>
 
       <SheetContent
-        className="flex flex-col gap-6 p-6"
+        className="@container flex flex-col gap-4 p-6"
         resizable={{
           defaultWidth: 512,
           maxWidth: 900,
@@ -172,11 +190,24 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
           <SheetDescription>{t("repo_pr_draft_desc")}</SheetDescription>
         </SheetHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-6">
+        <div className="flex min-h-0 flex-1 flex-col gap-4">
           <div className="flex min-h-0 flex-1 flex-col gap-4">
-            <Label className="text-muted-foreground">
-              {t("repo_pr_draft_staged_label", { count: filesCount })}
-            </Label>
+            <div className="flex shrink-0 items-center justify-between gap-2">
+              <Label className="text-muted-foreground">
+                {t("repo_pr_draft_staged_label", { count: filesCount })}
+              </Label>
+              {hiddenStagedFiles.length > 0 && (
+                <AppButton
+                  className="h-7 gap-1.5 px-2 text-xs"
+                  onClick={() => setShowHidden((prev) => !prev)}
+                  variant="ghost"
+                >
+                  {showHidden ? <EyeOff /> : <Eye />}
+                  {showHidden ? tCommon("hide") : tCommon("show")}
+                  <AppBadge variant="secondary">{hiddenStagedFiles.length}</AppBadge>
+                </AppButton>
+              )}
+            </div>
             <ScrollArea className="min-h-0 flex-1 rounded-xl border p-2">
               {isFilesLoading ? (
                 <SkeletonList
@@ -202,11 +233,13 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  {stagedFiles?.map((file) => (
+                  {renderedFiles.map((file) => (
                     <StagedFileDiff
                       file={file}
+                      isHidden={hiddenFiles.has(file.filePath)}
                       isRemoving={removingFiles.has(file.filePath)}
                       key={file.filePath}
+                      onToggleHidden={() => toggleHidden(file.filePath)}
                       onUnstage={() => handleUnstage(file.filePath)}
                       repoId={repoId}
                     />
@@ -218,7 +251,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
 
           <Form {...form}>
             <form
-              className="flex shrink-0 flex-col gap-4 border-t pt-4"
+              className="grid shrink-0 gap-4 border-t pt-4 @[28rem]:grid-cols-2"
               id="pr-form"
               onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
             >
@@ -263,8 +296,9 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
           </Form>
         </div>
 
-        <SheetFooter className="border-t pt-4">
+        <SheetFooter className="border-t p-0 pt-4 @[28rem]:flex-row @[28rem]:justify-end">
           <LoadingButton
+            className="w-full @[28rem]:w-auto"
             disabled={filesCount === 0 || openPrMutation.isPending}
             form="pr-form"
             isLoading={openPrMutation.isPending}

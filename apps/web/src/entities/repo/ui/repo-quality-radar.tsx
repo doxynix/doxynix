@@ -3,9 +3,11 @@
 import { useTranslations } from "next-intl";
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer } from "recharts";
 
+import { cn } from "@/shared/lib/cn";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/shared/ui/core/chart";
 
 type QualityRadarProps = {
+  className?: string;
   scores: {
     complexity: number;
     health: number;
@@ -15,7 +17,7 @@ type QualityRadarProps = {
   };
 };
 
-export function QualityRadar({ scores }: Readonly<QualityRadarProps>) {
+export function QualityRadar({ className, scores }: Readonly<QualityRadarProps>) {
   const t = useTranslations("Dashboard");
 
   const chartData = [
@@ -32,7 +34,7 @@ export function QualityRadar({ scores }: Readonly<QualityRadarProps>) {
 
   return (
     <ChartContainer
-      className="h-75 w-full"
+      className={cn("h-75 w-full", className)}
       config={config}
     >
       <ResponsiveContainer

@@ -78,9 +78,9 @@ export default function ErrorPage({
       </div>
 
       <div className="flex w-full max-w-md flex-col gap-4 text-center">
-        <h1 className="font-bold text-3xl tracking-tight">{t("server_error_title")}</h1>
+        <h1 className="font-bold text-3xl">{t("server_error_title")}</h1>
         <p className="text-base text-muted-foreground">{t("server_error_desc")}</p>
-        <p className="text-left font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+        <p className="text-left font-semibold text-muted-foreground text-xs uppercase">
           {t("request_id_label")}
         </p>
         <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted p-2 text-left">

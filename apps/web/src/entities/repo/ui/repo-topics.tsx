@@ -1,8 +1,11 @@
 import { AppBadge } from "@/shared/ui/core/badge";
 
-type Props = { repoTopics?: null | string[] };
+type Props = {
+  repoTopics?: null | string[];
+  variant?: "default" | "outline" | "secondary";
+};
 
-export function RepoTopics({ repoTopics }: Readonly<Props>) {
+export function RepoTopics({ repoTopics, variant }: Readonly<Props>) {
   if (repoTopics == null || repoTopics.length === 0) {
     return null;
   }
@@ -10,10 +13,15 @@ export function RepoTopics({ repoTopics }: Readonly<Props>) {
   return (
     <div className="mt-1 flex flex-wrap not-sm:justify-center gap-1">
       {repoTopics.slice(0, 10).map((topic) => (
-        <AppBadge key={topic}>{topic}</AppBadge>
+        <AppBadge
+          key={topic}
+          variant={variant}
+        >
+          {topic}
+        </AppBadge>
       ))}
       {repoTopics.length > 10 && (
-        <span className="self-center text-[10px] text-muted-foreground">
+        <span className="self-center text-2xs text-muted-foreground">
           +{repoTopics.length - 10}
         </span>
       )}

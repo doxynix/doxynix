@@ -16,7 +16,14 @@ import { toast } from "sonner";
 import { useTRPC } from "@/shared/api/trpc";
 import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { cn } from "@/shared/lib/cn";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/core/card";
 import { Checkbox } from "@/shared/ui/core/checkbox";
 import { Label } from "@/shared/ui/core/label";
 import {
@@ -157,7 +164,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
               widths={["w-40"]}
             />
             <SkeletonList
-              className="grid grid-cols-2 gap-4"
+              className="grid grid-cols-1 gap-4 sm:grid-cols-2"
               count={4}
               itemClassName="flex flex-col gap-2 rounded-xl border p-3"
               renderItem={() => (
@@ -223,16 +230,17 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
   const isUpdating = updateConfig.isPending;
 
   return (
-    <Card className="w-full">
+    <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
             <CardTitle>{t("settings_pr_card_title")}</CardTitle>
             <CardDescription>{t("settings_pr_card_desc")}</CardDescription>
           </div>
           <Switch
             aria-label={t("settings_pr_card_title")}
             checked={isEnabled}
+            disabled={isUpdating}
             onCheckedChange={(checked) => {
               form.setValue("enabled", checked, { shouldDirty: true });
               updateConfig.mutate({ ...form.getValues(), enabled: checked, repoId });
@@ -242,38 +250,60 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
       </CardHeader>
 
       <CardContent className="flex flex-col gap-6">
-        <div className={isEnabled === true ? "opacity-100" : "pointer-events-none opacity-75"}>
-          <div className="mb-6 flex flex-col gap-2">
-            <Label htmlFor={commentStyleId}>{t("settings_pr_comment_style_label")}</Label>
-            <Select
-              onValueChange={(v) =>
-                form.setValue("commentStyle", v as UpdatePRConfigInputValues["commentStyle"], {
-                  shouldDirty: true,
-                })
-              }
-              value={commentStyle}
-            >
-              <SelectTrigger
-                className="w-full"
-                id={commentStyleId}
+        <fieldset
+          className={cn("flex min-w-0 flex-col", isEnabled !== true && "opacity-75")}
+          disabled={isEnabled !== true}
+        >
+          <div className="flex flex-col gap-6 border-b pb-6">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor={commentStyleId}>{t("settings_pr_comment_style_label")}</Label>
+              <Select
+                onValueChange={(v) =>
+                  form.setValue("commentStyle", v as UpdatePRConfigInputValues["commentStyle"], {
+                    shouldDirty: true,
+                  })
+                }
+                value={commentStyle}
               >
-                <SelectValue placeholder={t("settings_pr_comment_style_placeholder")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={PRCommentStyle.DETAILED}>
-                  {t("settings_pr_style_detailed")}
-                </SelectItem>
-                <SelectItem value={PRCommentStyle.CONCISE}>
-                  {t("settings_pr_style_concise")}
-                </SelectItem>
-                <SelectItem value={PRCommentStyle.OFF}>{t("settings_pr_style_off")}</SelectItem>
-              </SelectContent>
-            </Select>
+                <SelectTrigger
+                  className="w-full"
+                  id={commentStyleId}
+                >
+                  <SelectValue placeholder={t("settings_pr_comment_style_placeholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={PRCommentStyle.DETAILED}>
+                    {t("settings_pr_style_detailed")}
+                  </SelectItem>
+                  <SelectItem value={PRCommentStyle.CONCISE}>
+                    {t("settings_pr_style_concise")}
+                  </SelectItem>
+                  <SelectItem value={PRCommentStyle.OFF}>{t("settings_pr_style_off")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <Label
+                  className="text-sm"
+                  htmlFor={ciTriggersId}
+                >
+                  {t("settings_pr_skip_ci_label")}
+                </Label>
+                <p className="text-muted-foreground text-xs">{t("settings_pr_skip_ci_hint")}</p>
+              </div>
+              <Switch
+                checked={ciSkip}
+                id={ciTriggersId}
+                onCheckedChange={(value) => form.setValue("ciSkip", value, { shouldDirty: true })}
+              />
+            </div>
           </div>
 
-          <div className="mb-6 flex flex-col gap-3">
+          <div className="flex flex-col gap-3 border-b py-6">
             <Label htmlFor={focusAreasId}>{t("settings_pr_focus_areas_label")}</Label>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {AREAS.map((area) => {
                 const isSelected = currentFocusAreas.includes(area.id);
                 const areaId = `${focusAreasId}-${area.id.toLowerCase()}`;
@@ -331,14 +361,15 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
             </div>
           </div>
 
-          <div className="mb-8 flex flex-col gap-4">
+          <div className="flex flex-col gap-4 pt-6">
             <div className="flex justify-between text-sm">
               <Label htmlFor={tokenBudgetId}>{t("settings_pr_token_budget_label")}</Label>
-              <span className="font-mono text-muted-foreground">
+              <span className="font-mono text-muted-foreground tabular-nums">
                 {tokenBudget?.toLocaleString(locale)}
               </span>
             </div>
             <Slider
+              disabled={isEnabled !== true}
               id={tokenBudgetId}
               max={100_000}
               min={10_000}
@@ -353,33 +384,19 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
             />
             <p className="text-muted-foreground text-xs">{t("settings_pr_token_budget_hint")}</p>
           </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label
-                className="text-sm"
-                htmlFor={ciTriggersId}
-              >
-                {t("settings_pr_skip_ci_label")}
-              </Label>
-              <p className="text-muted-foreground text-xs">{t("settings_pr_skip_ci_hint")}</p>
-            </div>
-            <Switch
-              checked={ciSkip}
-              id={ciTriggersId}
-              onCheckedChange={(value) => form.setValue("ciSkip", value, { shouldDirty: true })}
-            />
-          </div>
-          <LoadingButton
-            className="mt-6"
-            disabled={isUpdating || !form.formState.isDirty}
-            isLoading={isUpdating}
-            onClick={() => void form.handleSubmit(onSubmit)()}
-          >
-            {t("settings_pr_save_config")}
-          </LoadingButton>
-        </div>
+        </fieldset>
       </CardContent>
+
+      <CardFooter className="justify-end border-t">
+        <LoadingButton
+          disabled={isUpdating || !form.formState.isDirty}
+          isLoading={isUpdating}
+          onClick={() => void form.handleSubmit(onSubmit)()}
+          size="sm"
+        >
+          {t("settings_pr_save_config")}
+        </LoadingButton>
+      </CardFooter>
     </Card>
   );
 }

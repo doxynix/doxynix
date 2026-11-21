@@ -157,12 +157,12 @@ function AdminAuditRow({ log }: Readonly<RowProps>) {
       <TableCell className="text-center">
         <AppButton
           aria-label={t("detail_title")}
-          className="opacity-0 transition-opacity group-hover:opacity-100"
+          className="opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground focus-visible:opacity-100"
           onClick={() => setSheetOpen(true)}
           size="icon"
           variant="ghost"
         >
-          <Database className="text-muted-foreground hover:text-foreground" />
+          <Database />
         </AppButton>
       </TableCell>
 

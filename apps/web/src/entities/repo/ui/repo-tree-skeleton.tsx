@@ -22,7 +22,7 @@ export function RepoTreeSkeleton({ rows = 20, variant = "setup" }: Readonly<Prop
         >
           <Skeleton className="size-4 shrink-0 rounded-full" />
 
-          {variant === "setup" && <Skeleton className="size-4 shrink-0 rounded-[4px]" />}
+          {variant === "setup" && <Skeleton className="size-4 shrink-0 rounded-xs" />}
 
           <Skeleton className="size-4 shrink-0 rounded-full" />
 

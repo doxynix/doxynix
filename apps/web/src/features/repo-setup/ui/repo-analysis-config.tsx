@@ -14,9 +14,16 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { LOCALES } from "@/shared/config/locales";
+import { FLAGS, LOCALE_LABEL_KEYS, LOCALES } from "@/shared/config/locales";
 import { cn } from "@/shared/lib/cn";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/core/card";
 import { Checkbox } from "@/shared/ui/core/checkbox";
 import { Label } from "@/shared/ui/core/label";
 import {
@@ -28,7 +35,7 @@ import {
 } from "@/shared/ui/core/select";
 import { Textarea } from "@/shared/ui/core/textarea";
 import { ActionErrorAlert } from "@/shared/ui/kit/action-error-alert";
-import { FLAGS, Flag } from "@/shared/ui/kit/language-switcher";
+import { Flag } from "@/shared/ui/kit/language-switcher";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import type { ActionsType, StateType } from "../model/use-repo-setup";
@@ -42,16 +49,14 @@ type DocOption = {
 
 type Props = {
   actions: ActionsType;
+  className?: string;
   disabled: boolean;
   state: StateType;
 };
 
-export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>) {
+export function RepoAnalysisConfig({ actions, className, disabled, state }: Readonly<Props>) {
   const languageLabelId = useId();
   const t = useTranslations("Dashboard");
-  const translationKeys = LOCALES.map(
-    (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const,
-  );
 
   const isSelectionEmpty = state.selectedFilesCount === 0 || state.selectedDocs.length === 0;
 
@@ -89,7 +94,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
   ] as const;
 
   return (
-    <Card>
+    <Card className={cn("h-full min-h-0", className)}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Settings className="size-5" />
@@ -97,7 +102,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
         </CardTitle>
         <CardDescription>{t("setup_analysis_desc")}</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-6 overflow-y-auto">
+      <CardContent className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto">
         {state.error != null && (
           <ActionErrorAlert
             error={state.error}
@@ -125,26 +130,20 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {LOCALES.map((l, i) => {
-                  const key = translationKeys[i];
-                  if (key == null) {
-                    return null;
-                  }
-                  return (
-                    <SelectItem
-                      key={l}
-                      value={l}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Flag
-                          alt={l}
-                          src={FLAGS[l] || FLAGS.en}
-                        />
-                        <span>{t(key)}</span>
-                      </div>
-                    </SelectItem>
-                  );
-                })}
+                {LOCALES.map((l) => (
+                  <SelectItem
+                    key={l}
+                    value={l}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Flag
+                        alt={l}
+                        src={FLAGS[l]}
+                      />
+                      <span>{t(LOCALE_LABEL_KEYS[l])}</span>
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -155,7 +154,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
             <FileText />
             {t("setup_doc_types_label")}
           </Label>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-3">
             {DOC_OPTIONS.map((opt) => {
               const isSelected = state.selectedDocs.includes(opt.id);
               return (
@@ -179,7 +178,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                   <div className="flex items-center justify-between">
                     <div
                       className={cn(
-                        "flex size-8 items-center justify-center rounded-lg border",
+                        "flex size-8 items-center justify-center rounded-tile border",
                         isSelected
                           ? "border-border-strong bg-primary text-primary-foreground"
                           : "border-border bg-surface-hover text-muted-foreground",
@@ -190,12 +189,12 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                     <Checkbox
                       aria-hidden="true"
                       checked={isSelected}
-                      className="pointer-events-none size-4 rounded-full"
+                      className="pointer-events-none size-4 rounded-full border-border-strong bg-transparent data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
                       disabled={disabled}
                       tabIndex={-1}
                     />
                   </div>
-                  <p className="font-bold text-sm">{opt.label}</p>
+                  <p className="font-semibold text-sm">{opt.label}</p>
                   <p className="mt-1 text-muted-foreground text-xs">{opt.desc}</p>
                 </label>
               );
@@ -215,19 +214,19 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
             value={state.instructions}
           />
         </div>
-
-        <div className="flex justify-end">
-          <LoadingButton
-            className="w-fit gap-2"
-            disabled={disabled || isSelectionEmpty}
-            isLoading={disabled}
-            onClick={actions.handleStartAnalysis}
-          >
-            <Play />
-            {t("setup_start_analysis")}
-          </LoadingButton>
-        </div>
       </CardContent>
+
+      <CardFooter className="shrink-0 justify-end border-t">
+        <LoadingButton
+          className="w-fit gap-2"
+          disabled={disabled || isSelectionEmpty}
+          isLoading={disabled}
+          onClick={actions.handleStartAnalysis}
+        >
+          <Play />
+          {t("setup_start_analysis")}
+        </LoadingButton>
+      </CardFooter>
     </Card>
   );
 }

@@ -115,6 +115,23 @@ export const ERROR_MESSAGE_KEYS = {
 
 const KNOWN_CODES = new Set<string>(Object.values(MessageCode));
 
+// better-auth returns plain messages, not our wire codes; map the two-factor ones so the toast is specific.
+const TWO_FACTOR_ERROR_MESSAGES: Record<string, ErrorMessageKey> = {
+  "Backup codes aren't enabled": "two_factor_unavailable",
+  "Invalid backup code": "two_factor_invalid_code",
+  "Invalid code": "two_factor_invalid_code",
+  "Invalid two factor cookie": "two_factor_unavailable",
+  "OTP has expired": "two_factor_invalid_code",
+  "OTP is not available": "two_factor_unavailable",
+  "OTP not enabled": "two_factor_unavailable",
+  "TOTP is not available": "two_factor_unavailable",
+  "TOTP not enabled": "two_factor_unavailable",
+  "Too many attempts. Please request a new code.": "two_factor_rate_limited",
+  "Too many failed verification attempts. Your account is temporarily locked. Please try again later.":
+    "two_factor_rate_limited",
+  "Two factor isn't enabled": "two_factor_unavailable",
+};
+
 export function messageKeyFor(code: MessageCode): ErrorMessageKey {
   return ERROR_MESSAGE_KEYS[code];
 }
@@ -188,6 +205,11 @@ export function useErrorMessage() {
 
   return (error: unknown): string => {
     const { message, messageCode, params } = readErrorPayload(error);
+    const twoFactorKey = message == null ? null : TWO_FACTOR_ERROR_MESSAGES[message];
+
+    if (twoFactorKey != null) {
+      return t(twoFactorKey);
+    }
 
     if (messageCode != null) {
       return t(messageKeyFor(messageCode), params);

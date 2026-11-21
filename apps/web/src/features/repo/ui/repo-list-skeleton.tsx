@@ -5,9 +5,14 @@ import { RepoCardSkeleton } from "@/entities/repo/ui/repo-card-skeleton";
 type Props = {
   count: number;
   showTotalCount?: boolean;
+  variant?: "row" | "brief";
 };
 
-export function RepoListSkeleton({ count, showTotalCount = true }: Readonly<Props>) {
+export function RepoListSkeleton({
+  count,
+  showTotalCount = true,
+  variant = "row",
+}: Readonly<Props>) {
   return (
     <>
       {showTotalCount && (
@@ -20,9 +25,9 @@ export function RepoListSkeleton({ count, showTotalCount = true }: Readonly<Prop
         </div>
       )}
       <SkeletonList
-        className="flex flex-col gap-3"
+        className="flex flex-col gap-4"
         count={count}
-        renderItem={() => <RepoCardSkeleton />}
+        renderItem={() => <RepoCardSkeleton variant={variant} />}
       />
     </>
   );

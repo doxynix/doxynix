@@ -56,7 +56,7 @@ function NavigationMenuItem({
 }
 
 const navigationMenuTriggerStyle = cva(
-  "group inline-flex h-9 w-max items-center justify-center rounded-xl border border-transparent bg-background px-4 py-2 font-medium text-sm tracking-[-0.02em] shadow-sm outline-hidden transition-[color,background-color,border-color,box-shadow] duration-150 ease-out hover:border-border-accent hover:bg-accent hover:text-accent-foreground focus:border-border-accent focus:bg-accent focus:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/80 disabled:pointer-events-none disabled:opacity-50 data-[state=open]:border-border-accent data-[state=open]:bg-accent data-[state=open]:text-accent-foreground data-[state=open]:focus:bg-accent data-[state=open]:hover:bg-accent hover:[box-shadow:var(--shadow-sm)]",
+  "group inline-flex h-9 w-max items-center justify-center rounded-xl border border-transparent bg-background px-4 py-2 font-medium text-sm shadow-sm outline-hidden transition-[color,background-color,border-color,box-shadow] duration-150 ease-out hover:border-border-accent hover:bg-accent hover:text-accent-foreground focus:border-border-accent focus:bg-accent focus:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/80 disabled:pointer-events-none disabled:opacity-50 data-[state=open]:border-border-accent data-[state=open]:bg-accent data-[state=open]:text-accent-foreground data-[state=open]:focus:bg-accent data-[state=open]:hover:bg-accent hover:[box-shadow:var(--shadow-sm)]",
 );
 
 function NavigationMenuTrigger({

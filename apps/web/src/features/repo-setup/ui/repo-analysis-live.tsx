@@ -97,7 +97,7 @@ export function RepoAnalysisLive({
         </div>
 
         <div className="flex flex-col gap-1">
-          <h2 className="font-bold text-2xl tracking-tight">
+          <h2 className="font-bold text-2xl">
             {isFinished
               ? t("repo_analysis_complete")
               : isFailed

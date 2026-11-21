@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { useTRPC } from "@/shared/api/trpc";
+import { useErrorMessage } from "@/shared/i18n/use-error-message";
 import { trackClientEvent } from "@/shared/lib/posthog-client";
 
 export function useGithubInstall() {
   const trpc = useTRPC();
-  const t = useTranslations("Welcome");
+  const errorMessage = useErrorMessage();
   const [isLoading, setIsLoading] = useState(false);
   const { refetch } = useQuery(
     trpc.githubApp.getGithubInstallUrl.queryOptions(
@@ -27,15 +27,15 @@ export function useGithubInstall() {
       .then(({ data, error }) => {
         if (error != null || data == null) {
           trackClientEvent("github_app_install_failed");
-          toast.error(t("github_error"));
+          toast.error(errorMessage(error));
           return;
         }
 
         window.location.assign(data);
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         trackClientEvent("github_app_install_failed");
-        toast.error(t("github_error"));
+        toast.error(errorMessage(error));
       })
       .finally(() => {
         setIsLoading(false);

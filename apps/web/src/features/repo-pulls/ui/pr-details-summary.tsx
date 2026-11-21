@@ -39,27 +39,27 @@ export function PrDetailsSummary({ items, title }: Readonly<Props>) {
               tooltipText={t("repo_pull_copy_sha")}
               value={item.value}
             />
-            <span className={cn("font-medium text-xs")}>
+            <span className="font-medium text-xs">
               {item.value.slice(0, 7) || t("repo_pull_na")}
             </span>
           </>
         );
       }
       case "number": {
-        return <span className={cn("font-medium text-xs")}>{item.value}</span>;
+        return <span className="font-medium text-xs">{item.value}</span>;
       }
       case "status": {
         if (item.value == null) {
-          return <span className={cn("font-medium text-xs")}>{t("repo_pull_na")}</span>;
+          return <span className="font-medium text-xs">{t("repo_pull_na")}</span>;
         }
 
         const config = statusConfig[item.value];
 
-        return <span className={cn("font-bold", config.className)}>{config.label}</span>;
+        return <span className={cn("font-medium text-xs", config.className)}>{config.label}</span>;
       }
       case "time": {
         if (item.value == null) {
-          return <span className={cn("font-medium text-xs")}>{t("repo_pull_na")}</span>;
+          return <span className="font-medium text-xs">{t("repo_pull_na")}</span>;
         }
 
         return (
@@ -75,16 +75,18 @@ export function PrDetailsSummary({ items, title }: Readonly<Props>) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-bold text-sm">{title}</CardTitle>
+        <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-2 text-sm">
+
+      <CardContent className="flex flex-col">
         {items.map((item) => (
           <div
-            className="flex items-baseline justify-between"
+            className="flex items-baseline gap-2 py-1.5"
             key={item.label}
           >
-            <span className="min-w-0 truncate text-muted-foreground text-xs">{item.label}:</span>
-            <div className="flex shrink-0 items-center gap-1">{renderValue(item)}</div>
+            <span className="shrink-0 text-muted-foreground text-xs">{item.label}</span>
+            <span className="min-w-4 flex-1 border-border border-b border-dotted" />
+            <span className="flex shrink-0 items-center gap-1">{renderValue(item)}</span>
           </div>
         ))}
       </CardContent>

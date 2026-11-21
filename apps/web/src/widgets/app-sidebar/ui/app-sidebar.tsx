@@ -107,7 +107,7 @@ export function AppSidebar() {
                 >
                   <CollapsibleTrigger
                     className={cn(
-                      "mb-1 flex w-full justify-between px-3 text-muted-foreground hover:bg-accent hover:text-foreground",
+                      "mb-1 flex w-full justify-between px-3 text-muted-foreground hover:bg-accent hover:text-foreground group-data-[collapsible=icon]:mb-0",
                     )}
                     disabled={state === "collapsed"}
                   >

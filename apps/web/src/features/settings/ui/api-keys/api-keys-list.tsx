@@ -29,7 +29,7 @@ export function ApiKeysList({ active, archived, archivedPagination }: Readonly<P
           title={t("settings_api_keys_empty_title")}
         />
       ) : (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="flex flex-col gap-3">
           {active.map((key) => (
             <ApiKeyCard
               actions={

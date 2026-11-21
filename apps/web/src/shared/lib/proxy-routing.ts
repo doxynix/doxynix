@@ -83,3 +83,31 @@ export function resolveDocsPath(pathname: string): DocsPathDecision | null {
 
   return { pathname: `/${DEFAULT_LOCALE}${pathWithoutLocale}`, type: "rewrite" };
 }
+
+const TRPC_TOO_MANY_REQUESTS = -32_029;
+
+export function buildRateLimitBody(pathname: string, requestId: string): Record<string, unknown> {
+  const message = "You're sending requests too often. Please wait.";
+
+  if (!pathname.startsWith("/trpc") && !pathname.startsWith("/api/trpc")) {
+    return { error: "Too Many Requests", message };
+  }
+
+  return {
+    error: {
+      json: {
+        code: TRPC_TOO_MANY_REQUESTS,
+        data: {
+          code: "TOO_MANY_REQUESTS",
+          httpStatus: 429,
+          kind: "trpc",
+          messageCode: "MEMBER_RATE_LIMITED",
+          params: null,
+          requestId,
+          zodError: null,
+        },
+        message,
+      },
+    },
+  };
+}

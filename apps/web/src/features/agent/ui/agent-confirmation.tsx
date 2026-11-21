@@ -52,7 +52,7 @@ export function AgentConfirmation({ approvalId, args, label, onRespond }: Readon
           {t("agent_requesting_approval_to")} <strong className="text-foreground">{label}</strong>
         </ItemDescription>
         {preview != null && (
-          <pre className="no-scrollbar mt-1 max-h-24 overflow-auto rounded-lg border bg-muted/40 p-2 font-mono text-[10px] text-muted-foreground">
+          <pre className="no-scrollbar mt-1 max-h-24 overflow-auto rounded-lg border bg-muted/40 p-2 font-mono text-2xs text-muted-foreground">
             {preview}
           </pre>
         )}

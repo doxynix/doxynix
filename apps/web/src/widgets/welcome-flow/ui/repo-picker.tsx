@@ -2,13 +2,13 @@
 
 import { useDeferredValue, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { RefreshCcw, Search } from "lucide-react";
+import { Check, RefreshCcw, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { RepoItemFields } from "@/shared/api/repo.types";
 import { useTRPC } from "@/shared/api/trpc";
 import { AppButton } from "@/shared/ui/core/button";
-import { Card, CardContent } from "@/shared/ui/core/card";
+import { Card } from "@/shared/ui/core/card";
 import { Input } from "@/shared/ui/core/input";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
@@ -57,33 +57,32 @@ export function RepoPicker({ disabled = false, onSelect }: Readonly<Props>) {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="p-4">
-          <SkeletonList
-            className="flex flex-col gap-2"
-            count={5}
-            renderItem={() => (
-              <div className="flex flex-col gap-2 rounded-xl p-3">
-                <SkeletonText
-                  lines={1}
-                  widths={["w-48"]}
-                />
-                <SkeletonText
-                  lines={1}
-                  widths={["w-72"]}
-                />
-              </div>
-            )}
-          />
-        </CardContent>
+      <Card className="gap-2 p-2">
+        <SkeletonList
+          className="flex flex-col gap-2"
+          count={5}
+          renderItem={() => (
+            <div className="flex flex-col gap-2 rounded-xl p-3">
+              <SkeletonText
+                lines={1}
+                widths={["w-48"]}
+              />
+              <SkeletonText
+                lines={1}
+                size="sm"
+                widths={["w-72"]}
+              />
+            </div>
+          )}
+        />
       </Card>
     );
   }
 
   if (isError || data == null) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
+      <Card className="p-6">
+        <div className="flex flex-col items-center gap-3 text-center">
           <p className="text-muted-foreground text-sm">{t("error_generic")}</p>
           <AppButton
             onClick={() => void refetch()}
@@ -91,15 +90,15 @@ export function RepoPicker({ disabled = false, onSelect }: Readonly<Props>) {
           >
             <RefreshCcw /> {t("retry")}
           </AppButton>
-        </CardContent>
+        </div>
       </Card>
     );
   }
 
   if (data.oauthStatus === "invalid") {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
+      <Card className="p-6">
+        <div className="flex flex-col items-center gap-3 text-center">
           <p className="font-semibold">{t("repo_reconnect")}</p>
           <p className="text-muted-foreground text-sm">{t("repo_reconnect_desc")}</p>
           <LoadingButton
@@ -107,9 +106,9 @@ export function RepoPicker({ disabled = false, onSelect }: Readonly<Props>) {
             onClick={oauth.signIn}
             variant="outline"
           >
-            <GitHubIcon /> {t("repo_reconnect")}
+            <GitHubIcon className="size-4" /> {t("repo_reconnect")}
           </LoadingButton>
-        </CardContent>
+        </div>
       </Card>
     );
   }
@@ -139,56 +138,65 @@ export function RepoPicker({ disabled = false, onSelect }: Readonly<Props>) {
         </AppButton>
       </div>
 
-      <Card>
-        <CardContent className="p-1">
-          {items.length === 0 ? (
-            <div className="flex flex-col items-center gap-3 px-4 py-12 text-center">
-              <p className="font-semibold">{t("repo_empty_title")}</p>
-              <p className="text-muted-foreground text-sm">{t("repo_empty_desc")}</p>
-              <AppButton
-                asChild
-                variant="outline"
+      <Card className="gap-0 overflow-hidden p-0">
+        {items.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
+            <p className="font-semibold">{t("repo_empty_title")}</p>
+            <p className="text-muted-foreground text-sm">{t("repo_empty_desc")}</p>
+            <AppButton
+              asChild
+              variant="outline"
+            >
+              <a
+                href={manageUrl}
+                rel="noreferrer"
+                target="_blank"
               >
-                <a
-                  href={manageUrl}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  {t("repo_manage")}
-                </a>
-              </AppButton>
-            </div>
-          ) : (
-            <div className="flex max-h-[22rem] flex-col gap-0.5 overflow-y-auto p-1">
-              {items.map((repo) => (
-                <RepoItem
-                  className="max-w-none"
-                  disabled={disabled}
-                  key={repo.fullName}
-                  onClick={() => setSelectedFullName(repo.fullName)}
-                  repo={repo}
-                  selected={repo.fullName === selectedFullName}
-                />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                {t("repo_manage")}
+              </a>
+            </AppButton>
+          </div>
+        ) : (
+          <div className="flex max-h-[22rem] flex-col gap-0.5 overflow-y-auto p-2">
+            {items.map((repo) => (
+              <RepoItem
+                className="max-w-none"
+                disabled={disabled}
+                key={repo.fullName}
+                onClick={() => setSelectedFullName(repo.fullName)}
+                repo={repo}
+                selected={repo.fullName === selectedFullName}
+              />
+            ))}
+          </div>
+        )}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-muted-foreground text-xs">{t("repo_cta_hint")}</p>
-        <LoadingButton
-          disabled={selectedRepo == null || disabled}
-          isLoading={disabled}
-          onClick={() => {
-            if (selectedRepo != null) {
-              onSelect(selectedRepo);
-            }
-          }}
-        >
-          {selectedRepo == null ? t("repo_cta") : `${t("repo_cta")} — ${selectedRepo.fullName}`}
-        </LoadingButton>
-      </div>
+        {items.length > 0 && (
+          <div className="flex flex-col gap-3 border-t p-3 sm:flex-row sm:items-center sm:justify-between">
+            {selectedRepo == null ? (
+              <p className="min-w-0 text-muted-foreground text-xs">{t("repo_cta_hint")}</p>
+            ) : (
+              <p className="flex min-w-0 items-center gap-1.5 text-xs">
+                <Check className="size-3.5 shrink-0 text-success" />
+                <span className="truncate font-medium">{selectedRepo.fullName}</span>
+              </p>
+            )}
+
+            <LoadingButton
+              className="w-full shrink-0 sm:w-auto"
+              disabled={selectedRepo == null || disabled}
+              isLoading={disabled}
+              onClick={() => {
+                if (selectedRepo != null) {
+                  onSelect(selectedRepo);
+                }
+              }}
+            >
+              {t("repo_cta")}
+            </LoadingButton>
+          </div>
+        )}
+      </Card>
     </div>
   );
 }

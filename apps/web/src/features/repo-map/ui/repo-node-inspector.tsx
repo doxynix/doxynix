@@ -19,7 +19,6 @@ import { useTranslations } from "next-intl";
 
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
-import { Card, CardContent } from "@/shared/ui/core/card";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 
 import type { RepoNodeContext } from "@/entities/repo/model/repo.types";
@@ -86,7 +85,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
       value: stats.graphWarningCount,
     },
     {
-      icon: <Activity className="text-pink-400" />,
+      icon: <Activity className="text-chart-4" />,
       label: t("stat_labels_churn"),
       value: stats.churnCount,
     },
@@ -101,7 +100,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
       value: stats.configCount,
     },
     {
-      icon: <Zap className="text-purple-400" />,
+      icon: <Zap className="text-brand-ai" />,
       label: t("stat_labels_dep_risks"),
       value: stats.dependencyHotspotCount,
     },
@@ -111,17 +110,17 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
       value: stats.entrypointCount,
     },
     {
-      icon: <Boxes className="text-cyan-400" />,
+      icon: <Boxes className="text-chart-2" />,
       label: t("stat_labels_frameworks"),
       value: stats.frameworkCount,
     },
     {
-      icon: <FileSearch className="text-gray-400" />,
+      icon: <FileSearch className="text-muted-foreground" />,
       label: t("stat_labels_orphans"),
       value: stats.orphanCount,
     },
     {
-      icon: <GitBranch className="text-purple-400" />,
+      icon: <GitBranch className="text-brand-ai" />,
       label: t("stat_labels_deps"),
       value: explain.relationships.dependsOn.length,
     },
@@ -167,7 +166,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
         </AppButton>
       </div>
 
-      <ScrollArea>
+      <ScrollArea className="min-h-0 flex-1">
         <div className="flex flex-col gap-8 p-4">
           {explain.whyImportant && (
             <section className="flex flex-col gap-2">
@@ -200,7 +199,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           <div className="mt-2 flex flex-wrap gap-1">
             {explain.relationships.riskTitles.map((title) => (
               <AppBadge
-                className="text-[10px]"
+                className="text-2xs"
                 key={title}
                 variant="destructive"
               >
@@ -209,7 +208,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
             ))}
             {explain.relationships.factTitles.map((fact) => (
               <AppBadge
-                className="text-[10px]"
+                className="text-2xs"
                 key={fact}
                 variant="secondary"
               >
@@ -219,17 +218,18 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           </div>
 
           {activeStats.length > 0 && (
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 divide-x divide-border rounded-lg border border-border py-2">
               {activeStats.map((stat) => (
-                <Card key={stat.label}>
-                  <CardContent className="flex flex-col items-center justify-center gap-1 p-0">
-                    <div className="flex items-center gap-1">
-                      {stat.icon}
-                      <span className="font-bold text-sm">{stat.value}</span>
-                    </div>
-                    <span className="text-muted-foreground text-xs">{stat.label}</span>
-                  </CardContent>
-                </Card>
+                <div
+                  className="flex flex-col items-center justify-center gap-0.5 px-2"
+                  key={stat.label}
+                >
+                  <div className="flex items-center gap-1">
+                    {stat.icon}
+                    <span className="font-semibold text-sm">{stat.value}</span>
+                  </div>
+                  <span className="text-2xs text-muted-foreground">{stat.label}</span>
+                </div>
               ))}
             </div>
           )}
@@ -311,7 +311,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                         className="flex flex-col gap-1 rounded border p-2"
                         key={bucket}
                       >
-                        <div className="text-[10px] text-muted-foreground">{bucket}</div>
+                        <div className="text-2xs text-muted-foreground">{bucket}</div>
                         <div className="text-xs">
                           {t("related_modules", { count: paths.length })}
                         </div>
@@ -328,10 +328,10 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
               <div className="flex flex-col gap-2">
                 {inspect.recommendedActions.map((action, i) => (
                   <div
-                    className="flex gap-2 rounded-md border border-amber-500/10 bg-amber-500/5 p-2 text-xs"
+                    className="flex gap-2 rounded-md border border-warning/10 bg-warning/5 p-2 text-xs"
                     key={i}
                   >
-                    <Zap className="mt-0.5 text-amber-500" />
+                    <Zap className="mt-0.5 text-warning" />
                     <span>{action}</span>
                   </div>
                 ))}
@@ -345,7 +345,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
               <div className="flex flex-wrap gap-2">
                 {data.related.docs.map((doc) => (
                   <AppBadge
-                    className="text-[10px]"
+                    className="text-2xs"
                     key={doc.id}
                     variant="secondary"
                   >

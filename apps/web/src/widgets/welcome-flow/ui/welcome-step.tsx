@@ -41,7 +41,7 @@ export function WelcomeStep({
       <div className="flex min-w-0 flex-col gap-8">
         <div className="flex flex-col gap-2">
           <p className="text-muted-foreground text-sm">{t("eyebrow")}</p>
-          <h1 className="font-semibold text-3xl tracking-tight sm:text-4xl">{t("headline")}</h1>
+          <h1 className="font-semibold text-3xl sm:text-4xl">{t("headline")}</h1>
           <p className="text-muted-foreground">{t("subhead")}</p>
         </div>
 
