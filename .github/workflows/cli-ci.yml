@@ -56,7 +56,7 @@ jobs:
     # check needs a real database, not just the env vars.
     services:
       postgres:
-        image: postgres:18@sha256:3a4264520e121176619f54ff867d12774bc81e95e7b84db58d63bccdb6144b81
+        image: postgres:18@sha256:eb63372c1e05c755f55fa30cbd07aecc443676fc6c0fa90b9002d01537841e1a
         env:
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
