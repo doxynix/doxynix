@@ -63,7 +63,7 @@ const nextConfig: NextConfig = {
       "@tanstack/react-query",
       "cmdk",
       "sonner",
-      "@sentry/nextjs",
+      // [DISABLED]: Sentry 11.14 externalizes @sentry/nextjs under Bun; Turbopack rejects a package in both lists.
       "@sentry/react",
       "@sentry/browser",
       "@sentry/core",
