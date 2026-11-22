@@ -77,6 +77,17 @@ export function createMetadata(titleKey: string, descKey?: string, path?: string
   };
 }
 
+export function createNotFoundMetadata() {
+  const base = createMetadata("not_found_title", "not_found_desc");
+
+  return async function generateMetadata(): Promise<Metadata> {
+    return {
+      ...(await base()),
+      robots: { follow: false, index: false },
+    };
+  };
+}
+
 export function createRepoMetadata(view: RepoViewType = "overview") {
   return async function generateMetadata({
     params,

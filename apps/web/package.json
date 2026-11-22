@@ -1,6 +1,6 @@
 {
   "name": "@doxynix/web",
-  "version": "5.15.10",
+  "version": "5.15.12",
   "private": true,
   "license": "AGPL-3.0-only",
   "type": "module",
@@ -124,8 +124,7 @@
     "@react-email/render": "2.3.1",
     "@replit/codemirror-minimap": "0.5.2",
     "@scalar/api-reference-react": "0.9.93",
-    "@secretlint/core": "13.1.0",
-    "@secretlint/secretlint-rule-preset-canary": "13.1.0",
+    "@secretlint/core": "14.0.1",
     "@sentry/nextjs": "11.14.0",
     "@shikijs/rehype": "4.6.0",
     "@shikijs/transformers": "4.6.0",

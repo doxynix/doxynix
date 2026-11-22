@@ -35,7 +35,7 @@ export function SidebarLink({
       className={cn(
         "group/link flex cursor-pointer transition-colors",
         isActive
-          ? "bg-sidebar-accent font-bold text-sidebar-accent-foreground hover:bg-sidebar-accent"
+          ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground hover:bg-sidebar-accent"
           : "text-muted-foreground hover:bg-accent! hover:text-foreground",
       )}
       tooltip={title}

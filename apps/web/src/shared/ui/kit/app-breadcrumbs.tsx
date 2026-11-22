@@ -132,7 +132,7 @@ export function AppBreadcrumbs({
                 {isLast ? (
                   <BreadcrumbPage className="w-full min-w-0">
                     <TruncatedText
-                      className={cn("font-bold", item.className)}
+                      className={cn("font-semibold", item.className)}
                       text={label}
                     />
                   </BreadcrumbPage>

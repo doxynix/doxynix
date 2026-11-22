@@ -98,15 +98,15 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
                     <div className="mt-1 flex flex-col gap-1">
                       <p className="text-foreground text-xs">
                         {`${t("tooltip_complexity")}: `}
-                        <span className="font-bold">{data.y}</span>
+                        <span className="font-semibold">{data.y}</span>
                       </p>
                       <p className="text-foreground text-xs">
                         {`${t("tooltip_lines")}: `}
-                        <span className="font-bold">{data.x}</span>
+                        <span className="font-semibold">{data.x}</span>
                       </p>
                       <p className="text-warning text-xs">
                         {`${t("tooltip_risk_score")}: `}
-                        <span className="font-bold">{data.z}</span>
+                        <span className="font-semibold">{data.z}</span>
                       </p>
                     </div>
                   </div>
@@ -118,14 +118,14 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
           />
 
           <ReferenceLine
-            label={{ fill: "#ef4444", fontSize: 10, value: t("high_complexity") }}
-            stroke="#ef4444"
+            label={{ fill: "var(--destructive)", fontSize: 10, value: t("high_complexity") }}
+            stroke="var(--destructive)"
             strokeDasharray="3 3"
             y={15}
           />
           <ReferenceLine
-            label={{ fill: "#f59e0b", fontSize: 10, value: t("large_file") }}
-            stroke="#f59e0b"
+            label={{ fill: "var(--warning)", fontSize: 10, value: t("large_file") }}
+            stroke="var(--warning)"
             strokeDasharray="3 3"
             x={300}
           />

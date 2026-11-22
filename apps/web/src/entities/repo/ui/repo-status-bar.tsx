@@ -18,14 +18,14 @@ export function RepoStatusBar({ meta, mode, stats }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
   const readOnly = isReadOnly(mode);
   return (
-    <div className="flex items-center justify-between bg-card px-3 py-1.5 font-mono text-2xs">
+    <div className="flex items-center justify-between bg-card px-3 py-1.5 tabular-nums text-2xs">
       <div className="flex items-center gap-3 font-semibold">
         <span
           className={cn(
-            "rounded border p-px font-bold text-2xs",
+            "rounded border p-px font-semibold text-2xs",
             readOnly
-              ? "border-info/50 bg-info/10 text-info"
-              : "border-success/50 bg-success/10 text-success",
+              ? "border-info/30 bg-info/10 text-info"
+              : "border-success/30 bg-success/10 text-success",
           )}
         >
           {readOnly ? t("repo_status_view") : t("repo_status_edit")}
@@ -38,7 +38,7 @@ export function RepoStatusBar({ meta, mode, stats }: Readonly<Props>) {
           </span>
         )}
         {stats.errors > 0 && (
-          <div className="flex items-center gap-1 font-bold text-destructive">
+          <div className="flex items-center gap-1 font-semibold text-destructive">
             <AlertCircle className="size-3" />
             {stats.errors}
           </div>

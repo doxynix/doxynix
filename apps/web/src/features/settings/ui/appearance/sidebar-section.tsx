@@ -26,7 +26,7 @@ export function SidebarSection({ preferences, update }: Readonly<AppearanceSecti
       description={t("settings_appearance_sidebar_desc")}
       title={t("settings_appearance_sidebar_title")}
     >
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4">
         <AppearanceRow
           description={t("settings_appearance_sidebar_style_desc")}
           title={t("settings_appearance_sidebar_style_label")}

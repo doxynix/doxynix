@@ -15,7 +15,7 @@ export function AccordionListItem({ className, content, trigger, value }: Readon
       className={className}
       value={value}
     >
-      <AccordionTrigger className="text-left font-bold">{trigger}</AccordionTrigger>
+      <AccordionTrigger className="text-left font-semibold">{trigger}</AccordionTrigger>
       <AccordionContent>{content}</AccordionContent>
     </AccordionItem>
   );

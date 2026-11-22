@@ -25,7 +25,7 @@ export function SettingsMenu() {
               "justify-start transition-colors",
               isDestructive &&
                 isActive &&
-                "bg-destructive/20 text-destructive hover:bg-destructive/20 hover:text-destructive",
+                "bg-destructive/10 text-destructive hover:bg-destructive/10 hover:text-destructive",
 
               isDestructive &&
                 !isActive &&
@@ -33,7 +33,7 @@ export function SettingsMenu() {
 
               !isDestructive &&
                 isActive &&
-                "bg-sidebar-accent font-bold text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                "bg-sidebar-accent font-semibold text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
 
               !isDestructive &&
                 !isActive &&

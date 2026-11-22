@@ -219,7 +219,7 @@ export function RepoDocs({
 
   return (
     <Tabs
-      className="flex h-[var(--repo-workspace-height)] w-full flex-row gap-10"
+      className="flex h-[var(--repo-workspace-height)] w-full flex-row gap-8"
       onValueChange={(value) => {
         const nextType = value as DocType;
         trackClientEvent("doc_viewed", { doc_type: nextType, repo_id: repoId });

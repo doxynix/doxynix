@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { useLocale } from "next-intl";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
@@ -16,6 +17,7 @@ type Props = Readonly<{
   data: Array<{
     complexity: number;
     date: string;
+    fullDate: string;
     health: number;
     onboarding: number;
     security: number;
@@ -25,6 +27,18 @@ type Props = Readonly<{
 
 export function TrendsChart({ activeTab, chartConfig, data }: Props) {
   const id = useId();
+  const locale = useLocale();
+  const formatTick = (value: string) => {
+    const date = new Date(`${value}T00:00:00Z`);
+
+    return Number.isNaN(date.getTime())
+      ? value
+      : new Intl.DateTimeFormat(locale, {
+          day: "numeric",
+          month: "short",
+          timeZone: "UTC",
+        }).format(date);
+  };
 
   const fillHealthId = `${id}-fill-health`;
   const fillSecurityId = `${id}-fill-security`;
@@ -146,8 +160,8 @@ export function TrendsChart({ activeTab, chartConfig, data }: Props) {
         />
         <XAxis
           axisLine={false}
-          dataKey="date"
-          tickFormatter={(value) => value}
+          dataKey="fullDate"
+          tickFormatter={formatTick}
           tickLine={false}
           tickMargin={8}
         />
@@ -155,6 +169,7 @@ export function TrendsChart({ activeTab, chartConfig, data }: Props) {
         <ChartTooltip
           content={<ChartTooltipContent indicator="dot" />}
           cursor={false}
+          labelFormatter={(value) => formatTick(String(value))}
         />
         {activeTab === "overview" && (
           <Area

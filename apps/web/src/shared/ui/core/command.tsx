@@ -68,7 +68,7 @@ const CommandInput = forwardRef<ComponentRef<typeof CommandPrimitive.Input>, Com
       {isLoading ? (
         <Spinner className="mr-2 shrink-0 opacity-50" />
       ) : (
-        <Search className="mr-2 size-4 shrink-0 opacity-50" />
+        <Search className="mr-2 shrink-0 opacity-50" />
       )}
       <CommandPrimitive.Input
         className={cn(

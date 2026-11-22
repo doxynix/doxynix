@@ -147,7 +147,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
               onClick={() => toggleOption("regexp")}
               tooltipText={t("repo_code_regexp")}
             >
-              <span className="font-bold text-2xs leading-none">.*</span>
+              <span className="font-semibold text-2xs leading-none">.*</span>
             </RepoCodeActionButton>
           </kbd>
         </div>
