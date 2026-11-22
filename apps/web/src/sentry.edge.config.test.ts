@@ -15,6 +15,10 @@ describe("sentry.edge.config", () => {
     expect(source).toContain("tracesSampleRate: 0.1");
   });
 
+  it("serves the Sentry tunnel without the deprecated tunnelRoute build option", () => {
+    expect(source).toContain("Sentry.serveTunnelIntegration(");
+  });
+
   it("reuses the shared data-collection policy", () => {
     expect(source).toContain("dataCollection: SENTRY_DATA_COLLECTION");
   });

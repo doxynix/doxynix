@@ -360,8 +360,6 @@ const sentryOptions: SentryBuildOptions = {
 
   telemetry: false,
 
-  tunnelRoute: `${API_PREFIX}/dxnx/s`,
-
   webpack: {
     automaticVercelMonitors: true,
 
