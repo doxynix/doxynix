@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.15.11](https://github.com/doxynix/doxynix/compare/web-v5.15.10...web-v5.15.11) (2026-11-22)
+
+
+### Bug Fixes
+
+* **web:** align UI with design system ([#2436](https://github.com/doxynix/doxynix/issues/2436)) ([8b3808c](https://github.com/doxynix/doxynix/commit/8b3808cb18dcc333aa38af5ec0dd8fbd9d01c1bf))
+
 ## [5.15.10](https://github.com/doxynix/doxynix/compare/web-v5.15.9...web-v5.15.10) (2026-11-19)
 
 
