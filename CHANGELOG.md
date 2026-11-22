@@ -1,5 +1,19 @@
 # Changelog
 
+## [6.15.12](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.11...doxynix-v6.15.12) (2026-11-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency posthog-node to v6 ([#2433](https://github.com/doxynix/doxynix/issues/2433)) ([6ab2dd3](https://github.com/doxynix/doxynix/commit/6ab2dd3de384ec64c6295f626077008f17216f4a))
+
+## [6.15.11](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.10...doxynix-v6.15.11) (2026-11-22)
+
+
+### Bug Fixes
+
+* **web:** align UI with design system ([#2436](https://github.com/doxynix/doxynix/issues/2436)) ([8b3808c](https://github.com/doxynix/doxynix/commit/8b3808cb18dcc333aa38af5ec0dd8fbd9d01c1bf))
+
 ## [6.15.10](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.9...doxynix-v6.15.10) (2026-11-19)
 
 

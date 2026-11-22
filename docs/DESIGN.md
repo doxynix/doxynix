@@ -64,6 +64,9 @@ Rules:
 Weights: 400 body, 500 controls/meta emphasis, 600 card and section titles, 700 page titles
 (`h1`/`h2` in the page shell). Avoid 700 in cards and rows. Letter-spacing is zero across the scale.
 
+Marketing and public pages may use display sizes `text-4xl`–`text-6xl`; product UI stops at
+`text-3xl`. Display sizes never appear inside the private dashboard.
+
 ### 3.2 Spacing
 
 Base: 4px (`--spacing`).
@@ -160,8 +163,11 @@ uses the shared overlays; do not add a new arbitrary z-index outside a library w
 Rules:
 
 - Soft status background: `bg-success/10`; border `border-success/30`; text `text-success`.
+- Status alpha scale: callout background `bg-*/5` with `border-*/20`; chip background `bg-*/10`
+  with `border-*/30`. Do not introduce other status alphas.
 - Never encode state with color alone: pair with text, icon, or shape.
-- Chart colors use `--chart-*`; no per-series hex.
+- Chart colors use `--chart-*`; no per-series hex. The ramp maps to `chart-1` success, `chart-2`
+  info, `chart-3` warning, `chart-4` brand-ai, `chart-5` error.
 - Dark mode is a remap of the same roles; feature code must not contain `dark:` color pairs.
   Structural/alpha adjustments inside primitives (`dark:bg-input/30`) are allowed.
 - Contrast: 4.5:1 body text, 3:1 large text and non-text controls.
@@ -193,8 +199,9 @@ no component changes.
 ## 7. Radii and elevation
 
 - Cards are flat: `border border-border`, no shadow.
-- Popovers, dialogs, menus and the agent panel receive their shadow from the global
-  `[data-slot]` rules; do not add `shadow-*` classes in feature code.
+- Overlays (popovers, dialogs, menus, agent panel) are separated by their `popover` surface tone, a
+  `border`, and the dialog backdrop. They carry no shadow; do not add `shadow-*` in feature code.
+- Landing visuals (`widgets/landing`, `shared/ui/visuals`) may use art shadows.
 - Never add a shadow to a card to create hierarchy; use spacing, border, and type instead.
 - Do not replace a radius role with `rounded-[10px]` or `rounded-[1.75rem]`.
 
@@ -585,7 +592,7 @@ author is the owner and the reviewer is the approver; do not block on an unnamed
 
 ### 19.1 Automated
 
-Utility-level values and allowed ranges are in `docs/TAILWIND.md`. The checker enforces the three
+Utility-level values and allowed ranges are in `docs/TAILWIND.md`. The checker enforces the
 rules below.
 
 ```bash
@@ -596,7 +603,14 @@ Forbids:
 
 - arbitrary font sizes (`text-[...]`);
 - raw Tailwind palette classes;
-- `tracking-*`.
+- `tracking-*`;
+- literal radius values (`rounded-[10px]`);
+- `shadow-*` outside landing visuals;
+- z-index outside `0/10/20/50/100/9999`;
+- `text-4xl`–`text-6xl` outside marketing, public pages and art;
+- `font-bold` outside page titles;
+- `uppercase` outside brand abbreviations and art;
+- `gap-5/10/12` in product layout.
 
 Runs in `validate`. It scans `.ts` and `.tsx`.
 
@@ -604,11 +618,10 @@ Runs in `validate`. It scans `.ts` and `.tsx`.
 
 The checker does not catch semantics. Review these in PRs:
 
-- `uppercase` outside brand abbreviations;
-- `font-mono` outside code;
-- `leading-*` overrides;
-- spacing/radii outside the scale;
+- spacing outside `1/2/3/4/6/8` beyond the reviewed layout exceptions;
+- radius roles (`xl` controls, `lg` menus, `2xl` cards);
 - new colors instead of roles;
+- status alpha usage (`/5` callout, `/10` chip, `/20` callout border, `/30` chip border);
 - component variants bypassed with `className`;
 - accessibility states.
 

@@ -115,10 +115,10 @@ export function CreateApiKeyDialog() {
             </DialogHeader>
 
             <Alert
-              className="border-destructive/10 bg-destructive/5 text-destructive"
+              className="border-destructive/20 bg-destructive/5 text-destructive"
               variant="destructive"
             >
-              <AlertTitle className="font-bold text-base">{tCommon("warning")}</AlertTitle>
+              <AlertTitle className="font-semibold text-base">{tCommon("warning")}</AlertTitle>
               <AlertDescription>{t("settings_api_keys_alert_desc")}</AlertDescription>
             </Alert>
 

@@ -124,7 +124,7 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
 
   return (
     <section className="container relative mx-auto flex min-h-[calc(100dvh-3rem)] items-center justify-center overflow-hidden px-4">
-      <div className="flex w-full items-center justify-center gap-10">
+      <div className="flex w-full items-center justify-center gap-8">
         <div
           className={cn(
             "hidden max-w-2xl flex-col gap-8 transition-standard duration-300 ease-out lg:flex",
@@ -141,7 +141,7 @@ export function AuthForm({ redirectTo: target }: Readonly<{ redirectTo: string }
             />
           </div>
 
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-4">
             <h1 className="font-bold text-4xl xl:text-6xl">
               {t("hero_title")} <br />
               <span className="text-muted-foreground">{t("hero_subtitle")}</span>

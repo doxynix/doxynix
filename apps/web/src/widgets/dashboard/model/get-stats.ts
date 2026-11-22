@@ -57,7 +57,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
       value: `${overview.avgScores.onboarding}/100`,
     },
     {
-      className: "bg-foreground/10 text-foreground font-mono",
+      className: "bg-foreground/10 text-foreground tabular-nums",
       description: t("stat_loc_desc"),
       icon: Code2,
       id: "loc",
@@ -75,7 +75,10 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
       value: `${overview.avgScores.techDebt}/100`,
     },
     {
-      className: "bg-warning/10 text-warning",
+      className:
+        analysisStats.pending > 0
+          ? "bg-warning/10 text-warning"
+          : "bg-surface-hover text-muted-foreground",
       description: t("stat_pending_desc"),
       icon: Loader2,
       iconClass: analysisStats.pending > 0 ? "animate-spin" : undefined,
@@ -84,7 +87,10 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
       value: analysisStats.pending,
     },
     {
-      className: "bg-destructive/10 text-destructive",
+      className:
+        overview.criticalRepoCount > 0
+          ? "bg-destructive/10 text-destructive"
+          : "bg-surface-hover text-muted-foreground",
       description: t("stat_critical_repo_count_desc"),
       icon: TriangleAlert,
       id: "criticalRepoCount",

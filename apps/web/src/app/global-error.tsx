@@ -188,10 +188,9 @@ export default function GlobalError({
           h1 { font-size: 1.875rem; font-weight: 700; margin: 0 0 16px; letter-spacing: -0.025em; }
           p { color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
           .digest-box { background: var(--surface-panel); border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 16px; text-align: left; margin-bottom: 32px; }
-          .digest-label { font-size: 0.625rem; font-weight: 600; text-transform: uppercase; color: var(--text-soft); margin: 0 0 8px; }
+          .digest-label { font-size: 0.625rem; font-weight: 600; color: var(--text-soft); margin: 0 0 8px; }
           code { font-family: monospace; font-size: 0.75rem; color: var(--text-muted); word-break: break-all; opacity: 0.8; }
           button { background: var(--primary); color: var(--primary-foreground); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 10px 24px; font-weight: 500; cursor: pointer; transition: box-shadow 0.2s, border-color 0.2s; }
-          button:hover { border-color: var(--border-strong); box-shadow: 0 4px 18px color-mix(in oklab, var(--text-primary) 14%, transparent); }
           footer { margin-top: 48px; font-size: 0.875rem; color: var(--text-soft); }
           .error-icon { stroke: var(--status-error); }
         `}</style>

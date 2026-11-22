@@ -31,7 +31,7 @@ export function ApiKeyCard({ actions, active, muted = false }: Readonly<Props>) 
       size="row"
     >
       <span className="flex size-[34px] shrink-0 items-center justify-center rounded-tile bg-surface-hover text-muted-foreground">
-        <KeyRound className="size-4" />
+        <KeyRound className="" />
       </span>
 
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">

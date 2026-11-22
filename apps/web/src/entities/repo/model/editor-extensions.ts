@@ -228,7 +228,6 @@ const THEME_EXTENSION = EditorView.theme({
     backgroundColor: "var(--surface-panel)",
     border: "1px solid var(--border-strong)",
     borderRadius: "var(--radius-md)",
-    boxShadow: "var(--shadow-md)",
     color: "var(--brand-docs)",
     fontFamily: "var(--font-mono)",
     fontSize: "11px",

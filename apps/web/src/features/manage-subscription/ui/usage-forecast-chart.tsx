@@ -127,7 +127,7 @@ export function UsageForecastChart({ forecast, periodEnd, periodStart }: Readonl
           </span>
           {(overLimit || nearLimit) && (
             <AppBadge
-              className={overLimit ? "" : "border-warning/40 text-warning"}
+              className={overLimit ? "" : "border-warning/30 text-warning"}
               variant={overLimit ? "destructive" : "outline"}
             >
               {t(overLimit ? "billing_usage_at_limit" : "billing_usage_near_limit")}

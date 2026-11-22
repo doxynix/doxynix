@@ -1,6 +1,6 @@
 {
   "name": "@doxynix/cli",
-  "version": "5.5.31",
+  "version": "5.5.33",
   "description": "AI-powered repository analysis and documentation CLI.",
   "keywords": [
     "doxynix",
@@ -56,10 +56,10 @@
     "@doxynix/web": "workspace:*",
     "@trpc/client": "catalog:",
     "@trpc/server": "catalog:",
-    "@vitest/coverage-v8": "5.1.0",
+    "@vitest/coverage-v8": "5.1.1",
     "commander": "15.1.0",
-    "dependency-cruiser": "18.7.2",
-    "ora": "9.4.1",
+    "dependency-cruiser": "18.8.0",
+    "ora": "10.0.0",
     "pathe": "catalog:",
     "picocolors": "1.1.1",
     "superjson": "catalog:",
@@ -67,7 +67,7 @@
     "zod": "catalog:"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "publishConfig": {
     "access": "public"

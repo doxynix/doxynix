@@ -15,6 +15,10 @@ describe("sentry.server.config", () => {
     expect(source).toContain("tracesSampleRate: 0.1");
   });
 
+  it("serves the Sentry tunnel without the deprecated tunnelRoute build option", () => {
+    expect(source).toContain("Sentry.serveTunnelIntegration(");
+  });
+
   it("does not attach stack-frame local variables", () => {
     expect(source).not.toContain("includeLocalVariables: true");
   });

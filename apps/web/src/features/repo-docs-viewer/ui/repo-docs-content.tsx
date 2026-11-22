@@ -137,7 +137,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
           widths={["w-1/3"]}
         />
 
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4">
           <SkeletonText
             lines={6}
             widths={["w-full", "w-full", "w-11/12", "w-full", "w-4/5", "w-full"]}
@@ -278,7 +278,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
                 variant={alertConfig.variant}
               >
                 <IconComponent className="absolute top-4 left-4" />
-                <AlertTitle className="mb-1 font-bold font-sans text-xs">
+                <AlertTitle className="mb-1 font-semibold font-sans text-xs">
                   {alertConfig.title}
                 </AlertTitle>
 

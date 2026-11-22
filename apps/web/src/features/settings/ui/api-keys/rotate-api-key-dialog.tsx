@@ -86,11 +86,11 @@ export function RotateApiKeyDialog({ apiKey }: Readonly<Props>) {
               <DialogTitle>{t("settings_api_keys_rotate_key")}</DialogTitle>
               <DialogDescription>
                 {t("settings_api_keys_rotate_key_desc")}{" "}
-                <span className="font-bold text-foreground">{`${apiKey.prefix}...`}</span>
+                <span className="font-semibold text-foreground">{`${apiKey.prefix}...`}</span>
               </DialogDescription>
             </DialogHeader>
 
-            <Alert className="border-warning/20 bg-warning/10">
+            <Alert className="border-warning/30 bg-warning/10">
               <AlertTitle className="font-semibold text-foreground">
                 {t("settings_api_keys_rotate_note_title")}
               </AlertTitle>

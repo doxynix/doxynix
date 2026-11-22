@@ -50,6 +50,7 @@
     "**/messages/zh-CN.json",
     "**/docs/2026-11-20-ui-audit-plan.md",
     "**/docs/2026-11-20-ui-remaining-ledger.md",
+    "**/docs/2026-11-22-ui-consistency-map.md",
     "skills-lock.json"
   ],
   "import": [

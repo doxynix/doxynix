@@ -28,7 +28,7 @@ export function ProductPreview({ intent }: Readonly<Props>) {
   const reduceMotion = useReducedMotion() || preferences.reduceMotion;
 
   return (
-    <div className="relative min-w-0 overflow-hidden rounded-3xl border bg-card/70 shadow-sm backdrop-blur">
+    <div className="relative min-w-0 overflow-hidden rounded-3xl border bg-card/70 backdrop-blur">
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
         <div className="flex shrink-0 items-center gap-1.5">
           <span className="size-2.5 rounded-full bg-destructive/70" />

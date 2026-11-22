@@ -22,7 +22,7 @@ export default async function RepoOwnerNamePage({ params, searchParams }: Readon
   const aid = Array.isArray(query.aid) ? query.aid[0] : query.aid;
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-8">
       <Suspense fallback={<RepoOverviewSkeleton />}>
         <OverviewSection
           aid={aid}

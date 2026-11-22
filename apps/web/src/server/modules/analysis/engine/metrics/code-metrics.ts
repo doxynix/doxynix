@@ -1,5 +1,5 @@
 import { lintSource } from "@secretlint/core";
-import { creator as canaryPreset } from "@secretlint/secretlint-rule-preset-canary";
+import { presetCanary } from "@secretlint/core/builtin";
 import { clamp, uniq } from "es-toolkit";
 import { normalize } from "pathe";
 
@@ -38,9 +38,9 @@ import { calculateRepositoryDuplication, type DuplicationReport } from "./duplic
 const secretLintConfig = {
   rules: [
     {
-      id: canaryPreset.meta.id,
+      id: presetCanary.meta.id,
       options: {},
-      rule: canaryPreset,
+      rule: presetCanary,
     },
   ],
 };

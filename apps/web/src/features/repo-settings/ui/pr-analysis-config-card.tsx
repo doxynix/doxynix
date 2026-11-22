@@ -353,7 +353,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
                         tabIndex={-1}
                       />
                     </div>
-                    <p className="font-bold text-sm">{area.label}</p>
+                    <p className="font-semibold text-sm">{area.label}</p>
                     <p className="mt-1 text-muted-foreground text-xs">{area.desc}</p>
                   </label>
                 );

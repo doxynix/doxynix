@@ -43,7 +43,7 @@ export function ConnectionsListContainer() {
   }
 
   return (
-    <div className="grid gap-10">
+    <div className="grid gap-8">
       <section className="flex flex-col gap-4">
         <div>
           <h2>{t("settings_connections_auth_title")}</h2>

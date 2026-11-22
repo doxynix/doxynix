@@ -56,7 +56,7 @@ export function CodeComparison({
 
         <AppBadge
           aria-hidden="true"
-          className="pointer-events-none absolute top-1/2 left-1/2 hidden size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border font-bold text-xs md:flex"
+          className="pointer-events-none absolute top-1/2 left-1/2 hidden size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border font-semibold text-xs md:flex"
           variant="outline"
         >
           {tCommon("vs")}

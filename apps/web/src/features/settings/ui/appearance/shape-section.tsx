@@ -33,7 +33,7 @@ export function ShapeSection({ preferences, update }: Readonly<AppearanceSection
       description={t("settings_appearance_shape_desc")}
       title={t("settings_appearance_shape_title")}
     >
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4">
         <AppearanceRow
           description={t("settings_appearance_radius_desc")}
           title={t("settings_appearance_radius_title")}

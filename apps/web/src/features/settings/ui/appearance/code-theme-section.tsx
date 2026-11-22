@@ -123,7 +123,7 @@ export function CodeThemeSection({ preferences, update }: Readonly<AppearanceSec
       description={t("settings_appearance_code_theme_desc")}
       title={t("settings_appearance_code_theme_title")}
     >
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4">
         <AppearanceRow
           description={t("settings_appearance_code_theme_row_desc")}
           title={t("settings_appearance_code_theme_row_title")}
