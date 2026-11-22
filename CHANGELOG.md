@@ -1,5 +1,15 @@
 # Changelog
 
+## [6.15.13](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.12...doxynix-v6.15.13) (2026-11-22)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2432](https://github.com/doxynix/doxynix/issues/2432)) ([74df2c3](https://github.com/doxynix/doxynix/commit/74df2c3067ad454aa4091bfccb6a0836f6426df0))
+* **deps:** update linters & dev tools to v14 ([#2426](https://github.com/doxynix/doxynix/issues/2426)) ([bba7ce5](https://github.com/doxynix/doxynix/commit/bba7ce517fba34c3f7fa12db623aabf15d541dcb))
+* **web:** install sentry bun entry for turbopack build ([#2441](https://github.com/doxynix/doxynix/issues/2441)) ([f537821](https://github.com/doxynix/doxynix/commit/f5378212917b954e1d9f8b176fe911be776c6adc))
+* **web:** restore billing fixtures and turbopack build ([#2440](https://github.com/doxynix/doxynix/issues/2440)) ([dc8ad7e](https://github.com/doxynix/doxynix/commit/dc8ad7e4f556de454222cda0f680820e9de8cbff))
+
 ## [6.15.12](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.11...doxynix-v6.15.12) (2026-11-22)
 
 
