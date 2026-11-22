@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.15.12](https://github.com/doxynix/doxynix/compare/web-v5.15.11...web-v5.15.12) (2026-11-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency posthog-node to v6 ([#2433](https://github.com/doxynix/doxynix/issues/2433)) ([6ab2dd3](https://github.com/doxynix/doxynix/commit/6ab2dd3de384ec64c6295f626077008f17216f4a))
+
 ## [5.15.11](https://github.com/doxynix/doxynix/compare/web-v5.15.10...web-v5.15.11) (2026-11-22)
 
 

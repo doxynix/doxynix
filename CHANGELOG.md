@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.15.12](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.11...doxynix-v6.15.12) (2026-11-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency posthog-node to v6 ([#2433](https://github.com/doxynix/doxynix/issues/2433)) ([6ab2dd3](https://github.com/doxynix/doxynix/commit/6ab2dd3de384ec64c6295f626077008f17216f4a))
+
 ## [6.15.11](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.10...doxynix-v6.15.11) (2026-11-22)
 
 
