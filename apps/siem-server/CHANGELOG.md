@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.3](https://github.com/doxynix/doxynix/compare/siem-server-v0.7.2...siem-server-v0.7.3) (2026-11-22)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2432](https://github.com/doxynix/doxynix/issues/2432)) ([74df2c3](https://github.com/doxynix/doxynix/commit/74df2c3067ad454aa4091bfccb6a0836f6426df0))
+
 ## [0.7.2](https://github.com/doxynix/doxynix/compare/siem-server-v0.7.1...siem-server-v0.7.2) (2026-11-19)
 
 

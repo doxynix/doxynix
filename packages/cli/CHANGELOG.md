@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.5.34](https://github.com/doxynix/doxynix/compare/cli-v5.5.33...cli-v5.5.34) (2026-11-22)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2432](https://github.com/doxynix/doxynix/issues/2432)) ([74df2c3](https://github.com/doxynix/doxynix/commit/74df2c3067ad454aa4091bfccb6a0836f6426df0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 5.15.13
+
 ## [5.5.33](https://github.com/doxynix/doxynix/compare/cli-v5.5.32...cli-v5.5.33) (2026-11-22)
 
 
