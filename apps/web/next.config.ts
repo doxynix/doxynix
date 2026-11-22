@@ -35,7 +35,6 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: IS_PROD ? { exclude: ["error", "info"] } : false,
   },
-  compress: true,
   enablePrerenderSourceMaps: false, // Prevents conflicts with Sentry Debug IDs during SSG
   env: {
     APP_VERSION: pkg.version,
@@ -43,7 +42,8 @@ const nextConfig: NextConfig = {
   experimental: {
     authInterrupts: true,
     dynamicOnHover: true,
-    optimisticRouting: true,
+    // Keep @sentry/nextjs out: Next adds this list to transpilePackages, while Sentry 11.14
+    // externalizes it under Bun, and Turbopack rejects a package in both lists.
     optimizePackageImports: [
       "@radix-ui/react-avatar",
       "@radix-ui/react-dialog",
@@ -63,28 +63,18 @@ const nextConfig: NextConfig = {
       "@tanstack/react-query",
       "cmdk",
       "sonner",
-      // [DISABLED]: Sentry 11.14 externalizes @sentry/nextjs under Bun; Turbopack rejects a package in both lists.
-      "@sentry/react",
-      "@sentry/browser",
-      "@sentry/core",
-      "@sentry/replay",
-      "@sentry/browser-utils",
     ],
-    optimizeServerReact: true,
-    prefetchInlining: true,
     preloadEntriesOnStart: false,
     prerenderEarlyExit: false, // [DISABLED]: Known to cause premature build stalls on Next.js 16
     scrollRestoration: true,
-    serverComponentsHmrCache: true,
-    serverSourceMaps: false, // [DISABLED]: Avoid holding large server sourcemaps in memory during build
     taint: true,
-    turbopackFileSystemCacheForBuild: true,
-    turbopackFileSystemCacheForDev: true,
     typedEnv: true,
-    webpackMemoryOptimizations: false,
-    workerThreads: false, // [DISABLED]: Causes worker pool deadlocks during page data collection under Bun runtime
+    // [DISABLED]: The Bun build worker pool deadlocks during page data collection.
+    workerThreads: false,
   },
   async headers() {
+    // [NOTE]: No nonce here on purpose. A nonce-based CSP forces every page into dynamic
+    // rendering (no ISR/CDN caching), so 'unsafe-inline' stays until hash-based CSP is viable.
     const scriptSrc = [
       "'self'",
       "'unsafe-inline'",
@@ -259,7 +249,7 @@ const nextConfig: NextConfig = {
     pagesBufferLength: 2,
   },
   outputFileTracingExcludes: {
-    "*": ["./**/*.js.map", "./**/*.mjs.map"],
+    "**": ["./**/*.js.map", "./**/*.mjs.map"],
   },
   poweredByHeader: false,
   productionBrowserSourceMaps: false, // Ensures clients cannot fetch raw sourcemaps from browser
@@ -311,7 +301,6 @@ const nextConfig: NextConfig = {
     debugIds: true,
   },
   typedRoutes: false,
-  typescript: { ignoreBuildErrors: false },
 
   webpack: (config, { dev, isServer }) => {
     // StatsWriterPlugin with 'modules: true' serialises the whole module graph into RAM, causing GC freezes.
@@ -367,9 +356,6 @@ const sentryOptions: SentryBuildOptions = {
       removeDebugLogging: true,
     },
   },
-
-  // Crucial: uploads source maps for all client-side deps, keeping Sentry stack traces unmangled.
-  widenClientFileUpload: true,
 };
 
 const baseConfig =
