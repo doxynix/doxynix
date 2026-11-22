@@ -59,7 +59,7 @@ export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
         </AppTooltip>
       }
     >
-      <div className="truncate pb-2 font-bold text-foreground">{apiKey.name}</div>
+      <div className="truncate pb-2 font-semibold text-foreground">{apiKey.name}</div>
     </DangerActionDialog>
   );
 }

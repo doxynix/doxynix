@@ -99,7 +99,7 @@ export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
           </div>
         )}
 
-        <ChevronRight className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+        <ChevronRight className="mt-0.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
       </Link>
     </Card>
   );

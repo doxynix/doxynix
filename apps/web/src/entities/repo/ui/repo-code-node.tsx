@@ -51,7 +51,7 @@ export function RepoCodeNode({ activePath, node, onSelect, style }: RepoCodeNode
             <Folder className="fill-current" />
           )
         ) : (
-          <FileIcon className={cn(isActive && "font-bold")} />
+          <FileIcon className={cn(isActive && "font-semibold")} />
         )}
       </div>
       <span className="truncate text-sm">{node.data.name}</span>

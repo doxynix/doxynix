@@ -16,11 +16,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       className="toaster group"
       icons={{
-        error: <XCircle className="size-4 text-destructive" />,
-        info: <Info className="size-4 text-info" />,
+        error: <XCircle className="text-destructive" />,
+        info: <Info className="text-info" />,
         loading: <Spinner />,
-        success: <CheckCircle2 className="size-4 text-success" />,
-        warning: <AlertTriangle className="size-4 text-warning" />,
+        success: <CheckCircle2 className="text-success" />,
+        warning: <AlertTriangle className="text-warning" />,
       }}
       theme={theme as ToasterProps["theme"]}
       toastOptions={{

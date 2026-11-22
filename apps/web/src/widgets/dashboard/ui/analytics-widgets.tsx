@@ -66,7 +66,7 @@ function WidgetHeader({
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="font-semibold text-sm">{title}</p>
+        <p className="font-semibold text-base">{title}</p>
       </div>
 
       {action != null && <div className="flex shrink-0 items-center gap-1.5">{action}</div>}
@@ -434,6 +434,7 @@ export function RecentActivityWidget({ data }: Readonly<Props>) {
                 {activity.status === "PENDING" && (
                   <div className="mt-1.5 flex items-center gap-2">
                     <Progress
+                      aria-label={`${activity.repoOwner}/${activity.repoName}: ${activity.progress}%`}
                       className="h-1 flex-1"
                       indicatorStyle={{ backgroundColor: "var(--status-warning)" }}
                       value={activity.progress}

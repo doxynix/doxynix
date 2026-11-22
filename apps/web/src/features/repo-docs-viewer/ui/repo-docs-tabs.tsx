@@ -67,7 +67,7 @@ export function RepoDocsTabs({
 
   return (
     <div className="flex min-h-0 w-72 shrink-0 flex-col gap-4 overflow-y-auto pr-1">
-      <h2 className="px-2 py-1 font-bold">{t("repo_docs_title")}</h2>
+      <h2 className="px-2 py-1 font-semibold">{t("repo_docs_title")}</h2>
 
       <TabsList className="flex h-auto w-full flex-col items-stretch justify-start gap-1 bg-transparent p-0">
         {uniqueTabs.map((item) => {

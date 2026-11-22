@@ -1,10 +1,10 @@
 import { SearchX } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
-import { createMetadata } from "@/shared/lib/metadata";
+import { createNotFoundMetadata } from "@/shared/lib/metadata";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 
-export const generateMetadata = createMetadata("not_found_title", "not_found_desc");
+export const generateMetadata = createNotFoundMetadata();
 
 export default async function NotFound() {
   const tCommon = await getTranslations("Common");

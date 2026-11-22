@@ -57,7 +57,7 @@ export async function PublicHeader() {
         </nav>
         <div className="flex items-center gap-4">
           <AppTooltip content={t("work_in_progress")}>
-            <span className="rounded bg-warning/20 p-1 py-0.5 text-warning text-xs">
+            <span className="rounded bg-warning/10 p-1 py-0.5 text-warning text-xs">
               {t("beta")}
             </span>
           </AppTooltip>

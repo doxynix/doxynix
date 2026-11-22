@@ -149,10 +149,10 @@ export function GettingStartedChecklist() {
 
               <button
                 className={cn(
-                  "flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-standard",
+                  "flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-standard focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/80",
                   step.state === "current" &&
                     "border-border-strong bg-surface-selected text-foreground",
-                  step.state === "error" && "border-destructive/40 text-destructive",
+                  step.state === "error" && "border-destructive/30 text-destructive",
                   step.state === "pending" && "border-border text-muted-foreground",
                   step.state === "done" && "border-border text-muted-foreground",
                 )}

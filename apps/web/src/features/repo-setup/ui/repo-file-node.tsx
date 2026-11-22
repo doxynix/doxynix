@@ -77,7 +77,7 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
               <Folder className="fill-current" />
             )
           ) : (
-            <FileIcon className={cn(isSelected && "font-bold")} />
+            <FileIcon className={cn(isSelected && "font-semibold")} />
           )}
         </div>
 

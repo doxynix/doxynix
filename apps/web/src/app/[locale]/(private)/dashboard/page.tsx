@@ -60,21 +60,16 @@ export default async function DashboardPage({ searchParams }: Readonly<PageProps
 
   return (
     <div className="mx-auto flex h-full w-full flex-col gap-8">
-      <div className="sticky top-0 right-0 flex h-0 justify-end overflow-visible pt-2">
+      <Suspense fallback={null}>
+        <ChecklistSection />
+      </Suspense>
+      <div className="sticky top-0 z-20 flex items-center justify-between gap-4 bg-background/90 py-2 backdrop-blur-sm">
+        <h1 className="font-bold text-2xl">{t("title")}</h1>
         <DashboardDatePeriod />
       </div>
-
-      <div className="flex flex-col gap-4">
-        <Suspense fallback={null}>
-          <ChecklistSection />
-        </Suspense>
-        <div className="flex items-center justify-between">
-          <h1 className="font-bold text-2xl">{t("title")}</h1>
-        </div>
-        <Suspense fallback={<StatCardsSkeleton />}>
-          <StatsSection range={range} />
-        </Suspense>
-      </div>
+      <Suspense fallback={<StatCardsSkeleton />}>
+        <StatsSection range={range} />
+      </Suspense>
 
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
         <div className="flex flex-col gap-8 lg:col-span-8">

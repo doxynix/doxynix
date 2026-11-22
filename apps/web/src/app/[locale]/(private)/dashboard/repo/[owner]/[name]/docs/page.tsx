@@ -23,7 +23,7 @@ export default async function RepoDocsPage({ params, searchParams }: Readonly<Re
 
   return (
     <HydrateClient>
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-8">
         <RepoDocsContainer id={repo.id} />
       </div>
     </HydrateClient>

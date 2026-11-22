@@ -20,7 +20,7 @@ export function InteractionSection({ preferences, update }: Readonly<AppearanceS
       description={t("settings_appearance_behavior_desc")}
       title={t("settings_appearance_behavior_title")}
     >
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4">
         <AppearanceRow
           description={t("settings_appearance_pointer_desc")}
           htmlFor={POINTER_CURSOR_ID}

@@ -77,7 +77,7 @@ function RepoQuickActions({ repo }: Readonly<{ repo: UiRepoListItem }>) {
           className="flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:text-foreground focus-visible:opacity-100"
           href={`/dashboard/repo/${repo.owner}/${repo.name}/settings`}
         >
-          <Settings className="size-4" />
+          <Settings className="" />
         </Link>
       </AppTooltip>
     </div>
@@ -204,6 +204,7 @@ function RepoBriefCard({ repo }: Readonly<{ repo: UiRepoListItem }>) {
 
   const hasAnalysis = repo.healthScore != null;
   const healthScore = repo.healthScore ?? 0;
+  const securityScore = repo.securityScore ?? 0;
   const repoHref = `/dashboard/repo/${repo.owner}/${repo.name}`;
 
   const metaItems = [
@@ -283,27 +284,39 @@ function RepoBriefCard({ repo }: Readonly<{ repo: UiRepoListItem }>) {
           <div className="min-w-0">
             <div className="text-2xs text-muted-foreground">{t("quality_health")}</div>
             <div className="mt-0.5 font-semibold text-xl tabular-nums">
-              {repo.healthScore ?? "—"}
+              {repo.healthScore ?? <span className="text-muted-foreground">—</span>}
               <span className="font-normal text-muted-foreground text-xs">/100</span>
             </div>
+            {repo.healthScore != null && (
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    backgroundColor: getHealthColor(healthScore),
+                    width: `${Math.min(Math.max(healthScore, 0), 100)}%`,
+                  }}
+                />
+              </div>
+            )}
           </div>
           <div className="min-w-0">
             <div className="text-2xs text-muted-foreground">{t("quality_security")}</div>
             <div className="mt-0.5 font-semibold text-xl tabular-nums">
-              {repo.securityScore ?? "—"}
+              {repo.securityScore ?? <span className="text-muted-foreground">—</span>}
               <span className="font-normal text-muted-foreground text-xs">/100</span>
             </div>
+            {repo.securityScore != null && (
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    backgroundColor: getHealthColor(securityScore),
+                    width: `${Math.min(Math.max(securityScore, 0), 100)}%`,
+                  }}
+                />
+              </div>
+            )}
           </div>
-        </div>
-
-        <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full rounded-full"
-            style={{
-              backgroundColor: getHealthColor(healthScore),
-              width: `${Math.min(Math.max(healthScore, 0), 100)}%`,
-            }}
-          />
         </div>
       </div>
 

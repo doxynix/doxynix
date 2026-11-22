@@ -11,6 +11,6 @@ export const repoVisibilityConfig: Record<
     labelKey: RepoVisibilityLabelKey;
   }
 > = {
-  PRIVATE: { color: "text-error", icon: Lock, labelKey: "repo_visibility_private" },
-  PUBLIC: { color: "text-success", icon: Unlock, labelKey: "repo_visibility_public" },
+  PRIVATE: { color: "text-muted-foreground", icon: Lock, labelKey: "repo_visibility_private" },
+  PUBLIC: { color: "text-muted-foreground", icon: Unlock, labelKey: "repo_visibility_public" },
 };

@@ -202,7 +202,7 @@ function LogLine({ log, searchQuery }: Readonly<{ log: LogEntry; searchQuery: st
         {tokens.map((token, i) =>
           token.isHighlighted ? (
             <span
-              className="rounded-[1px] bg-warning/10 font-bold text-warning"
+              className="rounded-2xs bg-warning/10 font-semibold text-warning"
               key={i}
             >
               {token.text}

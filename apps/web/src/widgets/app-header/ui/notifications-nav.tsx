@@ -132,7 +132,7 @@ export function NotificationsNav() {
                       <div className="flex flex-col">
                         <p
                           className={cn(
-                            "mb-1 font-bold",
+                            "mb-1 font-semibold",
 
                             isRead && "text-muted-foreground",
                           )}
