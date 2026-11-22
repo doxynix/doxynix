@@ -130,7 +130,7 @@ export function UserMenu({ items }: Readonly<Props>) {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
-            className="text-destructive focus:bg-destructive/20 focus:text-destructive"
+            className="text-destructive focus:bg-destructive/10 focus:text-destructive"
             onSelect={() => setSignOutOpen(true)}
           >
             <LogOut className="text-destructive" />

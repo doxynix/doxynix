@@ -62,7 +62,7 @@ export function DeleteChatDialog({ onDeleted, session }: Readonly<Props>) {
         </AppTooltip>
       }
     >
-      <div className="truncate pb-2 font-bold text-foreground">{session.title}</div>
+      <div className="truncate pb-2 font-semibold text-foreground">{session.title}</div>
     </DangerActionDialog>
   );
 }

@@ -139,7 +139,7 @@ function Blockquote({ children, className }: ClassableBlockProps) {
         variant={alertConfig.variant}
       >
         <IconComponent className="absolute top-4 left-4 size-4" />
-        <AlertTitle className="mb-1 font-bold font-sans text-xs">
+        <AlertTitle className="mb-1 font-semibold font-sans text-xs">
           {t(alertConfig.titleKey)}
         </AlertTitle>
         <AlertDescription className="font-sans text-xs leading-relaxed opacity-90">

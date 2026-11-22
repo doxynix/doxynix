@@ -101,20 +101,20 @@ export function DangerActionDialog({
 
         {successAlertTitle && successAlertContent && (
           <Alert
-            className="border-success/10 bg-success/5 text-success"
+            className="border-success/20 bg-success/5 text-success"
             variant="success"
           >
-            <AlertTitle className="font-bold text-base">{successAlertTitle}</AlertTitle>
+            <AlertTitle className="font-semibold text-base">{successAlertTitle}</AlertTitle>
             <AlertDescription>{successAlertContent}</AlertDescription>
           </Alert>
         )}
 
         {destructiveAlertContent != null && (
           <Alert
-            className="border-destructive/10 bg-destructive/5 text-destructive"
+            className="border-destructive/20 bg-destructive/5 text-destructive"
             variant="destructive"
           >
-            <AlertTitle className="font-bold text-base">
+            <AlertTitle className="font-semibold text-base">
               <span>{tCommon("warning")}</span>
             </AlertTitle>
             <AlertDescription>{destructiveAlertContent}</AlertDescription>

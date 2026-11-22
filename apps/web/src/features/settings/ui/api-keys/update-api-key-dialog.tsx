@@ -99,7 +99,7 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
               <DialogTitle>{t("settings_api_keys_edit_title")}</DialogTitle>
               <DialogDescription>
                 {t("settings_api_keys_update_key_desc")}{" "}
-                <span className="font-bold text-foreground">{`${apiKey.prefix}...`}</span>
+                <span className="font-semibold text-foreground">{`${apiKey.prefix}...`}</span>
               </DialogDescription>
             </DialogHeader>
 

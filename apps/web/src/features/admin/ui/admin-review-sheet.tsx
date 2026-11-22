@@ -164,7 +164,7 @@ export function AdminReviewSheet({ onOpenChange, open, reviewId }: Readonly<Prop
               </dl>
 
               {data.error != null && (
-                <div className="flex flex-col gap-1 rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm">
+                <div className="flex flex-col gap-1 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm">
                   <span className="font-medium">{t("detail_error")}</span>
                   <span className="break-all text-muted-foreground">{data.error}</span>
                 </div>

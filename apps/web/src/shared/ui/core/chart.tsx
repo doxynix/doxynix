@@ -214,7 +214,7 @@ const ChartTooltipContent = forwardRef<HTMLDivElement, ChartTooltipContentProps>
     return (
       <div
         className={cn(
-          "grid min-w-32 items-start gap-1.5 rounded-xl border border-border bg-popover px-2.5 py-1.5 text-xs shadow-md",
+          "grid min-w-32 items-start gap-1.5 rounded-xl border border-border bg-popover px-2.5 py-1.5 text-xs",
           className,
         )}
         ref={ref}
@@ -277,7 +277,7 @@ const ChartTooltipContent = forwardRef<HTMLDivElement, ChartTooltipContentProps>
                           </span>
                         </div>
                         {item.value != null && (
-                          <span className="font-medium font-mono text-foreground tabular-nums">
+                          <span className="font-medium text-foreground tabular-nums">
                             {typeof item.value === "number"
                               ? item.value.toLocaleString(locale)
                               : String(item.value)}

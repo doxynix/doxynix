@@ -106,7 +106,7 @@ export function AppHeader() {
         <div className="flex items-center gap-2 md:gap-4">
           <AgentButton />
           <AppTooltip content={tCommon("work_in_progress")}>
-            <span className="cursor-default rounded bg-warning/20 p-1 py-0.5 text-warning text-xs">
+            <span className="cursor-default rounded bg-warning/10 p-1 py-0.5 text-warning text-xs">
               {tCommon("beta")}
             </span>
           </AppTooltip>

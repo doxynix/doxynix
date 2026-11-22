@@ -516,7 +516,7 @@ export function RepoCodeBrowser({
       {showAuditPanel && (
         <div className="fade-in slide-in-from-right-4 absolute top-20 right-6 z-50 w-96 animate-in rounded-xl border border-border bg-popover p-4">
           <div className="mb-3 flex items-center justify-between border-b pb-2">
-            <h3 className="flex items-center gap-1 font-bold text-xs">
+            <h3 className="flex items-center gap-1 font-semibold text-xs">
               <Sparkles />
               {t("repo_code_audit_title")}
             </h3>

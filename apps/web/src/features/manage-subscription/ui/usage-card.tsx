@@ -143,7 +143,7 @@ export function UsageCard({ entitlement, usage }: Readonly<Props>) {
           </CardAction>
         )}
       </CardHeader>
-      <CardContent className="flex flex-col gap-5">
+      <CardContent className="flex flex-col gap-4">
         <UsageRow
           forecast={forecasts.analyses}
           label={t("billing_usage_analyses")}

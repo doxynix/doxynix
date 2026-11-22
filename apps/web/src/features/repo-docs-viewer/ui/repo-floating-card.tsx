@@ -209,7 +209,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
       ) : (
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2 border-b pb-2">
-            <span className="flex max-w-52 items-center gap-1.5 truncate font-bold text-xs">
+            <span className="flex max-w-52 items-center gap-1.5 truncate font-semibold text-xs">
               <Code2 />
               {node.label}
             </span>
@@ -247,7 +247,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
 
           <div className="flex flex-col gap-2 border-t pt-2.5">
             {node.score > 0 && (
-              <div className="flex items-center gap-1.5 font-bold text-2xs">
+              <div className="flex items-center gap-1.5 font-semibold text-2xs">
                 <AlertTriangle className="size-3" />
                 <span>{t("importance_score")}</span>
                 <span>{node.score}</span>
@@ -272,7 +272,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
                       </div>
                       <span
                         className={cn(
-                          "shrink-0 font-bold",
+                          "shrink-0 font-semibold",
                           isDestructive ? "text-destructive" : "",
                         )}
                       >

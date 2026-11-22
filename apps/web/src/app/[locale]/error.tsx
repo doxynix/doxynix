@@ -80,7 +80,7 @@ export default function ErrorPage({
       <div className="flex w-full max-w-md flex-col gap-4 text-center">
         <h1 className="font-bold text-3xl">{t("server_error_title")}</h1>
         <p className="text-base text-muted-foreground">{t("server_error_desc")}</p>
-        <p className="text-left font-semibold text-muted-foreground text-xs uppercase">
+        <p className="text-left font-semibold text-muted-foreground text-xs">
           {t("request_id_label")}
         </p>
         <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted p-2 text-left">
@@ -97,7 +97,7 @@ export default function ErrorPage({
 
           {IS_DEV && (
             <div className="border-border border-t pt-2">
-              <p className="font-semibold text-destructive text-xs uppercase">{t("debug_error")}</p>
+              <p className="font-semibold text-destructive text-xs">{t("debug_error")}</p>
               <p className="truncate text-destructive text-xs">{errorMessage(error)}</p>
             </div>
           )}

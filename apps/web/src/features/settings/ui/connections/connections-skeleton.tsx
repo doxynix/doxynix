@@ -3,7 +3,7 @@ import { SkeletonList, SkeletonText } from "@/shared/ui/kit/app-skeleton";
 
 export function ConnectionsSkeleton() {
   return (
-    <div className="grid gap-10">
+    <div className="grid gap-8">
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <SkeletonText

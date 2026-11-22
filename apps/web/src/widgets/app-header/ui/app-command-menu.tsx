@@ -253,9 +253,11 @@ export function AppCommandMenu() {
                       src={repo.avatar}
                     />
                     <div className="line-clamp-1 flex">
-                      <span className="truncate font-bold text-muted-foreground">{repo.owner}</span>
+                      <span className="truncate font-semibold text-muted-foreground">
+                        {repo.owner}
+                      </span>
                       <span className="text-muted-foreground">/</span>
-                      <span className="truncate font-bold">{repo.name}</span>
+                      <span className="truncate font-semibold">{repo.name}</span>
                     </div>
                   </CommandItem>
                 ))}

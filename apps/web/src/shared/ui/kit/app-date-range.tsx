@@ -111,13 +111,13 @@ export function AppDateRange({
               <div className="grid min-w-0 flex-1 grid-cols-2 gap-4 text-center">
                 <div className="flex min-w-0 flex-col gap-1">
                   <span className="text-muted-foreground text-xs">{t("start_date")}</span>
-                  <span className="truncate font-mono text-xs tabular-nums">
+                  <span className="truncate text-xs tabular-nums">
                     {draft?.from ? format(draft.from, "yyyy-MM-dd") : "—"}
                   </span>
                 </div>
                 <div className="flex min-w-0 flex-col gap-1">
                   <span className="text-muted-foreground text-xs">{t("end_date")}</span>
-                  <span className="truncate font-mono text-xs tabular-nums">
+                  <span className="truncate text-xs tabular-nums">
                     {draft?.to ? format(draft.to, "yyyy-MM-dd") : "—"}
                   </span>
                 </div>

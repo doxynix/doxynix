@@ -328,7 +328,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
               <div className="flex flex-col gap-2">
                 {inspect.recommendedActions.map((action, i) => (
                   <div
-                    className="flex gap-2 rounded-md border border-warning/10 bg-warning/5 p-2 text-xs"
+                    className="flex gap-2 rounded-md border border-warning/20 bg-warning/5 p-2 text-xs"
                     key={i}
                   >
                     <Zap className="mt-0.5 text-warning" />
@@ -381,13 +381,13 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1 rounded-md border bg-muted p-2">
               <div className="text-muted-foreground text-xs">{t("depends_on")}</div>
-              <div className="font-bold text-xs">
+              <div className="font-semibold text-xs">
                 {t("depends_on_modules", { count: inspect.dependsOn.length })}
               </div>
             </div>
             <div className="flex flex-col gap-1 rounded-md border bg-muted p-2">
               <div className="text-muted-foreground text-xs">{t("used_by")}</div>
-              <div className="font-bold text-xs">
+              <div className="font-semibold text-xs">
                 {t("used_by_consumers", { count: inspect.usedBy.length })}
               </div>
             </div>
@@ -395,7 +395,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
 
           {allHints.length > 0 && (
             <div className="flex flex-col gap-3 rounded-xl border bg-muted p-4">
-              <div className="flex items-center gap-2 font-bold text-warning text-xs">
+              <div className="flex items-center gap-2 font-semibold text-warning text-xs">
                 <Lightbulb /> {t("technical_context")}
               </div>
               <div className="flex flex-col gap-3">

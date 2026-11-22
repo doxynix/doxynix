@@ -104,7 +104,7 @@ export function AgentSidebar({
   return (
     <div className="fade-in flex h-full animate-in flex-col">
       <div className="flex h-12 items-center justify-between border-b bg-card px-4">
-        <h2 className="font-bold text-muted-foreground text-xs">{t("history_title")}</h2>
+        <h2 className="font-semibold text-muted-foreground text-xs">{t("history_title")}</h2>
         <AppButton
           aria-label={t("new_chat")}
           className="size-6"

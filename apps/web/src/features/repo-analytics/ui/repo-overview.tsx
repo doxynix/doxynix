@@ -319,7 +319,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
             </CardAction>
           </CardHeader>
 
-          <CardContent className="flex flex-col gap-5">
+          <CardContent className="flex flex-col gap-4">
             {navigation.keyZones.length > 0 && (
               <section className="flex flex-col gap-1">
                 <p className="px-2 text-muted-foreground text-xs">{t("key_zones")}</p>
@@ -327,7 +327,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
                 <div className="flex flex-col">
                   {navigation.keyZones.map((zone) => (
                     <button
-                      className="group flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-standard hover:bg-surface-hover/40"
+                      className="group flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-standard hover:bg-surface-hover/40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/80"
                       key={zone.id}
                       onClick={() => handleMapNodeNavigation(zone.id)}
                       type="button"
@@ -367,7 +367,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
 
                     return (
                       <button
-                        className="group flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-standard hover:bg-surface-hover/40"
+                        className="group flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-standard hover:bg-surface-hover/40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/80"
                         key={path}
                         onClick={() => handleCodeNavigation(path)}
                         type="button"

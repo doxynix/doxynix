@@ -479,11 +479,11 @@
   --border: var(--border-soft);
   --input: var(--border-soft);
   --ring: var(--ring-color);
-  --chart-1: oklch(0.22 0.004 255);
-  --chart-2: oklch(0.33 0.004 255);
-  --chart-3: oklch(0.44 0.004 255);
-  --chart-4: oklch(0.53 0.004 255);
-  --chart-5: oklch(0.62 0.004 255);
+  --chart-1: var(--status-success);
+  --chart-2: var(--status-info);
+  --chart-3: var(--status-warning);
+  --chart-4: var(--brand-ai);
+  --chart-5: var(--status-error);
   --sidebar: var(--surface-sidebar);
   --sidebar-foreground: var(--text-primary);
   --sidebar-primary: var(--primary);
@@ -567,11 +567,11 @@
   --border: var(--border-soft);
   --input: var(--border-soft);
   --ring: var(--ring-color);
-  --chart-1: oklch(0.92 0.002 255);
-  --chart-2: oklch(0.81 0.003 255);
-  --chart-3: oklch(0.7 0.004 255);
-  --chart-4: oklch(0.59 0.004 255);
-  --chart-5: oklch(0.5 0.004 255);
+  --chart-1: var(--status-success);
+  --chart-2: var(--status-info);
+  --chart-3: var(--status-warning);
+  --chart-4: var(--brand-ai);
+  --chart-5: var(--status-error);
   --sidebar: var(--surface-sidebar);
   --sidebar-foreground: var(--text-primary);
   --sidebar-primary: var(--primary);
@@ -900,11 +900,11 @@ body:has([data-public-theme="marketing-dark"]),
   --border: var(--border-soft);
   --input: var(--border-soft);
   --ring: var(--ring-color);
-  --chart-1: oklch(0.92 0.002 255);
-  --chart-2: oklch(0.81 0.003 255);
-  --chart-3: oklch(0.7 0.004 255);
-  --chart-4: oklch(0.59 0.004 255);
-  --chart-5: oklch(0.5 0.004 255);
+  --chart-1: var(--status-success);
+  --chart-2: var(--status-info);
+  --chart-3: var(--status-warning);
+  --chart-4: var(--brand-ai);
+  --chart-5: var(--status-error);
   --sidebar: var(--surface-sidebar);
   --sidebar-foreground: var(--text-primary);
   --sidebar-primary: var(--primary);
@@ -1175,16 +1175,6 @@ body:has([data-public-theme="marketing-dark"]),
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-}
-
-[data-slot="dialog-content"],
-[data-slot="dropdown-menu-content"],
-[data-slot="popover-content"],
-[data-slot="select-content"],
-[data-slot="tooltip-content"] {
-  box-shadow:
-    inset 0 1px 0 0 color-mix(in oklab, var(--foreground) 10%, transparent),
-    0 8px 24px -4px oklch(0 0 0 / 50%);
 }
 
 @keyframes skeleton-pulse {

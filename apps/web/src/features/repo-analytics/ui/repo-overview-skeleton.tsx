@@ -139,7 +139,7 @@ export function RepoOverviewSkeleton() {
         </div>
 
         <SectionCard titleWidth="w-36">
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-4">
             {[0, 1].map((group) => (
               <div
                 className="flex flex-col gap-2"
