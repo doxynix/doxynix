@@ -78,7 +78,6 @@
     "@cspell/dict-pt-pt": "3.0.8",
     "@cspell/dict-ru_ru": "2.3.4",
     "@cspell/dict-tr-tr": "3.0.8",
-    "@secretlint/secretlint-rule-preset-recommend": "13.1.0",
     "@types/node": "26.6.6",
     "cspell": "10.5.1",
     "jscpd": "5.4.3",
