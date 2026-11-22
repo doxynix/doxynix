@@ -125,6 +125,7 @@
     "@replit/codemirror-minimap": "0.5.2",
     "@scalar/api-reference-react": "0.9.93",
     "@secretlint/core": "14.0.1",
+    "@sentry/bun": "11.14.0",
     "@sentry/nextjs": "11.14.0",
     "@shikijs/rehype": "4.6.0",
     "@shikijs/transformers": "4.6.0",
