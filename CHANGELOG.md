@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.15.11](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.10...doxynix-v6.15.11) (2026-11-22)
+
+
+### Bug Fixes
+
+* **web:** align UI with design system ([#2436](https://github.com/doxynix/doxynix/issues/2436)) ([8b3808c](https://github.com/doxynix/doxynix/commit/8b3808cb18dcc333aa38af5ec0dd8fbd9d01c1bf))
+
 ## [6.15.10](https://github.com/doxynix/doxynix/compare/doxynix-v6.15.9...doxynix-v6.15.10) (2026-11-19)
 
 
