@@ -147,7 +147,7 @@
     "@vercel/global-config": "1.5.1",
     "@vercel/speed-insights": "2.1.0",
     "@vercel/toolbar": "0.2.7",
-    "@xyflow/react": "12.12.1",
+    "@xyflow/react": "13.0.3",
     "@zenstackhq/runtime": "2.22.3",
     "ably": "2.30.0",
     "ai": "7.0.177",
